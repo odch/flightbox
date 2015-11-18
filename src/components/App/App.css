@@ -1,0 +1,8 @@
+@font-face {
+  font-family: "istok_webregular";
+  src: url("IstokWeb-Regular.ttf");
+}
+
+body {
+  font-family: 'istok_webregular', sans-serif;
+}
