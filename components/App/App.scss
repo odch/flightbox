@@ -1,0 +1,14 @@
+@import '../variables.scss';
+
+@font-face {
+  font-family: "istok_webregular";
+  src: url("IstokWeb-Regular.ttf");
+}
+
+html, body, #app, .App {
+  height: 100%;
+}
+
+body {
+  font-family: 'istok_webregular', sans-serif;
+}

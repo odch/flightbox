@@ -1,39 +1,24 @@
 /**
- * React Starter Kit (http://www.reactstarterkit.com/)
- *
- * Copyright © 2014-2015 Kriasoft, LLC. All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE.txt file in the root directory of this source tree.
+ * React Static Boilerplate
+ * https://github.com/koistya/react-static-boilerplate
+ * Copyright (c) Konstantin Tarkus (@koistya) | MIT license
  */
 
 import webpack from 'webpack';
 import task from './lib/task';
-import config from './config';
+import webpackConfig from './webpack.config';
 
-/**
- * Bundles JavaScript, CSS and images into one or more packages
- * ready to be used in a browser.
- */
-export default task('bundle', async () => new Promise((resolve, reject) => {
-  const bundler = webpack(config);
-  let bundlerRunCount = 0;
-
-  function bundle(err, stats) {
-    if (err) {
-      return reject(err);
-    }
-
-    console.log(stats.toString(config[0].stats));
-
-    if (++bundlerRunCount === (global.WATCH ? config.length : 1)) {
-      return resolve();
-    }
-  }
-
-  if (global.WATCH) {
-    bundler.watch(200, bundle);
-  } else {
-    bundler.run(bundle);
-  }
-}));
+export default task(function bundle() {
+  return new Promise((resolve, reject) => {
+    const bundler = webpack(webpackConfig);
+    const run = (err, stats) => {
+      if (err) {
+        reject(err);
+      } else {
+        console.log(stats.toString(webpackConfig[0].stats));
+        resolve();
+      }
+    };
+    bundler.run(run);
+  });
+});

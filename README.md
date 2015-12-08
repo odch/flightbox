@@ -1,140 +1,103 @@
-## React Starter Kit — "isomorphic" web app boilerplate
+# React Static Boilerplate
 
-[![Support us on Bountysource](https://dl.dropboxusercontent.com/u/16006521/react-starter-kit/banner.png)](https://salt.bountysource.com/teams/react-starter-kit)<br>
+[![NPM version](http://img.shields.io/npm/v/generator-react-static.svg?style=flat-square)](https://www.npmjs.com/package/generator-react-static)
+[![NPM downloads](http://img.shields.io/npm/dm/generator-react-static.svg?style=flat-square)](https://www.npmjs.com/package/generator-react-static)
+[![Build Status](http://img.shields.io/travis/koistya/react-static-boilerplate/master.svg?style=flat-square)](https://travis-ci.org/koistya/react-static-boilerplate)
+[![Dependency Status](http://img.shields.io/david/dev/koistya/react-static-boilerplate.svg?branch=master&style=flat-square)](https://david-dm.org/koistya/react-static-boilerplate#info=devDependencies)
 
-> [React Starter Kit](http://www.reactstarterkit.com) is an opinionated
-> boilerplate for web development built on top of Facebook's
-> [React](https://facebook.github.io/react/) library,
-> [Node.js](https://nodejs.org/) / [Express](http://expressjs.com/) server
-> and [Flux](http://facebook.github.io/flux/) architecture. Containing
-> modern web development tools such as [Webpack](http://webpack.github.io/),
-> [Babel](http://babeljs.io/) and [BrowserSync](http://www.browsersync.io/).
-> Helping you to stay productive following the best practices. A solid starting
-> point for both professionals and newcomers to the industry.
+> A static website starter kit powered by [React.js](http://facebook.github.io/react/)
+> and [Webpack](http://webpack.github.io/).
 
-Demo: http://demo.reactstarterkit.com &nbsp;|&nbsp;
-Join [#react-starter-kit](https://gitter.im/kriasoft/react-starter-kit) chatroom on Gitter to stay up to date.
+Visit [demo site](http://react-static.tarkus.me) &nbsp;|&nbsp;
+See [roadmap](https://waffle.io/koistya/react-static-boilerplate) &nbsp;|&nbsp;
+Join [#react-static-boilerplate](https://gitter.im/koistya/react-static-boilerplate) chatroom on Gitter to stay up to date.
 
-### Documentation
+### Features
 
-  * **General**
-    - [React Style Guide](./docs/react-style-guide.md)
-    - [How to configure text editors and IDEs](./docs/how-to-configure-text-editors.md)
-  * **Questions**
-    - [Which module bundler should I use?](https://github.com/kriasoft/react-starter-kit/issues/3)
-    - [Which Flux implementation should I use?](https://github.com/kriasoft/react-starter-kit/issues/22)
-  * **Recipes**
-    - [How to Implement Routing and Navigation](./docs/recipes/how-to-implement-routing.md)
-    - [How to Integrate Disqus](./docs/recipes/how-to-integrate-disqus.md)
+&nbsp; &nbsp; ✓ Generates static `.html` pages from [React](http://facebook.github.io/react/) components<br>
+&nbsp; &nbsp; ✓ Generates routes based on the list of files in the `/pages` folder<br>
+&nbsp; &nbsp; ✓ Next generation JavaScript with [Babel](https://github.com/babel/babel)<br>
+&nbsp; &nbsp; ✓ [Sass](http://sass-lang.com/) syntax for CSS via [postCSS](https://github.com/postcss/postcss) and [precss](https://github.com/jonathantneal/precss)<br>
+&nbsp; &nbsp; ✓ Development web server with [BrowserSync](http://www.browsersync.io) and [React Transform](https://github.com/gaearon/babel-plugin-react-transform)<br>
+&nbsp; &nbsp; ✓ Bundling and optimization with [Webpack](http://webpack.github.io/)<br>
+&nbsp; &nbsp; ✓ [Code-splitting](https://github.com/webpack/docs/wiki/code-splitting) and async chunk loading<br>
+&nbsp; &nbsp; ✓ Easy deployment to [GitHub Pages](https://pages.github.com/), [Amazon S3](http://davidwalsh.name/hosting-website-amazon-s3) or [Firebase](https://www.firebase.com/)<br>
+&nbsp; &nbsp; ✓ [Yeoman](http://yeoman.io/) generator ([generator-react-static](https://www.npmjs.com/package/generator-react-static))<br>
 
 ### Directory Layout
 
 ```
 .
 ├── /build/                     # The folder for compiled output
-├── /docs/                      # Documentation files for the project
 ├── /node_modules/              # 3rd-party libraries and utilities
-├── /src/                       # The source code of the application
-│   ├── /actions/               # Action creators that allow to trigger a dispatch to stores
-│   ├── /api/                   # REST API / Relay endpoints
-│   ├── /components/            # React components
-│   ├── /constants/             # Constants (action types etc.)
-│   ├── /content/               # Static content (plain HTML or Markdown, Jade, you name it)
-│   ├── /core/                  # Core components (Flux dispatcher, base classes, utilities)
-│   ├── /decorators/            # Higher-order React components
-│   ├── /public/                # Static files which are copied into the /build/public folder
-│   ├── /stores/                # Stores contain the application state and logic
-│   ├── /utils/                 # Utility classes and functions
-│   ├── /app.js                 # Client-side startup script
-│   ├── /config.js              # Global application settings
-│   ├── /routes.js              # Universal (isomorphic) application routes
-│   └── /server.js              # Server-side startup script
+├── /components/                # React components
+├── /core/                      # Core framework
+├── /pages/                     # React.js-based web pages
+│   ├── /blog/                  # Blog post entries example
+│   ├── /404.js                 # Not Found page
+│   ├── /500.js                 # Error page
+│   ├── /about.js               # About Us page
+│   └── /index.js               # Home page
+├── /static/                    # Static files such as favicon.ico etc.
+├── /test/                      # Unit and integration tests
 ├── /tools/                     # Build automation scripts and utilities
-│   ├── /lib/                   # Library for utility snippets
-│   ├── /build.js               # Builds the project from source to output (build) folder
-│   ├── /bundle.js              # Bundles the web resources into package(s) through Webpack
-│   ├── /clean.js               # Cleans up the output (build) folder
-│   ├── /config.js              # Webpack configuration for application bundles
-│   ├── /copy.js                # Copies static files to output (build) folder
-│   ├── /deploy.js              # Deploys your web application
-│   ├── /serve.js               # Launches the Node.js/Express web server
-│   └── /start.js               # Launches the development web server with "live reload"
-│── package.json                # The list of 3rd party libraries and utilities
-└── preprocessor.js             # ES6 transpiler settings for Jest
+│── app.js                      # The main JavaScript file (entry point)
+│── config.js                   # Website configuration / settings
+│── LICENSE.txt                 # License file
+│── package.json                # Dev dependencies and NPM scripts
+└── README.md                   # Project overview
 ```
 
 ### Getting Started
 
-Just clone the repo and start hacking:
+Just clone the repo, install Node.js modules and run `npm start`:
 
-```shell
-$ git clone -o react-starter-kit -b master --single-branch \
-      https://github.com/kriasoft/react-starter-kit.git MyApp
+```
+$ git clone -o react-static-boilerplate -b master --single-branch \
+      https://github.com/koistya/react-static-boilerplate.git MyApp
 $ cd MyApp
-$ npm install                   # Install Node.js components listed in ./package.json
-$ npm start                     # Compile and launch
+$ npm install
+$ npm start
 ```
 
-### How to Build
+Then open [http://localhost:3000/](http://localhost:3000/) in your browser.
 
-```shell
-$ npm run build                 # or, `npm run build -- release`
+### How to Test
+
+The unit tests are powered by [chai](http://chaijs.com/) and [mocha](http://mochajs.org/).
+
 ```
-
-By default, it builds in *debug* mode. If you need to build in release
-mode, just add a `-- release` flag. This will optimize the output bundle for
-production.
-
-### How to Run
-
-```shell
-$ npm start                     # or, `npm start -- release`
+$ npm test
 ```
-
-This will start a light-weight development server with "live reload" and
-synchronized browsing across multiple devices and browsers.
 
 ### How to Deploy
 
 ```shell
-$ npm run deploy                # or, `npm run deploy -- production`
+$ npm run deploy                # Deploys the project to GitHub Pages
 ```
 
-For more information see `tools/deploy.js`.
+Alternatively, you can build a production release to manually deploy to S3, Firebase, Netlify, and other static hosts. Simply run the command below and copy the generated `build` folder to your static host.
+
+```shell
+$ npm run build release         # Build production release 
+```
 
 ### How to Update
 
-You can always fetch and merge recent changes from this repo back into
+You can always fetch and merge the recent changes from this repo back into
 your own project:
 
 ```shell
 $ git checkout master
-$ git fetch react-starter-kit
-$ git merge react-starter-kit/master
+$ git fetch react-static-boilerplate
+$ git merge react-static-boilerplate/master
 $ npm install
 ```
-
-### How to Test
-
-Run unit tests powered by [Jest](https://facebook.github.io/jest/) with the following
-[npm](https://www.npmjs.org/doc/misc/npm-scripts.html) command:
-
-```shell
-$ npm test
-```
-
-Test any javascript module by creating a `__tests__/` directory where
-the file is. Append `-test.js` to the filename and [Jest](https://facebook.github.io/jest/) will do the rest.
-
-### Visit Our Sponsor
-
-[![Makers Academy](https://dl.dropboxusercontent.com/u/16006521/react-starter-kit/makers-academy.png)](http://www.makersacademy.com/?utm_source=ReactStarterKit&utm_medium=link&utm_campaign=ReactStarterKitGithub)
-
 ### Related Projects
 
-  * [React Static Boilerplate](https://github.com/koistya/react-static-boilerplate) — Generates static websites from React components
-  * [Babel Starter Kit](https://github.com/kriasoft/babel-starter-kit) — Boilerplate for authoring JavaScript/React.js libraries
-  * [React Decorators](https://github.com/kriasoft/react-decorators) — A collection of higher-order React components
+  * [React Starter Kit](https://github.com/kriasoft/react-starter-kit)
+  * [React Routing](https://github.com/kriasoft/react-routing)
+  * [React Decorators](https://github.com/kriasoft/react-decorators)
 
 ### Learn More
 
@@ -142,24 +105,7 @@ the file is. Append `-test.js` to the filename and [Jest](https://facebook.githu
   * [Getting Started with GraphQL and Relay](https://quip.com/oLxzA1gTsJsE)
   * [React.js Questions on StackOverflow](http://stackoverflow.com/questions/tagged/reactjs)
   * [React.js Discussion Board](https://discuss.reactjs.org/)
-  * [Flux Architecture for Building User Interfaces](http://facebook.github.io/flux/)
-  * [Jest - Painless Unit Testing](http://facebook.github.io/jest/)
-  * [Flow - A static type checker for JavaScript](http://flowtype.org/)
-  * [The Future of React](https://github.com/reactjs/react-future)
   * [Learn ES6](https://babeljs.io/docs/learn-es6/), [ES6 Features](https://github.com/lukehoban/es6features#readme)
 
-### Support
-
-  * [#react-starter-kit](https://gitter.im/kriasoft/react-starter-kit) on Gitter — Feedback, feature requests, Q&A
-  * [@koistya](https://www.codementor.io/koistya) on Codementor — Mentorship, code reviews
-  * support@kriasoft.com — Customization requests, help with GraphQL/Relay back-ends etc.
-
-### License
-
-Copyright © 2014-2015 Kriasoft, LLC. This source code is licensed under the MIT
-license found in the [LICENSE.txt](https://github.com/kriasoft/react-starter-kit/blob/master/LICENSE.txt)
-file. The documentation to the project is licensed under the
-[CC BY-SA 4.0](http://creativecommons.org/licenses/by-sa/4.0/) license.
-
 ---
-Made with ♥ by Konstantin Tarkus ([@koistya](https://twitter.com/koistya)) and [contributors](https://github.com/kriasoft/react-starter-kit/graphs/contributors)
+Made with ♥ by Konstantin Tarkus ([@koistya](https://twitter.com/koistya)) and [contributors](https://github.com/koistya/react-static-boilerplate/graphs/contributors) &nbsp;|&nbsp; MIT License
