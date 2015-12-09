@@ -1,0 +1,6 @@
+{
+  "name": "LanguageNavigation",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./LanguageNavigation.js"
+}

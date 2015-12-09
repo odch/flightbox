@@ -1,0 +1,6 @@
+{
+  "name": "PilotData",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./PilotData.js"
+}

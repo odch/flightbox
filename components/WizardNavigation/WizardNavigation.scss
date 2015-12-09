@@ -1,0 +1,28 @@
+.WizardNavigation {
+  padding: 10px 20px 0 20px;
+  overflow: hidden;
+
+  a {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .cancel {
+    float: left;
+  }
+
+  a.next {
+    color: #ed351c;
+  }
+
+  .next {
+    float: right;
+    margin-left: 20px;
+  }
+
+  .prev {
+    float: right;
+  }
+}

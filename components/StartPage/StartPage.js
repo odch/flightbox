@@ -1,6 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import './StartPage.scss';
-import StartButton from '../StartButton';
+import ImageButton from '../ImageButton';
 
 class StartPage extends Component {
 
@@ -13,8 +13,8 @@ class StartPage extends Component {
           <img className="logo" src="mfgt_logo_transp.png"/>
         </header>
         <div className="wrapper">
-          <StartButton className="departure" img={departureImagePath} label="Abflug"/>
-          <StartButton className="arrival" img={arrivalImagePath} label="Ankunft"/>
+          <ImageButton className="departure" img={departureImagePath} label="Abflug" href="departure"/>
+          <ImageButton className="arrival" img={arrivalImagePath} label="Ankunft"/>
         </div>
       </div>
     );

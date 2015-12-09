@@ -12,3 +12,16 @@ html, body, #app, .App {
 body {
   font-family: 'istok_webregular', sans-serif;
 }
+
+*:focus {
+  outline: 0;
+}
+
+a {
+  color: #000;
+  text-decoration: none;
+}
+
+.clear {
+  clear: both;
+}
