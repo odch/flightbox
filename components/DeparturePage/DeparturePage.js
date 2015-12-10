@@ -9,6 +9,7 @@ import Finish from '../Departure/Finish';
 import WizardNavigation from '../WizardNavigation';
 import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import LanguageNavigation from '../LanguageNavigation';
+import Firebase from 'firebase';
 
 class DeparturePage extends Component {
 
@@ -24,6 +25,7 @@ class DeparturePage extends Component {
       data: {},
       committed: false,
     };
+    this.firebaseRef = new Firebase('https://mfgt-flights.firebaseio.com/departures/');
   }
 
   getUpdateHandlerDelegate(key, scope) {
@@ -55,7 +57,9 @@ class DeparturePage extends Component {
   commit() {
     this.setState({
       committed: true,
-    });
+    }, function() {
+      this.firebaseRef.push(this.state.data);
+    }, this);
   }
 
   finish() {
