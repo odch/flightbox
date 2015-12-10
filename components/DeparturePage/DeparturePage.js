@@ -21,67 +21,23 @@ class DeparturePage extends Component {
     super(props);
     this.state = {
       step: 0,
+      data: {},
       committed: false,
     };
   }
 
-  pages = [
-    {
-      component: <AircraftData updateData={this.updateData.bind(this)}/>,
-      nextStep: this.nextStep.bind(this),
-      previousStep: this.cancel.bind(this),
-      breadcrumb: {
-        label: 'Flugzeugdaten',
-        handler: function() {
-          this.setState({ step: 0 });
-        }.bind(this),
-      },
-    }, {
-      component: <PilotData updateData={this.updateData.bind(this)}/>,
-      nextStep: this.nextStep.bind(this),
-      previousStep: this.previousStep.bind(this),
-      breadcrumb: {
-        label: 'Pilot',
-        handler: function() {
-          this.setState({ step: 1 });
-        }.bind(this),
-      },
-    }, {
-      component: <PassengerData updateData={this.updateData.bind(this)}/>,
-      nextStep: this.nextStep.bind(this),
-      previousStep: this.previousStep.bind(this),
-      breadcrumb: {
-        label: 'Passagiere',
-        handler: function() {
-          this.setState({ step: 2 });
-        }.bind(this),
-      },
-    }, {
-      component: <DepartureArrivalData updateData={this.updateData.bind(this)}/>,
-      nextStep: this.nextStep.bind(this),
-      previousStep: this.previousStep.bind(this),
-      breadcrumb: {
-        label: 'Start und Ziel',
-        handler: function() {
-          this.setState({ step: 3 });
-        }.bind(this),
-      },
-    }, {
-      component: <FlightData updateData={this.updateData.bind(this)}/>,
-      nextStep: this.commit.bind(this),
-      nextLabel: 'Speichern',
-      previousStep: this.previousStep.bind(this),
-      breadcrumb: {
-        label: 'Flug',
-        handler: function() {
-          this.setState({ step: 4 });
-        }.bind(this),
-      },
-    },
-  ];
+  getUpdateHandlerDelegate(key, scope) {
+    return function(data) {
+      scope.updateData(key, data);
+    };
+  }
 
-  updateData(data) {
-    console.log(data);
+  updateData(key, value) {
+    const data = this.state.data;
+    data[key] = value;
+    this.setState({
+      data: data,
+    });
   }
 
   nextStep() {
@@ -121,12 +77,67 @@ class DeparturePage extends Component {
           </div>
         </div>);
     } else {
-      const page = this.pages[this.state.step];
+      const pages = [
+        {
+          component: <AircraftData data={this.state.data.aircraft} updateData={this.getUpdateHandlerDelegate('aircraft', this)}/>,
+          nextStep: this.nextStep.bind(this),
+          previousStep: this.cancel.bind(this),
+          breadcrumb: {
+            label: 'Flugzeugdaten',
+            handler: function() {
+              this.setState({ step: 0 });
+            }.bind(this),
+          },
+        }, {
+          component: <PilotData data={this.state.data.pilot} updateData={this.getUpdateHandlerDelegate('pilot', this)}/>,
+          nextStep: this.nextStep.bind(this),
+          previousStep: this.previousStep.bind(this),
+          breadcrumb: {
+            label: 'Pilot',
+            handler: function() {
+              this.setState({ step: 1 });
+            }.bind(this),
+          },
+        }, {
+          component: <PassengerData data={this.state.data.passenger} updateData={this.getUpdateHandlerDelegate('passenger', this)}/>,
+          nextStep: this.nextStep.bind(this),
+          previousStep: this.previousStep.bind(this),
+          breadcrumb: {
+            label: 'Passagiere',
+            handler: function() {
+              this.setState({ step: 2 });
+            }.bind(this),
+          },
+        }, {
+          component: <DepartureArrivalData data={this.state.data.departureArrival} updateData={this.getUpdateHandlerDelegate('departureArrival', this)}/>,
+          nextStep: this.nextStep.bind(this),
+          previousStep: this.previousStep.bind(this),
+          breadcrumb: {
+            label: 'Start und Ziel',
+            handler: function() {
+              this.setState({ step: 3 });
+            }.bind(this),
+          },
+        }, {
+          component: <FlightData data={this.state.data.flight} updateData={this.getUpdateHandlerDelegate('flight', this)}/>,
+          nextStep: this.commit.bind(this),
+          nextLabel: 'Speichern',
+          previousStep: this.previousStep.bind(this),
+          breadcrumb: {
+            label: 'Flug',
+            handler: function() {
+              this.setState({ step: 4 });
+            }.bind(this),
+          },
+        },
+      ];
+
+      const page = pages[this.state.step];
 
       const breadcrumbItems = [{
         label: 'Abflug',
       }];
-      this.pages.forEach(function(page) { breadcrumbItems.push(page.breadcrumb); })
+      pages.forEach(function(page) { breadcrumbItems.push(page.breadcrumb); });
 
       rightComponent = (
         <div className="right">
