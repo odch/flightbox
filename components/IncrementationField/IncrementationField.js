@@ -3,10 +3,15 @@ import './IncrementationField.scss';
 
 class IncrementationField extends Component {
 
+  static propTypes = {
+    value: PropTypes.number,
+    onChange: PropTypes.func,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
-      value: 0,
+      value: this.props.value || 0,
     };
   }
 
@@ -25,13 +30,23 @@ class IncrementationField extends Component {
     if (newValue < 0) newValue = 0;
     this.setState({
       value: newValue,
-    });
+    }, this.fireChangeEvent.bind(this));
   }
 
   increment() {
     this.setState({
       value: this.state.value + 1,
-    });
+    }, this.fireChangeEvent.bind(this));
+  }
+
+  fireChangeEvent() {
+    if (typeof this.props.onChange === 'function') {
+      this.props.onChange({
+        target: {
+          value: this.state.value,
+        },
+      });
+    }
   }
 }
 
