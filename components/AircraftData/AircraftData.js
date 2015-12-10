@@ -8,9 +8,9 @@ class AircraftData extends WizardStep {
     return (
       <fieldset>
         <legend>Flugzeugdaten</legend>
-        <LabeledComponent label="Immatrikulation" className="immatriculation" component={<input type="text"/>}/>
-        <LabeledComponent label="Typ" className="type" component={<input type="text"/>}/>
-        <LabeledComponent label="Maximales Abfluggewicht (in Kilogramm)" className="mtow" component={<input type="number"/>}/>
+        <LabeledComponent label="Immatrikulation" className="immatriculation" component={<input type="text" value={this.state.data.immatriculation} onChange={this.getUpdateHandlerDelegate('immatriculation', this)}/>}/>
+        <LabeledComponent label="Typ" className="type" component={<input type="text" value={this.state.data.type} onChange={this.getUpdateHandlerDelegate('type', this)}/>}/>
+        <LabeledComponent label="Maximales Abfluggewicht (in Kilogramm)" className="mtow" component={<input type="number" value={this.state.data.mtow} onChange={this.getUpdateHandlerDelegate('mtow', this)}/>}/>
       </fieldset>
     );
   }

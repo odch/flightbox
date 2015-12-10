@@ -8,10 +8,10 @@ class PilotData extends WizardStep {
     return (
       <fieldset>
         <legend>Pilot</legend>
-        <LabeledComponent label="MFGT-Mitgliedernummer" className="member-nr" component={<input type="text"/>}/>
-        <LabeledComponent label="Telefon" className="phone" component={<input type="text"/>}/>
-        <LabeledComponent label="Nachname" className="lastname" component={<input type="text"/>}/>
-        <LabeledComponent label="Vorname" className="firstname" component={<input type="text"/>}/>
+        <LabeledComponent label="MFGT-Mitgliedernummer" className="memberNr" component={<input type="text" value={this.state.data.memberNr} onChange={this.getUpdateHandlerDelegate('memberNr', this)}/>}/>
+        <LabeledComponent label="Telefon" className="phone" component={<input type="text" value={this.state.data.phone} onChange={this.getUpdateHandlerDelegate('phone', this)}/>}/>
+        <LabeledComponent label="Nachname" className="lastname" component={<input type="text" value={this.state.data.lastname} onChange={this.getUpdateHandlerDelegate('lastname', this)}/>}/>
+        <LabeledComponent label="Vorname" className="firstname" component={<input type="text" value={this.state.data.firstname} onChange={this.getUpdateHandlerDelegate('firstname', this)}/>}/>
       </fieldset>
     );
   }

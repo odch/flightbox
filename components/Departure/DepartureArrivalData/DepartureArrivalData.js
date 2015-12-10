@@ -8,10 +8,10 @@ class DepartureArrivalData extends WizardStep {
     return (
       <fieldset>
         <legend>Start und Ziel</legend>
-        <LabeledComponent label="Startdatum" className="start-date" component={<input type="date"/>}/>
-        <LabeledComponent label="Startzeit (Lokalzeit)" className="start-time" component={<input type="time"/>}/>
-        <LabeledComponent label="Zielflugplatz" className="destination" component={<input type="text"/>}/>
-        <LabeledComponent label="Flugdauer" className="duration" component={<input type="time"/>}/>
+        <LabeledComponent label="Startdatum" className="start-date" component={<input type="date" value={this.state.data.startDate} onChange={this.getUpdateHandlerDelegate('startDate', this)}/>}/>
+        <LabeledComponent label="Startzeit (Lokalzeit)" className="start-time" component={<input type="time" value={this.state.data.startTime} onChange={this.getUpdateHandlerDelegate('startTime', this)}/>}/>
+        <LabeledComponent label="Zielflugplatz" className="destination" component={<input type="text" value={this.state.data.destination} onChange={this.getUpdateHandlerDelegate('destination', this)}/>}/>
+        <LabeledComponent label="Flugdauer" className="duration" component={<input type="time" value={this.state.data.duration} onChange={this.getUpdateHandlerDelegate('duration', this)}/>}/>
       </fieldset>
     );
   }
