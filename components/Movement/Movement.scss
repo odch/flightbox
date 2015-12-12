@@ -1,0 +1,30 @@
+.Movement {
+  clear: both;
+  padding: 1em;
+  overflow: hidden;
+  cursor: pointer;
+
+  .column {
+    float: left;
+  }
+
+  .immatriculation {
+    width: 25%;
+  }
+
+  .pilot {
+    width: 25%;
+  }
+
+  .start-time {
+    width: 25%;
+  }
+
+  .destination {
+    width: 25%;
+  }
+}
+
+.Movement:hover {
+  background-color: #f6f6f6;
+}
