@@ -1,44 +1,10 @@
 .DeparturePage {
-  height: 100%;
 
-  header {
-    background-color: #f6f6f6;
-    width: 17%;
+  .wizard-container {
     height: 100%;
-    position: fixed;
-    left: 0;
-    top: 0;
-    text-align: center;
-
-    .logo {
-      width: 85%;
-      margin-top: 10px;
-    }
-
-    .LanguageNavigation {
-      width: 17%;
-      position: fixed;
-      bottom: 10px;
-      left: 0;
-      font-size: 0.9em;
-
-      li {
-        text-align: left;
-        float: left;
-        width: 35%;
-        padding-left: 10%;
-      }
-
-      a {
-        color: #444;
-        text-decoration: none;
-      }
-    }
   }
 
   .wrapper {
-    margin-left: 17%;
-    width: 83%;
     min-height: 100%;
 
     main {
@@ -84,14 +50,8 @@
   footer {
     font-size: 1.5em;
     position: relative;
-    left: 17%;
-    width: 83%;
     margin-top: -50px;
     height: 50px;
     clear: both;
   }
-}
-
-.right {
-  height: 100%;
 }

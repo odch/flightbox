@@ -1,5 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import './DeparturePage.scss';
+import VerticalHeaderPage from '../VerticalHeaderPage';
 import AircraftData from '../AircraftData';
 import PilotData from '../PilotData';
 import PassengerData from '../Departure/PassengerData';
@@ -8,7 +9,6 @@ import FlightData from '../Departure/FlightData';
 import Finish from '../Departure/Finish';
 import WizardNavigation from '../WizardNavigation';
 import WizardBreadcrumbs from '../WizardBreadcrumbs';
-import LanguageNavigation from '../LanguageNavigation';
 import Firebase from 'firebase';
 
 class DeparturePage extends Component {
@@ -75,10 +75,8 @@ class DeparturePage extends Component {
 
     if (this.state.committed === true) {
       rightComponent = (
-        <div className="right">
-          <div className="wrapper">
-            <Finish finish={this.props.finish}/>
-          </div>
+        <div className="wrapper">
+          <Finish finish={this.props.finish}/>
         </div>);
     } else {
       const pages = [
@@ -144,7 +142,7 @@ class DeparturePage extends Component {
       pages.forEach(function(page) { breadcrumbItems.push(page.breadcrumb); });
 
       rightComponent = (
-        <div className="right">
+        <div className="wizard-container">
           <div className="wrapper">
             <main>
               <WizardBreadcrumbs items={breadcrumbItems} activeItem={this.state.step + 1}/>
@@ -161,13 +159,7 @@ class DeparturePage extends Component {
     }
 
     return (
-      <div className="DeparturePage">
-        <header>
-          <img className="logo" src="mfgt_logo_transp.png"/>
-          <LanguageNavigation/>
-        </header>
-        {rightComponent}
-      </div>
+      <VerticalHeaderPage className="DeparturePage" component={rightComponent}/>
     );
   }
 }
