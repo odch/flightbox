@@ -3,13 +3,6 @@ import './WizardNavigation.scss';
 
 class WizardNavigation extends Component {
 
-  static propTypes = {
-    cancel: PropTypes.func,
-    previousStep: PropTypes.func,
-    nextStep: PropTypes.func,
-    nextLabel: PropTypes.string,
-  };
-
   render() {
     const nextLabel = this.props.nextLabel || 'Weiter';
     return (
@@ -33,5 +26,12 @@ class WizardNavigation extends Component {
     this.props.nextStep();
   }
 }
+
+WizardNavigation.propTypes = {
+  cancel: PropTypes.func,
+  previousStep: PropTypes.func,
+  nextStep: PropTypes.func,
+  nextLabel: PropTypes.string,
+};
 
 export default WizardNavigation;

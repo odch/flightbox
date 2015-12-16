@@ -2,11 +2,6 @@ import React, { PropTypes, Component } from 'react';
 
 class WizardStep extends Component {
 
-  static propTypes = {
-    updateData: PropTypes.func,
-    data: PropTypes.object,
-  };
-
   constructor(props) {
     super(props);
     this.state = {
@@ -29,5 +24,10 @@ class WizardStep extends Component {
     this.props.updateData(this.state.data);
   }
 }
+
+WizardStep.propTypes = {
+  updateData: PropTypes.func,
+  data: PropTypes.object,
+};
 
 export default WizardStep;

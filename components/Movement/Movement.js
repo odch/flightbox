@@ -3,11 +3,6 @@ import './Movement.scss';
 
 class Movement extends Component {
 
-  static propTypes = {
-    data: PropTypes.object,
-    onClick: PropTypes.func,
-  };
-
   render() {
     const destination = this.props.data.departureArrival.destination === 'LSZT'
       ? 'Lokalflug'
@@ -22,5 +17,10 @@ class Movement extends Component {
     );
   }
 }
+
+Movement.propTypes = {
+  data: PropTypes.object,
+  onClick: PropTypes.func,
+};
 
 export default Movement;

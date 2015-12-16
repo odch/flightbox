@@ -7,15 +7,18 @@ import IncrementationField from '../../IncrementationField';
 
 class PassengerData extends WizardStep {
 
-  carriageVoucher = [
-    {
-      label: 'Ja',
-      value: 'yes',
-    }, {
-      label: 'Nein',
-      value: 'no',
-    },
-  ];
+  constructor(props) {
+    super(props);
+    this.carriageVoucher = [
+      {
+        label: 'Ja',
+        value: 'yes',
+      }, {
+        label: 'Nein',
+        value: 'no',
+      },
+    ];
+  }
 
   render() {
     return (

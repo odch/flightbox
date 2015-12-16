@@ -4,17 +4,13 @@ import LanguageNavigation from '../LanguageNavigation';
 
 class VerticalHeaderPage extends Component {
 
-  static propTypes = {
-    className: PropTypes.string,
-    component: PropTypes.element,
-  };
-
   render() {
     const className = 'VerticalHeaderPage ' + this.props.className;
+    const logoImagePath = require('./mfgt_logo_transp.png');
     return (
       <div className={className}>
         <header>
-          <img className="logo" src="mfgt_logo_transp.png"/>
+          <img className="logo" src={logoImagePath}/>
           <LanguageNavigation/>
         </header>
         <div className="right">
@@ -24,5 +20,10 @@ class VerticalHeaderPage extends Component {
     );
   }
 }
+
+VerticalHeaderPage.propTypes = {
+  className: PropTypes.string,
+  component: PropTypes.element,
+};
 
 export default VerticalHeaderPage;

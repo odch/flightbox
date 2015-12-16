@@ -6,27 +6,17 @@ import VerticalHeaderPage from '../VerticalHeaderPage';
 
 class MovementsPage extends Component {
 
-  movements = [];
-
-  static propTypes = {
-    onEdit: PropTypes.func,
-  };
-
   constructor(props) {
     super(props);
     this.state = {
       movements: [],
     };
     this.firebaseRef = new Firebase('https://mfgt-flights.firebaseio.com/departures/');
-    const me = this;
     this.firebaseRef.orderByKey().on('child_added', function(dataSnapshot) {
       const movement = dataSnapshot.val();
       movement.key = dataSnapshot.key();
-      me.movements.push(movement);
-      me.setState({
-        movements: me.movements,
-      });
-    });
+      this.setState({movements: this.state.movements.concat([movement])});
+    }.bind(this));
   }
 
   render() {
@@ -37,7 +27,7 @@ class MovementsPage extends Component {
   }
 
   listClick(item) {
-    this.props.onEdit(item);
+    window.location.hash = '/departure/' + item.key;
   }
 }
 

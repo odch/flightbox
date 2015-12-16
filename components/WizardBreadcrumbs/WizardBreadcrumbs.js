@@ -3,11 +3,6 @@ import './WizardBreadcrumbs.scss';
 
 class WizardBreadcrumbs extends Component {
 
-  static propTypes = {
-    items: PropTypes.array,
-    activeItem: PropTypes.number,
-  };
-
   render() {
     return (
       <nav className="WizardBreadcrumbs">
@@ -27,5 +22,10 @@ class WizardBreadcrumbs extends Component {
     );
   }
 }
+
+WizardBreadcrumbs.propTypes = {
+  items: PropTypes.array,
+  activeItem: PropTypes.number,
+};
 
 export default WizardBreadcrumbs;

@@ -13,11 +13,6 @@ import Firebase from 'firebase';
 
 class DeparturePage extends Component {
 
-  static propTypes = {
-    finish: PropTypes.func,
-    cancel: PropTypes.func,
-  };
-
   constructor(props) {
     super(props);
     this.state = {
@@ -25,7 +20,30 @@ class DeparturePage extends Component {
       data: {},
       committed: false,
     };
-    this.firebaseRef = new Firebase('https://mfgt-flights.firebaseio.com/departures/');
+    this.firebaseCollectionRef = new Firebase('https://mfgt-flights.firebaseio.com/departures/');
+    if (this.props.params.key) {
+      this.update = true;
+      this.firebaseCollectionRef.child(this.props.params.key).on('value', function(dataSnapshot) {
+        const movement = dataSnapshot.val();
+        if (this.mounted === true) {
+          this.setState({
+            data: movement,
+          });
+        } else {
+          this.state.data = movement;
+        }
+      }.bind(this));
+    } else {
+      this.update = false;
+    }
+  }
+
+  componentDidMount() {
+    this.mounted = true;
+  }
+
+  componentWillUnmount () {
+    this.mounted = false;
   }
 
   getUpdateHandlerDelegate(key, scope) {
@@ -58,16 +76,20 @@ class DeparturePage extends Component {
     this.setState({
       committed: true,
     }, function() {
-      this.firebaseRef.push(this.state.data);
+      if (this.update === true) {
+        this.firebaseCollectionRef.child(this.props.params.key).set(this.state.data);
+      } else {
+        this.firebaseCollectionRef.push(this.state.data);
+      }
     }, this);
   }
 
   finish() {
-    this.props.finish();
+    window.location.hash = '/';
   }
 
   cancel() {
-    this.props.cancel();
+    window.location.hash = '/';
   }
 
   render() {
@@ -76,7 +98,7 @@ class DeparturePage extends Component {
     if (this.state.committed === true) {
       rightComponent = (
         <div className="wrapper">
-          <Finish finish={this.props.finish}/>
+          <Finish finish={this.finish.bind(this)}/>
         </div>);
     } else {
       const pages = [

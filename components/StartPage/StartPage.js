@@ -5,15 +5,16 @@ import ImageButton from '../ImageButton';
 class StartPage extends Component {
 
   render() {
+    const logoImagePath = require('./mfgt_logo_transp.png');
     const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
     const arrivalImagePath = require('./ic_flight_land_black_48dp_2x.png');
     return (
       <div className="StartPage">
         <header>
-          <img className="logo" src="mfgt_logo_transp.png"/>
+          <img className="logo" src={logoImagePath}/>
         </header>
         <div className="wrapper">
-          <ImageButton className="departure" img={departureImagePath} label="Abflug" href="departure"/>
+          <ImageButton className="departure" img={departureImagePath} label="Abflug" href="#/departure/new"/>
           <ImageButton className="arrival" img={arrivalImagePath} label="Ankunft"/>
         </div>
       </div>

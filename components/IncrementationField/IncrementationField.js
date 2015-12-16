@@ -3,11 +3,6 @@ import './IncrementationField.scss';
 
 class IncrementationField extends Component {
 
-  static propTypes = {
-    value: PropTypes.number,
-    onChange: PropTypes.func,
-  };
-
   constructor(props) {
     super(props);
     this.state = {
@@ -49,5 +44,10 @@ class IncrementationField extends Component {
     }
   }
 }
+
+IncrementationField.propTypes = {
+  value: PropTypes.number,
+  onChange: PropTypes.func,
+};
 
 export default IncrementationField;

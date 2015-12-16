@@ -5,10 +5,6 @@ import ImageButton from '../../ImageButton';
 
 class Finish extends WizardStep {
 
-  static propTypes = {
-    finish: PropTypes.func,
-  };
-
   render() {
     const exitImagePath = require('./ic_exit_to_app_black_48dp_2x.png');
     return (
@@ -23,5 +19,9 @@ class Finish extends WizardStep {
     this.props.finish();
   }
 }
+
+Finish.propTypes = {
+  finish: PropTypes.func,
+};
 
 export default Finish;

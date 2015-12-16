@@ -3,13 +3,6 @@ import './RadioGroup.scss';
 
 class RadioGroup extends Component {
 
-  static propTypes = {
-    name: PropTypes.string,
-    items: PropTypes.array,
-    value: PropTypes.string,
-    onChange: PropTypes.func,
-  };
-
   constructor(props) {
     super(props);
     this.state = {
@@ -51,5 +44,12 @@ class RadioGroup extends Component {
     }
   }
 }
+
+RadioGroup.propTypes = {
+  name: PropTypes.string,
+  items: PropTypes.array,
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+};
 
 export default RadioGroup;

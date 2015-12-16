@@ -6,29 +6,30 @@ import LabeledComponent from '../../LabeledComponent';
 
 class FlightData extends WizardStep {
 
-  types = [
-    {
-      label: 'Privat',
-      value: 'private',
-    }, {
-      label: 'Gewerblich',
-      value: 'commercial',
-    }, {
-      label: 'Schulung',
-      value: 'instruction',
-    },
-  ];
-
-  departureRoutes = [
-    {
-      label: 'Sektor Süd',
-      value: 'south',
-    }, {
-      label: 'Matzingen',
-      value: 'matzingen',
-    },
-  ];
-
+  constructor(props) {
+    super(props);
+    this.types = [
+      {
+        label: 'Privat',
+        value: 'private',
+      }, {
+        label: 'Gewerblich',
+        value: 'commercial',
+      }, {
+        label: 'Schulung',
+        value: 'instruction',
+      },
+    ];
+    this.departureRoutes = [
+      {
+        label: 'Sektor Süd',
+        value: 'south',
+      }, {
+        label: 'Matzingen',
+        value: 'matzingen',
+      },
+    ];
+  }
   render() {
     return (
       <fieldset className="FlightData">

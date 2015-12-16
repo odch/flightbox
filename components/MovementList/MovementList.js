@@ -9,11 +9,6 @@ import MovementGroup from '../MovementGroup';
  */
 class MovementList extends Component {
 
-  static propTypes = {
-    items: PropTypes.array,
-    onClick: PropTypes.func,
-  };
-
   static todayPredicate(movement) {
     const movementDateString = movement.departureArrival.startDate;
     return movementDateString && new Date(movementDateString).toDateString() === new Date().toDateString();
@@ -97,5 +92,10 @@ class MovementList extends Component {
     this.props.onClick(item);
   }
 }
+
+MovementList.propTypes = {
+  items: PropTypes.array,
+  onClick: PropTypes.func,
+};
 
 export default MovementList;
