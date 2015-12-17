@@ -8,6 +8,7 @@ class StartPage extends Component {
     const logoImagePath = require('./mfgt_logo_transp.png');
     const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
     const arrivalImagePath = require('./ic_flight_land_black_48dp_2x.png');
+    const movementsImagePath = require('./ic_list_black_48dp_2x.png');
     return (
       <div className="StartPage">
         <header>
@@ -16,6 +17,7 @@ class StartPage extends Component {
         <div className="wrapper">
           <ImageButton className="departure" img={departureImagePath} label="Abflug" href="#/departure/new"/>
           <ImageButton className="arrival" img={arrivalImagePath} label="Ankunft"/>
+          <ImageButton className="movements" img={movementsImagePath} label="Erfasste Bewegungen" href="#/movements"/>
         </div>
       </div>
     );
