@@ -1,0 +1,6 @@
+{
+  "name": "FlightData",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./FlightData.js"
+}

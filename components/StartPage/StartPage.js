@@ -16,7 +16,7 @@ class StartPage extends Component {
         </header>
         <div className="wrapper">
           <ImageButton className="departure" img={departureImagePath} label="Abflug" href="#/departure/new"/>
-          <ImageButton className="arrival" img={arrivalImagePath} label="Ankunft"/>
+          <ImageButton className="arrival" img={arrivalImagePath} label="Ankunft" href="#/arrival/new"/>
           <ImageButton className="movements" img={movementsImagePath} label="Erfasste Bewegungen" href="#/movements"/>
         </div>
       </div>

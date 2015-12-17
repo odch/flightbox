@@ -1,19 +1,19 @@
 import React, { PropTypes, Component } from 'react';
-import './DeparturePage.scss';
+import './ArrivalPage.scss';
 import VerticalHeaderPage from '../VerticalHeaderPage';
-import PassengerData from '../Departure/PassengerData';
-import DepartureArrivalData from '../Departure/DepartureArrivalData';
-import FlightData from '../Departure/FlightData';
-import Finish from '../Departure/Finish';
+import PassengerData from '../Arrival/PassengerData';
+import DepartureArrivalData from '../Arrival/DepartureArrivalData';
+import FlightData from '../Arrival/FlightData';
+import Finish from '../Arrival/Finish';
 import MovementWizardPage from '../MovementWizardPage';
 
-class DeparturePage extends Component {
+class ArrivalPage extends Component {
 
   render() {
     return (
-      <MovementWizardPage label="Abflug"
-                          className="DeparturePage"
-                          firebaseUri="https://mfgt-flights.firebaseio.com/departures/"
+      <MovementWizardPage label="Ankunft"
+                          className="ArrivalPage"
+                          firebaseUri="https://mfgt-flights.firebaseio.com/arrivals/"
                           movementKey={this.props.params.key}
                           passengerDataComponentClass={PassengerData}
                           departureArrivalDataComponentClass={DepartureArrivalData}
@@ -23,4 +23,4 @@ class DeparturePage extends Component {
   }
 }
 
-export default DeparturePage;
+export default ArrivalPage;
