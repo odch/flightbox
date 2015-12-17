@@ -1,0 +1,46 @@
+.WizardContainer {
+  height: 100%;
+
+  .wrapper {
+    min-height: 100%;
+
+    main {
+      padding-bottom: 50px;
+
+      fieldset {
+        border: 0;
+        margin: 1em;
+
+        legend {
+          font-size: 2em;
+          margin-bottom: 1em;
+        }
+
+        .LabeledComponent {
+          width: 45%;
+          margin-right: 5%;
+          margin-bottom: 1.5em;
+          float: left;
+          overflow: hidden;
+
+          > label {
+            display: block;
+            margin-bottom: 1.5em;
+          }
+        }
+
+        .LabeledComponent {
+          border-bottom: 1px solid #000;
+        }
+      }
+    }
+  }
+
+  footer {
+    font-size: 1.5em;
+    position: relative;
+    margin-top: -50px;
+    height: 50px;
+    clear: both;
+  }
+}
