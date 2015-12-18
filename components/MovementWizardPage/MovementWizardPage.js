@@ -53,7 +53,7 @@ class MovementWizardPage extends Component {
 
   componentWillUnmount() {
     if (this.update === true) {
-      this.firebaseRef.child(this.props.movementKey).off('value', this.onFirebaseValue, this)
+      this.firebaseCollectionRef.child(this.props.movementKey).off('value', this.onFirebaseValue, this)
     }
   }
 
