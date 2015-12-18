@@ -39,30 +39,29 @@ class MovementWizardPage extends Component {
         label: 'Flug'
       }
     ];
-    this.firebaseCollectionRef = new Firebase(this.props.firebaseUri);
     if (this.props.movementKey) {
       this.update = true;
-      this.firebaseCollectionRef.child(this.props.movementKey).on('value', function(dataSnapshot) {
-        const movement = dataSnapshot.val();
-        if (this.mounted === true) {
-          this.setState({
-            data: movement,
-          });
-        } else {
-          this.state.data = movement;
-        }
-      }.bind(this));
-    } else {
-      this.update = false;
     }
   }
 
-  componentDidMount() {
-    this.mounted = true;
+  componentWillMount() {
+    this.firebaseCollectionRef = new Firebase(this.props.firebaseUri);
+    if (this.update === true) {
+      this.firebaseCollectionRef.child(this.props.movementKey).on('value', this.onFirebaseValue, this);
+    }
   }
 
-  componentWillUnmount () {
-    this.mounted = false;
+  componentWillUnmount() {
+    if (this.update === true) {
+      this.firebaseRef.child(this.props.movementKey).off('value', this.onFirebaseValue, this)
+    }
+  }
+
+  onFirebaseValue(dataSnapshot) {
+    const movement = dataSnapshot.val();
+    this.setState({
+      data: movement
+    });
   }
 
   commit(data) {
