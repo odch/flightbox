@@ -1,10 +1,10 @@
 .ArrivalPage {
 
   .PassengerData .LabeledComponent.count,
-  .DepartureArrival .LabeledComponent.runway,
   .DepartureArrival .LabeledComponent.landing-count,
   .FlightData .LabeledComponent.type,
-  .FlightData .LabeledComponent.arrival-route {
+  .FlightData .LabeledComponent.arrival-route,
+  .FlightData .LabeledComponent.runway {
     border-bottom: 0;
   }
 }
