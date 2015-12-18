@@ -1,33 +1,39 @@
 import React, { PropTypes, Component } from 'react';
-import Firebase from 'firebase';
-import MovementList from '../MovementList';
 import './MovementsPage.scss';
+import MovementList from '../MovementList';
+import TabPanel from '../TabPanel';
 import VerticalHeaderPage from '../VerticalHeaderPage';
 
 class MovementsPage extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      movements: [],
-    };
-    this.firebaseRef = new Firebase('https://mfgt-flights.firebaseio.com/departures/');
-    this.firebaseRef.orderByKey().on('child_added', function(dataSnapshot) {
-      const movement = dataSnapshot.val();
-      movement.key = dataSnapshot.key();
-      this.setState({movements: this.state.movements.concat([movement])});
-    }.bind(this));
-  }
-
   render() {
-    const movementList = <MovementList items={this.state.movements} onClick={this.listClick.bind(this)}/>;
+    const departuresList = <MovementList key="departures"
+                                         className="departures"
+                                         firebaseUri="https://mfgt-flights.firebaseio.com/departures/"
+                                         onClick={this.departuresListClick.bind(this)}/>;
+    const arrivalsList = <MovementList key="arrivals"
+                                       className="arrivals"
+                                       firebaseUri="https://mfgt-flights.firebaseio.com/arrivals/"
+                                       onClick={this.arrivalsListClick.bind(this)}/>;
+    const tabs = [{
+      label: 'Abflüge',
+      component: departuresList
+    }, {
+      label: 'Ankünfte',
+      component: arrivalsList
+    }];
+    const tabPanel = <TabPanel tabs={tabs}/>;
     return (
-      <VerticalHeaderPage className="MovementsPage" component={movementList}/>
+      <VerticalHeaderPage className="MovementsPage" component={tabPanel}/>
     );
   }
 
-  listClick(item) {
+  departuresListClick(item) {
     window.location.hash = '/departure/' + item.key;
+  }
+
+  arrivalsListClick(item) {
+    window.location.hash = '/arrival/' + item.key;
   }
 }
 

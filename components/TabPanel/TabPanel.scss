@@ -1,0 +1,31 @@
+.TabPanel {
+
+  .header {
+    overflow: hidden;
+    margin-bottom: 2em;
+    border-bottom: 1px solid #ed351c;
+
+    li {
+      float: left;
+      display: block;
+      width: 50%;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+
+    li.active a {
+      color: #ed351c;
+    }
+
+    a {
+      cursor: pointer;
+      display: block;
+      padding: 1em;
+    }
+
+    a:hover {
+      background-color: #f6f6f6;
+    }
+  }
+}

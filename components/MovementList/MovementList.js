@@ -1,5 +1,7 @@
 import React, { PropTypes, Component } from 'react';
+import Predicates from './Predicates.js';
 import MovementGroup from '../MovementGroup';
+import Firebase from 'firebase';
 
 /**
  * today
@@ -9,77 +11,42 @@ import MovementGroup from '../MovementGroup';
  */
 class MovementList extends Component {
 
-  static todayPredicate(movement) {
-    const movementDateString = movement.departureArrival.startDate;
-    return movementDateString && new Date(movementDateString).toDateString() === new Date().toDateString();
-  }
-
-  static yesterdayPredicate(movement) {
-    const movementDateString = movement.departureArrival.startDate;
-    if (movementDateString) {
-      const today = new Date();
-      today.setDate(today.getDate() - 1);
-      return new Date(movementDateString).toDateString() === today.toDateString();
-    }
-    return false;
-  }
-
-  static thisMonthPredicate(movement) {
-    const movementDateString = movement.departureArrival.startDate;
-    if (movementDateString) {
-      const today = new Date();
-      const movementDate = new Date(movementDateString);
-      if (today.getMonth() === movementDate.getMonth()
-        && today.getFullYear() === movementDate.getFullYear()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static olderThanThisMonthPredicate(movement) {
-    const movementDateString = movement.departureArrival.startDate;
-    if (movementDateString) {
-      const today = new Date();
-      const movementDate = new Date(movementDateString);
-      if (today.getMonth() > movementDate.getMonth()
-        && today.getFullYear() >= movementDate.getFullYear()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static not(predicate) {
-    return function(item) {
-      return !predicate(item);
+  constructor(props) {
+    super(props);
+    this.state = {
+      movements: []
     };
   }
 
-  static and(/* predicates */) {
-    const predicates = arguments;
-    return function(item) {
-      for (const predicate of predicates) {
-        if (!predicate(item)) {
-          return false;
-        }
-      }
-      return true;
-    };
+  componentWillMount() {
+    this.firebaseRef = new Firebase(this.props.firebaseUri);
+    this.firebaseRef.orderByKey().on('child_added', this.onFirebaseChildAdded, this);
+  }
+
+  componentWillUnmount() {
+    this.firebaseRef.off('child_added', this.onFirebaseChildAdded, this)
+  }
+
+  onFirebaseChildAdded(dataSnapshot) {
+    const movement = dataSnapshot.val();
+    movement.key = dataSnapshot.key();
+    this.setState({movements: this.state.movements.concat([movement])});
   }
 
   render() {
-    const movementsOfToday = this.props.items.filter(MovementList.todayPredicate);
-    const movementsOfYesterday = this.props.items.filter(MovementList.yesterdayPredicate);
-    const movementsOfThisMonth = this.props.items.filter(MovementList.and(
-      MovementList.not(MovementList.todayPredicate),
-      MovementList.not(MovementList.yesterdayPredicate),
-      MovementList.thisMonthPredicate)
+    const movementsOfToday = this.state.movements.filter(Predicates.today);
+    const movementsOfYesterday = this.state.movements.filter(Predicates.yesterday);
+    const movementsOfThisMonth = this.state.movements.filter(Predicates.and(
+        Predicates.not(Predicates.today),
+        Predicates.not(Predicates.yesterday),
+        Predicates.thisMonth)
     );
-    const olderMovements = this.props.items.filter(MovementList.olderThanThisMonthPredicate);
+    const olderMovements = this.state.movements.filter(Predicates.olderThanThisMonth);
+
+    const className = "MovementList " + this.props.className;
 
     return (
-      <div className="MovementList">
+      <div className={className}>
         <MovementGroup label="Heute" items={movementsOfToday} onClick={this.itemClick.bind(this)}/>
         <MovementGroup label="Gestern" items={movementsOfYesterday} onClick={this.itemClick.bind(this)}/>
         <MovementGroup label="Dieser Monat" items={movementsOfThisMonth} onClick={this.itemClick.bind(this)}/>
@@ -94,7 +61,8 @@ class MovementList extends Component {
 }
 
 MovementList.propTypes = {
-  items: PropTypes.array,
+  className: PropTypes.string,
+  firebaseUri: PropTypes.string,
   onClick: PropTypes.func,
 };
 
