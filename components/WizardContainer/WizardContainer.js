@@ -2,6 +2,7 @@ import React, { PropTypes, Component } from 'react';
 import './WizardContainer.scss';
 import WizardNavigation from '../WizardNavigation';
 import WizardBreadcrumbs from '../WizardBreadcrumbs';
+import update from 'react-addons-update';
 
 class WizardContainer extends Component {
 
@@ -14,6 +15,12 @@ class WizardContainer extends Component {
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      data: nextProps.data
+    });
+  }
+
   getUpdateHandlerDelegate(key, scope) {
     return function(data) {
       scope.updateData(key, data);
@@ -21,8 +28,9 @@ class WizardContainer extends Component {
   }
 
   updateData(key, value) {
-    const data = this.state.data;
-    data[key] = value;
+    var data = update(this.state.data, {
+      [key]: { $set: value }
+    });
     this.setState({
       data: data
     });

@@ -1,4 +1,5 @@
 import React, { PropTypes, Component } from 'react';
+import update from 'react-addons-update';
 
 class WizardStep extends Component {
 
@@ -9,6 +10,12 @@ class WizardStep extends Component {
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      data: nextProps.data
+    });
+  }
+
   getUpdateHandlerDelegate(key, scope) {
     return function(e) {
       scope.updateData(key, e.target.value);
@@ -16,12 +23,14 @@ class WizardStep extends Component {
   }
 
   updateData(key, value) {
-    const data = this.state.data;
-    data[key] = value;
-    this.setState({
-      data: data,
+    var data = update(this.state.data, {
+      [key]: { $set: value }
     });
-    this.props.updateData(this.state.data);
+    this.setState({
+      data: data
+    }, function() {
+      this.props.updateData(this.state.data);
+    }, this);
   }
 }
 
