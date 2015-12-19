@@ -1,5 +1,7 @@
 # MFGT Fluganmeldungen
 
+[![Build Status](https://travis-ci.org/lszt/flights-react.svg?branch=master)](https://travis-ci.org/lszt/flights-react)
+
 ### Directory Layout
 
 ```
