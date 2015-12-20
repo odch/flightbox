@@ -6,7 +6,7 @@ class IncrementationField extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: this.props.value || 0,
+      value: this.props.value,
     };
   }
 
@@ -48,6 +48,10 @@ class IncrementationField extends Component {
 IncrementationField.propTypes = {
   value: PropTypes.number,
   onChange: PropTypes.func,
+};
+
+IncrementationField.defaultProps = {
+  value: 0,
 };
 
 export default IncrementationField;
