@@ -4,21 +4,11 @@ import TestUtils from 'react-addons-test-utils';
 import bro from 'jsdom-test-browser';
 import expect from 'expect';
 import IncrementationField from '../components/IncrementationField';
+import Utils from './Utils.js';
 
 describe('IncrementationField', () => {
   before((done) => { bro.newBrowser(done); });
   before((done) => { bro.jQueryify(done); });
-
-  const callTracker = () => {
-    const calls = [];
-    const f = (...args) => {
-      calls.push(args);
-    };
-    f.calls = () => {
-      return calls;
-    };
-    return f;
-  };
 
   it('is initialized with value', () => {
     const component = TestUtils.renderIntoDocument(<IncrementationField value={42}/>);
@@ -70,7 +60,7 @@ describe('IncrementationField', () => {
   });
 
   it('calls onChange handler on increment', () => {
-    const handler = callTracker();
+    const handler = Utils.callTracker();
     const component = TestUtils.renderIntoDocument(<IncrementationField value={42} onChange={handler}/>);
     const element = ReactDOM.findDOMNode(component);
     const button = bro.$('.increment', element).get(0);
@@ -83,7 +73,7 @@ describe('IncrementationField', () => {
   });
 
   it('calls onChange handler on decrement', () => {
-    const handler = callTracker();
+    const handler = Utils.callTracker();
     const component = TestUtils.renderIntoDocument(<IncrementationField value={42} onChange={handler}/>);
     const element = ReactDOM.findDOMNode(component);
     const button = bro.$('.decrement', element).get(0);
