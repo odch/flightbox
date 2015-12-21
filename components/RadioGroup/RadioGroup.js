@@ -13,9 +13,9 @@ class RadioGroup extends Component {
   render() {
     return (
       <div className="RadioGroup">
-        {this.props.items.map(function(item, index) {
+        {this.props.items.map((item, index) => {
           let input;
-          if (item.value === this.props.value) {
+          if (item.value === this.state.value) {
             input = <input type="radio" name={this.props.name} value={item.value} onChange={this.handleChange.bind(this)} checked="checked"/>;
           } else {
             input = <input type="radio" name={this.props.name} value={item.value} onChange={this.handleChange.bind(this)}/>;
@@ -46,8 +46,8 @@ class RadioGroup extends Component {
 }
 
 RadioGroup.propTypes = {
-  name: PropTypes.string,
-  items: PropTypes.array,
+  name: PropTypes.string.isRequired,
+  items: PropTypes.array.isRequired,
   value: PropTypes.string,
   onChange: PropTypes.func,
 };
