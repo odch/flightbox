@@ -15,9 +15,9 @@ class LabeledComponent extends Component {
 }
 
 LabeledComponent.propTypes = {
-  label: PropTypes.string,
+  label: PropTypes.string.isRequired,
+  component: PropTypes.element.isRequired,
   className: PropTypes.string,
-  component: PropTypes.element,
 };
 
 export default LabeledComponent;
