@@ -13,7 +13,7 @@ class DepartureArrivalData extends WizardStep {
         <LabeledComponent label="Startflugplatz" className="departure" component={<input type="text" value={this.state.data.departure} onChange={this.getUpdateHandlerDelegate('departure', this)}/>}/>
         <LabeledComponent label="Datum" className="date" component={<input type="date" value={this.state.data.date} onChange={this.getUpdateHandlerDelegate('date', this)}/>}/>
         <div className="clear"/>
-        <LabeledComponent label="Landezeit (Lokalzeit)" className="arrival-time" component={<input type="time" value={this.state.data.arrivalTime} onChange={this.getUpdateHandlerDelegate('arrivalTime', this)}/>}/>
+        <LabeledComponent label="Landezeit (Lokalzeit)" className="arrival-time" component={<input type="time" value={this.state.data.time} onChange={this.getUpdateHandlerDelegate('time', this)}/>}/>
         <LabeledComponent label="Anzahl Landungen" className="landing-count" component={<IncrementationField value={this.state.data.landingCount} onChange={this.getUpdateHandlerDelegate('landingCount', this)}/>}/>
       </fieldset>
     );

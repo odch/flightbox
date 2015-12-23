@@ -1,4 +1,4 @@
-import React, { PropTypes, Component } from 'react';
+import { PropTypes, Component } from 'react';
 import update from 'react-addons-update';
 
 class WizardStep extends Component {
@@ -27,9 +27,12 @@ class WizardStep extends Component {
       [key]: { $set: value }
     });
     this.setState({
-      data: data
-    }, function() {
-      this.props.updateData(this.state.data);
+      data: data,
+    }, function () {
+      this.props.updateData({
+        key: key,
+        value: value,
+      });
     }, this);
   }
 }

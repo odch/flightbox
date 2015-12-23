@@ -9,7 +9,7 @@ class PassengerData extends WizardStep {
     return (
       <fieldset className="PassengerData">
         <legend>Passagiere</legend>
-        <LabeledComponent label="Anzahl" className="count" component={<IncrementationField value={this.state.data.count} onChange={this.getUpdateHandlerDelegate('count', this)}/>}/>
+        <LabeledComponent label="Anzahl" className="count" component={<IncrementationField value={this.state.data.passengerCount} onChange={this.getUpdateHandlerDelegate('passengerCount', this)}/>}/>
       </fieldset>
     );
   }

@@ -24,7 +24,7 @@ class PassengerData extends WizardStep {
     return (
       <fieldset className="PassengerData">
         <legend>Passagiere</legend>
-        <LabeledComponent label="Anzahl" className="count" component={<IncrementationField value={this.state.data.count} onChange={this.getUpdateHandlerDelegate('count', this)}/>}/>
+        <LabeledComponent label="Anzahl" className="count" component={<IncrementationField value={this.state.data.passengerCount} onChange={this.getUpdateHandlerDelegate('passengerCount', this)}/>}/>
         <LabeledComponent label="Beförderungsschein" className="carriage-voucher" component={<RadioGroup name="carriage-voucher" items={this.carriageVoucher} value={this.state.data.carriageVoucher} onChange={this.getUpdateHandlerDelegate('carriageVoucher', this)}/>}/>
       </fieldset>
     );

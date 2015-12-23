@@ -1,14 +1,12 @@
-import React, { PropTypes, Component } from 'react';
-
-class Predicates extends Component {
+class Predicates {
 
   static today(movement) {
-    const movementDateString = movement.departureArrival.date;
+    const movementDateString = movement.date;
     return movementDateString && new Date(movementDateString).toDateString() === new Date().toDateString();
   }
 
   static yesterday(movement) {
-    const movementDateString = movement.departureArrival.date;
+    const movementDateString = movement.date;
     if (movementDateString) {
       const today = new Date();
       today.setDate(today.getDate() - 1);
@@ -18,7 +16,7 @@ class Predicates extends Component {
   }
 
   static thisMonth(movement) {
-    const movementDateString = movement.departureArrival.date;
+    const movementDateString = movement.date;
     if (movementDateString) {
       const today = new Date();
       const movementDate = new Date(movementDateString);
@@ -31,7 +29,7 @@ class Predicates extends Component {
   }
 
   static olderThanThisMonth(movement) {
-    const movementDateString = movement.departureArrival.date;
+    const movementDateString = movement.date;
     if (movementDateString) {
       const today = new Date();
       const movementDate = new Date(movementDateString);

@@ -21,18 +21,12 @@ class WizardContainer extends Component {
     });
   }
 
-  getUpdateHandlerDelegate(key, scope) {
-    return function(data) {
-      scope.updateData(key, data);
-    };
-  }
-
-  updateData(key, value) {
-    var data = update(this.state.data, {
-      [key]: { $set: value }
+  updateData(e) {
+    const data = update(this.state.data, {
+      [e.key]: { $set: e.value },
     });
     this.setState({
-      data: data
+      data: data,
     });
   }
 
@@ -84,7 +78,7 @@ class WizardContainer extends Component {
     } else {
       const page = this.props.pages[this.state.step];
       const breadcrumbItems = this.buildBreadcrumbItems();
-      const pageComponent = <page.component data={this.state.data[page.id]} updateData={this.getUpdateHandlerDelegate(page.id, this)}/>;
+      const pageComponent = <page.component data={this.state.data} updateData={this.updateData.bind(this)}/>;
       const nextLabel = this.isLast() ? 'Speichern' : 'Weiter';
 
       return (
