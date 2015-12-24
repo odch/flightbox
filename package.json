@@ -20,6 +20,7 @@
     "ignore-styles": "~1.2.0",
     "jsdom-test-browser": "~4.0.2",
     "mocha": "~2.3.4",
+    "moment-timezone": "~0.4.1",
     "node-sass": "^3.4.2",
     "postcss-loader": "~0.8.0",
     "react": "~0.14.3",
