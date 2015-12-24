@@ -13,6 +13,7 @@ module.exports = {
         include: [
           path.resolve(__dirname, './core'),
           path.resolve(__dirname, './components'),
+          path.resolve(__dirname, './util'),
           path.resolve(__dirname, './app.js'),
         ],
         exclude: /node_modules/,
@@ -32,6 +33,10 @@ module.exports = {
       {
         test: /\.(eot|ttf|wav|mp3)$/,
         loader: 'file-loader'
+      },
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
       }
     ]
   }

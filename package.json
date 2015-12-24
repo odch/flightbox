@@ -19,6 +19,7 @@
     "firebase": "~2.3.2",
     "ignore-styles": "~1.2.0",
     "jsdom-test-browser": "~4.0.2",
+    "json-loader": "~0.5.4",
     "mocha": "~2.3.4",
     "moment-timezone": "~0.4.1",
     "node-sass": "^3.4.2",

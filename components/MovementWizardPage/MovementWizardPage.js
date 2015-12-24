@@ -4,6 +4,7 @@ import AircraftData from '../AircraftData';
 import PilotData from '../PilotData';
 import WizardContainer from '../WizardContainer';
 import Firebase from 'firebase';
+import { firebaseToLocal, localToFirebase } from '../../util/movements.js';
 
 class MovementWizardPage extends Component {
 
@@ -53,25 +54,26 @@ class MovementWizardPage extends Component {
 
   componentWillUnmount() {
     if (this.update === true) {
-      this.firebaseCollectionRef.child(this.props.movementKey).off('value', this.onFirebaseValue, this)
+      this.firebaseCollectionRef.child(this.props.movementKey).off('value', this.onFirebaseValue, this);
     }
   }
 
   onFirebaseValue(dataSnapshot) {
-    const movement = dataSnapshot.val();
+    const movement = firebaseToLocal(dataSnapshot.val());
     this.setState({
-      data: movement
+      data: movement,
     });
   }
 
   commit(data) {
     this.setState({
-      data: data
-    }, function() {
+      data,
+    }, function () {
+      const movement = localToFirebase(data);
       if (this.update === true) {
-        this.firebaseCollectionRef.child(this.props.movementKey).set(data);
+        this.firebaseCollectionRef.child(this.props.movementKey).set(movement);
       } else {
-        this.firebaseCollectionRef.push(this.state.data);
+        this.firebaseCollectionRef.push(movement);
       }
     }, this);
   }

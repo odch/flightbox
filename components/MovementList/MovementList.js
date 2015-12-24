@@ -2,6 +2,7 @@ import React, { PropTypes, Component } from 'react';
 import Predicates from './Predicates.js';
 import MovementGroup from '../MovementGroup';
 import Firebase from 'firebase';
+import { firebaseToLocal } from '../../util/movements.js';
 
 /**
  * today
@@ -24,13 +25,13 @@ class MovementList extends Component {
   }
 
   componentWillUnmount() {
-    this.firebaseRef.off('child_added', this.onFirebaseChildAdded, this)
+    this.firebaseRef.off('child_added', this.onFirebaseChildAdded, this);
   }
 
   onFirebaseChildAdded(dataSnapshot) {
-    const movement = dataSnapshot.val();
+    const movement = firebaseToLocal(dataSnapshot.val());
     movement.key = dataSnapshot.key();
-    this.setState({movements: this.state.movements.concat([movement])});
+    this.setState({ movements: this.state.movements.concat([movement]) });
   }
 
   render() {
