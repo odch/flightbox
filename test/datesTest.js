@@ -21,4 +21,9 @@ describe('dates', () => {
     expect(local.date).toBe('2015-12-24');
     expect(local.time).toBe('07:10');
   });
+
+  it('converts UTC to milliseconds', () => {
+    const milliseconds = dates.isoUtcToMilliseconds('2015-12-24T06:10:00.000Z');
+    expect(milliseconds).toBe(1450937400000);
+  });
 });

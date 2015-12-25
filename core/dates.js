@@ -13,6 +13,10 @@ const dates = {
       time: date.format('HH:mm'),
     };
   },
+
+  isoUtcToMilliseconds(isoUtc) {
+    return new Date(isoUtc).getTime();
+  },
 };
 
 export default dates;
