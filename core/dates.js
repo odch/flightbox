@@ -17,6 +17,14 @@ const dates = {
   isoUtcToMilliseconds(isoUtc) {
     return new Date(isoUtc).getTime();
   },
+
+  isoStartOfDay(jsDate) {
+    return moment(jsDate).tz('Europe/Zurich').startOf('day').toISOString();
+  },
+
+  isoEndOfDay(jsDate) {
+    return moment(jsDate).tz('Europe/Zurich').endOf('day').toISOString();
+  },
 };
 
 export default dates;
