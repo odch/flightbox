@@ -15,23 +15,27 @@ class MovementList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      movements: []
+      movements: [],
     };
+    this.firebaseRef = new Firebase(this.props.firebaseUri);
   }
 
   componentWillMount() {
-    this.firebaseRef = new Firebase(this.props.firebaseUri);
-    this.firebaseRef.orderByKey().on('child_added', this.onFirebaseChildAdded, this);
+    this.loadData();
   }
 
-  componentWillUnmount() {
-    this.firebaseRef.off('child_added', this.onFirebaseChildAdded, this);
+  loadData() {
+    this.firebaseRef.orderByChild('negativeTimestamp').once('value', this.onFirebaseValue, this);
   }
 
-  onFirebaseChildAdded(dataSnapshot) {
-    const movement = firebaseToLocal(dataSnapshot.val());
-    movement.key = dataSnapshot.key();
-    this.setState({ movements: this.state.movements.concat([movement]) });
+  onFirebaseValue(snapshot) {
+    const movements = [];
+    snapshot.forEach((data) => {
+      const movement = firebaseToLocal(data.val());
+      movement.key = data.key();
+      movements.push(movement);
+    });
+    this.setState({ movements: this.state.movements.concat(movements) });
   }
 
   render() {
@@ -44,7 +48,7 @@ class MovementList extends Component {
     );
     const olderMovements = this.state.movements.filter(Predicates.olderThanThisMonth);
 
-    const className = "MovementList " + this.props.className;
+    const className = 'MovementList ' + this.props.className;
 
     return (
       <div className={className}>

@@ -2,7 +2,7 @@
   "scripts": {
     "start": "webpack-dev-server --progress --colors",
     "build": "webpack --progress --colors",
-    "test": "mocha --require babel-core/register --require ignore-styles"
+    "test": "mocha --recursive --require babel-core/register --require ignore-styles"
   },
   "devDependencies": {
     "babel-core": "~6.3.17",
