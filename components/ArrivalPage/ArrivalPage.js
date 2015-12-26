@@ -6,6 +6,7 @@ import DepartureArrivalData from '../Arrival/DepartureArrivalData';
 import FlightData from '../Arrival/FlightData';
 import Finish from '../Arrival/Finish';
 import MovementWizardPage from '../MovementWizardPage';
+import dates from '../../core/dates.js';
 
 class ArrivalPage extends Component {
 
@@ -18,7 +19,8 @@ class ArrivalPage extends Component {
                           passengerDataComponentClass={PassengerData}
                           departureArrivalDataComponentClass={DepartureArrivalData}
                           flightDataComponentClass={FlightData}
-                          finishComponentClass={Finish}/>
+                          finishComponentClass={Finish}
+                          defaultTime={dates.localTimeRounded(15, 'down')}/>
     );
   }
 }

@@ -5,13 +5,17 @@ import PilotData from '../PilotData';
 import WizardContainer from '../WizardContainer';
 import Firebase from 'firebase';
 import { firebaseToLocal, localToFirebase } from '../../util/movements.js';
+import dates from '../../core/dates.js';
 
 class MovementWizardPage extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      data: {}
+      data: {
+        date: dates.localDate(),
+        time: this.props.defaultTime,
+      },
     };
     this.pages = [
       {
@@ -109,6 +113,7 @@ MovementWizardPage.propTypes = {
   departureArrivalDataComponentClass: PropTypes.func,
   flightDataComponentClass: PropTypes.func,
   finishComponentClass: PropTypes.func,
+  defaultTime: PropTypes.string,
 };
 
 export default MovementWizardPage;

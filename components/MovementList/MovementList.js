@@ -45,8 +45,8 @@ class MovementList extends Component {
   loadOnceOfToday() {
     new Firebase(this.props.firebaseUri)
       .orderByChild('dateTime')
-      .startAt(dates.isoStartOfDay(new Date()))
-      .endAt(dates.isoEndOfDay(new Date()))
+      .startAt(dates.isoStartOfDay())
+      .endAt(dates.isoEndOfDay())
       .once('value', this.initialValues, this);
   }
 
