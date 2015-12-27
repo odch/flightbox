@@ -28,22 +28,22 @@ describe('dates', () => {
   });
 
   it('returns start of day', () => {
-    const startOfDay = dates.isoStartOfDay(new Date('2015-12-25'));
+    const startOfDay = dates.isoStartOfDay('2015-12-25');
     expect(startOfDay).toBe('2015-12-24T23:00:00.000Z');
   });
 
   it('returns end of day', () => {
-    const endOfDay = dates.isoEndOfDay(new Date('2015-12-25'));
+    const endOfDay = dates.isoEndOfDay('2015-12-25');
     expect(endOfDay).toBe('2015-12-25T22:59:59.999Z');
   });
 
   it('returns local date', () => {
-    const localDate = dates.localDate(new Date('2015-12-25'));
+    const localDate = dates.localDate('2015-12-25');
     expect(localDate).toBe('2015-12-25');
   });
 
   it('returns local time rounded up', () => {
-    const date = new Date('2015-12-25 12:12');
+    const date = '2015-12-25 12:12';
     expect(dates.localTimeRounded(5, 'up', date)).toBe('12:15');
     expect(dates.localTimeRounded(10, 'up', date)).toBe('12:20');
     expect(dates.localTimeRounded(15, 'up', date)).toBe('12:15');
@@ -52,7 +52,7 @@ describe('dates', () => {
   });
 
   it('returns local time rounded down', () => {
-    const date = new Date('2015-12-25 12:37');
+    const date = '2015-12-25 12:37';
     expect(dates.localTimeRounded(5, 'down', date)).toBe('12:35');
     expect(dates.localTimeRounded(10, 'down', date)).toBe('12:30');
     expect(dates.localTimeRounded(15, 'down', date)).toBe('12:30');

@@ -19,33 +19,33 @@ const dates = {
   },
 
   /**
-   * @param jsDate optional JS date (default: now)
+   * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
    */
-  isoStartOfDay(jsDate) {
-    return moment(jsDate).tz('Europe/Zurich').startOf('day').toISOString();
+  isoStartOfDay(localDateString) {
+    return moment.tz(localDateString, 'Europe/Zurich').startOf('day').toISOString();
   },
 
   /**
-   * @param jsDate optional JS date (default: now)
+   * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
    */
-  isoEndOfDay(jsDate) {
-    return moment(jsDate).tz('Europe/Zurich').endOf('day').toISOString();
+  isoEndOfDay(localDateString) {
+    return moment.tz(localDateString, 'Europe/Zurich').endOf('day').toISOString();
   },
 
   /**
-   * @param jsDate optional JS date (default: now)
+   * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
    */
-  localDate(jsDate) {
-    return moment(jsDate).tz('Europe/Zurich').format('YYYY-MM-DD');
+  localDate(localDateString) {
+    return moment.tz(localDateString, 'Europe/Zurich').format('YYYY-MM-DD');
   },
 
   /**
    * @param minutesPrecision i.e. 5, 10, 15, 30, 60
    * @param direction 'up' or 'down'
-   * @param jsDate optional JS date (default: now)
+   * @param localTimeString optional local time string (for timezone 'Europe/Zurich'; if missing: now)
    */
-  localTimeRounded(minutesPrecision, direction, jsDate) {
-    const m = moment(jsDate).tz('Europe/Zurich').seconds(0).milliseconds(0);
+  localTimeRounded(minutesPrecision, direction, localTimeString) {
+    const m = moment.tz(localTimeString, 'Europe/Zurich').seconds(0).milliseconds(0);
 
     const remainder = m.minutes() % minutesPrecision;
 
