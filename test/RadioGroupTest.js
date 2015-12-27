@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 import bro from 'jsdom-test-browser';
 import expect from 'expect';
-import RadioGroup from '../components/RadioGroup';
+import RadioGroup from '../src/components/RadioGroup';
 import Utils from './Utils.js';
 
 describe('RadioGroup', () => {

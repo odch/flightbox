@@ -2,19 +2,6 @@
 
 [![Build Status](https://travis-ci.org/lszt/flights-react.svg?branch=master)](https://travis-ci.org/lszt/flights-react)
 
-### Directory Layout
-
-```
-.
-├── /build/                     # The folder for compiled output
-├── /node_modules/              # 3rd-party libraries and utilities
-├── /components/                # React components
-├── /test/                      # Unit and integration tests
-│── app.js                      # The main JavaScript file (entry point)
-│── package.json                # Dev dependencies and NPM scripts
-└── README.md                   # Project overview
-```
-
 ### Getting Started
 
 ```

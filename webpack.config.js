@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = {
-  entry: './app.js',
+  entry: './src/app.js',
   output: {
     path: __dirname + '/build',
     filename: 'bundle.js'
@@ -11,10 +11,7 @@ module.exports = {
       {
         test: /\.jsx?$/,
         include: [
-          path.resolve(__dirname, './core'),
-          path.resolve(__dirname, './components'),
-          path.resolve(__dirname, './util'),
-          path.resolve(__dirname, './app.js'),
+          path.resolve(__dirname, './src'),
         ],
         exclude: /node_modules/,
         loader: 'babel',

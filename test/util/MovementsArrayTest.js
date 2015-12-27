@@ -1,5 +1,5 @@
 import expect from 'expect';
-import MovementsArray from '../../util/MovementsArray.js';
+import MovementsArray from '../../src/util/MovementsArray.js';
 
 describe('MovementsArray', () => {
   describe('creation', () => {

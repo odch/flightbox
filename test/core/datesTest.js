@@ -1,5 +1,5 @@
 import expect from 'expect';
-import dates from '../core/dates.js';
+import dates from '../../src/core/dates.js';
 
 describe('dates', () => {
   it('converts local summer date to UTC', () => {

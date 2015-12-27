@@ -1,5 +1,5 @@
 import expect from 'expect';
-import { localToFirebase, firebaseToLocal } from '../../util/movements.js';
+import { localToFirebase, firebaseToLocal } from '../../src/util/movements.js';
 
 describe('movements', () => {
   describe('local to firebase', () => {

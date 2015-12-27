@@ -1,5 +1,5 @@
 import expect from 'expect';
-import { filter } from '../core/filter.js';
+import { filter } from '../../src/core/filter.js';
 
 describe('filter', () => {
   it('filters according to the given predicate', () => {
