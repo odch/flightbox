@@ -13,12 +13,27 @@ class WizardContainer extends Component {
       data: props.data,
       committed: false
     };
+    this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
     this.setState({
       data: nextProps.data
     });
+  }
+
+  componentWillMount() {
+    document.addEventListener('keydown', this.handleKeyDown);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleKeyDown);
+  }
+
+  handleKeyDown(e) {
+    if (e.keyCode === 13) { // enter
+      this.nextStep();
+    }
   }
 
   updateData(e) {
