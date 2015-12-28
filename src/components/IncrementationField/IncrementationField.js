@@ -5,8 +5,12 @@ class IncrementationField extends Component {
 
   constructor(props) {
     super(props);
+    const value = typeof this.props.value === 'undefined' ? this.props.minValue : this.props.value;
+    if (value < this.props.minValue) {
+      throw new Error('Given value ' + value + ' is lower than min value ' + this.props.minValue);
+    }
     this.state = {
-      value: this.props.value,
+      value,
     };
   }
 
@@ -22,7 +26,7 @@ class IncrementationField extends Component {
 
   decrement() {
     let newValue = this.state.value - 1;
-    if (newValue < 0) newValue = 0;
+    if (newValue < this.props.minValue) newValue = this.props.minValue;
     this.setState({
       value: newValue,
     }, this.fireChangeEvent.bind(this));
@@ -47,11 +51,12 @@ class IncrementationField extends Component {
 
 IncrementationField.propTypes = {
   value: PropTypes.number,
+  minValue: PropTypes.number,
   onChange: PropTypes.func,
 };
 
 IncrementationField.defaultProps = {
-  value: 0,
+  minValue: 0,
 };
 
 export default IncrementationField;
