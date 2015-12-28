@@ -1,10 +1,10 @@
-var path = require('path');
+const path = require('path');
 
 module.exports = {
-  entry: './src/app.js',
+  entry: path.resolve(__dirname, './src/app.js'),
   output: {
-    path: __dirname + '/build',
-    filename: 'bundle.js'
+    path: path.resolve(__dirname, './build'),
+    filename: 'bundle.js',
   },
   module: {
     loaders: [
@@ -16,25 +16,25 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'babel',
         query: {
-          presets: [ 'react', 'es2015' ]
-        }
+          presets: ['react', 'es2015'],
+        },
       },
       {
         test: /\.scss$/,
-        loader: 'style!css!sass'
+        loader: 'style!css!sass',
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg|woff|woff2)$/,
-        loader: 'url-loader?limit=10000'
+        loader: 'url-loader?limit=10000',
       },
       {
         test: /\.(eot|ttf|wav|mp3)$/,
-        loader: 'file-loader'
+        loader: 'file-loader',
       },
       {
         test: /\.json$/,
-        loader: 'json-loader'
-      }
-    ]
-  }
+        loader: 'json-loader',
+      },
+    ],
+  },
 };

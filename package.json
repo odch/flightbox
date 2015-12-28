@@ -1,8 +1,8 @@
 {
   "scripts": {
     "start": "webpack-dev-server --progress --colors",
-    "build": "webpack --progress --colors",
-    "test": "mocha --recursive --require babel-core/register --require ignore-styles"
+    "build": "gulp build",
+    "test": "gulp test"
   },
   "devDependencies": {
     "babel-core": "~6.3.17",
@@ -11,12 +11,16 @@
     "babel-preset-react": "~6.3.13",
     "classnames": "~2.2.1",
     "css-loader": "~0.23.0",
+    "del": "~2.2.0",
     "eslint": "~1.10.3",
     "eslint-config-airbnb": "~2.1.1",
     "eslint-plugin-react": "~3.11.3",
     "expect": "~1.13.4",
     "file-loader": "~0.8.5",
     "firebase": "~2.3.2",
+    "gulp": "~3.9.0",
+    "gulp-mocha": "~2.2.0",
+    "gulp-webpack": "~1.5.0",
     "ignore-styles": "~1.2.0",
     "jsdom-test-browser": "~4.0.2",
     "json-loader": "~0.5.4",
@@ -33,7 +37,6 @@
     "sass-loader": "~3.1.2",
     "style-loader": "~0.13.0",
     "url-loader": "~0.5.7",
-    "webpack": "~1.12.9",
     "webpack-dev-server": "~1.14.0"
   }
 }

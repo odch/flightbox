@@ -6,7 +6,6 @@
 
 ```
 $ npm install
-$ npm run build
 $ npm start
 ```
 
@@ -25,4 +24,4 @@ $ npm install
 $ npm run build
 ```
 
-Copy index.html and build directory to the server.
+Copy the build directory to the server.
