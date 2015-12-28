@@ -6,12 +6,12 @@ const del = require('del');
 
 require('ignore-styles');
 
-gulp.task('clean', () => {
+gulp.task('clean', function () {
   const config = require('./webpack.config.js');
   return del([config.output.path]);
 });
 
-gulp.task('build', ['clean'], () => {
+gulp.task('build', ['clean'], function () {
   const config = require('./webpack.config.js');
   return gulp.src(config.entry)
     .pipe(webpack(config))
@@ -21,7 +21,7 @@ gulp.task('build', ['clean'], () => {
     );
 });
 
-gulp.task('test', () => {
+gulp.task('test', function () {
   return gulp
     .src('./test/**/*.js')
     .pipe(mocha({
