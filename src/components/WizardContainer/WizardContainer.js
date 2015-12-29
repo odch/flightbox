@@ -62,10 +62,11 @@ class WizardContainer extends Component {
   previousStep() {
     if (this.isFirst()) {
       this.cancel();
+    } else {
+      this.setState({
+        step: this.state.step - 1,
+      });
     }
-    this.setState({
-      step: this.state.step - 1
-    });
   }
 
   commit() {
