@@ -31,7 +31,7 @@ class WizardContainer extends Component {
   }
 
   handleKeyDown(e) {
-    if (e.keyCode === 13) { // enter
+    if (e.keyCode === 13 && e.target.tagName !== 'TEXTAREA') { // enter
       this.nextStep();
     }
   }
