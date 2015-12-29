@@ -9,16 +9,16 @@ class Movement extends Component {
       ? dates.formatDate(this.props.data.date)
       : '\u00a0';
     const time = dates.formatTime(this.props.data.date, this.props.data.time);
-    const destination = this.props.data.destination === 'LSZT'
+    const location = this.props.data.location === 'LSZT'
       ? 'Lokalflug'
-      : this.props.data.destination;
+      : this.props.data.location;
     return (
       <div className="Movement" onClick={this.props.onClick}>
         <div className="column immatriculation">{this.props.data.immatriculation}</div>
         <div className="column pilot">{this.props.data.lastname}</div>
         <div className="column date">{date}</div>
         <div className="column time">{time}</div>
-        <div className="column destination">{destination}</div>
+        <div className="column location">{location}</div>
       </div>
     );
   }
