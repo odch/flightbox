@@ -7,7 +7,7 @@ const dates = {
   },
 
   isoUtcToLocal(isoUtc) {
-    const date = moment(isoUtc).tz('Europe/Zurich').locale('de');
+    const date = moment(isoUtc).tz('Europe/Zurich');
     return {
       date: date.format('YYYY-MM-DD'),
       time: date.format('HH:mm'),
@@ -33,6 +33,8 @@ const dates = {
   },
 
   /**
+   * Get the local date in format 'YYYY-MM-DD'.
+   *
    * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
    */
   localDate(localDateString) {
@@ -40,6 +42,8 @@ const dates = {
   },
 
   /**
+   * Get the local time in format 'HH:mm'.
+   *
    * @param minutesPrecision i.e. 5, 10, 15, 30, 60
    * @param direction 'up' or 'down'
    * @param localTimeString optional local time string (for timezone 'Europe/Zurich'; if missing: now)
@@ -60,6 +64,29 @@ const dates = {
     }
 
     return m.format('HH:mm');
+  },
+
+  /**
+   * Get the local date in format for given locale or locale 'de'.
+   *
+   * @param localDate the local date to format
+   * @param locale optional locale to format the date (if missing: de)
+   */
+  formatDate(localDate, locale) {
+    locale = locale || 'de';
+    return moment.tz(localDate, 'Europe/Zurich').locale(locale).format('L');
+  },
+
+  /**
+   * Get the local time in format for given locale or locale 'de'.
+   *
+   * @param localDate date part of the local date to format
+   * @param localTime time part of the local date to format
+   * @param locale optional locale to format the date (if missing: de)
+   */
+  formatTime(localDate, localTime, locale) {
+    locale = locale || 'de';
+    return moment.tz(localDate + ' ' + localTime, 'Europe/Zurich').locale(locale).format('LT');
   },
 };
 

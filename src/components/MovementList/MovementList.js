@@ -113,8 +113,8 @@ class MovementList extends Component {
 
     return (
       <div className={className}>
-        <MovementGroup label="Heute" items={movementsOfToday} onClick={this.itemClick.bind(this)}/>
-        <MovementGroup label="Gestern" items={movementsOfYesterday} onClick={this.itemClick.bind(this)}/>
+        <MovementGroup label="Heute" items={movementsOfToday} onClick={this.itemClick.bind(this)} timeWithDate={false}/>
+        <MovementGroup label="Gestern" items={movementsOfYesterday} onClick={this.itemClick.bind(this)} timeWithDate={false}/>
         <MovementGroup label="Dieser Monat" items={movementsOfThisMonth} onClick={this.itemClick.bind(this)}/>
         <MovementGroup label="Älter" items={olderMovements} onClick={this.itemClick.bind(this)}/>
       </div>

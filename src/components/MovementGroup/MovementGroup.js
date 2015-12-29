@@ -14,7 +14,7 @@ class MovementGroup extends Component {
         <div className="label">{this.props.label}</div>
         <div className="items">
           {this.props.items.map(function(item, index) {
-            return <Movement key={index} data={item} onClick={this.itemClick.bind(this, item)}/>;
+            return <Movement key={index} data={item} onClick={this.itemClick.bind(this, item)} timeWithDate={this.props.timeWithDate}/>;
           }, this)}
         </div>
       </div>
@@ -30,6 +30,7 @@ MovementGroup.propTypes = {
   label: PropTypes.string,
   items: PropTypes.array,
   onClick: PropTypes.func,
+  timeWithDate: PropTypes.bool,
 };
 
 export default MovementGroup;

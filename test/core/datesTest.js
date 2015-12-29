@@ -59,4 +59,20 @@ describe('dates', () => {
     expect(dates.localTimeRounded(30, 'down', date)).toBe('12:30');
     expect(dates.localTimeRounded(60, 'down', date)).toBe('12:00');
   });
+
+  it('formats local date with default locale (de)', () => {
+    expect(dates.formatDate('2015-12-29')).toBe('29.12.2015');
+  });
+
+  it('formats local date with given locale (en)', () => {
+    expect(dates.formatDate('2015-12-29', 'en')).toBe('12/29/2015');
+  });
+
+  it('formats local time with default locale (de)', () => {
+    expect(dates.formatTime('2015-12-29', '13:13')).toBe('13:13');
+  });
+
+  it('formats local time with given locale (en)', () => {
+    expect(dates.formatTime('2015-12-29', '13:13', 'en')).toBe('1:13 PM');
+  });
 });
