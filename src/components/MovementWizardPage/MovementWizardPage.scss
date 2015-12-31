@@ -1,0 +1,46 @@
+.MovementWizardPage {
+
+  .west {
+    background-color: #f6f6f6;
+    text-align: center;
+
+    .logo {
+      width: 85%;
+      margin-top: 10px;
+    }
+  }
+
+  .middle {
+
+    fieldset {
+      border: 0;
+      margin: 1em;
+
+      legend {
+        font-size: 2em;
+        margin-bottom: 1em;
+      }
+
+      .LabeledComponent {
+        width: 45%;
+        margin-right: 5%;
+        margin-bottom: 1.5em;
+        float: left;
+        overflow: hidden;
+
+        > label {
+          display: block;
+          margin-bottom: 1.5em;
+        }
+      }
+
+      .LabeledComponent {
+        border-bottom: 1px solid #000;
+      }
+    }
+  }
+
+  .south {
+    font-size: 1.5em;
+  }
+}
