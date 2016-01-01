@@ -5,6 +5,7 @@ const webpack = require('gulp-webpack');
 const del = require('del');
 
 require('ignore-styles');
+require('babel-polyfill');
 
 gulp.task('clean', function () {
   const config = require('./webpack.config.js');
