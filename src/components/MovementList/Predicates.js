@@ -42,16 +42,16 @@ class Predicates {
   }
 
   static not(predicate) {
-    return function(item) {
+    return (item) => {
       return !predicate(item);
     };
   }
 
   static and(/* predicates */) {
     const predicates = arguments;
-    return function(item) {
-      for (const predicate of predicates) {
-        if (!predicate(item)) {
+    return (item) => {
+      for (let i = 0; i < predicates.length; i++) {
+        if (!predicates[i](item)) {
           return false;
         }
       }
