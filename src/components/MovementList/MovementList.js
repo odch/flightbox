@@ -100,14 +100,17 @@ class MovementList extends Component {
   }
 
   render() {
-    const movementsOfToday = this.state.movements.filter(Predicates.today);
-    const movementsOfYesterday = this.state.movements.filter(Predicates.yesterday);
+    const movementsOfToday = this.state.movements.filter(Predicates.sameDay());
+    const movementsOfYesterday = this.state.movements.filter(Predicates.dayBefore());
     const movementsOfThisMonth = this.state.movements.filter(Predicates.and(
-        Predicates.not(Predicates.today),
-        Predicates.not(Predicates.yesterday),
-        Predicates.thisMonth)
-    );
-    const olderMovements = this.state.movements.filter(Predicates.olderThanThisMonth);
+      Predicates.sameMonth(),
+      Predicates.olderThanSameDay(),
+      Predicates.not(Predicates.dayBefore())
+    ));
+    const olderMovements = this.state.movements.filter(Predicates.and(
+      Predicates.olderThanSameMonth(),
+      Predicates.not(Predicates.dayBefore())
+    ));
 
     const className = 'MovementList ' + this.props.className;
 

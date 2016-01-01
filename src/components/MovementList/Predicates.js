@@ -1,44 +1,40 @@
+import moment from 'moment-timezone';
+
 class Predicates {
 
-  static today(movement) {
-    const movementDateString = movement.date;
-    return movementDateString && new Date(movementDateString).toDateString() === new Date().toDateString();
+  /**
+   * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
+   */
+  static sameDay(localDateString) {
+    return (movement) => moment.tz(localDateString, 'Europe/Zurich').isSame(movement.date, 'day');
   }
 
-  static yesterday(movement) {
-    const movementDateString = movement.date;
-    if (movementDateString) {
-      const today = new Date();
-      today.setDate(today.getDate() - 1);
-      return new Date(movementDateString).toDateString() === today.toDateString();
-    }
-    return false;
+  /**
+   * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
+   */
+  static olderThanSameDay(localDateString) {
+    return (movement) => moment.tz(localDateString, 'Europe/Zurich').isAfter(movement.date, 'day');
   }
 
-  static thisMonth(movement) {
-    const movementDateString = movement.date;
-    if (movementDateString) {
-      const today = new Date();
-      const movementDate = new Date(movementDateString);
-      if (today.getMonth() === movementDate.getMonth()
-        && today.getFullYear() === movementDate.getFullYear()) {
-        return true;
-      }
-    }
-    return false;
+  /**
+   * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
+   */
+  static dayBefore(localDateString) {
+    return (movement) => moment.tz(localDateString, 'Europe/Zurich').subtract(1, 'days').isSame(movement.date, 'day');
   }
 
-  static olderThanThisMonth(movement) {
-    const movementDateString = movement.date;
-    if (movementDateString) {
-      const today = new Date();
-      const movementDate = new Date(movementDateString);
-      if (today.getMonth() > movementDate.getMonth()
-        && today.getFullYear() >= movementDate.getFullYear()) {
-        return true;
-      }
-    }
-    return false;
+  /**
+   * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
+   */
+  static sameMonth(localDateString) {
+    return (movement) => moment.tz(localDateString, 'Europe/Zurich').isSame(movement.date, 'month');
+  }
+
+  /**
+   * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
+   */
+  static olderThanSameMonth(localDateString) {
+    return (movement) => moment.tz(localDateString, 'Europe/Zurich').isAfter(movement.date, 'month');
   }
 
   static not(predicate) {
