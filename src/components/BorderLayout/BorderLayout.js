@@ -33,7 +33,7 @@ class BorderLayout extends Component {
     }
 
     return (
-      <div className={className}>
+      <div className={className} onFocus={this.props.onFocus} onBlur={this.props.onBlur}>
         <div className="west">{west}</div>
         <div className="center">
           <div className="north">{north}</div>
@@ -49,6 +49,8 @@ class BorderLayout extends Component {
 BorderLayout.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node,
+  onFocus: PropTypes.func,
+  onBlur: PropTypes.func,
 };
 
 export default BorderLayout;

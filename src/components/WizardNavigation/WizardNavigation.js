@@ -7,9 +7,9 @@ class WizardNavigation extends Component {
     const nextLabel = this.props.nextLabel || 'Weiter';
     return (
       <div className="WizardNavigation">
-        <a onClick={this.cancel.bind(this)} className="cancel">Abbrechen</a>
-        <a onClick={this.nextStep.bind(this)} className="next">{nextLabel}</a>
-        <a onClick={this.previousStep.bind(this)} className="prev">Zurück</a>
+        <a onMouseDown={this.cancel.bind(this)} className="cancel" tabIndex="-1">Abbrechen</a>
+        <a onMouseDown={this.nextStep.bind(this)} className="next" tabIndex="-1">{nextLabel}</a>
+        <a onMouseDown={this.previousStep.bind(this)} className="prev" tabIndex="-1">Zurück</a>
       </div>
     );
   }

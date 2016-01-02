@@ -4,6 +4,7 @@ import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import WizardNavigation from '../WizardNavigation';
+import AircraftList from '../AircraftList';
 import Firebase from 'firebase';
 import { firebaseToLocal, localToFirebase } from '../../util/movements.js';
 import dates from '../../core/dates.js';
@@ -20,6 +21,7 @@ class MovementWizardPage extends Component {
         date: dates.localDate(),
         time: this.props.defaultTime,
       },
+      aircraftListVisible: false,
     };
 
     if (this.props.movementKey) {
@@ -35,6 +37,7 @@ class MovementWizardPage extends Component {
       this.firebaseCollectionRef.child(this.props.movementKey).on('value', this.onFirebaseValue, this);
     }
     document.addEventListener('keydown', this.handleKeyDown);
+    this.mounted = true;
   }
 
   componentWillUnmount() {
@@ -42,6 +45,7 @@ class MovementWizardPage extends Component {
       this.firebaseCollectionRef.child(this.props.movementKey).off('value', this.onFirebaseValue, this);
     }
     document.removeEventListener('keydown', this.handleKeyDown);
+    this.mounted = false;
   }
 
   onFirebaseValue(dataSnapshot) {
@@ -85,6 +89,46 @@ class MovementWizardPage extends Component {
     });
     this.setState({
       data,
+    });
+  }
+
+  focusHandler(e) {
+    this.setState({
+      aircraftListVisible: e.target && (e.target.name === 'immatriculation' || e.target.name === 'aircraftType'),
+    });
+  }
+
+  blurHandler() {
+    setTimeout(() => {
+      const aircraftListVisible = document.activeElement.name === 'immatriculation' || document.activeElement.name === 'aircraftType';
+      if (this.mounted === true && !aircraftListVisible) {
+        this.setState({
+          aircraftListVisible: false,
+        });
+      }
+    }, 1);
+  }
+
+  keyUpHandler(e) {
+    if (e.key === 'immatriculation') {
+      this.setState({
+        immatriculationFilter: e.value,
+      });
+    }
+    if (e.key === 'aircraftType') {
+      this.setState({
+        aircraftTypeFilter: e.value,
+      });
+    }
+  }
+
+  aircraftClickHandler(item) {
+    this.setState({
+      data: {
+        immatriculation: item.key,
+        aircraftType: item.value.type,
+        mtow: item.value.mtow,
+      },
     });
   }
 
@@ -138,6 +182,7 @@ class MovementWizardPage extends Component {
     let middleItem;
     let northItem;
     let southItem;
+    let eastItem;
 
     if (this.state.committed === true) {
       middleItem = <this.props.finishComponentClass finish={this.finish.bind(this)}/>;
@@ -146,7 +191,13 @@ class MovementWizardPage extends Component {
       const nextLabel = this.isLast() ? 'Speichern' : 'Weiter';
 
       const page = this.props.pages[this.state.step];
-      middleItem = <page.component data={this.state.data} updateData={this.updateData.bind(this)}/>;
+      middleItem = (
+        <page.component
+          data={this.state.data}
+          updateData={this.updateData.bind(this)}
+          onKeyUp={this.keyUpHandler.bind(this)}
+        />
+      );
 
       northItem = (
         <BorderLayoutItem region="north">
@@ -163,10 +214,22 @@ class MovementWizardPage extends Component {
           />
         </BorderLayoutItem>
       );
+
+      if (this.state.aircraftListVisible === true) {
+        eastItem = (
+          <BorderLayoutItem region="east">
+            <AircraftList
+              immatriculation={this.state.immatriculationFilter}
+              aircraftType={this.state.aircraftTypeFilter}
+              onClick={this.aircraftClickHandler.bind(this)}
+            />
+          </BorderLayoutItem>
+        );
+      }
     }
 
     return (
-      <BorderLayout className={className}>
+      <BorderLayout className={className} onFocus={this.focusHandler.bind(this)} onBlur={this.blurHandler.bind(this)}>
         <BorderLayoutItem region="west">
           <header>
             <img className="logo" src={logoImagePath}/>
@@ -177,6 +240,7 @@ class MovementWizardPage extends Component {
           {middleItem}
         </BorderLayoutItem>
         {southItem}
+        {eastItem}
       </BorderLayout>
     );
   }

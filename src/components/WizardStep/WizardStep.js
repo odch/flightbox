@@ -12,33 +12,45 @@ class WizardStep extends Component {
 
   componentWillReceiveProps(nextProps) {
     this.setState({
-      data: nextProps.data
+      data: nextProps.data,
     });
   }
 
-  getUpdateHandlerDelegate(key, scope) {
-    return function(e) {
-      scope.updateData(key, e.target.value);
+  getUpdateHandlerDelegate(key) {
+    return e => {
+      this.updateData(key, e.target.value);
+    };
+  }
+
+  getKeyUpHandlerDelegate(key) {
+    return e => {
+      if (typeof this.props.onKeyUp === 'function') {
+        this.props.onKeyUp({
+          key,
+          value: e.target.value,
+        });
+      }
     };
   }
 
   updateData(key, value) {
-    var data = update(this.state.data, {
-      [key]: { $set: value }
+    const data = update(this.state.data, {
+      [key]: { $set: value },
     });
     this.setState({
-      data: data,
-    }, function () {
+      data,
+    }, () => {
       this.props.updateData({
-        key: key,
-        value: value,
+        key,
+        value,
       });
-    }, this);
+    });
   }
 }
 
 WizardStep.propTypes = {
   updateData: PropTypes.func,
+  onKeyUp: PropTypes.func,
   data: PropTypes.object,
 };
 
