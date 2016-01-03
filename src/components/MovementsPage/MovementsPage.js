@@ -15,6 +15,14 @@ class MovementsPage extends Component {
     window.location.hash = '/arrival/' + item.key;
   }
 
+  departuresActionClick(item) {
+    window.location.hash = '/arrival/new/' + item.key;
+  }
+
+  arrivalsActionClick(item) {
+    window.location.hash = '/departure/new/' + item.key;
+  }
+
   render() {
     const logoImagePath = require('../../resources/mfgt_logo_transp.png');
     const departuresList = (
@@ -23,6 +31,8 @@ class MovementsPage extends Component {
         className="departures"
         firebaseUri="https://mfgt-flights.firebaseio.com/departures/"
         onClick={this.departuresListClick.bind(this)}
+        onAction={this.departuresActionClick.bind(this)}
+        actionLabel={<span><i className="material-icons">flight_land</i> Ankunft erfassen</span>}
       />
     );
     const arrivalsList = (
@@ -31,6 +41,8 @@ class MovementsPage extends Component {
         className="arrivals"
         firebaseUri="https://mfgt-flights.firebaseio.com/arrivals/"
         onClick={this.arrivalsListClick.bind(this)}
+        onAction={this.arrivalsActionClick.bind(this)}
+        actionLabel={<span><i className="material-icons">flight_takeoff</i> Abflug erfassen</span>}
       />
     );
     const tabs = [{

@@ -7,12 +7,16 @@ import DepartureArrivalData from '../Arrival/DepartureArrivalData';
 import FlightData from '../Arrival/FlightData';
 import Finish from '../Arrival/Finish';
 import MovementWizardPage from '../MovementWizardPage';
+import { firebaseToLocal } from '../../util/movements.js';
 import dates from '../../core/dates.js';
 
 class ArrivalPage extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      defaultData: null,
+    };
     this.pages = [
       {
         id: 'aircraft',
@@ -42,7 +46,54 @@ class ArrivalPage extends Component {
     ];
   }
 
+  componentWillMount() {
+    if (this.props.params.departureKey) {
+      const firebaseRef = new Firebase('https://mfgt-flights.firebaseio.com/departures/');
+      firebaseRef.child(this.props.params.departureKey).once('value', this.onFirebaseValue, this);
+    } else {
+      this.setState({
+        defaultData: {
+          date: dates.localDate(),
+          time: dates.localTimeRounded(15, 'down'),
+        },
+      });
+    }
+  }
+
+  onFirebaseValue(dataSnapshot) {
+    const defaultData = {
+      date: dates.localDate(),
+      time: dates.localTimeRounded(15, 'down'),
+    };
+
+    const val = dataSnapshot.val();
+    if (val) {
+      const departure = firebaseToLocal(dataSnapshot.val());
+
+      defaultData.immatriculation = departure.immatriculation;
+      defaultData.aircraftType = departure.aircraftType;
+      defaultData.mtow = departure.mtow;
+      defaultData.memberNr = departure.memberNr;
+      defaultData.lastname = departure.lastname;
+      defaultData.firstname = departure.firstname;
+      defaultData.phone = departure.phone;
+      defaultData.passengerCount = departure.passengerCount || 0;
+      defaultData.location = departure.location;
+      defaultData.flightType = departure.flightType;
+    }
+
+    this.setState({
+      defaultData,
+    });
+  }
+
   render() {
+    if (this.state.defaultData === null) {
+      return (
+        <div className="ArrivalPage loading">Bitte warten. Daten werden geladen.</div>
+      );
+    }
+
     return (
       <MovementWizardPage
         label="Ankunft"
@@ -51,7 +102,7 @@ class ArrivalPage extends Component {
         movementKey={this.props.params.key}
         pages={this.pages}
         finishComponentClass={Finish}
-        defaultTime={dates.localTimeRounded(15, 'down')}
+        defaultData={this.state.defaultData}
       />
     );
   }

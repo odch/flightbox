@@ -7,7 +7,6 @@ import WizardNavigation from '../WizardNavigation';
 import AircraftList from '../AircraftList';
 import Firebase from 'firebase';
 import { firebaseToLocal, localToFirebase } from '../../util/movements.js';
-import dates from '../../core/dates.js';
 import update from 'react-addons-update';
 
 class MovementWizardPage extends Component {
@@ -17,10 +16,7 @@ class MovementWizardPage extends Component {
     this.state = {
       step: 0,
       committed: false,
-      data: {
-        date: dates.localDate(),
-        time: this.props.defaultTime,
-      },
+      data: this.props.defaultData,
       aircraftListVisible: false,
     };
 
@@ -123,12 +119,13 @@ class MovementWizardPage extends Component {
   }
 
   aircraftClickHandler(item) {
+    const data = update(this.state.data, {
+      immatriculation: { $set: item.key },
+      aircraftType: { $set: item.value.type },
+      mtow: { $set: item.value.mtow },
+    });
     this.setState({
-      data: {
-        immatriculation: item.key,
-        aircraftType: item.value.type,
-        mtow: item.value.mtow,
-      },
+      data,
     });
   }
 
@@ -253,7 +250,11 @@ MovementWizardPage.propTypes = {
   movementKey: PropTypes.string,
   pages: PropTypes.array,
   finishComponentClass: PropTypes.func,
-  defaultTime: PropTypes.string,
+  defaultData: PropTypes.object,
+};
+
+MovementWizardPage.defaultProps = {
+  defaultData: {},
 };
 
 export default MovementWizardPage;

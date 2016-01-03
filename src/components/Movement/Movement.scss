@@ -9,23 +9,33 @@
   }
 
   .immatriculation {
-    width: 25%;
+    width: 20%;
   }
 
   .pilot {
-    width: 25%;
+    width: 20%;
   }
 
   .date {
-    width: 15%;
-  }
-
-  .time {
     width: 10%;
   }
 
+  .time {
+    width: 13%;
+  }
+
   .location {
-    width: 25%;
+    width: 17%;
+  }
+
+  .action {
+    width: 20%;
+    text-align: right;
+    font-size: 1.2em;
+  }
+
+  .action > span:hover {
+    color: #ed351c;
   }
 }
 

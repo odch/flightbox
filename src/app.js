@@ -13,8 +13,10 @@ ReactDOM.render((
     <Route path="/" handler={App}>
       <IndexRoute component={StartPage}/>
       <Route path="departure/new" component={DeparturePage}/>
+      <Route path="departure/new/:arrivalKey" component={DeparturePage}/>
       <Route path="departure/:key" component={DeparturePage}/>
       <Route path="arrival/new" component={ArrivalPage}/>
+      <Route path="arrival/new/:departureKey" component={ArrivalPage}/>
       <Route path="arrival/:key" component={ArrivalPage}/>
       <Route path="movements" component={MovementsPage}/>
     </Route>

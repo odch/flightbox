@@ -4,6 +4,13 @@ import dates from '../../core/dates.js';
 
 class Movement extends Component {
 
+  actionHandler(e) {
+    e.stopPropagation(); // prevent call of onClick handler
+    if (typeof this.props.onAction === 'function') {
+      this.props.onAction(this.props.data);
+    }
+  }
+
   render() {
     const date = this.props.timeWithDate === true
       ? dates.formatDate(this.props.data.date)
@@ -19,6 +26,7 @@ class Movement extends Component {
         <div className="column date">{date}</div>
         <div className="column time">{time}</div>
         <div className="column location">{location}</div>
+        <div className="column action"><span onClick={this.actionHandler.bind(this)}>{this.props.actionLabel}</span></div>
       </div>
     );
   }
@@ -28,6 +36,8 @@ Movement.propTypes = {
   data: PropTypes.object,
   onClick: PropTypes.func,
   timeWithDate: PropTypes.bool,
+  onAction: PropTypes.func,
+  actionLabel: PropTypes.element,
 };
 
 Movement.defaultProps = {

@@ -116,16 +116,38 @@ class MovementList extends Component {
 
     return (
       <div className={className}>
-        <MovementGroup label="Heute" items={movementsOfToday} onClick={this.itemClick.bind(this)} timeWithDate={false}/>
-        <MovementGroup label="Gestern" items={movementsOfYesterday} onClick={this.itemClick.bind(this)} timeWithDate={false}/>
-        <MovementGroup label="Dieser Monat" items={movementsOfThisMonth} onClick={this.itemClick.bind(this)}/>
-        <MovementGroup label="Älter" items={olderMovements} onClick={this.itemClick.bind(this)}/>
+        <MovementGroup
+          label="Heute"
+          items={movementsOfToday}
+          onClick={this.props.onClick}
+          timeWithDate={false}
+          onAction={this.props.onAction}
+          actionLabel={this.props.actionLabel}
+        />
+        <MovementGroup
+          label="Gestern"
+          items={movementsOfYesterday}
+          onClick={this.props.onClick}
+          timeWithDate={false}
+          onAction={this.props.onAction}
+          actionLabel={this.props.actionLabel}
+        />
+        <MovementGroup
+          label="Dieser Monat"
+          items={movementsOfThisMonth}
+          onClick={this.props.onClick}
+          onAction={this.props.onAction}
+          actionLabel={this.props.actionLabel}
+        />
+        <MovementGroup
+          label="Älter"
+          items={olderMovements}
+          onClick={this.props.onClick}
+          onAction={this.props.onAction}
+          actionLabel={this.props.actionLabel}
+        />
       </div>
     );
-  }
-
-  itemClick(item) {
-    this.props.onClick(item);
   }
 }
 
@@ -133,6 +155,8 @@ MovementList.propTypes = {
   className: PropTypes.string,
   firebaseUri: PropTypes.string,
   onClick: PropTypes.func,
+  onAction: PropTypes.func,
+  actionLabel: PropTypes.element,
 };
 
 export default MovementList;
