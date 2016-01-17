@@ -92,3 +92,14 @@ $south-height: 50px;
     bottom: 0;
   }
 }
+
+@media screen and (max-width: 768px) {
+  .BorderLayout {
+    .west {
+      width: 0;
+    }
+    .center {
+      left: 0;
+    }
+  }
+}
