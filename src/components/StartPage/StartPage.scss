@@ -17,11 +17,20 @@
     position: absolute;
     top: 25%;
     width: 100%;
+    display: table;
+    height: 75%;
   }
 
   .wrapper > div {
     width: 33%;
-    float: left;
+    display: table-cell;
+    vertical-align: middle;
+
+    @media screen and (max-width: 768px) {
+      width: 100%;
+      display: inline-block;
+      margin-top: 2em;
+    }
   }
 
   a {
