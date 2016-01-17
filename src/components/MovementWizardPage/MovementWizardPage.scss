@@ -31,8 +31,9 @@
         width: 45%;
         margin-right: 5%;
         margin-bottom: 1.5em;
-        float: left;
         overflow: hidden;
+        display: inline-block;
+        vertical-align: top;
 
         > label {
           display: block;

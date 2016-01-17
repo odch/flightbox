@@ -36,7 +36,6 @@ class FlightData extends WizardStep {
         <legend>Flug</legend>
         <LabeledComponent label="Typ" className="type" component={<RadioGroup name="type" items={this.types} value={this.state.data.flightType} onChange={this.getUpdateHandlerDelegate('flightType', this)}/>}/>
         <LabeledComponent label="Abflugroute" className="departure-route" component={<RadioGroup name="departure-route" items={this.departureRoutes} value={this.state.data.departureRoute} onChange={this.getUpdateHandlerDelegate('departureRoute', this)}/>}/>
-        <div className="clear"/>
         <LabeledComponent label="Bemerkungen" className="remarks" component={<textarea value={this.state.data.remarks} onChange={this.getUpdateHandlerDelegate('remarks', this)}/>}/>
         <LabeledComponent label="Routing" className="route" component={<textarea value={this.state.data.route} onChange={this.getUpdateHandlerDelegate('route', this)}/>}/>
       </fieldset>
