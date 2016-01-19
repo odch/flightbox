@@ -19,9 +19,23 @@ $ npm test
 
 ### How to Deploy
 
+#### Install the required node modules
+
 ```
 $ npm install
+```
+#### Build
+
+##### Development or test environment
+
+```
 $ npm run build
+```
+
+##### Production environment
+
+```
+$ npm run build:prod
 ```
 
 Copy the build directory to the server.

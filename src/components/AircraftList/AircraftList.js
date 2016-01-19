@@ -3,6 +3,7 @@ import './AircraftList.scss';
 import SearchTerms from './SearchTerms.js';
 import FirebaseList from './FirebaseList.js';
 import Firebase from 'firebase';
+import Config from 'Config';
 
 class AircraftList extends Component {
 
@@ -11,7 +12,7 @@ class AircraftList extends Component {
     this.state = {
       aircrafts: [],
     };
-    this.firebaseRef = new Firebase('https://mfgt-flights.firebaseio.com/aircrafts');
+    this.firebaseRef = new Firebase(Config.firebaseUrl + '/aircrafts');
     this.firebaseList = new FirebaseList(
       this.firebaseRef,
       (aircraft1, aircraft2) => aircraft1.key.localeCompare(aircraft2.key)

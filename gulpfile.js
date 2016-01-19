@@ -3,6 +3,7 @@ const mocha = require('gulp-mocha');
 const babel = require('babel-core/register');
 const webpack = require('gulp-webpack');
 const del = require('del');
+const env = require('gulp-env');
 
 require('ignore-styles');
 require('babel-polyfill');
@@ -21,6 +22,16 @@ gulp.task('build', ['clean'], function () {
       .pipe(gulp.dest(config.output.path))
     );
 });
+
+gulp.task('prod-env', function () {
+  env({
+    vars: {
+      ENV: 'production',
+    },
+  });
+});
+
+gulp.task('build:prod', ['prod-env', 'build']);
 
 gulp.task('test', function () {
   return gulp

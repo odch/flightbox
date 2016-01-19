@@ -9,6 +9,7 @@ import Finish from '../Departure/Finish';
 import MovementWizardPage from '../MovementWizardPage';
 import { firebaseToLocal } from '../../util/movements.js';
 import dates from '../../core/dates.js';
+import Config from 'Config';
 
 class DeparturePage extends Component {
 
@@ -48,7 +49,7 @@ class DeparturePage extends Component {
 
   componentWillMount() {
     if (this.props.params.arrivalKey) {
-      const firebaseRef = new Firebase('https://mfgt-flights.firebaseio.com/arrivals/');
+      const firebaseRef = new Firebase(Config.firebaseUrl + '/arrivals/');
       firebaseRef.child(this.props.params.arrivalKey).once('value', this.onFirebaseValue, this);
     } else {
       this.setState({
@@ -98,7 +99,7 @@ class DeparturePage extends Component {
       <MovementWizardPage
         label="Abflug"
         className="DeparturePage"
-        firebaseUri="https://mfgt-flights.firebaseio.com/departures/"
+        firebaseUri={Config.firebaseUrl + '/departures/'}
         movementKey={this.props.params.key}
         pages={this.pages}
         finishComponentClass={Finish}

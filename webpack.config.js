@@ -1,6 +1,13 @@
 const path = require('path');
 
 module.exports = {
+  externals: {
+    'Config': JSON.stringify(process.env.ENV === 'production' ? {
+      firebaseUrl: 'https://mfgt-flights.firebaseio.com',
+    } : {
+      firebaseUrl: 'https://mfgt-flights.firebaseio.com',
+    }),
+  },
   entry: [
     'babel-polyfill',
     path.resolve(__dirname, './src/app.js'),

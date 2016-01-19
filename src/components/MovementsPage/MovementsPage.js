@@ -4,6 +4,7 @@ import MovementList from '../MovementList';
 import TabPanel from '../TabPanel';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
+import Config from 'Config';
 
 class MovementsPage extends Component {
 
@@ -29,7 +30,7 @@ class MovementsPage extends Component {
       <MovementList
         key="departures"
         className="departures"
-        firebaseUri="https://mfgt-flights.firebaseio.com/departures/"
+        firebaseUri={Config.firebaseUrl + '/departures/'}
         onClick={this.departuresListClick.bind(this)}
         onAction={this.departuresActionClick.bind(this)}
         actionLabel={<span><i className="material-icons">flight_land</i> Ankunft erfassen</span>}
@@ -39,7 +40,7 @@ class MovementsPage extends Component {
       <MovementList
         key="arrivals"
         className="arrivals"
-        firebaseUri="https://mfgt-flights.firebaseio.com/arrivals/"
+        firebaseUri={Config.firebaseUrl + '/arrivals/'}
         onClick={this.arrivalsListClick.bind(this)}
         onAction={this.arrivalsActionClick.bind(this)}
         actionLabel={<span><i className="material-icons">flight_takeoff</i> Abflug erfassen</span>}
