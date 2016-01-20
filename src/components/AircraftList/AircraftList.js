@@ -1,91 +1,41 @@
 import React, { PropTypes, Component } from 'react';
 import './AircraftList.scss';
-import SearchTerms from './SearchTerms.js';
-import FirebaseList from './FirebaseList.js';
-import Firebase from 'firebase';
+import SearchTerms from '../../util/SearchTerms.js';
+import FilteredList from '../FilteredList';
 import Config from 'Config';
+import AircraftItem from './AircraftItem.js';
 
 class AircraftList extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      aircrafts: [],
-    };
-    this.firebaseRef = new Firebase(Config.firebaseUrl + '/aircrafts');
-    this.firebaseList = new FirebaseList(
-      this.firebaseRef,
-      (aircraft1, aircraft2) => aircraft1.key.localeCompare(aircraft2.key)
-    );
-    this.onSearchResult = this.onSearchResult.bind(this);
-  }
-
-  componentWillMount() {
-    this.firebaseList.addResultCallback(this.onSearchResult);
-    this.initSearch(this.props);
-  }
-
-  componentWillUnmount() {
-    this.firebaseList.removeResultCallback(this.onSearchResult);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.initSearch(nextProps);
-  }
-
-  onSearchResult(result) {
-    this.setState({
-      aircrafts: result.data,
-    });
-  }
-
-  initSearch(props) {
-    const terms = new SearchTerms();
-    if (props.immatriculation) {
-      terms.key(props.immatriculation.toUpperCase().trim(), ['HB', 'D', 'OE', 'I', 'F', 'N']);
+  buildSearchTerms() {
+    const searchTerms = new SearchTerms();
+    if (this.props.immatriculation) {
+      searchTerms.key(this.props.immatriculation.toUpperCase().trim(), ['HB', 'D', 'OE', 'I', 'F', 'N']);
     }
-    if (props.aircraftType) {
-      terms.child('type', props.aircraftType.toUpperCase().trim());
+    if (this.props.aircraftType) {
+      searchTerms.child('type', this.props.aircraftType.toUpperCase().trim());
     }
-    this.firebaseList.search(terms);
-  }
-
-  clickHandler(item) {
-    if (typeof this.props.onClick === 'function') {
-      this.props.onClick(item);
-    }
+    return searchTerms;
   }
 
   render() {
-    let content;
+    const emptyMessage = 'Tippen Sie die ersten Buchstaben der Immatrikulation oder des Typs und wählen ' +
+      'Sie das gewünschte Flugzeug anschliessend aus der Liste hier aus.';
 
-    if (this.state.aircrafts.length > 0) {
-      content = (
-        <ul>
-          {this.state.aircrafts.map((item, index) => {
-            return (
-              <li key={index} onMouseDown={this.clickHandler.bind(this, item)}>
-                <span className="immatriculation">{item.key}</span>
-                <span className="type">{item.value.type}</span>
-              </li>
-            );
-          })}
-        </ul>
-      );
-    } else {
-      content = (
-        <div className="empty-message">
-          <em>Keine Ergebnisse</em>
-          <p>Tippen Sie die ersten Buchstaben der Immatrikulation oder des Typs und wählen
-            Sie das gewünschte Flugzeug anschliessend aus der Liste hier aus.</p>
-        </div>
-      );
-    }
+    const searchTerms = this.buildSearchTerms();
+
+    const itemComparator = (aircraft1, aircraft2) => aircraft1.key.localeCompare(aircraft2.key);
 
     return (
-      <div className="AircraftList">
-        {content}
-      </div>
+      <FilteredList
+        className="AircraftList"
+        emptyMessage={emptyMessage}
+        searchTerms={searchTerms}
+        itemComponentClass={AircraftItem}
+        firebaseUri={Config.firebaseUrl + '/aircrafts/'}
+        itemComparator={itemComparator}
+        onClick={this.props.onClick}
+      />
     );
   }
 }

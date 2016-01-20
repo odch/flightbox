@@ -5,6 +5,7 @@ import BorderLayoutItem from '../BorderLayoutItem';
 import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import WizardNavigation from '../WizardNavigation';
 import AircraftList from '../AircraftList';
+import UserList from '../UserList';
 import Firebase from 'firebase';
 import { firebaseToLocal, localToFirebase } from '../../util/movements.js';
 import update from 'react-addons-update';
@@ -18,6 +19,7 @@ class MovementWizardPage extends Component {
       committed: false,
       data: this.props.defaultData,
       aircraftListVisible: false,
+      userListVisible: false,
     };
 
     if (this.props.movementKey) {
@@ -25,6 +27,15 @@ class MovementWizardPage extends Component {
     }
 
     this.handleKeyDown = this.handleKeyDown.bind(this);
+
+    this.aircraftListVisibleFields = {
+      'immatriculation': true,
+      'aircraftType': true,
+    };
+
+    this.userListVisibleFields = {
+      'memberNr': true,
+    };
   }
 
   componentWillMount() {
@@ -90,16 +101,17 @@ class MovementWizardPage extends Component {
 
   focusHandler(e) {
     this.setState({
-      aircraftListVisible: e.target && (e.target.name === 'immatriculation' || e.target.name === 'aircraftType'),
+      aircraftListVisible: e.target && this.aircraftListVisibleFields[e.target.name] === true,
+      userListVisible: e.target && this.userListVisibleFields[e.target.name] === true,
     });
   }
 
   blurHandler() {
     setTimeout(() => {
-      const aircraftListVisible = document.activeElement.name === 'immatriculation' || document.activeElement.name === 'aircraftType';
-      if (this.mounted === true && !aircraftListVisible) {
+      if (this.mounted === true) {
         this.setState({
-          aircraftListVisible: false,
+          aircraftListVisible: this.aircraftListVisibleFields[document.activeElement.name] === true,
+          userListVisible: this.userListVisibleFields[document.activeElement.name] === true,
         });
       }
     }, 1);
@@ -116,6 +128,11 @@ class MovementWizardPage extends Component {
         aircraftTypeFilter: e.value,
       });
     }
+    if (e.key === 'memberNr') {
+      this.setState({
+        memberNrFilter: e.value,
+      });
+    }
   }
 
   aircraftClickHandler(item) {
@@ -123,6 +140,18 @@ class MovementWizardPage extends Component {
       immatriculation: { $set: item.key },
       aircraftType: { $set: item.value.type },
       mtow: { $set: item.value.mtow },
+    });
+    this.setState({
+      data,
+    });
+  }
+
+  userClickHandler(item) {
+    const data = update(this.state.data, {
+      memberNr: { $set: item.value.memberNr },
+      lastname: { $set: item.value.lastname },
+      firstname: { $set: item.value.firstname },
+      phone: { $set: item.value.phone },
     });
     this.setState({
       data,
@@ -219,6 +248,15 @@ class MovementWizardPage extends Component {
               immatriculation={this.state.immatriculationFilter}
               aircraftType={this.state.aircraftTypeFilter}
               onClick={this.aircraftClickHandler.bind(this)}
+            />
+          </BorderLayoutItem>
+        );
+      } else if (this.state.userListVisible === true) {
+        eastItem = (
+          <BorderLayoutItem region="east">
+            <UserList
+              memberNr={this.state.memberNrFilter}
+              onClick={this.userClickHandler.bind(this)}
             />
           </BorderLayoutItem>
         );
