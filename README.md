@@ -38,4 +38,10 @@ $ npm run build
 $ npm run build:prod
 ```
 
-Copy the build directory to the server.
+#### Push to Firebase
+
+Prerequisites: Firebase Tools must be installed (`npm install -g firebase-tools`).
+
+```
+$ firebase deploy
+```
