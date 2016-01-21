@@ -3,6 +3,8 @@ language: node_js
 node_js:
   - '4'
   - iojs
+before_script:
+  - npm install -g gulp
 script:
   - npm run build
 install:
