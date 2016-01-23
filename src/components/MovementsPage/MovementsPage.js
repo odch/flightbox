@@ -57,7 +57,9 @@ class MovementsPage extends Component {
       <BorderLayout className="MovementsPage">
         <BorderLayoutItem region="west">
           <header>
-            <img className="logo" src={logoImagePath}/>
+            <a href="#/">
+              <img className="logo" src={logoImagePath}/>
+            </a>
           </header>
         </BorderLayoutItem>
         <BorderLayoutItem region="middle">

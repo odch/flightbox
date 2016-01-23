@@ -297,7 +297,9 @@ class MovementWizardPage extends Component {
       <BorderLayout className={className} onFocus={this.focusHandler.bind(this)} onBlur={this.blurHandler.bind(this)}>
         <BorderLayoutItem region="west">
           <header>
-            <img className="logo" src={logoImagePath}/>
+            <a href="#/">
+              <img className="logo" src={logoImagePath}/>
+            </a>
           </header>
         </BorderLayoutItem>
         {northItem}
