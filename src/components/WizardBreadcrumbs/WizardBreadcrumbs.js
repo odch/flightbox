@@ -7,7 +7,7 @@ class WizardBreadcrumbs extends Component {
     return (
       <nav className="WizardBreadcrumbs">
         <ol>
-          {this.props.items.map(function(item, index) {
+          {this.props.items.map((item, index) => {
             let className = item.className;
             if (index === this.props.activeItem) {
               className += ' active';
@@ -15,8 +15,12 @@ class WizardBreadcrumbs extends Component {
             if (!item.handler) {
               className += ' no-handler';
             }
-            return <li className={className} key={index}><a onClick={item.handler}>{item.label}</a></li>;
-          }, this)}
+            return (
+              <li className={className} key={index}>
+                <a onMouseDown={item.handler} tabIndex="-1">{item.label}</a>
+              </li>
+            );
+          })}
         </ol>
       </nav>
     );
@@ -24,7 +28,7 @@ class WizardBreadcrumbs extends Component {
 }
 
 WizardBreadcrumbs.propTypes = {
-  items: PropTypes.array,
+  items: PropTypes.array.isRequired,
   activeItem: PropTypes.number,
 };
 
