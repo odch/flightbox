@@ -6,6 +6,7 @@ import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import WizardNavigation from '../WizardNavigation';
 import AircraftList from '../AircraftList';
 import UserList from '../UserList';
+import AirportList from '../AirportList';
 import Firebase from 'firebase';
 import { firebaseToLocal, localToFirebase } from '../../util/movements.js';
 import update from 'react-addons-update';
@@ -14,12 +15,17 @@ class MovementWizardPage extends Component {
 
   constructor(props) {
     super(props);
+
+    this.quickSelectionConf = {
+      aircraftList: new Set(['immatriculation', 'aircraftType']),
+      userList: new Set(['memberNr']),
+      airportList: new Set(['location']),
+    };
+
     this.state = {
       step: 0,
       committed: false,
       data: this.props.defaultData,
-      aircraftListVisible: false,
-      userListVisible: false,
     };
 
     if (this.props.movementKey) {
@@ -27,15 +33,6 @@ class MovementWizardPage extends Component {
     }
 
     this.handleKeyDown = this.handleKeyDown.bind(this);
-
-    this.aircraftListVisibleFields = {
-      'immatriculation': true,
-      'aircraftType': true,
-    };
-
-    this.userListVisibleFields = {
-      'memberNr': true,
-    };
   }
 
   componentWillMount() {
@@ -100,39 +97,54 @@ class MovementWizardPage extends Component {
   }
 
   focusHandler(e) {
-    this.setState({
-      aircraftListVisible: e.target && this.aircraftListVisibleFields[e.target.name] === true,
-      userListVisible: e.target && this.userListVisibleFields[e.target.name] === true,
-    });
+    const fieldName = e.target ? e.target.name : null;
+    const visibilityFlags = this.getQuickSelectionListVisibilities(fieldName);
+    this.setState(visibilityFlags);
   }
 
   blurHandler() {
     setTimeout(() => {
       if (this.mounted === true) {
-        this.setState({
-          aircraftListVisible: this.aircraftListVisibleFields[document.activeElement.name] === true,
-          userListVisible: this.userListVisibleFields[document.activeElement.name] === true,
-        });
+        const activeElementName = document.activeElement.name;
+        const visibilityFlags = this.getQuickSelectionListVisibilities(activeElementName);
+        this.setState(visibilityFlags);
       }
     }, 1);
   }
 
+  getQuickSelectionListVisibilities(activeFieldName) {
+    const visibilityFlags = {};
+
+    for (const listKey in this.quickSelectionConf) {
+      if (this.quickSelectionConf.hasOwnProperty(listKey)) {
+        const listVisibilityStateKey = listKey + 'Visible';
+        visibilityFlags[listVisibilityStateKey] = activeFieldName && this.quickSelectionConf[listKey].has(activeFieldName);
+      }
+    }
+
+    return visibilityFlags;
+  }
+
   keyUpHandler(e) {
-    if (e.key === 'immatriculation') {
-      this.setState({
-        immatriculationFilter: e.value,
-      });
+    if (this.isQuickSelectionFilterField(e.key)) {
+      const filterStateKey = e.key + 'Filter';
+
+      const stateObj = {};
+      stateObj[filterStateKey] = e.value;
+
+      this.setState(stateObj);
     }
-    if (e.key === 'aircraftType') {
-      this.setState({
-        aircraftTypeFilter: e.value,
-      });
+  }
+
+  isQuickSelectionFilterField(fieldName) {
+    for (const listKey in this.quickSelectionConf) {
+      if (this.quickSelectionConf.hasOwnProperty(listKey)) {
+        if (this.quickSelectionConf[listKey].has(fieldName)) {
+          return true;
+        }
+      }
     }
-    if (e.key === 'memberNr') {
-      this.setState({
-        memberNrFilter: e.value,
-      });
-    }
+    return false;
   }
 
   aircraftClickHandler(item) {
@@ -152,6 +164,15 @@ class MovementWizardPage extends Component {
       lastname: { $set: item.value.lastname },
       firstname: { $set: item.value.firstname },
       phone: { $set: item.value.phone },
+    });
+    this.setState({
+      data,
+    });
+  }
+
+  airportClickHandler(item) {
+    const data = update(this.state.data, {
+      location: { $set: item.key },
     });
     this.setState({
       data,
@@ -257,6 +278,15 @@ class MovementWizardPage extends Component {
             <UserList
               memberNr={this.state.memberNrFilter}
               onClick={this.userClickHandler.bind(this)}
+            />
+          </BorderLayoutItem>
+        );
+      } else if (this.state.airportListVisible === true) {
+        eastItem = (
+          <BorderLayoutItem region="east">
+            <AirportList
+              airport={this.state.locationFilter}
+              onClick={this.airportClickHandler.bind(this)}
             />
           </BorderLayoutItem>
         );
