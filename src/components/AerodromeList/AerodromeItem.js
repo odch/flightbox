@@ -1,10 +1,10 @@
 import React, { PropTypes, Component } from 'react';
 
-class AirportItem extends Component {
+class AerodromeItem extends Component {
 
   render() {
     return (
-      <div className="AirportItem">
+      <div className="AerodromeItem">
         <span className="name">{this.props.item.value.name}</span>
         <span className="identification">{this.props.item.key}</span>
       </div>
@@ -12,8 +12,8 @@ class AirportItem extends Component {
   }
 }
 
-AirportItem.propTypes = {
+AerodromeItem.propTypes = {
   item: PropTypes.object.isRequired,
 };
 
-export default AirportItem;
+export default AerodromeItem;

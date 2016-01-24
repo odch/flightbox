@@ -6,7 +6,7 @@ import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import WizardNavigation from '../WizardNavigation';
 import AircraftList from '../AircraftList';
 import UserList from '../UserList';
-import AirportList from '../AirportList';
+import AerodromeList from '../AerodromeList';
 import Firebase from 'firebase';
 import { firebaseToLocal, localToFirebase } from '../../util/movements.js';
 import update from 'react-addons-update';
@@ -19,7 +19,7 @@ class MovementWizardPage extends Component {
     this.quickSelectionConf = {
       aircraftList: new Set(['immatriculation', 'aircraftType']),
       userList: new Set(['memberNr']),
-      airportList: new Set(['location']),
+      aerodromeList: new Set(['location']),
     };
 
     this.state = {
@@ -170,7 +170,7 @@ class MovementWizardPage extends Component {
     });
   }
 
-  airportClickHandler(item) {
+  aerodromeClickHandler(item) {
     const data = update(this.state.data, {
       location: { $set: item.key },
     });
@@ -281,12 +281,12 @@ class MovementWizardPage extends Component {
             />
           </BorderLayoutItem>
         );
-      } else if (this.state.airportListVisible === true) {
+      } else if (this.state.aerodromeListVisible === true) {
         eastItem = (
           <BorderLayoutItem region="east">
-            <AirportList
-              airport={this.state.locationFilter}
-              onClick={this.airportClickHandler.bind(this)}
+            <AerodromeList
+              aerodrome={this.state.locationFilter}
+              onClick={this.aerodromeClickHandler.bind(this)}
             />
           </BorderLayoutItem>
         );
