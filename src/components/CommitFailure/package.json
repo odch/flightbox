@@ -1,0 +1,6 @@
+{
+  "name": "CommitFailure",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./CommitFailure.js"
+}

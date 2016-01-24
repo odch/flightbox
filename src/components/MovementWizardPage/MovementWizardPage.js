@@ -7,6 +7,7 @@ import WizardNavigation from '../WizardNavigation';
 import AircraftList from '../AircraftList';
 import UserList from '../UserList';
 import AerodromeList from '../AerodromeList';
+import CommitFailure from '../CommitFailure';
 import Firebase from 'firebase';
 import { firebaseToLocal, localToFirebase } from '../../util/movements.js';
 import update from 'react-addons-update';
@@ -61,10 +62,16 @@ class MovementWizardPage extends Component {
 
   commit() {
     const movement = localToFirebase(this.state.data);
-    const setCommitted = () => {
-      this.setState({
-        committed: true,
-      });
+    const setCommitted = (error) => {
+      if (error) {
+        this.setState({
+          commitError: error,
+        });
+      } else {
+        this.setState({
+          committed: true,
+        });
+      }
     };
     if (this.update === true) {
       this.firebaseCollectionRef.child(this.props.movementKey).set(movement, setCommitted);
@@ -199,6 +206,12 @@ class MovementWizardPage extends Component {
     }
   }
 
+  unsetCommitError() {
+    this.setState({
+      commitError: null,
+    });
+  }
+
   isFirst() {
     return this.state.step === 0;
   }
@@ -233,6 +246,13 @@ class MovementWizardPage extends Component {
 
     if (this.state.committed === true) {
       middleItem = <this.props.finishComponentClass finish={this.finish.bind(this)}/>;
+    } else if (this.state.commitError) {
+      middleItem = (
+        <CommitFailure
+          errorMsg={this.state.commitError.message}
+          back={this.unsetCommitError.bind(this)}
+        />
+      );
     } else {
       const breadcrumbItems = this.buildBreadcrumbItems();
       const nextLabel = this.isLast() ? 'Speichern' : 'Weiter';

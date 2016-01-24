@@ -1,4 +1,5 @@
 {
   "firebase": "mfgt-flights",
-  "public": "build"
+  "public": "build",
+  "rules": "firebase-rules.json"
 }

@@ -1,0 +1,90 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "departures": {
+      ".indexOn": [
+        "dateTime",
+        "negativeTimestamp"
+      ],
+      "$departure_id": {
+        ".validate": "newData.hasChildren(['aircraftType', 'dateTime', 'departureRoute', 'duration', 'firstname', 'flightType', 'immatriculation', 'lastname', 'location', 'mtow', 'negativeTimestamp'])",
+        "aircraftType": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "carriageVoucher": {
+          ".validate": "newData.parent().child('passengerCount').val() === 0 || (newData.val() === 'yes' || newData.val() === 'no')"
+        },
+        "dateTime": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
+        },
+        "departureRoute": {
+          ".validate": "newData.val() === 'south' || newData.val() === 'matzingen'"
+        },
+        "duration": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d{2}:\\d{2}$/)"
+        },
+        "firstname": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "flightType": {
+          ".validate": "newData.val() === 'private' || newData.val() === 'commercial' || newData.val() === 'instruction'"
+        },
+        "immatriculation": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "lastname": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "location": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "memberNr": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d+$/)"
+        },
+        "mtow": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "negativeTimestamp": {
+          ".validate": "newData.isNumber() && newData.val() < 0"
+        },
+        "passengerCount": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "phone": {
+          ".validate": "newData.isString()"
+        },
+        "remarks": {
+          ".validate": "newData.isString()"
+        },
+        "route": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "arrivals": {
+      ".indexOn": [
+        "dateTime",
+        "negativeTimestamp"
+      ]
+    },
+    "aircrafts": {
+      ".indexOn": [
+        "type"
+      ]
+    },
+    "users": {
+      ".indexOn": [
+        "memberNr"
+      ]
+    },
+    "aerodromes": {
+      ".indexOn": [
+        "name"
+      ]
+    }
+  }
+}
