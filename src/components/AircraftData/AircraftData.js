@@ -28,7 +28,7 @@ class AircraftData extends WizardStep {
         name="mtow"
         type="number"
         value={this.state.data.mtow}
-        onChange={this.getUpdateHandlerDelegate('mtow', this)}
+        onChange={this.updateMtowHandler.bind(this)}
       />
     );
 
@@ -40,6 +40,15 @@ class AircraftData extends WizardStep {
         <LabeledComponent label="Maximales Abfluggewicht (in Kilogramm)" className="mtow" component={mtowInput}/>
       </fieldset>
     );
+  }
+
+  updateMtowHandler(e) {
+    if (e.target.value && /^\d+$/.test(e.target.value)) {
+      const mtowNumber = parseInt(e.target.value);
+      this.updateData('mtow', mtowNumber);
+    } else {
+      this.updateData('mtow', null);
+    }
   }
 }
 
