@@ -56,6 +56,7 @@ class ArrivalPage extends Component {
         defaultData: {
           date: dates.localDate(),
           time: dates.localTimeRounded(15, 'down'),
+          landingCount: 1,
         },
       });
     }
@@ -65,6 +66,7 @@ class ArrivalPage extends Component {
     const defaultData = {
       date: dates.localDate(),
       time: dates.localTimeRounded(15, 'down'),
+      landingCount: 1,
     };
 
     const val = dataSnapshot.val();
