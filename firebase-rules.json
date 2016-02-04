@@ -69,7 +69,61 @@
       ".indexOn": [
         "dateTime",
         "negativeTimestamp"
-      ]
+      ],
+      "$arrival_id": {
+        ".validate": "newData.hasChildren(['aircraftType', 'arrivalRoute', 'dateTime', 'firstname', 'flightType', 'immatriculation', 'landingCount', 'lastname', 'location', 'mtow', 'negativeTimestamp', 'runway'])",
+        "aircraftType": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "arrivalRoute": {
+          ".validate": "newData.val() === 'north' || newData.val() === 'south'"
+        },
+        "dateTime": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
+        },
+        "firstname": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "flightType": {
+          ".validate": "newData.val() === 'private' || newData.val() === 'commercial' || newData.val() === 'instruction'"
+        },
+        "immatriculation": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "landingCount": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "lastname": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "location": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "memberNr": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d+$/)"
+        },
+        "mtow": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "negativeTimestamp": {
+          ".validate": "newData.isNumber() && newData.val() < 0"
+        },
+        "passengerCount": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "phone": {
+          ".validate": "newData.isString()"
+        },
+        "remarks": {
+          ".validate": "newData.isString()"
+        },
+        "runway": {
+          ".validate": "newData.val() === '06' || newData.val() === '24'"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     },
     "aircrafts": {
       ".indexOn": [
