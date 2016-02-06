@@ -22,6 +22,7 @@ class MovementGroup extends Component {
                 timeWithDate={this.props.timeWithDate}
                 onAction={this.props.onAction}
                 actionLabel={this.props.actionLabel}
+                onDelete={this.props.onDelete}
               />
             );
           }, this)}
@@ -42,6 +43,7 @@ MovementGroup.propTypes = {
   timeWithDate: PropTypes.bool,
   onAction: PropTypes.func,
   actionLabel: PropTypes.element,
+  onDelete: PropTypes.func,
 };
 
 export default MovementGroup;

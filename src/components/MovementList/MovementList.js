@@ -1,10 +1,12 @@
 import React, { PropTypes, Component } from 'react';
 import Predicates from './Predicates.js';
 import MovementGroup from '../MovementGroup';
+import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
 import Firebase from 'firebase';
 import MovementsArray from '../../util/MovementsArray.js';
 import { firebaseToLocal } from '../../util/movements.js';
 import dates from '../../core/dates.js';
+import update from 'react-addons-update';
 
 /**
  * today
@@ -51,11 +53,11 @@ class MovementList extends Component {
   }
 
   loadContinuouslyLimited() {
-    this.tearDownFirebase();
     this.firebaseRef = new Firebase(this.props.firebaseUri)
       .orderByChild('negativeTimestamp')
       .limitToFirst(this.limit);
     this.firebaseRef.on('child_added', this.onFirebaseChildAdded, this);
+    this.firebaseRef.on('child_removed', this.onFirebaseChildRemoved, this);
   }
 
   initialValues(snapshot) {
@@ -77,12 +79,24 @@ class MovementList extends Component {
     const addedMovement = firebaseToLocal(data.val());
     addedMovement.key = data.key();
 
-    const sorted = new MovementsArray(this.state.movements);
-    const inserted = sorted.insert(addedMovement);
+    this.setState(state => {
+      const sorted = new MovementsArray(state.movements);
+      const inserted = sorted.insert(addedMovement);
 
-    if (inserted) {
-      this.childAddedSinceLastIncrease = true;
-      this.setState({ movements: sorted.array });
+      if (inserted) {
+        this.childAddedSinceLastIncrease = true;
+      }
+
+      return { movements: sorted.array };
+    });
+  }
+
+  onFirebaseChildRemoved(data) {
+    const index = this.state.movements.findIndex(movement => movement.key === data.key());
+    if (index > -1) {
+      this.setState({
+        movements: update(this.state.movements, { $splice: [[index, 1]] }),
+      });
     }
   }
 
@@ -97,6 +111,25 @@ class MovementList extends Component {
     this.limit += this.increase;
     this.childAddedSinceLastIncrease = false;
     this.loadContinuouslyLimited();
+  }
+
+  onListDeleteTrigger(item) {
+    this.setState({
+      deleteConfirmation: item,
+    });
+  }
+
+  onDeleteConfirmation(item) {
+    new Firebase(this.props.firebaseUri).child(item.key).remove();
+    this.setState({
+      deleteConfirmation: null,
+    });
+  }
+
+  onDeleteCancel() {
+    this.setState({
+      deleteConfirmation: null,
+    });
   }
 
   render() {
@@ -114,6 +147,13 @@ class MovementList extends Component {
 
     const className = 'MovementList ' + this.props.className;
 
+    const confirmationDialog = this.state.deleteConfirmation ?
+      (<MovementDeleteConfirmationDialog
+        item={this.state.deleteConfirmation}
+        onConfirm={this.onDeleteConfirmation.bind(this)}
+        onCancel={this.onDeleteCancel.bind(this)}
+      />) : null;
+
     return (
       <div className={className}>
         <MovementGroup
@@ -123,6 +163,7 @@ class MovementList extends Component {
           timeWithDate={false}
           onAction={this.props.onAction}
           actionLabel={this.props.actionLabel}
+          onDelete={this.onListDeleteTrigger.bind(this)}
         />
         <MovementGroup
           label="Gestern"
@@ -131,6 +172,7 @@ class MovementList extends Component {
           timeWithDate={false}
           onAction={this.props.onAction}
           actionLabel={this.props.actionLabel}
+          onDelete={this.onListDeleteTrigger.bind(this)}
         />
         <MovementGroup
           label="Dieser Monat"
@@ -138,6 +180,7 @@ class MovementList extends Component {
           onClick={this.props.onClick}
           onAction={this.props.onAction}
           actionLabel={this.props.actionLabel}
+          onDelete={this.onListDeleteTrigger.bind(this)}
         />
         <MovementGroup
           label="Älter"
@@ -145,7 +188,9 @@ class MovementList extends Component {
           onClick={this.props.onClick}
           onAction={this.props.onAction}
           actionLabel={this.props.actionLabel}
+          onDelete={this.onListDeleteTrigger.bind(this)}
         />
+        {confirmationDialog}
       </div>
     );
   }

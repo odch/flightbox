@@ -1,0 +1,64 @@
+.MovementDeleteConfirmationDialog {
+  .mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    opacity: 0.7;
+  }
+
+  .content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 1em;
+    background-color: #fff;
+    box-shadow: 0 0 2em 0 #aaa;
+
+    .question {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+
+    .data {
+      margin-bottom: 1em;
+
+      > div {
+        margin-bottom: 0.3em;
+      }
+    }
+
+    button {
+      padding: 0.5em;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2em;
+      background-color: white;
+      cursor: pointer;
+    }
+
+    button.cancel {
+      float: left;
+    }
+
+    button.cancel:hover {
+      color: #ed351c;
+    }
+
+    button.confirm {
+      float: right;
+      background-color: #ed351c;
+      color: #fff;
+    }
+
+    button.confirm:hover {
+      background-color: #000;
+    }
+  }
+}
