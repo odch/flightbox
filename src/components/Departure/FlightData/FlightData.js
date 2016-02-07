@@ -29,15 +29,25 @@ class FlightData extends WizardStep {
         value: 'matzingen',
       },
     ];
+    this.runway = [
+      {
+        label: '06',
+        value: '06',
+      }, {
+        label: '24',
+        value: '24',
+      },
+    ];
   }
   render() {
     return (
       <fieldset className="FlightData">
         <legend>Flug</legend>
         <LabeledComponent label="Typ" className="type" component={<RadioGroup name="type" items={this.types} value={this.state.data.flightType} onChange={this.getUpdateHandlerDelegate('flightType', this)}/>}/>
+        <LabeledComponent label="Pistenrichtung" className="runway" component={<RadioGroup name="runway" items={this.runway} value={this.state.data.runway} onChange={this.getUpdateHandlerDelegate('runway', this)}/>}/>
         <LabeledComponent label="Abflugroute" className="departure-route" component={<RadioGroup name="departure-route" items={this.departureRoutes} value={this.state.data.departureRoute} onChange={this.getUpdateHandlerDelegate('departureRoute', this)}/>}/>
-        <LabeledComponent label="Bemerkungen" className="remarks" component={<textarea value={this.state.data.remarks} onChange={this.getUpdateHandlerDelegate('remarks', this)}/>}/>
         <LabeledComponent label="Routing" className="route" component={<textarea value={this.state.data.route} onChange={this.getUpdateHandlerDelegate('route', this)}/>}/>
+        <LabeledComponent label="Bemerkungen" className="remarks" component={<textarea value={this.state.data.remarks} onChange={this.getUpdateHandlerDelegate('remarks', this)}/>}/>
       </fieldset>
     );
   }

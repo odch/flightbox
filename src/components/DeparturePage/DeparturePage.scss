@@ -3,7 +3,8 @@
   .PassengerData .LabeledComponent.carriage-voucher,
   .PassengerData .LabeledComponent.count,
   .FlightData .LabeledComponent.type,
-  .FlightData .LabeledComponent.departure-route {
+  .FlightData .LabeledComponent.departure-route,
+  .FlightData .LabeledComponent.runway {
     border-bottom: 0;
   }
 }
