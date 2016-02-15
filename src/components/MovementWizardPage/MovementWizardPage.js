@@ -27,6 +27,8 @@ class MovementWizardPage extends Component {
       step: 0,
       committed: false,
       data: this.props.defaultData,
+      showValidationErrors: false,
+      validPages: {},
     };
 
     if (this.props.movementKey) {
@@ -188,11 +190,11 @@ class MovementWizardPage extends Component {
 
   nextStep() {
     if (this.isLast()) {
-      this.commit();
+      if (this.validateCurrentPage() === true) {
+        this.commit();
+      }
     } else {
-      this.setState({
-        step: this.state.step + 1,
-      });
+      this.goToStep(this.state.step + 1);
     }
   }
 
@@ -203,6 +205,17 @@ class MovementWizardPage extends Component {
       this.setState({
         step: this.state.step - 1,
       });
+    }
+  }
+
+  goToStep(step) {
+    if (step !== this.state.step) {
+      if (step < this.state.step || this.validateCurrentPage() === true) {
+        this.setState({
+          step,
+          showValidationErrors: false,
+        });
+      }
     }
   }
 
@@ -220,6 +233,22 @@ class MovementWizardPage extends Component {
     return this.state.step === (this.props.pages.length - 1);
   }
 
+  validateCurrentPage() {
+    const valid = this.refs.page.validate();
+    const newState = {
+      validPages: update(this.state.validPages, {
+        [this.state.step]: {
+          $set: valid,
+        },
+      }),
+    };
+    if (valid !== true) {
+      newState.showValidationErrors = true;
+    }
+    this.setState(newState);
+    return valid;
+  }
+
   buildBreadcrumbItems() {
     const breadcrumbItems = [{
       label: this.props.label,
@@ -227,8 +256,9 @@ class MovementWizardPage extends Component {
     this.props.pages.forEach((page, index) => {
       breadcrumbItems.push({
         label: page.label,
+        valid: this.state.validPages[index] === true,
         handler: () => {
-          this.setState({ step: index });
+          this.goToStep(index);
         },
       });
     });
@@ -263,6 +293,8 @@ class MovementWizardPage extends Component {
           data={this.state.data}
           updateData={this.updateData.bind(this)}
           onKeyUp={this.keyUpHandler.bind(this)}
+          ref="page"
+          showValidationErrors={this.state.showValidationErrors === true}
         />
       );
 
