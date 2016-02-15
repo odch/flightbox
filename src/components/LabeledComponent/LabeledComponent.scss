@@ -10,4 +10,19 @@
       resize: none;
     }
   }
+
+  .validation-msg {
+    color: #ed351c;
+    overflow: hidden;
+
+    .icon {
+      float: left;
+    }
+
+    .text {
+      font-style: italic;
+      line-height: 1.3em;
+      margin-left: 2em;
+    }
+  }
 }
