@@ -42,12 +42,49 @@ class PilotData extends WizardStep {
     return (
       <fieldset>
         <legend>Pilot</legend>
-        <LabeledComponent label="MFGT-Mitgliedernummer" className="memberNr" component={memberNrInput}/>
-        <LabeledComponent label="Telefon" className="phone" component={phoneInput}/>
-        <LabeledComponent label="Nachname" className="lastname" component={lastnameInput}/>
-        <LabeledComponent label="Vorname" className="firstname" component={firstnameInput}/>
+        <LabeledComponent
+          label="MFGT-Mitgliedernummer"
+          className="memberNr"
+          component={memberNrInput}
+          validationError={this.getValidationError('memberNr')}
+        />
+        <LabeledComponent
+          label="Telefon"
+          className="phone"
+          component={phoneInput}
+          validationError={this.getValidationError('phone')}
+        />
+        <LabeledComponent
+          label="Nachname"
+          className="lastname"
+          component={lastnameInput}
+          validationError={this.getValidationError('lastname')}
+        />
+        <LabeledComponent
+          label="Vorname"
+          className="firstname"
+          component={firstnameInput}
+          validationError={this.getValidationError('firstname')}
+        />
       </fieldset>
     );
+  }
+
+  getValidationConfig() {
+    return {
+      lastname: {
+        types: {
+          required: true,
+        },
+        message: 'Geben Sie hier den Nachnamen des Piloten ein.',
+      },
+      firstname: {
+        types: {
+          required: true,
+        },
+        message: 'Geben Sie hier den Vornamen des Piloten ein.',
+      },
+    };
   }
 }
 

@@ -43,12 +43,65 @@ class DepartureArrivalData extends WizardStep {
     return (
       <fieldset className="DepartureArrival">
         <legend>Start und Ziel</legend>
-        <LabeledComponent label="Startflugplatz" className="location" component={locationInput}/>
-        <LabeledComponent label="Datum" className="date" component={dateInput}/>
-        <LabeledComponent label="Landezeit (Lokalzeit)" className="arrival-time" component={arrivalTimeInput}/>
-        <LabeledComponent label="Anzahl Landungen" className="landing-count" component={landingCountInput}/>
+        <LabeledComponent
+          label="Startflugplatz"
+          className="location"
+          component={locationInput}
+          validationError={this.getValidationError('location')}
+        />
+        <LabeledComponent
+          label="Datum"
+          className="date"
+          component={dateInput}
+          validationError={this.getValidationError('date')}
+        />
+        <LabeledComponent
+          label="Landezeit (Lokalzeit)"
+          className="arrival-time"
+          component={arrivalTimeInput}
+          validationError={this.getValidationError('time')}
+        />
+        <LabeledComponent
+          label="Anzahl Landungen"
+          className="landing-count"
+          component={landingCountInput}
+          validationError={this.getValidationError('landingCount')}
+        />
       </fieldset>
     );
+  }
+
+  getValidationConfig() {
+    return {
+      location: {
+        types: {
+          required: true,
+        },
+        message: 'Geben Sie hier den Startflugplatz ein. Wenn der Flugplatz ein ICAO-Kürzel besitzt,' +
+        'verwenden Sie dieses.',
+      },
+      date: {
+        types: {
+          required: true,
+          match: /^\d{4}-\d{2}-\d{2}$/,
+        },
+        message: 'Geben Sie hier das Datum ein.',
+      },
+      time: {
+        types: {
+          required: true,
+          match: /^\d{2}:\d{2}$/,
+        },
+        message: 'Geben Sie hier die Landezeit in Stunden und Minuten ein (Lokalzeit).',
+      },
+      landingCount: {
+        types: {
+          required: true,
+          integer: true,
+        },
+        message: 'Geben Sie hier die Anzahl Landungen ein.',
+      },
+    };
   }
 }
 

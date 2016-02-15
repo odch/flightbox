@@ -35,9 +35,24 @@ class AircraftData extends WizardStep {
     return (
       <fieldset>
         <legend>Flugzeugdaten</legend>
-        <LabeledComponent label="Immatrikulation" className="immatriculation" component={immatriculationInput}/>
-        <LabeledComponent label="Typ" className="type" component={typeInput}/>
-        <LabeledComponent label="Maximales Abfluggewicht (in Kilogramm)" className="mtow" component={mtowInput}/>
+        <LabeledComponent
+          label="Immatrikulation"
+          className="immatriculation"
+          component={immatriculationInput}
+          validationError={this.getValidationError('immatriculation')}
+        />
+        <LabeledComponent
+          label="Typ"
+          className="type"
+          component={typeInput}
+          validationError={this.getValidationError('aircraftType')}
+        />
+        <LabeledComponent
+          label="Maximales Abfluggewicht (in Kilogramm)"
+          className="mtow"
+          component={mtowInput}
+          validationError={this.getValidationError('mtow')}
+        />
       </fieldset>
     );
   }
@@ -49,6 +64,34 @@ class AircraftData extends WizardStep {
     } else {
       this.updateData('mtow', null);
     }
+  }
+
+  getValidationConfig() {
+    return {
+      immatriculation: {
+        types: {
+          required: true,
+          match: /^[A-Z0-9]+$/,
+        },
+        message: 'Geben Sie hier die Immatrikulation des Flugzeugs ein. ' +
+        'Sie darf nur Grossbuchstaben und Zahlen enthalten.',
+      },
+      aircraftType: {
+        types: {
+          required: true,
+          match: /^[A-Z0-9]+$/,
+        },
+        message: 'Geben Sie hier den Typ des Flugzeugs ein. ' +
+        'Er darf nur Grossbuchstaben und Zahlen enthalten.',
+      },
+      mtow: {
+        types: {
+          required: true,
+          integer: true,
+        },
+        message: 'Geben Sie hier das maximale Abfluggewicht des Flugzeugs ein (in Kilogramm).',
+      },
+    };
   }
 }
 

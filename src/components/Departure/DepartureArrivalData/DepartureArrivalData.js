@@ -42,12 +42,65 @@ class DepartureArrivalData extends WizardStep {
     return (
       <fieldset>
         <legend>Start und Ziel</legend>
-        <LabeledComponent label="Datum" className="date" component={dateInput}/>
-        <LabeledComponent label="Startzeit (Lokalzeit)" className="start-time" component={timeInput}/>
-        <LabeledComponent label="Zielflugplatz" className="location" component={locationInput}/>
-        <LabeledComponent label="Flugdauer" className="duration" component={durationInput}/>
+        <LabeledComponent
+          label="Datum"
+          className="date"
+          component={dateInput}
+          validationError={this.getValidationError('date')}
+        />
+        <LabeledComponent
+          label="Startzeit (Lokalzeit)"
+          className="start-time"
+          component={timeInput}
+          validationError={this.getValidationError('time')}
+        />
+        <LabeledComponent
+          label="Zielflugplatz"
+          className="location"
+          component={locationInput}
+          validationError={this.getValidationError('location')}
+        />
+        <LabeledComponent
+          label="Flugdauer"
+          className="duration"
+          component={durationInput}
+          validationError={this.getValidationError('duration')}
+        />
       </fieldset>
     );
+  }
+
+  getValidationConfig() {
+    return {
+      date: {
+        types: {
+          required: true,
+          match: /^\d{4}-\d{2}-\d{2}$/,
+        },
+        message: 'Geben Sie hier das Datum ein.',
+      },
+      time: {
+        types: {
+          required: true,
+          match: /^\d{2}:\d{2}$/,
+        },
+        message: 'Geben Sie hier die Startzeit in Stunden und Minuten ein (Lokalzeit).',
+      },
+      location: {
+        types: {
+          required: true,
+        },
+        message: 'Geben Sie hier den Zielflugplatz ein. Wenn der Flugplatz ein ICAO-Kürzel besitzt,' +
+        'verwenden Sie dieses.',
+      },
+      duration: {
+        types: {
+          required: true,
+          match: /^\d{2}:\d{2}$/,
+        },
+        message: 'Geben Sie hier die Dauer des Fluges in Stunden und Minuten ein.',
+      },
+    };
   }
 }
 
