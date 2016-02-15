@@ -12,18 +12,29 @@ class WizardBreadcrumbs extends Component {
             if (index === this.props.activeItem) {
               className += ' active';
             }
-            if (!item.handler) {
+            const previousValid = this.arePreviousItemsValid(index);
+            const handler = previousValid ? item.handler : undefined;
+            if (!handler) {
               className += ' no-handler';
             }
             return (
               <li className={className} key={index}>
-                <a onMouseDown={item.handler} tabIndex="-1">{item.label}</a>
+                <a onMouseDown={handler} tabIndex="-1">{item.label}</a>
               </li>
             );
           })}
         </ol>
       </nav>
     );
+  }
+
+  arePreviousItemsValid(index) {
+    for (let i = 0; i < index; i++) {
+      if (this.props.items[i].valid === false) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
