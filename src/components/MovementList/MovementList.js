@@ -133,6 +133,7 @@ class MovementList extends Component {
   }
 
   render() {
+    const movementsAfterToday = this.state.movements.filter(Predicates.newerThanSameDay());
     const movementsOfToday = this.state.movements.filter(Predicates.sameDay());
     const movementsOfYesterday = this.state.movements.filter(Predicates.dayBefore());
     const movementsOfThisMonth = this.state.movements.filter(Predicates.and(
@@ -156,6 +157,15 @@ class MovementList extends Component {
 
     return (
       <div className={className}>
+        <MovementGroup
+          label="Ab morgen"
+          items={movementsAfterToday}
+          onClick={this.props.onClick}
+          timeWithDate={true}
+          onAction={this.props.onAction}
+          actionLabel={this.props.actionLabel}
+          onDelete={this.onListDeleteTrigger.bind(this)}
+        />
         <MovementGroup
           label="Heute"
           items={movementsOfToday}

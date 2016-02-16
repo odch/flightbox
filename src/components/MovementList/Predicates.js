@@ -5,6 +5,13 @@ class Predicates {
   /**
    * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
    */
+  static newerThanSameDay(localDateString) {
+    return (movement) => moment.tz(localDateString, 'Europe/Zurich').isBefore(movement.date, 'day');
+  }
+
+  /**
+   * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
+   */
   static sameDay(localDateString) {
     return (movement) => moment.tz(localDateString, 'Europe/Zurich').isSame(movement.date, 'day');
   }
