@@ -19,6 +19,7 @@ class AircraftList extends Component {
   }
 
   render() {
+    const emptyTitle = 'Flugzeug auswählen';
     const emptyMessage = 'Tippen Sie die ersten Buchstaben der Immatrikulation oder des Typs und wählen ' +
       'Sie das gewünschte Flugzeug anschliessend aus der Liste hier aus.';
 
@@ -29,6 +30,7 @@ class AircraftList extends Component {
     return (
       <FilteredList
         className="AircraftList"
+        emptyTitle={emptyTitle}
         emptyMessage={emptyMessage}
         searchTerms={searchTerms}
         itemComponentClass={AircraftItem}

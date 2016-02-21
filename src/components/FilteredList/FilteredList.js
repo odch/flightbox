@@ -61,7 +61,7 @@ class FilteredList extends Component {
     } else {
       content = (
         <div className="empty-message">
-          <em>Keine Ergebnisse</em>
+          <em>{this.props.emptyTitle}</em>
           <p>{this.props.emptyMessage}</p>
         </div>
       );
@@ -81,6 +81,7 @@ FilteredList.propTypes = {
   itemComponentClass: PropTypes.func.isRequired,
   searchTerms: PropTypes.object,
   onClick: PropTypes.func,
+  emptyTitle: PropTypes.string,
   emptyMessage: PropTypes.string,
   className: PropTypes.string,
 };

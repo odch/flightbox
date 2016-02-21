@@ -17,6 +17,7 @@ class AerodromeList extends Component {
   }
 
   render() {
+    const emptyTitle = 'Flugplatz auswählen';
     const emptyMessage = 'Tippen Sie die ersten Buchstaben der ICAO-Identifikation oder des Namens und wählen ' +
       'Sie anschliessend aus der Liste hier aus.';
 
@@ -27,6 +28,7 @@ class AerodromeList extends Component {
     return (
       <FilteredList
         className="AerodromeList"
+        emptyTitle={emptyTitle}
         emptyMessage={emptyMessage}
         searchTerms={searchTerms}
         itemComponentClass={AerodromeItem}

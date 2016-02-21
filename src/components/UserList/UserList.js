@@ -16,6 +16,7 @@ class UserList extends Component {
   }
 
   render() {
+    const emptyTitle = 'MFGT-Mitglied auswählen';
     const emptyMessage = 'Tippen Sie die ersten Zahlen der Mitgliedernummer und wählen ' +
       'Sie anschliessend aus der Liste hier aus.';
 
@@ -26,6 +27,7 @@ class UserList extends Component {
     return (
       <FilteredList
         className="UserList"
+        emptyTitle={emptyTitle}
         emptyMessage={emptyMessage}
         searchTerms={searchTerms}
         itemComponentClass={UserItem}
