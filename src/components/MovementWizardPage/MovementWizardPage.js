@@ -18,9 +18,18 @@ class MovementWizardPage extends Component {
     super(props);
 
     this.quickSelectionConf = {
-      aircraftList: new Set(['immatriculation', 'aircraftType']),
-      userList: new Set(['memberNr']),
-      aerodromeList: new Set(['location']),
+      aircraftList: {
+        step: 0,
+        fields: new Set(['immatriculation', 'aircraftType']),
+      },
+      userList: {
+        step: 1,
+        fields: new Set(['memberNr']),
+      },
+      aerodromeList: {
+        step: 3,
+        fields: new Set(['location']),
+      },
     };
 
     this.state = {
@@ -105,33 +114,9 @@ class MovementWizardPage extends Component {
     });
   }
 
-  focusHandler(e) {
-    const fieldName = e.target ? e.target.name : null;
-    const visibilityFlags = this.getQuickSelectionListVisibilities(fieldName);
-    this.setState(visibilityFlags);
-  }
-
-  blurHandler() {
-    setTimeout(() => {
-      if (this.mounted === true) {
-        const activeElementName = document.activeElement.name;
-        const visibilityFlags = this.getQuickSelectionListVisibilities(activeElementName);
-        this.setState(visibilityFlags);
-      }
-    }, 1);
-  }
-
-  getQuickSelectionListVisibilities(activeFieldName) {
-    const visibilityFlags = {};
-
-    for (const listKey in this.quickSelectionConf) {
-      if (this.quickSelectionConf.hasOwnProperty(listKey)) {
-        const listVisibilityStateKey = listKey + 'Visible';
-        visibilityFlags[listVisibilityStateKey] = activeFieldName && this.quickSelectionConf[listKey].has(activeFieldName);
-      }
-    }
-
-    return visibilityFlags;
+  quickSelectionListVisible(listKey) {
+    const conf = this.quickSelectionConf[listKey];
+    return conf && conf.step === this.state.step;
   }
 
   keyUpHandler(e) {
@@ -148,7 +133,7 @@ class MovementWizardPage extends Component {
   isQuickSelectionFilterField(fieldName) {
     for (const listKey in this.quickSelectionConf) {
       if (this.quickSelectionConf.hasOwnProperty(listKey)) {
-        if (this.quickSelectionConf[listKey].has(fieldName)) {
+        if (this.quickSelectionConf[listKey].fields.has(fieldName)) {
           return true;
         }
       }
@@ -314,7 +299,7 @@ class MovementWizardPage extends Component {
         </BorderLayoutItem>
       );
 
-      if (this.state.aircraftListVisible === true) {
+      if (this.quickSelectionListVisible('aircraftList')) {
         eastItem = (
           <BorderLayoutItem region="east">
             <AircraftList
@@ -324,7 +309,7 @@ class MovementWizardPage extends Component {
             />
           </BorderLayoutItem>
         );
-      } else if (this.state.userListVisible === true) {
+      } else if (this.quickSelectionListVisible('userList')) {
         eastItem = (
           <BorderLayoutItem region="east">
             <UserList
@@ -333,7 +318,7 @@ class MovementWizardPage extends Component {
             />
           </BorderLayoutItem>
         );
-      } else if (this.state.aerodromeListVisible === true) {
+      } else if (this.quickSelectionListVisible('aerodromeList')) {
         eastItem = (
           <BorderLayoutItem region="east">
             <AerodromeList
@@ -346,7 +331,7 @@ class MovementWizardPage extends Component {
     }
 
     return (
-      <BorderLayout className={className} onFocus={this.focusHandler.bind(this)} onBlur={this.blurHandler.bind(this)}>
+      <BorderLayout className={className}>
         <BorderLayoutItem region="west">
           <header>
             <a href="#/">
