@@ -83,6 +83,10 @@ class ArrivalPage extends Component {
       defaultData.passengerCount = departure.passengerCount || 0;
       defaultData.location = departure.location;
       defaultData.flightType = departure.flightType;
+
+      if (departure.departureRoute === 'circuits') {
+        defaultData.arrivalRoute = 'circuits';
+      }
     }
 
     this.setState({
