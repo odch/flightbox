@@ -27,6 +27,9 @@ class FlightData extends WizardStep {
       }, {
         label: 'Matzingen',
         value: 'matzingen',
+      }, {
+        label: 'Platzrunden (ohne Verlassen des Platzverkehrs)',
+        value: 'circuits',
       },
     ];
     this.runway = [
@@ -96,7 +99,7 @@ class FlightData extends WizardStep {
       departureRoute: {
         types: {
           required: true,
-          values: ['south', 'matzingen'],
+          values: ['south', 'matzingen', 'circuits'],
         },
         message: 'Wählen Sie hier die Abflugroute aus.',
       },

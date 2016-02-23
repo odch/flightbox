@@ -26,6 +26,9 @@ class FlightData extends WizardStep {
       }, {
         label: 'Sektor Süd',
         value: 'south',
+      }, {
+        label: 'Platzrunden (ohne Verlassen des Platzverkehrs)',
+        value: 'circuits',
       },
     ];
     this.runway = [
@@ -83,7 +86,7 @@ class FlightData extends WizardStep {
       arrivalRoute: {
         types: {
           required: true,
-          values: ['north', 'south'],
+          values: ['north', 'south', 'circuits'],
         },
         message: 'Wählen Sie hier die Ankunftsroute aus.',
       },
