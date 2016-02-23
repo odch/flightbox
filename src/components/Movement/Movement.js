@@ -23,22 +23,29 @@ class Movement extends Component {
       ? dates.formatDate(this.props.data.date)
       : '\u00a0';
     const time = dates.formatTime(this.props.data.date, this.props.data.time);
-    const location = this.props.data.location === 'LSZT'
-      ? 'Lokalflug'
-      : this.props.data.location;
     return (
       <div className="Movement" onClick={this.props.onClick}>
         <div className="column immatriculation">{this.props.data.immatriculation}</div>
         <div className="column pilot">{this.props.data.lastname}</div>
         <div className="column date">{date}</div>
         <div className="column time">{time}</div>
-        <div className="column location">{location}</div>
+        <div className="column location">{this.getLocation()}</div>
         <div className="column action"><span onClick={this.actionHandler.bind(this)}>{this.props.actionLabel}</span></div>
         <div className="column delete">
           <span onClick={this.deleteHandler.bind(this)}><i className="material-icons">delete</i>&nbsp;Löschen</span>
         </div>
       </div>
     );
+  }
+
+  getLocation() {
+    if (this.props.data.location.toUpperCase() === 'LSZT') {
+      if (this.props.data.departureRoute === 'circuits' || this.props.data.arrivalRoute === 'circuits') {
+        return 'Platzrunden';
+      }
+      return 'Lokalflug';
+    }
+    return this.props.data.location;
   }
 }
 
