@@ -19,7 +19,7 @@
           ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
         },
         "departureRoute": {
-          ".validate": "newData.val() === 'south' || newData.val() === 'matzingen' || newData.val() === 'circuits'"
+          ".validate": "newData.val() === 'south' || newData.val() === 'matzingen' || (newData.val() === 'circuits' && newData.parent().child('location').val().toUpperCase() === 'LSZT')"
         },
         "duration": {
           ".validate": "newData.isString() && newData.val().matches(/^\\d{2}:\\d{2}$/)"
@@ -79,7 +79,7 @@
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "arrivalRoute": {
-          ".validate": "newData.val() === 'north' || newData.val() === 'south' || newData.val() === 'circuits'"
+          ".validate": "newData.val() === 'north' || newData.val() === 'south' || (newData.val() === 'circuits' && newData.parent().child('location').val().toUpperCase() === 'LSZT')"
         },
         "dateTime": {
           ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
