@@ -29,6 +29,7 @@ class FlightData extends WizardStep {
       }, {
         label: 'Platzrunden (ohne Verlassen des Platzverkehrs)',
         value: 'circuits',
+        available: data => data.location.toUpperCase() === 'LSZT',
       },
     ];
     this.runway = [
@@ -55,7 +56,7 @@ class FlightData extends WizardStep {
         <LabeledComponent
           label="Ankunftsroute"
           className="arrival-route"
-          component={<RadioGroup name="arrival-route" items={this.arrivalRoutes} value={this.state.data.arrivalRoute} onChange={this.getUpdateHandlerDelegate('arrivalRoute', this)}/>}
+          component={<RadioGroup name="arrival-route" items={this.filterOptions(this.arrivalRoutes)} value={this.state.data.arrivalRoute} onChange={this.getUpdateHandlerDelegate('arrivalRoute', this)}/>}
           validationError={this.getValidationError('arrivalRoute')}
         />
         <LabeledComponent

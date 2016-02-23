@@ -173,6 +173,20 @@ class WizardStep extends Component {
 
     return validationErrors;
   }
+
+  filterOptions(options) {
+    return options
+      .map(option => {
+        if (typeof option.available === 'function') {
+          if (option.available(this.state.data) === true) {
+            return option;
+          }
+          return null;
+        }
+        return option;
+      })
+      .filter(option => !!option);
+  }
 }
 
 WizardStep.propTypes = {
