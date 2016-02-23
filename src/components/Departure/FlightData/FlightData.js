@@ -65,12 +65,15 @@ class FlightData extends WizardStep {
           component={<RadioGroup name="departure-route" items={this.filterOptions(this.departureRoutes)} value={this.state.data.departureRoute} onChange={this.getUpdateHandlerDelegate('departureRoute', this)}/>}
           validationError={this.getValidationError('departureRoute')}
         />
-        <LabeledComponent
-          label="Routing"
-          className="route"
-          component={<textarea value={this.state.data.route} onChange={this.getUpdateHandlerDelegate('route', this)}/>}
-          validationError={this.getValidationError('route')}
-        />
+        {this.state.data.departureRoute !== 'circuits' ?
+          <LabeledComponent
+            label="Routing"
+            className="route"
+            component={<textarea value={this.state.data.route} onChange={this.getUpdateHandlerDelegate('route', this)}/>}
+            validationError={this.getValidationError('route')}
+          />
+          : null
+        }
         <LabeledComponent
           label="Bemerkungen"
           className="remarks"
