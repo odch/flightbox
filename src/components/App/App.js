@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import './App.scss';
+import 'moment/locale/de';
 
 function App({ children }) {
   return (
