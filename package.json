@@ -28,6 +28,7 @@
     "jsdom-test-browser": "~4.0.2",
     "json-loader": "~0.5.4",
     "mocha": "~2.3.4",
+    "moment": "~2.11.2",
     "moment-timezone": "~0.4.1",
     "node-sass": "^3.4.2",
     "postcss-loader": "~0.8.0",
