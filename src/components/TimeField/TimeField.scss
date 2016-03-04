@@ -1,0 +1,15 @@
+.TimeField {
+  > div {
+    border: 0 !important;
+  }
+
+  // arrows
+  > div > div > span {
+    font-size: 0.7em;
+  }
+
+  input {
+    border: 0;
+    font-size: 1em;
+  }
+}
