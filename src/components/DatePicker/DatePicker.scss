@@ -1,0 +1,28 @@
+.DateTimePicker {
+  .date-picker {
+    .dp-table.dp-month-view {
+      width: 400px;
+    }
+
+    .dp-row.dp-week-day-names {
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
+
+    .dp-cell:not(.dp-week-day-name) {
+      cursor: pointer;
+      padding: 0.3em 0.5em;
+    }
+
+    .dp-month-view {
+      .dp-cell.dp-next, .dp-cell.dp-prev {
+        color: #666;
+      }
+    }
+
+    .dp-cell.dp-value {
+      color: #ed351c;
+    }
+  }
+}
+
