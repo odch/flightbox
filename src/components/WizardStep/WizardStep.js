@@ -193,6 +193,7 @@ WizardStep.propTypes = {
   updateData: PropTypes.func,
   onKeyUp: PropTypes.func,
   data: PropTypes.object,
+  itemKey: PropTypes.string,
   showValidationErrors: PropTypes.bool,
 };
 

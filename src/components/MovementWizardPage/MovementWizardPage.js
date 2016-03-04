@@ -260,7 +260,7 @@ class MovementWizardPage extends Component {
     let eastItem;
 
     if (this.state.committed === true) {
-      middleItem = <this.props.finishComponentClass finish={this.finish.bind(this)}/>;
+      middleItem = <this.props.finishComponentClass itemKey={this.props.movementKey} finish={this.finish.bind(this)}/>;
     } else if (this.state.commitError) {
       middleItem = (
         <CommitFailure
@@ -280,6 +280,7 @@ class MovementWizardPage extends Component {
           onKeyUp={this.keyUpHandler.bind(this)}
           ref="page"
           showValidationErrors={this.state.showValidationErrors === true}
+          itemKey={this.props.movementKey}
         />
       );
 
