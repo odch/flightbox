@@ -2,6 +2,7 @@ import React from 'react';
 import WizardStep from '../../WizardStep';
 import LabeledComponent from '../../LabeledComponent';
 import DatePicker from '../../DatePicker';
+import TimeField from '../../TimeField';
 
 class DepartureArrivalData extends WizardStep {
 
@@ -13,11 +14,9 @@ class DepartureArrivalData extends WizardStep {
       />
     );
     const timeInput = (
-      <input
-        name="time"
-        type="time"
+      <TimeField
         value={this.state.data.time}
-        onChange={this.getUpdateHandlerDelegate('time', this)}
+        onChange={(e) => this.updateData('time', e.value)}
       />
     );
     const locationInput = (
@@ -30,16 +29,14 @@ class DepartureArrivalData extends WizardStep {
       />
     );
     const durationInput = (
-      <input
-        name="duration"
-        type="time"
+      <TimeField
         value={this.state.data.duration}
-        onChange={this.getUpdateHandlerDelegate('duration', this)}
+        onChange={(e) => this.updateData('duration', e.value)}
       />
     );
 
     return (
-      <fieldset>
+      <fieldset className="DepartureArrivalData">
         <legend>Start und Ziel</legend>
         <LabeledComponent
           label="Datum"

@@ -1,7 +1,8 @@
 .ArrivalPage {
 
   .PassengerData .LabeledComponent.count,
-  .DepartureArrival .LabeledComponent.landing-count,
+  .DepartureArrivalData .LabeledComponent.landing-count,
+  .DepartureArrivalData .LabeledComponent.arrival-time,
   .FlightData .LabeledComponent.type,
   .FlightData .LabeledComponent.arrival-route,
   .FlightData .LabeledComponent.runway {

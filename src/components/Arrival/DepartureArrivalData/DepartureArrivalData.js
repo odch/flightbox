@@ -3,6 +3,7 @@ import WizardStep from '../../WizardStep';
 import LabeledComponent from '../../LabeledComponent';
 import IncrementationField from '../../IncrementationField';
 import DatePicker from '../../DatePicker';
+import TimeField from '../../TimeField';
 
 class DepartureArrivalData extends WizardStep {
 
@@ -23,11 +24,9 @@ class DepartureArrivalData extends WizardStep {
       />
     );
     const arrivalTimeInput = (
-      <input
-        name="time"
-        type="time"
+      <TimeField
         value={this.state.data.time}
-        onChange={this.getUpdateHandlerDelegate('time', this)}
+        onChange={(e) => this.updateData('time', e.value)}
       />
     );
     const landingCountInput = (
@@ -40,7 +39,7 @@ class DepartureArrivalData extends WizardStep {
     );
 
     return (
-      <fieldset className="DepartureArrival">
+      <fieldset className="DepartureArrivalData">
         <legend>Start und Ziel</legend>
         <LabeledComponent
           label="Startflugplatz"
