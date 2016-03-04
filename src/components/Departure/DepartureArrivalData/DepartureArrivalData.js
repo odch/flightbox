@@ -1,16 +1,15 @@
 import React from 'react';
 import WizardStep from '../../WizardStep';
 import LabeledComponent from '../../LabeledComponent';
+import DatePicker from '../../DatePicker';
 
 class DepartureArrivalData extends WizardStep {
 
   render() {
     const dateInput = (
-      <input
-        name="date"
-        type="date"
+      <DatePicker
         value={this.state.data.date}
-        onChange={this.getUpdateHandlerDelegate('date', this)}
+        onChange={(e) => this.updateData('date', e.value)}
       />
     );
     const timeInput = (
