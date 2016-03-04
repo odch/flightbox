@@ -41,6 +41,7 @@ class MovementList extends Component {
   tearDownFirebase() {
     if (this.firebaseRef) {
       this.firebaseRef.off('child_added', this.onFirebaseChildAdded, this);
+      this.firebaseRef.off('child_removed', this.onFirebaseChildRemoved, this);
     }
   }
 
