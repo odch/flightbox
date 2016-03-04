@@ -40,7 +40,8 @@ class MovementWizardPage extends Component {
       validPages: {},
     };
 
-    if (this.props.movementKey) {
+    this.movementKey = this.props.movementKey;
+    if (this.movementKey) {
       this.update = true;
     }
 
@@ -87,7 +88,7 @@ class MovementWizardPage extends Component {
     if (this.update === true) {
       this.firebaseCollectionRef.child(this.props.movementKey).set(movement, setCommitted);
     } else {
-      this.firebaseCollectionRef.push(movement, setCommitted);
+      this.movementKey = this.firebaseCollectionRef.push(movement, setCommitted).key();
     }
   }
 
@@ -260,7 +261,12 @@ class MovementWizardPage extends Component {
     let eastItem;
 
     if (this.state.committed === true) {
-      middleItem = <this.props.finishComponentClass itemKey={this.props.movementKey} finish={this.finish.bind(this)}/>;
+      middleItem = (
+        <this.props.finishComponentClass
+          itemKey={this.movementKey}
+          finish={this.finish.bind(this)}
+          update={this.update}
+        />);
     } else if (this.state.commitError) {
       middleItem = (
         <CommitFailure
@@ -280,7 +286,8 @@ class MovementWizardPage extends Component {
           onKeyUp={this.keyUpHandler.bind(this)}
           ref="page"
           showValidationErrors={this.state.showValidationErrors === true}
-          itemKey={this.props.movementKey}
+          itemKey={this.movementKey}
+          update={this.update}
         />
       );
 

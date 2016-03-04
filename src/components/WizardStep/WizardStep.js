@@ -195,6 +195,7 @@ WizardStep.propTypes = {
   data: PropTypes.object,
   itemKey: PropTypes.string,
   showValidationErrors: PropTypes.bool,
+  update: PropTypes.bool,
 };
 
 export default WizardStep;

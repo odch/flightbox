@@ -17,7 +17,7 @@ class Finish extends WizardStep {
   }
 
   getMessage() {
-    return (this.props.itemKey)
+    return (this.props.update === true)
       ? 'Der Abflug wurde erfolgreich aktualisiert!'
       : 'Ihr Abflug wurde erfolgreich erfasst!';
   }
