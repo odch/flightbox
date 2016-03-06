@@ -6,6 +6,7 @@ import PassengerData from '../Departure/PassengerData';
 import DepartureArrivalData from '../Departure/DepartureArrivalData';
 import FlightData from '../Departure/FlightData';
 import Finish from '../Departure/Finish';
+import CommitRequirementsDialog from '../Departure/CommitRequirementsDialog';
 import MovementWizardPage from '../MovementWizardPage';
 import { firebaseToLocal } from '../../util/movements.js';
 import dates from '../../core/dates.js';
@@ -103,6 +104,7 @@ class DeparturePage extends Component {
         movementKey={this.props.params.key}
         pages={this.pages}
         finishComponentClass={Finish}
+        commitRequirementsDialogClass={CommitRequirementsDialog}
         defaultData={this.state.defaultData}
       />
     );

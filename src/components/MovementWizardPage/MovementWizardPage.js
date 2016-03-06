@@ -73,6 +73,18 @@ class MovementWizardPage extends Component {
   }
 
   commit() {
+    if (this.update !== true
+      && this.state.commitRequirementsConfirmed !== true
+      && typeof this.props.commitRequirementsDialogClass === 'function') {
+      this.setState({
+        showCommitRequirements: true,
+      });
+    } else {
+      this.save();
+    }
+  }
+
+  save() {
     const movement = localToFirebase(this.state.data);
     const setCommitted = (error) => {
       if (error) {
@@ -251,6 +263,20 @@ class MovementWizardPage extends Component {
     return breadcrumbItems;
   }
 
+  confirmRequirementsCancelHandler() {
+    this.setState({
+      showCommitRequirements: false,
+    });
+  }
+
+  confirmRequirementsConfirmHandler() {
+    this.setState({
+      showCommitRequirements: false,
+      commitRequirementsConfirmed: true,
+    });
+    this.save();
+  }
+
   render() {
     const className = 'MovementWizardPage ' + this.props.className;
     const logoImagePath = require('../../resources/mfgt_logo_transp.png');
@@ -259,6 +285,7 @@ class MovementWizardPage extends Component {
     let northItem;
     let southItem;
     let eastItem;
+    let commitRequirements;
 
     if (this.state.committed === true) {
       middleItem = (
@@ -336,6 +363,15 @@ class MovementWizardPage extends Component {
           </BorderLayoutItem>
         );
       }
+
+      if (this.state.showCommitRequirements === true) {
+        commitRequirements = (
+          <this.props.commitRequirementsDialogClass
+            onCancel={this.confirmRequirementsCancelHandler.bind(this)}
+            onConfirm={this.confirmRequirementsConfirmHandler.bind(this)}
+          />
+        );
+      }
     }
 
     return (
@@ -350,6 +386,7 @@ class MovementWizardPage extends Component {
         {northItem}
         <BorderLayoutItem region="middle">
           {middleItem}
+          {commitRequirements}
         </BorderLayoutItem>
         {southItem}
         {eastItem}
@@ -365,6 +402,7 @@ MovementWizardPage.propTypes = {
   movementKey: PropTypes.string,
   pages: PropTypes.array,
   finishComponentClass: PropTypes.func,
+  commitRequirementsDialogClass: PropTypes.func,
   defaultData: PropTypes.object,
 };
 
