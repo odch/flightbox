@@ -56,3 +56,8 @@ a {
   /* Support for IE. */
   font-feature-settings: 'liga';
 }
+
+// align vertically with text
+.material-icons {
+  vertical-align: middle;
+}
