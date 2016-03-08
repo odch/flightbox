@@ -4,8 +4,7 @@ import MovementGroup from '../MovementGroup';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
 import Firebase from 'firebase';
 import MovementsArray from '../../util/MovementsArray.js';
-import { firebaseToLocal } from '../../util/movements.js';
-import dates from '../../core/dates.js';
+import { firebaseToLocal, localToFirebase, compare } from '../../util/movements.js';
 import update from 'react-addons-update';
 
 /**
@@ -21,75 +20,126 @@ class MovementList extends Component {
     this.state = {
       movements: [],
     };
-    this.increase = 50;
-    this.limit = this.increase;
+    this.limit = 10;
     this.childAddedSinceLastIncrease = true;
 
     this.handleScroll = this.handleScroll.bind(this);
   }
 
   componentWillMount() {
-    this.loadOnceOfToday();
-    window.addEventListener('scroll', this.handleScroll);
-  }
-
-  componentWillUnmount() {
-    this.tearDownFirebase();
-    window.removeEventListener('scroll', this.handleScroll);
-  }
-
-  tearDownFirebase() {
-    if (this.firebaseRef) {
-      this.firebaseRef.off('child_added', this.onFirebaseChildAdded, this);
-      this.firebaseRef.off('child_removed', this.onFirebaseChildRemoved, this);
-    }
-  }
-
-  loadOnceOfToday() {
-    new Firebase(this.props.firebaseUri)
-      .orderByChild('dateTime')
-      .startAt(dates.isoStartOfDay())
-      .endAt(dates.isoEndOfDay())
-      .once('value', this.initialValues, this);
-  }
-
-  loadContinuouslyLimited() {
-    this.firebaseRef = new Firebase(this.props.firebaseUri)
-      .orderByChild('negativeTimestamp')
-      .limitToFirst(this.limit);
+    this.loadLimited();
+    this.firebaseRef = new Firebase(this.props.firebaseUri);
     this.firebaseRef.on('child_added', this.onFirebaseChildAdded, this);
     this.firebaseRef.on('child_removed', this.onFirebaseChildRemoved, this);
   }
 
-  initialValues(snapshot) {
-    const movements = [];
+  componentDidMount() {
+    const scrollableElement = this.findScrollableElement();
+    if (scrollableElement) {
+      scrollableElement.addEventListener('scroll', this.handleScroll);
+    }
+  }
+
+  componentDidUpdate() {
+    if (this.childAddedSinceLastIncrease === true) {
+      const scrollableElement = this.findScrollableElement();
+      if (scrollableElement && this.isEndReached(scrollableElement)) {
+        this.loadLimited();
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.firebaseRef) {
+      this.firebaseRef.off('child_added', this.onFirebaseChildAdded, this);
+      this.firebaseRef.off('child_removed', this.onFirebaseChildRemoved, this);
+    }
+
+    const scrollableElement = this.findScrollableElement();
+    if (scrollableElement) {
+      scrollableElement.removeEventListener('scroll', this.handleScroll);
+    }
+  }
+
+  loadLimited() {
+    const pagination = this.getPagination();
+    new Firebase(this.props.firebaseUri)
+      .orderByChild('negativeTimestamp')
+      .limitToFirst(pagination.limit)
+      .startAt(pagination.start)
+      .once('value', this.onFirebaseValues, this);
+  }
+
+  getPagination() {
+    let limit = this.limit;
+    let start = undefined;
+
+    const movements = this.state.movements;
+
+    let i = movements.length;
+    while (i > 0) {
+      const negTs = localToFirebase(movements[i - 1]).negativeTimestamp;
+      if (start === undefined) {
+        start = negTs;
+        limit++;
+      } else if (start === negTs) {
+        limit++;
+      } else {
+        break;
+      }
+      i--;
+    }
+
+    return {
+      start,
+      limit,
+    };
+  }
+
+  onFirebaseValues(snapshot) {
+    const movements = new MovementsArray(this.state.movements);
+
     snapshot.forEach((data) => {
       const movement = firebaseToLocal(data.val());
       movement.key = data.key();
 
-      movements.unshift(movement);
+      const inserted = movements.insert(movement);
+      if (inserted === true) {
+        this.childAddedSinceLastIncrease = true;
+      }
     });
+
     this.setState({
-      movements,
-    }, () => {
-      this.loadContinuouslyLimited();
-    }, this);
+      movements: movements.array,
+    });
   }
 
   onFirebaseChildAdded(data) {
     const addedMovement = firebaseToLocal(data.val());
     addedMovement.key = data.key();
 
-    this.setState(state => {
-      const sorted = new MovementsArray(state.movements);
-      const inserted = sorted.insert(addedMovement);
+    if (this.shouldMovementBeVisible(addedMovement)) {
+      const movements = new MovementsArray(this.state.movements);
 
-      if (inserted) {
-        this.childAddedSinceLastIncrease = true;
+      const inserted = movements.insert(addedMovement);
+
+      if (inserted === true) {
+        this.setState({
+          movements: movements.array,
+        });
       }
+    }
+  }
 
-      return { movements: sorted.array };
-    });
+  shouldMovementBeVisible(movement) {
+    if (this.state.movements.length > 2) {
+      const oldestMovement = this.state.movements[this.state.movements.length - 1];
+
+      if (compare(movement, oldestMovement) === -1) {
+        return true;
+      }
+    }
+    return this.childAddedSinceLastIncrease === false;
   }
 
   onFirebaseChildRemoved(data) {
@@ -101,17 +151,27 @@ class MovementList extends Component {
     }
   }
 
-  handleScroll() {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight
-      && this.childAddedSinceLastIncrease === true) {
-      this.increaseLimit();
+  findScrollableElement() {
+    let element = this.element;
+    do {
+      const style = window.getComputedStyle(element);
+      const overflow = style.getPropertyValue('overflow');
+      if (overflow === 'auto' || overflow === 'scroll') {
+        return element;
+      }
+      element = element.parentNode;
+    } while (element);
+    return null;
+  }
+
+  handleScroll(e) {
+    if (this.isEndReached(e.target) && this.childAddedSinceLastIncrease === true) {
+      this.loadLimited();
     }
   }
 
-  increaseLimit() {
-    this.limit += this.increase;
-    this.childAddedSinceLastIncrease = false;
-    this.loadContinuouslyLimited();
+  isEndReached(element) {
+    return element.offsetHeight + element.scrollTop === element.scrollHeight;
   }
 
   onListDeleteTrigger(item) {
@@ -157,7 +217,7 @@ class MovementList extends Component {
       />) : null;
 
     return (
-      <div className={className}>
+      <div className={className} ref={(element) => this.element = element}>
         <MovementGroup
           label="Ab morgen"
           items={movementsAfterToday}

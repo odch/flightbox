@@ -1,5 +1,6 @@
-import moment from 'moment-timezone';
 import dates from '../core/dates.js';
+import bs from 'binary-search';
+import { compare } from './movements';
 
 /**
  * Helper class for list of movements ordered by date and time descending.
@@ -16,9 +17,12 @@ class MovementsArray {
     this.array = [];
     this.keys = {}; // map for quick lookup (keys must be kept in sync with movements in the array)
 
+    const arrCopy = array.slice();
+    arrCopy.sort(compare);
+
     let index = 0;
-    while (index < array.length) {
-      this.insert(array[index++]);
+    while (index < arrCopy.length) {
+      this.insert(arrCopy[index++]);
     }
   }
 
@@ -34,39 +38,17 @@ class MovementsArray {
     if (!movement.time) throw new Error('Property "time" is missing');
 
     if (this.keys[movement.key] === undefined) {
-      let index = this.array.length;
-
-      this.array.push(movement);
       this.keys[movement.key] = dates.localToIsoUtc(movement.date, movement.time);
-
-      while (index > 0) {
-        const i = index;
-        const j = --index;
-
-        if (this.compare(this.array[i], this.array[j]) < 0) {
-          const temp = this.array[i];
-          this.array[i] = this.array[j];
-          this.array[j] = temp;
-        }
+      let index = bs(this.array, movement, compare);
+      if (index < 0) {
+        index = (index + 1) * -1;
       }
+      this.array.splice(index, 0, movement);
 
       return true;
     }
 
     return false;
-  }
-
-  compare(a, b) {
-    const momentA = moment(dates.localToIsoUtc(a.date, a.time));
-    const momentB = moment(dates.localToIsoUtc(b.date, b.time));
-
-    if (momentA.isBefore(momentB)) {
-      return 1;
-    }
-    if (momentA.isAfter(momentB)) {
-      return -1;
-    }
-    return 0;
   }
 }
 

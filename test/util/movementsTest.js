@@ -1,5 +1,5 @@
 import expect from 'expect';
-import { localToFirebase, firebaseToLocal } from '../../src/util/movements.js';
+import { localToFirebase, firebaseToLocal, compare } from '../../src/util/movements.js';
 
 describe('movements', () => {
   describe('local to firebase', () => {
@@ -73,6 +73,64 @@ describe('movements', () => {
       const local = firebaseToLocal(movement);
 
       expect(local.aircraftType).toBe('DR40');
+    });
+  });
+
+  describe('compare', () => {
+    it('returns 1 if first movement is before second movement', () => {
+      const a = {
+        date: '2016-03-07',
+        time: '09:45',
+      };
+      const b = {
+        date: '2016-03-08',
+        time: '08:30',
+      };
+
+      expect(compare(a, b)).toBe(1);
+    });
+
+    it('returns -1 if first movement is after second movement', () => {
+      const a = {
+        date: '2016-03-08',
+        time: '08:30',
+      };
+      const b = {
+        date: '2016-03-07',
+        time: '09:45',
+      };
+
+      expect(compare(a, b)).toBe(-1);
+    });
+
+    it('returns 1 if same time and immatriculation of a comes after b (lexicographically)', () => {
+      const a = {
+        date: '2016-03-08',
+        time: '08:30',
+        immatriculation: 'HB-KOF',
+      };
+      const b = {
+        date: '2016-03-08',
+        time: '08:30',
+        immatriculation: 'HB-KFW',
+      };
+
+      expect(compare(a, b)).toBe(1);
+    });
+
+    it('returns -1 if same time and immatriculation of a comes before b (lexicographically)', () => {
+      const a = {
+        date: '2016-03-08',
+        time: '08:30',
+        immatriculation: 'HB-KFW',
+      };
+      const b = {
+        date: '2016-03-08',
+        time: '08:30',
+        immatriculation: 'HB-KOF',
+      };
+
+      expect(compare(a, b)).toBe(-1);
     });
   });
 });
