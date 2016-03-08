@@ -99,19 +99,24 @@ class MovementList extends Component {
   onFirebaseValues(snapshot) {
     const movements = new MovementsArray(this.state.movements);
 
+    let childAddedSinceLastIncrease = false;
+
     snapshot.forEach((data) => {
       const movement = firebaseToLocal(data.val());
       movement.key = data.key();
 
       const inserted = movements.insert(movement);
       if (inserted === true) {
-        this.childAddedSinceLastIncrease = true;
+        childAddedSinceLastIncrease = true;
       }
     });
 
-    this.setState({
-      movements: movements.array,
-    });
+    this.childAddedSinceLastIncrease = childAddedSinceLastIncrease;
+    if (childAddedSinceLastIncrease === true) {
+      this.setState({
+        movements: movements.array,
+      });
+    }
   }
 
   onFirebaseChildAdded(data) {
