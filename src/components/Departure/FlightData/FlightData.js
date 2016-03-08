@@ -1,6 +1,6 @@
 import React from 'react';
 import WizardStep from '../../WizardStep';
-import RadioGroup from '../../RadioGroup';
+import SingleSelect from '../../SingleSelect';
 import './FlightData.scss';
 import LabeledComponent from '../../LabeledComponent';
 
@@ -28,8 +28,9 @@ class FlightData extends WizardStep {
         label: 'Matzingen',
         value: 'matzingen',
       }, {
-        label: 'Platzrunden (ohne Verlassen des Platzverkehrs)',
+        label: 'Platzrunden',
         value: 'circuits',
+        description: 'Ohne Verlassen des Platzverkehrs',
         available: data => data.location.toUpperCase() === 'LSZT',
       },
     ];
@@ -44,32 +45,68 @@ class FlightData extends WizardStep {
     ];
   }
   render() {
+    const typeComponent = (
+      <SingleSelect
+        items={this.types}
+        value={this.state.data.flightType}
+        onChange={this.getUpdateHandlerDelegate('flightType', this)}
+        orientation="vertical"
+      />
+    );
+    const runwayComponent = (
+      <SingleSelect
+        items={this.runway}
+        value={this.state.data.runway}
+        onChange={this.getUpdateHandlerDelegate('runway', this)}
+      />
+    );
+    const departureRouteComponent = (
+      <SingleSelect
+        items={this.filterOptions(this.departureRoutes)}
+        value={this.state.data.departureRoute}
+        onChange={this.getUpdateHandlerDelegate('departureRoute', this)}
+        orientation="vertical"
+      />
+    );
+    const routingComponent = (
+      <textarea
+        value={this.state.data.route}
+        onChange={this.getUpdateHandlerDelegate('route', this)}
+      />
+    );
+    const remarksComponent = (
+      <textarea
+        value={this.state.data.remarks}
+        onChange={this.getUpdateHandlerDelegate('remarks', this)}
+      />
+    );
+
     return (
       <fieldset className="FlightData">
         <legend>Flug</legend>
         <LabeledComponent
           label="Typ"
           className="type"
-          component={<RadioGroup name="type" items={this.types} value={this.state.data.flightType} onChange={this.getUpdateHandlerDelegate('flightType', this)}/>}
+          component={typeComponent}
           validationError={this.getValidationError('flightType')}
         />
         <LabeledComponent
           label="Pistenrichtung"
           className="runway"
-          component={<RadioGroup name="runway" items={this.runway} value={this.state.data.runway} onChange={this.getUpdateHandlerDelegate('runway', this)}/>}
+          component={runwayComponent}
           validationError={this.getValidationError('runway')}
         />
         <LabeledComponent
           label="Abflugroute"
           className="departure-route"
-          component={<RadioGroup name="departure-route" items={this.filterOptions(this.departureRoutes)} value={this.state.data.departureRoute} onChange={this.getUpdateHandlerDelegate('departureRoute', this)}/>}
+          component={departureRouteComponent}
           validationError={this.getValidationError('departureRoute')}
         />
         {this.state.data.departureRoute !== 'circuits' ?
           <LabeledComponent
             label="Routing"
             className="route"
-            component={<textarea value={this.state.data.route} onChange={this.getUpdateHandlerDelegate('route', this)}/>}
+            component={routingComponent}
             validationError={this.getValidationError('route')}
           />
           : null
@@ -77,7 +114,7 @@ class FlightData extends WizardStep {
         <LabeledComponent
           label="Bemerkungen"
           className="remarks"
-          component={<textarea value={this.state.data.remarks} onChange={this.getUpdateHandlerDelegate('remarks', this)}/>}
+          component={remarksComponent}
           validationError={this.getValidationError('remarks')}
         />
       </fieldset>

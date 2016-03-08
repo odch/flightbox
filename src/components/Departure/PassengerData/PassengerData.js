@@ -1,7 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import './PassengerData.scss';
 import WizardStep from '../../WizardStep';
-import RadioGroup from '../../RadioGroup';
+import SingleSelect from '../../SingleSelect';
 import LabeledComponent from '../../LabeledComponent';
 import IncrementationField from '../../IncrementationField';
 
@@ -21,11 +21,25 @@ class PassengerData extends WizardStep {
   }
 
   render() {
+    const countComponent = (
+      <IncrementationField
+        value={this.state.data.passengerCount}
+        onChange={this.getUpdateHandlerDelegate('passengerCount', this)}
+      />
+    );
+    const voucherComponent = (
+      <SingleSelect
+        items={this.carriageVoucher}
+        value={this.state.data.carriageVoucher}
+        onChange={this.getUpdateHandlerDelegate('carriageVoucher', this)}
+      />
+    );
+
     return (
       <fieldset className="PassengerData">
         <legend>Passagiere</legend>
-        <LabeledComponent label="Anzahl" className="count" component={<IncrementationField value={this.state.data.passengerCount} onChange={this.getUpdateHandlerDelegate('passengerCount', this)}/>}/>
-        <LabeledComponent label="Beförderungsschein" className="carriage-voucher" component={<RadioGroup name="carriage-voucher" items={this.carriageVoucher} value={this.state.data.carriageVoucher} onChange={this.getUpdateHandlerDelegate('carriageVoucher', this)}/>}/>
+        <LabeledComponent label="Anzahl" className="count" component={countComponent}/>
+        <LabeledComponent label="Beförderungsschein" className="carriage-voucher" component={voucherComponent}/>
       </fieldset>
     );
   }
