@@ -1,0 +1,42 @@
+.ReportForm {
+
+  .content {
+
+    > div {
+      display: flex;
+
+      > .LabeledComponent {
+        margin-bottom: 1em;
+        width: 50%;
+
+        .component-wrap {
+          padding: 1em 0;
+        }
+      }
+    }
+
+    button.generate {
+      padding: 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2em;
+      background-color: white;
+      cursor: pointer;
+    }
+
+    button.generate:hover:enabled {
+      color: #ed351c;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+
+    .content > div {
+      display: block;
+
+      > .LabeledComponent {
+        width: 100%;
+      }
+    }
+  }
+}
