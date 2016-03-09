@@ -1,0 +1,6 @@
+{
+  "name": "LabeledBox",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./LabeledBox.js"
+}
