@@ -17,14 +17,13 @@
     position: absolute;
     top: 25%;
     width: 100%;
-    display: table;
-    height: 75%;
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .wrapper > div {
     width: 33%;
-    display: table-cell;
-    vertical-align: middle;
+    margin: 1em 0;
 
     @media screen and (max-width: 768px) {
       width: 100%;
