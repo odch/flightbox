@@ -4,7 +4,7 @@ import MovementGroup from '../MovementGroup';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
 import Firebase from 'firebase';
 import MovementsArray from '../../util/MovementsArray.js';
-import { firebaseToLocal, localToFirebase, compare } from '../../util/movements.js';
+import { firebaseToLocal, localToFirebase, compareDescending } from '../../util/movements.js';
 import update from 'react-addons-update';
 
 /**
@@ -97,7 +97,7 @@ class MovementList extends Component {
   }
 
   onFirebaseValues(snapshot) {
-    const movements = new MovementsArray(this.state.movements);
+    const movements = new MovementsArray(this.state.movements, compareDescending);
 
     let childAddedSinceLastIncrease = false;
 
@@ -124,7 +124,7 @@ class MovementList extends Component {
     addedMovement.key = data.key();
 
     if (this.shouldMovementBeVisible(addedMovement)) {
-      const movements = new MovementsArray(this.state.movements);
+      const movements = new MovementsArray(this.state.movements, compareDescending);
 
       const inserted = movements.insert(addedMovement);
 
@@ -140,7 +140,7 @@ class MovementList extends Component {
     if (this.state.movements.length > 2) {
       const oldestMovement = this.state.movements[this.state.movements.length - 1];
 
-      if (compare(movement, oldestMovement) === -1) {
+      if (compareDescending(movement, oldestMovement) === -1) {
         return true;
       }
     }

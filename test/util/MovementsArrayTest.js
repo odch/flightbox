@@ -1,5 +1,6 @@
 import expect from 'expect';
 import MovementsArray from '../../src/util/MovementsArray.js';
+import { compareDescending } from '../../src/util/movements.js';
 
 describe('MovementsArray', () => {
   describe('creation', () => {
@@ -18,7 +19,7 @@ describe('MovementsArray', () => {
         time: '08:30',
       }];
 
-      const movementArr = new MovementsArray(initialItems);
+      const movementArr = new MovementsArray(initialItems, compareDescending);
 
       expect(movementArr.array.length, 3);
       expect(movementArr.array[0].key).toBe('m3');
@@ -37,7 +38,7 @@ describe('MovementsArray', () => {
         time: '10:15',
       }];
 
-      expect(() => new MovementsArray(initialItems)).toThrow('Property "key" is missing');
+      expect(() => new MovementsArray(initialItems, compareDescending)).toThrow('Property "key" is missing');
     });
 
     it('throws error if date is missing', () => {
@@ -46,7 +47,7 @@ describe('MovementsArray', () => {
         time: '10:15',
       }];
 
-      expect(() => new MovementsArray(initialItems)).toThrow('Property "date" is missing');
+      expect(() => new MovementsArray(initialItems, compareDescending)).toThrow('Property "date" is missing');
     });
 
     it('throws error if time is missing', () => {
@@ -55,7 +56,7 @@ describe('MovementsArray', () => {
         date: '2015-12-23',
       }];
 
-      expect(() => new MovementsArray(initialItems)).toThrow('Property "time" is missing');
+      expect(() => new MovementsArray(initialItems, compareDescending)).toThrow('Property "time" is missing');
     });
   });
 
@@ -71,7 +72,7 @@ describe('MovementsArray', () => {
         time: '08:30',
       }];
 
-      const movementArr = new MovementsArray(initialItems);
+      const movementArr = new MovementsArray(initialItems, compareDescending);
       const inserted = movementArr.insert({
         key: 'm3',
         date: '2015-12-23',
@@ -102,7 +103,7 @@ describe('MovementsArray', () => {
         time: '08:30',
       }];
 
-      const movementArr = new MovementsArray(initialItems);
+      const movementArr = new MovementsArray(initialItems, compareDescending);
       const inserted = movementArr.insert({
         key: 'm3',
         date: '2015-12-25',
@@ -133,7 +134,7 @@ describe('MovementsArray', () => {
         time: '08:30',
       }];
 
-      const movementArr = new MovementsArray(initialItems);
+      const movementArr = new MovementsArray(initialItems, compareDescending);
       const inserted = movementArr.insert({
         key: 'm2',
         date: '2015-12-24',
@@ -157,7 +158,7 @@ describe('MovementsArray', () => {
         time: '10:15',
       };
 
-      const movementArr = new MovementsArray([]);
+      const movementArr = new MovementsArray([], compareDescending);
       expect(() => movementArr.insert(movement)).toThrow('Property "key" is missing');
     });
 
@@ -167,7 +168,7 @@ describe('MovementsArray', () => {
         time: '10:15',
       };
 
-      const movementArr = new MovementsArray([]);
+      const movementArr = new MovementsArray([], compareDescending);
       expect(() => movementArr.insert(movement)).toThrow('Property "date" is missing');
     });
 
@@ -177,7 +178,7 @@ describe('MovementsArray', () => {
         date: '2015-12-23',
       };
 
-      const movementArr = new MovementsArray([]);
+      const movementArr = new MovementsArray([], compareDescending);
       expect(() => movementArr.insert(movement)).toThrow('Property "time" is missing');
     });
   });

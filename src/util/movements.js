@@ -49,11 +49,9 @@ function localToFirebase(movement) {
 /**
  * @param a the first movement
  * @param b the other movement
- * @returns {number} 1 if movement a takes place before movement b, otherwise -1.
- * If two movements take place at the same time, they are sorted lexicographically
- * by immatriculation.
+ * @returns {number} 1 if movement a takes place before movement b, if after -1, otherwise 0.
  */
-function compare(a, b) {
+function compareDateDescending(a, b) {
   const momentA = moment(dates.localToIsoUtc(a.date, a.time));
   const momentB = moment(dates.localToIsoUtc(b.date, b.time));
 
@@ -64,11 +62,51 @@ function compare(a, b) {
     return -1;
   }
 
+  return 0;
+}
+
+/**
+ * Reverse of #compareDateAscending(a, b).
+ */
+function compareDateAscending(a, b) {
+  return compareDateDescending(a, b) * -1;
+}
+
+/**
+ * @param a the first movement
+ * @param b the other movement
+ * @returns {number} 1 if movement a takes place before movement b, otherwise -1.
+ * If two movements take place at the same time, they are sorted lexicographically
+ * by immatriculation (ascending).
+ */
+function compareDescending(a, b) {
+  const dateCompare = compareDateDescending(a, b);
+
+  if (dateCompare !== 0) {
+    return dateCompare;
+  }
+
+  return a.immatriculation.localeCompare(b.immatriculation);
+}
+
+/**
+ * Reverse of #compareDescending(a, a).
+ *
+ * Still ordered by immatriculation ascending if movements take place at the same time.
+ */
+function compareAscending(a, b) {
+  const dateCompare = compareDateAscending(a, b);
+
+  if (dateCompare !== 0) {
+    return dateCompare;
+  }
+
   return a.immatriculation.localeCompare(b.immatriculation);
 }
 
 module.exports = {
   firebaseToLocal,
   localToFirebase,
-  compare,
+  compareDescending,
+  compareAscending,
 };

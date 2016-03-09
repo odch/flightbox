@@ -1,5 +1,5 @@
 import expect from 'expect';
-import { localToFirebase, firebaseToLocal, compare } from '../../src/util/movements.js';
+import { localToFirebase, firebaseToLocal, compareDescending, compareAscending } from '../../src/util/movements.js';
 
 describe('movements', () => {
   describe('local to firebase', () => {
@@ -76,7 +76,7 @@ describe('movements', () => {
     });
   });
 
-  describe('compare', () => {
+  describe('compareDescending', () => {
     it('returns 1 if first movement is before second movement', () => {
       const a = {
         date: '2016-03-07',
@@ -87,7 +87,7 @@ describe('movements', () => {
         time: '08:30',
       };
 
-      expect(compare(a, b)).toBe(1);
+      expect(compareDescending(a, b)).toBe(1);
     });
 
     it('returns -1 if first movement is after second movement', () => {
@@ -100,7 +100,7 @@ describe('movements', () => {
         time: '09:45',
       };
 
-      expect(compare(a, b)).toBe(-1);
+      expect(compareDescending(a, b)).toBe(-1);
     });
 
     it('returns 1 if same time and immatriculation of a comes after b (lexicographically)', () => {
@@ -115,7 +115,7 @@ describe('movements', () => {
         immatriculation: 'HB-KFW',
       };
 
-      expect(compare(a, b)).toBe(1);
+      expect(compareDescending(a, b)).toBe(1);
     });
 
     it('returns -1 if same time and immatriculation of a comes before b (lexicographically)', () => {
@@ -130,7 +130,65 @@ describe('movements', () => {
         immatriculation: 'HB-KOF',
       };
 
-      expect(compare(a, b)).toBe(-1);
+      expect(compareDescending(a, b)).toBe(-1);
+    });
+  });
+
+  describe('compareAscending', () => {
+    it('returns -1 if first movement is before second movement', () => {
+      const a = {
+        date: '2016-03-07',
+        time: '09:45',
+      };
+      const b = {
+        date: '2016-03-08',
+        time: '08:30',
+      };
+
+      expect(compareAscending(a, b)).toBe(-1);
+    });
+
+    it('returns 1 if first movement is after second movement', () => {
+      const a = {
+        date: '2016-03-08',
+        time: '08:30',
+      };
+      const b = {
+        date: '2016-03-07',
+        time: '09:45',
+      };
+
+      expect(compareAscending(a, b)).toBe(1);
+    });
+
+    it('returns 1 if same time and immatriculation of a comes after b (lexicographically)', () => {
+      const a = {
+        date: '2016-03-08',
+        time: '08:30',
+        immatriculation: 'HB-KOF',
+      };
+      const b = {
+        date: '2016-03-08',
+        time: '08:30',
+        immatriculation: 'HB-KFW',
+      };
+
+      expect(compareAscending(a, b)).toBe(1);
+    });
+
+    it('returns -1 if same time and immatriculation of a comes before b (lexicographically)', () => {
+      const a = {
+        date: '2016-03-08',
+        time: '08:30',
+        immatriculation: 'HB-KFW',
+      };
+      const b = {
+        date: '2016-03-08',
+        time: '08:30',
+        immatriculation: 'HB-KOF',
+      };
+
+      expect(compareAscending(a, b)).toBe(-1);
     });
   });
 });
