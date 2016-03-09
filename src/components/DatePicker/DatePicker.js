@@ -36,7 +36,7 @@ class DateTimePicker extends Component {
     }
     return (
       <div className="DateTimePicker">
-        <div onClick={this.showPicker.bind(this)}>{dates.formatDate(this.state.value)}</div>
+        <div className="value" onClick={this.showPicker.bind(this)}>{dates.formatDate(this.state.value)}</div>
         {dialog}
       </div>
     );

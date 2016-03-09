@@ -1,4 +1,9 @@
 .DateTimePicker {
+
+  .value {
+    cursor: pointer;
+  }
+
   .date-picker {
     .dp-table.dp-month-view {
       width: 400px;
