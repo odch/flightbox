@@ -36,7 +36,14 @@ class DateTimePicker extends Component {
     }
     return (
       <div className="DateTimePicker">
-        <div className="value" onClick={this.showPicker.bind(this)}>{dates.formatDate(this.state.value)}</div>
+        <div className="value" onClick={this.showPicker.bind(this)}>
+          {this.state.value ? dates.formatDate(this.state.value) : '\u00a0'}
+          {this.props.clearable === true && this.state.value
+            ? <button className="clear" onClick={this.clearButtonHandler.bind(this)}>
+                <i className="material-icons">clear</i>
+              </button>
+            : null}
+        </div>
         {dialog}
       </div>
     );
@@ -52,6 +59,11 @@ class DateTimePicker extends Component {
         value: dateString,
       });
     }
+  }
+
+  clearButtonHandler(e) {
+    e.stopPropagation(); // prevent call of outer div onClick handler
+    this.updateValueHandler(null);
   }
 
   showPicker() {
@@ -70,6 +82,11 @@ class DateTimePicker extends Component {
 DateTimePicker.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
+  clearable: PropTypes.bool,
+};
+
+DateTimePicker.defaultProps = {
+  clearable: false,
 };
 
 export default DateTimePicker;
