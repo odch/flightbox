@@ -4,6 +4,7 @@ import LabeledBox from '../LabeledBox';
 import DatePicker from '../DatePicker';
 import Firebase from 'firebase';
 import Config from 'Config';
+import moment from 'moment';
 import './LockMovementsForm.scss';
 
 class LockMovementsForm extends Component {
@@ -22,9 +23,13 @@ class LockMovementsForm extends Component {
   }
 
   onFirebaseValue(snapshot) {
-    this.setState({
-      date: snapshot.val(),
-    });
+    const ms = snapshot.val();
+    if (ms) {
+      const str = moment(ms).format('YYYY-MM-DD');
+      this.setState({
+        date: str,
+      });
+    }
   }
 
   render() {
@@ -68,7 +73,8 @@ class LockMovementsForm extends Component {
   }
 
   saveClickHandler() {
-    new Firebase(Config.firebaseUrl + '/settings/lockDate').set(this.state.date, () => {
+    const ms = this.state.date ? new Date(this.state.date).getTime() : null;
+    new Firebase(Config.firebaseUrl + '/settings/lockDate').set(ms, () => {
       this.setState({
         changed: false,
       });
