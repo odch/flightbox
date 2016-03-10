@@ -1,0 +1,33 @@
+.LockMovementsForm {
+
+  .content {
+
+    .LabeledComponent {
+      width: 50%;
+      margin-top: 1.5em;
+      margin-bottom: 1.5em;
+      border-bottom: 1px solid #000;
+
+      .component-wrap {
+        padding: 1em 0;
+      }
+    }
+
+    button {
+      padding: 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2em;
+      background-color: white;
+      cursor: pointer;
+    }
+
+    button:hover:enabled {
+      color: #ed351c;
+    }
+
+    .clear {
+      float: right;
+    }
+  }
+}
