@@ -6,11 +6,14 @@
       display: flex;
 
       > .LabeledComponent {
-        margin-bottom: 1em;
-        width: 50%;
+        width: 45%;
+        margin-bottom: 1.8em;
+        margin-right: 5%;
+        border-bottom: 1px solid #000;
 
-        .component-wrap {
-          padding: 1em 0;
+        label {
+          display: block;
+          margin-bottom: 1.5em;
         }
       }
     }
