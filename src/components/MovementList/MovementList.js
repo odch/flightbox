@@ -22,6 +22,7 @@ class MovementList extends Component {
     };
     this.limit = 10;
     this.childAddedSinceLastIncrease = true;
+    this.loadInProgress = false;
 
     this.handleScroll = this.handleScroll.bind(this);
   }
@@ -41,7 +42,7 @@ class MovementList extends Component {
   }
 
   componentDidUpdate() {
-    if (this.childAddedSinceLastIncrease === true) {
+    if (this.loadInProgress === false && this.childAddedSinceLastIncrease === true) {
       const scrollableElement = this.findScrollableElement();
       if (scrollableElement && this.isEndReached(scrollableElement)) {
         this.loadLimited();
@@ -62,6 +63,7 @@ class MovementList extends Component {
   }
 
   loadLimited() {
+    this.loadInProgress = true;
     const pagination = this.getPagination();
     new Firebase(this.props.firebaseUri)
       .orderByChild('negativeTimestamp')
@@ -117,6 +119,8 @@ class MovementList extends Component {
         movements: movements.array,
       });
     }
+
+    this.loadInProgress = false;
   }
 
   onFirebaseChildAdded(data) {
