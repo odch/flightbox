@@ -1,13 +1,16 @@
 {
   "rules": {
-    ".read": true,
-    ".write": true,
     "departures": {
+      ".read": true,
       ".indexOn": [
         "dateTime",
         "negativeTimestamp"
       ],
       "$departure_id": {
+        ".write": "!root.child('settings/lockDate').exists() ||
+                   (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) ||
+                   (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) ||
+                   (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)",
         ".validate": "newData.hasChildren(['aircraftType', 'dateTime', 'departureRoute', 'duration', 'firstname', 'flightType', 'immatriculation', 'lastname', 'location', 'mtow', 'negativeTimestamp', 'runway'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -69,11 +72,16 @@
       }
     },
     "arrivals": {
+      ".read": true,
       ".indexOn": [
         "dateTime",
         "negativeTimestamp"
       ],
       "$arrival_id": {
+        ".write": "!root.child('settings/lockDate').exists() ||
+                   (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) ||
+                   (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) ||
+                   (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)",
         ".validate": "newData.hasChildren(['aircraftType', 'arrivalRoute', 'dateTime', 'firstname', 'flightType', 'immatriculation', 'landingCount', 'lastname', 'location', 'mtow', 'negativeTimestamp', 'runway'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -129,19 +137,29 @@
       }
     },
     "aircrafts": {
+      ".read": true,
+      ".write": true,
       ".indexOn": [
         "type"
       ]
     },
     "users": {
+      ".read": true,
+      ".write": true,
       ".indexOn": [
         "memberNr"
       ]
     },
     "aerodromes": {
+      ".read": true,
+      ".write": true,
       ".indexOn": [
         "name"
       ]
+    },
+    "settings": {
+      ".read": true,
+      ".write": true
     }
   }
 }
