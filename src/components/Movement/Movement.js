@@ -19,12 +19,16 @@ class Movement extends Component {
   }
 
   render() {
+    let className = 'Movement';
+    if (this.props.locked === true) {
+      className += ' locked';
+    }
     const date = this.props.timeWithDate === true
       ? dates.formatDate(this.props.data.date)
       : '\u00a0';
     const time = dates.formatTime(this.props.data.date, this.props.data.time);
     return (
-      <div className="Movement" onClick={this.props.onClick}>
+      <div className={className} onClick={this.props.onClick}>
         <div className="column immatriculation">{this.props.data.immatriculation}</div>
         <div className="column pilot">{this.props.data.lastname}</div>
         <div className="column date">{date}</div>
@@ -32,7 +36,13 @@ class Movement extends Component {
         <div className="column location">{this.getLocation()}</div>
         <div className="column action"><span onClick={this.actionHandler.bind(this)}>{this.props.actionLabel}</span></div>
         <div className="column delete">
-          <span onClick={this.deleteHandler.bind(this)}><i className="material-icons">delete</i>&nbsp;Löschen</span>
+          {this.props.locked !== true
+            ? (
+              <span onClick={this.deleteHandler.bind(this)}>
+                <i className="material-icons">delete</i>&nbsp;Löschen
+              </span>
+            )
+            : null}
         </div>
       </div>
     );
@@ -56,6 +66,7 @@ Movement.propTypes = {
   onAction: PropTypes.func,
   actionLabel: PropTypes.element,
   onDelete: PropTypes.func,
+  locked: PropTypes.bool,
 };
 
 Movement.defaultProps = {

@@ -231,6 +231,7 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
+          lockDate={this.props.lockDate}
         />
         <MovementGroup
           label="Heute"
@@ -240,6 +241,7 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
+          lockDate={this.props.lockDate}
         />
         <MovementGroup
           label="Gestern"
@@ -249,6 +251,7 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
+          lockDate={this.props.lockDate}
         />
         <MovementGroup
           label="Dieser Monat"
@@ -257,6 +260,7 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
+          lockDate={this.props.lockDate}
         />
         <MovementGroup
           label="Älter"
@@ -265,6 +269,7 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
+          lockDate={this.props.lockDate}
         />
         {confirmationDialog}
       </div>
@@ -278,6 +283,7 @@ MovementList.propTypes = {
   onClick: PropTypes.func,
   onAction: PropTypes.func,
   actionLabel: PropTypes.element,
+  lockDate: PropTypes.number,
 };
 
 export default MovementList;

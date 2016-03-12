@@ -1,6 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import Movement from '../Movement';
 import './MovementGroup.scss';
+import { isLocked } from '../../util/movements.js';
 
 class MovementGroup extends Component {
 
@@ -13,7 +14,7 @@ class MovementGroup extends Component {
       <div className={className}>
         <div className="label">{this.props.label}</div>
         <div className="items">
-          {this.props.items.map(function(item, index) {
+          {this.props.items.map((item, index) => {
             return (
               <Movement
                 key={index}
@@ -23,9 +24,10 @@ class MovementGroup extends Component {
                 onAction={this.props.onAction}
                 actionLabel={this.props.actionLabel}
                 onDelete={this.props.onDelete}
+                locked={isLocked(item, this.props.lockDate)}
               />
             );
-          }, this)}
+          })}
         </div>
       </div>
     );
@@ -44,6 +46,7 @@ MovementGroup.propTypes = {
   onAction: PropTypes.func,
   actionLabel: PropTypes.element,
   onDelete: PropTypes.func,
+  lockDate: PropTypes.number,
 };
 
 export default MovementGroup;

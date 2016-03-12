@@ -1,5 +1,5 @@
 import expect from 'expect';
-import { localToFirebase, firebaseToLocal, compareDescending, compareAscending } from '../../src/util/movements.js';
+import { localToFirebase, firebaseToLocal, compareDescending, compareAscending, isLocked } from '../../src/util/movements.js';
 
 describe('movements', () => {
   describe('local to firebase', () => {
@@ -189,6 +189,38 @@ describe('movements', () => {
       };
 
       expect(compareAscending(a, b)).toBe(-1);
+    });
+  });
+
+  describe('isLocked', () => {
+    it('returns true if movement is before lock date', () => {
+      const movement = {
+        date: '2016-03-06',
+        time: '09:45',
+      };
+      const lockDate = new Date('2016-03-07').getTime();
+
+      expect(isLocked(movement, lockDate)).toBe(true);
+    });
+
+    it('returns true if movement is at lock date', () => {
+      const movement = {
+        date: '2016-03-07',
+        time: '23:59',
+      };
+      const lockDate = new Date('2016-03-07').getTime();
+
+      expect(isLocked(movement, lockDate)).toBe(true);
+    });
+
+    it('returns true if movement is after lock date', () => {
+      const movement = {
+        date: '2016-03-08',
+        time: '00:00',
+      };
+      const lockDate = new Date('2016-03-07').getTime();
+
+      expect(isLocked(movement, lockDate)).toBe(false);
     });
   });
 });

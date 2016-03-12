@@ -45,6 +45,10 @@
   }
 }
 
+.Movement.locked {
+  color: #555;
+}
+
 .Movement:hover {
   background-color: #f6f6f6;
 }

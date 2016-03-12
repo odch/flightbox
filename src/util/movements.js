@@ -46,6 +46,14 @@ function localToFirebase(movement) {
   return addNegativeTimestamp(withUtc);
 }
 
+function isLocked(movement, lockDate) {
+  if (typeof lockDate === 'number') {
+    const movementDayTimestamp = dates.isoUtcToMilliseconds(dates.localToIsoUtc(movement.date, '00:00'));
+    return movementDayTimestamp <= lockDate;
+  }
+  return false;
+}
+
 /**
  * @param a the first movement
  * @param b the other movement
@@ -109,4 +117,5 @@ module.exports = {
   localToFirebase,
   compareDescending,
   compareAscending,
+  isLocked
 };
