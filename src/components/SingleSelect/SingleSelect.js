@@ -19,8 +19,13 @@ class SingleSelect extends Component {
       buttonStyle.width = (100 / this.props.items.length) + '%';
     }
 
+    let className = 'SingleSelect ' + orientation;
+    if (this.props.readOnly === true) {
+      className += ' readonly';
+    }
+
     return (
-      <div className={'SingleSelect ' + orientation}>
+      <div className={className}>
         {this.props.items.map((item, index) => {
           const className = this.state.value === item.value ? 'selected' : '';
           return (
@@ -42,9 +47,11 @@ class SingleSelect extends Component {
   }
 
   clickHandler(value) {
-    this.setState({
-      value,
-    }, this.fireChangeEvent);
+    if (this.props.readOnly !== true) {
+      this.setState({
+        value,
+      }, this.fireChangeEvent);
+    }
   }
 
   fireChangeEvent() {
@@ -63,6 +70,7 @@ SingleSelect.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   orientation: PropTypes.string,
+  readOnly: PropTypes.bool,
 };
 
 export default SingleSelect;

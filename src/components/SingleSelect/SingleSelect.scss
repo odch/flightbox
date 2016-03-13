@@ -4,7 +4,6 @@
     margin: 0;
     background-color: #fff;
     border: solid #eee;
-    cursor: pointer;
     font-size: 1em;
     padding: 0.5em 1em;
   }
@@ -14,7 +13,7 @@
     color: #333;
   }
 
-  button:hover, button.selected {
+  button.selected {
     color: #ed351c;
     background-color: #f6f6f6;
   }
@@ -26,12 +25,25 @@
     float: left;
   }
 
-  button:hover::before, button.selected::before {
+  button.selected::before {
     color: #ed351c;
   }
 
   .label-wrap {
     line-height: 1em;
+  }
+}
+
+.SingleSelect:not(.readonly) {
+  cursor: pointer;
+
+  button:hover {
+    color: #ed351c;
+    background-color: #f6f6f6;
+  }
+
+  button:hover::before {
+    color: #ed351c;
   }
 }
 
