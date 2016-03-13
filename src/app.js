@@ -8,6 +8,7 @@ import DeparturePage from './components/DeparturePage';
 import ArrivalPage from './components/ArrivalPage';
 import MovementsPage from './components/MovementsPage';
 import AdminPage from './components/AdminPage';
+import MessagePage from './components/MessagePage';
 
 ReactDOM.render((
   <Router>
@@ -21,6 +22,7 @@ ReactDOM.render((
       <Route path="arrival/:key" component={ArrivalPage}/>
       <Route path="movements" component={MovementsPage}/>
       <Route path="admin" component={AdminPage}/>
+      <Route path="message" component={MessagePage}/>
     </Route>
   </Router>
 ), document.getElementById('app'));
