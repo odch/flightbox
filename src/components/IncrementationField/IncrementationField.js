@@ -15,6 +15,14 @@ class IncrementationField extends Component {
   }
 
   render() {
+    if (this.props.readOnly === true) {
+      return (
+        <div className="IncrementationField readonly">
+          <span className="value">{this.state.value}</span>
+        </div>
+      );
+    }
+
     return (
       <div className="IncrementationField">
         <a className="decrement" onClick={this.decrement.bind(this)}>-</a>
@@ -53,6 +61,7 @@ IncrementationField.propTypes = {
   value: PropTypes.number,
   minValue: PropTypes.number,
   onChange: PropTypes.func,
+  readOnly: PropTypes.bool,
 };
 
 IncrementationField.defaultProps = {
