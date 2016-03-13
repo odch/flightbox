@@ -7,10 +7,7 @@
         "negativeTimestamp"
       ],
       "$departure_id": {
-        ".write": "!root.child('settings/lockDate').exists() ||
-                   (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) ||
-                   (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) ||
-                   (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)",
+        ".write": "!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)",
         ".validate": "newData.hasChildren(['aircraftType', 'dateTime', 'departureRoute', 'duration', 'firstname', 'flightType', 'immatriculation', 'lastname', 'location', 'mtow', 'negativeTimestamp', 'runway'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -78,10 +75,7 @@
         "negativeTimestamp"
       ],
       "$arrival_id": {
-        ".write": "!root.child('settings/lockDate').exists() ||
-                   (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) ||
-                   (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) ||
-                   (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)",
+        ".write": "!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)",
         ".validate": "newData.hasChildren(['aircraftType', 'arrivalRoute', 'dateTime', 'firstname', 'flightType', 'immatriculation', 'landingCount', 'lastname', 'location', 'mtow', 'negativeTimestamp', 'runway'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
