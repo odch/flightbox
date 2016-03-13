@@ -1,9 +1,5 @@
 .DateTimePicker {
 
-  .value {
-    cursor: pointer;
-  }
-
   .date-picker {
     .dp-table.dp-month-view {
       width: 400px;
@@ -28,6 +24,13 @@
     .dp-cell.dp-value {
       color: #ed351c;
     }
+  }
+}
+
+.DateTimePicker:not(.readonly) {
+
+  .value {
+    cursor: pointer;
   }
 }
 

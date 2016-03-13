@@ -22,6 +22,16 @@ class DateTimePicker extends Component {
   }
 
   render() {
+    if (this.props.readOnly === true) {
+      return (
+        <div className="DateTimePicker readonly">
+          <div className="value">
+            {this.state.value ? dates.formatDate(this.state.value) : '\u00a0'}
+          </div>
+        </div>
+      );
+    }
+
     let dialog;
     if (this.state.showPicker === true) {
       const picker = (
@@ -83,6 +93,7 @@ DateTimePicker.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   clearable: PropTypes.bool,
+  readOnly: PropTypes.bool,
 };
 
 DateTimePicker.defaultProps = {
