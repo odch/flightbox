@@ -1,5 +1,6 @@
 import { PropTypes, Component } from 'react';
 import update from 'react-addons-update';
+import validate from '../../util/validate.js';
 
 class WizardStep extends Component {
 
@@ -23,7 +24,7 @@ class WizardStep extends Component {
    * if there are validation errors.
    */
   validate() {
-    const validationErrors = this.getValidationErrors();
+    const validationErrors = validate(this.state.data, this.getValidationConfig());
     this.setState({
       validationErrors,
     });
@@ -119,59 +120,6 @@ class WizardStep extends Component {
       }
     }
     return null;
-  }
-
-  getValidationErrors() {
-    const validationErrors = [];
-
-    const validationConfig = this.getValidationConfig();
-    for (const key in validationConfig) {
-      if (validationConfig.hasOwnProperty(key)) {
-        let valid = true;
-
-        const dataValue = this.state.data[key];
-
-        const validationTypes = validationConfig[key].types || {};
-
-        for (const typeKey in validationTypes) {
-          if (validationTypes.hasOwnProperty(typeKey)) {
-            switch (typeKey) {
-              case 'required':
-                if (validationTypes[typeKey] === true && !dataValue) {
-                  valid = false;
-                }
-                break;
-              case 'integer':
-                if (validationTypes[typeKey] === true && dataValue !== parseInt(dataValue, 10)) {
-                  valid = false;
-                }
-                break;
-              case 'match':
-                if (!validationTypes[typeKey].test(dataValue)) {
-                  valid = false;
-                }
-                break;
-              case 'values':
-                if (validationTypes[typeKey].indexOf(dataValue) === -1) {
-                  valid = false;
-                }
-                break;
-              default:
-                throw new Error('Unknown validation type: ' + typeKey);
-            }
-          }
-        }
-
-        if (valid === false) {
-          validationErrors.push({
-            key,
-            message: validationConfig[key].message,
-          });
-        }
-      }
-    }
-
-    return validationErrors;
   }
 
   filterOptions(options) {
