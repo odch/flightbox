@@ -18,6 +18,14 @@ class TimeField extends Component {
   }
 
   render() {
+    if (this.props.readOnly === true) {
+      return (
+        <div className="TimeField readonly">
+          {this.state.value}
+        </div>
+      );
+    }
+
     return (
       <div className="TimeField">
         <TimePicker
@@ -44,6 +52,7 @@ class TimeField extends Component {
 TimeField.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
+  readOnly: PropTypes.bool,
 };
 
 export default TimeField;
