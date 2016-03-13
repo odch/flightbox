@@ -8,18 +8,21 @@
       margin-bottom: 1.5em;
       border-bottom: 1px solid #000;
 
-      .component-wrap {
-        padding: 1em 0;
+      label {
+        display: block;
+        margin-bottom: 1.5em;
       }
     }
 
     button {
       padding: 0;
       border: none;
-      border-radius: 5px;
-      font-size: 1.2em;
       background-color: white;
       cursor: pointer;
+    }
+
+    button.save {
+      font-size: 1.2em;
     }
 
     button:hover:enabled {
