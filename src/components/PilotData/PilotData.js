@@ -12,6 +12,7 @@ class PilotData extends WizardStep {
         value={this.state.data.memberNr}
         onChange={this.getUpdateHandlerDelegate('memberNr', this)}
         onKeyUp={this.getKeyUpHandlerDelegate('memberNr')}
+        readOnly={this.props.readOnly}
       />
     );
     const phoneInput = (
@@ -20,6 +21,7 @@ class PilotData extends WizardStep {
         type="text"
         value={this.state.data.phone}
         onChange={this.getUpdateHandlerDelegate('phone', this)}
+        readOnly={this.props.readOnly}
       />
     );
     const lastnameInput = (
@@ -28,6 +30,7 @@ class PilotData extends WizardStep {
         type="text"
         value={this.state.data.lastname}
         onChange={this.getUpdateHandlerDelegate('lastname', this)}
+        readOnly={this.props.readOnly}
       />
     );
     const firstnameInput = (
@@ -36,6 +39,7 @@ class PilotData extends WizardStep {
         type="text"
         value={this.state.data.firstname}
         onChange={this.getUpdateHandlerDelegate('firstname', this)}
+        readOnly={this.props.readOnly}
       />
     );
 

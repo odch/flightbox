@@ -25,6 +25,7 @@ class PassengerData extends WizardStep {
       <IncrementationField
         value={this.state.data.passengerCount}
         onChange={this.getUpdateHandlerDelegate('passengerCount', this)}
+        readOnly={this.props.readOnly}
       />
     );
     const voucherComponent = (
@@ -32,6 +33,7 @@ class PassengerData extends WizardStep {
         items={this.carriageVoucher}
         value={this.state.data.carriageVoucher}
         onChange={this.getUpdateHandlerDelegate('carriageVoucher', this)}
+        readOnly={this.props.readOnly}
       />
     );
 

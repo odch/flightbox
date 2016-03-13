@@ -11,12 +11,14 @@ class DepartureArrivalData extends WizardStep {
       <DatePicker
         value={this.state.data.date}
         onChange={(e) => this.updateData('date', e.value)}
+        readOnly={this.props.readOnly}
       />
     );
     const timeInput = (
       <TimeField
         value={this.state.data.time}
         onChange={(e) => this.updateData('time', e.value)}
+        readOnly={this.props.readOnly}
       />
     );
     const locationInput = (
@@ -26,12 +28,14 @@ class DepartureArrivalData extends WizardStep {
         value={this.state.data.location}
         onChange={this.getUpdateHandlerDelegate('location', this)}
         onKeyUp={this.getKeyUpHandlerDelegate('location')}
+        readOnly={this.props.readOnly}
       />
     );
     const durationInput = (
       <TimeField
         value={this.state.data.duration}
         onChange={(e) => this.updateData('duration', e.value)}
+        readOnly={this.props.readOnly}
       />
     );
 

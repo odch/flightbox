@@ -12,6 +12,7 @@ class AircraftData extends WizardStep {
         value={this.state.data.immatriculation}
         onChange={this.getUpdateHandlerDelegate('immatriculation')}
         onKeyUp={this.getKeyUpHandlerDelegate('immatriculation')}
+        readOnly={this.props.readOnly}
       />
     );
     const typeInput = (
@@ -21,6 +22,7 @@ class AircraftData extends WizardStep {
         value={this.state.data.aircraftType}
         onChange={this.getUpdateHandlerDelegate('aircraftType', this)}
         onKeyUp={this.getKeyUpHandlerDelegate('aircraftType')}
+        readOnly={this.props.readOnly}
       />
     );
     const mtowInput = (
@@ -29,6 +31,7 @@ class AircraftData extends WizardStep {
         type="number"
         value={this.state.data.mtow}
         onChange={this.updateMtowHandler.bind(this)}
+        readOnly={this.props.readOnly}
       />
     );
 

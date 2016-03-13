@@ -51,6 +51,7 @@ class FlightData extends WizardStep {
         value={this.state.data.flightType}
         onChange={this.getUpdateHandlerDelegate('flightType', this)}
         orientation="vertical"
+        readOnly={this.props.readOnly}
       />
     );
     const runwayComponent = (
@@ -58,6 +59,7 @@ class FlightData extends WizardStep {
         items={this.runway}
         value={this.state.data.runway}
         onChange={this.getUpdateHandlerDelegate('runway', this)}
+        readOnly={this.props.readOnly}
       />
     );
     const departureRouteComponent = (
@@ -66,18 +68,21 @@ class FlightData extends WizardStep {
         value={this.state.data.departureRoute}
         onChange={this.getUpdateHandlerDelegate('departureRoute', this)}
         orientation="vertical"
+        readOnly={this.props.readOnly}
       />
     );
     const routingComponent = (
       <textarea
         value={this.state.data.route}
         onChange={this.getUpdateHandlerDelegate('route', this)}
+        readOnly={this.props.readOnly}
       />
     );
     const remarksComponent = (
       <textarea
         value={this.state.data.remarks}
         onChange={this.getUpdateHandlerDelegate('remarks', this)}
+        readOnly={this.props.readOnly}
       />
     );
 

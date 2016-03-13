@@ -196,6 +196,7 @@ WizardStep.propTypes = {
   itemKey: PropTypes.string,
   showValidationErrors: PropTypes.bool,
   update: PropTypes.bool,
+  readOnly: PropTypes.bool,
 };
 
 export default WizardStep;

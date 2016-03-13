@@ -9,8 +9,9 @@ import UserList from '../UserList';
 import AerodromeList from '../AerodromeList';
 import CommitFailure from '../CommitFailure';
 import Firebase from 'firebase';
-import { firebaseToLocal, localToFirebase } from '../../util/movements.js';
+import { firebaseToLocal, localToFirebase, isLocked } from '../../util/movements.js';
 import update from 'react-addons-update';
+import Config from 'Config';
 
 class MovementWizardPage extends Component {
 
@@ -49,7 +50,9 @@ class MovementWizardPage extends Component {
   }
 
   componentWillMount() {
-    this.firebaseCollectionRef = new Firebase(this.props.firebaseUri);
+    this.firebaseLockDateRef = new Firebase(Config.firebaseUrl + '/settings/lockDate');
+    this.firebaseLockDateRef.on('value', this.onLockDateValue, this);
+    this.firebaseCollectionRef = new Firebase(Config.firebaseUrl + this.props.firebaseUri);
     if (this.update === true) {
       this.firebaseCollectionRef.child(this.props.movementKey).on('value', this.onFirebaseValue, this);
     }
@@ -58,11 +61,18 @@ class MovementWizardPage extends Component {
   }
 
   componentWillUnmount() {
+    this.firebaseLockDateRef.off('value', this.onLockDateValue, this);
     if (this.update === true) {
       this.firebaseCollectionRef.child(this.props.movementKey).off('value', this.onFirebaseValue, this);
     }
     document.removeEventListener('keydown', this.handleKeyDown);
     this.mounted = false;
+  }
+
+  onLockDateValue(dataSnapshot) {
+    this.setState({
+      lockDate: dataSnapshot.val(),
+    });
   }
 
   onFirebaseValue(dataSnapshot) {
@@ -278,6 +288,7 @@ class MovementWizardPage extends Component {
   }
 
   render() {
+    const locked = isLocked(this.state.data, this.state.lockDate);
     const className = 'MovementWizardPage ' + this.props.className;
     const logoImagePath = require('../../resources/mfgt_logo_transp.png');
 
@@ -315,6 +326,7 @@ class MovementWizardPage extends Component {
           showValidationErrors={this.state.showValidationErrors === true}
           itemKey={this.movementKey}
           update={this.update}
+          readOnly={locked}
         />
       );
 
@@ -330,6 +342,7 @@ class MovementWizardPage extends Component {
             previousStep={this.previousStep.bind(this)}
             nextStep={this.nextStep.bind(this)}
             nextLabel={nextLabel}
+            nextVisible={!(this.isLast() && locked)}
           />
         </BorderLayoutItem>
       );

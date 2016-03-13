@@ -105,7 +105,7 @@ class ArrivalPage extends Component {
       <MovementWizardPage
         label="Ankunft"
         className="ArrivalPage"
-        firebaseUri={Config.firebaseUrl + '/arrivals/'}
+        firebaseUri={'/arrivals/'}
         movementKey={this.props.params.key}
         pages={this.pages}
         finishComponentClass={Finish}

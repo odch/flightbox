@@ -15,18 +15,21 @@ class DepartureArrivalData extends WizardStep {
         value={this.state.data.location}
         onChange={this.getUpdateHandlerDelegate('location', this)}
         onKeyUp={this.getKeyUpHandlerDelegate('location')}
+        readOnly={this.props.readOnly}
       />
     );
     const dateInput = (
       <DatePicker
         value={this.state.data.date}
         onChange={(e) => this.updateData('date', e.value)}
+        readOnly={this.props.readOnly}
       />
     );
     const arrivalTimeInput = (
       <TimeField
         value={this.state.data.time}
         onChange={(e) => this.updateData('time', e.value)}
+        readOnly={this.props.readOnly}
       />
     );
     const landingCountInput = (
@@ -35,6 +38,7 @@ class DepartureArrivalData extends WizardStep {
         value={this.state.data.landingCount}
         minValue={1}
         onChange={this.getUpdateHandlerDelegate('landingCount', this)}
+        readOnly={this.props.readOnly}
       />
     );
 
