@@ -5,12 +5,12 @@ import BorderLayoutItem from '../BorderLayoutItem';
 import ReportForm from '../ReportForm';
 import LockMovementsForm from '../LockMovementsForm';
 
-class MovementsPage extends Component {
+class AdminPage extends Component {
 
   render() {
     const logoImagePath = require('../../resources/mfgt_logo_transp.png');
     return (
-      <BorderLayout className="MovementsPage">
+      <BorderLayout className="AdminPage">
         <BorderLayoutItem region="west">
           <header>
             <a href="#/">
@@ -27,4 +27,4 @@ class MovementsPage extends Component {
   }
 }
 
-export default MovementsPage;
+export default AdminPage;
