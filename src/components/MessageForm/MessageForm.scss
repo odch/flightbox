@@ -1,0 +1,63 @@
+.MessageForm {
+
+  h1 {
+    font-size: 2em;
+    margin-bottom: 1em;
+  }
+
+  .intro {
+    font-size: 1.2em;
+    line-height: 1.5em;
+    margin-bottom: 1.5em;
+  }
+
+  .LabeledComponent {
+    margin-bottom: 1.8em;
+    margin-right: 5%;
+    border-bottom: 1px solid #000;
+
+    label {
+      margin-bottom: 1.5em;
+      display: block;
+    }
+  }
+
+  button.send {
+    padding: 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    background-color: white;
+    cursor: pointer;
+  }
+
+  button.send:hover:enabled {
+    color: #ed351c;
+  }
+
+  .ModalDialog {
+
+    .heading {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+
+    .message {
+      margin-bottom: 1em;
+    }
+
+    button {
+      padding: 0.5em;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2em;
+      background-color: white;
+      cursor: pointer;
+      float: right;
+    }
+
+    button:hover {
+      color: #ed351c;
+    }
+  }
+}

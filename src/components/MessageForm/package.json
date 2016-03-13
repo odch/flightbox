@@ -1,0 +1,6 @@
+{
+  "name": "MessageForm",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./MessageForm.js"
+}
