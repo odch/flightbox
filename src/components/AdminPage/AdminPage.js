@@ -3,6 +3,7 @@ import './AdminPage.scss';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import ReportForm from '../ReportForm';
+import LockMovementsForm from '../LockMovementsForm';
 
 class MovementsPage extends Component {
 
@@ -19,6 +20,7 @@ class MovementsPage extends Component {
         </BorderLayoutItem>
         <BorderLayoutItem region="middle">
           <ReportForm/>
+          <LockMovementsForm/>
         </BorderLayoutItem>
       </BorderLayout>
     );
