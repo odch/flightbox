@@ -1,0 +1,52 @@
+.MessageList {
+  padding: 0;
+
+  .empty-msg {
+    padding: 1em;
+  }
+
+  .item {
+    padding: 1em;
+    cursor: pointer;
+
+    > .header {
+
+      > .name {
+        display: inline-block;
+      }
+
+      > .date {
+        display: inline-block;
+        float: right;
+      }
+    }
+
+    > .content {
+      padding-top: 1em;
+      line-height: 1.3em;
+
+      > .message {
+        padding: 1em 0;
+      }
+    }
+  }
+
+  .item.selected {
+    background-color: #f6f6f6;
+
+    > .header {
+      font-weight: bold;
+    }
+
+    > .content {
+
+      > .contact {
+        font-weight: bold;
+      }
+    }
+  }
+
+  .item:hover {
+    background-color: #f6f6f6;
+  }
+}
