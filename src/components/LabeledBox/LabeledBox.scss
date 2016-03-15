@@ -4,13 +4,13 @@
   border: 1px solid #eee;
   box-shadow: 3px;
 
-  .label {
+  > .label {
     border-bottom: 1px solid #ed351c;
     padding: 1em;
     background-color: #f6f6f6;
   }
 
-  .content {
+  > .content {
     padding: 1em;
     overflow: hidden;
   }
