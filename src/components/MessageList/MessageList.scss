@@ -1,10 +1,6 @@
 .MessageList {
   padding: 0;
 
-  .empty-msg {
-    padding: 1em;
-  }
-
   .item {
     padding: 1em;
     cursor: pointer;
@@ -49,4 +45,8 @@
   .item:hover {
     background-color: #f6f6f6;
   }
+}
+
+.MessageList.empty {
+  padding: 1em;
 }
