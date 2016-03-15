@@ -13,10 +13,11 @@ class MessageList extends Component {
   }
 
   render() {
-    if (this.props.items.length === 0)
+    if (this.props.items.length === 0) {
       return (
-      <div className="MessageList empty">Keine Nachrichten</div>
-    );
+        <div className="MessageList empty">Keine Nachrichten</div>
+      );
+    }
 
     return (
       <div className="MessageList">
