@@ -1,15 +1,14 @@
 import React, { PropTypes, Component } from 'react';
 import Firebase from 'firebase';
-import MovementsArray from '../../util/MovementsArray.js';
-import { firebaseToLocal, localToFirebase, compareDescending } from '../../util/movements.js';
+import ItemsArray from './ItemsArray.js';
 import update from 'react-addons-update';
 
-export const AutoLoad = List => class extends Component {
+export const AutoLoad = (List) => class extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      movements: [],
+      items: [],
     };
     this.limit = 10;
     this.childAddedSinceLastIncrease = true;
@@ -33,12 +32,14 @@ export const AutoLoad = List => class extends Component {
   }
 
   componentDidUpdate() {
-    if (this.loadInProgress === false && this.childAddedSinceLastIncrease === true) {
-      const scrollableElement = this.findScrollableElement();
-      if (scrollableElement && this.isEndReached(scrollableElement)) {
-        this.loadLimited();
+    window.requestAnimationFrame(() => {
+      if (this.loadInProgress === false && this.childAddedSinceLastIncrease === true) {
+        const scrollableElement = this.findScrollableElement();
+        if (scrollableElement && this.isEndReached(scrollableElement)) {
+          this.loadLimited();
+        }
       }
-    }
+    });
   }
 
   componentWillUnmount() {
@@ -67,11 +68,11 @@ export const AutoLoad = List => class extends Component {
     let limit = this.limit;
     let start = undefined;
 
-    const movements = this.state.movements;
+    const items = this.state.items;
 
-    let i = movements.length;
+    let i = items.length;
     while (i > 0) {
-      const negTs = localToFirebase(movements[i - 1]).negativeTimestamp;
+      const negTs = this.localToFirebase(items[i - 1]).negativeTimestamp;
       if (start === undefined) {
         start = negTs;
         limit++;
@@ -90,15 +91,15 @@ export const AutoLoad = List => class extends Component {
   }
 
   onFirebaseValues(snapshot) {
-    const movements = new MovementsArray(this.state.movements, compareDescending);
+    const items = new ItemsArray(this.state.items, this.getComparator());
 
     let childAddedSinceLastIncrease = false;
 
     snapshot.forEach((data) => {
-      const movement = firebaseToLocal(data.val());
-      movement.key = data.key();
+      const item = this.firebaseToLocal(data.val());
+      item.key = data.key();
 
-      const inserted = movements.insert(movement);
+      const inserted = items.insert(item);
       if (inserted === true) {
         childAddedSinceLastIncrease = true;
       }
@@ -107,7 +108,7 @@ export const AutoLoad = List => class extends Component {
     this.childAddedSinceLastIncrease = childAddedSinceLastIncrease;
     if (childAddedSinceLastIncrease === true) {
       this.setState({
-        movements: movements.array,
+        items: items.array,
       });
     }
 
@@ -115,27 +116,27 @@ export const AutoLoad = List => class extends Component {
   }
 
   onFirebaseChildAdded(data) {
-    const addedMovement = firebaseToLocal(data.val());
-    addedMovement.key = data.key();
+    const addedItem = this.firebaseToLocal(data.val());
+    addedItem.key = data.key();
 
-    if (this.shouldMovementBeVisible(addedMovement)) {
-      const movements = new MovementsArray(this.state.movements, compareDescending);
+    if (this.shouldItemBeVisible(addedItem)) {
+      const items = new ItemsArray(this.state.items, this.getComparator());
 
-      const inserted = movements.insert(addedMovement);
+      const inserted = items.insert(addedItem);
 
       if (inserted === true) {
         this.setState({
-          movements: movements.array,
+          items: items.array,
         });
       }
     }
   }
 
-  shouldMovementBeVisible(movement) {
-    if (this.state.movements.length > 2) {
-      const oldestMovement = this.state.movements[this.state.movements.length - 1];
+  shouldItemBeVisible(item) {
+    if (this.state.items.length > 2) {
+      const oldestItem = this.state.items[this.state.items.length - 1];
 
-      if (compareDescending(movement, oldestMovement) === -1) {
+      if (this.getComparator()(item, oldestItem) === -1) {
         return true;
       }
     }
@@ -143,12 +144,35 @@ export const AutoLoad = List => class extends Component {
   }
 
   onFirebaseChildRemoved(data) {
-    const index = this.state.movements.findIndex(movement => movement.key === data.key());
+    const index = this.state.items.findIndex(item => item.key === data.key());
     if (index > -1) {
       this.setState({
-        movements: update(this.state.movements, { $splice: [[index, 1]] }),
+        items: update(this.state.items, { $splice: [[index, 1]] }),
       });
     }
+  }
+
+  localToFirebase(item) {
+    if (typeof this.props.localToFirebase === 'function') {
+      return this.props.localToFirebase(item);
+    }
+    return item;
+  }
+
+  firebaseToLocal(item) {
+    if (typeof this.props.firebaseToLocal === 'function') {
+      return this.props.firebaseToLocal(item);
+    }
+    return item;
+  }
+
+  getComparator() {
+    if (typeof this.props.comparator === 'function') {
+      return this.props.comparator;
+    }
+    return (a, b) => {
+      return this.localToFirebase(a).negativeTimestamp - this.localToFirebase(b).negativeTimestamp;
+    };
   }
 
   findScrollableElement() {
@@ -177,13 +201,16 @@ export const AutoLoad = List => class extends Component {
   render() {
     return (
       <div className={this.props.className} ref={(element) => this.element = element}>
-        <List {...this.props} movements={this.state.movements}/>
+        <List {...this.props} items={this.state.items}/>
       </div>
     );
   }
 };
 
 AutoLoad.propTypes = {
-  firebaseUri: PropTypes.string,
+  firebaseUri: PropTypes.string.isRequired,
+  comparator: PropTypes.func,
+  firebaseToLocal: PropTypes.func,
+  localToFirebase: PropTypes.func,
   className: PropTypes.string,
 };

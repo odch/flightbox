@@ -3,7 +3,7 @@ import Predicates from './Predicates.js';
 import MovementGroup from '../MovementGroup';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
 import Firebase from 'firebase';
-import { AutoLoad } from './AutoLoad.js';
+import { AutoLoad } from '../../util/AutoLoad.js';
 
 /**
  * today
@@ -38,15 +38,17 @@ class MovementList extends Component {
   }
 
   render() {
-    const movementsAfterToday = this.props.movements.filter(Predicates.newerThanSameDay());
-    const movementsOfToday = this.props.movements.filter(Predicates.sameDay());
-    const movementsOfYesterday = this.props.movements.filter(Predicates.dayBefore());
-    const movementsOfThisMonth = this.props.movements.filter(Predicates.and(
+    const movements = this.props.items;
+
+    const movementsAfterToday = movements.filter(Predicates.newerThanSameDay());
+    const movementsOfToday = movements.filter(Predicates.sameDay());
+    const movementsOfYesterday = movements.filter(Predicates.dayBefore());
+    const movementsOfThisMonth = movements.filter(Predicates.and(
       Predicates.sameMonth(),
       Predicates.olderThanSameDay(),
       Predicates.not(Predicates.dayBefore())
     ));
-    const olderMovements = this.props.movements.filter(Predicates.and(
+    const olderMovements = movements.filter(Predicates.and(
       Predicates.olderThanSameMonth(),
       Predicates.not(Predicates.dayBefore())
     ));
@@ -115,7 +117,7 @@ class MovementList extends Component {
 }
 
 MovementList.propTypes = {
-  movements: PropTypes.array.isRequired,
+  items: PropTypes.array.isRequired,
   firebaseUri: PropTypes.string,
   onClick: PropTypes.func,
   onAction: PropTypes.func,

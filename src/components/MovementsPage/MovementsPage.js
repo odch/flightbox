@@ -6,6 +6,7 @@ import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import Config from 'Config';
 import Firebase from 'firebase';
+import { firebaseToLocal, localToFirebase, compareDescending } from '../../util/movements.js';
 
 class MovementsPage extends Component {
 
@@ -54,6 +55,9 @@ class MovementsPage extends Component {
         key="departures"
         className="departures"
         firebaseUri={Config.firebaseUrl + '/departures/'}
+        comparator={compareDescending}
+        localToFirebase={localToFirebase}
+        firebaseToLocal={firebaseToLocal}
         onClick={this.departuresListClick.bind(this)}
         onAction={this.departuresActionClick.bind(this)}
         actionLabel={<span><i className="material-icons">flight_land</i> Ankunft erfassen</span>}
@@ -65,6 +69,9 @@ class MovementsPage extends Component {
         key="arrivals"
         className="arrivals"
         firebaseUri={Config.firebaseUrl + '/arrivals/'}
+        comparator={compareDescending}
+        localToFirebase={localToFirebase}
+        firebaseToLocal={firebaseToLocal}
         onClick={this.arrivalsListClick.bind(this)}
         onAction={this.arrivalsActionClick.bind(this)}
         actionLabel={<span><i className="material-icons">flight_takeoff</i> Abflug erfassen</span>}

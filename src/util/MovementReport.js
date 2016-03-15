@@ -3,7 +3,7 @@ import Firebase from 'firebase';
 import Download from './Download.js';
 import { firebaseToLocal, compareAscending } from './movements.js';
 import dates from '../core/dates.js';
-import MovementsArray from './MovementsArray.js';
+import ItemsArray from './ItemsArray.js';
 import moment from 'moment';
 
 class MovementReport {
@@ -62,7 +62,7 @@ class MovementReport {
   }
 
   getMovementsArray(snapshots) {
-    const movements = new MovementsArray([], compareAscending);
+    const movements = new ItemsArray([], compareAscending);
 
     snapshots.forEach(snapshot => {
       snapshot.snapshot.forEach(record => {

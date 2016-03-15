@@ -1,8 +1,8 @@
 import expect from 'expect';
-import MovementsArray from '../../src/util/MovementsArray.js';
+import ItemsArray from '../../src/util/ItemsArray.js';
 import { compareDescending } from '../../src/util/movements.js';
 
-describe('MovementsArray', () => {
+describe('ItemsArray', () => {
   describe('creation', () => {
     it('is initialized with correct order', () => {
       const initialItems = [{
@@ -19,7 +19,7 @@ describe('MovementsArray', () => {
         time: '08:30',
       }];
 
-      const movementArr = new MovementsArray(initialItems, compareDescending);
+      const movementArr = new ItemsArray(initialItems, compareDescending);
 
       expect(movementArr.array.length, 3);
       expect(movementArr.array[0].key).toBe('m3');
@@ -27,9 +27,9 @@ describe('MovementsArray', () => {
       expect(movementArr.array[2].key).toBe('m2');
 
       expect(movementArr.keys.length, 3);
-      expect(movementArr.keys['m1']).toBe('2015-12-23T09:15:00.000Z');
-      expect(movementArr.keys['m2']).toBe('2015-12-21T13:30:00.000Z');
-      expect(movementArr.keys['m3']).toBe('2015-12-24T07:30:00.000Z');
+      expect(movementArr.keys['m1']).toBe(true);
+      expect(movementArr.keys['m2']).toBe(true);
+      expect(movementArr.keys['m3']).toBe(true);
     });
 
     it('throws error if key is missing', () => {
@@ -38,25 +38,7 @@ describe('MovementsArray', () => {
         time: '10:15',
       }];
 
-      expect(() => new MovementsArray(initialItems, compareDescending)).toThrow('Property "key" is missing');
-    });
-
-    it('throws error if date is missing', () => {
-      const initialItems = [{
-        key: 'm1',
-        time: '10:15',
-      }];
-
-      expect(() => new MovementsArray(initialItems, compareDescending)).toThrow('Property "date" is missing');
-    });
-
-    it('throws error if time is missing', () => {
-      const initialItems = [{
-        key: 'm1',
-        date: '2015-12-23',
-      }];
-
-      expect(() => new MovementsArray(initialItems, compareDescending)).toThrow('Property "time" is missing');
+      expect(() => new ItemsArray(initialItems, compareDescending)).toThrow('Property "key" is missing');
     });
   });
 
@@ -72,7 +54,7 @@ describe('MovementsArray', () => {
         time: '08:30',
       }];
 
-      const movementArr = new MovementsArray(initialItems, compareDescending);
+      const movementArr = new ItemsArray(initialItems, compareDescending);
       const inserted = movementArr.insert({
         key: 'm3',
         date: '2015-12-23',
@@ -87,9 +69,9 @@ describe('MovementsArray', () => {
       expect(movementArr.array[2].key).toBe('m1');
 
       expect(movementArr.keys.length, 3);
-      expect(movementArr.keys['m1']).toBe('2015-12-21T13:30:00.000Z');
-      expect(movementArr.keys['m2']).toBe('2015-12-24T07:30:00.000Z');
-      expect(movementArr.keys['m3']).toBe('2015-12-23T09:15:00.000Z');
+      expect(movementArr.keys['m1']).toBe(true);
+      expect(movementArr.keys['m2']).toBe(true);
+      expect(movementArr.keys['m3']).toBe(true);
     });
 
     it('inserts new movement at beginning correctly', () => {
@@ -103,7 +85,7 @@ describe('MovementsArray', () => {
         time: '08:30',
       }];
 
-      const movementArr = new MovementsArray(initialItems, compareDescending);
+      const movementArr = new ItemsArray(initialItems, compareDescending);
       const inserted = movementArr.insert({
         key: 'm3',
         date: '2015-12-25',
@@ -118,9 +100,9 @@ describe('MovementsArray', () => {
       expect(movementArr.array[2].key).toBe('m1');
 
       expect(movementArr.keys.length, 3);
-      expect(movementArr.keys['m1']).toBe('2015-12-21T13:30:00.000Z');
-      expect(movementArr.keys['m2']).toBe('2015-12-24T07:30:00.000Z');
-      expect(movementArr.keys['m3']).toBe('2015-12-25T09:15:00.000Z');
+      expect(movementArr.keys['m1']).toBe(true);
+      expect(movementArr.keys['m2']).toBe(true);
+      expect(movementArr.keys['m3']).toBe(true);
     });
 
     it('does not insert existing movement again', () => {
@@ -134,7 +116,7 @@ describe('MovementsArray', () => {
         time: '08:30',
       }];
 
-      const movementArr = new MovementsArray(initialItems, compareDescending);
+      const movementArr = new ItemsArray(initialItems, compareDescending);
       const inserted = movementArr.insert({
         key: 'm2',
         date: '2015-12-24',
@@ -148,38 +130,16 @@ describe('MovementsArray', () => {
       expect(movementArr.array[1].key).toBe('m1');
 
       expect(movementArr.keys.length, 1);
-      expect(movementArr.keys['m1']).toBe('2015-12-21T13:30:00.000Z');
-      expect(movementArr.keys['m2']).toBe('2015-12-24T07:30:00.000Z');
+      expect(movementArr.keys['m1']).toBe(true);
+      expect(movementArr.keys['m2']).toBe(true);
     });
 
     it('throws error if key is missing', () => {
       const movement = {
-        date: '2015-12-23',
-        time: '10:15',
       };
 
-      const movementArr = new MovementsArray([], compareDescending);
+      const movementArr = new ItemsArray([], compareDescending);
       expect(() => movementArr.insert(movement)).toThrow('Property "key" is missing');
-    });
-
-    it('throws error if date is missing', () => {
-      const movement = {
-        key: 'm1',
-        time: '10:15',
-      };
-
-      const movementArr = new MovementsArray([], compareDescending);
-      expect(() => movementArr.insert(movement)).toThrow('Property "date" is missing');
-    });
-
-    it('throws error if time is missing', () => {
-      const movement = {
-        key: 'm1',
-        date: '2015-12-23',
-      };
-
-      const movementArr = new MovementsArray([], compareDescending);
-      expect(() => movementArr.insert(movement)).toThrow('Property "time" is missing');
     });
   });
 });
