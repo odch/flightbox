@@ -16,12 +16,23 @@ class StartPage extends Component {
         <header>
           <img className="logo" src={logoImagePath}/>
         </header>
-        <div className="wrapper">
-          <ImageButton className="departure" img={departureImagePath} label="Abflug" href="#/departure/new"/>
-          <ImageButton className="arrival" img={arrivalImagePath} label="Ankunft" href="#/arrival/new"/>
-          <ImageButton className="movements" img={movementsImagePath} label="Erfasste Bewegungen" href="#/movements"/>
-          <ImageButton className="message" img={messageImagePath} label="Rückmeldung" href="#/message"/>
-          <ImageButton className="admin" img={adminImagePath} label="Administration" href="#/admin"/>
+        <div className="main">
+          <div className="hint">
+            <ul>
+              <li>Bitte erfassen Sie Ihren <strong>Abflug immer vor dem Start</strong>.</li>
+              <li>Bitte erfassen Sie Ihre <strong>Ankunft immer nach der Landung</strong>.</li>
+              <li>Haben Sie Fragen, Anregungen oder ein anderes Anliegen bezüglich
+                der Erfassung der Abflüge und Ankünfte, benachrichtigen Sie uns
+                bitte über das <a href="#/message">Rückmeldungsformular</a>.</li>
+            </ul>
+          </div>
+          <div className="wrapper">
+            <ImageButton className="departure" img={departureImagePath} label="Abflug" href="#/departure/new"/>
+            <ImageButton className="arrival" img={arrivalImagePath} label="Ankunft" href="#/arrival/new"/>
+            <ImageButton className="movements" img={movementsImagePath} label="Erfasste Bewegungen" href="#/movements"/>
+            <ImageButton className="message" img={messageImagePath} label="Rückmeldung" href="#/message"/>
+            <ImageButton className="admin" img={adminImagePath} label="Administration" href="#/admin"/>
+          </div>
         </div>
       </div>
     );

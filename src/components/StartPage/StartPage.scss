@@ -13,22 +13,56 @@
     }
   }
 
-  .wrapper {
+  .main {
     position: absolute;
     top: 25%;
     width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-  }
 
-  .wrapper > div {
-    width: 33%;
-    margin: 1em 0;
+    .hint {
+      border-radius: 10px;
+      background-color: #f6f6f6;
+      margin: 1em auto;
+      padding: 1em;
+      width: 80%;
+      font-size: 1.2em;
+      line-height: 1.2em;
 
-    @media screen and (max-width: 768px) {
-      width: 100%;
-      display: inline-block;
-      margin-top: 2em;
+      strong {
+        font-weight: bold;
+        color: #ed351c;
+      }
+
+      li {
+        padding-left: 1.5em;
+      }
+
+      li:before {
+        font-family: 'Material Icons';
+        content: '\e5ca';
+        margin-left: -1.5em;
+        margin-right: 0.5em;
+        vertical-align: middle;
+      }
+
+      a {
+        text-decoration: underline;
+      }
+    }
+
+    .wrapper {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .wrapper > div {
+      width: 33%;
+      margin: 1em 0;
+
+      @media screen and (max-width: 768px) {
+        width: 100%;
+        display: inline-block;
+        margin-top: 2em;
+      }
     }
   }
 
