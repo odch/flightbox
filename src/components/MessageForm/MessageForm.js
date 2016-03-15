@@ -178,8 +178,10 @@ class MessageForm extends Component {
   buttonClickHandler() {
     const valid = this.validate();
     if (valid === true) {
+      const timestamp = new Date().getTime();
       const withDate = update(this.state.data, {
-        date: { $set: new Date().getTime() },
+        timestamp: { $set: timestamp },
+        negativeTimestamp: { $set: timestamp * -1 },
       });
       new Firebase(Config.firebaseUrl + '/messages/').push(withDate, (error) => {
         if (error) {

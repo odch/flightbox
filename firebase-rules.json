@@ -158,8 +158,11 @@
     "messages": {
       ".read": true,
       ".write": true,
-      "$arrival_id": {
-        ".validate": "newData.hasChildren(['name', 'email', 'phone', 'message', 'date'])",
+      ".indexOn": [
+        "negativeTimestamp"
+      ],
+      "$message_id": {
+        ".validate": "newData.hasChildren(['name', 'email', 'phone', 'message', 'timestamp', 'negativeTimestamp'])",
         "name": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
@@ -172,8 +175,11 @@
         "message": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
-        "date": {
-          ".validate": "newData.isNumber() && newData.val() > 0"
+        "timestamp": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() === newData.parent().child('negativeTimestamp').val() * -1"
+        },
+        "negativeTimestamp": {
+          ".validate": "newData.isNumber() && newData.val() < 0 && newData.val() === newData.parent().child('timestamp').val() * -1"
         },
         "$other": {
           ".validate": false
