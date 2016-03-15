@@ -2,6 +2,15 @@
 
   .middle {
     padding: 2em;
+
+    .messages {
+
+      > .content {
+        padding: 0;
+        max-height: 400px;
+        overflow: auto;
+      }
+    }
   }
 
   .west {

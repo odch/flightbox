@@ -4,6 +4,9 @@ import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import ReportForm from '../ReportForm';
 import LockMovementsForm from '../LockMovementsForm';
+import MessageList from '../MessageList';
+import LabeledBox from '../LabeledBox';
+import Config from 'Config';
 
 class AdminPage extends Component {
 
@@ -21,6 +24,9 @@ class AdminPage extends Component {
         <BorderLayoutItem region="middle">
           <ReportForm/>
           <LockMovementsForm/>
+          <LabeledBox label="Nachrichten" className="messages">
+            <MessageList firebaseUri={Config.firebaseUrl + '/messages/'}/>
+          </LabeledBox>
         </BorderLayoutItem>
       </BorderLayout>
     );
