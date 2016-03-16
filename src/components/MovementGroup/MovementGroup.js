@@ -22,6 +22,7 @@ class MovementGroup extends Component {
                 onClick={this.itemClick.bind(this, item)}
                 timeWithDate={this.props.timeWithDate}
                 onAction={this.props.onAction}
+                actionIcon={this.props.actionIcon}
                 actionLabel={this.props.actionLabel}
                 onDelete={this.props.onDelete}
                 locked={isLocked(item, this.props.lockDate)}
@@ -44,7 +45,8 @@ MovementGroup.propTypes = {
   onClick: PropTypes.func,
   timeWithDate: PropTypes.bool,
   onAction: PropTypes.func,
-  actionLabel: PropTypes.element,
+  actionIcon: PropTypes.string,
+  actionLabel: PropTypes.string,
   onDelete: PropTypes.func,
   lockDate: PropTypes.number,
 };

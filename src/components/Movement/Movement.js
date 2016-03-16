@@ -31,15 +31,21 @@ class Movement extends Component {
       <div className={className} onClick={this.props.onClick}>
         <div className="column immatriculation">{this.props.data.immatriculation}</div>
         <div className="column pilot">{this.props.data.lastname}</div>
-        <div className="column date">{date}</div>
-        <div className="column time">{time}</div>
+        <div className="column datetime">
+          <span className="date">{date}</span>
+          <span className="time">{time}</span>
+        </div>
         <div className="column location">{this.getLocation()}</div>
-        <div className="column action"><span onClick={this.actionHandler.bind(this)}>{this.props.actionLabel}</span></div>
+        <div className="column action">
+          <span onClick={this.actionHandler.bind(this)}>
+            <i className="material-icons">{this.props.actionIcon}</i><span className="action-label">&nbsp;{this.props.actionLabel}</span>
+          </span>
+        </div>
         <div className="column delete">
           {this.props.locked !== true
             ? (
               <span onClick={this.deleteHandler.bind(this)}>
-                <i className="material-icons">delete</i>&nbsp;Löschen
+                <i className="material-icons">delete</i><span className="delete-label">&nbsp;Löschen</span>
               </span>
             )
             : null}
@@ -64,7 +70,8 @@ Movement.propTypes = {
   onClick: PropTypes.func,
   timeWithDate: PropTypes.bool,
   onAction: PropTypes.func,
-  actionLabel: PropTypes.element,
+  actionIcon: PropTypes.string,
+  actionLabel: PropTypes.string,
   onDelete: PropTypes.func,
   locked: PropTypes.bool,
 };

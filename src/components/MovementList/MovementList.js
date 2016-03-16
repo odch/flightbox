@@ -68,6 +68,7 @@ class MovementList extends Component {
           onClick={this.props.onClick}
           timeWithDate={true}
           onAction={this.props.onAction}
+          actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
           lockDate={this.props.lockDate}
@@ -78,6 +79,7 @@ class MovementList extends Component {
           onClick={this.props.onClick}
           timeWithDate={false}
           onAction={this.props.onAction}
+          actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
           lockDate={this.props.lockDate}
@@ -88,6 +90,7 @@ class MovementList extends Component {
           onClick={this.props.onClick}
           timeWithDate={false}
           onAction={this.props.onAction}
+          actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
           lockDate={this.props.lockDate}
@@ -97,6 +100,7 @@ class MovementList extends Component {
           items={movementsOfThisMonth}
           onClick={this.props.onClick}
           onAction={this.props.onAction}
+          actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
           lockDate={this.props.lockDate}
@@ -106,6 +110,7 @@ class MovementList extends Component {
           items={olderMovements}
           onClick={this.props.onClick}
           onAction={this.props.onAction}
+          actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
           lockDate={this.props.lockDate}
@@ -121,7 +126,8 @@ MovementList.propTypes = {
   firebaseUri: PropTypes.string,
   onClick: PropTypes.func,
   onAction: PropTypes.func,
-  actionLabel: PropTypes.element,
+  actionIcon: PropTypes.string,
+  actionLabel: PropTypes.string,
   lockDate: PropTypes.number,
 };
 
