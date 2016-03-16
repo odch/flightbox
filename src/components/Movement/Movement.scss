@@ -62,6 +62,21 @@
       display: none;
     }
   }
+
+  @media (max-width: 600px) {
+
+    .location {
+      display: none;
+    }
+
+    .immatriculation, .pilot, .datetime {
+      width: 26%;
+    }
+
+    .action, .delete {
+      width: 11%;
+    }
+  }
 }
 
 .Movement.locked {
