@@ -4,6 +4,7 @@ const babel = require('babel-core/register');
 const webpack = require('gulp-webpack');
 const del = require('del');
 const env = require('gulp-env');
+const merge = require('merge-stream');
 
 require('ignore-styles');
 require('babel-polyfill');
@@ -15,12 +16,15 @@ gulp.task('clean', function () {
 
 gulp.task('build', ['clean'], function () {
   const config = require('./webpack.config.js');
-  return gulp.src(config.entry)
+
+  const bundle = gulp.src(config.entry)
     .pipe(webpack(config))
-    .pipe(gulp.dest(config.output.path))
-    .pipe(gulp.src('./index.html')
-      .pipe(gulp.dest(config.output.path))
-    );
+    .pipe(gulp.dest(config.output.path));
+
+  const copy = gulp.src(['./index.html', './favicons/**/*'], { base: './' })
+    .pipe(gulp.dest(config.output.path));
+
+  return merge(bundle, copy);
 });
 
 gulp.task('prod-env', function () {
@@ -42,4 +46,3 @@ gulp.task('test', function () {
       },
     }));
 });
-
