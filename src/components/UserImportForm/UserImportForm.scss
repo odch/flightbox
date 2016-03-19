@@ -1,0 +1,71 @@
+.UserImportForm {
+
+  p {
+    margin-bottom: 1em;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  strong {
+    font-weight: bold;
+  }
+
+  pre.example {
+    font-family: "Courier New", serif;
+    margin-bottom: 2em;
+  }
+
+  .LabeledComponent {
+    margin-bottom: 1em;
+
+    .component-wrap {
+      padding-top: 1em;
+
+      > * {
+        font-size: 1em;
+      }
+    }
+  }
+
+  button.import {
+    padding: 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    background-color: white;
+    cursor: pointer;
+  }
+
+  button.import:hover:enabled {
+    color: #ed351c;
+  }
+
+
+  .ModalDialog {
+
+    .heading {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+
+    .message {
+      margin-bottom: 1em;
+    }
+
+    button {
+      padding: 0.5em;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2em;
+      background-color: white;
+      cursor: pointer;
+      float: right;
+    }
+
+    button:hover {
+      color: #ed351c;
+    }
+  }
+}
