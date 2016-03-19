@@ -6,6 +6,7 @@ import ReportForm from '../ReportForm';
 import LockMovementsForm from '../LockMovementsForm';
 import MessageList from '../MessageList';
 import LabeledBox from '../LabeledBox';
+import UserImportForm from '../UserImportForm';
 import Config from 'Config';
 
 class AdminPage extends Component {
@@ -26,6 +27,9 @@ class AdminPage extends Component {
           <LockMovementsForm/>
           <LabeledBox label="Nachrichten" className="messages">
             <MessageList firebaseUri={Config.firebaseUrl + '/messages/'}/>
+          </LabeledBox>
+          <LabeledBox label="Benutzerliste importieren" className="user-import">
+            <UserImportForm/>
           </LabeledBox>
         </BorderLayoutItem>
       </BorderLayout>
