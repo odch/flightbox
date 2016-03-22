@@ -320,6 +320,7 @@ class MovementWizardPage extends Component {
       middleItem = (
         <page.component
           data={this.state.data}
+          oppositeData={this.props.oppositeData}
           updateData={this.updateData.bind(this)}
           onKeyUp={this.keyUpHandler.bind(this)}
           ref="page"
@@ -417,6 +418,7 @@ MovementWizardPage.propTypes = {
   finishComponentClass: PropTypes.func,
   commitRequirementsDialogClass: PropTypes.func,
   defaultData: PropTypes.object,
+  oppositeData: PropTypes.object,
 };
 
 MovementWizardPage.defaultProps = {

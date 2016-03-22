@@ -126,7 +126,11 @@ class WizardStep extends Component {
     return options
       .map(option => {
         if (typeof option.available === 'function') {
-          if (option.available(this.state.data) === true) {
+          const arg = {
+            data: this.state.data,
+            oppositeData: this.props.oppositeData,
+          };
+          if (option.available(arg) === true) {
             return option;
           }
           return null;
@@ -141,6 +145,7 @@ WizardStep.propTypes = {
   updateData: PropTypes.func,
   onKeyUp: PropTypes.func,
   data: PropTypes.object,
+  oppositeData: PropTypes.object,
   itemKey: PropTypes.string,
   showValidationErrors: PropTypes.bool,
   update: PropTypes.bool,

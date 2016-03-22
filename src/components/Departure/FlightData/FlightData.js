@@ -31,7 +31,7 @@ class FlightData extends WizardStep {
         label: 'Platzrunden',
         value: 'circuits',
         description: 'Ohne Verlassen des Platzverkehrs',
-        available: data => data.location.toUpperCase() === 'LSZT',
+        available: arg => arg.data.location.toUpperCase() === 'LSZT',
       },
     ];
     this.runway = [

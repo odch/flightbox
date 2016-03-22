@@ -23,14 +23,17 @@ class FlightData extends WizardStep {
       {
         label: 'Sektor Nord',
         value: 'north',
+        available: arg => !arg.oppositeData || arg.oppositeData.departureRoute !== 'circuits',
       }, {
         label: 'Sektor Süd',
         value: 'south',
+        available: arg => !arg.oppositeData || arg.oppositeData.departureRoute !== 'circuits',
       }, {
         label: 'Platzrunden',
         value: 'circuits',
         description: 'Ohne Verlassen des Platzverkehrs',
-        available: data => data.location.toUpperCase() === 'LSZT',
+        available: arg => arg.data.location.toUpperCase() === 'LSZT' &&
+                          (!arg.oppositeData || arg.oppositeData.departureRoute === 'circuits'),
       },
     ];
     this.runway = [

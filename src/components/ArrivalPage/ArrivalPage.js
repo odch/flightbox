@@ -63,6 +63,8 @@ class ArrivalPage extends Component {
   }
 
   onFirebaseValue(dataSnapshot) {
+    let departure;
+
     const defaultData = {
       date: dates.localDate(),
       time: dates.localTimeRounded(15, 'down'),
@@ -71,7 +73,7 @@ class ArrivalPage extends Component {
 
     const val = dataSnapshot.val();
     if (val) {
-      const departure = firebaseToLocal(dataSnapshot.val());
+      departure = firebaseToLocal(dataSnapshot.val());
 
       defaultData.immatriculation = departure.immatriculation;
       defaultData.aircraftType = departure.aircraftType;
@@ -91,6 +93,7 @@ class ArrivalPage extends Component {
 
     this.setState({
       defaultData,
+      oppositeData: departure,
     });
   }
 
@@ -110,6 +113,7 @@ class ArrivalPage extends Component {
         pages={this.pages}
         finishComponentClass={Finish}
         defaultData={this.state.defaultData}
+        oppositeData={this.state.oppositeData}
       />
     );
   }
