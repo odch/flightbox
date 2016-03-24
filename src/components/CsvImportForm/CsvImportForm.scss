@@ -1,4 +1,4 @@
-.UserImportForm {
+.CsvImportForm {
 
   p {
     margin-bottom: 1em;
@@ -15,6 +15,7 @@
   pre.example {
     font-family: "Courier New", serif;
     margin-bottom: 2em;
+    overflow: auto;
   }
 
   .LabeledComponent {
