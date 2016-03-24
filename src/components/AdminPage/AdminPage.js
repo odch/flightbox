@@ -7,6 +7,7 @@ import LockMovementsForm from '../LockMovementsForm';
 import MessageList from '../MessageList';
 import LabeledBox from '../LabeledBox';
 import UserImportForm from '../UserImportForm';
+import AerodromeImportForm from '../AerodromeImportForm';
 import Config from 'Config';
 
 class AdminPage extends Component {
@@ -30,6 +31,9 @@ class AdminPage extends Component {
           </LabeledBox>
           <LabeledBox label="Benutzerliste importieren" className="user-import">
             <UserImportForm/>
+          </LabeledBox>
+          <LabeledBox label="Flugplatzliste importieren" className="aerodrome-import">
+            <AerodromeImportForm/>
           </LabeledBox>
         </BorderLayoutItem>
       </BorderLayout>
