@@ -25,14 +25,14 @@ class Movement extends Component {
     }
     const date = this.props.timeWithDate === true
       ? dates.formatDate(this.props.data.date)
-      : '\u00a0';
+      : null;
     const time = dates.formatTime(this.props.data.date, this.props.data.time);
     return (
       <div className={className} onClick={this.props.onClick}>
         <div className="column immatriculation">{this.props.data.immatriculation}</div>
         <div className="column pilot">{this.props.data.lastname}</div>
         <div className="column datetime">
-          <span className="date">{date}</span>
+          {date ? <span className="date">{date}</span> : null}
           <span className="time">{time}</span>
         </div>
         <div className="column location">{this.getLocation()}</div>
