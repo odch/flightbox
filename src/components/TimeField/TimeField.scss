@@ -1,15 +1,26 @@
 .TimeField {
-  > div {
-    border: 0 !important;
+  display: flex;
+  align-items: center;
+
+  a {
+    cursor: pointer;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
   }
 
-  // arrows
-  > div > div > span {
-    font-size: 0.7em;
-  }
+  .number-block {
+    width: 100px;
 
-  input {
-    border: 0;
-    font-size: 1em;
+    > * {
+      display: block;
+      width: 100%;
+      text-align: center;
+    }
+
+    input {
+      border: 0;
+      font-size: 1em;
+    }
   }
 }
