@@ -20,7 +20,8 @@ class AircraftList extends Component {
 
   render() {
     const emptyTitle = 'Flugzeug auswählen';
-    const emptyMessage = 'Tippen Sie die ersten Buchstaben der Immatrikulation oder des Typs und wählen ' +
+    const emptyMessage = this.props.emptyMessage ||
+      'Tippen Sie die ersten Buchstaben der Immatrikulation oder des Typs und wählen ' +
       'Sie das gewünschte Flugzeug anschliessend aus der Liste hier aus.';
 
     const searchTerms = this.buildSearchTerms();
@@ -46,6 +47,7 @@ AircraftList.propTypes = {
   immatriculation: PropTypes.string,
   aircraftType: PropTypes.string,
   onClick: PropTypes.func,
+  emptyMessage: PropTypes.string,
 };
 
 export default AircraftList;
