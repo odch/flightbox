@@ -1,0 +1,44 @@
+.FullscreenFilterList {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #fff;
+
+  .header {
+    display: flex;
+    align-items: center;
+    background-color: #f6f6f6;
+    height: 63px;
+
+    .back {
+      width: 50px;
+      text-align: center;
+    }
+
+    .input-wrap {
+      width: calc(100% - 50px);
+      padding: 0.7em;
+      color: #999;
+
+      > div {
+        background-color: #fff;
+        padding: 0.5em;
+        border-radius: 3px;
+
+        input {
+          border: 0;
+          font-size: 1em;
+          width: calc(100% - 30px);
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+
+  .list-wrap {
+    height: calc(100% - 63px);
+    overflow: auto;
+  }
+}
