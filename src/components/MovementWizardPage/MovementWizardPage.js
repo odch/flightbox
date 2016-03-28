@@ -4,34 +4,18 @@ import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import WizardNavigation from '../WizardNavigation';
-import AircraftList from '../AircraftList';
-import UserList from '../UserList';
-import AerodromeList from '../AerodromeList';
 import CommitFailure from '../CommitFailure';
+import FullscreenFilterList from '../FullscreenFilterList';
 import Firebase from 'firebase';
 import { firebaseToLocal, localToFirebase, isLocked } from '../../util/movements.js';
 import update from 'react-addons-update';
 import Config from 'Config';
+import { getVisibleListByField, getVisibleListByStep } from './quick-selection-conf.js';
 
 class MovementWizardPage extends Component {
 
   constructor(props) {
     super(props);
-
-    this.quickSelectionConf = {
-      aircraftList: {
-        step: 0,
-        fields: new Set(['immatriculation', 'aircraftType']),
-      },
-      userList: {
-        step: 1,
-        fields: new Set(['memberNr']),
-      },
-      aerodromeList: {
-        step: 3,
-        fields: new Set(['location']),
-      },
-    };
 
     this.state = {
       step: 0,
@@ -52,11 +36,20 @@ class MovementWizardPage extends Component {
   componentWillMount() {
     this.firebaseLockDateRef = new Firebase(Config.firebaseUrl + '/settings/lockDate');
     this.firebaseLockDateRef.on('value', this.onLockDateValue, this);
+
     this.firebaseCollectionRef = new Firebase(Config.firebaseUrl + this.props.firebaseUri);
     if (this.update === true) {
       this.firebaseCollectionRef.child(this.props.movementKey).on('value', this.onFirebaseValue, this);
     }
+
     document.addEventListener('keydown', this.handleKeyDown);
+
+    const mql = matchMedia('screen and (max-width: 768px)');
+    this.setState({
+      smallDevice: mql.matches,
+    });
+    mql.addListener(this.onMediaChange.bind(this));
+
     this.mounted = true;
   }
 
@@ -67,6 +60,12 @@ class MovementWizardPage extends Component {
     }
     document.removeEventListener('keydown', this.handleKeyDown);
     this.mounted = false;
+  }
+
+  onMediaChange(mql) {
+    this.setState({
+      smallDevice: mql.matches,
+    });
   }
 
   onLockDateValue(dataSnapshot) {
@@ -137,63 +136,27 @@ class MovementWizardPage extends Component {
     });
   }
 
-  quickSelectionListVisible(listKey) {
-    const conf = this.quickSelectionConf[listKey];
-    return conf && conf.step === this.state.step;
-  }
-
-  keyUpHandler(e) {
-    if (this.isQuickSelectionFilterField(e.key)) {
-      const filterStateKey = e.key + 'Filter';
-
-      const stateObj = {};
-      stateObj[filterStateKey] = e.value;
-
-      this.setState(stateObj);
-    }
-  }
-
-  isQuickSelectionFilterField(fieldName) {
-    for (const listKey in this.quickSelectionConf) {
-      if (this.quickSelectionConf.hasOwnProperty(listKey)) {
-        if (this.quickSelectionConf[listKey].fields.has(fieldName)) {
-          return true;
-        }
+  focusHandler(e) {
+    const fieldName = e.target ? e.target.name : null;
+    if (this.state.smallDevice === true && fieldName) {
+      const list = getVisibleListByField(fieldName);
+      if (list) {
+        this.setState({
+          fullscreenList: list,
+        });
       }
     }
-    return false;
   }
 
-  aircraftClickHandler(item) {
-    const data = update(this.state.data, {
-      immatriculation: { $set: item.key },
-      aircraftType: { $set: item.value.type },
-      mtow: { $set: item.value.mtow },
-    });
-    this.setState({
-      data,
-    });
-  }
-
-  userClickHandler(item) {
-    const data = update(this.state.data, {
-      memberNr: { $set: item.value.memberNr },
-      lastname: { $set: item.value.lastname },
-      firstname: { $set: item.value.firstname },
-      phone: { $set: item.value.phone },
-    });
-    this.setState({
-      data,
-    });
-  }
-
-  aerodromeClickHandler(item) {
-    const data = update(this.state.data, {
-      location: { $set: item.key },
-    });
-    this.setState({
-      data,
-    });
+  blurHandler() {
+    setTimeout(() => {
+      if (this.mounted === true) {
+        const activeElementName = document.activeElement.name;
+        this.setState({
+          selectedField: activeElementName,
+        });
+      }
+    }, 1);
   }
 
   nextStep() {
@@ -292,119 +255,177 @@ class MovementWizardPage extends Component {
     const className = 'MovementWizardPage ' + this.props.className;
     const logoImagePath = require('../../resources/mfgt_logo_transp.png');
 
-    let middleItem;
-    let northItem;
-    let southItem;
-    let eastItem;
-    let commitRequirements;
-
     if (this.state.committed === true) {
-      middleItem = (
+      const middleItem = (
         <this.props.finishComponentClass
           itemKey={this.movementKey}
           finish={this.finish.bind(this)}
           update={this.update}
         />);
-    } else if (this.state.commitError) {
-      middleItem = (
+      return (
+        <BorderLayout className={className}>
+          <BorderLayoutItem region="west">
+            <header>
+              <a href="#/">
+                <img className="logo" src={logoImagePath}/>
+              </a>
+            </header>
+          </BorderLayoutItem>
+          <BorderLayoutItem region="middle">
+            {middleItem}
+          </BorderLayoutItem>
+        </BorderLayout>
+      );
+    }
+
+    if (this.state.commitError) {
+      const middleItem = (
         <CommitFailure
           errorMsg={this.state.commitError.message}
           back={this.unsetCommitError.bind(this)}
         />
       );
-    } else {
-      const breadcrumbItems = this.buildBreadcrumbItems();
-      const nextLabel = this.isLast() ? 'Speichern' : 'Weiter';
+      return (
+        <BorderLayout className={className}>
+          <BorderLayoutItem region="west">
+            <header>
+              <a href="#/">
+                <img className="logo" src={logoImagePath}/>
+              </a>
+            </header>
+          </BorderLayoutItem>
+          <BorderLayoutItem region="middle">
+            {middleItem}
+          </BorderLayoutItem>
+        </BorderLayout>
+      );
+    }
 
-      const page = this.props.pages[this.state.step];
-      middleItem = (
-        <page.component
-          data={this.state.data}
-          oppositeData={this.props.oppositeData}
-          updateData={this.updateData.bind(this)}
-          onKeyUp={this.keyUpHandler.bind(this)}
-          ref="page"
-          showValidationErrors={this.state.showValidationErrors === true}
-          itemKey={this.movementKey}
-          update={this.update}
-          readOnly={locked}
+    const breadcrumbItems = this.buildBreadcrumbItems();
+    const nextLabel = this.isLast() ? 'Speichern' : 'Weiter';
+
+    const page = this.props.pages[this.state.step];
+    const middleItem = (
+      <page.component
+        data={this.state.data}
+        oppositeData={this.props.oppositeData}
+        updateData={this.updateData.bind(this)}
+        ref="page"
+        showValidationErrors={this.state.showValidationErrors === true}
+        itemKey={this.movementKey}
+        update={this.update}
+        readOnly={locked}
+      />
+    );
+
+    const northItem = (
+      <BorderLayoutItem region="north">
+        <WizardBreadcrumbs items={breadcrumbItems} activeItem={this.state.step + 1}/>
+      </BorderLayoutItem>
+    );
+    const southItem = (
+      <BorderLayoutItem region="south">
+        <WizardNavigation
+          cancel={this.cancel.bind(this)}
+          previousStep={this.previousStep.bind(this)}
+          nextStep={this.nextStep.bind(this)}
+          nextLabel={nextLabel}
+          nextVisible={!(this.isLast() && locked)}
         />
-      );
+      </BorderLayoutItem>
+    );
 
-      northItem = (
-        <BorderLayoutItem region="north">
-          <WizardBreadcrumbs items={breadcrumbItems} activeItem={this.state.step + 1}/>
-        </BorderLayoutItem>
-      );
-      southItem = (
-        <BorderLayoutItem region="south">
-          <WizardNavigation
-            cancel={this.cancel.bind(this)}
-            previousStep={this.previousStep.bind(this)}
-            nextStep={this.nextStep.bind(this)}
-            nextLabel={nextLabel}
-            nextVisible={!(this.isLast() && locked)}
-          />
-        </BorderLayoutItem>
-      );
+    const commitRequirements = this.state.showCommitRequirements === true
+      ? (
+        <this.props.commitRequirementsDialogClass
+          onCancel={this.confirmRequirementsCancelHandler.bind(this)}
+          onConfirm={this.confirmRequirementsConfirmHandler.bind(this)}
+        />
+      )
+      : null;
 
-      if (this.quickSelectionListVisible('aircraftList')) {
-        eastItem = (
-          <BorderLayoutItem region="east">
-            <AircraftList
-              immatriculation={this.state.immatriculationFilter}
-              aircraftType={this.state.aircraftTypeFilter}
-              onClick={this.aircraftClickHandler.bind(this)}
-            />
-          </BorderLayoutItem>
-        );
-      } else if (this.quickSelectionListVisible('userList')) {
-        eastItem = (
-          <BorderLayoutItem region="east">
-            <UserList
-              memberNr={this.state.memberNrFilter}
-              onClick={this.userClickHandler.bind(this)}
-            />
-          </BorderLayoutItem>
-        );
-      } else if (this.quickSelectionListVisible('aerodromeList')) {
-        eastItem = (
-          <BorderLayoutItem region="east">
-            <AerodromeList
-              aerodrome={this.state.locationFilter}
-              onClick={this.aerodromeClickHandler.bind(this)}
-            />
-          </BorderLayoutItem>
-        );
-      }
+    if (this.state.smallDevice === true) {
+      return (
+        <div onFocus={this.focusHandler.bind(this)} onBlur={this.blurHandler.bind(this)}>
+          <BorderLayout className={className}>
+            {northItem}
+            <BorderLayoutItem region="middle">
+              {middleItem}
+              {commitRequirements}
+            </BorderLayoutItem>
+            {southItem}
+          </BorderLayout>
+          {this.state.fullscreenList
+            ? (
+              <FullscreenFilterList
+                listComponent={this.state.fullscreenList.component}
+                filterProp={this.state.fullscreenList.filterProp}
+                filterValue={this.state.data[this.state.fullscreenList.fieldName]}
+                inputLabel={this.state.fullscreenList.fieldLabel}
+                emptyMessage={this.state.fullscreenList.emptyMessage}
+                onClick={item => {
+                  const newData = this.state.fullscreenList.clickHandler(this.state.data, item);
+                  this.setState({
+                    data: newData,
+                    fullscreenList: null,
+                  });
+                }}
+                onBackClick={() => {
+                  this.setState({
+                    fullscreenList: null,
+                  });
+                }}
+              />)
+            : null}
+        </div>
+      );
+    }
 
-      if (this.state.showCommitRequirements === true) {
-        commitRequirements = (
-          <this.props.commitRequirementsDialogClass
-            onCancel={this.confirmRequirementsCancelHandler.bind(this)}
-            onConfirm={this.confirmRequirementsConfirmHandler.bind(this)}
-          />
-        );
-      }
+    let quickSelectionList;
+
+    const listConf = getVisibleListByStep(this.state.step);
+    if (listConf) {
+      const listProps = {
+        onClick: item => {
+          const newData = listConf.clickHandler(this.state.data, item);
+          this.setState({
+            data: newData,
+          });
+        },
+      };
+      listConf.fields.forEach(field => {
+        const fieldName = field.field;
+        const filterProp = field.filterProp;
+        listProps[filterProp] = this.state.data[fieldName];
+      });
+      quickSelectionList = <listConf.component {...listProps}/>;
     }
 
     return (
-      <BorderLayout className={className}>
-        <BorderLayoutItem region="west">
-          <header>
-            <a href="#/">
-              <img className="logo" src={logoImagePath}/>
-            </a>
-          </header>
-        </BorderLayoutItem>
-        {northItem}
-        <BorderLayoutItem region="middle">
-          {middleItem}
-          {commitRequirements}
-        </BorderLayoutItem>
-        {southItem}
-        {eastItem}
-      </BorderLayout>
+      <div onFocus={this.focusHandler.bind(this)} onBlur={this.blurHandler.bind(this)}>
+        <BorderLayout className={className}>
+          <BorderLayoutItem region="west">
+            <header>
+              <a href="#/">
+                <img className="logo" src={logoImagePath}/>
+              </a>
+            </header>
+          </BorderLayoutItem>
+          {northItem}
+          <BorderLayoutItem region="middle">
+            {middleItem}
+            {commitRequirements}
+          </BorderLayoutItem>
+          {southItem}
+          {quickSelectionList
+            ? (
+              <BorderLayoutItem region="east">
+                {quickSelectionList}
+              </BorderLayoutItem>
+            )
+            : null}
+        </BorderLayout>
+      </div>
     );
   }
 }
