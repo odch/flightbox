@@ -3,7 +3,7 @@ const path = require('path');
 module.exports = {
   externals: {
     'Config': JSON.stringify(process.env.ENV === 'production' ? {
-      firebaseUrl: 'https://flights.lszt.ch',
+      firebaseUrl: 'https://lszt.firebaseio.com',
     } : {
       firebaseUrl: 'https://mfgt-flights.firebaseio.com',
     }),
