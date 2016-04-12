@@ -12,7 +12,7 @@ import MessagePage from './components/MessagePage';
 
 ReactDOM.render((
   <Router>
-    <Route path="/" handler={App}>
+    <Route path="/" component={App}>
       <IndexRoute component={StartPage}/>
       <Route path="departure/new" component={DeparturePage}/>
       <Route path="departure/new/:arrivalKey" component={DeparturePage}/>

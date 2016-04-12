@@ -61,3 +61,13 @@ a {
 .material-icons {
   vertical-align: middle;
 }
+
+.App.failure, .App.loading {
+  > div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%)
+  }
+}
