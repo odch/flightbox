@@ -4,8 +4,12 @@ module.exports = {
   externals: {
     'Config': JSON.stringify(process.env.ENV === 'production' ? {
       firebaseUrl: 'https://lszt.firebaseio.com',
+      ipAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/ip',
+      credentialsAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt',
     } : {
       firebaseUrl: 'https://mfgt-flights.firebaseio.com',
+      ipAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/ip',
+      credentialsAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt',
     }),
   },
   entry: [
