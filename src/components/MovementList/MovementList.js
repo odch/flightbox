@@ -2,7 +2,7 @@ import React, { PropTypes, Component } from 'react';
 import Predicates from './Predicates.js';
 import MovementGroup from '../MovementGroup';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
-import Firebase from 'firebase';
+import firebase from '../../util/firebase.js';
 import { AutoLoad } from '../../util/AutoLoad.js';
 
 /**
@@ -25,9 +25,11 @@ class MovementList extends Component {
   }
 
   onDeleteConfirmation(item) {
-    new Firebase(this.props.firebaseUri).child(item.key).remove();
-    this.setState({
-      deleteConfirmation: null,
+    firebase(this.props.firebaseUri, (error, ref) => {
+      ref.child(item.key).remove();
+      this.setState({
+        deleteConfirmation: null,
+      });
     });
   }
 

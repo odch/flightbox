@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import LabeledComponent from '../LabeledComponent';
 import LabeledBox from '../LabeledBox';
 import DatePicker from '../DatePicker';
-import Firebase from 'firebase';
-import Config from 'Config';
+import firebase from '../../util/firebase.js';
 import moment from 'moment';
 import './LockMovementsForm.scss';
 
@@ -18,8 +17,7 @@ class LockMovementsForm extends Component {
   }
 
   componentWillMount() {
-    new Firebase(Config.firebaseUrl + '/settings/lockDate')
-      .once('value', this.onFirebaseValue, this);
+    firebase('/settings/lockDate', (error, ref) => ref.once('value', this.onFirebaseValue, this));
   }
 
   onFirebaseValue(snapshot) {
@@ -74,9 +72,11 @@ class LockMovementsForm extends Component {
 
   saveClickHandler() {
     const ms = this.state.date ? new Date(this.state.date).getTime() : null;
-    new Firebase(Config.firebaseUrl + '/settings/lockDate').set(ms, () => {
-      this.setState({
-        changed: false,
+    firebase('/settings/lockDate', (error, ref) => {
+      ref.set(ms, () => {
+        this.setState({
+          changed: false,
+        });
       });
     });
   }

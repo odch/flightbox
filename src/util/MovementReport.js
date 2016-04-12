@@ -1,5 +1,4 @@
-import Config from 'Config';
-import Firebase from 'firebase';
+import firebase from './firebase.js';
 import Download from './Download.js';
 import { firebaseToLocal, compareAscending } from './movements.js';
 import dates from '../core/dates.js';
@@ -29,16 +28,17 @@ class MovementReport {
 
   readMovements(type) {
     return new Promise(fulfill => {
-      new Firebase(Config.firebaseUrl + type.path)
-        .orderByChild('dateTime')
-        .startAt(dates.isoStartOfDay(this.startDate))
-        .endAt(dates.isoEndOfDay(this.endDate))
-        .once('value', (snapshot) => {
-          fulfill({
-            type,
-            snapshot,
-          });
-        }, this);
+      firebase(type.path, (error, ref) => {
+        ref.orderByChild('dateTime')
+          .startAt(dates.isoStartOfDay(this.startDate))
+          .endAt(dates.isoEndOfDay(this.endDate))
+          .once('value', (snapshot) => {
+            fulfill({
+              type,
+              snapshot,
+            });
+          }, this);
+      });
     });
   }
 

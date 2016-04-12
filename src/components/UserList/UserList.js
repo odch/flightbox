@@ -2,7 +2,6 @@ import React, { PropTypes, Component } from 'react';
 import './UserList.scss';
 import SearchTerms from '../../util/SearchTerms.js';
 import FilteredList from '../FilteredList';
-import Config from 'Config';
 import UserItem from './UserItem.js';
 
 class UserList extends Component {
@@ -31,7 +30,7 @@ class UserList extends Component {
         emptyMessage={emptyMessage}
         searchTerms={searchTerms}
         itemComponentClass={UserItem}
-        firebaseUri={Config.firebaseUrl + '/users/'}
+        firebaseUri="/users/"
         itemComparator={itemComparator}
         onClick={this.props.onClick}
       />

@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import LabeledComponent from '../LabeledComponent';
 import ModalDialog from '../ModalDialog';
-import Config from 'Config';
-import Firebase from 'firebase';
+import firebase from '../../util/firebase.js';
 import update from 'react-addons-update';
 import validate from '../../util/validate.js';
 import './MessageForm.scss';
@@ -183,16 +182,18 @@ class MessageForm extends Component {
         timestamp: { $set: timestamp },
         negativeTimestamp: { $set: timestamp * -1 },
       });
-      new Firebase(Config.firebaseUrl + '/messages/').push(withDate, (error) => {
-        if (error) {
-          this.setState({
-            commitError: error,
-          });
-        } else {
-          this.setState({
-            sent: true,
-          });
-        }
+      firebase('/messages/', (error, ref) => {
+        ref.push(withDate, commitError => {
+          if (error) {
+            this.setState({
+              commitError,
+            });
+          } else {
+            this.setState({
+              sent: true,
+            });
+          }
+        });
       });
     } else {
       this.setState({

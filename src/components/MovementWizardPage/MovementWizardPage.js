@@ -6,10 +6,9 @@ import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import WizardNavigation from '../WizardNavigation';
 import CommitFailure from '../CommitFailure';
 import FullscreenFilterList from '../FullscreenFilterList';
-import Firebase from 'firebase';
+import firebase from '../../util/firebase.js';
 import { firebaseToLocal, localToFirebase, isLocked } from '../../util/movements.js';
 import update from 'react-addons-update';
-import Config from 'Config';
 import { getVisibleListByField, getVisibleListByStep } from './quick-selection-conf.js';
 
 class MovementWizardPage extends Component {
@@ -34,13 +33,17 @@ class MovementWizardPage extends Component {
   }
 
   componentWillMount() {
-    this.firebaseLockDateRef = new Firebase(Config.firebaseUrl + '/settings/lockDate');
-    this.firebaseLockDateRef.on('value', this.onLockDateValue, this);
+    firebase('/settings/lockDate', (lockDateError, lockDateRef) => {
+      this.firebaseLockDateRef = lockDateRef;
+      this.firebaseLockDateRef.on('value', this.onLockDateValue, this);
 
-    this.firebaseCollectionRef = new Firebase(Config.firebaseUrl + this.props.firebaseUri);
-    if (this.update === true) {
-      this.firebaseCollectionRef.child(this.props.movementKey).on('value', this.onFirebaseValue, this);
-    }
+      firebase(this.props.firebaseUri, (collectionError, collectionRef) => {
+        this.firebaseCollectionRef = collectionRef;
+        if (this.update === true) {
+          this.firebaseCollectionRef.child(this.props.movementKey).on('value', this.onFirebaseValue, this);
+        }
+      });
+    });
 
     document.addEventListener('keydown', this.handleKeyDown);
 
@@ -54,8 +57,10 @@ class MovementWizardPage extends Component {
   }
 
   componentWillUnmount() {
-    this.firebaseLockDateRef.off('value', this.onLockDateValue, this);
-    if (this.update === true) {
+    if (this.firebaseLockDateRef) {
+      this.firebaseLockDateRef.off('value', this.onLockDateValue, this);
+    }
+    if (this.update === true && this.firebaseCollectionRef) {
       this.firebaseCollectionRef.child(this.props.movementKey).off('value', this.onFirebaseValue, this);
     }
     document.removeEventListener('keydown', this.handleKeyDown);

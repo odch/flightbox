@@ -4,8 +4,7 @@ import MovementList from '../MovementList';
 import TabPanel from '../TabPanel';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
-import Config from 'Config';
-import Firebase from 'firebase';
+import firebase from '../../util/firebase.js';
 import { firebaseToLocal, localToFirebase, compareDescending } from '../../util/movements.js';
 
 class MovementsPage extends Component {
@@ -18,12 +17,16 @@ class MovementsPage extends Component {
   }
 
   componentWillMount() {
-    this.firebaseRef = new Firebase(Config.firebaseUrl + '/settings/lockDate');
-    this.firebaseRef.on('value', this.onLockDateValue, this);
+    firebase('/settings/lockDate', (error, ref) => {
+      this.firebaseRef = ref;
+      this.firebaseRef.on('value', this.onLockDateValue, this);
+    });
   }
 
   componentWillUnmount() {
-    this.firebaseRef.off('value', this.onLockDateValue, this);
+    if (this.firebaseRef) {
+      this.firebaseRef.off('value', this.onLockDateValue, this);
+    }
   }
 
   onLockDateValue(data) {
@@ -54,7 +57,7 @@ class MovementsPage extends Component {
       <MovementList
         key="departures"
         className="departures"
-        firebaseUri={Config.firebaseUrl + '/departures/'}
+        firebaseUri="/departures/"
         comparator={compareDescending}
         localToFirebase={localToFirebase}
         firebaseToLocal={firebaseToLocal}
@@ -69,7 +72,7 @@ class MovementsPage extends Component {
       <MovementList
         key="arrivals"
         className="arrivals"
-        firebaseUri={Config.firebaseUrl + '/arrivals/'}
+        firebaseUri="/arrivals/"
         comparator={compareDescending}
         localToFirebase={localToFirebase}
         firebaseToLocal={firebaseToLocal}

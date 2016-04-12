@@ -1,5 +1,5 @@
 import React, { PropTypes, Component } from 'react';
-import Firebase from 'firebase';
+import firebase from './firebase.js';
 import ItemsArray from './ItemsArray.js';
 import update from 'react-addons-update';
 
@@ -19,9 +19,11 @@ export const AutoLoad = (List) => class extends Component {
 
   componentWillMount() {
     this.loadLimited();
-    this.firebaseRef = new Firebase(this.props.firebaseUri);
-    this.firebaseRef.on('child_added', this.onFirebaseChildAdded, this);
-    this.firebaseRef.on('child_removed', this.onFirebaseChildRemoved, this);
+    firebase(this.props.firebaseUri, (error, ref) => {
+      this.firebaseRef = ref;
+      this.firebaseRef.on('child_added', this.onFirebaseChildAdded, this);
+      this.firebaseRef.on('child_removed', this.onFirebaseChildRemoved, this);
+    });
   }
 
   componentDidMount() {
@@ -57,11 +59,12 @@ export const AutoLoad = (List) => class extends Component {
   loadLimited() {
     this.loadInProgress = true;
     const pagination = this.getPagination();
-    new Firebase(this.props.firebaseUri)
-      .orderByChild('negativeTimestamp')
-      .limitToFirst(pagination.limit)
-      .startAt(pagination.start)
-      .once('value', this.onFirebaseValues, this);
+    firebase(this.props.firebaseUri, (error, ref) => {
+      ref.orderByChild('negativeTimestamp')
+        .limitToFirst(pagination.limit)
+        .startAt(pagination.start)
+        .once('value', this.onFirebaseValues, this);
+    });
   }
 
   getPagination() {

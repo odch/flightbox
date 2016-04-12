@@ -2,7 +2,6 @@ import React, { PropTypes, Component } from 'react';
 import './AircraftList.scss';
 import SearchTerms from '../../util/SearchTerms.js';
 import FilteredList from '../FilteredList';
-import Config from 'Config';
 import AircraftItem from './AircraftItem.js';
 
 class AircraftList extends Component {
@@ -35,7 +34,7 @@ class AircraftList extends Component {
         emptyMessage={emptyMessage}
         searchTerms={searchTerms}
         itemComponentClass={AircraftItem}
-        firebaseUri={Config.firebaseUrl + '/aircrafts/'}
+        firebaseUri="/aircrafts/"
         itemComparator={itemComparator}
         onClick={this.props.onClick}
       />

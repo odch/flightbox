@@ -1,5 +1,4 @@
-import Config from 'Config';
-import Firebase from 'firebase';
+import firebase from './firebase.js';
 import parse from 'csv-parse';
 
 function findIndex(row, name) {
@@ -128,11 +127,11 @@ function importCsv(csvString, options, callback) {
   parse(csvString, (err, output) => {
     const itemMap = getMap(output, options);
 
-    const firebaseRef = new Firebase(Config.firebaseUrl + options.path);
-
-    updateExisting(firebaseRef, itemMap, options, existing => {
-      addNew(firebaseRef, itemMap, existing, options);
-      callback();
+    firebase(options.path, (error, ref) => {
+      updateExisting(ref, itemMap, options, existing => {
+        addNew(ref, itemMap, existing, options);
+        callback();
+      });
     });
   });
 }

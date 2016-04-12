@@ -9,7 +9,7 @@ import Finish from '../Arrival/Finish';
 import MovementWizardPage from '../MovementWizardPage';
 import { firebaseToLocal } from '../../util/movements.js';
 import dates from '../../core/dates.js';
-import Config from 'Config';
+import firebase from '../../util/firebase.js';
 
 class ArrivalPage extends Component {
 
@@ -49,8 +49,9 @@ class ArrivalPage extends Component {
 
   componentWillMount() {
     if (this.props.params.departureKey) {
-      const firebaseRef = new Firebase(Config.firebaseUrl + '/departures/');
-      firebaseRef.child(this.props.params.departureKey).once('value', this.onFirebaseValue, this);
+      firebase('/departures/', (error, ref) => {
+        ref.child(this.props.params.departureKey).once('value', this.onFirebaseValue, this);
+      });
     } else {
       this.setState({
         defaultData: {

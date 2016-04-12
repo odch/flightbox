@@ -8,7 +8,6 @@ import MessageList from '../MessageList';
 import LabeledBox from '../LabeledBox';
 import UserImportForm from '../UserImportForm';
 import AerodromeImportForm from '../AerodromeImportForm';
-import Config from 'Config';
 
 class AdminPage extends Component {
 
@@ -27,7 +26,7 @@ class AdminPage extends Component {
           <ReportForm/>
           <LockMovementsForm/>
           <LabeledBox label="Nachrichten" className="messages">
-            <MessageList firebaseUri={Config.firebaseUrl + '/messages/'}/>
+            <MessageList firebaseUri="/messages/"/>
           </LabeledBox>
           <LabeledBox label="Benutzerliste importieren" className="user-import">
             <UserImportForm/>

@@ -1,7 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import './FilteredList.scss';
 import FirebaseList from '../../util/FirebaseList.js';
-import Firebase from 'firebase';
+import firebase from '../../util/firebase.js';
 
 class FilteredList extends Component {
 
@@ -10,25 +10,27 @@ class FilteredList extends Component {
     this.state = {
       items: [],
     };
-    this.firebaseRef = new Firebase(this.props.firebaseUri);
-    this.firebaseList = new FirebaseList(
-      this.firebaseRef,
-      this.props.itemComparator
-    );
     this.onSearchResult = this.onSearchResult.bind(this);
   }
 
   componentWillMount() {
-    this.firebaseList.addResultCallback(this.onSearchResult);
-    this.firebaseList.search(this.props.searchTerms);
+    firebase(this.props.firebaseUri, (error, ref) => {
+      this.firebaseList = new FirebaseList(ref, this.props.itemComparator);
+      this.firebaseList.addResultCallback(this.onSearchResult);
+      this.firebaseList.search(this.props.searchTerms);
+    });
   }
 
   componentWillReceiveProps(nextProps) {
-    this.firebaseList.search(nextProps.searchTerms);
+    if (this.firebaseList) {
+      this.firebaseList.search(nextProps.searchTerms);
+    }
   }
 
   componentWillUnmount() {
-    this.firebaseList.removeResultCallback(this.onSearchResult);
+    if (this.firebaseList) {
+      this.firebaseList.removeResultCallback(this.onSearchResult);
+    }
   }
 
   onSearchResult(result) {
