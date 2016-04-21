@@ -8,7 +8,7 @@ class UserImportForm extends Component {
     const description = (
       <div>
         <p>Für den Import wird eine CSV-Datei benötigt, die alle Benutzer enthält. Beim Import werden
-          alle Benuter aus der Datenbank entfernt, die nicht in der CSV-Datei enthalten sind.</p>
+          alle Benutzer aus der Datenbank entfernt, die nicht in der CSV-Datei enthalten sind.</p>
         <p>
           Die Datei muss aus den Spalten <em>UserName</em>, <em>LastName</em>, <em>FirstName</em> und <em>PhoneMobile</em> bestehen.
           Die Sortierung ist nicht relevant.
