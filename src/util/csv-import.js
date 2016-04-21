@@ -19,6 +19,8 @@ function modify(value, modification) {
       return value.toUpperCase();
     case 'lowercase':
       return value.toLowerCase();
+    case 'parseint':
+      return parseInt(value, 10);
     default:
       throw new Error('Unsupported modification "' + modification + '"');
   }
@@ -124,7 +126,10 @@ function addNew(firebaseRef, itemMap, existing, options) {
  * @param callback
  */
 function importCsv(csvString, options, callback) {
-  parse(csvString, (err, output) => {
+  const parseOptions = {
+    skip_empty_lines: true,
+  };
+  parse(csvString, parseOptions, (err, output) => {
     const itemMap = getMap(output, options);
 
     firebase(options.path, (error, ref) => {
