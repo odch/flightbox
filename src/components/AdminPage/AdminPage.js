@@ -8,6 +8,7 @@ import MessageList from '../MessageList';
 import LabeledBox from '../LabeledBox';
 import UserImportForm from '../UserImportForm';
 import AerodromeImportForm from '../AerodromeImportForm';
+import AircraftImportForm from '../AircraftImportForm';
 
 class AdminPage extends Component {
 
@@ -33,6 +34,9 @@ class AdminPage extends Component {
           </LabeledBox>
           <LabeledBox label="Flugplatzliste importieren" className="aerodrome-import">
             <AerodromeImportForm/>
+          </LabeledBox>
+          <LabeledBox label="Flugzeugliste importieren" className="aircraft-import">
+            <AircraftImportForm/>
           </LabeledBox>
         </BorderLayoutItem>
       </BorderLayout>
