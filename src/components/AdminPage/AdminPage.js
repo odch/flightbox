@@ -9,6 +9,7 @@ import LabeledBox from '../LabeledBox';
 import UserImportForm from '../UserImportForm';
 import AerodromeImportForm from '../AerodromeImportForm';
 import AircraftImportForm from '../AircraftImportForm';
+import FirebaseKeyList from '../FirebaseKeyList';
 
 class AdminPage extends Component {
 
@@ -37,6 +38,12 @@ class AdminPage extends Component {
           </LabeledBox>
           <LabeledBox label="Flugzeugliste importieren" className="aircraft-import">
             <AircraftImportForm/>
+          </LabeledBox>
+          <LabeledBox label="Flugzeuge der MFGT" className="mfgt-aircrafts">
+            <FirebaseKeyList path="/settings/aircraftsMFGT"/>
+          </LabeledBox>
+          <LabeledBox label="In Lommis stationierte Flugzeuge (ohne Flugzeuge der MFGT)" className="lszt-aircrafts">
+            <FirebaseKeyList path="/settings/aircraftsLSZT"/>
           </LabeledBox>
         </BorderLayoutItem>
       </BorderLayout>
