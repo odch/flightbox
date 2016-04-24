@@ -10,6 +10,7 @@ import FullscreenFilterList from '../FullscreenFilterList';
 import CancelConfirmationDialog from '../CancelConfirmationDialog';
 import firebase from '../../util/firebase.js';
 import { firebaseToLocal, localToFirebase, isLocked } from '../../util/movements.js';
+import { getFromItemKey } from '../../util/reference-number.js';
 import update from 'react-addons-update';
 import { getVisibleListByField, getVisibleListByStep } from './quick-selection-conf.js';
 
@@ -38,6 +39,8 @@ class MovementWizardPage extends Component {
 
   componentWillMount() {
     firebase((error, ref) => {
+      this.firebaseRootRef = ref;
+
       this.firebaseLockDateRef = ref.child('/settings/lockDate');
       this.firebaseLockDateRef.on('value', this.onLockDateValue, this);
 
@@ -254,8 +257,12 @@ class MovementWizardPage extends Component {
   }
 
   buildBreadcrumbItems() {
+    let firstLabel = this.props.label;
+    if (this.movementKey) {
+      firstLabel += ' (' + getFromItemKey(this.movementKey) + ')';
+    }
     const breadcrumbItems = [{
-      label: this.props.label,
+      label: firstLabel,
     }];
     this.props.pages.forEach((page, index) => {
       breadcrumbItems.push({
@@ -294,6 +301,8 @@ class MovementWizardPage extends Component {
           itemKey={this.movementKey}
           finish={this.finish.bind(this)}
           update={this.update}
+          data={this.state.data}
+          firebaseRootRef={this.firebaseRootRef}
         />);
       return (
         <BorderLayout className={className}>

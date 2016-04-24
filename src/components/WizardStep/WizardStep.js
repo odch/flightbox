@@ -150,6 +150,7 @@ WizardStep.propTypes = {
   showValidationErrors: PropTypes.bool,
   update: PropTypes.bool,
   readOnly: PropTypes.bool,
+  firebaseRootRef: PropTypes.object,
 };
 
 export default WizardStep;
