@@ -8,7 +8,7 @@ import FlightData from '../Departure/FlightData';
 import Finish from '../Departure/Finish';
 import CommitRequirementsDialog from '../Departure/CommitRequirementsDialog';
 import MovementWizardPage from '../MovementWizardPage';
-import { firebaseToLocal } from '../../util/movements.js';
+import { firebaseToLocal, transferValues } from '../../util/movements.js';
 import dates from '../../core/dates.js';
 import firebase from '../../util/firebase.js';
 
@@ -73,16 +73,18 @@ class DeparturePage extends Component {
     if (val) {
       const arrival = firebaseToLocal(dataSnapshot.val());
 
-      defaultData.immatriculation = arrival.immatriculation;
-      defaultData.aircraftType = arrival.aircraftType;
-      defaultData.mtow = arrival.mtow;
-      defaultData.memberNr = arrival.memberNr;
-      defaultData.lastname = arrival.lastname;
-      defaultData.firstname = arrival.firstname;
-      defaultData.phone = arrival.phone;
-      defaultData.passengerCount = arrival.passengerCount || 0;
-      defaultData.location = arrival.location;
-      defaultData.flightType = arrival.flightType;
+      transferValues(arrival, defaultData, [
+        'immatriculation',
+        'aircraftType',
+        'mtow',
+        'memberNr',
+        'lastname',
+        'firstname',
+        'phone',
+        { name: 'passengerCount', defaultValue: 0 },
+        'location',
+        'flightType',
+      ]);
     }
 
     this.setState({

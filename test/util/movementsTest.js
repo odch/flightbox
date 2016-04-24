@@ -1,5 +1,5 @@
 import expect from 'expect';
-import { localToFirebase, firebaseToLocal, compareDescending, compareAscending, isLocked } from '../../src/util/movements.js';
+import { localToFirebase, firebaseToLocal, compareDescending, compareAscending, isLocked, transferValues } from '../../src/util/movements.js';
 
 describe('movements', () => {
   describe('local to firebase', () => {
@@ -221,6 +221,42 @@ describe('movements', () => {
       const lockDate = new Date('2016-03-07').getTime();
 
       expect(isLocked(movement, lockDate)).toBe(false);
+    });
+  });
+
+  describe('transferValues', () => {
+    it('transfers values which are not undefined and not null', () => {
+      const source = {
+        val1: undefined,
+        val2: null,
+        val3: 'foo',
+      };
+      const target = {};
+
+      transferValues(source, target, ['val1', 'val2', 'val3']);
+
+      const props = [];
+
+      for (const key in target) {
+        if (target.hasOwnProperty(key)) {
+          props.push(key);
+        }
+      }
+
+      expect(props.length).toBe(1);
+      expect(props[0]).toBe('val3');
+      expect(target.val3).toBe('foo');
+    });
+
+    it('takes default value if value is null or undefined', () => {
+      const source = {
+        val1: undefined,
+      };
+      const target = {};
+
+      transferValues(source, target, [{ name: 'val1', defaultValue: 0 }]);
+
+      expect(target.val1).toBe(0);
     });
   });
 });

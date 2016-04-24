@@ -54,6 +54,23 @@ function isLocked(movement, lockDate) {
   return false;
 }
 
+function transferValues(from, to, properties) {
+  properties.forEach(prop => {
+    if (typeof prop === 'string') {
+      prop = {
+        name: prop,
+      };
+    }
+
+    const value = from[prop.name];
+    if (value !== undefined && value !== null) {
+      to[prop.name] = value;
+    } else if (prop.defaultValue !== undefined && prop.defaultValue !== null) {
+      to[prop.name] = prop.defaultValue;
+    }
+  });
+}
+
 /**
  * @param a the first movement
  * @param b the other movement
@@ -117,5 +134,6 @@ module.exports = {
   localToFirebase,
   compareDescending,
   compareAscending,
-  isLocked
+  isLocked,
+  transferValues,
 };
