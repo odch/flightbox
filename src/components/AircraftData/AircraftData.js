@@ -82,10 +82,8 @@ class AircraftData extends WizardStep {
       aircraftType: {
         types: {
           required: true,
-          match: /^[A-Z0-9]+$/,
         },
-        message: 'Geben Sie hier den Typ des Flugzeugs ein. ' +
-        'Er darf nur Grossbuchstaben und Zahlen enthalten.',
+        message: 'Geben Sie hier den Typ des Flugzeugs ein.',
       },
       mtow: {
         types: {
