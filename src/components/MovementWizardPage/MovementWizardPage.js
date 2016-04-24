@@ -37,16 +37,14 @@ class MovementWizardPage extends Component {
   }
 
   componentWillMount() {
-    firebase('/settings/lockDate', (lockDateError, lockDateRef) => {
-      this.firebaseLockDateRef = lockDateRef;
+    firebase((error, ref) => {
+      this.firebaseLockDateRef = ref.child('/settings/lockDate');
       this.firebaseLockDateRef.on('value', this.onLockDateValue, this);
 
-      firebase(this.props.firebaseUri, (collectionError, collectionRef) => {
-        this.firebaseCollectionRef = collectionRef;
-        if (this.update === true) {
-          this.firebaseCollectionRef.child(this.props.movementKey).on('value', this.onFirebaseValue, this);
-        }
-      });
+      this.firebaseCollectionRef = ref.child(this.props.firebaseUri);
+      if (this.update === true) {
+        this.firebaseCollectionRef.child(this.props.movementKey).on('value', this.onFirebaseValue, this);
+      }
     });
 
     document.addEventListener('keydown', this.handleKeyDown);
