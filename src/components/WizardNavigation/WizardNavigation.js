@@ -11,7 +11,9 @@ class WizardNavigation extends Component {
         {this.props.nextVisible !== false
           ? <a onMouseDown={this.nextStep.bind(this)} className="next" tabIndex="-1">{nextLabel}</a>
           : null}
-        <a onMouseDown={this.previousStep.bind(this)} className="prev" tabIndex="-1">Zurück</a>
+        {this.props.previousVisible !== false
+          ? <a onMouseDown={this.previousStep.bind(this)} className="prev" tabIndex="-1">Zurück</a>
+          : null}
       </div>
     );
   }
@@ -35,6 +37,7 @@ WizardNavigation.propTypes = {
   nextStep: PropTypes.func,
   nextLabel: PropTypes.string,
   nextVisible: PropTypes.bool,
+  previousVisible: PropTypes.bool,
 };
 
 export default WizardNavigation;

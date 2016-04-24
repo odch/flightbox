@@ -366,6 +366,7 @@ class MovementWizardPage extends Component {
           nextStep={this.nextStep.bind(this)}
           nextLabel={nextLabel}
           nextVisible={!(this.isLast() && locked)}
+          previousVisible={!this.isFirst()}
         />
       </BorderLayoutItem>
     );
