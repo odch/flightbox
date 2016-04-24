@@ -10,6 +10,7 @@ import UserImportForm from '../UserImportForm';
 import AerodromeImportForm from '../AerodromeImportForm';
 import AircraftImportForm from '../AircraftImportForm';
 import FirebaseKeyList from '../FirebaseKeyList';
+import JumpNavigation from '../JumpNavigation';
 
 class AdminPage extends Component {
 
@@ -25,6 +26,7 @@ class AdminPage extends Component {
           </header>
         </BorderLayoutItem>
         <BorderLayoutItem region="middle">
+          <JumpNavigation/>
           <ReportForm/>
           <LockMovementsForm/>
           <LabeledBox label="Nachrichten" className="messages">

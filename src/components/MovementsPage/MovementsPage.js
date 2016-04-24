@@ -4,6 +4,7 @@ import MovementList from '../MovementList';
 import TabPanel from '../TabPanel';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
+import JumpNavigation from '../JumpNavigation';
 import firebase from '../../util/firebase.js';
 import { firebaseToLocal, localToFirebase, compareDescending } from '../../util/movements.js';
 
@@ -100,6 +101,7 @@ class MovementsPage extends Component {
           </header>
         </BorderLayoutItem>
         <BorderLayoutItem region="middle">
+          <JumpNavigation/>
           <TabPanel tabs={tabs}/>
         </BorderLayoutItem>
       </BorderLayout>

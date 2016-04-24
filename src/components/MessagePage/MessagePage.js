@@ -3,6 +3,7 @@ import './MessagePage.scss';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import MessageForm from '../MessageForm';
+import JumpNavigation from '../JumpNavigation';
 
 class MessagePage extends Component {
 
@@ -18,6 +19,7 @@ class MessagePage extends Component {
           </header>
         </BorderLayoutItem>
         <BorderLayoutItem region="middle">
+          <JumpNavigation/>
           <MessageForm/>
         </BorderLayoutItem>
       </BorderLayout>
