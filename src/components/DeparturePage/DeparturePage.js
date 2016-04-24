@@ -107,6 +107,7 @@ class DeparturePage extends Component {
         finishComponentClass={Finish}
         commitRequirementsDialogClass={CommitRequirementsDialog}
         defaultData={this.state.defaultData}
+        route={this.props.route}
       />
     );
   }

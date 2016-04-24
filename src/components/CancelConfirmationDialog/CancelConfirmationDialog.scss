@@ -1,0 +1,39 @@
+.CancelConfirmationDialog {
+  .heading {
+    font-size: 1.5em;
+    margin-bottom: 1em;
+  }
+
+  .msg {
+    margin-bottom: 2em;
+  }
+
+  button {
+    padding: 0.5em;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    background-color: white;
+    cursor: pointer;
+  }
+
+  button.cancel {
+    float: left;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  button.cancel:hover {
+    color: #ed351c;
+  }
+
+  button.confirm {
+    float: right;
+    background-color: #ed351c;
+    color: #fff;
+  }
+
+  button.confirm:hover {
+    background-color: #000;
+  }
+}

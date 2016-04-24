@@ -1,4 +1,5 @@
 import React, { PropTypes, Component } from 'react';
+import { connectLifecycle } from 'react-router-ad-hocs';
 import './MovementWizardPage.scss';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
@@ -6,6 +7,7 @@ import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import WizardNavigation from '../WizardNavigation';
 import CommitFailure from '../CommitFailure';
 import FullscreenFilterList from '../FullscreenFilterList';
+import CancelConfirmationDialog from '../CancelConfirmationDialog';
 import firebase from '../../util/firebase.js';
 import { firebaseToLocal, localToFirebase, isLocked } from '../../util/movements.js';
 import update from 'react-addons-update';
@@ -18,6 +20,7 @@ class MovementWizardPage extends Component {
 
     this.state = {
       step: 0,
+      changed: false,
       committed: false,
       data: this.props.defaultData,
       showValidationErrors: false,
@@ -30,6 +33,7 @@ class MovementWizardPage extends Component {
     }
 
     this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.routerWillLeave = this.routerWillLeave.bind(this);
   }
 
   componentWillMount() {
@@ -126,6 +130,31 @@ class MovementWizardPage extends Component {
     window.location.hash = '/';
   }
 
+  routerWillLeave() {
+    if (this.state.changed === true && this.state.cancelConfirmed !== true) {
+      this.setState({
+        showCancelConfirmation: true,
+      });
+      return false;
+    }
+    return true;
+  }
+
+  cancelConfirmationCancelHandler() {
+    this.setState({
+      showCancelConfirmation: false,
+    });
+  }
+
+  cancelConfirmationConfirmHandler() {
+    this.setState({
+      showCancelConfirmation: false,
+      cancelConfirmed: true,
+    }, () => {
+      window.location.hash = '/';
+    });
+  }
+
   handleKeyDown(e) {
     if (e.keyCode === 13 && e.target.tagName !== 'TEXTAREA') { // enter
       this.nextStep();
@@ -137,6 +166,7 @@ class MovementWizardPage extends Component {
       [e.key]: { $set: e.value },
     });
     this.setState({
+      changed: true,
       data,
     });
   }
@@ -349,6 +379,15 @@ class MovementWizardPage extends Component {
       )
       : null;
 
+    const cancelConfirmation = this.state.showCancelConfirmation === true
+      ? (
+        <CancelConfirmationDialog
+          onCancel={this.cancelConfirmationCancelHandler.bind(this)}
+          onConfirm={this.cancelConfirmationConfirmHandler.bind(this)}
+        />
+      )
+      : null;
+
     if (this.state.smallDevice === true) {
       return (
         <div onFocus={this.focusHandler.bind(this)} onBlur={this.blurHandler.bind(this)}>
@@ -357,6 +396,7 @@ class MovementWizardPage extends Component {
             <BorderLayoutItem region="middle">
               {middleItem}
               {commitRequirements}
+              {cancelConfirmation}
             </BorderLayoutItem>
             {southItem}
           </BorderLayout>
@@ -420,6 +460,7 @@ class MovementWizardPage extends Component {
           <BorderLayoutItem region="middle">
             {middleItem}
             {commitRequirements}
+            {cancelConfirmation}
           </BorderLayoutItem>
           {southItem}
           {quickSelectionList
@@ -451,4 +492,4 @@ MovementWizardPage.defaultProps = {
   defaultData: {},
 };
 
-export default MovementWizardPage;
+export default connectLifecycle(MovementWizardPage);

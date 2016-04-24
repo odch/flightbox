@@ -115,6 +115,7 @@ class ArrivalPage extends Component {
         finishComponentClass={Finish}
         defaultData={this.state.defaultData}
         oppositeData={this.state.oppositeData}
+        route={this.props.route}
       />
     );
   }
