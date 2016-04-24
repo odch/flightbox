@@ -21,6 +21,9 @@ class StartPage extends Component {
             <ul>
               <li>Bitte erfassen Sie Ihren <strong>Abflug immer vor dem Start</strong>.</li>
               <li>Bitte erfassen Sie Ihre <strong>Ankunft immer nach der Landung</strong>.</li>
+              <li>Möchten Sie eine Ankunft für einen bereits erfassten Abflug erfassen
+                (oder umgekehrt), nutzen Sie den Link <i>Ankunft erfassen</i> (bzw. <i>Abflug erfassen</i>)
+                bei der bereits <a href="#/movements">erfassten Bewegung</a>.</li>
               <li>Haben Sie Fragen, Anregungen oder ein anderes Anliegen bezüglich
                 der Erfassung der Abflüge und Ankünfte, benachrichtigen Sie uns
                 bitte über das <a href="#/message">Rückmeldungsformular</a>.</li>
