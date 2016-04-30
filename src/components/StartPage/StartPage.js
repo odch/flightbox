@@ -10,6 +10,7 @@ class StartPage extends Component {
     const arrivalImagePath = require('./ic_flight_land_black_48dp_2x.png');
     const movementsImagePath = require('./ic_list_black_48dp_2x.png');
     const messageImagePath = require('./ic_message_black_48dp_2x.png');
+    const helpImagePath = require('./ic_help_outline_black_48dp_2x.png');
     const adminImagePath = require('./ic_settings_black_48dp_2x.png');
     return (
       <div className="StartPage">
@@ -34,6 +35,7 @@ class StartPage extends Component {
             <ImageButton className="arrival" img={arrivalImagePath} label="Ankunft" href="#/arrival/new"/>
             <ImageButton className="movements" img={movementsImagePath} label="Erfasste Bewegungen" href="#/movements"/>
             <ImageButton className="message" img={messageImagePath} label="Rückmeldung" href="#/message"/>
+            <ImageButton className="help" img={helpImagePath} label="Hilfe" href="#/help"/>
             <ImageButton className="admin" img={adminImagePath} label="Administration" href="#/admin"/>
           </div>
         </div>

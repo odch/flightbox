@@ -9,6 +9,7 @@ import ArrivalPage from './components/ArrivalPage';
 import MovementsPage from './components/MovementsPage';
 import AdminPage from './components/AdminPage';
 import MessagePage from './components/MessagePage';
+import HelpPage from './components/HelpPage';
 
 ReactDOM.render((
   <Router>
@@ -23,6 +24,7 @@ ReactDOM.render((
       <Route path="movements" component={MovementsPage}/>
       <Route path="admin" component={AdminPage}/>
       <Route path="message" component={MessagePage}/>
+      <Route path="help" component={HelpPage}/>
     </Route>
   </Router>
 ), document.getElementById('app'));
