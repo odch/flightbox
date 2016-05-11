@@ -9,6 +9,8 @@ class TimeField extends Component {
     super(props);
     this.state = {
       value: this.parse(props.value),
+      editingHours: null,
+      editingMinutes: null,
     };
   }
 
@@ -34,9 +36,11 @@ class TimeField extends Component {
           <input
             className="hours"
             type="text"
-            value={this.formatTwoDigit(this.state.value.hours)}
+            value={this.state.editingHours !== null ? this.state.editingHours : this.formatTwoDigit(this.state.value.hours)}
             onFocus={e => e.target.select()}
-            onChange={this.updateHours.bind(this)}
+            onChange={this.editHours.bind(this)}
+            onBlur={this.updateHours.bind(this)}
+            maxLength={2}
           />
           <a className="decrement" onMouseDown={this.decrementHours.bind(this)}>-</a>
         </div>
@@ -46,9 +50,11 @@ class TimeField extends Component {
           <input
             className="minutes"
             type="text"
-            value={this.formatTwoDigit(this.state.value.minutes)}
+            value={this.state.editingMinutes ? this.state.editingMinutes : this.formatTwoDigit(this.state.value.minutes)}
             onFocus={e => e.target.select()}
-            onChange={this.updateMinutes.bind(this)}
+            onChange={this.editMinutes.bind(this)}
+            onBlur={this.updateMinutes.bind(this)}
+            maxLength={2}
           />
           <a className="decrement" onMouseDown={this.decrementMinutes.bind(this)}>-</a>
         </div>
@@ -92,22 +98,48 @@ class TimeField extends Component {
     });
   }
 
-  updateHours(e) {
-    const hours = /^\d+$/.test(e.target.value)
-      ? parseInt(e.target.value, 10)
+  editHours(e) {
+    if (/^\d{0,2}$/.test(e.target.value)) {
+      this.setState({
+        editingHours: e.target.value,
+      });
+    }
+  }
+
+  updateHours() {
+    const hours = /^\d{1,2}$/.test(this.state.editingHours)
+      ? parseInt(this.state.editingHours, 10)
       : 0;
+
     const newTime = update(this.state.value, {
       hours: { $set: hours },
+    });
+
+    this.setState({
+      editingHours: null,
     });
     this.setTime(newTime);
   }
 
-  updateMinutes(e) {
-    const minutes = /^\d+$/.test(e.target.value)
-      ? parseInt(e.target.value, 10)
+  editMinutes(e) {
+    if (/^\d{0,2}$/.test(e.target.value)) {
+      this.setState({
+        editingMinutes: e.target.value,
+      });
+    }
+  }
+
+  updateMinutes() {
+    const minutes = /^\d{1,2}$/.test(this.state.editingMinutes)
+      ? parseInt(this.state.editingMinutes, 10)
       : 0;
+
     const newTime = update(this.state.value, {
       minutes: { $set: minutes },
+    });
+
+    this.setState({
+      editingMinutes: null,
     });
     this.setTime(newTime);
   }
