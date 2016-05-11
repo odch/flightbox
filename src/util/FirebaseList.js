@@ -1,8 +1,9 @@
 class FirebaseList {
 
-  constructor(firebaseRef, comparator) {
+  constructor(firebaseRef, comparator, limit) {
     this.firebaseRef = firebaseRef;
     this.comparator = comparator;
+    this.limit = limit;
     this.results = [];
 
     this.callbacks = [];
@@ -52,18 +53,23 @@ class FirebaseList {
           results: [],
         };
         this.keySearches.push(searchObj);
-        this.firebaseRef.orderByKey().startAt(term).endAt(term + '\uf8ff').once('value', snapshot => {
-          if (snapshot.numChildren() > 0) {
-            snapshot.forEach(item => {
-              searchObj.results.push({
-                key: item.key(),
-                value: item.val(),
+        this.firebaseRef
+          .orderByKey()
+          .startAt(term)
+          .endAt(term + '\uf8ff')
+          .limitToFirst(this.limit)
+          .once('value', snapshot => {
+            if (snapshot.numChildren() > 0) {
+              snapshot.forEach(item => {
+                searchObj.results.push({
+                  key: item.key(),
+                  value: item.val(),
+                });
               });
-            });
-          }
-          searchObj.completed = true;
-          this.combineResults();
-        });
+            }
+            searchObj.completed = true;
+            this.combineResults();
+          });
       }
     });
 
@@ -87,18 +93,23 @@ class FirebaseList {
           results: [],
         };
         this.childSearches.push(searchObj);
-        this.firebaseRef.orderByChild(searchObj.child).startAt(searchObj.term).endAt(searchObj.term + '\uf8ff').once('value', snapshot => {
-          if (snapshot.numChildren() > 0) {
-            snapshot.forEach(item => {
-              searchObj.results.push({
-                key: item.key(),
-                value: item.val(),
+        this.firebaseRef
+          .orderByChild(searchObj.child)
+          .startAt(searchObj.term)
+          .endAt(searchObj.term + '\uf8ff')
+          .limitToFirst(this.limit)
+          .once('value', snapshot => {
+            if (snapshot.numChildren() > 0) {
+              snapshot.forEach(item => {
+                searchObj.results.push({
+                  key: item.key(),
+                  value: item.val(),
+                });
               });
-            });
-          }
-          searchObj.completed = true;
-          this.combineResults();
-        });
+            }
+            searchObj.completed = true;
+            this.combineResults();
+          });
       }
     });
 
@@ -118,10 +129,12 @@ class FirebaseList {
     const keySearchesCompleted = this.addResults(combinedResults, this.keySearches);
     const childSearchesCompleted = this.addResults(combinedResults, this.childSearches);
 
-    combinedResults.sort(this.comparator);
+    const limited = combinedResults.slice(0, this.limit);
+
+    limited.sort(this.comparator);
 
     this.callbacks.forEach(callback => callback({
-      data: combinedResults,
+      data: limited,
       final: keySearchesCompleted && childSearchesCompleted,
     }));
   }

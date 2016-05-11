@@ -15,7 +15,7 @@ class FilteredList extends Component {
 
   componentWillMount() {
     firebase(this.props.firebaseUri, (error, ref) => {
-      this.firebaseList = new FirebaseList(ref, this.props.itemComparator);
+      this.firebaseList = new FirebaseList(ref, this.props.itemComparator, 20);
       this.firebaseList.addResultCallback(this.onSearchResult);
       this.firebaseList.search(this.props.searchTerms);
     });
