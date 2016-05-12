@@ -8,8 +8,8 @@ module.exports = {
       credentialsAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt',
     } : {
       firebaseUrl: 'https://mfgt-flights.firebaseio.com',
-      ipAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/ip',
-      credentialsAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt',
+      ipAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/ip-test',
+      credentialsAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt-test',
     }),
   },
   entry: [
