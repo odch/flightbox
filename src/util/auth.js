@@ -40,6 +40,7 @@ export default {
   },
 
   loadCredentialsToken(credentials, callback) {
-    jsonp(Config.credentialsAuth, credentials, (error, result) => callback(result.token));
+    const url = Config.credentialsAuth + '?username=' + credentials.username + '&password=' + credentials.password;
+    jsonp(url, null, (error, result) => callback(result.token));
   },
 };
