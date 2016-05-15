@@ -1,8 +1,35 @@
 import React, { Component } from 'react';
 import './StartPage.scss';
 import ImageButton from '../ImageButton';
+import auth from '../../util/auth';
+
+const LoginInfo = props => {
+  const credentialsAuth = auth.getCredentialsAuth();
+  if (credentialsAuth) {
+    return (
+      <div className="LoginInfo">
+        <i className="material-icons">account_box</i>
+        <span className="username">{credentialsAuth.uid}</span>
+        <button className="logout" onClick={props.onLogout}>Abmelden</button>
+      </div>
+    );
+  }
+
+  return <div className="LoginInfo"><a href="#/login">Anmelden</a></div>;
+};
+
+LoginInfo.propTypes = {
+  onLogout: React.PropTypes.func,
+};
 
 class StartPage extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      auth: auth.getCredentialsAuth(),
+    };
+  }
 
   render() {
     const logoImagePath = require('./mfgt_logo_transp.png');
@@ -15,6 +42,7 @@ class StartPage extends Component {
     return (
       <div className="StartPage">
         <header>
+          <LoginInfo onLogout={this.handleLogout.bind(this)}/>
           <img className="logo" src={logoImagePath}/>
         </header>
         <div className="main">
@@ -41,6 +69,13 @@ class StartPage extends Component {
         </div>
       </div>
     );
+  }
+
+  handleLogout() {
+    auth.setCredentialsAuth(null);
+    this.setState({
+      auth: null,
+    });
   }
 }
 

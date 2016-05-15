@@ -11,6 +11,24 @@
     .logo {
       height: 85%;
     }
+
+    .LoginInfo {
+      float: right;
+
+      .username {
+        margin-right: 0.3em;
+      }
+
+      button {
+        padding: 0;
+        border: none;
+        border-radius: 5px;
+        font-size: 1em;
+        background-color: transparent;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    }
   }
 
   .main {
