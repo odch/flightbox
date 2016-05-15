@@ -1,8 +1,19 @@
 import jsonp from 'jsonp';
 import Config from 'Config';
+import Cookies from 'js-cookie';
 
 let ipToken = null;
-let credentialsToken = null;
+let credentialsAuth = null;
+
+const cookie = Cookies.get('auth');
+if (cookie) {
+  const parts = cookie.split(':');
+  credentialsAuth = {
+    uid: parts[0],
+    expiration: parts[1],
+    token: parts[2],
+  };
+}
 
 export default {
 
@@ -17,20 +28,26 @@ export default {
     return ipToken;
   },
 
-  setCredentialsToken(token) {
-    credentialsToken = token;
+  /**
+   * @param auth Object containing `uid` and `token` string and expiration date
+   * */
+  setCredentialsAuth(auth) {
+    credentialsAuth = auth;
+    if (!credentialsAuth) {
+      Cookies.remove('auth');
+    } else {
+      const value = auth.uid + ':' + auth.expiration.getTime() + ':' + auth.token;
+      Cookies.set('auth', value, { expires: auth.expiration });
+    }
   },
 
-  getCredentialsToken() {
-    if (credentialsToken === null) {
-      throw new Error('Credentials token has not been set');
-    }
-    return credentialsToken;
+  getCredentialsAuth() {
+    return credentialsAuth;
   },
 
   getBestToken() {
-    if (credentialsToken) {
-      return credentialsToken;
+    if (credentialsAuth) {
+      return credentialsAuth.token;
     }
     return this.getIpToken();
   },
