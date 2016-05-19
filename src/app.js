@@ -10,7 +10,6 @@ import MovementsPage from './components/MovementsPage';
 import AdminPage from './components/AdminPage';
 import MessagePage from './components/MessagePage';
 import HelpPage from './components/HelpPage';
-import LoginPage from './components/LoginPage';
 
 ReactDOM.render((
   <Router>
@@ -26,7 +25,6 @@ ReactDOM.render((
       <Route path="admin" component={AdminPage}/>
       <Route path="message" component={MessagePage}/>
       <Route path="help" component={HelpPage}/>
-      <Route path="login" component={LoginPage}/>
     </Route>
   </Router>
 ), document.getElementById('app'));

@@ -1,35 +1,28 @@
 import React, { Component } from 'react';
 import './StartPage.scss';
 import ImageButton from '../ImageButton';
-import auth from '../../util/auth';
 
 const LoginInfo = props => {
-  const credentialsAuth = auth.getCredentialsAuth();
-  if (credentialsAuth) {
+  if (props.auth.success === true && props.auth.type === 'credentials') {
     return (
       <div className="LoginInfo">
         <i className="material-icons">account_box</i>
-        <span className="username">{credentialsAuth.uid}</span>
+        <span className="username">{props.auth.data.uid}</span>
         <button className="logout" onClick={props.onLogout}>Abmelden</button>
       </div>
     );
   }
 
-  return <div className="LoginInfo"><a href="#/login">Anmelden</a></div>;
+  return <div className="LoginInfo"><button onClick={props.showLogin}>Anmelden</button></div>;
 };
 
 LoginInfo.propTypes = {
+  auth: React.PropTypes.object,
   onLogout: React.PropTypes.func,
+  showLogin: React.PropTypes.func,
 };
 
 class StartPage extends Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      auth: auth.getCredentialsAuth(),
-    };
-  }
 
   render() {
     const logoImagePath = require('./mfgt_logo_transp.png');
@@ -42,7 +35,7 @@ class StartPage extends Component {
     return (
       <div className="StartPage">
         <header>
-          <LoginInfo onLogout={this.handleLogout.bind(this)}/>
+          <LoginInfo onLogout={this.props.onLogout} auth={this.props.auth} showLogin={this.props.showLogin}/>
           <img className="logo" src={logoImagePath}/>
         </header>
         <div className="main">
@@ -70,13 +63,12 @@ class StartPage extends Component {
       </div>
     );
   }
-
-  handleLogout() {
-    auth.setCredentialsAuth(null);
-    this.setState({
-      auth: null,
-    });
-  }
 }
+
+StartPage.propTypes = {
+  auth: React.PropTypes.object,
+  onLogout: React.PropTypes.func,
+  showLogin: React.PropTypes.func,
+};
 
 export default StartPage;

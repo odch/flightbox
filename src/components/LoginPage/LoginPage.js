@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './LoginPage.scss';
 import LabeledComponent from '../LabeledComponent';
 import auth from '../../util/auth';
-import firebase from '../../util/firebase';
+import { authenticate } from '../../util/firebase';
 
 class LoginPage extends Component {
 
@@ -46,7 +46,7 @@ class LoginPage extends Component {
             <LabeledComponent label="Benutzername" component={usernameInput}/>
             <LabeledComponent label="Passwort" component={passwordInput}/>
             {failure && <div className="failure">Login fehlgeschlagen</div>}
-            <a href="#/">Abbrechen</a>
+            {this.props.showCancel === true && <button type="button" onClick={this.props.onCancel}>Abbrechen</button>}
             <button type="submit" disabled={submitting || username.length === 0 || password.length === 0}>
               <i className="material-icons">send</i>&nbsp;Anmelden
             </button>
@@ -73,17 +73,15 @@ class LoginPage extends Component {
     };
     auth.loadCredentialsToken(cred, token => {
       if (token) {
-        firebase('/', token, (error, ref, authData) => {
+        authenticate(token, (error, authData) => {
           if (error) {
             this.fail();
           } else {
-            auth.setCredentialsAuth({
+            this.props.onLogin({
               uid: authData.uid,
               expiration: new Date(authData.expires * 1000),
               token,
             });
-            this.setState({ submitting: false });
-            window.location.hash = '/';
           }
         });
       } else {
@@ -100,5 +98,11 @@ class LoginPage extends Component {
     });
   }
 }
+
+LoginPage.propTypes = {
+  onLogin: React.PropTypes.func,
+  onCancel: React.PropTypes.func,
+  showCancel: React.PropTypes.bool,
+};
 
 export default LoginPage;
