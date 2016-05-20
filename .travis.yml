@@ -11,5 +11,6 @@ script:
   - npm test
   - npm run build
 after_success:
+  - firebase use production
   - firebase deploy --token "${FIREBASE_TOKEN}"
 
