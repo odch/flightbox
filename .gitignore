@@ -4,6 +4,7 @@
 *.iws
 
 build/
+.wercker
 
 node_modules/
 npm-debug.log
