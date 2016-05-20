@@ -1,5 +1,8 @@
 {
-  "firebase": "mfgt-flights",
-  "public": "build",
-  "rules": "firebase-rules.json"
+  "database": {
+    "rules": "firebase-rules.json"
+  },
+  "hosting": {
+    "public": "build"
+  }
 }
