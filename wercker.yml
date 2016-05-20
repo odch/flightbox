@@ -1,5 +1,4 @@
 box: node:4
-# Defining the dev pipeline
 dev:
   steps:
     - npm-install
