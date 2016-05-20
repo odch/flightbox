@@ -1,4 +1,3 @@
-# The container definition we want to use for developing our app
 box: node:4
 # Defining the dev pipeline
 dev:
