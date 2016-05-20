@@ -1,13 +1,13 @@
 {
   "rules": {
     "departures": {
-      ".read": true,
+      ".read": "auth !== null",
       ".indexOn": [
         "dateTime",
         "negativeTimestamp"
       ],
       "$departure_id": {
-        ".write": "!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)",
+        ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24))",
         ".validate": "newData.hasChildren(['aircraftType', 'dateTime', 'departureRoute', 'duration', 'firstname', 'flightType', 'immatriculation', 'lastname', 'location', 'mtow', 'negativeTimestamp', 'runway'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -69,13 +69,13 @@
       }
     },
     "arrivals": {
-      ".read": true,
+      ".read": "auth !== null",
       ".indexOn": [
         "dateTime",
         "negativeTimestamp"
       ],
       "$arrival_id": {
-        ".write": "!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)",
+        ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24))",
         ".validate": "newData.hasChildren(['aircraftType', 'arrivalRoute', 'dateTime', 'firstname', 'flightType', 'immatriculation', 'landingCount', 'lastname', 'location', 'mtow', 'negativeTimestamp', 'runway'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -131,37 +131,50 @@
       }
     },
     "aircrafts": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth !== null",
+      ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
       ".indexOn": [
         "type"
       ]
     },
     "users": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth !== null",
+      ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
       ".indexOn": [
         "memberNr"
       ]
     },
     "aerodromes": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth !== null",
+      ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
       ".indexOn": [
         "name"
       ]
     },
     "settings": {
-      ".read": true,
-      ".write": true
+      "lockDate": {
+        ".read": "auth !== null",
+        ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
+      },
+      "aircraftsLSZT": {
+        ".read": "auth !== null",
+        ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
+      },
+      "aircraftsMFGT": {
+        ".read": "auth !== null",
+        ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
+      },
+      "$other": {
+        ".validate": false
+      }
     },
     "messages": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
       ".indexOn": [
         "negativeTimestamp"
       ],
       "$message_id": {
+        ".write": "auth !== null && !data.exists() && newData.exists()",
         ".validate": "newData.hasChildren(['name', 'email', 'phone', 'message', 'timestamp', 'negativeTimestamp'])",
         "name": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -184,6 +197,13 @@
         "$other": {
           ".validate": false
         }
+      }
+    },
+    "admins": {
+      ".read": false,
+      ".write": false,
+      "$admin_id": {
+        ".validate": "newData.exists() && newData.isBoolean()"
       }
     }
   }
