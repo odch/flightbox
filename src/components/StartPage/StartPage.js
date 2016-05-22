@@ -57,7 +57,7 @@ class StartPage extends Component {
             <ImageButton className="movements" img={movementsImagePath} label="Erfasste Bewegungen" href="#/movements"/>
             <ImageButton className="message" img={messageImagePath} label="Rückmeldung" href="#/message"/>
             <ImageButton className="help" img={helpImagePath} label="Hilfe" href="#/help"/>
-            <ImageButton className="admin" img={adminImagePath} label="Administration" href="#/admin"/>
+            {this.props.auth.admin === true && <ImageButton className="admin" img={adminImagePath} label="Administration" href="#/admin"/>}
           </div>
         </div>
       </div>
