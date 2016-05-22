@@ -200,9 +200,9 @@
       }
     },
     "admins": {
-      ".read": false,
       ".write": false,
       "$admin_id": {
+        ".read": "auth !== null && $admin_id === auth.uid",
         ".validate": "newData.exists() && newData.isBoolean()"
       }
     }

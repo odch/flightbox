@@ -19,7 +19,8 @@ class App extends Component {
        *    uid,
        *    expiration,
        *    token
-       *  }
+       *  },
+       *  admin: true|false // only if type credentials
        * }
        */
       auth: null,
@@ -57,7 +58,9 @@ class App extends Component {
         authenticate(cookie.token, (error) => {
           const success = !error;
           if (success === true) {
-            resolve(this.authObj(true, 'credentials', cookie));
+            this.checkAdmin(cookie.uid, admin => {
+              resolve(this.authObj(true, 'credentials', cookie, admin));
+            });
           } else {
             resolve(this.authObj(false, 'credentials'));
           }
@@ -134,9 +137,21 @@ class App extends Component {
 
   handleLogin(authData) {
     auth.setAuthCookie(authData);
-    this.setState({
-      auth: this.authObj(true, 'credentials', authData),
-      showLogin: false,
+    this.checkAdmin(authData.uid, isAdmin => {
+      this.setState({
+        auth: this.authObj(true, 'credentials', authData, isAdmin),
+        showLogin: false,
+      });
+    });
+  }
+
+  checkAdmin(uid, callback) {
+    firebase('/admins/' + uid, (error, ref) => {
+      ref.once('value', snapshot => {
+        callback(snapshot.exists());
+      }, () => {
+        callback(false);
+      });
     });
   }
 
@@ -148,11 +163,12 @@ class App extends Component {
     this.setState({ showLogin: false });
   }
 
-  authObj(success, type, data) {
+  authObj(success, type, data, admin) {
     return {
       success,
       type,
       data,
+      admin,
     };
   }
 }
