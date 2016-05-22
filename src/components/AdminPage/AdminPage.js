@@ -14,6 +14,12 @@ import JumpNavigation from '../JumpNavigation';
 
 class AdminPage extends Component {
 
+  componentWillMount() {
+    if (this.props.auth.admin !== true) {
+      this.props.history.push('/');
+    }
+  }
+
   render() {
     const logoImagePath = require('../../resources/mfgt_logo_transp.png');
     return (
@@ -25,32 +31,38 @@ class AdminPage extends Component {
             </a>
           </header>
         </BorderLayoutItem>
-        <BorderLayoutItem region="middle">
-          <JumpNavigation/>
-          <ReportForm/>
-          <LockMovementsForm/>
-          <LabeledBox label="Nachrichten" className="messages">
-            <MessageList firebaseUri="/messages/"/>
-          </LabeledBox>
-          <LabeledBox label="Benutzerliste importieren" className="user-import">
-            <UserImportForm/>
-          </LabeledBox>
-          <LabeledBox label="Flugplatzliste importieren" className="aerodrome-import">
-            <AerodromeImportForm/>
-          </LabeledBox>
-          <LabeledBox label="Flugzeugliste importieren" className="aircraft-import">
-            <AircraftImportForm/>
-          </LabeledBox>
-          <LabeledBox label="Flugzeuge der MFGT" className="mfgt-aircrafts">
-            <FirebaseKeyList path="/settings/aircraftsMFGT"/>
-          </LabeledBox>
-          <LabeledBox label="In Lommis stationierte Flugzeuge (ohne Flugzeuge der MFGT)" className="lszt-aircrafts">
-            <FirebaseKeyList path="/settings/aircraftsLSZT"/>
-          </LabeledBox>
-        </BorderLayoutItem>
+        {this.props.auth.admin === true &&
+          <BorderLayoutItem region="middle">
+            <JumpNavigation/>
+            <ReportForm/>
+            <LockMovementsForm/>
+            <LabeledBox label="Nachrichten" className="messages">
+              <MessageList firebaseUri="/messages/"/>
+            </LabeledBox>
+            <LabeledBox label="Benutzerliste importieren" className="user-import">
+              <UserImportForm/>
+            </LabeledBox>
+            <LabeledBox label="Flugplatzliste importieren" className="aerodrome-import">
+              <AerodromeImportForm/>
+            </LabeledBox>
+            <LabeledBox label="Flugzeugliste importieren" className="aircraft-import">
+              <AircraftImportForm/>
+            </LabeledBox>
+            <LabeledBox label="Flugzeuge der MFGT" className="mfgt-aircrafts">
+              <FirebaseKeyList path="/settings/aircraftsMFGT"/>
+            </LabeledBox>
+            <LabeledBox label="In Lommis stationierte Flugzeuge (ohne Flugzeuge der MFGT)" className="lszt-aircrafts">
+              <FirebaseKeyList path="/settings/aircraftsLSZT"/>
+            </LabeledBox>
+          </BorderLayoutItem>}
       </BorderLayout>
     );
   }
 }
+
+AdminPage.propTypes = {
+  auth: React.PropTypes.object,
+  history: React.PropTypes.object,
+};
 
 export default AdminPage;
