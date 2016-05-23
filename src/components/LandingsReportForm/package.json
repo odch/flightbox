@@ -1,0 +1,6 @@
+{
+  "name": "LandingsReportForm",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./LandingsReportForm.js"
+}
