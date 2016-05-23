@@ -3,6 +3,7 @@ import './AdminPage.scss';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import AirstatReportForm from '../AirstatReportForm';
+import LandingsReportForm from '../LandingsReportForm';
 import LockMovementsForm from '../LockMovementsForm';
 import MessageList from '../MessageList';
 import LabeledBox from '../LabeledBox';
@@ -35,6 +36,7 @@ class AdminPage extends Component {
           <BorderLayoutItem region="middle">
             <JumpNavigation/>
             <AirstatReportForm/>
+            <LandingsReportForm/>
             <LockMovementsForm/>
             <LabeledBox label="Nachrichten" className="messages">
               <MessageList firebaseUri="/messages/"/>
