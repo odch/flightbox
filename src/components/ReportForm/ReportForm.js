@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import LabeledComponent from '../LabeledComponent';
-import LabeledBox from '../LabeledBox';
 import DatePicker from '../DatePicker';
-import MovementReport from '../../util/MovementReport.js';
 import './ReportForm.scss';
 import moment from 'moment';
 
@@ -32,29 +30,19 @@ class ReportForm extends Component {
     );
 
     return (
-      <LabeledBox label="CSV-Report herunterladen" className="ReportForm">
+      <div className="ReportForm">
         <div>
           <LabeledComponent ref="startDate" label="Startdatum" component={startDatePicker}/>
           <LabeledComponent ref="endDate" label="Enddatum" component={endDatePicker}/>
         </div>
-        {this.state.generationInProgress === true
-          ? (
-          <button
-            onClick={this.buttonClickHandler.bind(this)}
-            className="generate"
-            disabled="disabled"
-          >
-            <i className="material-icons">file_download</i>&nbsp;Herunterladen
-          </button>)
-          : (
-          <button
-            onClick={this.buttonClickHandler.bind(this)}
-            className="generate"
-          >
-            <i className="material-icons">file_download</i>&nbsp;Herunterladen
-          </button>)
-        }
-      </LabeledBox>
+        <button
+          onClick={this.buttonClickHandler.bind(this)}
+          className="generate"
+          disabled={this.state.generationInProgress === true}
+        >
+          <i className="material-icons">file_download</i>&nbsp;Herunterladen
+        </button>
+      </div>
     );
   }
 
@@ -62,8 +50,8 @@ class ReportForm extends Component {
     this.setState({
       generationInProgress: true,
     });
-    new MovementReport(this.state.startDate, this.state.endDate)
-      .generate(download => {
+    this.props.generate(this.state.startDate, this.state.endDate)
+      .then(download => {
         this.setState({
           generationInProgress: false,
         });
@@ -71,5 +59,9 @@ class ReportForm extends Component {
       });
   }
 }
+
+ReportForm.propTypes = {
+  generate: React.PropTypes.func.isRequired,
+};
 
 export default ReportForm;

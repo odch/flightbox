@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './AdminPage.scss';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
-import ReportForm from '../ReportForm';
+import AirstatReportForm from '../AirstatReportForm';
 import LockMovementsForm from '../LockMovementsForm';
 import MessageList from '../MessageList';
 import LabeledBox from '../LabeledBox';
@@ -34,7 +34,7 @@ class AdminPage extends Component {
         {this.props.auth.admin === true &&
           <BorderLayoutItem region="middle">
             <JumpNavigation/>
-            <ReportForm/>
+            <AirstatReportForm/>
             <LockMovementsForm/>
             <LabeledBox label="Nachrichten" className="messages">
               <MessageList firebaseUri="/messages/"/>
