@@ -1,9 +1,9 @@
 import MovementReport from './MovementReport';
 import LandingsReport from './LandingsReport';
 
-export function airstat(startDate, endDate) {
+export function airstat(startDate, endDate, options) {
   return new Promise(resolve => {
-    new MovementReport(startDate, endDate)
+    new MovementReport(startDate, endDate, options)
       .generate(download => {
         resolve(download);
       });

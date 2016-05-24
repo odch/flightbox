@@ -35,6 +35,7 @@ class ReportForm extends Component {
           <LabeledComponent ref="startDate" label="Startdatum" component={startDatePicker}/>
           <LabeledComponent ref="endDate" label="Enddatum" component={endDatePicker}/>
         </div>
+        {this.props.children}
         <button
           onClick={this.buttonClickHandler.bind(this)}
           className="generate"
@@ -62,6 +63,7 @@ class ReportForm extends Component {
 
 ReportForm.propTypes = {
   generate: React.PropTypes.func.isRequired,
+  children: React.PropTypes.node,
 };
 
 export default ReportForm;
