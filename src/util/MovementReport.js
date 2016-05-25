@@ -131,7 +131,15 @@ class MovementReport {
   }
 
   getNumberOfMovements(movement) {
-    return (movement.type === 'D') ? 1 : movement.landingCount || 1;
+    if (movement.type === 'A') {
+      const landingCount = movement.landingCount || 1;
+
+      return (movement.arrivalRoute === 'circuits')
+        ? landingCount * 2
+        : landingCount * 2 - 1;
+    }
+
+    return 1;
   }
 
   getDirectionOfDeparture(movement) {
