@@ -50,9 +50,18 @@ class MovementReport {
 
   build(snapshots, aircrafts, callback) {
     const content = 'data:text/csv;charset=utf-8,' + this.buildContent(snapshots, aircrafts);
-    const filename = 'report_' + this.startDate + '_' + this.endDate + '.csv';
+    const filename = this.getFileName();
     const download = new Download(filename, 'text/csv;charset=utf-8;', content);
     callback(download);
+  }
+
+  getFileName() {
+    let fileName = 'ARP_LSZT_' + moment(this.startDate).format('MMYYYY');
+    if (this.options.internal === true) {
+      fileName += '_internal';
+    }
+    fileName += '.csv';
+    return fileName;
   }
 
   buildContent(snapshots, aircrafts) {

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import LabeledComponent from '../LabeledComponent';
-import DatePicker from '../DatePicker';
+import { MonthPicker } from '../DatePicker';
 import './ReportForm.scss';
 import moment from 'moment';
 
@@ -10,30 +10,22 @@ class ReportForm extends Component {
     super(props);
     this.state = {
       generationInProgress: false,
-      startDate: moment().subtract(1, 'month').startOf('month').format('YYYY-MM-DD'),
-      endDate: moment().subtract(1, 'month').endOf('month').format('YYYY-MM-DD'),
+      date: moment().subtract(1, 'month').startOf('month').format('YYYY-MM-DD'),
     };
   }
 
   render() {
-    const startDatePicker = (
-      <DatePicker
-        value={this.state.startDate}
-        onChange={(e) => this.setState({ startDate: e.value })}
-      />
-    );
-    const endDatePicker = (
-      <DatePicker
-        value={this.state.endDate}
-        onChange={(e) => this.setState({ endDate: e.value })}
+    const monthPicker = (
+      <MonthPicker
+        value={this.state.date}
+        onChange={(e) => this.setState({ date: e.value })}
       />
     );
 
     return (
       <div className="ReportForm">
         <div>
-          <LabeledComponent ref="startDate" label="Startdatum" component={startDatePicker}/>
-          <LabeledComponent ref="endDate" label="Enddatum" component={endDatePicker}/>
+          <LabeledComponent label="Monat" component={monthPicker}/>
         </div>
         {this.props.children}
         <button
@@ -51,7 +43,9 @@ class ReportForm extends Component {
     this.setState({
       generationInProgress: true,
     });
-    this.props.generate(this.state.startDate, this.state.endDate)
+    const startDate = this.state.date;
+    const endDate = moment(this.state.date).endOf('month').format('YYYY-MM-DD');
+    this.props.generate(startDate, endDate)
       .then(download => {
         this.setState({
           generationInProgress: false,
