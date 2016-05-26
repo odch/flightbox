@@ -1,11 +1,12 @@
 import React, { Component, PropTypes } from 'react';
 import ModalDialog from '../ModalDialog';
-import DatePicker from 'react-date-picker';
+import ReactDatePicker from 'react-date-picker';
+import classNames from 'classnames';
 import 'react-date-picker/base.css';
 import './DatePicker.scss';
 import dates from '../../core/dates.js';
 
-class DateTimePicker extends Component {
+class DatePicker extends Component {
 
   constructor(props) {
     super(props);
@@ -34,20 +35,15 @@ class DateTimePicker extends Component {
 
     let dialog;
     if (this.state.showPicker === true) {
-      const picker = (
-        <DatePicker
-          date={this.state.value}
-          onChange={this.updateValueHandler.bind(this)}
-          hideFooter={true}
-        />);
+      const picker = this.renderPicker();
       dialog = (
         <ModalDialog content={picker} onBlur={this.hidePicker.bind(this)}/>
       );
     }
     return (
-      <div className="DateTimePicker">
+      <div className={classNames('DatePicker', this.getClassName())}>
         <div className="value" onClick={this.showPicker.bind(this)}>
-          {this.state.value ? dates.formatDate(this.state.value) : '\u00a0'}
+          {this.state.value ? this.renderValue() : '\u00a0'}
           {this.props.clearable === true && this.state.value
             ? <button className="clear" onClick={this.clearButtonHandler.bind(this)}>
                 <i className="material-icons">clear</i>
@@ -56,6 +52,25 @@ class DateTimePicker extends Component {
         </div>
         {dialog}
       </div>
+    );
+  }
+
+  getClassName() {
+    return null;
+  }
+
+  renderValue() {
+    return dates.formatDate(this.state.value);
+  }
+
+  renderPicker() {
+    return (
+      <ReactDatePicker
+        date={this.state.value}
+        onChange={this.updateValueHandler.bind(this)}
+        hideFooter={true}
+        locale="de"
+      />
     );
   }
 
@@ -89,15 +104,45 @@ class DateTimePicker extends Component {
   }
 }
 
-DateTimePicker.propTypes = {
+DatePicker.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   clearable: PropTypes.bool,
   readOnly: PropTypes.bool,
 };
 
-DateTimePicker.defaultProps = {
+DatePicker.defaultProps = {
   clearable: false,
 };
 
-export default DateTimePicker;
+class MonthPicker extends DatePicker {
+
+  getClassName() {
+    return 'month';
+  }
+
+  renderValue() {
+    return dates.formatMonth(this.state.value);
+  }
+
+  renderPicker() {
+    return (
+      <ReactDatePicker
+        date={this.state.value}
+        hideFooter={true}
+        locale="de"
+        view="year"
+        onSelect={this.selectHandler.bind(this)}
+      />
+    );
+  }
+
+  selectHandler(dateString, moment, view) {
+    if (view === 'month') {
+      this.updateValueHandler(dateString);
+    }
+  }
+}
+
+export default DatePicker;
+export { MonthPicker };

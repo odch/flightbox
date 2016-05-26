@@ -1,4 +1,4 @@
-.DateTimePicker {
+.DatePicker {
 
   .date-picker {
     .dp-table.dp-month-view {
@@ -27,7 +27,7 @@
   }
 }
 
-.DateTimePicker:not(.readonly) {
+.DatePicker:not(.readonly) {
 
   .value {
     cursor: pointer;
