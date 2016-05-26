@@ -78,6 +78,16 @@ const dates = {
   },
 
   /**
+   * Get the month in format for given locale or locale 'de'.
+   *
+   * @param localDate the local date to format.
+   * @param locale optional locale to format the date (if missing: de)
+     */
+  formatMonth(localDate, locale = 'de') {
+    return moment.tz(localDate, 'Europe/Zurich').locale(locale).format('MMMM YYYY');
+  },
+
+  /**
    * Get the local time in format for given locale or locale 'de'.
    *
    * @param localDate date part of the local date to format

@@ -68,6 +68,14 @@ describe('dates', () => {
     expect(dates.formatDate('2015-12-29', 'en')).toBe('12/29/2015');
   });
 
+  it('formats local date month with default locale (de)', () => {
+    expect(dates.formatMonth('2015-12-29')).toBe('Dezember 2015');
+  });
+
+  it('formats local date month with given locale (en)', () => {
+    expect(dates.formatMonth('2015-12-29', 'en')).toBe('December 2015');
+  });
+
   it('formats local time with default locale (de)', () => {
     expect(dates.formatTime('2015-12-29', '13:13')).toBe('13:13');
   });
