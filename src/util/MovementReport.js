@@ -2,6 +2,7 @@ import firebase from './firebase.js';
 import Download from './Download.js';
 import { firebaseToLocal, compareAscending } from './movements.js';
 import { fetch as fetchAircrafts } from './aircrafts';
+import { fetch as fetchAerodromes } from './aerodromes';
 import { getFromItemKey } from './reference-number';
 import dates from '../core/dates.js';
 import ItemsArray from './ItemsArray.js';
@@ -24,11 +25,13 @@ class MovementReport {
     ];
     const promises = types.map(this.readMovements, this);
     const aircrafts = fetchAircrafts();
-    Promise.all(promises.concat([aircrafts]))
+    const aerodromes = fetchAerodromes();
+    Promise.all(promises.concat([aircrafts, aerodromes]))
       .then((results) => {
         const snapshots = [results[0], results[1]];
         const aircrafts = results[2];
-        this.build(snapshots, aircrafts, callback);
+        const aerodromes = results[3];
+        this.build(snapshots, aircrafts, aerodromes, callback);
       });
   }
 
@@ -48,8 +51,8 @@ class MovementReport {
     });
   }
 
-  build(snapshots, aircrafts, callback) {
-    const content = 'data:text/csv;charset=utf-8,' + this.buildContent(snapshots, aircrafts);
+  build(snapshots, aircrafts, aerodromes, callback) {
+    const content = 'data:text/csv;charset=utf-8,' + this.buildContent(snapshots, aircrafts, aerodromes);
     const filename = this.getFileName();
     const download = new Download(filename, 'text/csv;charset=utf-8;', content);
     callback(download);
@@ -64,12 +67,12 @@ class MovementReport {
     return fileName;
   }
 
-  buildContent(snapshots, aircrafts) {
+  buildContent(snapshots, aircrafts, aerodromes) {
     const movements = this.getMovementsArray(snapshots);
 
     const csvRecords = movements
       .filter(movement => !(movement.type === 'D' && movement.departureRoute === 'circuits'))
-      .map(movement => this.getMovementString(movement, aircrafts), this);
+      .map(movement => this.getMovementString(movement, aircrafts, aerodromes), this);
 
     const header = (this.options.internal === true)
       ? MovementReport.header.concat(MovementReport.internalHeader)
@@ -95,14 +98,14 @@ class MovementReport {
     return movements.array;
   }
 
-  getMovementString(movement, aircrafts) {
+  getMovementString(movement, aircrafts, aerodromes) {
     const airstatRecord = {
       ARP: 'LSZT',
       TYPMO: this.getMovementType(movement),
       ACREG: movement.immatriculation,
       TYPTR: this.getTypeOfTraffic(movement),
       NUMMO: this.getNumberOfMovements(movement),
-      ORIDE: movement.location,
+      ORIDE: this.getLocation(movement.location, aerodromes),
       PAX: movement.passengerCount || 0,
       DATMO: movement.date.replace(/-/g, ''),
       TIMMO: movement.time.replace(/:/g, ''),
@@ -151,6 +154,17 @@ class MovementReport {
     return 1;
   }
 
+  getLocation(location, aerodromes) {
+    if (location && typeof location === 'string') {
+      const upper = location.toUpperCase();
+      const result = aerodromes[upper];
+      if (result) {
+        return upper;
+      }
+    }
+    return MovementReport.LOCATION_DEFAULT;
+  }
+
   getDirectionOfDeparture(movement) {
     return (movement.type === 'D') ? movement.departureRoute : '';
   }
@@ -162,6 +176,9 @@ class MovementReport {
     airstatRecord.MTOW = movement.mtow;
     airstatRecord.MFGT = aircrafts.mfgt[movement.immatriculation] === true ? 1 : undefined;
     airstatRecord.LSZT = aircrafts.lszt[movement.immatriculation] === true ? 1 : undefined;
+    airstatRecord.ORIGINAL_ORIDE = airstatRecord.ORIDE === MovementReport.LOCATION_DEFAULT
+      ? movement.location
+      : undefined;
     airstatRecord.REMARKS = movement.remarks;
 
     return airstatRecord;
@@ -193,7 +210,10 @@ MovementReport.internalHeader = [
   'MTOW',
   'MFGT',
   'LSZT',
+  'ORIGINAL_ORIDE',
   'REMARKS',
 ];
+
+MovementReport.LOCATION_DEFAULT = 'LSZZ';
 
 export default MovementReport;
