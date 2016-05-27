@@ -11,16 +11,13 @@ class AircraftList extends Component {
     if (this.props.immatriculation) {
       searchTerms.key(this.props.immatriculation.toUpperCase().trim(), ['HB', 'D', 'OE', 'I', 'F', 'N']);
     }
-    if (this.props.aircraftType) {
-      searchTerms.child('type', this.props.aircraftType.toUpperCase().trim());
-    }
     return searchTerms;
   }
 
   render() {
     const emptyTitle = 'Flugzeug auswählen';
     const emptyMessage = this.props.emptyMessage ||
-      'Tippen Sie die ersten Buchstaben der Immatrikulation oder des Typs und wählen ' +
+      'Tippen Sie die ersten Buchstaben der Immatrikulation und wählen ' +
       'Sie das gewünschte Flugzeug anschliessend aus der Liste hier aus.';
 
     const searchTerms = this.buildSearchTerms();
@@ -44,7 +41,6 @@ class AircraftList extends Component {
 
 AircraftList.propTypes = {
   immatriculation: PropTypes.string,
-  aircraftType: PropTypes.string,
   onClick: PropTypes.func,
   emptyMessage: PropTypes.string,
 };

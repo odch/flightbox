@@ -20,12 +20,6 @@ const lists = {
       label: 'Immatrikulation',
       emptyMessage: 'Tippen Sie die ersten Buchstaben der Immatrikulation und wählen ' +
       'Sie das gewünschte Flugzeug anschliessend aus der Liste hier aus.',
-    }, {
-      field: 'aircraftType',
-      filterProp: 'aircraftType',
-      label: 'Flugzeugtyp',
-      emptyMessage: 'Tippen Sie die ersten Buchstaben des Typs und wählen ' +
-      'Sie das gewünschte Flugzeug anschliessend aus der Liste hier aus.',
     }],
   },
   user: {
