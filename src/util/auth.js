@@ -1,33 +1,42 @@
 import jsonp from 'jsonp';
 import Config from 'Config';
 import Cookies from 'js-cookie';
+import moment from 'moment';
+
+function isExpired(expirationDate) {
+  return moment(expirationDate).isBefore(moment());
+}
 
 export default {
 
   /**
-   * @param auth Object containing `uid` and `token` string and expiration date
+   * @param {Object} auth Object containing `uid` and `token` string and expiration date
    * */
   setAuthCookie(auth) {
     if (!auth) {
       Cookies.remove('auth');
     } else {
       const value = auth.uid + ':' + auth.expiration.getTime() + ':' + auth.token;
-      Cookies.set('auth', value, { expires: auth.expiration });
+      Cookies.set('auth', value); // no expires field, should expire when session is closed
     }
   },
 
   /**
-   * @return an object containing `uid` and `token` string and expiration date in ms
+   * @return {Object} an object containing `uid` and `token` string and expiration date
    * */
   getAuthCookie() {
     const cookie = Cookies.get('auth');
     if (cookie) {
       const parts = cookie.split(':');
-      return {
-        uid: parts[0],
-        expiration: parts[1],
-        token: parts[2],
-      };
+      const [uid, expiration, token] = parts;
+      const expirationDate = new Date(parseInt(expiration, 10));
+      if (!isExpired(expirationDate)) { // session cookie could outlive token expiration
+        return {
+          uid,
+          expiration: expirationDate,
+          token,
+        };
+      }
     }
     return null;
   },
