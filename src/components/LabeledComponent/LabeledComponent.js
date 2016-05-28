@@ -3,6 +3,13 @@ import './LabeledComponent.scss';
 
 class LabeledComponent extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      tooltipVisible: false,
+    };
+  }
+
   render() {
     let className = 'LabeledComponent ' + this.props.className;
 
@@ -20,12 +27,25 @@ class LabeledComponent extends Component {
     }
 
     return (
-      <div className={className}>
+      <div className={className} onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)}>
         <label>{this.props.label}</label>
         {validationMsg}
         <div className="component-wrap">{this.props.component}</div>
+        {this.state.tooltipVisible && this.props.tooltip && <div className="tooltip">{this.props.tooltip}</div>}
       </div>
     );
+  }
+
+  onFocus() {
+    this.setState({
+      tooltipVisible: true,
+    });
+  }
+
+  onBlur() {
+    this.setState({
+      tooltipVisible: false,
+    });
   }
 }
 
@@ -34,6 +54,7 @@ LabeledComponent.propTypes = {
   component: PropTypes.element.isRequired,
   className: PropTypes.string,
   validationError: PropTypes.string,
+  tooltip: PropTypes.string,
 };
 
 export default LabeledComponent;
