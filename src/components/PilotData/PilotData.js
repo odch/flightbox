@@ -51,6 +51,8 @@ class PilotData extends WizardStep {
           className="memberNr"
           component={memberNrInput}
           validationError={this.getValidationError('memberNr')}
+          tooltip="Tippen Sie die ersten Zahlen der Mitgliedernummer und wählen Sie anschliessend aus der Liste
+          rechts aus."
         />
         <LabeledComponent
           label="Telefon"

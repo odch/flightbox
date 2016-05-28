@@ -59,6 +59,8 @@ class DepartureArrivalData extends WizardStep {
           className="location"
           component={locationInput}
           validationError={this.getValidationError('location')}
+          tooltip="Tippen Sie die ersten Buchstaben der ICAO-Identifikation oder des Namens und wählen Sie
+          anschliessend aus der Liste rechts aus."
         />
         <LabeledComponent
           label="Flugdauer"

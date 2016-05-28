@@ -43,6 +43,8 @@ class AircraftData extends WizardStep {
           className="immatriculation"
           component={immatriculationInput}
           validationError={this.getValidationError('immatriculation')}
+          tooltip="Tippen Sie die ersten Buchstaben der Immatrikulation und wählen Sie das gewünschte Flugzeug
+          anschliessend aus der Liste rechts aus."
         />
         <LabeledComponent
           label="Typ"
