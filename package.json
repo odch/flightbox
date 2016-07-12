@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "webpack-dev-server --progress --colors --host 0.0.0.0",
+    "start": "DEV=1 webpack-dev-server --progress --colors --host 0.0.0.0",
     "build": "gulp build",
     "build:prod": "gulp build:prod",
     "test": "gulp test"

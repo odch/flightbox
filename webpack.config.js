@@ -1,4 +1,9 @@
 const path = require('path');
+const webpack = require('webpack');
+
+const featureFlags = new webpack.DefinePlugin({
+  __DEV__: process.env.DEV || false,
+});
 
 module.exports = {
   externals: {
@@ -51,4 +56,5 @@ module.exports = {
       },
     ],
   },
+  plugins: [featureFlags],
 };
