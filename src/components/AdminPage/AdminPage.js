@@ -16,7 +16,7 @@ import JumpNavigation from '../JumpNavigation';
 class AdminPage extends Component {
 
   componentWillMount() {
-    if (this.props.auth.admin !== true) {
+    if (this.props.auth.data.admin !== true) {
       this.props.history.push('/');
     }
   }
@@ -32,7 +32,7 @@ class AdminPage extends Component {
             </a>
           </header>
         </BorderLayoutItem>
-        {this.props.auth.admin === true &&
+        {this.props.auth.data.admin === true &&
           <BorderLayoutItem region="middle">
             <JumpNavigation/>
             <AirstatReportForm/>
@@ -63,8 +63,8 @@ class AdminPage extends Component {
 }
 
 AdminPage.propTypes = {
-  auth: React.PropTypes.object,
-  history: React.PropTypes.object,
+  auth: React.PropTypes.object.isRequired,
+  history: React.PropTypes.object.isRequired,
 };
 
 export default AdminPage;

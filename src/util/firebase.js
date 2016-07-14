@@ -1,6 +1,5 @@
 import Config from 'Config';
 import Firebase from 'firebase';
-import auth from './auth.js';
 
 /**
  * Get a firebase ref.
@@ -17,19 +16,26 @@ function firebase(path, callback) {
   callback(null, ref);
 }
 
-export function authenticate(token, callback) {
-  const ref = new Firebase(Config.firebaseUrl);
-  ref.authWithCustomToken(token, (error, authData) => {
-    if (error) {
-      callback(error);
-    } else {
-      callback(null, authData);
-    }
+export function authenticate(token) {
+  return () => new Promise((resolve, reject) => {
+    const ref = new Firebase(Config.firebaseUrl);
+    ref.authWithCustomToken(token, (error, authData) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(authData);
+      }
+    }, {
+      remember: 'sessionOnly',
+    });
   });
 }
 
 export function unauth() {
-  new Firebase(Config.firebaseUrl).unauth();
+  return () => new Promise((resolve) => {
+    new Firebase(Config.firebaseUrl).unauth();
+    resolve();
+  });
 }
 
 export default firebase;

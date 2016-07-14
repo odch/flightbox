@@ -115,4 +115,9 @@ class DeparturePage extends Component {
   }
 }
 
+DeparturePage.propTypes = {
+  params: React.PropTypes.object.isRequired,
+  route: React.PropTypes.object.isRequired,
+};
+
 export default DeparturePage;

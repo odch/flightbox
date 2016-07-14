@@ -3,12 +3,12 @@ import './StartPage.scss';
 import ImageButton from '../ImageButton';
 
 const LoginInfo = props => {
-  if (props.auth.success === true && props.auth.type === 'credentials') {
+  if (props.auth.authenticated === true && typeof props.auth.data.uid === 'string') {
     return (
       <div className="LoginInfo">
         <i className="material-icons">account_box</i>
         <span className="username">{props.auth.data.uid}</span>
-        <button className="logout" onClick={props.onLogout}>Abmelden</button>
+        <button className="logout" onClick={props.logout}>Abmelden</button>
       </div>
     );
   }
@@ -17,9 +17,9 @@ const LoginInfo = props => {
 };
 
 LoginInfo.propTypes = {
-  auth: React.PropTypes.object,
-  onLogout: React.PropTypes.func,
-  showLogin: React.PropTypes.func,
+  auth: React.PropTypes.object.isRequired,
+  logout: React.PropTypes.func.isRequired,
+  showLogin: React.PropTypes.func.isRequired,
 };
 
 class StartPage extends Component {
@@ -35,7 +35,7 @@ class StartPage extends Component {
     return (
       <div className="StartPage">
         <header>
-          <LoginInfo onLogout={this.props.onLogout} auth={this.props.auth} showLogin={this.props.showLogin}/>
+          <LoginInfo logout={this.props.logout} auth={this.props.auth} showLogin={this.props.showLogin}/>
           <img className="logo" src={logoImagePath}/>
         </header>
         <div className="main">
@@ -57,7 +57,7 @@ class StartPage extends Component {
             <ImageButton className="movements" img={movementsImagePath} label="Erfasste Bewegungen" href="#/movements"/>
             <ImageButton className="message" img={messageImagePath} label="Rückmeldung" href="#/message"/>
             <ImageButton className="help" img={helpImagePath} label="Hilfe" href="#/help"/>
-            {this.props.auth.admin === true && <ImageButton className="admin" img={adminImagePath} label="Administration" href="#/admin"/>}
+            {this.props.auth.data.admin === true && <ImageButton className="admin" img={adminImagePath} label="Administration" href="#/admin"/>}
           </div>
         </div>
       </div>
@@ -66,9 +66,9 @@ class StartPage extends Component {
 }
 
 StartPage.propTypes = {
-  auth: React.PropTypes.object,
-  onLogout: React.PropTypes.func,
-  showLogin: React.PropTypes.func,
+  auth: React.PropTypes.object.isRequired,
+  logout: React.PropTypes.func.isRequired,
+  showLogin: React.PropTypes.func.isRequired,
 };
 
 export default StartPage;

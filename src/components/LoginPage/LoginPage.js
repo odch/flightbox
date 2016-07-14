@@ -6,18 +6,8 @@ import { authenticate } from '../../util/firebase';
 
 class LoginPage extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      failure: false,
-      submitting: false,
-      username: '',
-      password: '',
-    };
-  }
-
   render() {
-    const { username, password, submitting, failure } = this.state;
+    const { username, password, submitting, failure, updateUsername, updatePassword } = this.props;
     const logoImagePath = require('../../resources/mfgt_logo_transp.png');
     const usernameInput = (
       <input
@@ -25,7 +15,7 @@ class LoginPage extends Component {
         value={username}
         autoFocus={true}
         readOnly={submitting}
-        onChange={this.updateUsername.bind(this)}
+        onChange={e => { updateUsername(e.target.value); }}
       />
     );
     const passwordInput = (
@@ -33,7 +23,7 @@ class LoginPage extends Component {
         type="password"
         value={password}
         readOnly={submitting}
-        onChange={this.updatePassword.bind(this)}
+        onChange={e => { updatePassword(e.target.value); }}
       />
     );
     return (
@@ -42,10 +32,10 @@ class LoginPage extends Component {
           <a href="#/"><img className="logo" src={logoImagePath}/></a>
         </header>
         <div className="main">
-          <form onSubmit={this.handleSubmit.bind(this)}>
+          <form onSubmit={this.submitLogin.bind(this)} disabled={this.props.submitting}>
             <LabeledComponent label="Benutzername" component={usernameInput}/>
             <LabeledComponent label="Passwort" component={passwordInput}/>
-            {failure && <div className="failure">Login fehlgeschlagen</div>}
+            <div className="failure">{failure ? 'Login fehlgeschlagen' : '\u00a0'}</div>
             {this.props.showCancel === true && <button type="button" onClick={this.props.onCancel}>Abbrechen</button>}
             <button type="submit" disabled={submitting || username.length === 0 || password.length === 0}>
               <i className="material-icons">send</i>&nbsp;Anmelden
@@ -56,53 +46,20 @@ class LoginPage extends Component {
     );
   }
 
-  updateUsername(e) {
-    this.setState({ username: e.target.value });
-  }
-
-  updatePassword(e) {
-    this.setState({ password: e.target.value });
-  }
-
-  handleSubmit(e) {
+  submitLogin(e) {
     e.preventDefault();
-    this.setState({ submitting: true });
-    const cred = {
-      username: this.state.username,
-      password: this.state.password,
-    };
-    auth.loadCredentialsToken(cred, token => {
-      if (token) {
-        authenticate(token, (error, authData) => {
-          if (error) {
-            this.fail();
-          } else {
-            this.props.onLogin({
-              uid: authData.uid,
-              expiration: new Date(authData.expires * 1000),
-              token,
-            });
-          }
-        });
-      } else {
-        this.fail();
-      }
-    });
-  }
-
-  fail() {
-    this.setState({
-      failure: true,
-      submitting: false,
-      password: '',
-    });
+    this.props.authenticate(this.props.username, this.props.password);
   }
 }
 
 LoginPage.propTypes = {
-  onLogin: React.PropTypes.func,
-  onCancel: React.PropTypes.func,
-  showCancel: React.PropTypes.bool,
+  authenticate: React.PropTypes.func.isRequired,
+  onCancel: React.PropTypes.func.isRequired,
+  showCancel: React.PropTypes.bool.isRequired,
+  username: React.PropTypes.string.isRequired,
+  password: React.PropTypes.string.isRequired,
+  submitting: React.PropTypes.bool.isRequired,
+  failure: React.PropTypes.bool.isRequired,
 };
 
 export default LoginPage;

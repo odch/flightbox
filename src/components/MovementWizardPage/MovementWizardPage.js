@@ -494,6 +494,7 @@ MovementWizardPage.propTypes = {
   commitRequirementsDialogClass: PropTypes.func,
   defaultData: PropTypes.object,
   oppositeData: PropTypes.object,
+  route: PropTypes.object.isRequired,
 };
 
 MovementWizardPage.defaultProps = {
