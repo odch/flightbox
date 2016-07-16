@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import './HelpPage.scss';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
@@ -171,7 +172,7 @@ class HelpPage extends Component {
 
   handleItemClick(index) {
     const box = this.refs['box' + index];
-    const domNode = React.findDOMNode(box);
+    const domNode = ReactDOM.findDOMNode(box);
     domNode.scrollIntoView();
   }
 }

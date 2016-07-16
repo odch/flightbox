@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, IndexRoute } from 'react-router';
+import { Router, Route, IndexRoute, hashHistory } from 'react-router';
 
 import App from './components/App';
 import StartPage from './components/StartPage';
@@ -12,7 +12,7 @@ import MessagePage from './components/MessagePage';
 import HelpPage from './components/HelpPage';
 
 ReactDOM.render((
-  <Router>
+  <Router history={hashHistory}>
     <Route path="/" component={App}>
       <IndexRoute component={StartPage}/>
       <Route path="departure/new" component={DeparturePage}/>

@@ -175,7 +175,6 @@ class App extends Component {
 
 App.propTypes = {
   children: PropTypes.element.isRequired,
-  history: PropTypes.object.isRequired,
 };
 
 export default App;

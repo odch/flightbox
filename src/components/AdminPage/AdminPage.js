@@ -17,7 +17,7 @@ class AdminPage extends Component {
 
   componentWillMount() {
     if (this.props.auth.admin !== true) {
-      this.props.history.push('/');
+      this.context.router.push('/');
     }
   }
 
@@ -64,7 +64,10 @@ class AdminPage extends Component {
 
 AdminPage.propTypes = {
   auth: React.PropTypes.object,
-  history: React.PropTypes.object,
+};
+
+AdminPage.contextTypes = {
+  router: React.PropTypes.object.isRequired,
 };
 
 export default AdminPage;
