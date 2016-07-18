@@ -1,5 +1,4 @@
 import React, { PropTypes, Component } from 'react';
-import { connectLifecycle } from 'react-router-ad-hocs';
 import './MovementWizardPage.scss';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
@@ -131,7 +130,7 @@ class MovementWizardPage extends Component {
     window.location.hash = '/';
   }
 
-  routerWillLeave() {
+  routerWillLeave() { // FIXME: never called
     if (this.state.changed === true && this.state.cancelConfirmed !== true) {
       this.setState({
         showCancelConfirmation: true,
@@ -501,4 +500,4 @@ MovementWizardPage.defaultProps = {
   defaultData: {},
 };
 
-export default connectLifecycle(MovementWizardPage);
+export default MovementWizardPage;

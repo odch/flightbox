@@ -31,7 +31,6 @@ class App extends Component {
 
 App.propTypes = {
   children: PropTypes.element.isRequired,
-  history: PropTypes.object.isRequired,
   auth: PropTypes.object.isRequired,
   showLogin: PropTypes.bool.isRequired,
 };

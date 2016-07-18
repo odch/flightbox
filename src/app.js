@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, IndexRoute } from 'react-router';
+import { Router, Route, IndexRoute, hashHistory } from 'react-router';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware, compose } from 'redux';
 import createSagaMiddleware from 'redux-saga';
@@ -33,7 +33,7 @@ if (__DEV__) {
 
 ReactDOM.render((
   <Provider store={store}>
-    <Router>
+    <Router history={hashHistory}>
       <Route path="/" component={App}>
         <IndexRoute component={StartPage}/>
         <Route path="departure/new" component={DeparturePage}/>
