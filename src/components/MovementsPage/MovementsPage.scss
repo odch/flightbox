@@ -3,6 +3,10 @@
   .middle {
     padding: 2em;
 
+    .LoadingInfo {
+      text-align: center;
+    }
+
     @media (max-width: 768px) {
       padding: 1em 0 0 0;
     }

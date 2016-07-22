@@ -1,3 +1,5 @@
+import { call, put } from 'redux-saga/effects'
+
 export default function createChannel() {
   const messageQueue = [];
   const resolveQueue = [];
@@ -31,3 +33,10 @@ export default function createChannel() {
     put,
   };
 };
+
+export function* monitor(channel) {
+  while (true) {
+    const action = yield call(channel.take);
+    yield put(action);
+  }
+}

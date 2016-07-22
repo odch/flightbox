@@ -5,6 +5,10 @@ import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialo
 import firebase from '../../util/firebase.js';
 import { AutoLoad } from '../../util/AutoLoad.js';
 
+const LoadingInfo = () => (
+  <div className="LoadingInfo">Bewegungen werden geladen ...</div>
+);
+
 /**
  * today
  * yesterday
@@ -16,6 +20,12 @@ class MovementList extends Component {
   constructor(props) {
     super(props);
     this.state = {};
+  }
+
+  componentWillMount() {
+    if (this.props.items.length === 0) {
+      this.props.loadItems();
+    }
   }
 
   onListDeleteTrigger(item) {
@@ -117,6 +127,7 @@ class MovementList extends Component {
           onDelete={this.onListDeleteTrigger.bind(this)}
           lockDate={this.props.lockDate}
         />
+        {this.props.loading && <LoadingInfo/>}
         {confirmationDialog}
       </div>
     );
@@ -124,7 +135,9 @@ class MovementList extends Component {
 }
 
 MovementList.propTypes = {
+  loadItems: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
+  loading: PropTypes.bool.isRequired,
   firebaseUri: PropTypes.string,
   onClick: PropTypes.func,
   onAction: PropTypes.func,

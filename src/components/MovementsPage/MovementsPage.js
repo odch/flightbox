@@ -6,7 +6,6 @@ import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import JumpNavigation from '../JumpNavigation';
 import firebase from '../../util/firebase.js';
-import { firebaseToLocal, localToFirebase, compareDescending } from '../../util/movements.js';
 
 class MovementsPage extends Component {
 
@@ -58,10 +57,9 @@ class MovementsPage extends Component {
       <MovementList
         key="departures"
         className="departures"
-        firebaseUri="/departures/"
-        comparator={compareDescending}
-        localToFirebase={localToFirebase}
-        firebaseToLocal={firebaseToLocal}
+        loadItems={this.props.loadDepartures}
+        items={this.props.movements.departures.data.array}
+        loading={this.props.movements.departures.loading}
         onClick={this.departuresListClick.bind(this)}
         onAction={this.departuresActionClick.bind(this)}
         actionIcon="flight_land"
@@ -73,10 +71,9 @@ class MovementsPage extends Component {
       <MovementList
         key="arrivals"
         className="arrivals"
-        firebaseUri="/arrivals/"
-        comparator={compareDescending}
-        localToFirebase={localToFirebase}
-        firebaseToLocal={firebaseToLocal}
+        loadItems={this.props.loadArrivals}
+        items={this.props.movements.arrivals.data.array}
+        loading={this.props.movements.arrivals.loading}
         onClick={this.arrivalsListClick.bind(this)}
         onAction={this.arrivalsActionClick.bind(this)}
         actionIcon="flight_takeoff"
@@ -108,5 +105,11 @@ class MovementsPage extends Component {
     );
   }
 }
+
+MovementsPage.propTypes = {
+  movements: React.PropTypes.object.isRequired,
+  loadDepartures: React.PropTypes.func.isRequired,
+  loadArrivals: React.PropTypes.func.isRequired,
+};
 
 export default MovementsPage;
