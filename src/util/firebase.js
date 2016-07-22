@@ -13,7 +13,11 @@ function firebase(path, callback) {
     path = '/';
   }
   const ref = new Firebase(Config.firebaseUrl + path);
-  callback(null, ref);
+  if (typeof callback === 'function') {
+    callback(null, ref);
+  } else {
+    return ref;
+  }
 }
 
 export function authenticate(token) {
