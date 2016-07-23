@@ -5,34 +5,11 @@ import TabPanel from '../TabPanel';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import JumpNavigation from '../JumpNavigation';
-import firebase from '../../util/firebase.js';
 
 class MovementsPage extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      lockDate: null,
-    };
-  }
-
   componentWillMount() {
-    firebase('/settings/lockDate', (error, ref) => {
-      this.firebaseRef = ref;
-      this.firebaseRef.on('value', this.onLockDateValue, this);
-    });
-  }
-
-  componentWillUnmount() {
-    if (this.firebaseRef) {
-      this.firebaseRef.off('value', this.onLockDateValue, this);
-    }
-  }
-
-  onLockDateValue(data) {
-    this.setState({
-      lockDate: data.val(),
-    });
+    this.props.loadLockDate();
   }
 
   departuresListClick(item) {
@@ -64,7 +41,7 @@ class MovementsPage extends Component {
         onAction={this.departuresActionClick.bind(this)}
         actionIcon="flight_land"
         actionLabel="Ankunft erfassen"
-        lockDate={this.state.lockDate}
+        lockDate={this.props.lockDate}
       />
     );
     const arrivalsList = (
@@ -78,7 +55,7 @@ class MovementsPage extends Component {
         onAction={this.arrivalsActionClick.bind(this)}
         actionIcon="flight_takeoff"
         actionLabel="Abflug erfassen"
-        lockDate={this.state.lockDate}
+        lockDate={this.props.lockDate}
       />
     );
     const tabs = [{
@@ -110,6 +87,8 @@ MovementsPage.propTypes = {
   movements: React.PropTypes.object.isRequired,
   loadDepartures: React.PropTypes.func.isRequired,
   loadArrivals: React.PropTypes.func.isRequired,
+  lockDate: React.PropTypes.object.isRequired,
+  loadLockDate: React.PropTypes.func.isRequired,
 };
 
 export default MovementsPage;

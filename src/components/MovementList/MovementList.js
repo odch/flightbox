@@ -50,6 +50,10 @@ class MovementList extends Component {
   }
 
   render() {
+    if (this.props.lockDate.loading === true) {
+      return <LoadingInfo/>;
+    }
+
     const movements = this.props.items;
 
     const movementsAfterToday = movements.filter(Predicates.newerThanSameDay());
@@ -83,7 +87,7 @@ class MovementList extends Component {
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
-          lockDate={this.props.lockDate}
+          lockDate={this.props.lockDate.date}
         />
         <MovementGroup
           label="Heute"
@@ -94,7 +98,7 @@ class MovementList extends Component {
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
-          lockDate={this.props.lockDate}
+          lockDate={this.props.lockDate.date}
         />
         <MovementGroup
           label="Gestern"
@@ -105,7 +109,7 @@ class MovementList extends Component {
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
-          lockDate={this.props.lockDate}
+          lockDate={this.props.lockDate.date}
         />
         <MovementGroup
           label="Dieser Monat"
@@ -115,7 +119,7 @@ class MovementList extends Component {
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
-          lockDate={this.props.lockDate}
+          lockDate={this.props.lockDate.date}
         />
         <MovementGroup
           label="Älter"
@@ -125,7 +129,7 @@ class MovementList extends Component {
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.onListDeleteTrigger.bind(this)}
-          lockDate={this.props.lockDate}
+          lockDate={this.props.lockDate.date}
         />
         {this.props.loading && <LoadingInfo/>}
         {confirmationDialog}
@@ -143,7 +147,7 @@ MovementList.propTypes = {
   onAction: PropTypes.func,
   actionIcon: PropTypes.string,
   actionLabel: PropTypes.string,
-  lockDate: PropTypes.number,
+  lockDate: PropTypes.object.isRequired,
 };
 
 export default AutoLoad(MovementList);

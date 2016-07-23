@@ -4,7 +4,7 @@ import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import AirstatReportForm from '../AirstatReportForm';
 import LandingsReportForm from '../LandingsReportForm';
-import LockMovementsForm from '../LockMovementsForm';
+import LockMovementsForm from '../../containers/LockMovementsFormContainer';
 import MessageList from '../MessageList';
 import LabeledBox from '../LabeledBox';
 import UserImportForm from '../UserImportForm';
