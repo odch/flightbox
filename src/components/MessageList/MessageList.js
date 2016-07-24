@@ -1,19 +1,15 @@
 import React, { PropTypes, Component } from 'react';
-import { AutoLoad } from '../../util/AutoLoad.js';
 import dates from '../../core/dates.js';
 import './MessageList.scss';
 
 class MessageList extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      selected: null,
-    };
+  componentWillMount() {
+    this.props.loadMessages();
   }
 
   render() {
-    if (this.props.items.length === 0) {
+    if (this.props.messages.data.array.length === 0) {
       return (
         <div className="MessageList empty">Keine Nachrichten</div>
       );
@@ -21,8 +17,8 @@ class MessageList extends Component {
 
     return (
       <div className="MessageList">
-        {this.props.items.map((item, index) => {
-          const isSelected = this.state.selected === item.key;
+        {this.props.messages.data.array.map((item, index) => {
+          const isSelected = this.props.messages.selected === item.key;
 
           let className = 'item';
           if (isSelected) {
@@ -30,7 +26,7 @@ class MessageList extends Component {
           }
 
           return (
-            <div key={index} className={className} onClick={this.handleHeaderClick.bind(this, item)}>
+            <div key={index} className={className} onClick={this.handleHeaderClick.bind(this, item.key)}>
               <div className="header">
                 <div className="name">{item.name}</div>
                 <div className="date">{dates.formatDate(item.timestamp)}</div>
@@ -58,15 +54,15 @@ class MessageList extends Component {
     );
   }
 
-  handleHeaderClick(item) {
-    this.setState({
-      selected: this.state.selected === item.key ? null : item.key,
-    });
+  handleHeaderClick(key) {
+    this.props.selectMessage(this.props.messages.selected === key ? null : key);
   }
 }
 
 MessageList.propTypes = {
-  items: PropTypes.array.isRequired,
+  messages: PropTypes.object.isRequired,
+  loadMessages: PropTypes.func.isRequired,
+  selectMessage: PropTypes.func.isRequired,
 };
 
-export default AutoLoad(MessageList);
+export default MessageList;

@@ -5,7 +5,7 @@ import BorderLayoutItem from '../BorderLayoutItem';
 import AirstatReportForm from '../AirstatReportForm';
 import LandingsReportForm from '../LandingsReportForm';
 import LockMovementsForm from '../../containers/LockMovementsFormContainer';
-import MessageList from '../MessageList';
+import MessageList from '../../containers/MessageListContainer';
 import LabeledBox from '../LabeledBox';
 import UserImportForm from '../UserImportForm';
 import AerodromeImportForm from '../AerodromeImportForm';
@@ -39,7 +39,7 @@ class AdminPage extends Component {
             <LandingsReportForm/>
             <LockMovementsForm/>
             <LabeledBox label="Nachrichten" className="messages">
-              <MessageList firebaseUri="/messages/"/>
+              <MessageList/>
             </LabeledBox>
             <LabeledBox label="Benutzerliste importieren" className="user-import">
               <UserImportForm/>
