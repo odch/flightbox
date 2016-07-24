@@ -14,7 +14,7 @@ function messagesLoaded(state, action) {
   });
 
   return Object.assign({}, state, {
-    data: state.data.insertAll(messages),
+    data: new ImmutableItemsArray(messages),
     loading: false,
   });
 }
