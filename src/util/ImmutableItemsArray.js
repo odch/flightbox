@@ -57,11 +57,15 @@ class ImmutableItemsArray {
       if (!item.key) throw new Error('Property "key" is missing');
 
       if (this.keys[item.key] === undefined) {
-        let index = bs(newArr, item, comparator);
-        if (index < 0) {
-          index = (index + 1) * -1;
+        if (typeof comparator === 'function') {
+          let index = bs(newArr, item, comparator);
+          if (index < 0) {
+            index = (index + 1) * -1;
+          }
+          newArr.splice(index, 0, item);
+        } else {
+          newArr.push(item);
         }
-        newArr.splice(index, 0, item);
       }
     });
 
