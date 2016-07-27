@@ -1,8 +1,8 @@
-import { loadDepartures } from './actions';
+import { loadDepartures, deleteDeparture } from './actions';
 import reducer from './reducer';
 import sagas from './sagas.js';
 
-export { loadDepartures };
+export { loadDepartures, deleteDeparture };
 
 export { sagas };
 

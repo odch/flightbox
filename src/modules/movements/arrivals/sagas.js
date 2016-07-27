@@ -14,11 +14,16 @@ function* loadArrivals(channel) {
   );
 }
 
+function* deleteArrival(action) {
+  yield sharedSagas.deleteMovement('/arrivals', action.payload.key, action.payload.successAction);
+}
+
 export default function* sagas() {
   const channel = createChannel();
 
   yield [
     fork(monitor, channel),
     fork(takeEvery, actions.LOAD_ARRIVALS, loadArrivals, channel),
+    fork(takeEvery, actions.DELETE_ARRIVAL, deleteArrival),
   ]
 }

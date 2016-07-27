@@ -1,6 +1,7 @@
 export const LOAD_ARRIVALS = 'LOAD_ARRIVALS';
 export const SET_ARRIVALS_LOADING = 'SET_ARRIVALS_LOADING';
 export const ARRIVALS_ADDED = 'ARRIVALS_ADDED';
+export const DELETE_ARRIVAL = 'DELETE_ARRIVAL';
 
 export function loadArrivals() {
   return {
@@ -19,6 +20,16 @@ export function arrivalsAdded(snapshot) {
     type: ARRIVALS_ADDED,
     payload: {
       snapshot,
+    },
+  };
+}
+
+export function deleteArrival(key, successAction) {
+  return {
+    type: DELETE_ARRIVAL,
+    payload: {
+      key,
+      successAction,
     },
   };
 }

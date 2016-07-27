@@ -2,7 +2,6 @@ import React, { PropTypes, Component } from 'react';
 import Predicates from './Predicates.js';
 import MovementGroup from '../MovementGroup';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
-import firebase from '../../util/firebase.js';
 import { AutoLoad } from '../../util/AutoLoad.js';
 
 const LoadingInfo = () => (
@@ -17,36 +16,10 @@ const LoadingInfo = () => (
  */
 class MovementList extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
   componentWillMount() {
     if (this.props.items.length === 0) {
       this.props.loadItems();
     }
-  }
-
-  onListDeleteTrigger(item) {
-    this.setState({
-      deleteConfirmation: item,
-    });
-  }
-
-  onDeleteConfirmation(item) {
-    firebase(this.props.firebaseUri, (error, ref) => {
-      ref.child(item.key).remove();
-      this.setState({
-        deleteConfirmation: null,
-      });
-    });
-  }
-
-  onDeleteCancel() {
-    this.setState({
-      deleteConfirmation: null,
-    });
   }
 
   render() {
@@ -69,11 +42,11 @@ class MovementList extends Component {
       Predicates.not(Predicates.dayBefore())
     ));
 
-    const confirmationDialog = this.state.deleteConfirmation ?
+    const confirmationDialog = this.props.deleteConfirmation ?
       (<MovementDeleteConfirmationDialog
-        item={this.state.deleteConfirmation}
-        onConfirm={this.onDeleteConfirmation.bind(this)}
-        onCancel={this.onDeleteCancel.bind(this)}
+        item={this.props.deleteConfirmation}
+        confirm={this.props.deleteItem}
+        hide={this.props.hideDeleteConfirmationDialog}
       />) : null;
 
     return (
@@ -86,7 +59,7 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
-          onDelete={this.onListDeleteTrigger.bind(this)}
+          onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
         <MovementGroup
@@ -97,7 +70,7 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
-          onDelete={this.onListDeleteTrigger.bind(this)}
+          onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
         <MovementGroup
@@ -108,7 +81,7 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
-          onDelete={this.onListDeleteTrigger.bind(this)}
+          onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
         <MovementGroup
@@ -118,7 +91,7 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
-          onDelete={this.onListDeleteTrigger.bind(this)}
+          onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
         <MovementGroup
@@ -128,7 +101,7 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
-          onDelete={this.onListDeleteTrigger.bind(this)}
+          onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
         {this.props.loading && <LoadingInfo/>}
@@ -142,7 +115,10 @@ MovementList.propTypes = {
   loadItems: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
   loading: PropTypes.bool.isRequired,
-  firebaseUri: PropTypes.string,
+  deleteConfirmation: PropTypes.object,
+  deleteItem: PropTypes.func.isRequired,
+  hideDeleteConfirmationDialog: PropTypes.func.isRequired,
+  showDeleteConfirmationDialog: React.PropTypes.func.isRequired,
   onClick: PropTypes.func,
   onAction: PropTypes.func,
   actionIcon: PropTypes.string,

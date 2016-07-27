@@ -8,6 +8,7 @@ import loginPage from './loginPage';
 import movements, { sagas as movementSagas } from './movements';
 import settings, { sagas as settingsSagas } from './settings';
 import messages, { sagas as messagesSagas } from './messages';
+import ui, { sagas as uiSagas } from './ui';
 
 const reducer = combineReducers({
   auth,
@@ -16,6 +17,7 @@ const reducer = combineReducers({
   movements,
   settings,
   messages,
+  ui,
 });
 
 const forkSagas = map(fork);
@@ -26,6 +28,7 @@ export const sagas = function* rootSaga () {
     movementSagas,
     settingsSagas,
     messagesSagas,
+    uiSagas,
   ])
 };
 

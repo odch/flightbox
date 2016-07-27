@@ -1,8 +1,8 @@
-import { loadArrivals } from './actions';
+import { loadArrivals, deleteArrival } from './actions';
 import reducer from './reducer';
 import sagas from './sagas.js';
 
-export { loadArrivals };
+export { loadArrivals, deleteArrival };
 
 export { sagas };
 

@@ -14,6 +14,12 @@ export function loadLimited(path, start, limit) {
   });
 }
 
+export function removeMovement(path, key) {
+  return new Promise(resolve => {
+    firebase(path).child(key).remove(resolve);
+  });
+}
+
 export function* loadMovements(setLoadingAction, stateSelector, firebasePath, channel, successAction) {
   const movements = yield select(stateSelector);
   if (movements.loading !== true) {
@@ -22,4 +28,9 @@ export function* loadMovements(setLoadingAction, stateSelector, firebasePath, ch
     const snapshot = yield call(loadLimited(firebasePath, pagination.start, pagination.limit));
     channel.put(successAction(snapshot));
   }
+}
+
+export function* deleteMovement(path, key, successAction) {
+  yield call(removeMovement, path, key);
+  yield put(successAction());
 }

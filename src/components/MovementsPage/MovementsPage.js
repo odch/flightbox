@@ -42,6 +42,10 @@ class MovementsPage extends Component {
         actionIcon="flight_land"
         actionLabel="Ankunft erfassen"
         lockDate={this.props.lockDate}
+        deleteConfirmation={this.props.deleteConfirmation}
+        deleteItem={this.props.deleteDeparture}
+        hideDeleteConfirmationDialog={this.props.hideDeleteConfirmationDialog}
+        showDeleteConfirmationDialog={this.props.showDeleteConfirmationDialog}
       />
     );
     const arrivalsList = (
@@ -56,6 +60,10 @@ class MovementsPage extends Component {
         actionIcon="flight_takeoff"
         actionLabel="Abflug erfassen"
         lockDate={this.props.lockDate}
+        deleteConfirmation={this.props.deleteConfirmation}
+        deleteItem={this.props.deleteArrival}
+        hideDeleteConfirmationDialog={this.props.hideDeleteConfirmationDialog}
+        showDeleteConfirmationDialog={this.props.showDeleteConfirmationDialog}
       />
     );
     const tabs = [{
@@ -86,9 +94,14 @@ class MovementsPage extends Component {
 MovementsPage.propTypes = {
   movements: React.PropTypes.object.isRequired,
   loadDepartures: React.PropTypes.func.isRequired,
+  deleteDeparture: React.PropTypes.func.isRequired,
   loadArrivals: React.PropTypes.func.isRequired,
+  deleteArrival: React.PropTypes.func.isRequired,
   lockDate: React.PropTypes.object.isRequired,
   loadLockDate: React.PropTypes.func.isRequired,
+  deleteConfirmation: React.PropTypes.object,
+  showDeleteConfirmationDialog: React.PropTypes.func.isRequired,
+  hideDeleteConfirmationDialog: React.PropTypes.func.isRequired,
 };
 
 export default MovementsPage;
