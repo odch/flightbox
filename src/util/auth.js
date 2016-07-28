@@ -1,5 +1,4 @@
 import jsonp from 'jsonp';
-import Config from 'Config';
 import Cookies from 'js-cookie';
 import moment from 'moment';
 
@@ -42,11 +41,11 @@ export default {
   },
 
   loadIpToken(callback) {
-    jsonp(Config.ipAuth, null, (error, result) => callback(result.token));
+    jsonp(__IP_AUTH__, null, (error, result) => callback(result.token));
   },
 
   loadCredentialsToken(credentials, callback) {
-    const url = Config.credentialsAuth + '?username=' + credentials.username + '&password=' + credentials.password;
+    const url = __CREDENTIALS_AUTH__ + '?username=' + credentials.username + '&password=' + credentials.password;
     jsonp(url, null, (error, result) => callback(result.token));
   },
 };

@@ -1,4 +1,3 @@
-import Config from 'Config';
 import Firebase from 'firebase';
 import auth from './auth.js';
 
@@ -13,12 +12,12 @@ function firebase(path, callback) {
     callback = path;
     path = '/';
   }
-  const ref = new Firebase(Config.firebaseUrl + path);
+  const ref = new Firebase(__FIREBASE_URL__ + path);
   callback(null, ref);
 }
 
 export function authenticate(token, callback) {
-  const ref = new Firebase(Config.firebaseUrl);
+  const ref = new Firebase(__FIREBASE_URL__);
   ref.authWithCustomToken(token, (error, authData) => {
     if (error) {
       callback(error);
@@ -29,7 +28,7 @@ export function authenticate(token, callback) {
 }
 
 export function unauth() {
-  new Firebase(Config.firebaseUrl).unauth();
+  new Firebase(__FIREBASE_URL__).unauth();
 }
 
 export default firebase;

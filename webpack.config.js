@@ -1,22 +1,21 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const featureFlags = new webpack.DefinePlugin({
+const globals = {
   __DEV__: process.env.DEV || false,
-});
+};
+
+if (process.env.ENV === 'production') {
+  globals.__FIREBASE_URL__ = JSON.stringify('https://lszt.firebaseio.com');
+  globals.__IP_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/ip');
+  globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt');
+} else {
+  globals.__FIREBASE_URL__ = JSON.stringify('https://mfgt-flights.firebaseio.com');
+  globals.__IP_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/ip-test');
+  globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt-test');
+}
 
 module.exports = {
-  externals: {
-    'Config': JSON.stringify(process.env.ENV === 'production' ? {
-      firebaseUrl: 'https://lszt.firebaseio.com',
-      ipAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/ip',
-      credentialsAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt',
-    } : {
-      firebaseUrl: 'https://mfgt-flights.firebaseio.com',
-      ipAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/ip-test',
-      credentialsAuth: 'https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt-test',
-    }),
-  },
   entry: [
     'babel-polyfill',
     path.resolve(__dirname, './src/app.js'),
@@ -56,5 +55,7 @@ module.exports = {
       },
     ],
   },
-  plugins: [featureFlags],
+  plugins: [
+    new webpack.DefinePlugin(globals),
+  ],
 };
