@@ -1,4 +1,3 @@
-import Config from 'Config';
 import Firebase from 'firebase';
 
 /**
@@ -12,7 +11,7 @@ function firebase(path, callback) {
     callback = path;
     path = '/';
   }
-  const ref = new Firebase(Config.firebaseUrl + path);
+  const ref = new Firebase(__FIREBASE_URL__ + path);
   if (typeof callback === 'function') {
     callback(null, ref);
   } else {
@@ -22,7 +21,7 @@ function firebase(path, callback) {
 
 export function authenticate(token) {
   return () => new Promise((resolve, reject) => {
-    const ref = new Firebase(Config.firebaseUrl);
+    const ref = new Firebase(__FIREBASE_URL__);
     ref.authWithCustomToken(token, (error, authData) => {
       if (error) {
         reject(error);
@@ -37,7 +36,7 @@ export function authenticate(token) {
 
 export function unauth() {
   return () => new Promise((resolve) => {
-    new Firebase(Config.firebaseUrl).unauth();
+    new Firebase(__FIREBASE_URL__).unauth();
     resolve();
   });
 }
