@@ -10,7 +10,7 @@ if (process.env.ENV === 'production') {
   globals.__IP_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/ip');
   globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt');
 } else {
-  globals.__FIREBASE_URL__ = JSON.stringify('https://mfgt-flights.firebaseio.com');
+  globals.__FIREBASE_URL__ = JSON.stringify('https://mfgt-flights-redux.firebaseio.com');
   globals.__IP_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/ip-test');
   globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt-test');
 }
