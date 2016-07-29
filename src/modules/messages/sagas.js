@@ -3,6 +3,8 @@ import { call, put, fork, select } from 'redux-saga/effects'
 import * as actions from './actions';
 import firebase from '../../util/firebase';
 
+export const messagesSelector = state => state.messages;
+
 export function loadAll() {
   return new Promise(resolve => {
     const ref = firebase('/messages');
@@ -13,7 +15,7 @@ export function loadAll() {
 }
 
 export function* loadMessages() {
-  const messages = yield select(state => state.messages);
+  const messages = yield select(messagesSelector);
   if (messages.loading !== true) {
     yield put(actions.setMessagesLoading());
     const snapshot = yield call(loadAll);
