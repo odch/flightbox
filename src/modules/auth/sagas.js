@@ -58,12 +58,25 @@ function* doLogout() {
 function* doListenFirebaseAuthentication(action) {
   const authenticated = !!action.payload.authData;
 
-  const authData = authenticated ? {
-    uid: action.payload.authData.uid,
-    expiration: (action.payload.authData.expires * 1000),
-    token: action.payload.authData.token,
-    admin: yield call(isAdmin(action.payload.authData.uid))
-  } : null;
+  let authData = null;
+
+  if (authenticated) {
+    const { uid, expires, token } = action.payload.authData;
+
+    if (uid === 'ipauth') {
+      authData = {
+        expiration: expires * 1000,
+        token,
+      }
+    } else {
+      authData = {
+        uid,
+        expiration: expires * 1000,
+        token,
+        admin: yield call(isAdmin(uid)),
+      }
+    }
+  }
 
   yield put(actions.firebaseAuthenticationEvent(authData));
 

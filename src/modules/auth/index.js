@@ -1,8 +1,8 @@
-import { authenticate, logout } from './actions';
+import { FIREBASE_AUTHENTICATION_EVENT, authenticate, logout } from './actions';
 import reducer from './reducer';
 import sagas from './sagas';
 
-export { authenticate, logout };
+export { FIREBASE_AUTHENTICATION_EVENT, authenticate, logout };
 
 export { sagas };
 
