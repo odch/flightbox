@@ -6,6 +6,16 @@ function isExpired(expirationDate) {
   return moment(expirationDate).isBefore(moment());
 }
 
+function post(url) {
+  return new Promise(resolve => {
+    fetch(url, {
+      method: 'POST',
+    }).then(response => {
+      response.json().then(json => resolve(json));
+    });
+  });
+}
+
 export default {
 
   /**
@@ -41,11 +51,11 @@ export default {
   },
 
   loadIpToken(callback) {
-    jsonp(__IP_AUTH__, null, (error, result) => callback(result.token));
+    post(__IP_AUTH__).then(result => callback(result.token));
   },
 
   loadCredentialsToken(credentials, callback) {
     const url = __CREDENTIALS_AUTH__ + '?username=' + credentials.username + '&password=' + credentials.password;
-    jsonp(url, null, (error, result) => callback(result.token));
+    post(url).then(result => callback(result.token));
   },
 };

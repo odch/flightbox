@@ -11,8 +11,8 @@ if (process.env.ENV === 'production') {
   globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt');
 } else {
   globals.__FIREBASE_URL__ = JSON.stringify('https://mfgt-flights.firebaseio.com');
-  globals.__IP_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/ip-test');
-  globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt-test');
+  globals.__IP_AUTH__ = JSON.stringify('https://mfgt-api-hug-playground.44fs.preview.openshiftapps.com/api/v1/firebaseauth/ip-test');
+  globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://mfgt-api-hug-playground.44fs.preview.openshiftapps.com/api/v1/firebaseauth/mfgt-test');
 }
 
 module.exports = {
