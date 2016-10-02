@@ -8,6 +8,7 @@ import FlightData from '../Arrival/FlightData';
 import Finish from '../Arrival/Finish';
 import MovementWizardPage from '../MovementWizardPage';
 import LocationConfirmationDialog from '../LocationConfirmationDialog';
+import { firebaseToLocal, transferValues } from '../../util/movements.js';
 import dates from '../../core/dates.js';
 import firebase from '../../util/firebase.js';
 import { exists as aerodromeExists } from '../../util/aerodromes';

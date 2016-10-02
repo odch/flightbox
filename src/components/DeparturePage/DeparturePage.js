@@ -9,6 +9,7 @@ import Finish from '../Departure/Finish';
 import CommitRequirementsDialog from '../Departure/CommitRequirementsDialog';
 import MovementWizardPage from '../MovementWizardPage';
 import LocationConfirmationDialog from '../LocationConfirmationDialog';
+import { firebaseToLocal, transferValues } from '../../util/movements.js';
 import dates from '../../core/dates.js';
 import firebase from '../../util/firebase.js';
 import { exists as aerodromeExists } from '../../util/aerodromes';
