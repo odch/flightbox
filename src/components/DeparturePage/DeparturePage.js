@@ -8,9 +8,10 @@ import FlightData from '../Departure/FlightData';
 import Finish from '../Departure/Finish';
 import CommitRequirementsDialog from '../Departure/CommitRequirementsDialog';
 import MovementWizardPage from '../MovementWizardPage';
-import { firebaseToLocal, transferValues } from '../../util/movements.js';
+import LocationConfirmationDialog from '../LocationConfirmationDialog';
 import dates from '../../core/dates.js';
 import firebase from '../../util/firebase.js';
+import { exists as aerodromeExists } from '../../util/aerodromes';
 
 class DeparturePage extends Component {
 
@@ -39,6 +40,10 @@ class DeparturePage extends Component {
         id: 'departureArrival',
         component: DepartureArrivalData,
         label: 'Start und Ziel',
+        confirmation: {
+          predicatePromise: data => data.location ? aerodromeExists(data.location) : Promise.resolve(false),
+          component: LocationConfirmationDialog,
+        },
       },
       {
         id: 'flight',
