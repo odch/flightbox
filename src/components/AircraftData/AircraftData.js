@@ -10,7 +10,7 @@ class AircraftData extends WizardStep {
         name="immatriculation"
         type="text"
         value={this.state.data.immatriculation}
-        onChange={this.getUpdateHandlerDelegate('immatriculation')}
+        onChange={this.updateImmatriculationHandler.bind(this)}
         onKeyUp={this.getKeyUpHandlerDelegate('immatriculation')}
         readOnly={this.props.readOnly}
       />
@@ -60,6 +60,14 @@ class AircraftData extends WizardStep {
         />
       </fieldset>
     );
+  }
+
+  updateImmatriculationHandler(e) {
+    let value = null;
+    if (e.target.value) {
+      value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/, '');
+    }
+    this.updateData('immatriculation', value);
   }
 
   updateMtowHandler(e) {
