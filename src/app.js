@@ -29,10 +29,6 @@ const store = createStore(reducer, {}, middleware);
 
 sagaMiddleware.run(sagas);
 
-if (__DEV__) {
-  if (window.devToolsExtension) window.devToolsExtension.open();
-}
-
 ReactDOM.render((
   <Provider store={store}>
     <Router history={hashHistory}>
