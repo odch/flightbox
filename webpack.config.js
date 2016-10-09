@@ -7,8 +7,8 @@ const globals = {
 
 if (process.env.ENV === 'production') {
   globals.__FIREBASE_URL__ = JSON.stringify('https://lszt.firebaseio.com');
-  globals.__IP_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/ip');
-  globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://mfgt-api.appspot.com/api/v1/firebaseauth/mfgt');
+  globals.__IP_AUTH__ = JSON.stringify('https://api.mfgt.ch/api/v1/firebaseauth/ip');
+  globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://api.mfgt.ch/api/v1/firebaseauth/mfgt');
 } else {
   globals.__FIREBASE_URL__ = JSON.stringify('https://mfgt-flights-redux.firebaseio.com');
   globals.__IP_AUTH__ = JSON.stringify('https://mfgt-flights-auth-test.appspot.com/ip');
@@ -18,6 +18,7 @@ if (process.env.ENV === 'production') {
 module.exports = {
   entry: [
     'babel-polyfill',
+    'whatwg-fetch',
     path.resolve(__dirname, './src/app.js'),
   ],
   output: {

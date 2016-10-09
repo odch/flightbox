@@ -13,7 +13,7 @@ class DepartureArrivalData extends WizardStep {
         name="location"
         type="text"
         value={this.state.data.location}
-        onChange={this.getUpdateHandlerDelegate('location', this)}
+        onChange={(e) => this.updateData('location', e.target.value.toUpperCase())}
         onKeyUp={this.getKeyUpHandlerDelegate('location')}
         readOnly={this.props.readOnly}
       />

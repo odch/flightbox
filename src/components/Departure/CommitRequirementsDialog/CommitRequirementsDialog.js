@@ -13,6 +13,7 @@ class CommitRequirementsDialog extends Component {
           <li>Das maximale Abfluggewicht und der Schwerpunkt sind innerhalb der zulässigen Limiten.</li>
           <li>Die verfügbare Pistenlänge ist ausreichend.</li>
           <li>Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.</li>
+          <li>Der Preflight-Check wurde ausgeführt.</li>
         </ul>
         <div className="actions">
           <button className="cancel" onClick={this.props.onCancel}>Abbrechen</button>

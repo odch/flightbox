@@ -91,15 +91,31 @@ class MovementWizardPage extends Component {
   }
 
   commit() {
-    if (this.update !== true
-      && this.state.commitRequirementsConfirmed !== true
-      && typeof this.props.commitRequirementsDialogClass === 'function') {
-      this.setState({
-        showCommitRequirements: true,
-      });
-    } else {
-      this.save();
+    if (this.validateCurrentPage() !== true) {
+      return;
     }
+
+    const saveFn = () => {
+      if (this.update !== true
+        && this.state.commitRequirementsConfirmed !== true
+        && typeof this.props.commitRequirementsDialogClass === 'function') {
+        this.setState({
+          showCommitRequirements: true,
+        });
+      } else {
+        this.save();
+      }
+    };
+
+    this.shouldShowStepConfirmationMessage().then(shouldShow => {
+      if (shouldShow !== true) {
+        saveFn();
+      } else {
+        this.setState({
+          showStepConfirmation: true,
+        });
+      }
+    });
   }
 
   save() {
@@ -196,9 +212,7 @@ class MovementWizardPage extends Component {
 
   nextStep() {
     if (this.isLast()) {
-      if (this.validateCurrentPage() === true) {
-        this.commit();
-      }
+      this.commit();
     } else {
       this.goToStep(this.state.step + 1);
     }
@@ -215,14 +229,62 @@ class MovementWizardPage extends Component {
   }
 
   goToStep(step) {
-    if (step !== this.state.step) {
-      if (step < this.state.step || this.validateCurrentPage() === true) {
+    if (step === this.state.step) {
+      return;
+    }
+
+    const goFn = () => {
+      this.setState({
+        step,
+        showValidationErrors: false,
+      });
+    };
+
+    if (step < this.state.step) {
+      goFn();
+      return;
+    }
+
+    if (this.validateCurrentPage() !== true) {
+      return;
+    }
+
+    this.shouldShowStepConfirmationMessage().then(shouldShow => {
+      if (shouldShow !== true) {
+        goFn();
+      } else {
         this.setState({
-          step,
-          showValidationErrors: false,
+          showStepConfirmation: true,
         });
       }
-    }
+    });
+  }
+
+  shouldShowStepConfirmationMessage() {
+    return new Promise(resolve => {
+      if (this.state.stepConfirmationMessageConfirmed === true) {
+        resolve(false);
+      }
+
+      const page = this.props.pages[this.state.step];
+      const confirmationObj = page.confirmation;
+
+      if (!confirmationObj) {
+        resolve(false);
+      }
+
+      if (!confirmationObj.predicatePromise) {
+        resolve(false);
+      }
+
+      confirmationObj.predicatePromise(this.state.data).then(shouldShow => {
+        if (shouldShow !== true) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      });
+    });
   }
 
   unsetCommitError() {
@@ -287,6 +349,19 @@ class MovementWizardPage extends Component {
       commitRequirementsConfirmed: true,
     });
     this.save();
+  }
+
+  confirmStepMessageCancelHandler() {
+    this.setState({
+      showStepConfirmation: false,
+    });
+  }
+
+  confirmStepMessageConfirmHandler() {
+    this.setState({
+      showStepConfirmation: false,
+      stepConfirmationMessageConfirmed: true,
+    });
   }
 
   render() {
@@ -395,6 +470,15 @@ class MovementWizardPage extends Component {
       )
       : null;
 
+    const stepConfirmation = this.state.showStepConfirmation === true
+      ? (
+        <page.confirmation.component
+          onCancel={this.confirmStepMessageCancelHandler.bind(this)}
+          onConfirm={this.confirmStepMessageConfirmHandler.bind(this)}
+        />
+      )
+      : null;
+
     if (this.state.smallDevice === true) {
       return (
         <div onFocus={this.focusHandler.bind(this)} onBlur={this.blurHandler.bind(this)}>
@@ -404,6 +488,7 @@ class MovementWizardPage extends Component {
               {middleItem}
               {commitRequirements}
               {cancelConfirmation}
+              {stepConfirmation}
             </BorderLayoutItem>
             {southItem}
           </BorderLayout>
@@ -468,6 +553,7 @@ class MovementWizardPage extends Component {
             {middleItem}
             {commitRequirements}
             {cancelConfirmation}
+            {stepConfirmation}
           </BorderLayoutItem>
           {southItem}
           {quickSelectionList

@@ -13,3 +13,15 @@ export function fetch() {
     });
   });
 }
+
+export function exists(key) {
+  return new Promise(resolve => {
+    firebase('/aerodromes/' + key, (error, ref) => {
+      ref.once('value', snapshot => {
+        resolve(!snapshot.exists());
+      }, () => {
+        resolve(true);
+      });
+    });
+  });
+}
