@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Router, Route, IndexRoute, hashHistory } from 'react-router';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware, compose } from 'redux';
+import { routerMiddleware } from 'react-router-redux';
 import createSagaMiddleware from 'redux-saga';
 import reducer, { sagas } from './modules';
 
@@ -16,8 +17,9 @@ import MessagePage from './containers/MessagePageContainer';
 import HelpPage from './containers/HelpPageContainer';
 
 const sagaMiddleware = createSagaMiddleware();
+const reduxRouterMiddleware = routerMiddleware(hashHistory);
 
-let middleware = applyMiddleware(sagaMiddleware);
+let middleware = applyMiddleware(sagaMiddleware, reduxRouterMiddleware);
 
 if (__DEV__ && window.devToolsExtension) {
   middleware = compose(middleware, window.devToolsExtension());

@@ -1,0 +1,101 @@
+.DepartureWizard {
+
+  .west {
+    background-color: #f6f6f6;
+    text-align: center;
+
+    .logo {
+      width: 85%;
+      margin-top: 10px;
+    }
+  }
+
+  .east {
+    background-color: #f6f6f6;
+    box-shadow: -5px 0 10px 0 rgba(0,0,0,0.1);
+    overflow: scroll;
+  }
+
+  .middle {
+
+    fieldset {
+      border: 0;
+      margin: 1em;
+
+      legend {
+        font-size: 2em;
+        margin-bottom: 1em;
+      }
+
+      .LabeledComponent {
+        width: 45%;
+        margin-right: 5%;
+        margin-bottom: 1.5em;
+        display: inline-block;
+        vertical-align: top;
+
+        @media screen and (max-width: 768px) {
+          width: 100%;
+          margin-right: 0;
+        }
+
+        > label {
+          display: block;
+          margin-bottom: 1.5em;
+        }
+      }
+
+      .LabeledComponent {
+        border-bottom: 1px solid #000;
+      }
+    }
+
+    .PassengerPage .LabeledComponent.carriageVoucher,
+    .PassengerPage .LabeledComponent.passengerCount,
+    .DepartureArrivalPage .LabeledComponent.time,
+    .DepartureArrivalPage .LabeledComponent.duration,
+    .FlightPage .LabeledComponent.flightType,
+    .FlightPage .LabeledComponent.departureRoute,
+    .FlightPage .LabeledComponent.runway {
+      border-bottom: 0;
+    }
+
+    .WizardNavigation {
+      padding: 10px 20px 0 20px;
+      overflow: hidden;
+
+      button {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+        user-select: none;
+        border: none;
+        background: none;
+        font-size: 1.5em;
+      }
+
+      button.next {
+        color: #ed351c;
+      }
+
+      .next {
+        float: right;
+        margin-left: 20px;
+      }
+    }
+  }
+
+  .south {
+    font-size: 1.5em;
+  }
+
+  @media screen and (max-width: 768px) {
+    .east {
+      width: 0 !important;
+    }
+
+    .center {
+      right: 0 !important;
+    }
+  }
+}

@@ -30,6 +30,7 @@ class SingleSelect extends Component {
           const className = this.state.value === item.value ? 'selected' : '';
           return (
             <button
+              type="button"
               key={index}
               className={className}
               style={buttonStyle}
