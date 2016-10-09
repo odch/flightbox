@@ -18,6 +18,7 @@ if (process.env.ENV === 'production') {
 module.exports = {
   entry: [
     'babel-polyfill',
+    'whatwg-fetch',
     path.resolve(__dirname, './src/app.js'),
   ],
   output: {
