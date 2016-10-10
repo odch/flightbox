@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
+import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import AircraftPage from './pages/AircraftPage';
 import PilotPage from './pages/PilotPage';
 import PassengerPage from './pages/PassengerPage';
@@ -9,6 +10,29 @@ import FlightPage from './pages/FlightPage';
 import CommitRequirementsDialog from './CommitRequirementsDialog';
 import Finish from './Finish';
 import './DepartureWizard.scss';
+
+const pages = [
+  {
+    component: AircraftPage,
+    label: 'Flugzeugdaten',
+  },
+  {
+    component: PilotPage,
+    label: 'Pilot',
+  },
+  {
+    component: PassengerPage,
+    label: 'Passagiere',
+  },
+  {
+    component: DepartureArrivalPage,
+    label: 'Start und Ziel',
+  },
+  {
+    component: FlightPage,
+    label: 'Flug',
+  },
+];
 
 class DepartureWizard extends Component {
 
@@ -24,6 +48,11 @@ class DepartureWizard extends Component {
             </a>
           </header>
         </BorderLayoutItem>
+        {this.props.wizard.committed !== true && (
+          <BorderLayoutItem region="north">
+            <WizardBreadcrumbs items={this.buildBreadcrumbItems()} activeItem={this.props.wizard.page}/>
+          </BorderLayoutItem>
+        )}
         <BorderLayoutItem region="middle">
           {this.getMiddleItem()}
         </BorderLayoutItem>
@@ -36,32 +65,34 @@ class DepartureWizard extends Component {
       return <Finish finish={this.props.finish} isUpdate={false}/>;
     }
 
-    switch (this.props.wizard.page) {
-      case 1:
-        return <AircraftPage onSubmit={this.props.nextPage}/>;
-      case 2:
-        return <PilotPage previousPage={this.props.previousPage} onSubmit={this.props.nextPage}/>;
-      case 3:
-        return <PassengerPage previousPage={this.props.previousPage} onSubmit={this.props.nextPage}/>;
-      case 4:
-        return <DepartureArrivalPage previousPage={this.props.previousPage} onSubmit={this.props.nextPage}/>;
-      case 5:
-        const flightPage = <FlightPage previousPage={this.props.previousPage} onSubmit={this.props.showCommitRequirementsDialog}/>;
-        if (this.props.wizard.showCommitRequirementsDialog === true) {
-          return (
-            <div>
-              {flightPage}
-              <CommitRequirementsDialog
-                onCancel={this.props.hideCommitRequirementsDialog}
-                onConfirm={this.props.saveDeparture}
-              />
-            </div>
-          );
-        }
-        return flightPage;
-      default:
-        return null;
+    const isLast = this.props.wizard.page === pages.length;
+
+    const submitHandler = isLast ? this.props.showCommitRequirementsDialog : this.props.nextPage;
+
+    const pageObj = pages[this.props.wizard.page - 1];
+    const pageComponent = <pageObj.component previousPage={this.props.previousPage} onSubmit={submitHandler}/>;
+
+    if (isLast && this.props.wizard.showCommitRequirementsDialog === true) {
+      return (
+        <div>
+          {pageComponent}
+          <CommitRequirementsDialog
+            onCancel={this.props.hideCommitRequirementsDialog}
+            onConfirm={this.props.saveDeparture}
+          />
+        </div>
+      );
     }
+
+    return pageComponent;
+  }
+
+  buildBreadcrumbItems() {
+    return [{
+      label: 'Neuer Abflug',
+    }].concat(pages.map(page => ({
+      label: page.label,
+    })));
   }
 }
 
