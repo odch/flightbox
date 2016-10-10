@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { nextPage, previousPage, finish, showCommitRequirementsDialog, hideCommitRequirementsDialog } from '../modules/ui/wizard';
-import { saveDeparture } from '../modules/departures';
+import { initNewDeparture, saveDeparture } from '../modules/departures';
 import DepartureWizard from '../components/DepartureWizard';
 
 const mapStateToProps = (state, ownProps) => {
@@ -12,6 +12,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapActionCreators = {
+  initNewDeparture,
   nextPage,
   previousPage,
   finish,

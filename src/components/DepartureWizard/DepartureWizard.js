@@ -36,6 +36,10 @@ const pages = [
 
 class DepartureWizard extends Component {
 
+  componentDidMount() {
+    this.props.initNewDeparture();
+  }
+
   render() {
     const logoImagePath = require('../../resources/mfgt_logo_transp.png');
 
@@ -98,6 +102,7 @@ class DepartureWizard extends Component {
 
 DepartureWizard.propTypes = {
   wizard: React.PropTypes.object.isRequired,
+  initNewDeparture: React.PropTypes.func.isRequired,
   nextPage: React.PropTypes.func.isRequired,
   previousPage: React.PropTypes.func.isRequired,
   finish: React.PropTypes.func.isRequired,

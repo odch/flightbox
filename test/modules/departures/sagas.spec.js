@@ -1,10 +1,24 @@
 import expect from 'expect';
 import { select, put, call } from 'redux-saga/effects';
-import { getFormValues } from 'redux-form';
+import { initialize, getFormValues } from 'redux-form';
+import dates from '../../../src/core/dates.js';
 import * as actions from '../../../src/modules/departures/actions';
 import * as sagas from '../../../src/modules/departures/sagas';
 
 describe('departues sagas', () => {
+  describe('initNewDeparture', () => {
+    it('should init new departure', () => {
+      const generator = sagas.initNewDeparture();
+
+      expect(generator.next().value).toEqual(put(initialize('wizard', {
+        date: dates.localDate(),
+        time: dates.localTimeRounded(15, 'up'),
+      })));
+
+      expect(generator.next().done).toEqual(true);
+    });
+  });
+
   describe('saveDeparture', () => {
     it('should save departure', () => {
       const generator = sagas.saveDeparture();
