@@ -140,7 +140,7 @@ class Dropdown extends Component {
   handleContainerBlur() {
     window.requestAnimationFrame(() => {
       if (this.isComponentElement(document.activeElement) === false) {
-        this.props.onBlur();
+        this.props.onBlur(this.state.value);
       }
     });
   }
