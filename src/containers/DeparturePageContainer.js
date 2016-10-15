@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { destroy } from 'redux-form';
 import { nextPage, previousPage, finish, showCommitRequirementsDialog, hideCommitRequirementsDialog } from '../modules/ui/wizard';
 import { initNewDeparture, saveDeparture } from '../modules/departures';
 import DepartureWizard from '../components/DepartureWizard';
@@ -19,6 +20,7 @@ const mapActionCreators = {
   showCommitRequirementsDialog,
   hideCommitRequirementsDialog,
   saveDeparture,
+  destroyForm: destroy,
 };
 
 export default connect(mapStateToProps, mapActionCreators)(DepartureWizard);

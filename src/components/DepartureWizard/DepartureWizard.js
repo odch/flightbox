@@ -40,6 +40,10 @@ class DepartureWizard extends Component {
     this.props.initNewDeparture();
   }
 
+  componentWillUnmount() {
+    this.props.destroyForm('wizard');
+  }
+
   render() {
     const logoImagePath = require('../../resources/mfgt_logo_transp.png');
 
@@ -109,6 +113,7 @@ DepartureWizard.propTypes = {
   showCommitRequirementsDialog: React.PropTypes.func.isRequired,
   hideCommitRequirementsDialog: React.PropTypes.func.isRequired,
   saveDeparture: React.PropTypes.func.isRequired,
+  destroyForm: React.PropTypes.func.isRequired,
 };
 
 DepartureWizard.contextTypes = {
