@@ -4,6 +4,7 @@ import IncrementationField from '../IncrementationField';
 import SingleSelect from '../SingleSelect';
 import DatePicker from '../DatePicker';
 import TimeField from '../TimeField';
+import AircraftDropdown from '../../containers/AircraftDropdownContainer';
 
 const renderLabeledComponent = (props, component) => {
   const { name, label, tooltip, meta: { touched, error } } = props;
@@ -50,5 +51,10 @@ export const renderDurationField = (props) => {
 
 export const renderTextArea = (props) => {
   const cmp = <textarea {...props.input}/>;
+  return renderLabeledComponent(props, cmp);
+};
+
+export const renderAircraftDropdown = (props) => {
+  const cmp = <AircraftDropdown {...props.input}/>;
   return renderLabeledComponent(props, cmp);
 };

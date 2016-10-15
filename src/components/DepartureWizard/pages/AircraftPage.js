@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../validate';
-import { renderInputField } from '../renderField';
+import { renderInputField, renderAircraftDropdown } from '../renderField';
 
 const AircraftPage = (props) => {
   const { handleSubmit } = props;
@@ -11,9 +11,16 @@ const AircraftPage = (props) => {
         <legend>Flugzeugdaten</legend>
         <Field
           name="immatriculation"
-          type="text"
-          component={renderInputField}
+          component={renderAircraftDropdown}
           label="Immatrikulation"
+          normalize={aircraft => {
+            if (aircraft) {
+              props.change('aircraftType', aircraft.type);
+              props.change('mtow', aircraft.mtow);
+              return aircraft.key;
+            }
+            return null;
+          }}
         />
         <Field
           name="aircraftType"
@@ -36,7 +43,8 @@ const AircraftPage = (props) => {
 };
 
 AircraftPage.propTypes = {
-  handleSubmit: PropTypes.func,
+  handleSubmit: PropTypes.func.isRequired,
+  change: PropTypes.func.isRequired,
 };
 
 export default reduxForm({
