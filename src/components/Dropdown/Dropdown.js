@@ -8,6 +8,8 @@ const KEY_CODE_ARROW_UP = 38;
 const KEY_CODE_ENTER = 13;
 const KEY_CODE_ESCAPE = 27;
 
+const OPTIONS_RENDER_LIMIT = 10;
+
 class Dropdown extends Component {
 
   constructor(props) {
@@ -64,9 +66,16 @@ class Dropdown extends Component {
 
     const filteredOptions = this.getFilteredOptions(this.state.filter);
 
-    const options = filteredOptions.length > 0
-      ? filteredOptions.map(option => this.renderOption(option))
-      : <div className="Dropdown-no-options">{this.props.noOptionsText}</div>;
+    let options;
+
+    if (filteredOptions.length > 0) {
+      options = filteredOptions.slice(0, OPTIONS_RENDER_LIMIT).map(option => this.renderOption(option));
+      if (filteredOptions.length > OPTIONS_RENDER_LIMIT) {
+        options.push(this.renderMoreOptionsLabel());
+      }
+    } else {
+      options = this.renderNoOptionsLabel();
+    }
 
     return (
       <div
@@ -90,6 +99,14 @@ class Dropdown extends Component {
         {this.props.optionRenderer(option)}
       </div>
     );
+  }
+
+  renderNoOptionsLabel() {
+    return <div className="Dropdown-no-options">{this.props.noOptionsText}</div>;
+  }
+
+  renderMoreOptionsLabel() {
+    return <div className="Dropdown-more-options" key="more-options">{this.props.moreOptionsText}</div>;
   }
 
   handleInputChange(e) {
@@ -270,6 +287,7 @@ Dropdown.propTypes = {
   value: React.PropTypes.string,
   optionRenderer: React.PropTypes.func.isRequired,
   noOptionsText: React.PropTypes.string,
+  moreOptionsText: React.PropTypes.string,
   mustSelect: React.PropTypes.bool,
   onChange: React.PropTypes.func,
   onBeforeInputChange: React.PropTypes.func,
@@ -279,6 +297,7 @@ Dropdown.propTypes = {
 
 Dropdown.defaultProps = {
   noOptionsText: 'No options found',
+  moreOptionsText: 'Too many options available. Type to filter...',
   mustSelect: false,
 };
 

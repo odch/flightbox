@@ -6,6 +6,11 @@ $focused-option-color: #ed351c;
 $input-border-bottom-color: #000;
 $no-options-color: #999;
 $no-options-font-size: 0.7em;
+$no-options-padding: 0.4em;
+$more-options-color: #999;
+$more-options-font-size: 0.7em;
+$more-options-padding: 0.4em;
+$more-options-line-height: 1.3em;
 
 .Dropdown {
   position: relative;
@@ -44,8 +49,19 @@ $no-options-font-size: 0.7em;
   }
 
   .Dropdown-no-options {
-    padding: 0.2em;
+    padding: $no-options-padding;
     color: $no-options-color;
     font-size: $no-options-font-size;
+    cursor: default;
+    font-style: italic;
+  }
+
+  .Dropdown-more-options {
+    padding: $more-options-padding;
+    color: $more-options-color;
+    font-size: $more-options-font-size;
+    cursor: default;
+    font-style: italic;
+    line-height: $more-options-line-height;
   }
 }
