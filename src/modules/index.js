@@ -12,6 +12,7 @@ import settings, { sagas as settingsSagas } from './settings';
 import messages, { sagas as messagesSagas } from './messages';
 import ui, { sagas as uiSagas } from './ui';
 import { sagas as departureSagas } from './departures';
+import users, { sagas as usersSagas } from './users';
 
 const reducer = combineReducers({
   aircrafts,
@@ -23,6 +24,7 @@ const reducer = combineReducers({
   settings,
   messages,
   ui,
+  users
 });
 
 const forkSagas = map(fork);
@@ -36,6 +38,7 @@ export const sagas = function* rootSaga () {
     messagesSagas,
     uiSagas,
     departureSagas,
+    usersSagas,
   ])
 };
 
