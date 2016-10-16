@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../validate';
-import { renderInputField } from '../renderField';
+import { renderInputField, renderUserDropdown } from '../renderField';
 
 const PilotPage = (props) => {
   const { previousPage, handleSubmit } = props;
@@ -11,9 +11,17 @@ const PilotPage = (props) => {
         <legend>Pilot</legend>
         <Field
           name="memberNr"
-          type="text"
           label="MFGT-Mitgliedernummer"
-          component={renderInputField}
+          component={renderUserDropdown}
+          normalize={user => {
+            if (user) {
+              props.change('firstname', user.firstname);
+              props.change('lastname', user.lastname);
+              props.change('phone', user.phone);
+              return user.memberNr;
+            }
+            return null;
+          }}
         />
         <Field
           name="phone"

@@ -5,6 +5,7 @@ import SingleSelect from '../SingleSelect';
 import DatePicker from '../DatePicker';
 import TimeField from '../TimeField';
 import AircraftDropdown from '../../containers/AircraftDropdownContainer';
+import UserDropdown from '../../containers/UserDropdownContainer';
 
 const renderLabeledComponent = (props, component) => {
   const { name, label, tooltip, meta: { touched, error } } = props;
@@ -56,5 +57,10 @@ export const renderTextArea = (props) => {
 
 export const renderAircraftDropdown = (props) => {
   const cmp = <AircraftDropdown {...props.input}/>;
+  return renderLabeledComponent(props, cmp);
+};
+
+export const renderUserDropdown = (props) => {
+  const cmp = <UserDropdown {...props.input}/>;
   return renderLabeledComponent(props, cmp);
 };
