@@ -1,6 +1,6 @@
 import * as actions from './actions';
-import { USERNAME_PASSWORD_AUTHENTICATION_FAILURE, FIREBASE_AUTHENTICATION_EVENT } from '../auth';
-import reducer from '../../util/reducer';
+import { USERNAME_PASSWORD_AUTHENTICATION_FAILURE, FIREBASE_AUTHENTICATION_EVENT } from '../../auth';
+import reducer from '../../../util/reducer';
 
 const INITIAL_STATE = {
   username: '',

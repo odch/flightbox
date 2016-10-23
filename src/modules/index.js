@@ -5,7 +5,6 @@ import { reducer as formReducer } from 'redux-form';
 
 import aircrafts, { sagas as aircraftsSagas } from './aircrafts';
 import auth, { sagas as authSagas } from './auth';
-import loginPage from './loginPage';
 import movements, { sagas as movementSagas } from './movements';
 import settings, { sagas as settingsSagas } from './settings';
 import messages, { sagas as messagesSagas } from './messages';
@@ -17,7 +16,6 @@ const reducer = combineReducers({
   aircrafts,
   form: formReducer,
   auth,
-  loginPage,
   movements,
   settings,
   messages,
