@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { logout } from '../modules/auth';
-import { showLogin } from '../modules/showLogin';
+import { showLogin } from '../modules/ui/showLogin';
 
 import StartPage from '../components/StartPage';
 

@@ -1,6 +1,6 @@
 import * as actions from './actions';
-import { FIREBASE_AUTHENTICATION_EVENT } from '../auth';
-import reducer from '../../util/reducer';
+import { FIREBASE_AUTHENTICATION_EVENT } from '../../auth';
+import reducer from '../../../util/reducer';
 
 const INITIAL_STATE = false;
 

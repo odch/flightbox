@@ -5,7 +5,7 @@ import App from '../components/App';
 const mapStateToProps = state => {
   return {
     auth: state.auth,
-    showLogin: state.showLogin,
+    showLogin: state.ui.showLogin,
   };
 };
 

@@ -1,13 +1,13 @@
 import { connect } from 'react-redux';
 import { updateUsername, updatePassword } from '../modules/loginPage';
 import { authenticate } from '../modules/auth';
-import { hideLogin } from '../modules/showLogin';
+import { hideLogin } from '../modules/ui/showLogin';
 
 import LoginPage from '../components/LoginPage';
 
 const mapStateToProps = state => {
   const { username, password } = state.loginPage;
-  const showCancel = state.showLogin === true;
+  const showCancel = state.ui.showLogin === true;
 
   let submitting = false;
   let failure = false;
