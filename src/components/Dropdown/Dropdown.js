@@ -257,7 +257,9 @@ class Dropdown extends Component {
   }
 
   getFilteredOptions(filter) {
-    return this.props.options.filter(option => option.key.indexOf(filter) > -1);
+    return (typeof this.props.optionFilter === 'function')
+      ? this.props.optionFilter(this.props.options, filter)
+      : this.props.options.filter(option => option.key.indexOf(filter) > -1);
   }
 
   getCurrentlyFocusedIndex(filteredOptions) {
@@ -286,6 +288,7 @@ Dropdown.propTypes = {
   options: React.PropTypes.array.isRequired,
   value: React.PropTypes.string,
   optionRenderer: React.PropTypes.func.isRequired,
+  optionFilter: React.PropTypes.func,
   noOptionsText: React.PropTypes.string,
   moreOptionsText: React.PropTypes.string,
   mustSelect: React.PropTypes.bool,
