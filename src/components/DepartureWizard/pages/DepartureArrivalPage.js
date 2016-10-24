@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../validate';
-import { renderInputField, renderDateField, renderTimeField, renderDurationField } from '../renderField';
+import { renderAerodromeDropdown, renderDateField, renderTimeField, renderDurationField } from '../renderField';
 
 const DepartureArrivalPage = (props) => {
   const { previousPage, handleSubmit } = props;
@@ -23,9 +23,8 @@ const DepartureArrivalPage = (props) => {
         />
         <Field
           name="location"
-          type="text"
-          component={renderInputField}
-          normalize={value => value.toUpperCase()}
+          component={renderAerodromeDropdown}
+          normalize={aerodrome => aerodrome ? aerodrome.key : null}
           label="Zielflugplatz"
         />
         <Field
