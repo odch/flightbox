@@ -41,4 +41,13 @@ export function unauth() {
   });
 }
 
+export function loadValue(path) {
+  return new Promise(resolve => {
+    const ref = firebase(path);
+    ref.orderByKey().once('value', snapshot => {
+      resolve(snapshot);
+    });
+  });
+}
+
 export default firebase;
