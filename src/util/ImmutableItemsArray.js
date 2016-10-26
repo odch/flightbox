@@ -21,7 +21,7 @@ class ImmutableItemsArray {
     if (array) {
       array.forEach(item => {
         this.array.push(item);
-        this.keys[item.key] = true;
+        this.keys[item.key] = item;
       });
     }
   }
