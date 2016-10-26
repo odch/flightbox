@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import WizardBreadcrumbs from '../WizardBreadcrumbs';
+import { getFromItemKey } from '../../util/reference-number';
 import AircraftPage from './pages/AircraftPage';
 import PilotPage from './pages/PilotPage';
 import PassengerPage from './pages/PassengerPage';
@@ -37,11 +38,11 @@ const pages = [
 class DepartureWizard extends Component {
 
   componentDidMount() {
-    this.props.initNewDeparture();
-  }
-
-  componentWillUnmount() {
-    this.props.destroyForm('wizard');
+    if (this.props.params.key) {
+      this.props.editDeparture(this.props.params.key);
+    } else {
+      this.props.initNewDeparture();
+    }
   }
 
   render() {
@@ -70,12 +71,12 @@ class DepartureWizard extends Component {
 
   getMiddleItem() {
     if (this.props.wizard.committed === true) {
-      return <Finish finish={this.props.finish} isUpdate={false}/>;
+      return <Finish finish={this.props.finish} isUpdate={this.isUpdate()}/>;
     }
 
     const isLast = this.props.wizard.page === pages.length;
 
-    const submitHandler = isLast ? this.props.showCommitRequirementsDialog : this.props.nextPage;
+    const submitHandler = this.getSubmitHandler(isLast);
 
     const pageObj = pages[this.props.wizard.page - 1];
     const pageComponent = <pageObj.component previousPage={this.props.previousPage} onSubmit={submitHandler}/>;
@@ -95,18 +96,40 @@ class DepartureWizard extends Component {
     return pageComponent;
   }
 
+  getSubmitHandler(isLast) {
+    if (isLast) {
+      if (this.isUpdate()) {
+        return this.props.saveDeparture;
+      } else {
+        return this.props.showCommitRequirementsDialog;
+      }
+    } else {
+      return this.props.nextPage;
+    }
+  }
+
   buildBreadcrumbItems() {
+    const label = this.isUpdate()
+      ? 'Abflug bearbeiten (' + getFromItemKey(this.props.params.key) + ')'
+      : 'Neuer Abflug';
+
     return [{
-      label: 'Neuer Abflug',
+      label,
     }].concat(pages.map(page => ({
       label: page.label,
     })));
+  }
+
+  isUpdate() {
+    return typeof this.props.params.key === 'string' && this.props.params.key.length > 0;
   }
 }
 
 DepartureWizard.propTypes = {
   wizard: React.PropTypes.object.isRequired,
+  params: React.PropTypes.object.isRequired,
   initNewDeparture: React.PropTypes.func.isRequired,
+  editDeparture: React.PropTypes.func.isRequired,
   nextPage: React.PropTypes.func.isRequired,
   previousPage: React.PropTypes.func.isRequired,
   finish: React.PropTypes.func.isRequired,
