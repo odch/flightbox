@@ -1,6 +1,6 @@
 import expect from 'expect';
 import { select, put, call } from 'redux-saga/effects';
-import { initialize, getFormValues } from 'redux-form';
+import { initialize, getFormValues, destroy } from 'redux-form';
 import dates from '../../../src/core/dates.js';
 import * as actions from '../../../src/modules/departures/actions';
 import * as sagas from '../../../src/modules/departures/sagas';
@@ -10,6 +10,7 @@ describe('departues sagas', () => {
     it('should init new departure', () => {
       const generator = sagas.initNewDeparture();
 
+      expect(generator.next().value).toEqual(put(destroy('wizard')));
       expect(generator.next().value).toEqual(put(initialize('wizard', {
         date: dates.localDate(),
         time: dates.localTimeRounded(15, 'up'),
@@ -37,7 +38,7 @@ describe('departues sagas', () => {
         negativeTimestamp: -1476028800000,
       };
 
-      expect(generator.next(formValues).value).toEqual(call(sagas.pushMovement, formValuesForFirebase));
+      expect(generator.next(formValues).value).toEqual(call(sagas.saveMovement, formValuesForFirebase));
 
       const key = 'new-departure-key';
 
