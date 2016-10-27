@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { destroy } from 'redux-form';
 import { nextPage, previousPage, finish, showCommitRequirementsDialog, hideCommitRequirementsDialog } from '../modules/ui/wizard';
-import { initNewDeparture, editDeparture, saveDeparture } from '../modules/departures';
+import { initNewDeparture, editDeparture, saveDeparture } from '../modules/movements/departures';
 import DepartureWizard from '../components/DepartureWizard';
 
 const mapStateToProps = (state, ownProps) => {

@@ -1,9 +1,9 @@
 import expect from 'expect';
 import { select, put, call } from 'redux-saga/effects';
 import { initialize, getFormValues, destroy } from 'redux-form';
-import dates from '../../../src/core/dates.js';
-import * as actions from '../../../src/modules/departures/actions';
-import * as sagas from '../../../src/modules/departures/sagas';
+import dates from '../../../../src/core/dates.js';
+import * as actions from '../../../../src/modules/movements/departures/actions';
+import * as sagas from '../../../../src/modules/movements/departures/sagas';
 
 describe('departues sagas', () => {
   describe('initNewDeparture', () => {

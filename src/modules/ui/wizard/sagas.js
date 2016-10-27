@@ -2,7 +2,7 @@ import { takeEvery } from 'redux-saga';
 import { put, fork } from 'redux-saga/effects'
 import { destroy } from 'redux-form';
 import { push } from 'react-router-redux'
-import { INIT_NEW_DEPARTURE, EDIT_DEPARTURE, SAVE_DEPARTURE_SUCCESS } from '../../departures';
+import { INIT_NEW_DEPARTURE, EDIT_DEPARTURE, SAVE_DEPARTURE_SUCCESS } from '../../movements/departures';
 import * as actions from './actions';
 
 export function* init() {

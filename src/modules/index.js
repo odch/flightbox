@@ -10,7 +10,6 @@ import movements, { sagas as movementSagas } from './movements';
 import settings, { sagas as settingsSagas } from './settings';
 import messages, { sagas as messagesSagas } from './messages';
 import ui, { sagas as uiSagas } from './ui';
-import { sagas as departureSagas } from './departures';
 import users, { sagas as usersSagas } from './users';
 
 const reducer = combineReducers({
@@ -36,7 +35,6 @@ export const sagas = function* rootSaga () {
     settingsSagas,
     messagesSagas,
     uiSagas,
-    departureSagas,
     usersSagas,
   ])
 };
