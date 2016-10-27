@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import BorderLayout from '../BorderLayout';
-import BorderLayoutItem from '../BorderLayoutItem';
-import WizardBreadcrumbs from '../WizardBreadcrumbs';
-import { getFromItemKey } from '../../util/reference-number';
+import BorderLayout from '../../BorderLayout';
+import BorderLayoutItem from '../../BorderLayoutItem';
+import WizardBreadcrumbs from '../../WizardBreadcrumbs';
+import { getFromItemKey } from '../../../util/reference-number';
 import AircraftPage from './pages/AircraftPage';
 import PilotPage from './pages/PilotPage';
 import PassengerPage from './pages/PassengerPage';
@@ -46,7 +46,7 @@ class DepartureWizard extends Component {
   }
 
   render() {
-    const logoImagePath = require('../../resources/mfgt_logo_transp.png');
+    const logoImagePath = require('../../../resources/mfgt_logo_transp.png');
 
     return (
       <BorderLayout className="DepartureWizard">

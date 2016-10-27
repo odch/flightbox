@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import ModalDialog from '../../ModalDialog';
+import ModalDialog from '../../../ModalDialog';
 import './CommitRequirementsDialog.scss';
 
 const CommitRequirementsDialog = props => {

@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import './Finish.scss';
-import ImageButton from '../../ImageButton';
+import ImageButton from '../../../ImageButton';
 
 const getMessage = isUpdate =>
   isUpdate === true

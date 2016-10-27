@@ -1,4 +1,4 @@
-import validateUtil from '../../util/validate';
+import validateUtil from '../../../util/validate';
 
 const config = {
   immatriculation: {
