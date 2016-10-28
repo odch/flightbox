@@ -1,12 +1,12 @@
 import React from 'react';
-import LabeledComponent from '../../LabeledComponent';
-import IncrementationField from '../../IncrementationField';
-import SingleSelect from '../../SingleSelect';
-import DatePicker from '../../DatePicker';
-import TimeField from '../../TimeField';
-import AerodromeDropdown from '../../../containers/AerodromeDropdownContainer';
-import AircraftDropdown from '../../../containers/AircraftDropdownContainer';
-import UserDropdown from '../../../containers/UserDropdownContainer';
+import LabeledComponent from '../LabeledComponent';
+import IncrementationField from '../IncrementationField';
+import SingleSelect from '../SingleSelect';
+import DatePicker from '../DatePicker';
+import TimeField from '../TimeField';
+import AerodromeDropdown from '../../containers/AerodromeDropdownContainer';
+import AircraftDropdown from '../../containers/AircraftDropdownContainer';
+import UserDropdown from '../../containers/UserDropdownContainer';
 
 const renderLabeledComponent = (props, component) => {
   const { name, label, tooltip, meta: { touched, error } } = props;

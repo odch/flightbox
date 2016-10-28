@@ -13,14 +13,14 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapActionCreators = {
-  initNewDeparture,
-  editDeparture,
+  initNewMovement: initNewDeparture,
+  editMovement: editDeparture,
   nextPage,
   previousPage,
   finish,
   showCommitRequirementsDialog,
   hideCommitRequirementsDialog,
-  saveDeparture,
+  saveMovement: saveDeparture,
   destroyForm: destroy,
 };
 

@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
-import validate from '../validate';
-import { renderSingleSelect, renderTextArea } from '../renderField';
+import validate from '../../validate';
+import { renderSingleSelect, renderTextArea } from '../../renderField';
 
 const flightTypes = [
   {

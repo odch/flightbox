@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
-import validate from '../validate';
-import { renderAerodromeDropdown, renderDateField, renderTimeField, renderDurationField } from '../renderField';
+import validate from '../../validate';
+import { renderAerodromeDropdown, renderDateField, renderTimeField, renderDurationField } from '../../renderField';
 
 const DepartureArrivalPage = (props) => {
   const { previousPage, handleSubmit } = props;
