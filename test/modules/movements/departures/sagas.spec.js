@@ -4,6 +4,7 @@ import { initialize, getFormValues, destroy } from 'redux-form';
 import dates from '../../../../src/core/dates.js';
 import * as actions from '../../../../src/modules/movements/departures/actions';
 import * as sagas from '../../../../src/modules/movements/departures/sagas';
+import * as remote from '../../../../src/modules/movements/shared/remote';
 
 describe('departues sagas', () => {
   describe('initNewDeparture', () => {
@@ -38,7 +39,7 @@ describe('departues sagas', () => {
         negativeTimestamp: -1476028800000,
       };
 
-      expect(generator.next(formValues).value).toEqual(call(sagas.saveMovement, formValuesForFirebase));
+      expect(generator.next(formValues).value).toEqual(call(remote.saveMovement, '/departures', undefined, formValuesForFirebase));
 
       const key = 'new-departure-key';
 
