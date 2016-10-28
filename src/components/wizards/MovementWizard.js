@@ -8,7 +8,7 @@ import './MovementWizard.scss';
 
 class MovementWizard extends Component {
 
-  componentDidMount() {
+  componentWillMount() {
     if (this.props.params.key) {
       this.props.editMovement(this.props.params.key);
     } else {
