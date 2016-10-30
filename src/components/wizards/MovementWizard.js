@@ -69,7 +69,7 @@ class MovementWizard extends Component {
 
   getSubmitHandler(isLast) {
     if (isLast) {
-      if (this.isUpdate()) {
+      if (this.isUpdate() || !this.props.showCommitRequirementsDialog) {
         return this.props.saveMovement;
       } else {
         return this.props.showCommitRequirementsDialog;
@@ -114,8 +114,8 @@ MovementWizard.propTypes = {
   nextPage: React.PropTypes.func.isRequired,
   previousPage: React.PropTypes.func.isRequired,
   finish: React.PropTypes.func.isRequired,
-  showCommitRequirementsDialog: React.PropTypes.func.isRequired,
-  hideCommitRequirementsDialog: React.PropTypes.func.isRequired,
+  showCommitRequirementsDialog: React.PropTypes.func,
+  hideCommitRequirementsDialog: React.PropTypes.func,
   saveMovement: React.PropTypes.func.isRequired,
   destroyForm: React.PropTypes.func.isRequired,
 };
