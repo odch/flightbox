@@ -50,11 +50,12 @@ export function saveArrival() {
   };
 }
 
-export function saveArrivalSuccess(key) {
+export function saveArrivalSuccess(key, values) {
   return {
     type: SAVE_ARRIVAL_SUCCESS,
     payload: {
       key,
+      values,
     },
   };
 }

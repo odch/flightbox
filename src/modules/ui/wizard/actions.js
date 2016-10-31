@@ -42,8 +42,12 @@ export function hideCommitRequirementsDialog() {
   };
 }
 
-export function setCommitted() {
+export function setCommitted(key, values) {
   return {
     type: WIZARD_SET_COMMITTED,
+    payload: {
+      key,
+      values,
+    }
   };
 }

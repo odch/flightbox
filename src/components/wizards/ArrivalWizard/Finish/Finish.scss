@@ -1,8 +1,33 @@
-.Finish {
+.ArrivalFinish {
   text-align: center;
 
-  .msg {
+  .heading {
     font-size: 2em;
     padding: 2em;
+  }
+
+  .msg {
+    font-size: 1.5em;
+    padding: 1em;
+    margin-bottom: 1.5em;
+  }
+
+  .wrapper {
+    display: table;
+    width: 80%;
+    margin: 0 auto;
+
+    > div {
+      width: 50%;
+      display: table-cell;
+    }
+  }
+
+  .loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%)
   }
 }

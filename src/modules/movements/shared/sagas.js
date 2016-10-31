@@ -44,5 +44,5 @@ export function* saveMovement(path, successAction) {
 
   key = yield call(remote.saveMovement, path, key, movement);
 
-  yield put(successAction(key))
+  yield put(successAction(key, values))
 }

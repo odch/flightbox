@@ -3,13 +3,20 @@ import { put } from 'redux-saga/effects';
 import { push } from 'react-router-redux';
 import * as actions from '../../../../src/modules/ui/wizard/actions';
 import * as sagas from '../../../../src/modules/ui/wizard/sagas';
+import { saveDepartureSuccess } from '../../../../src/modules/movements/departures/actions';
 
 describe('wizard sagas', () => {
   describe('setCommitted', () => {
     it('should set committed', () => {
-      const generator = sagas.setCommitted();
+      const key = 'testkey';
+      const values = {
+        immatriculation: 'HBKOF',
+      };
+      const saveDepartureSuccessAction = saveDepartureSuccess(key, values);
 
-      expect(generator.next().value).toEqual(put(actions.setCommitted()));
+      const generator = sagas.setCommitted(saveDepartureSuccessAction);
+
+      expect(generator.next().value).toEqual(put(actions.setCommitted(key, values)));
       expect(generator.next().done).toEqual(true);
     });
   });

@@ -7,6 +7,7 @@ export {
   initNewDeparture,
   saveDeparture,
   editDeparture,
+  createDepartureFromArrival,
   INIT_NEW_DEPARTURE,
   EDIT_DEPARTURE,
   SAVE_DEPARTURE_SUCCESS,

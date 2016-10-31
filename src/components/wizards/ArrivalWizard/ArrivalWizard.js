@@ -5,7 +5,7 @@ import PilotPage from '../pages/PilotPage';
 import PassengerPage from './pages/PassengerPage';
 import DepartureArrivalPage from './pages/DepartureArrivalPage';
 import FlightPage from './pages/FlightPage';
-import Finish from './Finish';
+import Finish from '../../../containers/ArrivalFinishContainer';
 import './ArrivalWizard.scss';
 
 const pages = [

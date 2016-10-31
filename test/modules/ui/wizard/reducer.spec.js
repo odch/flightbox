@@ -6,6 +6,7 @@ const INITIAL_STATE = {
   page: 1,
   showCommitRequirementsDialog: false,
   committed: false,
+  values: null,
 };
 
 describe('wizard reducer', () => {
@@ -85,12 +86,19 @@ describe('wizard reducer', () => {
 
   describe('WIZARD_SET_COMMITTED', () => {
     it('should reset wizard', () => {
+      const key = 'mykey';
+      const values = {
+        foo: 'bar',
+      };
+
       expect(
         wizard({
           committed: false,
-        }, actions.setCommitted())
+        }, actions.setCommitted(key, values))
       ).toEqual({
         committed: true,
+        itemKey: key,
+        values,
       });
     });
   });

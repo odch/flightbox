@@ -5,6 +5,7 @@ const INITIAL_STATE = {
   page: 1,
   showCommitRequirementsDialog: false,
   committed: false,
+  values: null,
 };
 
 function nextPage(state) {
@@ -35,9 +36,11 @@ function hideCommitRequirementsDialog(state) {
   });
 }
 
-function setCommitted(state) {
+function setCommitted(state, action) {
   return Object.assign({}, state, {
     committed: true,
+    itemKey: action.payload.key,
+    values: action.payload.values,
   });
 }
 

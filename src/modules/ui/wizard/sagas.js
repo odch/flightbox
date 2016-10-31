@@ -10,8 +10,8 @@ export function* init() {
   yield put(actions.reset());
 }
 
-export function* setCommitted() {
-  yield put(actions.setCommitted());
+export function* setCommitted(action) {
+  yield put(actions.setCommitted(action.payload.key, action.payload.values));
 }
 
 export function* finish() {
