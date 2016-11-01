@@ -34,6 +34,7 @@ const pages = [
 const ArrivalWizard = props => (
   <MovementWizard
     {...props}
+    initMovement={props.params.departureKey ? props.initNewArrivalFromDeparture.bind(null, props.params.departureKey) : null}
     pages={pages}
     className="ArrivalWizard"
     finishComponentClass={Finish}
@@ -46,6 +47,7 @@ ArrivalWizard.propTypes = {
   wizard: React.PropTypes.object.isRequired,
   params: React.PropTypes.object.isRequired,
   initNewMovement: React.PropTypes.func.isRequired,
+  initNewArrivalFromDeparture: React.PropTypes.func.isRequired,
   editMovement: React.PropTypes.func.isRequired,
   nextPage: React.PropTypes.func.isRequired,
   previousPage: React.PropTypes.func.isRequired,

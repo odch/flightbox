@@ -1,9 +1,11 @@
 import { takeEvery, takeLatest } from 'redux-saga';
-import { fork } from 'redux-saga/effects'
+import { fork, call } from 'redux-saga/effects'
 import * as actions from './actions';
 import createChannel, { monitor } from '../../../util/createChannel';
 import * as sharedSagas from '../shared/sagas';
+import * as remote from '../shared/remote';
 import dates from '../../../core/dates.js';
+import { firebaseToLocal, transferValues } from '../../../util/movements';
 
 export const arrivalSelector = (state, key) => state.movements.arrivals.data.keys[key];
 
@@ -28,6 +30,38 @@ export function* initNewArrival() {
   });
 }
 
+export function* initNewArrivalFromDeparture(action) {
+  const snapshot = yield call(remote.loadByKey, '/departures', action.payload.departureKey);
+
+  const initialValues = {
+    date: dates.localDate(),
+    time: dates.localTimeRounded(15, 'down'),
+  };
+
+  const val = snapshot.val();
+  if (val) {
+    const departure = firebaseToLocal(snapshot.val());
+    transferValues(departure, initialValues, [
+      'immatriculation',
+      'aircraftType',
+      'mtow',
+      'memberNr',
+      'lastname',
+      'firstname',
+      'phone',
+      { name: 'passengerCount', defaultValue: 0 },
+      'location',
+      'flightType',
+    ]);
+
+    if (departure.departureRoute === 'circuits') {
+      initialValues.arrivalRoute = 'circuits';
+    }
+  }
+
+  yield call(sharedSagas.initNewMovement, initialValues);
+}
+
 export function* editArrival(action) {
   yield sharedSagas.editMovement('/arrivals', arrivalSelector, action.payload.key);
 }
@@ -44,6 +78,7 @@ export default function* sagas() {
     fork(takeEvery, actions.LOAD_ARRIVALS, loadArrivals, channel),
     fork(takeEvery, actions.DELETE_ARRIVAL, deleteArrival),
     fork(takeEvery, actions.INIT_NEW_ARRIVAL, initNewArrival),
+    fork(takeEvery, actions.INIT_NEW_ARRIVAL_FROM_DEPARTURE, initNewArrivalFromDeparture),
     fork(takeEvery, actions.SAVE_ARRIVAL, saveArrival),
     fork(takeLatest, actions.EDIT_ARRIVAL, editArrival),
   ]

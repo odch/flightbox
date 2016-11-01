@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { destroy } from 'redux-form';
 import { nextPage, previousPage, finish } from '../modules/ui/wizard';
-import { initNewArrival, editArrival, saveArrival } from '../modules/movements/arrivals';
+import { initNewArrival, initNewArrivalFromDeparture, editArrival, saveArrival } from '../modules/movements/arrivals';
 
 import ArrivalWizard from '../components/wizards/ArrivalWizard';
 
@@ -15,6 +15,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapActionCreators = {
   initNewMovement: initNewArrival,
+  initNewArrivalFromDeparture,
   editMovement: editArrival,
   nextPage,
   previousPage,

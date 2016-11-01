@@ -5,10 +5,12 @@ import { push } from 'react-router-redux'
 import {
   INIT_NEW_DEPARTURE,
   INIT_NEW_DEPARTURE_FROM_ARRIVAL,
-  EDIT_DEPARTURE, SAVE_DEPARTURE_SUCCESS
+  EDIT_DEPARTURE,
+  SAVE_DEPARTURE_SUCCESS
 } from '../../movements/departures';
 import {
   INIT_NEW_ARRIVAL,
+  INIT_NEW_ARRIVAL_FROM_DEPARTURE,
   EDIT_ARRIVAL,
   SAVE_ARRIVAL_SUCCESS
 } from '../../movements/arrivals';
@@ -32,6 +34,7 @@ export default function* sagas() {
     fork(takeEvery, INIT_NEW_DEPARTURE, init),
     fork(takeEvery, INIT_NEW_DEPARTURE_FROM_ARRIVAL, init),
     fork(takeEvery, INIT_NEW_ARRIVAL, init),
+    fork(takeEvery, INIT_NEW_ARRIVAL_FROM_DEPARTURE, init),
     fork(takeEvery, EDIT_DEPARTURE, init),
     fork(takeEvery, EDIT_ARRIVAL, init),
     fork(takeEvery, SAVE_DEPARTURE_SUCCESS, setCommitted),
