@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { loadAircraftSettings } from '../modules/settings/aircrafts';
-import { createDepartureFromArrival } from '../modules/movements/departures';
+import { createDepartureFromArrival } from '../modules/ui/movements';
 import Finish, { FinishLoading } from '../components/wizards/ArrivalWizard/Finish';
 
 class ArrivalFinishContainer extends Component {

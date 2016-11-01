@@ -3,10 +3,10 @@ export const SET_DEPARTURES_LOADING = 'SET_DEPARTURES_LOADING';
 export const DEPARTURES_ADDED = 'DEPARTURES_ADDED';
 export const DELETE_DEPARTURE = 'DELETE_DEPARTURE';
 export const INIT_NEW_DEPARTURE = 'INIT_NEW_DEPARTURE';
+export const INIT_NEW_DEPARTURE_FROM_ARRIVAL = 'INIT_NEW_DEPARTURE_FROM_ARRIVAL';
 export const SAVE_DEPARTURE = 'SAVE_DEPARTURE';
 export const SAVE_DEPARTURE_SUCCESS = 'SAVE_DEPARTURE_SUCCESS';
 export const EDIT_DEPARTURE = 'EDIT_DEPARTURE';
-export const CREATE_DEPARTURE_FROM_ARRIVAL = 'CREATE_DEPARTURE_FROM_ARRIVAL';
 
 export function loadDepartures() {
   return {
@@ -45,6 +45,15 @@ export function initNewDeparture() {
   };
 }
 
+export function initNewDepartureFromArrival(arrivalKey) {
+  return {
+    type: INIT_NEW_DEPARTURE_FROM_ARRIVAL,
+    payload: {
+      arrivalKey,
+    },
+  };
+}
+
 export function saveDeparture() {
   return {
     type: SAVE_DEPARTURE,
@@ -66,15 +75,6 @@ export function editDeparture(key) {
     type: EDIT_DEPARTURE,
     payload: {
       key,
-    },
-  };
-}
-
-export function createDepartureFromArrival(arrivalKey) {
-  return {
-    type: CREATE_DEPARTURE_FROM_ARRIVAL,
-    payload: {
-      arrivalKey,
     },
   };
 }

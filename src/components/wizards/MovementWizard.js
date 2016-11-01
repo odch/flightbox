@@ -9,7 +9,9 @@ import './MovementWizard.scss';
 class MovementWizard extends Component {
 
   componentWillMount() {
-    if (this.props.params.key) {
+    if (typeof this.props.initMovement === 'function') {
+      this.props.initMovement();
+    } else if (this.props.params.key) {
       this.props.editMovement(this.props.params.key);
     } else {
       this.props.initNewMovement();
@@ -111,6 +113,7 @@ MovementWizard.propTypes = {
 
   initNewMovement: React.PropTypes.func.isRequired,
   editMovement: React.PropTypes.func.isRequired,
+  initMovement: React.PropTypes.func,
   nextPage: React.PropTypes.func.isRequired,
   previousPage: React.PropTypes.func.isRequired,
   finish: React.PropTypes.func.isRequired,

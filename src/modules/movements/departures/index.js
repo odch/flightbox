@@ -5,10 +5,11 @@ export {
   loadDepartures,
   deleteDeparture,
   initNewDeparture,
+  initNewDepartureFromArrival,
   saveDeparture,
   editDeparture,
-  createDepartureFromArrival,
   INIT_NEW_DEPARTURE,
+  INIT_NEW_DEPARTURE_FROM_ARRIVAL,
   EDIT_DEPARTURE,
   SAVE_DEPARTURE_SUCCESS,
 } from './actions';
