@@ -83,7 +83,7 @@ const config = {
     },
     message: 'Wählen Sie hier die Abflugroute aus.',
   },
-  arrivalRoute: {
+  /*arrivalRoute: {
     types: {
       required: true,
       values: ['north', 'south', 'circuits'],
@@ -96,7 +96,7 @@ const config = {
       integer: true,
     },
     message: 'Geben Sie hier die Anzahl Landungen ein.',
-  },
+  },*/
 };
 
 const validate = values => {
