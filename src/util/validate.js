@@ -1,4 +1,11 @@
-function validate(data, config) {
+function getMessage(message, type) {
+  if (!type || typeof message === 'string') {
+    return message;
+  }
+  return message[type];
+}
+
+function validate(data, config, type) {
   const validationErrors = [];
 
   for (const key in config) {
@@ -41,7 +48,7 @@ function validate(data, config) {
       if (valid === false) {
         validationErrors.push({
           key,
-          message: config[key].message,
+          message: getMessage(config[key].message, type),
         });
       }
     }

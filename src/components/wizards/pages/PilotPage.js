@@ -58,5 +58,5 @@ PilotPage.propTypes = {
 export default reduxForm({
   form: 'wizard',
   destroyOnUnmount: false,
-  validate: validate(['memberNr', 'phone', 'lastname', 'firstname']),
+  validate: validate(null, ['memberNr', 'phone', 'lastname', 'firstname']),
 })(PilotPage);

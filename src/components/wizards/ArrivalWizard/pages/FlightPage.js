@@ -96,5 +96,5 @@ FlightPage.propTypes = {
 export default reduxForm({
   form: 'wizard',
   destroyOnUnmount: false,
-  validate: validate(['flightType', 'arrivalRoute', 'remarks', 'runway']),
+  validate: validate('arrival', ['flightType', 'arrivalRoute', 'remarks', 'runway']),
 })(FlightPage);

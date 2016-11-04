@@ -46,14 +46,21 @@ const config = {
       required: true,
       match: /^\d{2}:\d{2}$/,
     },
-    message: 'Geben Sie hier die Startzeit in Stunden und Minuten ein (Lokalzeit).',
+    message: {
+      departure: 'Geben Sie hier die Startzeit in Stunden und Minuten ein (Lokalzeit).',
+      arrival: 'Geben Sie hier die Landezeit in Stunden und Minuten ein (Lokalzeit).',
+    },
   },
   location: {
     types: {
       required: true,
     },
-    message: 'Geben Sie hier den Zielflugplatz ein. Wenn der Flugplatz ein ICAO-Kürzel besitzt,' +
-    'verwenden Sie dieses.',
+    message: {
+      departure: 'Geben Sie hier den Zielflugplatz ein. Wenn der Flugplatz ein ICAO-Kürzel besitzt,' +
+        'verwenden Sie dieses.',
+      arrival: 'Geben Sie hier den Startflugplatz ein. Wenn der Flugplatz ein ICAO-Kürzel besitzt,' +
+      'verwenden Sie dieses.',
+    },
   },
   duration: {
     types: {
@@ -74,7 +81,10 @@ const config = {
       required: true,
       values: ['06', '24'],
     },
-    message: 'Wählen Sie hier die Pistenrichtung für den Abflug aus.',
+    message: {
+      departure: 'Wählen Sie hier die Pistenrichtung für den Abflug aus.',
+      arrival: 'Wählen Sie hier die Pistenrichtung für die Landung aus.',
+    },
   },
   departureRoute: {
     types: {
@@ -106,8 +116,8 @@ const getConfig = (fields = []) => Object.keys(config)
     return obj;
   }, {});
 
-const validate = fields => values => {
-  const errorArr = validateUtil(values, getConfig(fields));
+const validate = (type, fields) => values => {
+  const errorArr = validateUtil(values, getConfig(fields), type);
 
   const errors = {};
 

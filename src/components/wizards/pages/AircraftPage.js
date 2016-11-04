@@ -50,5 +50,5 @@ AircraftPage.propTypes = {
 export default reduxForm({
   form: 'wizard',
   destroyOnUnmount: false,
-  validate: validate(['immatriculation', 'aircraftType', 'mtow']),
+  validate: validate(null, ['immatriculation', 'aircraftType', 'mtow']),
 })(AircraftPage);
