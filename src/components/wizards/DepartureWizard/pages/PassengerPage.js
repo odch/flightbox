@@ -60,5 +60,5 @@ PassengerPage.propTypes = {
 export default reduxForm({
   form: 'wizard',
   destroyOnUnmount: false,
-  validate,
+  validate: validate(['passengerCount', 'carriageVoucher']),
 })(PassengerPage);

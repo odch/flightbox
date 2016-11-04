@@ -83,7 +83,7 @@ const config = {
     },
     message: 'Wählen Sie hier die Abflugroute aus.',
   },
-  /*arrivalRoute: {
+  arrivalRoute: {
     types: {
       required: true,
       values: ['north', 'south', 'circuits'],
@@ -96,11 +96,18 @@ const config = {
       integer: true,
     },
     message: 'Geben Sie hier die Anzahl Landungen ein.',
-  },*/
+  },
 };
 
-const validate = values => {
-  const errorArr = validateUtil(values, config);
+const getConfig = (fields = []) => Object.keys(config)
+  .filter(key => fields.includes(key))
+  .reduce((obj, key) => {
+    obj[key] = config[key];
+    return obj;
+  }, {});
+
+const validate = fields => values => {
+  const errorArr = validateUtil(values, getConfig(fields));
 
   const errors = {};
 

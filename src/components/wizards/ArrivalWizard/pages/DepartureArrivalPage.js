@@ -61,5 +61,5 @@ DepartureArrivalPage.propTypes = {
 export default reduxForm({
   form: 'wizard',
   destroyOnUnmount: false,
-  validate,
+  validate: validate(['location', 'date', 'time', 'landingCount']),
 })(DepartureArrivalPage);
