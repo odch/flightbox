@@ -1,6 +1,0 @@
-{
-  "name": "AircraftData",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./AircraftData.js"
-}
