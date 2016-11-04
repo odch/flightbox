@@ -21,7 +21,7 @@ const reduxRouterMiddleware = routerMiddleware(hashHistory);
 
 let middleware = applyMiddleware(sagaMiddleware, reduxRouterMiddleware);
 
-if (__DEV__ && window.devToolsExtension) {
+if (window.devToolsExtension) {
   middleware = compose(middleware, window.devToolsExtension());
 }
 
