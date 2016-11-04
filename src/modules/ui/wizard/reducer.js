@@ -2,11 +2,18 @@ import * as actions from './actions';
 import reducer from '../../../util/reducer';
 
 const INITIAL_STATE = {
+  initialized: false,
   page: 1,
   showCommitRequirementsDialog: false,
   committed: false,
   values: null,
 };
+
+function setInitialized(state) {
+  return Object.assign({}, state, {
+    initialized: true,
+  });
+}
 
 function nextPage(state) {
   return Object.assign({}, state, {
@@ -45,6 +52,7 @@ function setCommitted(state, action) {
 }
 
 const ACTION_HANDLERS = {
+  [actions.WIZARD_SET_INITIALIZED]: setInitialized,
   [actions.WIZARD_NEXT_PAGE]: nextPage,
   [actions.WIZARD_PREVIOUS_PAGE]: previousPage,
   [actions.WIZARD_RESET]: reset,

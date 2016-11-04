@@ -30,7 +30,7 @@ class MovementWizard extends Component {
             </a>
           </header>
         </BorderLayoutItem>
-        {this.props.wizard.committed !== true && (
+        {this.props.wizard.initialized === true && this.props.wizard.committed !== true && (
           <BorderLayoutItem region="north">
             <WizardBreadcrumbs items={this.buildBreadcrumbItems()} activeItem={this.props.wizard.page}/>
           </BorderLayoutItem>
@@ -43,6 +43,10 @@ class MovementWizard extends Component {
   }
 
   getMiddleItem() {
+    if (this.props.wizard.initialized !== true) {
+      return <div className="loading">Bitte warten ...</div>;
+    }
+
     if (this.props.wizard.committed === true) {
       return <this.props.finishComponentClass finish={this.props.finish} isUpdate={this.isUpdate()}/>;
     }

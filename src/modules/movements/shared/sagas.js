@@ -1,6 +1,7 @@
 import { getPagination } from './pagination';
 import { put, call, select } from 'redux-saga/effects'
 import { initialize, destroy, getFormValues } from 'redux-form'
+import * as actions from './actions';
 import * as remote from './remote';
 import { localToFirebase, firebaseToLocal } from '../../../util/movements';
 
@@ -19,12 +20,16 @@ export function* deleteMovement(path, key, successAction) {
   yield put(successAction());
 }
 
-export function* initNewMovement(initialValues) {
+export function* initNewMovement(loadInitialValues, ...loadInitialValuesArgs) {
+  yield put(actions.startInitializeWizard());
   yield put(destroy('wizard'));
+  const initialValues = yield call(loadInitialValues, ...loadInitialValuesArgs);
   yield put(initialize('wizard', initialValues));
+  yield put(actions.wizardInitialized());
 }
 
 export function* editMovement(path, movementSelector, key) {
+  yield put(actions.startInitializeWizard());
   yield put(destroy('wizard'));
   let movement = yield(select(movementSelector, key));
   if (!movement) {
@@ -33,6 +38,7 @@ export function* editMovement(path, movementSelector, key) {
     movement.key = snapshot.key();
   }
   yield put(initialize('wizard', movement));
+  yield put(actions.wizardInitialized());
 }
 
 export function* saveMovement(path, successAction) {

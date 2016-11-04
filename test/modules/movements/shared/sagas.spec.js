@@ -2,6 +2,7 @@ import expect from 'expect';
 import { select, put, call } from 'redux-saga/effects';
 import { initialize, getFormValues, destroy } from 'redux-form';
 import dates from '../../../../src/core/dates.js';
+import * as actions from '../../../../src/modules/movements/shared/actions';
 import * as sagas from '../../../../src/modules/movements/shared/sagas';
 import * as remote from '../../../../src/modules/movements/shared/remote';
 
@@ -11,15 +12,22 @@ describe('modules', () => {
       describe('sagas', () => {
         describe('initNewMovement', () => {
           it('should init new departure', () => {
+            const loadInitialValues = () => undefined;
+
+            const generator = sagas.initNewMovement(loadInitialValues, 'testarg1', 'testarg2');
+
+            expect(generator.next().value).toEqual(put(actions.startInitializeWizard()));
+            expect(generator.next().value).toEqual(put(destroy('wizard')));
+            expect(generator.next().value).toEqual(call(loadInitialValues, 'testarg1', 'testarg2'));
+
             const initialValues = {
               date: dates.localDate(),
               time: dates.localTimeRounded(15, 'up'),
             };
 
-            const generator = sagas.initNewMovement(initialValues);
+            expect(generator.next(initialValues).value).toEqual(put(initialize('wizard', initialValues)));
 
-            expect(generator.next().value).toEqual(put(destroy('wizard')));
-            expect(generator.next().value).toEqual(put(initialize('wizard', initialValues)));
+            expect(generator.next().value).toEqual(put(actions.wizardInitialized()));
 
             expect(generator.next().done).toEqual(true);
           });

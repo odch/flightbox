@@ -13,15 +13,24 @@ describe('modules', () => {
           it('should init new departure', () => {
             const generator = departuresSagas.initNewDeparture();
 
-            const initialValues = {
-              date: dates.localDate(),
-              time: dates.localTimeRounded(15, 'up'),
-            };
-
-            expect(generator.next().value).toEqual(call(sharedSagas.initNewMovement, initialValues));
+            expect(generator.next().value).toEqual(call(sharedSagas.initNewMovement, departuresSagas.getDefaultValues));
 
             expect(generator.next().done).toEqual(true);
           });
+        });
+
+        describe('getInitialValues', () => {
+          const generator = departuresSagas.getDefaultValues();
+
+          const initialValues = {
+            date: dates.localDate(),
+            time: dates.localTimeRounded(15, 'up'),
+          };
+
+          const next = generator.next();
+
+          expect(next.value).toEqual(initialValues);
+          expect(next.done).toEqual(true);
         });
 
         describe('saveDeparture', () => {

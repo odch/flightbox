@@ -3,6 +3,7 @@ import wizard from '../../../../src/modules/ui/wizard/reducer';
 import * as actions from '../../../../src/modules/ui/wizard/actions';
 
 const INITIAL_STATE = {
+  initialized: false,
   page: 1,
   showCommitRequirementsDialog: false,
   committed: false,

@@ -9,34 +9,17 @@ import { firebaseToLocal, transferValues } from '../../../util/movements';
 
 export const arrivalSelector = (state, key) => state.movements.arrivals.data.keys[key];
 
-function* loadArrivals(channel) {
-  yield sharedSagas.loadMovements(
-    actions.setArrivalsLoading,
-    state => state.movements.arrivals,
-    '/arrivals',
-    channel,
-    actions.arrivalsAdded
-  );
-}
-
-function* deleteArrival(action) {
-  yield sharedSagas.deleteMovement('/arrivals', action.payload.key, action.payload.successAction);
-}
-
-export function* initNewArrival() {
-  yield sharedSagas.initNewMovement({
-    date: dates.localDate(),
-    time: dates.localTimeRounded(15, 'down'),
-  });
-}
-
-export function* initNewArrivalFromDeparture(action) {
-  const snapshot = yield call(remote.loadByKey, '/departures', action.payload.departureKey);
-
-  const initialValues = {
+export function* getDefaultValues() {
+  return {
     date: dates.localDate(),
     time: dates.localTimeRounded(15, 'down'),
   };
+}
+
+export function* getDefaultValuesFromDeparture(departureKey) {
+  const snapshot = yield call(remote.loadByKey, '/departures', departureKey);
+
+  const initialValues = yield call(getDefaultValues);
 
   const val = snapshot.val();
   if (val) {
@@ -59,11 +42,33 @@ export function* initNewArrivalFromDeparture(action) {
     }
   }
 
-  yield call(sharedSagas.initNewMovement, initialValues);
+  return initialValues;
+}
+
+function* loadArrivals(channel) {
+  yield sharedSagas.loadMovements(
+    actions.setArrivalsLoading,
+    state => state.movements.arrivals,
+    '/arrivals',
+    channel,
+    actions.arrivalsAdded
+  );
+}
+
+function* deleteArrival(action) {
+  yield sharedSagas.deleteMovement('/arrivals', action.payload.key, action.payload.successAction);
+}
+
+export function* initNewArrival() {
+  yield call(sharedSagas.initNewMovement, getDefaultValues);
+}
+
+export function* initNewArrivalFromDeparture(action) {
+  yield call(sharedSagas.initNewMovement, getDefaultValuesFromDeparture, action.payload.departureKey);
 }
 
 export function* editArrival(action) {
-  yield sharedSagas.editMovement('/arrivals', arrivalSelector, action.payload.key);
+  yield sharedSagas.editMovement('/arrivals', arrivalSelector, action.payload.key, actions.arrivalInitialized);
 }
 
 export function* saveArrival() {
