@@ -7,6 +7,7 @@ const INITIAL_STATE = {
   showCommitRequirementsDialog: false,
   committed: false,
   values: null,
+  commitError: null,
 };
 
 function setInitialized(state) {
@@ -51,6 +52,19 @@ function setCommitted(state, action) {
   });
 }
 
+function setCommitError(state, action) {
+  return Object.assign({}, state, {
+    commitError: action.payload.error,
+    showCommitRequirementsDialog: false,
+  });
+}
+
+function unsetCommitError(state) {
+  return Object.assign({}, state, {
+    commitError: null,
+  });
+}
+
 const ACTION_HANDLERS = {
   [actions.WIZARD_SET_INITIALIZED]: setInitialized,
   [actions.WIZARD_NEXT_PAGE]: nextPage,
@@ -59,6 +73,8 @@ const ACTION_HANDLERS = {
   [actions.WIZARD_SHOW_COMMIT_REQUIREMENTS_DIALOG]: showCommitRequirementsDialog,
   [actions.WIZARD_HIDE_COMMIT_REQUIREMENTS_DIALOG]: hideCommitRequirementsDialog,
   [actions.WIZARD_SET_COMMITTED]: setCommitted,
+  [actions.WIZARD_SET_COMMIT_ERROR]: setCommitError,
+  [actions.WIZARD_UNSET_COMMIT_ERROR]: unsetCommitError,
 };
 
 export default reducer(INITIAL_STATE, ACTION_HANDLERS);

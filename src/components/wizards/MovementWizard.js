@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import WizardBreadcrumbs from '../WizardBreadcrumbs';
+import CommitFailureDialog from '../CommitFailureDialog';
 import { getFromItemKey } from '../../util/reference-number';
 import './MovementWizard.scss';
 
@@ -58,19 +59,29 @@ class MovementWizard extends Component {
     const pageObj = this.props.pages[this.props.wizard.page - 1];
     const pageComponent = <pageObj.component previousPage={this.props.previousPage} onSubmit={submitHandler}/>;
 
-    if (isLast && this.props.wizard.showCommitRequirementsDialog === true) {
-      return (
-        <div>
-          {pageComponent}
-          <this.props.commitRequirementsDialogClass
-            onCancel={this.props.hideCommitRequirementsDialog}
-            onConfirm={this.props.saveMovement}
-          />
-        </div>
-      );
-    }
+    const commitRequirementsDialog = isLast && this.props.wizard.showCommitRequirementsDialog === true
+      ? (
+        <this.props.commitRequirementsDialogClass
+          onCancel={this.props.hideCommitRequirementsDialog}
+          onConfirm={this.props.saveMovement}
+        />
+      ) : null;
 
-    return pageComponent;
+    const commitFailureDialog = this.props.wizard.commitError
+      ? (
+        <CommitFailureDialog
+          onClose={this.props.unsetCommitError}
+          errorMsg={this.props.wizard.commitError.message}
+        />
+      ) : null;
+
+    return (
+      <div>
+        {pageComponent}
+        {commitRequirementsDialog}
+        {commitFailureDialog}
+      </div>
+    );
   }
 
   getSubmitHandler(isLast) {
@@ -124,6 +135,7 @@ MovementWizard.propTypes = {
   showCommitRequirementsDialog: React.PropTypes.func,
   hideCommitRequirementsDialog: React.PropTypes.func,
   saveMovement: React.PropTypes.func.isRequired,
+  unsetCommitError: React.PropTypes.func,
   destroyForm: React.PropTypes.func.isRequired,
 };
 

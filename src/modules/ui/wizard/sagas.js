@@ -3,10 +3,12 @@ import { put, fork } from 'redux-saga/effects'
 import { destroy } from 'redux-form';
 import { push } from 'react-router-redux'
 import {
-  SAVE_DEPARTURE_SUCCESS
+  SAVE_DEPARTURE_SUCCESS,
+  SAVE_DEPARTURE_FAILED,
 } from '../../movements/departures';
 import {
-  SAVE_ARRIVAL_SUCCESS
+  SAVE_ARRIVAL_SUCCESS,
+  SAVE_ARRIVAL_FAILED,
 } from '../../movements/arrivals';
 import {
   START_INITIALIZE_WIZARD,
@@ -26,6 +28,10 @@ export function* setCommitted(action) {
   yield put(actions.setCommitted(action.payload.key, action.payload.values));
 }
 
+export function* setCommitError(action) {
+  yield put(actions.setCommitError(action.payload.error));
+}
+
 export function* finish() {
   yield put(push('/'));
   yield put(actions.reset());
@@ -38,5 +44,7 @@ export default function* sagas() {
     fork(takeEvery, SAVE_DEPARTURE_SUCCESS, setCommitted),
     fork(takeEvery, SAVE_ARRIVAL_SUCCESS, setCommitted),
     fork(takeEvery, actions.WIZARD_FINISH, finish),
+    fork(takeEvery, SAVE_DEPARTURE_FAILED, setCommitError),
+    fork(takeEvery, SAVE_ARRIVAL_FAILED, setCommitError),
   ]
 }

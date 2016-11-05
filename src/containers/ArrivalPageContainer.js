@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { destroy } from 'redux-form';
-import { nextPage, previousPage, finish } from '../modules/ui/wizard';
+import { nextPage, previousPage, finish, unsetCommitError } from '../modules/ui/wizard';
 import { initNewArrival, initNewArrivalFromDeparture, editArrival, saveArrival } from '../modules/movements/arrivals';
 
 import ArrivalWizard from '../components/wizards/ArrivalWizard';
@@ -21,6 +21,7 @@ const mapActionCreators = {
   previousPage,
   finish,
   saveMovement: saveArrival,
+  unsetCommitError,
   destroyForm: destroy,
 };
 

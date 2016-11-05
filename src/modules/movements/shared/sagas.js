@@ -41,14 +41,20 @@ export function* editMovement(path, movementSelector, key) {
   yield put(actions.wizardInitialized());
 }
 
-export function* saveMovement(path, successAction) {
+export function* saveMovement(path, successAction, failureAction) {
   const values = yield select(getFormValues('wizard'));
   const movement = localToFirebase(values);
 
   let key = movement.key;
   delete movement.key;
 
-  key = yield call(remote.saveMovement, path, key, movement);
-
-  yield put(successAction(key, values))
+  try {
+    key = yield call(remote.saveMovement, path, key, movement);
+    yield put(successAction(key, values))
+  } catch(e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to save movement', e);
+    }
+    yield put(failureAction(e))
+  }
 }

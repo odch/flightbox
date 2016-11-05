@@ -53,6 +53,7 @@ ArrivalWizard.propTypes = {
   previousPage: React.PropTypes.func.isRequired,
   finish: React.PropTypes.func.isRequired,
   saveMovement: React.PropTypes.func.isRequired,
+  unsetCommitError: React.PropTypes.func.isRequired,
   destroyForm: React.PropTypes.func.isRequired,
 };
 

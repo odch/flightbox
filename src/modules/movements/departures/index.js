@@ -12,6 +12,7 @@ export {
   INIT_NEW_DEPARTURE_FROM_ARRIVAL,
   EDIT_DEPARTURE,
   SAVE_DEPARTURE_SUCCESS,
+  SAVE_DEPARTURE_FAILED,
 } from './actions';
 
 export { sagas };

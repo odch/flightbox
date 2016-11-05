@@ -1,6 +1,13 @@
 import { connect } from 'react-redux';
 import { destroy } from 'redux-form';
-import { nextPage, previousPage, finish, showCommitRequirementsDialog, hideCommitRequirementsDialog } from '../modules/ui/wizard';
+import {
+  nextPage,
+  previousPage,
+  finish,
+  showCommitRequirementsDialog,
+  hideCommitRequirementsDialog,
+  unsetCommitError,
+} from '../modules/ui/wizard';
 import { initNewDeparture, initNewDepartureFromArrival, editDeparture, saveDeparture } from '../modules/movements/departures';
 import DepartureWizard from '../components/wizards/DepartureWizard';
 
@@ -22,6 +29,7 @@ const mapActionCreators = {
   showCommitRequirementsDialog,
   hideCommitRequirementsDialog,
   saveMovement: saveDeparture,
+  unsetCommitError,
   destroyForm: destroy,
 };
 

@@ -6,6 +6,7 @@ export const INIT_NEW_DEPARTURE = 'INIT_NEW_DEPARTURE';
 export const INIT_NEW_DEPARTURE_FROM_ARRIVAL = 'INIT_NEW_DEPARTURE_FROM_ARRIVAL';
 export const SAVE_DEPARTURE = 'SAVE_DEPARTURE';
 export const SAVE_DEPARTURE_SUCCESS = 'SAVE_DEPARTURE_SUCCESS';
+export const SAVE_DEPARTURE_FAILED = 'SAVE_DEPARTURE_FAILED';
 export const EDIT_DEPARTURE = 'EDIT_DEPARTURE';
 
 export function loadDepartures() {
@@ -66,6 +67,15 @@ export function saveDepartureSuccess(key, values) {
     payload: {
       key,
       values,
+    },
+  };
+}
+
+export function saveDepartureFailed(error) {
+  return {
+    type: SAVE_DEPARTURE_FAILED,
+    payload: {
+      error,
     },
   };
 }

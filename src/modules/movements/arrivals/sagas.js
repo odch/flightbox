@@ -72,7 +72,7 @@ export function* editArrival(action) {
 }
 
 export function* saveArrival() {
-  yield sharedSagas.saveMovement('/arrivals', actions.saveArrivalSuccess);
+  yield sharedSagas.saveMovement('/arrivals', actions.saveArrivalSuccess, actions.saveArrivalFailed);
 }
 
 export default function* sagas() {

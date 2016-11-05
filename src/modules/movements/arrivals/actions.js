@@ -6,6 +6,7 @@ export const INIT_NEW_ARRIVAL = 'INIT_NEW_ARRIVAL';
 export const INIT_NEW_ARRIVAL_FROM_DEPARTURE = 'INIT_NEW_ARRIVAL_FROM_DEPARTURE';
 export const SAVE_ARRIVAL = 'SAVE_ARRIVAL';
 export const SAVE_ARRIVAL_SUCCESS = 'SAVE_ARRIVAL_SUCCESS';
+export const SAVE_ARRIVAL_FAILED = 'SAVE_ARRIVAL_FAILED';
 export const EDIT_ARRIVAL = 'EDIT_ARRIVAL';
 
 export function loadArrivals() {
@@ -66,6 +67,15 @@ export function saveArrivalSuccess(key, values) {
     payload: {
       key,
       values,
+    },
+  };
+}
+
+export function saveArrivalFailed(error) {
+  return {
+    type: SAVE_ARRIVAL_FAILED,
+    payload: {
+      error,
     },
   };
 }

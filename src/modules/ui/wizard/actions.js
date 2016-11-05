@@ -6,6 +6,8 @@ export const WIZARD_RESET = 'WIZARD_RESET';
 export const WIZARD_SHOW_COMMIT_REQUIREMENTS_DIALOG = 'WIZARD_SHOW_COMMIT_REQUIREMENTS_DIALOG';
 export const WIZARD_HIDE_COMMIT_REQUIREMENTS_DIALOG = 'WIZARD_HIDE_COMMIT_REQUIREMENTS_DIALOG';
 export const WIZARD_SET_COMMITTED = 'WIZARD_SET_COMMITTED';
+export const WIZARD_SET_COMMIT_ERROR = 'WIZARD_SET_COMMIT_ERROR';
+export const WIZARD_UNSET_COMMIT_ERROR = 'WIZARD_UNSET_COMMIT_ERROR';
 
 export function setInitialized() {
   return {
@@ -55,6 +57,21 @@ export function setCommitted(key, values) {
     payload: {
       key,
       values,
-    }
+    },
+  };
+}
+
+export function setCommitError(error) {
+  return {
+    type: WIZARD_SET_COMMIT_ERROR,
+    payload: {
+      error,
+    },
+  };
+}
+
+export function unsetCommitError() {
+  return {
+    type: WIZARD_UNSET_COMMIT_ERROR,
   };
 }

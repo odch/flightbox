@@ -57,6 +57,7 @@ DepartureWizard.propTypes = {
   showCommitRequirementsDialog: React.PropTypes.func.isRequired,
   hideCommitRequirementsDialog: React.PropTypes.func.isRequired,
   saveMovement: React.PropTypes.func.isRequired,
+  unsetCommitError: React.PropTypes.func.isRequired,
   destroyForm: React.PropTypes.func.isRequired,
 };
 

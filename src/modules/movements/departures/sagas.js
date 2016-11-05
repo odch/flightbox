@@ -69,7 +69,7 @@ export function* editDeparture(action) {
 }
 
 export function* saveDeparture() {
-  yield call(sharedSagas.saveMovement, '/departures', actions.saveDepartureSuccess);
+  yield call(sharedSagas.saveMovement, '/departures', actions.saveDepartureSuccess, actions.saveDepartureFailed);
 }
 
 export default function* sagas() {

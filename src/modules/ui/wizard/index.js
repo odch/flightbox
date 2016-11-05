@@ -9,6 +9,7 @@ export {
   showCommitRequirementsDialog,
   hideCommitRequirementsDialog,
   setCommitted,
+  unsetCommitError,
 } from './actions';
 
 export { sagas };
