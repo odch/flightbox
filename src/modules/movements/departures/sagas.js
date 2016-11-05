@@ -65,7 +65,7 @@ export function* initNewDepartureFromArrival(action) {
 }
 
 export function* editDeparture(action) {
-  yield call(sharedSagas.editMovement, '/departures', departureSelector, action.payload.key, actions.departureInitialized);
+  yield call(sharedSagas.editMovement, '/departures', departureSelector, action.payload.key);
 }
 
 export function* saveDeparture() {
