@@ -37,7 +37,12 @@ describe('modules', () => {
           it('should save departure', () => {
             const generator = departuresSagas.saveDeparture();
 
-            expect(generator.next().value).toEqual(call(sharedSagas.saveMovement, '/departures', actions.saveDepartureSuccess));
+            expect(generator.next().value).toEqual(call(
+              sharedSagas.saveMovement,
+              '/departures',
+              actions.saveDepartureSuccess,
+              actions.saveDepartureFailed
+            ));
 
             expect(generator.next().done).toEqual(true);
           });

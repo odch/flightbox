@@ -8,6 +8,7 @@ const INITIAL_STATE = {
   showCommitRequirementsDialog: false,
   committed: false,
   values: null,
+  commitError: null,
 };
 
 describe('wizard reducer', () => {
@@ -100,6 +101,33 @@ describe('wizard reducer', () => {
         committed: true,
         itemKey: key,
         values,
+      });
+    });
+  });
+
+  describe('WIZARD_SET_COMMIT_ERROR', () => {
+    it('should set commit error', () => {
+      const error = new Error('testerror');
+      expect(
+        wizard({
+          commitError: null,
+          showCommitRequirementsDialog: true,
+        }, actions.setCommitError(error))
+      ).toEqual({
+        commitError: error,
+        showCommitRequirementsDialog: false,
+      });
+    });
+  });
+
+  describe('WIZARD_UNSET_COMMIT_ERROR', () => {
+    it('should unset commit error', () => {
+      expect(
+        wizard({
+          commitError: new Error('testerror'),
+        }, actions.unsetCommitError())
+      ).toEqual({
+        commitError: null,
       });
     });
   });
