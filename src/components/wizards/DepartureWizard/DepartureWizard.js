@@ -4,7 +4,7 @@ import AircraftPage from '../pages/AircraftPage';
 import PilotPage from '../pages/PilotPage';
 import PassengerPage from './pages/PassengerPage';
 import DepartureArrivalPage from './pages/DepartureArrivalPage';
-import FlightPage from './pages/FlightPage';
+import FlightPage from '../../../containers/DepartureFlightPageContainer';
 import CommitRequirementsDialog from './CommitRequirementsDialog';
 import Finish from './Finish';
 import './DepartureWizard.scss';

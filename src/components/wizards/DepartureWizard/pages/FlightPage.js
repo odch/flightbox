@@ -3,46 +3,8 @@ import { Field, reduxForm } from 'redux-form';
 import validate from '../../validate';
 import { renderSingleSelect, renderTextArea } from '../../renderField';
 
-const flightTypes = [
-  {
-    label: 'Privat',
-    value: 'private',
-  }, {
-    label: 'Gewerblich',
-    value: 'commercial',
-  }, {
-    label: 'Schulung',
-    value: 'instruction',
-  },
-];
-
-const runways = [
-  {
-    label: '06',
-    value: '06',
-  }, {
-    label: '24',
-    value: '24',
-  },
-];
-
-const departureRoutes = [
-  {
-    label: 'Sektor Süd',
-    value: 'south',
-  }, {
-    label: 'Matzingen',
-    value: 'matzingen',
-  }, {
-    label: 'Platzrunden',
-    value: 'circuits',
-    description: 'Ohne Verlassen des Platzverkehrs',
-    available: arg => arg.data.location.toUpperCase() === 'LSZT',
-  },
-];
-
 const FlightPage = (props) => {
-  const { previousPage, handleSubmit } = props;
+  const { previousPage, handleSubmit, flightTypes, runways, departureRoutes } = props;
   return (
     <form onSubmit={handleSubmit} className="FlightPage">
       <fieldset>
@@ -92,6 +54,19 @@ const FlightPage = (props) => {
 FlightPage.propTypes = {
   previousPage: PropTypes.func,
   handleSubmit: PropTypes.func,
+  flightTypes: PropTypes.arrayOf(PropTypes.shape({
+    label: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired,
+  })).isRequired,
+  runways: PropTypes.arrayOf(PropTypes.shape({
+    label: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired,
+  })).isRequired,
+  departureRoutes: PropTypes.arrayOf(PropTypes.shape({
+    label: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired,
+    description: PropTypes.string,
+  })).isRequired,
 };
 
 export default reduxForm({
