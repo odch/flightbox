@@ -19,11 +19,19 @@ class ImmutableItemsArray {
     this.keys = {}; // map for quick lookup (keys must be kept in sync with items in the array)
 
     if (array) {
-      array.forEach(item => {
+      array.forEach((item, index) => {
         this.array.push(item);
-        this.keys[item.key] = item;
+        this.keys[item.key] = index;
       });
     }
+  }
+
+  getByKey(key) {
+    const index = this.keys[key];
+    if (typeof index === 'number') {
+      return this.array[index];
+    }
+    return null;
   }
 
   /**
@@ -43,6 +51,40 @@ class ImmutableItemsArray {
         index = (index + 1) * -1;
       }
       newArr.splice(index, 0, item);
+
+      return new ImmutableItemsArray(newArr);
+    }
+
+    return this;
+  }
+
+  update(item, comparator) {
+    if (!item.key) throw new Error('Property "key" is missing');
+
+    const currentIndex = this.keys[item.key];
+
+    if (typeof currentIndex === 'number') {
+      const newArr = this.array.slice(0);
+      newArr.splice(currentIndex, 1);
+
+      let index = bs(newArr, item, comparator);
+      if (index < 0) {
+        index = (index + 1) * -1;
+      }
+      newArr.splice(index, 0, item);
+
+      return new ImmutableItemsArray(newArr);
+    }
+
+    return this;
+  }
+
+  remove(key) {
+    const currentIndex = this.keys[key];
+
+    if (typeof currentIndex === 'number') {
+      const newArr = this.array.slice(0);
+      newArr.splice(currentIndex, 1);
 
       return new ImmutableItemsArray(newArr);
     }

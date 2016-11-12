@@ -1,6 +1,9 @@
 export const LOAD_ARRIVALS = 'LOAD_ARRIVALS';
 export const SET_ARRIVALS_LOADING = 'SET_ARRIVALS_LOADING';
 export const ARRIVALS_ADDED = 'ARRIVALS_ADDED';
+export const ARRIVAL_ADDED = 'ARRIVAL_ADDED';
+export const ARRIVAL_CHANGED = 'ARRIVAL_CHANGED';
+export const ARRIVAL_DELETED = 'ARRIVAL_DELETED';
 export const DELETE_ARRIVAL = 'DELETE_ARRIVAL';
 export const INIT_NEW_ARRIVAL = 'INIT_NEW_ARRIVAL';
 export const INIT_NEW_ARRIVAL_FROM_DEPARTURE = 'INIT_NEW_ARRIVAL_FROM_DEPARTURE';
@@ -24,6 +27,33 @@ export function setArrivalsLoading() {
 export function arrivalsAdded(snapshot) {
   return {
     type: ARRIVALS_ADDED,
+    payload: {
+      snapshot,
+    },
+  };
+}
+
+export function arrivalAdded(snapshot) {
+  return {
+    type: ARRIVAL_ADDED,
+    payload: {
+      snapshot,
+    },
+  };
+}
+
+export function arrivalChanged(snapshot) {
+  return {
+    type: ARRIVAL_CHANGED,
+    payload: {
+      snapshot,
+    },
+  };
+}
+
+export function arrivalDeleted(snapshot) {
+  return {
+    type: ARRIVAL_DELETED,
     payload: {
       snapshot,
     },

@@ -7,7 +7,7 @@ import * as remote from '../shared/remote';
 import dates from '../../../core/dates.js';
 import { localToFirebase, firebaseToLocal, transferValues } from '../../../util/movements';
 
-export const departureSelector = (state, key) => state.movements.departures.data.keys[key];
+export const departureSelector = (state, key) => state.movements.departures.data.getByKey(key);
 
 export function* getDefaultValues() {
   return {
@@ -48,7 +48,10 @@ export function* loadDepartures(channel) {
     state => state.movements.departures,
     '/departures',
     channel,
-    actions.departuresAdded
+    actions.departuresAdded,
+    actions.departureAdded,
+    actions.departureChanged,
+    actions.departureDeleted
   );
 }
 

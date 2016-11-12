@@ -5,12 +5,28 @@ import * as actions from './actions';
 import * as remote from './remote';
 import { localToFirebase, firebaseToLocal } from '../../../util/movements';
 
-export function* loadMovements(setLoadingAction, stateSelector, firebasePath, channel, successAction) {
+export function* loadMovements(setLoadingAction, stateSelector, firebasePath, channel, successAction,
+                               childAddedAction, childChangedAction, childRemovedAction) {
   const movements = yield select(stateSelector);
   if (movements.loading !== true) {
     yield put(setLoadingAction());
+
     const pagination = getPagination(movements.data.array);
-    const snapshot = yield call(remote.loadLimited, firebasePath, pagination.start, pagination.limit);
+
+    const childAdded = snapshot => channel.put(childAddedAction(snapshot));
+    const childChanged = snapshot => channel.put(childChangedAction(snapshot));
+    const childRemoved = snapshot => channel.put(childRemovedAction(snapshot));
+
+    const snapshot = yield call(
+      remote.loadLimited,
+      firebasePath,
+      pagination.start,
+      pagination.limit,
+      childAdded,
+      childChanged,
+      childRemoved
+    );
+
     channel.put(successAction(snapshot));
   }
 }

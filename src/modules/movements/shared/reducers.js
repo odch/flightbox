@@ -27,6 +27,36 @@ export function childrenAdded(state, action) {
   });
 }
 
+export function childAdded(state, action) {
+  const snapshot = action.payload.snapshot;
+
+  const movement = firebaseToLocal(snapshot.val());
+  movement.key = snapshot.key();
+
+  return Object.assign({}, state, {
+    data: state.data.insert(movement, compareDescending),
+  });
+}
+
+export function childChanged(state, action) {
+  const snapshot = action.payload.snapshot;
+
+  const movement = firebaseToLocal(snapshot.val());
+  movement.key = snapshot.key();
+
+  return Object.assign({}, state, {
+    data: state.data.update(movement, compareDescending),
+  });
+}
+
+export function childRemoved(state, action) {
+  const snapshot = action.payload.snapshot;
+
+  return Object.assign({}, state, {
+    data: state.data.remove(snapshot.key()),
+  });
+}
+
 export function setLoading(state) {
   return Object.assign({}, state, {
     loading: true,
