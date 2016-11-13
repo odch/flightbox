@@ -1,4 +1,5 @@
 import React, { PropTypes, Component } from 'react';
+import isElementInViewport from '../util/isElementInViewport';
 
 export const AutoLoad = (List) => class extends Component {
 
@@ -18,6 +19,13 @@ export const AutoLoad = (List) => class extends Component {
     const scrollableElement = this.findScrollableElement();
     if (scrollableElement) {
       scrollableElement.removeEventListener('scroll', this.handleScroll);
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.items.length > prevProps.items.length
+      && this.bottomMarker && isElementInViewport(this.bottomMarker)) {
+      this.props.loadItems();
     }
   }
 
@@ -48,6 +56,7 @@ export const AutoLoad = (List) => class extends Component {
     return (
       <div className={this.props.className} ref={(element) => this.element = element}>
         <List {...this.props}/>
+        <div ref={element => this.bottomMarker = element}></div>
       </div>
     );
   }
@@ -55,5 +64,6 @@ export const AutoLoad = (List) => class extends Component {
 
 AutoLoad.propTypes = {
   loadItems: PropTypes.func.isRequired,
+  items: PropTypes.array.isRequired,
   className: PropTypes.string,
 };
