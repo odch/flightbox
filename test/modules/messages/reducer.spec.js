@@ -8,6 +8,10 @@ const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
   loading: false,
   selected: null,
+  form: {
+    sent: false,
+    commitFailed: false,
+  },
 };
 
 describe('messages reducer', () => {

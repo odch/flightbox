@@ -2,6 +2,7 @@ import expect from 'expect';
 import { call, put, select } from 'redux-saga/effects';
 import * as actions from '../../../src/modules/messages/actions';
 import * as sagas from '../../../src/modules/messages/sagas';
+import * as remote from '../../../src/modules/messages/remote';
 import FakeFirebaseSnapshot from '../../FakeFirebaseSnapshot';
 
 describe('messages sagas', () => {
@@ -18,7 +19,7 @@ describe('messages sagas', () => {
 
       expect(generator.next().value).toEqual(select(sagas.messagesSelector));
       expect(generator.next({ loading: false }).value).toEqual(put(actions.setMessagesLoading()));
-      expect(generator.next().value).toEqual(call(sagas.loadAll));
+      expect(generator.next().value).toEqual(call(remote.loadAll));
 
       const snapshot = new FakeFirebaseSnapshot('messages', []);
       expect(generator.next(snapshot).value).toEqual(put(actions.messagesLoaded(snapshot)));
