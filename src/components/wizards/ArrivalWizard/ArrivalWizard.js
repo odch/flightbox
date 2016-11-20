@@ -6,7 +6,6 @@ import PassengerPage from './pages/PassengerPage';
 import DepartureArrivalPage from './pages/DepartureArrivalPage';
 import FlightPage from '../../../containers/ArrivalFlightPageContainer';
 import Finish from '../../../containers/ArrivalFinishContainer';
-import './ArrivalWizard.scss';
 
 const pages = [
   {

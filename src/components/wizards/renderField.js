@@ -1,9 +1,11 @@
 import React from 'react';
 import LabeledComponent from '../LabeledComponent';
+import Input from '../Input';
 import IncrementationField from '../IncrementationField';
 import SingleSelect from '../SingleSelect';
 import DatePicker from '../DatePicker';
 import TimeField from '../TimeField';
+import TextArea from '../TextArea';
 import AerodromeDropdown from '../../containers/AerodromeDropdownContainer';
 import AircraftDropdown from '../../containers/AircraftDropdownContainer';
 import UserDropdown from '../../containers/UserDropdownContainer';
@@ -22,7 +24,7 @@ const renderLabeledComponent = (props, component) => {
 };
 
 export const renderInputField = (props) => {
-  const cmp = <input {...props.input} name={props.name} type={props.type}/>;
+  const cmp = <Input {...props.input} name={props.name} type={props.type}/>;
   return renderLabeledComponent(props, cmp);
 };
 
@@ -52,7 +54,7 @@ export const renderDurationField = (props) => {
 };
 
 export const renderTextArea = (props) => {
-  const cmp = <textarea {...props.input}/>;
+  const cmp = <TextArea {...props.input}/>;
   return renderLabeledComponent(props, cmp);
 };
 

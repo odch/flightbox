@@ -14,13 +14,16 @@ $more-options-line-height: 1.3em;
 
 .Dropdown {
   position: relative;
+  border: 0;
+  border-bottom: 1px solid $input-border-bottom-color;
+  padding: 1px;
 
   .Dropdown-input {
     box-sizing: border-box;
     width: 100%;
     font-size: inherit;
     border: 0;
-    border-bottom: 1px solid $input-border-bottom-color;
+    padding: 0;
   }
 
   .Dropdown-options {

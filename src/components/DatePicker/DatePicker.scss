@@ -1,4 +1,11 @@
 .DatePicker {
+  padding: 1px;
+  border-bottom: 1px solid #000;
+
+  .value {
+    line-height: normal;
+    box-sizing: border-box;
+  }
 
   .date-picker {
     .dp-table.dp-month-view {

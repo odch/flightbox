@@ -7,7 +7,6 @@ import DepartureArrivalPage from './pages/DepartureArrivalPage';
 import FlightPage from '../../../containers/DepartureFlightPageContainer';
 import CommitRequirementsDialog from './CommitRequirementsDialog';
 import Finish from './Finish';
-import './DepartureWizard.scss';
 
 const pages = [
   {
