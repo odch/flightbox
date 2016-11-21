@@ -10,7 +10,7 @@ import LabeledBox from '../LabeledBox';
 import UserImportForm from '../UserImportForm';
 import AerodromeImportForm from '../AerodromeImportForm';
 import AircraftImportForm from '../AircraftImportForm';
-import FirebaseKeyList from '../FirebaseKeyList';
+import AircraftsItemList from '../../containers/AircraftsItemListContainer';
 import JumpNavigation from '../JumpNavigation';
 
 class AdminPage extends Component {
@@ -51,10 +51,10 @@ class AdminPage extends Component {
               <AircraftImportForm/>
             </LabeledBox>
             <LabeledBox label="Flugzeuge der MFGT" className="mfgt-aircrafts">
-              <FirebaseKeyList path="/settings/aircraftsMFGT"/>
+              <AircraftsItemList type="club"/>
             </LabeledBox>
             <LabeledBox label="In Lommis stationierte Flugzeuge (ohne Flugzeuge der MFGT)" className="lszt-aircrafts">
-              <FirebaseKeyList path="/settings/aircraftsLSZT"/>
+              <AircraftsItemList type="homeBase"/>
             </LabeledBox>
           </BorderLayoutItem>}
       </BorderLayout>

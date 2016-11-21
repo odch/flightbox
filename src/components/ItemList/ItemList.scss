@@ -1,6 +1,6 @@
-.FirebaseKeyList {
+.ItemList {
 
-  .input-wrap {
+  form {
     margin-bottom: 2em;
 
     input {
@@ -15,10 +15,13 @@
       border: none;
       background: none;
       font-size: 1.3em;
+    }
+
+    button.add:enabled {
       cursor: pointer;
     }
 
-    button.add:hover {
+    button.add:hover:enabled {
       color: #ed351c;
     }
   }
@@ -27,7 +30,7 @@
     max-height: 300px;
     overflow: auto;
 
-    .FirebaseKeyListItem {
+    .Item {
       width: 130px;
       font-size: 1.3em;
       margin-bottom: 0.5em;
