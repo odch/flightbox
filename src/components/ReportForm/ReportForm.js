@@ -1,63 +1,46 @@
-import React, { Component } from 'react';
+import React from 'react';
 import LabeledComponent from '../LabeledComponent';
 import { MonthPicker } from '../DatePicker';
 import './ReportForm.scss';
-import moment from 'moment';
 
-class ReportForm extends Component {
+const handleSubmit = (generate, date, parameters, e) => {
+  e.preventDefault();
+  generate(date, parameters);
+};
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      generationInProgress: false,
-      date: moment().subtract(1, 'month').startOf('month').format('YYYY-MM-DD'),
-    };
-  }
+const ReportForm = props => {
+  const monthPicker = (
+    <MonthPicker
+      value={props.date}
+      onChange={(e) => props.setDate(e.value)}
+    />
+  );
 
-  render() {
-    const monthPicker = (
-      <MonthPicker
-        value={this.state.date}
-        onChange={(e) => this.setState({ date: e.value })}
-      />
-    );
-
-    return (
-      <div className="ReportForm">
+  return (
+    <form
+      className="ReportForm"
+      onSubmit={handleSubmit.bind(null, props.generate, props.date, props.parameters)}
+    >
+      <fieldset disabled={props.disabled}>
         <div>
           <LabeledComponent label="Monat" component={monthPicker}/>
         </div>
-        {this.props.children}
-        <button
-          onClick={this.buttonClickHandler.bind(this)}
-          className="generate"
-          disabled={this.state.generationInProgress === true}
-        >
+        {props.children}
+        <button type="submit" className="generate">
           <i className="material-icons">file_download</i>&nbsp;Herunterladen
         </button>
-      </div>
-    );
-  }
-
-  buttonClickHandler() {
-    this.setState({
-      generationInProgress: true,
-    });
-    const startDate = this.state.date;
-    const endDate = moment(this.state.date).endOf('month').format('YYYY-MM-DD');
-    this.props.generate(startDate, endDate)
-      .then(download => {
-        this.setState({
-          generationInProgress: false,
-        });
-        download.start();
-      });
-  }
-}
+      </fieldset>
+    </form>
+  );
+};
 
 ReportForm.propTypes = {
-  generate: React.PropTypes.func.isRequired,
+  disabled: React.PropTypes.bool,
   children: React.PropTypes.node,
+  date: React.PropTypes.string,
+  parameters: React.PropTypes.object,
+  setDate: React.PropTypes.func.isRequired,
+  generate: React.PropTypes.func.isRequired,
 };
 
 export default ReportForm;

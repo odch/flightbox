@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './AdminPage.scss';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
-import AirstatReportForm from '../AirstatReportForm';
+import AirstatReportForm from '../../containers/AirstatReportFormContainer';
 import LandingsReportForm from '../LandingsReportForm';
 import LockMovementsForm from '../../containers/LockMovementsFormContainer';
 import MessageList from '../../containers/MessageListContainer';
@@ -35,7 +35,9 @@ class AdminPage extends Component {
         {this.props.auth.data.admin === true &&
           <BorderLayoutItem region="middle">
             <JumpNavigation/>
-            <AirstatReportForm/>
+            <LabeledBox label="BAZL-Report herunterladen (CSV)" className="AirstatReportForm">
+              <AirstatReportForm/>
+            </LabeledBox>
             <LandingsReportForm/>
             <LockMovementsForm/>
             <LabeledBox label="Nachrichten" className="messages">
