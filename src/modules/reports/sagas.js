@@ -20,15 +20,17 @@ function* startDownload(download) {
 }
 
 export function* generateReport(action) {
-  yield put(actions.setReportGenerationInProgress(action.payload.report, true));
+  const report = action.payload.report;
 
-  const state = yield select(selectReport('airstat'));
+  yield put(actions.setReportGenerationInProgress(report, true));
+
+  const state = yield select(selectReport(report));
   const startDate = state.date;
   const endDate = moment(state.date).endOf('month').format('YYYY-MM-DD');
 
-  const download = yield call(generate, action.payload.report, startDate, endDate, state.parameters);
+  const download = yield call(generate, report, startDate, endDate, state.parameters);
 
-  yield put(actions.setReportGenerationInProgress(action.payload.report, false));
+  yield put(actions.setReportGenerationInProgress(report, false));
 
   yield call(startDownload, download);
 }
