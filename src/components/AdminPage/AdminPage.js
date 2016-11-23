@@ -3,7 +3,7 @@ import './AdminPage.scss';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import AirstatReportForm from '../../containers/AirstatReportFormContainer';
-import LandingsReportForm from '../LandingsReportForm';
+import LandingsReportForm from '../../containers/LandingsReportFormContainer';
 import LockMovementsForm from '../../containers/LockMovementsFormContainer';
 import MessageList from '../../containers/MessageListContainer';
 import LabeledBox from '../LabeledBox';
@@ -38,7 +38,9 @@ class AdminPage extends Component {
             <LabeledBox label="BAZL-Report herunterladen (CSV)" className="AirstatReportForm">
               <AirstatReportForm/>
             </LabeledBox>
-            <LandingsReportForm/>
+            <LabeledBox label="Landeliste herunterladen (CSV)">
+              <LandingsReportForm/>
+            </LabeledBox>
             <LockMovementsForm/>
             <LabeledBox label="Nachrichten" className="messages">
               <MessageList/>

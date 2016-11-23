@@ -2,7 +2,7 @@ import { takeEvery } from 'redux-saga';
 import { fork, call, put, select } from 'redux-saga/effects';
 import moment from 'moment';
 import * as actions from './actions';
-import { airstat } from '../../util/report';
+import { airstat, landings } from '../../util/report';
 
 export const selectReport = report => state => state.reports[report];
 
@@ -10,6 +10,8 @@ function generate(report, startDate, endDate, options) {
   switch (report) {
     case 'airstat':
       return airstat(startDate, endDate, options);
+    case 'landings':
+      return landings(startDate, endDate, options);
     default:
       throw new Error('Unknown report ' + report);
   }
