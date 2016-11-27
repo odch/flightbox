@@ -1,6 +1,6 @@
 import importCsv from './csv-import.js';
 
-function importUsers(csvString, callback) {
+function importUsers(csvString) {
   const options = {
     path: '/users',
     columns: [
@@ -10,7 +10,7 @@ function importUsers(csvString, callback) {
       { csv: 'PhoneMobile', firebase: 'phone' },
     ],
   };
-  importCsv(csvString, options, callback);
+  return importCsv(csvString, options);
 }
 
 export default importUsers;

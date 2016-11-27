@@ -123,19 +123,20 @@ function addNew(firebaseRef, itemMap, existing, options) {
  *   { csv: 'FirstName', firebase: 'firstname' },
  *   { csv: 'PhoneMobile', firebase: 'phone' },
  * ]
- * @param callback
  */
-function importCsv(csvString, options, callback) {
-  const parseOptions = {
-    skip_empty_lines: true,
-  };
-  parse(csvString, parseOptions, (err, output) => {
-    const itemMap = getMap(output, options);
+function importCsv(csvString, options) {
+  return new Promise(resolve => {
+    const parseOptions = {
+      skip_empty_lines: true,
+    };
+    parse(csvString, parseOptions, (err, output) => {
+      const itemMap = getMap(output, options);
 
-    firebase(options.path, (error, ref) => {
-      updateExisting(ref, itemMap, options, existing => {
-        addNew(ref, itemMap, existing, options);
-        callback();
+      firebase(options.path, (error, ref) => {
+        updateExisting(ref, itemMap, options, existing => {
+          addNew(ref, itemMap, existing, options);
+          resolve();
+        });
       });
     });
   });

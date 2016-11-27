@@ -2,16 +2,16 @@ import React, { Component } from 'react';
 import './AdminPage.scss';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
+import LabeledBox from '../LabeledBox';
+import JumpNavigation from '../JumpNavigation';
 import AirstatReportForm from '../../containers/AirstatReportFormContainer';
 import LandingsReportForm from '../../containers/LandingsReportFormContainer';
 import LockMovementsForm from '../../containers/LockMovementsFormContainer';
 import MessageList from '../../containers/MessageListContainer';
-import LabeledBox from '../LabeledBox';
-import UserImportForm from '../UserImportForm';
-import AerodromeImportForm from '../AerodromeImportForm';
-import AircraftImportForm from '../AircraftImportForm';
+import UserImportForm from '../../containers/UserImportFormContainer';
+import AerodromeImportForm from '../../containers/AerodromeImportFormContainer';
+import AircraftImportForm from '../../containers/AircraftImportFormContainer';
 import AircraftsItemList from '../../containers/AircraftsItemListContainer';
-import JumpNavigation from '../JumpNavigation';
 
 class AdminPage extends Component {
 
