@@ -27,16 +27,24 @@ const FileInput = props => (
     {props.value
     ? (
       <div>
-        <button
-          onClick={() => props.onChange(event(null))}
-          className="remove"
-        >
-          <i className="material-icons">block</i>
-        </button>
+        {!props.disabled && (
+          <button
+            onClick={() => props.onChange(event(null))}
+            className="remove"
+          >
+            <i className="material-icons">block</i>
+          </button>
+        )}
         {props.value.name}
       </div>
     )
-    : <input type="file" onChange={handleFileChange.bind(null, props.onChange)}/>}
+    : (
+      <input
+        type="file"
+        onChange={handleFileChange.bind(null, props.onChange)}
+        disabled={props.disabled}
+      />
+    )}
   </div>
 );
 
@@ -45,6 +53,7 @@ FileInput.propTypes = {
     name: React.PropTypes.string.isRequired,
   }),
   onChange: React.PropTypes.func,
+  disabled: React.PropTypes.bool,
 };
 
 export default FileInput;
