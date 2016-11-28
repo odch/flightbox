@@ -19,19 +19,26 @@ const CsvImportForm = props => {
       />
     ) : null;
 
-  const fileInput = <FileInput value={props.selectedFile} onChange={e => props.selectFile(e.target.value)}/>;
+  const fileInput = (
+    <FileInput
+      value={props.selectedFile}
+      onChange={e => props.selectFile(e.target.value)}
+      disabled={props.disabled || props.importInProgress}
+    />
+  );
 
   return (
     <div className="CsvImportForm">
       <div>
         {props.description}
         <form onSubmit={handleFormSubmit.bind(null, props.startImport)}>
-          <fieldset disabled={props.disabled}>
-            <LabeledComponent label="CSV-Datei auswählen" component={fileInput}/>
-            <button type="submit" className="import">
-              <i className="material-icons">file_upload</i>&nbsp;Importieren
-            </button>
-          </fieldset>
+          <LabeledComponent label="CSV-Datei auswählen" component={fileInput}/>
+          <button type="submit" className="import" disabled={props.disabled || props.importInProgress || !props.selectedFile}>
+            <i className="material-icons">file_upload</i>&nbsp;Importieren
+          </button>
+          {props.importInProgress && (
+            <span className="import-in-progress-msg">Import wird ausgeführt. Bitte warten ...</span>
+          )}
         </form>
       </div>
       {importDoneDialog}
@@ -41,6 +48,7 @@ const CsvImportForm = props => {
 
 CsvImportForm.propTypes = {
   disabled: PropTypes.bool,
+  importInProgress: PropTypes.bool.isRequired,
   importDone: PropTypes.bool.isRequired,
   selectedFile: PropTypes.object,
   description: PropTypes.element.isRequired,

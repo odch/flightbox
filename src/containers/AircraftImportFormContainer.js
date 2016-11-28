@@ -14,8 +14,9 @@ class AircraftImportFormContainer extends React.Component {
   render() {
     return (
       <AircraftImportForm
-        disabled={!this.props.initialized || this.props.inProgress}
+        disabled={!this.props.initialized}
         selectedFile={this.props.selectedFile}
+        importInProgress={this.props.inProgress}
         importDone={this.props.importDone}
         selectFile={this.props.selectFile}
         startImport={this.props.startImport}

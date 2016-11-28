@@ -27,6 +27,8 @@ const AerodromeImportForm = props => {
         doneHeading="Flugplätze importiert"
         doneMessage="Die Flugplätze wurden importiert."
         selectedFile={props.selectedFile}
+        disabled={props.disabled}
+        importInProgress={props.importInProgress}
         importDone={props.importDone}
         selectFile={props.selectFile}
         startImport={props.startImport}
@@ -38,6 +40,7 @@ const AerodromeImportForm = props => {
 
 AerodromeImportForm.propTypes = {
   disabled: React.PropTypes.bool,
+  importInProgress: React.PropTypes.bool.isRequired,
   importDone: React.PropTypes.bool.isRequired,
   selectedFile: React.PropTypes.object,
   selectFile: React.PropTypes.func.isRequired,
