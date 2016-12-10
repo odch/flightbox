@@ -55,6 +55,7 @@ class Dropdown extends Component {
         onFocus={this.handleInputFocus.bind(this)}
         onBlur={this.handleInputBlur.bind(this)}
         ref="input"
+        readOnly={this.props.readOnly}
       />
     );
   }
@@ -135,6 +136,9 @@ class Dropdown extends Component {
   }
 
   handleInputFocus() {
+    if (this.props.readOnly === true) {
+      return;
+    }
     this.setState({
       inputFocused: true,
       optionsVisible: true,
@@ -296,6 +300,7 @@ Dropdown.propTypes = {
   onBeforeInputChange: React.PropTypes.func,
   onFocus: React.PropTypes.func,
   onBlur: React.PropTypes.func,
+  readOnly: React.PropTypes.bool,
 };
 
 Dropdown.defaultProps = {
