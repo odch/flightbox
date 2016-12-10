@@ -35,6 +35,7 @@ const PassengerPage = (props) => {
           parse={e => e.target.value}
           label="Anzahl"
           component={renderIncrementationField}
+          readOnly={props.readOnly}
         />
         <Field
           name="carriageVoucher"
@@ -42,6 +43,7 @@ const PassengerPage = (props) => {
           items={carriageVoucherItems}
           label="Beförderungsschein"
           component={renderSingleSelect}
+          readOnly={props.readOnly}
         />
       </fieldset>
       <div className="WizardNavigation">
@@ -55,6 +57,7 @@ const PassengerPage = (props) => {
 PassengerPage.propTypes = {
   previousPage: PropTypes.func,
   handleSubmit: PropTypes.func,
+  readOnly: PropTypes.bool,
 };
 
 export default reduxForm({

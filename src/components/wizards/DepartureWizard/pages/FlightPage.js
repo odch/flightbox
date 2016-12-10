@@ -16,6 +16,7 @@ const FlightPage = (props) => {
           orientation="vertical"
           parse={e => e.target.value}
           label="Typ"
+          readOnly={props.readOnly}
         />
         <Field
           name="runway"
@@ -23,6 +24,7 @@ const FlightPage = (props) => {
           items={runways}
           parse={e => e.target.value}
           label="Pistenrichtung"
+          readOnly={props.readOnly}
         />
         <Field
           name="departureRoute"
@@ -31,21 +33,24 @@ const FlightPage = (props) => {
           orientation="vertical"
           parse={e => e.target.value}
           label="Abflugroute"
+          readOnly={props.readOnly}
         />
         <Field
           name="route"
           component={renderTextArea}
           label="Routing"
+          readOnly={props.readOnly}
         />
         <Field
           name="remarks"
           component={renderTextArea}
           label="Bemerkungen"
+          readOnly={props.readOnly}
         />
       </fieldset>
       <div className="WizardNavigation">
         <button type="button" className="previous" onClick={previousPage}>Zurück</button>
-        <button type="submit" className="next">Speichern</button>
+        {!props.readOnly && <button type="submit" className="next">Speichern</button>}
       </div>
     </form>
   );
@@ -54,6 +59,7 @@ const FlightPage = (props) => {
 FlightPage.propTypes = {
   previousPage: PropTypes.func,
   handleSubmit: PropTypes.func,
+  readOnly: PropTypes.bool,
   flightTypes: PropTypes.arrayOf(PropTypes.shape({
     label: PropTypes.string.isRequired,
     value: PropTypes.string.isRequired,

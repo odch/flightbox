@@ -10,6 +10,7 @@ import './MovementWizard.scss';
 class MovementWizard extends Component {
 
   componentWillMount() {
+    this.props.loadLockDate();
     if (typeof this.props.initMovement === 'function') {
       this.props.initMovement();
     } else if (this.props.params.key) {
@@ -44,7 +45,7 @@ class MovementWizard extends Component {
   }
 
   getMiddleItem() {
-    if (this.props.wizard.initialized !== true) {
+    if (this.props.wizard.initialized !== true || this.props.lockDateLoading === true) {
       return <div className="loading">Bitte warten ...</div>;
     }
 
@@ -57,7 +58,13 @@ class MovementWizard extends Component {
     const submitHandler = this.getSubmitHandler(isLast);
 
     const pageObj = this.props.pages[this.props.wizard.page - 1];
-    const pageComponent = <pageObj.component previousPage={this.props.previousPage} onSubmit={submitHandler}/>;
+    const pageComponent = (
+      <pageObj.component
+        previousPage={this.props.previousPage}
+        onSubmit={submitHandler}
+        readOnly={this.props.locked}
+      />
+    );
 
     const commitRequirementsDialog = isLast && this.props.wizard.showCommitRequirementsDialog === true
       ? (
@@ -124,6 +131,8 @@ MovementWizard.propTypes = {
   params: React.PropTypes.object.isRequired,
   newMovementLabel: React.PropTypes.string.isRequired,
   updateMovementLabel: React.PropTypes.string.isRequired,
+  lockDateLoading: React.PropTypes.bool.isRequired,
+  locked: React.PropTypes.bool.isRequired,
   className: React.PropTypes.string,
 
   initNewMovement: React.PropTypes.func.isRequired,
@@ -137,6 +146,7 @@ MovementWizard.propTypes = {
   saveMovement: React.PropTypes.func.isRequired,
   unsetCommitError: React.PropTypes.func,
   destroyForm: React.PropTypes.func.isRequired,
+  loadLockDate: React.PropTypes.func.isRequired,
 };
 
 MovementWizard.contextTypes = {

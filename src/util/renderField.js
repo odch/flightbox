@@ -24,51 +24,65 @@ const renderLabeledComponent = (props, component) => {
 };
 
 export const renderInputField = (props) => {
-  const cmp = <Input {...props.input} name={props.name} type={props.type}/>;
+  const cmp = (
+    <Input
+      {...props.input}
+      name={props.name}
+      type={props.type}
+      readOnly={props.readOnly}
+    />
+  );
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderSingleSelect = (props) => {
-  const cmp = <SingleSelect {...props.input} items={props.items} orientation={props.orientation}/>;
+  const cmp = (
+    <SingleSelect
+      {...props.input}
+      items={props.items}
+      orientation={props.orientation}
+      readOnly={props.readOnly}
+    />
+  );
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderIncrementationField = (props) => {
-  const cmp = <IncrementationField {...props.input}/>;
+  const cmp = <IncrementationField {...props.input} readOnly={props.readOnly}/>;
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderDateField = (props) => {
-  const cmp = <DatePicker {...props.input}/>;
+  const cmp = <DatePicker {...props.input} readOnly={props.readOnly}/>;
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderTimeField = (props) => {
-  const cmp = <TimeField {...props.input}/>;
+  const cmp = <TimeField {...props.input} readOnly={props.readOnly}/>;
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderDurationField = (props) => {
-  const cmp = <TimeField {...props.input}/>;
+  const cmp = <TimeField {...props.input} readOnly={props.readOnly}/>;
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderTextArea = (props) => {
-  const cmp = <TextArea {...props.input}/>;
+  const cmp = <TextArea {...props.input} readOnly={props.readOnly}/>;
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderAerodromeDropdown = (props) => {
-  const cmp = <AerodromeDropdown {...props.input}/>;
+  const cmp = <AerodromeDropdown {...props.input} readOnly={props.readOnly}/>;
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderAircraftDropdown = (props) => {
-  const cmp = <AircraftDropdown {...props.input}/>;
+  const cmp = <AircraftDropdown {...props.input} readOnly={props.readOnly}/>;
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderUserDropdown = (props) => {
-  const cmp = <UserDropdown {...props.input}/>;
+  const cmp = <UserDropdown {...props.input} readOnly={props.readOnly}/>;
   return renderLabeledComponent(props, cmp);
 };

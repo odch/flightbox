@@ -55,6 +55,7 @@ const AerodromeDropdown = props => (
     moreOptionsText="Mehr Flugplätze vorhanden! Tippen Sie einen Teil des ICAO-Codes oder des Namens, um die Liste einzuschränken."
     onFocus={props.onFocus}
     onBlur={callWithValue.bind(null, props.onBlur, props.aerodromes.data.array)}
+    readOnly={props.readOnly}
   />
 );
 
@@ -64,6 +65,7 @@ AerodromeDropdown.propTypes = {
   onChange: React.PropTypes.func.isRequired,
   onFocus: React.PropTypes.func.isRequired,
   onBlur: React.PropTypes.func.isRequired,
+  readOnly: React.PropTypes.bool,
 };
 
 export default AerodromeDropdown;

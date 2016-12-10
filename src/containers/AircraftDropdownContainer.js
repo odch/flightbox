@@ -17,6 +17,7 @@ class AircraftDropdownContainer extends Component {
         onChange={this.props.onChange}
         onFocus={this.props.onFocus}
         onBlur={this.props.onBlur}
+        readOnly={this.props.readOnly}
       />
     );
   }
@@ -29,6 +30,7 @@ AircraftDropdownContainer.propTypes = {
   onChange: React.PropTypes.func.isRequired,
   onFocus: React.PropTypes.func.isRequired,
   onBlur: React.PropTypes.func.isRequired,
+  readOnly: React.PropTypes.bool,
 };
 
 const mapStateToProps = (state, ownProps) => {

@@ -49,6 +49,7 @@ const AircraftDropdown = props => (
     moreOptionsText="Mehr Flugzeuge vorhanden! Tippen Sie einen Teil der Immatrikulation, um die Liste einzuschränken."
     onFocus={props.onFocus}
     onBlur={callWithValue.bind(null, props.onBlur, props.aircrafts.data.array)}
+    readOnly={props.readOnly}
   />
 );
 
@@ -58,6 +59,7 @@ AircraftDropdown.propTypes = {
   onChange: React.PropTypes.func.isRequired,
   onFocus: React.PropTypes.func.isRequired,
   onBlur: React.PropTypes.func.isRequired,
+  readOnly: React.PropTypes.bool,
 };
 
 export default AircraftDropdown;

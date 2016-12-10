@@ -46,12 +46,14 @@ const UserDropdown = props => (
     moreOptionsText="Mehr Mitglieder vorhanden! Tippen Sie einen Teil der Mitgliedernummer, um die Liste einzuschränken."
     onFocus={props.onFocus}
     onBlur={callWithValue.bind(null, props.onBlur, props.users.data.array)}
+    readOnly={props.readOnly}
   />
 );
 
 UserDropdown.propTypes = {
   value: React.PropTypes.string.isRequired,
   users: React.PropTypes.object.isRequired,
+  readOnly: React.PropTypes.bool,
   onChange: React.PropTypes.func.isRequired,
   onFocus: React.PropTypes.func.isRequired,
   onBlur: React.PropTypes.func.isRequired,

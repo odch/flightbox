@@ -24,18 +24,21 @@ const DepartureArrivalPage = (props) => {
           component={renderAerodromeDropdown}
           normalize={aerodrome => aerodrome ? aerodrome.key : null}
           label="Startflugplatz"
+          readOnly={props.readOnly}
         />
         <Field
           name="date"
           component={renderDateField}
           parse={e => e.value}
           label="Datum"
+          readOnly={props.readOnly}
         />
         <Field
           name="time"
           component={renderTimeField}
           parse={e => e.value}
           label="Landezeit (Lokalzeit)"
+          readOnly={props.readOnly}
         />
         <Field
           name="landingCount"
@@ -43,6 +46,7 @@ const DepartureArrivalPage = (props) => {
           component={renderIncrementationField}
           parse={e => e.target.value}
           label="Anzahl Landungen"
+          readOnly={props.readOnly}
         />
       </fieldset>
       <div className="WizardNavigation">
@@ -56,6 +60,7 @@ const DepartureArrivalPage = (props) => {
 DepartureArrivalPage.propTypes = {
   previousPage: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
+  readOnly: PropTypes.bool,
 };
 
 export default reduxForm({

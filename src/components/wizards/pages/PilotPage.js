@@ -13,6 +13,7 @@ const PilotPage = (props) => {
           name="memberNr"
           label="MFGT-Mitgliedernummer"
           component={renderUserDropdown}
+          readOnly={props.readOnly}
           normalize={user => {
             if (user) {
               props.change('firstname', user.firstname);
@@ -28,18 +29,21 @@ const PilotPage = (props) => {
           type="text"
           label="Telefon"
           component={renderInputField}
+          readOnly={props.readOnly}
         />
         <Field
           name="lastname"
           type="text"
           label="Nachname"
           component={renderInputField}
+          readOnly={props.readOnly}
         />
         <Field
           name="firstname"
           type="text"
           label="Vorname"
           component={renderInputField}
+          readOnly={props.readOnly}
         />
       </fieldset>
       <div className="WizardNavigation">
@@ -53,6 +57,7 @@ const PilotPage = (props) => {
 PilotPage.propTypes = {
   previousPage: PropTypes.func,
   handleSubmit: PropTypes.func,
+  readOnly: PropTypes.bool,
 };
 
 export default reduxForm({
