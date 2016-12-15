@@ -13,7 +13,7 @@
     "babel-preset-react": "^6.16.0",
     "binary-search": "~1.3.0",
     "classnames": "~2.2.1",
-    "css-loader": "~0.23.0",
+    "css-loader": "^0.26.1",
     "csv-parse": "~1.1.3",
     "del": "~2.2.0",
     "eslint": "~1.10.3",
@@ -35,8 +35,8 @@
     "mocha": "^3.2.0",
     "moment": "^2.17.1",
     "moment-timezone": "~0.5.4",
-    "node-sass": "^3.4.2",
-    "postcss-loader": "~0.9.1",
+    "node-sass": "^4.0.0",
+    "postcss-loader": "^1.2.1",
     "ramda": "^0.21.0",
     "react": "~15.2.1",
     "react-addons-test-utils": "~15.2.1",
@@ -50,11 +50,11 @@
     "redux": "^3.5.2",
     "redux-form": "^6.0.5",
     "redux-saga": "^0.10.5",
-    "sass-loader": "~4.0.0",
+    "sass-loader": "^4.1.0",
     "scroll-into-view": "^1.7.1",
     "style-loader": "~0.13.0",
     "url-loader": "~0.5.7",
     "whatwg-fetch": "^1.0.0",
-    "webpack-dev-server": "~1.14.0"
+    "webpack-dev-server": "^1.16.2"
   }
 }
