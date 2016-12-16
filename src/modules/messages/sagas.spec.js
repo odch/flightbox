@@ -1,9 +1,9 @@
 import expect from 'expect';
 import { call, put, select } from 'redux-saga/effects';
-import * as actions from '../../../src/modules/messages/actions';
-import * as sagas from '../../../src/modules/messages/sagas';
-import * as remote from '../../../src/modules/messages/remote';
-import FakeFirebaseSnapshot from '../../FakeFirebaseSnapshot';
+import * as actions from './actions';
+import * as sagas from './sagas';
+import * as remote from './remote';
+import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot';
 
 describe('messages sagas', () => {
   describe('loadMessages', () => {

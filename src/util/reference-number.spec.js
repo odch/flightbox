@@ -1,5 +1,5 @@
 import expect from 'expect';
-import { getFromItemKey } from '../../src/util/reference-number.js';
+import { getFromItemKey } from './reference-number';
 
 describe('reference-number', () => {
   describe('getFromItemKey', () => {

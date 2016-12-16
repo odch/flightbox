@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 import bro from 'jsdom-test-browser';
 import expect from 'expect';
-import BorderLayout from '../../src/components/BorderLayout';
-import BorderLayoutItem from '../../src/components/BorderLayoutItem';
+import BorderLayout from './BorderLayout';
+import BorderLayoutItem from '../BorderLayoutItem';
 
 describe('BorderLayout', () => {
   before((done) => { bro.newBrowser(done); });

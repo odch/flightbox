@@ -1,8 +1,8 @@
 import expect from 'expect';
-import messages from '../../../src/modules/messages/reducer';
-import * as actions from '../../../src/modules/messages/actions';
-import ImmutableItemsArray from '../../../src/util/ImmutableItemsArray';
-import SS from '../../FakeFirebaseSnapshot';
+import messages from './reducer';
+import * as actions from './actions';
+import ImmutableItemsArray from '../../util/ImmutableItemsArray';
+import SS from '../../../test/FakeFirebaseSnapshot';
 
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),

@@ -1,5 +1,5 @@
 import expect from 'expect';
-import * as actions from '../../../src/modules/messages/actions';
+import * as actions from './actions';
 
 describe('messages actions', () => {
   it('loadMessages should create LOAD_MESSAGES action', () => {

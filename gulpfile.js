@@ -39,7 +39,7 @@ gulp.task('build:prod', ['prod-env', 'build']);
 
 gulp.task('test', function () {
   return gulp
-    .src('./test/**/*.js')
+    .src('./src/**/*.spec.js')
     .pipe(mocha({
       compilers: {
         js: babel,

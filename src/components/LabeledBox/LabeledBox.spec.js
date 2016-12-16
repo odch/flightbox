@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 import bro from 'jsdom-test-browser';
 import expect from 'expect';
-import LabeledBox from '../../../src/components/LabeledBox';
+import LabeledBox from './LabeledBox';
 
 describe('LabeledBox', () => {
   before((done) => { bro.newBrowser(done); });

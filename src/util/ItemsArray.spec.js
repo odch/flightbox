@@ -1,6 +1,6 @@
 import expect from 'expect';
-import ItemsArray from '../../src/util/ItemsArray.js';
-import { compareDescending } from '../../src/util/movements.js';
+import ItemsArray from './ItemsArray';
+import { compareDescending } from './movements';
 
 describe('ItemsArray', () => {
   describe('creation', () => {

@@ -1,9 +1,9 @@
 import expect from 'expect';
 import { call } from 'redux-saga/effects';
-import dates from '../../../../src/core/dates.js';
-import * as actions from '../../../../src/modules/movements/departures/actions';
-import * as departuresSagas from '../../../../src/modules/movements/departures/sagas';
-import * as sharedSagas from '../../../../src/modules/movements/shared/sagas';
+import dates from '../../../core/dates';
+import * as actions from './actions';
+import * as departuresSagas from './sagas';
+import * as sharedSagas from '../shared/sagas';
 
 describe('modules', () => {
   describe('movements', () => {

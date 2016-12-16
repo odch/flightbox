@@ -1,6 +1,6 @@
 import expect from 'expect';
-import wizard from '../../../../src/modules/ui/wizard/reducer';
-import * as actions from '../../../../src/modules/ui/wizard/actions';
+import wizard from './reducer';
+import * as actions from './actions';
 
 const INITIAL_STATE = {
   initialized: false,

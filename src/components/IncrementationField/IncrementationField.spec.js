@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 import bro from 'jsdom-test-browser';
 import expect from 'expect';
-import IncrementationField from '../src/components/IncrementationField';
-import Utils from './Utils.js';
+import IncrementationField from './IncrementationField';
+import Utils from '../../../test/Utils';
 
 describe('IncrementationField', () => {
   before((done) => { bro.newBrowser(done); });

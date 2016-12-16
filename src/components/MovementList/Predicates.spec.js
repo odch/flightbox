@@ -1,5 +1,5 @@
 import expect from 'expect';
-import Predicates from '../../../src/components/MovementList/Predicates.js';
+import Predicates from './Predicates.js';
 
 describe('Predicates', () => {
   describe('and', () => {

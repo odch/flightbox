@@ -1,5 +1,5 @@
 import expect from 'expect';
-import { normalize, parse } from '../../src/util/time.js';
+import { normalize, parse } from './time';
 
 describe('time', () => {
   describe('normalize', () => {

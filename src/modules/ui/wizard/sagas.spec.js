@@ -1,9 +1,9 @@
 import expect from 'expect';
 import { put } from 'redux-saga/effects';
 import { push } from 'react-router-redux';
-import * as actions from '../../../../src/modules/ui/wizard/actions';
-import * as sagas from '../../../../src/modules/ui/wizard/sagas';
-import { saveDepartureSuccess } from '../../../../src/modules/movements/departures/actions';
+import * as actions from './actions';
+import * as sagas from './sagas';
+import { saveDepartureSuccess } from '../../movements/departures/actions';
 
 describe('wizard sagas', () => {
   describe('setCommitted', () => {
