@@ -4,7 +4,7 @@ import * as actions from './actions';
 import createChannel, { monitor } from '../../../util/createChannel';
 import * as sharedSagas from '../shared/sagas';
 import * as remote from '../shared/remote';
-import dates from '../../../core/dates.js';
+import dates from '../../../util/dates';
 import { firebaseToLocal, transferValues } from '../../../util/movements';
 
 export const arrivalSelector = (state, key) => state.movements.arrivals.data.getByKey(key);

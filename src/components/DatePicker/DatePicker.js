@@ -4,7 +4,7 @@ import ReactDatePicker from 'react-date-picker';
 import classNames from 'classnames';
 import 'react-date-picker/base.css';
 import './DatePicker.scss';
-import dates from '../../core/dates.js';
+import dates from '../../util/dates';
 
 class DatePicker extends Component {
 

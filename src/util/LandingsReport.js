@@ -1,7 +1,7 @@
 import firebase from './firebase.js';
 import Download from './Download.js';
 import { firebaseToLocal } from './movements.js';
-import dates from '../core/dates.js';
+import dates from '../util/dates';
 import moment from 'moment';
 
 class LandingsReport {

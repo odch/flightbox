@@ -1,6 +1,6 @@
 import expect from 'expect';
 import { call } from 'redux-saga/effects';
-import dates from '../../../core/dates';
+import dates from '../../../util/dates';
 import * as actions from './actions';
 import * as departuresSagas from './sagas';
 import * as sharedSagas from '../shared/sagas';

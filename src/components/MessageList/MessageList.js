@@ -1,5 +1,5 @@
 import React, { PropTypes, Component } from 'react';
-import dates from '../../core/dates.js';
+import dates from '../../util/dates';
 import './MessageList.scss';
 
 class MessageList extends Component {

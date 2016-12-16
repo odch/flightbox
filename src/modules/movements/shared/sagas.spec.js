@@ -1,7 +1,7 @@
 import expect from 'expect';
 import { select, put, call } from 'redux-saga/effects';
 import { initialize, getFormValues, destroy } from 'redux-form';
-import dates from '../../../core/dates';
+import dates from '../../../util/dates';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';

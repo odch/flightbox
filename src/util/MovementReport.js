@@ -4,8 +4,8 @@ import { firebaseToLocal, compareAscending } from './movements.js';
 import { fetch as fetchAircrafts } from './aircrafts';
 import { fetch as fetchAerodromes } from './aerodromes';
 import { getFromItemKey } from './reference-number';
-import dates from '../core/dates.js';
-import ItemsArray from './ItemsArray.js';
+import dates from '../util/dates';
+import ItemsArray from './ItemsArray';
 import moment from 'moment';
 
 class MovementReport {

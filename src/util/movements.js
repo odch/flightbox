@@ -1,5 +1,5 @@
-import dates from '../core/dates.js';
-import { filter } from '../core/filter.js';
+import dates from '../util/dates';
+import { filter } from '../util/filter';
 import update from 'react-addons-update';
 import moment from 'moment';
 

@@ -1,7 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import './MovementDeleteConfirmationDialog.scss';
 import ModalDialog from '../ModalDialog';
-import dates from '../../core/dates.js';
+import dates from '../../util/dates';
 
 class MovementDeleteConfirmationDialog extends Component {
 

@@ -1,6 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import './Movement.scss';
-import dates from '../../core/dates.js';
+import dates from '../../util/dates';
 
 class Movement extends Component {
 
