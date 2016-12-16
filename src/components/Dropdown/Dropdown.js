@@ -51,7 +51,7 @@ class Dropdown extends Component {
         type="text"
         value={this.state.inputFocused === true ? this.state.filter : this.state.value}
         placeholder={this.state.value}
-        onChange={this.state.inputFocused === true ? this.handleInputChange.bind(this) : null}
+        onChange={this.handleInputChange.bind(this)}
         onFocus={this.handleInputFocus.bind(this)}
         onBlur={this.handleInputBlur.bind(this)}
         ref="input"
@@ -111,6 +111,10 @@ class Dropdown extends Component {
   }
 
   handleInputChange(e) {
+    if (this.state.inputFocused !== true) {
+      return;
+    }
+
     let filter = e.target.value;
 
     if (typeof this.props.onBeforeInputChange === 'function') {
