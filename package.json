@@ -26,7 +26,7 @@
     "gulp-env": "~0.4.0",
     "gulp-mocha": "^3.0.1",
     "gulp-webpack": "~1.5.0",
-    "history": "^3.0.0",
+    "history": "^4.5.0",
     "ignore-styles": "^5.0.1",
     "jsdom-test-browser": "~4.0.2",
     "json-loader": "~0.5.4",
