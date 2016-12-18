@@ -36,7 +36,8 @@ class HelpPage extends Component {
         answer: (
           <div>
             <p>
-              Geben Sie beim Abflug Lommis (LSZT) als Zielflugplatz und bei der Ankunft als Startflugplatz an.
+              Geben Sie beim Abflug {__CONF__.aerodrome.name} ({__CONF__.aerodrome.ICAO}) als Zielflugplatz und bei
+              der Ankunft als Startflugplatz an.
             </p>
           </div>
         ),
@@ -46,8 +47,9 @@ class HelpPage extends Component {
           <div>
             <p>
               Wenn Sie den Platzbereich nicht verlassen und in der Platzrunde bleiben, wählen Sie beim Abflug
-              als Zielflugplatz Lommis (LSZT) und als Abflugroute "Platzrunden". Bei der Ankunft wählen Sie ebenfalls
-              "Platzrunden" als Anflugroute. Wählen Sie "Anzahl Landungen" bei der Ankunft entsprechend.
+              als Zielflugplatz {__CONF__.aerodrome.name} ({__CONF__.aerodrome.ICAO}) und als Abflugroute "Platzrunden".
+              Bei der Ankunft wählen Sie ebenfalls "Platzrunden" als Anflugroute. Wählen Sie "Anzahl Landungen"
+              bei der Ankunft entsprechend.
             </p>
             <p>
               Wenn Sie den Platzbereich verlassen und vor dem Verlassen des Platzverkehrs Platzrunden durchführen,
@@ -64,7 +66,7 @@ class HelpPage extends Component {
         answer: (
           <div>
             <p>
-              Wenn Ihr Flugzeug nicht in Lommis stationiert ist, legen Sie den fälligen Betrag
+              Wenn Ihr Flugzeug nicht in {__CONF__.aerodrome.name} stationiert ist, legen Sie den fälligen Betrag
               bitte in bar in ein dafür vorgesehenes Couvert, beschriften Sie es mit der Referenznummer,
               die bei der Erfassung anzeigt wird, und deponieren Sie es im Briefkasten
               vor dem C-Büro.

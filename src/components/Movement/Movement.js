@@ -55,7 +55,7 @@ class Movement extends Component {
   }
 
   getLocation() {
-    if (this.props.data.location.toUpperCase() === 'LSZT') {
+    if (this.props.data.location.toUpperCase() === __CONF__.aerodrome.ICAO) {
       if (this.props.data.departureRoute === 'circuits' || this.props.data.arrivalRoute === 'circuits') {
         return 'Platzrunden';
       }

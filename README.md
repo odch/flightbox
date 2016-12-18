@@ -6,10 +6,16 @@
 
 ```
 $ npm install
-$ npm start
+$ npm start [--project={PROJECT_NAME}]
 ```
 
 Then open [http://0.0.0.0:8080/webpack-dev-server/](http://0.0.0.0:8080/webpack-dev-server/) in your browser.
+
+#### Parameters
+
+* `project` (optional): Name of the project. There must a configuration file called `{PROJECT_NAME}.json` be available
+                        in the `projects` directory. The default project is `lszt`.
+
 
 ### How to Test
 
@@ -26,16 +32,21 @@ $ npm install
 ```
 #### Build
 
+##### Parameters
+
+* `project` (optional): Name of the project. There must a configuration file called `{PROJECT_NAME}.json` be available
+                        in the `projects` directory. The default project is `lszt`.
+
 ##### Development or test environment
 
 ```
-$ npm run build
+$ npm run build [--project={PROJECT_NAME}]
 ```
 
 ##### Production environment
 
 ```
-$ npm run build:prod
+$ npm run build:prod [--project={PROJECT_NAME}]
 ```
 
 #### Push to Firebase
