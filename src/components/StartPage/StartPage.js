@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './StartPage.scss';
 import ImageButton from '../ImageButton';
+import Logo from '../Logo';
 
 const LoginInfo = props => {
   if (props.auth.authenticated === true && typeof props.auth.data.uid === 'string') {
@@ -25,7 +26,6 @@ LoginInfo.propTypes = {
 class StartPage extends Component {
 
   render() {
-    const logoImagePath = require('./mfgt_logo_transp.png');
     const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
     const arrivalImagePath = require('./ic_flight_land_black_48dp_2x.png');
     const movementsImagePath = require('./ic_list_black_48dp_2x.png');
@@ -36,7 +36,7 @@ class StartPage extends Component {
       <div className="StartPage">
         <header>
           <LoginInfo logout={this.props.logout} auth={this.props.auth} showLogin={this.props.showLogin}/>
-          <img className="logo" src={logoImagePath}/>
+          <Logo className="logo"/>
         </header>
         <div className="main">
           <div className="hint">

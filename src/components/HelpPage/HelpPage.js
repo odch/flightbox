@@ -5,6 +5,7 @@ import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import LabeledBox from '../LabeledBox';
 import JumpNavigation from '../JumpNavigation';
+import Logo from '../Logo';
 
 class HelpPage extends Component {
 
@@ -143,13 +144,12 @@ class HelpPage extends Component {
   }
 
   render() {
-    const logoImagePath = require('../../resources/mfgt_logo_transp.png');
     return (
       <BorderLayout className="HelpPage">
         <BorderLayoutItem region="west">
           <header>
             <a href="#/">
-              <img className="logo" src={logoImagePath}/>
+              <Logo className="logo"/>
             </a>
           </header>
         </BorderLayoutItem>

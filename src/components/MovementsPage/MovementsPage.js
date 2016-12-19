@@ -5,6 +5,7 @@ import TabPanel from '../TabPanel';
 import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import JumpNavigation from '../JumpNavigation';
+import Logo from '../Logo';
 
 class MovementsPage extends Component {
 
@@ -29,7 +30,6 @@ class MovementsPage extends Component {
   }
 
   render() {
-    const logoImagePath = require('../../resources/mfgt_logo_transp.png');
     const departuresList = (
       <MovementList
         key="departures"
@@ -78,7 +78,7 @@ class MovementsPage extends Component {
         <BorderLayoutItem region="west">
           <header>
             <a href="#/">
-              <img className="logo" src={logoImagePath}/>
+              <Logo className="logo"/>
             </a>
           </header>
         </BorderLayoutItem>

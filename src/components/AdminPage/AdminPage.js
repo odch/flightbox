@@ -4,6 +4,7 @@ import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import LabeledBox from '../LabeledBox';
 import JumpNavigation from '../JumpNavigation';
+import Logo from '../Logo';
 import AirstatReportForm from '../../containers/AirstatReportFormContainer';
 import LandingsReportForm from '../../containers/LandingsReportFormContainer';
 import LockMovementsForm from '../../containers/LockMovementsFormContainer';
@@ -22,13 +23,12 @@ class AdminPage extends Component {
   }
 
   render() {
-    const logoImagePath = require('../../resources/mfgt_logo_transp.png');
     return (
       <BorderLayout className="AdminPage">
         <BorderLayoutItem region="west">
           <header>
             <a href="#/">
-              <img className="logo" src={logoImagePath}/>
+              <Logo className="logo"/>
             </a>
           </header>
         </BorderLayoutItem>

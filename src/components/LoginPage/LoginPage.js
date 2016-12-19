@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './LoginPage.scss';
 import LabeledComponent from '../LabeledComponent';
+import Logo from '../Logo';
 import auth from '../../util/auth';
 import { authenticate } from '../../util/firebase';
 
@@ -8,7 +9,6 @@ class LoginPage extends Component {
 
   render() {
     const { username, password, submitting, failure, updateUsername, updatePassword } = this.props;
-    const logoImagePath = require('../../resources/mfgt_logo_transp.png');
     const usernameInput = (
       <input
         type="text"
@@ -29,7 +29,7 @@ class LoginPage extends Component {
     return (
       <div className="LoginPage">
         <header>
-          <a href="#/"><img className="logo" src={logoImagePath}/></a>
+          <a href="#/"><Logo className="logo"/></a>
         </header>
         <div className="main">
           <form onSubmit={this.submitLogin.bind(this)} disabled={this.props.submitting}>

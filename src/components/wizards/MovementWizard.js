@@ -4,6 +4,7 @@ import BorderLayout from '../BorderLayout';
 import BorderLayoutItem from '../BorderLayoutItem';
 import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import CommitFailureDialog from '../CommitFailureDialog';
+import Logo from '../Logo';
 import { getFromItemKey } from '../../util/reference-number';
 import './MovementWizard.scss';
 
@@ -21,14 +22,12 @@ class MovementWizard extends Component {
   }
 
   render() {
-    const logoImagePath = require('../../resources/mfgt_logo_transp.png');
-
     return (
       <BorderLayout className={classNames('MovementWizard', this.props.className)}>
         <BorderLayoutItem region="west">
           <header>
             <a href="#/">
-              <img className="logo" src={logoImagePath}/>
+              <Logo className="logo"/>
             </a>
           </header>
         </BorderLayoutItem>
