@@ -5,6 +5,8 @@ const webpack = require('gulp-webpack');
 const del = require('del');
 const env = require('gulp-env');
 const merge = require('merge-stream');
+const projects = require('./projects');
+const processFirebaseRules = require('./tasks/processFirebaseRules');
 
 require('ignore-styles');
 require('babel-polyfill');
@@ -17,6 +19,9 @@ gulp.task('clean', function () {
 gulp.task('build', ['clean'], function () {
   const config = require('./webpack.config.js');
 
+  const projectName = process.env.npm_config_project || 'lszt';
+  const projectConf = projects.load(projectName);
+
   const bundle = gulp.src(config.entry)
     .pipe(webpack(config))
     .pipe(gulp.dest(config.output.path));
@@ -24,7 +29,11 @@ gulp.task('build', ['clean'], function () {
   const copy = gulp.src(['./index.html', './favicons/**/*'], { base: './' })
     .pipe(gulp.dest(config.output.path));
 
-  return merge(bundle, copy);
+  const rules = gulp.src(['./firebase-rules.json'], { base: './' })
+    .pipe(processFirebaseRules(projectConf.aerodrome))
+    .pipe(gulp.dest(config.output.path));
+
+  return merge(bundle, copy, rules);
 });
 
 gulp.task('prod-env', function () {

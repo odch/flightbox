@@ -1,8 +1,11 @@
 {
   "database": {
-    "rules": "firebase-rules.json"
+    "rules": "build/firebase-rules.json"
   },
   "hosting": {
-    "public": "build"
+    "public": "build",
+    "ignore": [
+      "firebase-rules.json"
+    ]
   }
 }
