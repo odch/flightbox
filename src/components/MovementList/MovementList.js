@@ -1,6 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import Predicates from './Predicates.js';
-import MovementGroup from '../MovementGroup';
+import MovementGroup from './MovementGroup';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
 import { AutoLoad } from '../../util/AutoLoad.js';
 
@@ -51,7 +51,7 @@ class MovementList extends Component {
 
     return (
       <div>
-        <MovementGroup
+        {movementsAfterToday.length > 0 && <MovementGroup
           label="Ab morgen"
           items={movementsAfterToday}
           onClick={this.props.onClick}
@@ -61,8 +61,8 @@ class MovementList extends Component {
           actionLabel={this.props.actionLabel}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
-        />
-        <MovementGroup
+        />}
+        {movementsOfToday.length > 0 && <MovementGroup
           label="Heute"
           items={movementsOfToday}
           onClick={this.props.onClick}
@@ -72,8 +72,8 @@ class MovementList extends Component {
           actionLabel={this.props.actionLabel}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
-        />
-        <MovementGroup
+        />}
+        {movementsOfYesterday.length > 0 && <MovementGroup
           label="Gestern"
           items={movementsOfYesterday}
           onClick={this.props.onClick}
@@ -83,8 +83,8 @@ class MovementList extends Component {
           actionLabel={this.props.actionLabel}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
-        />
-        <MovementGroup
+        />}
+        {movementsOfThisMonth.length > 0 && <MovementGroup
           label="Dieser Monat"
           items={movementsOfThisMonth}
           onClick={this.props.onClick}
@@ -93,8 +93,8 @@ class MovementList extends Component {
           actionLabel={this.props.actionLabel}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
-        />
-        <MovementGroup
+        />}
+        {olderMovements.length > 0 && <MovementGroup
           label="Älter"
           items={olderMovements}
           onClick={this.props.onClick}
@@ -103,7 +103,7 @@ class MovementList extends Component {
           actionLabel={this.props.actionLabel}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
-        />
+        />}
         {this.props.loading && <LoadingInfo/>}
         {confirmationDialog}
       </div>
