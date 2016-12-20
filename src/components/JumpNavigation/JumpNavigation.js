@@ -1,29 +1,22 @@
 import React, { PropTypes, Component } from 'react';
-import './JumpNavigation.scss';
+import styled from 'styled-components';
+import Item from './Item';
 
-class JumpNavigation extends Component {
-
-  render() {
-    return (
-      <div className="JumpNavigation">
-        <div className="home">
-          <a href="#/">
-            <i className="material-icons">home</i> <span className="label">Startseite</span>
-          </a>
-        </div>
-        <div className="departure">
-          <a href="#/departure/new">
-            <i className="material-icons">flight_takeoff</i> <span className="label">Abflug erfassen</span>
-          </a>
-        </div>
-        <div className="arrival">
-          <a href="#/arrival/new">
-            <i className="material-icons">flight_land</i> <span className="label">Ankunft erfassen</span>
-          </a>
-        </div>
-      </div>
-    );
+const Wrapper = styled.div`
+  font-size: 1.2em;
+  margin-bottom: 2em;
+  
+  @media (max-width: 768px) {
+    text-align: center;
   }
-}
+`;
+
+const JumpNavigation = () => (
+  <Wrapper>
+    <Item href="#/" icon="home" label="Startseite"/>
+    <Item href="#/departure/new" icon="flight_takeoff" label="Abflug erfassen"/>
+    <Item href="#/arrival/new" icon="flight_land" label="Ankunft erfassen"/>
+  </Wrapper>
+);
 
 export default JumpNavigation;
