@@ -1,6 +1,6 @@
 import React from 'react';
-import logo from '../../resources/mfgt_logo_transp.png';
+import { withTheme } from 'styled-components';
 
-const Logo = props => <img {...props} src={logo}/>;
+const Logo = ({ theme, ...rest }) => <img {...rest} src={theme.images.logo}/>;
 
-export default Logo;
+export default withTheme(Logo);
