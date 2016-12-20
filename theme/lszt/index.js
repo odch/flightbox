@@ -1,4 +1,4 @@
-import logo from './mfgt_logo_transp.png';
+import logo from './logo.svg';
 
 const theme = {
   colors: {
