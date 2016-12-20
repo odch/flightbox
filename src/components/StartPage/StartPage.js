@@ -1,27 +1,7 @@
 import React, { Component } from 'react';
 import './StartPage.scss';
 import ImageButton from '../ImageButton';
-import Logo from '../Logo';
-
-const LoginInfo = props => {
-  if (props.auth.authenticated === true && typeof props.auth.data.uid === 'string') {
-    return (
-      <div className="LoginInfo">
-        <i className="material-icons">account_box</i>
-        <span className="username">{props.auth.data.uid}</span>
-        <button className="logout" onClick={props.logout}>Abmelden</button>
-      </div>
-    );
-  }
-
-  return <div className="LoginInfo"><button onClick={props.showLogin}>Anmelden</button></div>;
-};
-
-LoginInfo.propTypes = {
-  auth: React.PropTypes.object.isRequired,
-  logout: React.PropTypes.func.isRequired,
-  showLogin: React.PropTypes.func.isRequired,
-};
+import Header from './Header';
 
 class StartPage extends Component {
 
@@ -34,10 +14,7 @@ class StartPage extends Component {
     const adminImagePath = require('./ic_settings_black_48dp_2x.png');
     return (
       <div className="StartPage">
-        <header>
-          <LoginInfo logout={this.props.logout} auth={this.props.auth} showLogin={this.props.showLogin}/>
-          <Logo className="logo"/>
-        </header>
+        <Header logout={this.props.logout} auth={this.props.auth} showLogin={this.props.showLogin}/>
         <div className="main">
           <div className="hint">
             <ul>

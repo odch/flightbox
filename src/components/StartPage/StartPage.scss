@@ -1,36 +1,5 @@
 .StartPage {
 
-  header {
-    position: absolute;
-    height: 25%;
-    width: 100%;
-    background-color: #f6f6f6;
-    padding: 10px;
-    box-sizing: border-box;
-
-    .logo {
-      height: 85%;
-    }
-
-    .LoginInfo {
-      float: right;
-
-      .username {
-        margin-right: 0.3em;
-      }
-
-      button {
-        padding: 0;
-        border: none;
-        border-radius: 5px;
-        font-size: 1em;
-        background-color: transparent;
-        text-decoration: underline;
-        cursor: pointer;
-      }
-    }
-  }
-
   .main {
     position: absolute;
     top: 25%;
