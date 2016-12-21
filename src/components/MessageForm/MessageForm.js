@@ -1,5 +1,6 @@
 import React from 'react';
 import { Field, reduxForm } from 'redux-form';
+import MaterialIcon from '../MaterialIcon';
 import validate from './validate.js';
 import { renderInputField, renderTextArea } from '../../util/renderField';
 import MessageSentDialog from './MessageSentDialog';
@@ -47,7 +48,7 @@ class MessageForm extends React.Component {
           />
         </div>
         <button type="submit" className="send">
-          <i className="material-icons">send</i>&nbsp;Senden
+          <MaterialIcon icon="send"/>&nbsp;Senden
         </button>
         {this.props.sent && <MessageSentDialog onClose={this.props.confirmSaveMessageSuccess}/>}
         {this.props.commitFailed && <CommitErrorDialog onClose={this.props.resetMessageForm}/>}

@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import MaterialIcon from '../MaterialIcon';
 
 const UserName = styled.span`
   margin-right: 0.3em;
@@ -19,7 +20,7 @@ const LoginInfo = props => {
   if (props.auth.authenticated === true && typeof props.auth.data.uid === 'string') {
     return (
       <div className={props.className}>
-        <i className="material-icons">account_box</i>
+        <MaterialIcon icon="account_box"/>
         <UserName>{props.auth.data.uid}</UserName>
         <LogoutButton onClick={props.logout}>Abmelden</LogoutButton>
       </div>

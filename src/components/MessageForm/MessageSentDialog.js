@@ -1,12 +1,13 @@
 import React from 'react';
 import ModalDialog from '../ModalDialog';
+import MaterialIcon from '../MaterialIcon';
 
 const MessageSentDialog = props => {
   const content = (
     <div>
       <div className="heading">Nachricht gesendet</div>
       <div className="message">Vielen Dank! Ihre Nachricht wurde gesendet.</div>
-      <button className="close" onClick={props.onClose}><i className="material-icons">close</i>&nbsp;Schliessen</button>
+      <button className="close" onClick={props.onClose}><MaterialIcon icon="close"/>&nbsp;Schliessen</button>
     </div>
   );
   return (

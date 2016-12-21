@@ -1,4 +1,5 @@
 import React, { PropTypes, Component } from 'react';
+import MaterialIcon from '../MaterialIcon';
 import styled from 'styled-components';
 import dates from '../../util/dates';
 
@@ -74,7 +75,7 @@ const ActionLabel = styled.span`
 
 const Action = props => (
   <StyledAction onClick={props.onClick} className={props.className}>
-    <i className="material-icons">{props.icon}</i><ActionLabel>&nbsp;{props.label}</ActionLabel>
+    <MaterialIcon icon={props.icon}/><ActionLabel>&nbsp;{props.label}</ActionLabel>
   </StyledAction>
 );
 

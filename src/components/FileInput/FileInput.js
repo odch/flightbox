@@ -1,4 +1,5 @@
 import React from 'react';
+import MaterialIcon from '../MaterialIcon';
 import './FileInput.scss';
 
 const getSelectedFile = e => {
@@ -32,7 +33,7 @@ const FileInput = props => (
             onClick={() => props.onChange(event(null))}
             className="remove"
           >
-            <i className="material-icons">block</i>
+            <MaterialIcon icon="block"/>
           </button>
         )}
         {props.value.name}

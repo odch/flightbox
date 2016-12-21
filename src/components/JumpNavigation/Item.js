@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import MaterialIcon from '../MaterialIcon';
 
 const Wrapper = styled.div`
   display: inline-block;
@@ -29,7 +30,7 @@ const Label = styled.span`
 const Item = props => (
   <Wrapper>
     <A href={props.href}>
-      <i className="material-icons">{props.icon}</i> <Label>{props.label}</Label>
+      <MaterialIcon icon={props.icon}/> <Label>{props.label}</Label>
     </A>
   </Wrapper>
 );

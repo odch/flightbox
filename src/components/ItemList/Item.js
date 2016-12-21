@@ -1,4 +1,5 @@
 import React from 'react';
+import MaterialIcon from '../MaterialIcon';
 
 const Item = props => (
   <div className="Item">
@@ -7,7 +8,7 @@ const Item = props => (
       onClick={props.onRemoveClick}
       className="remove"
     >
-      <i className="material-icons">block</i>
+      <MaterialIcon icon="block"/>
     </button>
   </div>
 );

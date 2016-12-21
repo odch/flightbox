@@ -1,6 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import './MovementDeleteConfirmationDialog.scss';
 import ModalDialog from '../ModalDialog';
+import MaterialIcon from '../MaterialIcon';
 import dates from '../../util/dates';
 
 class MovementDeleteConfirmationDialog extends Component {
@@ -23,7 +24,7 @@ class MovementDeleteConfirmationDialog extends Component {
         <div className="actions">
           <button className="cancel" onClick={hide}>Abbrechen</button>
           <button className="confirm" onClick={() => { confirm(item.key, hide); }}>
-            <i className="material-icons">delete</i>&nbsp;Bewegung löschen
+            <MaterialIcon icon="delete"/>&nbsp;Bewegung löschen
           </button>
         </div>
       </div>

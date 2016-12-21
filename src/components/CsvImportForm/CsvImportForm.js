@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import LabeledComponent from '../LabeledComponent';
 import FileInput from '../FileInput';
+import MaterialIcon from '../MaterialIcon';
 import ImportDoneDialog from './ImportDoneDialog';
 import './CsvImportForm.scss';
 
@@ -34,7 +35,7 @@ const CsvImportForm = props => {
         <form onSubmit={handleFormSubmit.bind(null, props.startImport)}>
           <LabeledComponent label="CSV-Datei auswählen" component={fileInput}/>
           <button type="submit" className="import" disabled={props.disabled || props.importInProgress || !props.selectedFile}>
-            <i className="material-icons">file_upload</i>&nbsp;Importieren
+            <MaterialIcon icon="file_upload"/>&nbsp;Importieren
           </button>
           {props.importInProgress && (
             <span className="import-in-progress-msg">Import wird ausgeführt. Bitte warten ...</span>

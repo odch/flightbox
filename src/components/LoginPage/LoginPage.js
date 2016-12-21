@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './LoginPage.scss';
 import LabeledComponent from '../LabeledComponent';
 import Logo from '../Logo';
+import MaterialIcon from '../MaterialIcon';
 import auth from '../../util/auth';
 import { authenticate } from '../../util/firebase';
 
@@ -38,7 +39,7 @@ class LoginPage extends Component {
             <div className="failure">{failure ? 'Login fehlgeschlagen' : '\u00a0'}</div>
             {this.props.showCancel === true && <button type="button" onClick={this.props.onCancel}>Abbrechen</button>}
             <button type="submit" disabled={submitting || username.length === 0 || password.length === 0}>
-              <i className="material-icons">send</i>&nbsp;Anmelden
+              <MaterialIcon icon="send"/>&nbsp;Anmelden
             </button>
           </form>
         </div>

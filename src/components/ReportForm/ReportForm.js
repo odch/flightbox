@@ -1,6 +1,7 @@
 import React from 'react';
 import LabeledComponent from '../LabeledComponent';
 import { MonthPicker } from '../DatePicker';
+import MaterialIcon from '../MaterialIcon';
 import './ReportForm.scss';
 
 const handleSubmit = (generate, date, parameters, e) => {
@@ -27,7 +28,7 @@ const ReportForm = props => {
         </div>
         {props.children}
         <button type="submit" className="generate">
-          <i className="material-icons">file_download</i>&nbsp;Herunterladen
+          <MaterialIcon icon="file_download"/>&nbsp;Herunterladen
         </button>
       </fieldset>
     </form>

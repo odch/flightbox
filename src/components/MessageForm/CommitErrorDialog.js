@@ -1,12 +1,13 @@
 import React from 'react';
 import ModalDialog from '../ModalDialog';
+import MaterialIcon from '../MaterialIcon';
 
 const CommitErrorDialog = props => {
   const content = (
     <div>
       <div className="heading">Fehler</div>
       <div className="message">Ihre Nachricht konnte nicht gesendet werden.</div>
-      <button className="close" onClick={props.onClose}><i className="material-icons">close</i>&nbsp;Schliessen</button>
+      <button className="close" onClick={props.onClose}><MaterialIcon icon="close"/>&nbsp;Schliessen</button>
     </div>
   );
   return (

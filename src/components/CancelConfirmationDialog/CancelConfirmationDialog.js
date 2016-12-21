@@ -1,5 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import ModalDialog from '../ModalDialog';
+import MaterialIcon from '../MaterialIcon';
 import './CancelConfirmationDialog.scss';
 
 class CancelConfirmationDialog extends Component {
@@ -11,7 +12,7 @@ class CancelConfirmationDialog extends Component {
         <div className="msg">Möchten Sie wirklich abbrechen? Nicht gespeicherte Daten gehen unwiderruflich verloren.</div>
         <div className="actions">
           <button className="cancel" onClick={this.props.onCancel}>Nicht abbrechen</button>
-          <button className="confirm" onClick={this.props.onConfirm}><i className="material-icons">done</i>&nbsp;Abbrechen und Daten verwerfen
+          <button className="confirm" onClick={this.props.onConfirm}><MaterialIcon icon="done"/>&nbsp;Abbrechen und Daten verwerfen
           </button>
         </div>
       </div>

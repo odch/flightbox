@@ -1,5 +1,6 @@
 import React from 'react';
 import ModalDialog from '../ModalDialog';
+import MaterialIcon from '../MaterialIcon';
 
 const ImportDoneDialog = props => {
   const content = (
@@ -7,7 +8,7 @@ const ImportDoneDialog = props => {
       <div className="heading">{props.doneHeading}</div>
       <div className="message">{props.doneMessage}</div>
       <button className="close" onClick={props.onClose}>
-        <i className="material-icons">close</i>&nbsp;Schliessen
+        <MaterialIcon icon="close"/>&nbsp;Schliessen
       </button>
     </div>
   );

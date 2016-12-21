@@ -1,4 +1,5 @@
 import React from 'react';
+import MaterialIcon from '../MaterialIcon';
 import Item from './Item';
 import './ItemList.scss';
 
@@ -20,7 +21,7 @@ const ItemList = props => (
         className="add"
         disabled={props.newItem.length === 0}
       >
-        <i className="material-icons">done</i>&nbsp;Hinzufügen
+        <MaterialIcon icon="done"/>&nbsp;Hinzufügen
       </button>
     </form>
     <div className="items-wrap">

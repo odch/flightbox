@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import ModalDialog from '../../../ModalDialog';
+import MaterialIcon from '../../../MaterialIcon';
 import './CommitRequirementsDialog.scss';
 
 const CommitRequirementsDialog = props => {
@@ -15,9 +16,7 @@ const CommitRequirementsDialog = props => {
       </ul>
       <div className="actions">
         <button className="cancel" onClick={props.onCancel}>Abbrechen</button>
-        <button className="confirm" onClick={props.onConfirm}><i className="material-icons">done_all</i>&nbsp;
-          Bestätigen
-        </button>
+        <button className="confirm" onClick={props.onConfirm}><MaterialIcon icon="done_all"/>&nbsp;Bestätigen</button>
       </div>
     </div>
   );
