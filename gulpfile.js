@@ -26,7 +26,7 @@ gulp.task('build', ['clean'], function () {
     .pipe(webpack(config))
     .pipe(gulp.dest(config.output.path));
 
-  const copy = gulp.src(['./index.html', './favicons/**/*'], { base: './' })
+  const copy = gulp.src(['./index.html', './reset.css', './favicons/**/*'], { base: './' })
     .pipe(gulp.dest(config.output.path));
 
   const rules = gulp.src(['./firebase-rules.json'], { base: './' })
