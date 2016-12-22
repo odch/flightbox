@@ -1,7 +1,6 @@
 import React, {PropTypes, Component} from 'react';
 import LoginPage from '../../containers/LoginPageContainer';
 import Centered from '../Centered';
-import 'moment/locale/de';
 
 const App = props => {
   if (props.auth.initialized !== true) {

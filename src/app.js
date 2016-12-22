@@ -7,6 +7,8 @@ import { routerMiddleware } from 'react-router-redux';
 import createSagaMiddleware from 'redux-saga';
 import { ThemeProvider, withTheme } from 'styled-components';
 
+import 'moment/locale/de';
+
 import reducer, { sagas } from './modules';
 
 import App from './containers/AppContainer';
