@@ -11,6 +11,7 @@ class HelpPage extends Component {
 
   constructor(props) {
     super(props);
+    this.boxes = [];
     this.questions = [
       { question: 'Wann muss ich einen Abflug und wann eine Ankunft erfassen?',
         answer: (
@@ -161,7 +162,7 @@ class HelpPage extends Component {
             ))}
           </ol>
           {this.questions.map((question, index) => (
-            <LabeledBox key={index} ref={'box' + index} label={(index + 1) + '. ' + question.question}>
+            <LabeledBox key={index} innerRef={box => this.boxes[index] = box} label={(index + 1) + '. ' + question.question}>
               <div>
                 {question.answer}
               </div>
@@ -173,7 +174,7 @@ class HelpPage extends Component {
   }
 
   handleItemClick(index) {
-    const box = this.refs['box' + index];
+    const box = this.boxes[index];
     const domNode = ReactDOM.findDOMNode(box);
     domNode.scrollIntoView();
   }

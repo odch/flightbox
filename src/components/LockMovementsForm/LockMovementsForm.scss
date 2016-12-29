@@ -1,27 +1,24 @@
 .LockMovementsForm {
 
-  .content {
+  .LabeledComponent {
+    width: 50%;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
 
-    .LabeledComponent {
-      width: 50%;
-      margin-top: 1.5em;
+    label {
+      display: block;
       margin-bottom: 1.5em;
-
-      label {
-        display: block;
-        margin-bottom: 1.5em;
-      }
     }
+  }
 
-    button {
-      padding: 0;
-      border: none;
-      background-color: white;
-      cursor: pointer;
-    }
+  button {
+    padding: 0;
+    border: none;
+    background-color: white;
+    cursor: pointer;
+  }
 
-    .clear {
-      float: right;
-    }
+  .clear {
+    float: right;
   }
 }

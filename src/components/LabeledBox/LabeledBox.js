@@ -1,22 +1,49 @@
 import React, { PropTypes, Component } from 'react';
-import './LabeledBox.scss';
-import classNames from 'classnames';
+import styled from 'styled-components';
 
-class LabeledBox extends Component {
+const Wrapper = styled.div`
+  margin: 0 0 2em 0;
+  overflow: hidden;
+  border: 1px solid #eee;
+  box-shadow: 3px;
+`;
 
-  render() {
-    return (
-      <div className={classNames('LabeledBox', this.props.className)}>
-        <div className="label">{this.props.label}</div>
-        <div className="content">{this.props.children}</div>
-      </div>
-    );
+const Label = styled.div`
+  border-bottom: 1px solid ${props => props.theme.colors.main};
+  padding: 1em;
+  background-color: ${props => props.theme.colors.background};
+`;
+
+const Content = styled.div`
+  padding: ${props => typeof props.padding === 'number' ? `${props.padding}px` : '1em'};
+  overflow: auto;
+  ${props => props.contentMaxHeight > 0 && `max-height: ${props.contentMaxHeight}px;`}
+  
+  a {
+    text-decoration: underline;
   }
-}
+
+  p:not(:last-child) {
+    margin-bottom: 1em;
+  }
+`;
+
+const LabeledBox = props => (
+  <Wrapper className={props.className} innerRef={props.innerRef}>
+    <Label>{props.label}</Label>
+    <Content
+      maxHeight={props.contentMaxHeight}
+      padding={props.contentPadding}
+    >{props.children}</Content>
+  </Wrapper>
+);
 
 LabeledBox.propTypes = {
   label: PropTypes.string.isRequired,
   className: PropTypes.string,
+  contentMaxHeight: PropTypes.number,
+  contentPadding: PropTypes.number,
+  innerRef: PropTypes.func,
 };
 
 export default LabeledBox;
