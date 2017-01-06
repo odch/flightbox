@@ -46,30 +46,6 @@
       }
     }
 
-    .WizardNavigation {
-      padding: 10px 20px 0 20px;
-      overflow: hidden;
-
-      button {
-        color: #000;
-        text-decoration: none;
-        cursor: pointer;
-        user-select: none;
-        border: none;
-        background: none;
-        font-size: 1.5em;
-      }
-
-      button.next {
-        color: #ed351c;
-      }
-
-      .next {
-        float: right;
-        margin-left: 20px;
-      }
-    }
-
     .loading {
       position: absolute;
       top: 50%;

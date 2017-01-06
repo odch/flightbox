@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../../validate';
 import { renderSingleSelect, renderTextArea } from '../../renderField';
+import WizardNavigation from '../../../WizardNavigation';
 
 const FlightPage = (props) => {
   const { previousPage, handleSubmit, flightTypes, runways, departureRoutes } = props;
@@ -48,10 +49,7 @@ const FlightPage = (props) => {
           readOnly={props.readOnly}
         />
       </fieldset>
-      <div className="WizardNavigation">
-        <button type="button" className="previous" onClick={previousPage}>Zurück</button>
-        {!props.readOnly && <button type="submit" className="next">Speichern</button>}
-      </div>
+      <WizardNavigation previousStep={previousPage} nextLabel="Speichern" nextVisible={!props.readOnly}/>
     </form>
   );
 };

@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../validate';
 import { renderInputField, renderAircraftDropdown } from '../renderField';
+import WizardNavigation from '../../WizardNavigation';
 
 const AircraftPage = (props) => {
   const { handleSubmit } = props;
@@ -38,9 +39,7 @@ const AircraftPage = (props) => {
           readOnly={props.readOnly}
         />
       </fieldset>
-      <div className="WizardNavigation">
-        <button type="submit" className="next">Weiter</button>
-      </div>
+      <WizardNavigation previousVisible={false}/>
     </form>
   );
 };

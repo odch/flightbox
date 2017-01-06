@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../../validate';
 import { renderIncrementationField } from '../../renderField';
+import WizardNavigation from '../../../WizardNavigation';
 
 const toNumber = value => {
   if (typeof value === 'number') {
@@ -28,10 +29,7 @@ const PassengerPage = props => {
           readOnly={props.readOnly}
         />
       </fieldset>
-      <div className="WizardNavigation">
-        <button type="button" className="previous" onClick={previousPage}>Zurück</button>
-        <button type="submit" className="next">Weiter</button>
-      </div>
+      <WizardNavigation previousStep={previousPage}/>
     </form>
   );
 };

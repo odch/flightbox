@@ -1,43 +1,48 @@
-import React, { PropTypes, Component } from 'react';
-import './WizardNavigation.scss';
+import React, {PropTypes, Component} from 'react';
+import styled from 'styled-components';
 
-class WizardNavigation extends Component {
+const Wrapper = styled.div`
+  padding: 10px 20px 0 20px;
+  overflow: hidden;
+`;
 
-  render() {
-    const nextLabel = this.props.nextLabel || 'Weiter';
-    return (
-      <div className="WizardNavigation">
-        <a onMouseDown={this.cancel.bind(this)} className="cancel" tabIndex="-1">Abbrechen</a>
-        {this.props.nextVisible !== false
-          ? <a onMouseDown={this.nextStep.bind(this)} className="next" tabIndex="-1">{nextLabel}</a>
-          : null}
-        {this.props.previousVisible !== false
-          ? <a onMouseDown={this.previousStep.bind(this)} className="prev" tabIndex="-1">Zurück</a>
-          : null}
-      </div>
-    );
-  }
+const Button = styled.button`
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  background: none;
+  font-size: 1.5em;
+`;
 
-  cancel() {
-    this.props.cancel();
-  }
+const Next = styled(Button)`
+  color: ${props => props.theme.colors.main};
+  float: right;
+  margin-left: 20px;
+`;
 
-  previousStep() {
-    this.props.previousStep();
-  }
+const Prev = styled(Button)`
+`;
 
-  nextStep() {
-    this.props.nextStep();
-  }
-}
+const WizardNavigation = props => (
+  <Wrapper>
+    {props.previousVisible && <Prev type="button" onMouseDown={props.previousStep} tabIndex="-1">Zurück</Prev>}
+    {props.nextVisible && <Next type="submit" onMouseDown={props.nextStep} tabIndex="-1">{props.nextLabel || 'Weiter'}</Next>}
+  </Wrapper>
+);
 
 WizardNavigation.propTypes = {
-  cancel: PropTypes.func,
   previousStep: PropTypes.func,
   nextStep: PropTypes.func,
   nextLabel: PropTypes.string,
   nextVisible: PropTypes.bool,
   previousVisible: PropTypes.bool,
+};
+
+WizardNavigation.defaultProps = {
+  nextVisible: true,
+  previousVisible: true
 };
 
 export default WizardNavigation;
