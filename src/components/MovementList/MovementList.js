@@ -1,12 +1,9 @@
 import React, { PropTypes, Component } from 'react';
-import Predicates from './Predicates.js';
+import Predicates from './Predicates';
 import MovementGroup from './MovementGroup';
+import LoadingInfo from './LoadingInfo';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
-import { AutoLoad } from '../../util/AutoLoad.js';
-
-const LoadingInfo = () => (
-  <div className="LoadingInfo">Bewegungen werden geladen ...</div>
-);
+import { AutoLoad } from '../../util/AutoLoad';
 
 /**
  * today

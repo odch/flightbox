@@ -1,6 +1,0 @@
-{
-  "name": "MovementList",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./MovementList.js"
-}
