@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
-import classNames from 'classnames';
-import BorderLayout from '../BorderLayout';
-import BorderLayoutItem from '../BorderLayoutItem';
-import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import CommitFailureDialog from '../CommitFailureDialog';
-import Logo from '../Logo';
 import Centered from '../Centered';
+import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import { getFromItemKey } from '../../util/reference-number';
-import './MovementWizard.scss';
+import Breadcrumbs from './Breadcrumbs';
+import Content from './Content';
 
 class MovementWizard extends Component {
 
@@ -24,23 +21,13 @@ class MovementWizard extends Component {
 
   render() {
     return (
-      <BorderLayout className={classNames('MovementWizard', this.props.className)}>
-        <BorderLayoutItem region="west">
-          <header>
-            <a href="#/">
-              <Logo className="logo"/>
-            </a>
-          </header>
-        </BorderLayoutItem>
-        {this.props.wizard.initialized === true && this.props.wizard.committed !== true && (
-          <BorderLayoutItem region="north">
-            <WizardBreadcrumbs items={this.buildBreadcrumbItems()} activeItem={this.props.wizard.page}/>
-          </BorderLayoutItem>
-        )}
-        <BorderLayoutItem region="middle">
-          {this.getMiddleItem()}
-        </BorderLayoutItem>
-      </BorderLayout>
+      <VerticalHeaderLayout>
+        <div>
+          {this.props.wizard.initialized === true && this.props.wizard.committed !== true &&
+            <Breadcrumbs items={this.buildBreadcrumbItems()} activeItem={this.props.wizard.page}/>}
+          <Content>{this.getMiddleItem()}</Content>
+        </div>
+      </VerticalHeaderLayout>
     );
   }
 
