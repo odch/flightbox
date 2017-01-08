@@ -1,6 +1,11 @@
 .LabeledComponent {
   position: relative;
 
+  > label {
+    margin-bottom: 1.5em;
+    display: block;
+  }
+
   .component-wrap {
     padding: 0.2em;
 
