@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import './MovementsPage.scss';
+import Content from './Content';
 import MovementList from '../MovementList';
 import TabPanel from '../TabPanel';
-import BorderLayout from '../BorderLayout';
-import BorderLayoutItem from '../BorderLayoutItem';
 import JumpNavigation from '../JumpNavigation';
-import Logo from '../Logo';
+import VerticalHeaderLayout from '../VerticalHeaderLayout';
 
 class MovementsPage extends Component {
 
@@ -74,19 +72,12 @@ class MovementsPage extends Component {
       component: arrivalsList,
     }];
     return (
-      <BorderLayout className="MovementsPage">
-        <BorderLayoutItem region="west">
-          <header>
-            <a href="#/">
-              <Logo className="logo"/>
-            </a>
-          </header>
-        </BorderLayoutItem>
-        <BorderLayoutItem region="middle">
+      <VerticalHeaderLayout>
+        <Content>
           <JumpNavigation/>
           <TabPanel tabs={tabs}/>
-        </BorderLayoutItem>
-      </BorderLayout>
+        </Content>
+      </VerticalHeaderLayout>
     );
   }
 }
