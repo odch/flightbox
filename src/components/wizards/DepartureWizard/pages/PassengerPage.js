@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../../validate';
 import { renderIncrementationField, renderSingleSelect } from '../../renderField';
+import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
 
 const carriageVoucherItems = [
@@ -28,8 +29,7 @@ const PassengerPage = (props) => {
   const { previousPage, handleSubmit } = props;
   return (
     <form onSubmit={handleSubmit} className="PassengerPage">
-      <fieldset>
-        <legend>Passagiere</legend>
+      <FieldSet legend="Passagiere">
         <Field
           name="passengerCount"
           format={toNumber}
@@ -46,7 +46,7 @@ const PassengerPage = (props) => {
           component={renderSingleSelect}
           readOnly={props.readOnly}
         />
-      </fieldset>
+      </FieldSet>
       <WizardNavigation previousStep={previousPage}/>
     </form>
   );

@@ -2,14 +2,14 @@ import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../../validate';
 import { renderSingleSelect, renderTextArea } from '../../renderField';
+import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
 
 const FlightPage = (props) => {
   const { previousPage, handleSubmit, flightTypes, arrivalRoutes, runways } = props;
   return (
     <form onSubmit={handleSubmit} className="FlightPage">
-      <fieldset>
-        <legend>Flug</legend>
+      <FieldSet legend="Flug">
         <Field
           name="flightType"
           component={renderSingleSelect}
@@ -42,7 +42,7 @@ const FlightPage = (props) => {
           label="Pistenrichtung"
           readOnly={props.readOnly}
         />
-      </fieldset>
+      </FieldSet>
       <WizardNavigation previousStep={previousPage} nextLabel="Speichern" nextVisible={!props.readOnly}/>
     </form>
   );

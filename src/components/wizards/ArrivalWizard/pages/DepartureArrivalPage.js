@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../../validate';
 import { renderAerodromeDropdown, renderDateField, renderTimeField, renderIncrementationField } from '../../renderField';
+import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
 
 const toNumber = value => {
@@ -18,8 +19,7 @@ const DepartureArrivalPage = (props) => {
   const { previousPage, handleSubmit } = props;
   return (
     <form onSubmit={handleSubmit} className="DepartureArrivalPage">
-      <fieldset>
-        <legend>Start und Ziel</legend>
+      <FieldSet legend="Start und Ziel">
         <Field
           name="location"
           component={renderAerodromeDropdown}
@@ -49,7 +49,7 @@ const DepartureArrivalPage = (props) => {
           label="Anzahl Landungen"
           readOnly={props.readOnly}
         />
-      </fieldset>
+      </FieldSet>
       <WizardNavigation previousStep={previousPage}/>
     </form>
   );

@@ -11,32 +11,21 @@
   }
 
   .middle {
+    .LabeledComponent {
+      width: 45%;
+      margin-right: 5%;
+      margin-bottom: 1.5em;
+      display: inline-block;
+      vertical-align: top;
 
-    fieldset {
-      border: 0;
-      margin: 1em;
-
-      legend {
-        font-size: 2em;
-        margin-bottom: 1em;
+      @media screen and (max-width: 768px) {
+        width: 100%;
+        margin-right: 0;
       }
 
-      .LabeledComponent {
-        width: 45%;
-        margin-right: 5%;
+      > label {
+        display: block;
         margin-bottom: 1.5em;
-        display: inline-block;
-        vertical-align: top;
-
-        @media screen and (max-width: 768px) {
-          width: 100%;
-          margin-right: 0;
-        }
-
-        > label {
-          display: block;
-          margin-bottom: 1.5em;
-        }
       }
     }
   }

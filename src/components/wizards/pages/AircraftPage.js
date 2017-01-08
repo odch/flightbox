@@ -2,14 +2,14 @@ import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../validate';
 import { renderInputField, renderAircraftDropdown } from '../renderField';
+import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
 
 const AircraftPage = (props) => {
   const { handleSubmit } = props;
   return (
     <form onSubmit={handleSubmit} className="AircraftPage">
-      <fieldset>
-        <legend>Flugzeugdaten</legend>
+      <FieldSet legend="Flugzeugdaten">
         <Field
           name="immatriculation"
           component={renderAircraftDropdown}
@@ -38,7 +38,7 @@ const AircraftPage = (props) => {
           label="Maximales Abfluggewicht (in Kilogramm)"
           readOnly={props.readOnly}
         />
-      </fieldset>
+      </FieldSet>
       <WizardNavigation previousVisible={false}/>
     </form>
   );

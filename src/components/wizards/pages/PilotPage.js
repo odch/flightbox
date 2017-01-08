@@ -2,14 +2,14 @@ import React, { PropTypes } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../validate';
 import { renderInputField, renderUserDropdown } from '../renderField';
+import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
 
 const PilotPage = (props) => {
   const { previousPage, handleSubmit } = props;
   return (
     <form onSubmit={handleSubmit} className="PilotPage">
-      <fieldset>
-        <legend>Pilot</legend>
+      <FieldSet legend="Pilot">
         <Field
           name="memberNr"
           label="MFGT-Mitgliedernummer"
@@ -46,7 +46,7 @@ const PilotPage = (props) => {
           component={renderInputField}
           readOnly={props.readOnly}
         />
-      </fieldset>
+      </FieldSet>
       <WizardNavigation previousStep={previousPage}/>
     </form>
   );
