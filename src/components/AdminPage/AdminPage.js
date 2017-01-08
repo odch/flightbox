@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
-import './AdminPage.scss';
-import BorderLayout from '../BorderLayout';
-import BorderLayoutItem from '../BorderLayoutItem';
 import LabeledBox from '../LabeledBox';
 import JumpNavigation from '../JumpNavigation';
-import Logo from '../Logo';
+import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import AirstatReportForm from '../../containers/AirstatReportFormContainer';
 import LandingsReportForm from '../../containers/LandingsReportFormContainer';
 import LockMovementsForm from '../../containers/LockMovementsFormContainer';
@@ -13,6 +10,7 @@ import UserImportForm from '../../containers/UserImportFormContainer';
 import AerodromeImportForm from '../../containers/AerodromeImportFormContainer';
 import AircraftImportForm from '../../containers/AircraftImportFormContainer';
 import AircraftsItemList from '../../containers/AircraftsItemListContainer';
+import Content from './Content';
 
 class AdminPage extends Component {
 
@@ -24,16 +22,9 @@ class AdminPage extends Component {
 
   render() {
     return (
-      <BorderLayout className="AdminPage">
-        <BorderLayoutItem region="west">
-          <header>
-            <a href="#/">
-              <Logo className="logo"/>
-            </a>
-          </header>
-        </BorderLayoutItem>
+      <VerticalHeaderLayout>
         {this.props.auth.data.admin === true &&
-          <BorderLayoutItem region="middle">
+          <Content>
             <JumpNavigation/>
             <LabeledBox label="BAZL-Report herunterladen (CSV)" className="AirstatReportForm">
               <AirstatReportForm/>
@@ -60,8 +51,8 @@ class AdminPage extends Component {
             <LabeledBox label="In Lommis stationierte Flugzeuge (ohne Flugzeuge der MFGT)" className="lszt-aircrafts">
               <AircraftsItemList type="homeBase"/>
             </LabeledBox>
-          </BorderLayoutItem>}
-      </BorderLayout>
+          </Content>}
+      </VerticalHeaderLayout>
     );
   }
 }
