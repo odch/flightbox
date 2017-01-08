@@ -5,6 +5,7 @@ import BorderLayoutItem from '../BorderLayoutItem';
 import WizardBreadcrumbs from '../WizardBreadcrumbs';
 import CommitFailureDialog from '../CommitFailureDialog';
 import Logo from '../Logo';
+import Centered from '../Centered';
 import { getFromItemKey } from '../../util/reference-number';
 import './MovementWizard.scss';
 
@@ -45,7 +46,7 @@ class MovementWizard extends Component {
 
   getMiddleItem() {
     if (this.props.wizard.initialized !== true || this.props.lockDateLoading === true) {
-      return <div className="loading">Bitte warten ...</div>;
+      return <Centered>Bitte warten ...</Centered>;
     }
 
     if (this.props.wizard.committed === true) {
