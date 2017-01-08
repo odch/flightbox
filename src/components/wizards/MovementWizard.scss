@@ -10,12 +10,6 @@
     }
   }
 
-  .east {
-    background-color: #f6f6f6;
-    box-shadow: -5px 0 10px 0 rgba(0,0,0,0.1);
-    overflow: scroll;
-  }
-
   .middle {
 
     fieldset {
@@ -44,20 +38,6 @@
           margin-bottom: 1.5em;
         }
       }
-    }
-  }
-
-  .south {
-    font-size: 1.5em;
-  }
-
-  @media screen and (max-width: 768px) {
-    .east {
-      width: 0 !important;
-    }
-
-    .center {
-      right: 0 !important;
     }
   }
 }
