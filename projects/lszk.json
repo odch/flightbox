@@ -1,0 +1,43 @@
+{
+  "aerodrome": {
+    "name": "Speck-Fehraltorf",
+    "ICAO": "LSZK",
+    "runways": [
+      "12",
+      "30"
+    ],
+    "departureRoutes": [
+      {
+        "name": "S",
+        "label": "S"
+      },
+      {
+        "name": "W",
+        "label": "W"
+      }
+    ],
+    "arrivalRoutes": [
+      {
+        "name": "E",
+        "label": "E"
+      },
+      {
+        "name": "W",
+        "label": "W"
+      }
+    ]
+  },
+  "environments": {
+    "test": {
+      "firebase": "https://lszk-test.firebaseio.com",
+      "ipAuth": "https://lszk-api.app.mfgt.ch/api/v1/firebaseauth/ip-test",
+      "credentialsAuth": "https://lszk-api.app.mfgt.ch/api/v1/firebaseauth/mfgt-test"
+    },
+    "production": {
+      "firebase": "https://lszk-test.firebaseio.com",
+      "ipAuth": "https://lszk-api.app.mfgt.ch/api/v1/firebaseauth/ip-test",
+      "credentialsAuth": "https://lszk-api.app.mfgt.ch/api/v1/firebaseauth/mfgt-test"
+    }
+  },
+  "theme": "lszk"
+}
