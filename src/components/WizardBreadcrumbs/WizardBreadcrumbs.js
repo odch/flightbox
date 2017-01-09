@@ -1,45 +1,64 @@
 import React, { PropTypes, Component } from 'react';
-import './WizardBreadcrumbs.scss';
+import styled from 'styled-components';
 
-class WizardBreadcrumbs extends Component {
+const Wrapper = styled.nav`
+  padding: 1em;
+`;
 
-  render() {
-    return (
-      <nav className="WizardBreadcrumbs">
-        <ol>
-          {this.props.items.map((item, index) => {
-            let className = item.className;
-            if (index === this.props.activeItem) {
-              className += ' active';
-            }
-            const previousValid = this.arePreviousItemsValid(index);
-            const handler = previousValid ? item.handler : undefined;
-            if (!handler) {
-              className += ' no-handler';
-            }
-            return (
-              <li className={className} key={index}>
-                <a onMouseDown={handler} tabIndex="-1">{item.label}</a>
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
-    );
-  }
+const List = styled.ol`
+  list-style-type: none;
+  display: flex;
+  justify-content: space-between;
+`;
 
-  arePreviousItemsValid(index) {
-    for (let i = 0; i < index; i++) {
-      if (this.props.items[i].valid === false) {
-        return false;
-      }
+const Item = styled.li`
+  float: left;
+  display: block;
+`;
+
+const A = styled.a`
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+  
+  ${props => props.noHandler && `cursor: default;`}
+  ${props => props.active && `color: ${props.theme.colors.main};`}
+`;
+
+
+const arePreviousItemsValid = (items, index) => {
+  for (let i = 0; i < index; i++) {
+    if (items[i].valid === false) {
+      return false;
     }
-    return true;
   }
-}
+  return true;
+};
+
+const WizardBreadcrumbs = props => (
+  <Wrapper>
+    <List>
+      {props.items.map((item, index) => {
+        const active = index === props.activeItem;
+        const handler = arePreviousItemsValid(props.items, index) ? item.handler : undefined;
+        return (
+          <Item key={index}>
+            <A onMouseDown={handler} tabIndex="-1" active={active} noHandler={!handler}>{item.label}</A>
+          </Item>
+        );
+      })}
+    </List>
+  </Wrapper>
+);
 
 WizardBreadcrumbs.propTypes = {
-  items: PropTypes.array.isRequired,
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      handler: PropTypes.func,
+      valid: PropTypes.bool,
+    })
+  ).isRequired,
   activeItem: PropTypes.number,
 };
 
