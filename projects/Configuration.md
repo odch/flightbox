@@ -17,6 +17,7 @@ project.
   * `test`
   * `production`
 * `theme`
+* `title`
 
 ### `aerodrome`
 
@@ -94,6 +95,13 @@ Description of the production environment.
 ### `theme`
 
 The name of the theme to use (must exist in the `theme` directory in the project root). The default theme is "lszt".
+
+### `title`
+
+The title of the browser window.
+
+Example: `"MFGT Bewegungen"`
+
 ## Full example
 
 
@@ -139,6 +147,7 @@ The name of the theme to use (must exist in the `theme` directory in the project
       "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/mfgt"
     }
   },
-  "theme": "lszt"
+  "theme": "lszt",
+  "title": "MFGT Bewegungen"
 }
 ```

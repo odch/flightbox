@@ -5,6 +5,7 @@ const webpack = require('gulp-webpack');
 const del = require('del');
 const env = require('gulp-env');
 const merge = require('merge-stream');
+const replace = require('gulp-replace');
 const projects = require('./projects');
 const processFirebaseRules = require('./tasks/processFirebaseRules');
 
@@ -27,6 +28,7 @@ gulp.task('build', ['clean'], function () {
     .pipe(gulp.dest(config.output.path));
 
   const copy = gulp.src(['./index.html', './reset.css', './favicons/**/*'], { base: './' })
+    .pipe(replace('%TITLE%', projectConf.title))
     .pipe(gulp.dest(config.output.path));
 
   const rules = gulp.src(['./firebase-rules.json'], { base: './' })

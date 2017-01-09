@@ -39,5 +39,6 @@
       "credentialsAuth": "https://lszk-api.app.mfgt.ch/api/v1/firebaseauth/mfgt-test"
     }
   },
-  "theme": "lszk"
+  "theme": "lszk",
+  "title": "FGZO Bewegungen"
 }

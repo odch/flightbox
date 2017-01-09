@@ -39,5 +39,6 @@
       "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/mfgt"
     }
   },
-  "theme": "lszt"
+  "theme": "lszt",
+  "title": "MFGT Bewegungen"
 }
