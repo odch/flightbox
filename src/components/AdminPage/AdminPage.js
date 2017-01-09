@@ -45,10 +45,10 @@ class AdminPage extends Component {
             <LabeledBox label="Flugzeugliste importieren" className="aircraft-import">
               <AircraftImportForm/>
             </LabeledBox>
-            <LabeledBox label="Flugzeuge der MFGT" className="mfgt-aircrafts">
+            <LabeledBox label="Club-Flugzeuge">
               <AircraftsItemList type="club"/>
             </LabeledBox>
-            <LabeledBox label="In Lommis stationierte Flugzeuge (ohne Flugzeuge der MFGT)" className="lszt-aircrafts">
+            <LabeledBox label="Auf diesem Flugplatz stationierte Flugzeuge (ohne Club-Flugzeuge)">
               <AircraftsItemList type="homeBase"/>
             </LabeledBox>
           </Content>}
