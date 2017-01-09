@@ -27,15 +27,18 @@ gulp.task('build', ['clean'], function () {
     .pipe(webpack(config))
     .pipe(gulp.dest(config.output.path));
 
-  const copy = gulp.src(['./index.html', './reset.css', './favicons/**/*'], { base: './' })
+  const copy = gulp.src(['./index.html', './reset.css'], { base: './' })
     .pipe(replace('%TITLE%', projectConf.title))
+    .pipe(gulp.dest(config.output.path));
+
+  const favicons = gulp.src(['./theme/' + projectConf.theme + '/favicons/*'], { base: './theme/' + projectConf.theme })
     .pipe(gulp.dest(config.output.path));
 
   const rules = gulp.src(['./firebase-rules.json'], { base: './' })
     .pipe(processFirebaseRules(projectConf.aerodrome))
     .pipe(gulp.dest(config.output.path));
 
-  return merge(bundle, copy, rules);
+  return merge(bundle, copy, favicons, rules);
 });
 
 gulp.task('prod-env', function () {
