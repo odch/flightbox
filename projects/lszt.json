@@ -38,5 +38,6 @@
       "ipAuth": "https://api.mfgt.ch/api/v1/firebaseauth/ip",
       "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/mfgt"
     }
-  }
+  },
+  "theme": "lszt"
 }

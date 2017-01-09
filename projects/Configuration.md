@@ -16,6 +16,7 @@ project.
 * `environments`
   * `test`
   * `production`
+* `theme`
 
 ### `aerodrome`
 
@@ -90,6 +91,9 @@ Description of the test environment.
 
 Description of the production environment.
 
+### `theme`
+
+The name of the theme to use (must exist in the `theme` directory in the project root). The default theme is "lszt".
 ## Full example
 
 
@@ -134,6 +138,7 @@ Description of the production environment.
       "ipAuth": "https://api.mfgt.ch/api/v1/firebaseauth/ip",
       "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/mfgt"
     }
-  }
+  },
+  "theme": "lszt"
 }
 ```

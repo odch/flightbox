@@ -1,4 +1,4 @@
-import logo from './logo.svg';
+const logo = require('./logo.svg');
 
 const theme = {
   colors: {
@@ -10,4 +10,4 @@ const theme = {
   }
 };
 
-export default theme;
+module.exports = theme;

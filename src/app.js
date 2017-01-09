@@ -20,8 +20,9 @@ import AdminPage from './containers/AdminPageContainer';
 import MessagePage from './containers/MessagePageContainer';
 import HelpPage from './containers/HelpPageContainer';
 
-import theme from '../theme/lszt';
 import './style/global-style';
+
+const theme = require('../theme/' + __THEME__);
 
 const sagaMiddleware = createSagaMiddleware();
 const reduxRouterMiddleware = routerMiddleware(hashHistory);
