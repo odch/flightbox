@@ -12,7 +12,7 @@ const PilotPage = (props) => {
       <FieldSet legend="Pilot">
         <Field
           name="memberNr"
-          label="MFGT-Mitgliedernummer"
+          label="Mitgliedernummer"
           component={renderUserDropdown}
           readOnly={props.readOnly}
           normalize={user => {
