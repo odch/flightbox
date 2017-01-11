@@ -1,16 +1,33 @@
 import React from 'react';
+import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
 
+const Wrapper = styled.div`
+  width: 130px;
+  font-size: 1.3em;
+  margin-bottom: 0.5em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const RemoveButton = styled.button`
+  cursor: pointer;
+  border: none;
+  background: none;
+  
+  &:hover {
+    color: ${props => props.theme.colors.main};
+  }
+`;
+
 const Item = props => (
-  <div className="Item">
-    <span className="name">{props.name}</span>
-    <button
-      onClick={props.onRemoveClick}
-      className="remove"
-    >
+  <Wrapper>
+    <span>{props.name}</span>
+    <RemoveButton onClick={props.onRemoveClick}>
       <MaterialIcon icon="block"/>
-    </button>
-  </div>
+    </RemoveButton>
+  </Wrapper>
 );
 
 Item.propTypes = {
