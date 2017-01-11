@@ -5,8 +5,8 @@ import createChannel, { monitor } from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
 
 const paths = {
-  club: '/settings/aircraftsMFGT',
-  homeBase: '/settings/aircraftsLSZT',
+  club: '/settings/aircrafts/club',
+  homeBase: '/settings/aircrafts/homeBase',
 };
 
 function* loadByType(channel, type) {

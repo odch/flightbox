@@ -16,14 +16,14 @@ function read(path) {
 
 export function fetch() {
   return new Promise(resolve => {
-    const mfgtAircrafts = read('/settings/aircraftsMFGT');
-    const lsztAircrafts = read('/settings/aircraftsLSZT');
+    const clubAircrafts = read('/settings/aircrafts/club');
+    const homeBaseAircrafts = read('/settings/aircrafts/homeBase');
 
-    Promise.all([mfgtAircrafts, lsztAircrafts])
+    Promise.all([clubAircrafts, homeBaseAircrafts])
       .then(results => {
         const aircrafts = {
-          mfgt: results[0],
-          lszt: results[1],
+          club: results[0],
+          homeBase: results[1],
         };
         resolve(aircrafts);
       });

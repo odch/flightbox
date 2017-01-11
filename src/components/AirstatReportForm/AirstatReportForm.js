@@ -31,10 +31,10 @@ const AirstatReportForm = props => (
         <dd>Der Nachname des Piloten</dd>
         <dt>MTOW</dt>
         <dd>Das maximale Abfluggewicht</dd>
-        <dt>MFGT</dt>
-        <dd><emph>1</emph>, wenn Flugzeug der MFGT, sonst leer</dd>
-        <dt>LSZT</dt>
-        <dd><emph>1</emph>, wenn in Lommis stationiertes Flugzeug (ohne Flugzeuge der MFGT), sonst leer</dd>
+        <dt>CLUB</dt>
+        <dd><emph>1</emph>, wenn Club-Flugzeug, sonst leer</dd>
+        <dt>HOME_BASE</dt>
+        <dd><emph>1</emph>, wenn auf diesem Flugplatz stationiertes Flugzeug (ohne Club-Flugzeuge), sonst leer</dd>
         <dt>ORIGINAL_ORIDE</dt>
         <dd>Der ursprüngliche Start- oder Zielflugplatz, falls er nicht identifiziert werden konnte
           und durch <emph>LSZZ</emph> ersetzt wurde</dd>

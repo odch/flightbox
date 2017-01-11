@@ -1,6 +1,7 @@
 import firebase from './firebase.js';
 import Download from './Download.js';
 import { firebaseToLocal } from './movements.js';
+import { fetch as fetchAircrafts } from './aircrafts';
 import dates from '../util/dates';
 import moment from 'moment';
 
@@ -14,32 +15,13 @@ class LandingsReport {
   }
 
   generate(callback) {
-    const mfgtAircrafts = this.readAircrafts('/settings/aircraftsMFGT');
-    const lsztAircrafts = this.readAircrafts('/settings/aircraftsLSZT');
     const arrivals = this.readArrivals();
+    const aircrafts = fetchAircrafts();
 
-    Promise.all([mfgtAircrafts, lsztAircrafts, arrivals])
+    Promise.all([arrivals, aircrafts])
       .then(results => {
-        const aircrafts = {
-          mfgt: results[0],
-          lszt: results[1],
-        };
-        this.build(results[2], aircrafts, callback);
+        this.build(results[0], results[1], callback);
       });
-  }
-
-  readAircrafts(path) {
-    return new Promise(resolve => {
-      firebase(path, (error, ref) => {
-        ref.once('value', snapshot => {
-          const aircrafts = {};
-          snapshot.forEach(record => {
-            aircrafts[record.key()] = true;
-          });
-          resolve(aircrafts);
-        });
-      });
-    });
   }
 
   readArrivals() {
@@ -106,8 +88,8 @@ class LandingsReport {
       Registration: record.immatriculation,
       MTOW: record.mtow,
       Landings: record.landingCount,
-      MFGT: aircrafts.mfgt[record.immatriculation] === true ? 1 : undefined,
-      LSZT: aircrafts.lszt[record.immatriculation] === true ? 1 : undefined,
+      Club: aircrafts.club[record.immatriculation] === true ? 1 : undefined,
+      HomeBase: aircrafts.homeBase[record.immatriculation] === true ? 1 : undefined,
       InvalidMTOW: record.invalidMtow === true ? 1 : undefined,
     };
 
@@ -121,8 +103,8 @@ LandingsReport.header = [
   'Registration',
   'MTOW',
   'Landings',
-  'MFGT',
-  'LSZT',
+  'Club',
+  'Homebase',
   'InvalidMTOW',
 ];
 

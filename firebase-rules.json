@@ -156,13 +156,18 @@
         ".read": "auth !== null",
         ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
       },
-      "aircraftsLSZT": {
-        ".read": "auth !== null",
-        ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
-      },
-      "aircraftsMFGT": {
-        ".read": "auth !== null",
-        ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
+      "aircrafts": {
+        "homeBase": {
+          ".read": "auth !== null",
+          ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
+        },
+        "club": {
+          ".read": "auth !== null",
+          ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
+        },
+        "$other": {
+          ".validate": false
+        }
       },
       "$other": {
         ".validate": false

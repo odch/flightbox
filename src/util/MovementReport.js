@@ -59,7 +59,7 @@ class MovementReport {
   }
 
   getFileName() {
-    let fileName = 'ARP_LSZT_' + moment(this.startDate).format('MMYYYY');
+    let fileName = 'ARP_' + __CONF__.aerodrome.ICAO + '_' + moment(this.startDate).format('MMYYYY');
     if (this.options.internal === true) {
       fileName += '_internal';
     }
@@ -100,7 +100,7 @@ class MovementReport {
 
   getMovementString(movement, aircrafts, aerodromes) {
     const airstatRecord = {
-      ARP: 'LSZT',
+      ARP: __CONF__.aerodrome.ICAO,
       TYPMO: this.getMovementType(movement),
       ACREG: movement.immatriculation,
       TYPTR: this.getTypeOfTraffic(movement),
@@ -112,7 +112,7 @@ class MovementReport {
       PIMO: movement.runway,
       TYPPI: 'G',
       DIRDE: this.getDirectionOfDeparture(movement),
-      CID: 'LSZT',
+      CID: __CONF__.aerodrome.ICAO,
       CDT: this.creationDate.format('YYYYMMDD'),
       CDM: this.creationDate.format('HHmm'),
     };
@@ -174,8 +174,8 @@ class MovementReport {
     airstatRecord.MEMBERNR = movement.memberNr;
     airstatRecord.LASTNAME = movement.lastname;
     airstatRecord.MTOW = movement.mtow;
-    airstatRecord.MFGT = aircrafts.mfgt[movement.immatriculation] === true ? 1 : undefined;
-    airstatRecord.LSZT = aircrafts.lszt[movement.immatriculation] === true ? 1 : undefined;
+    airstatRecord.CLUB = aircrafts.club[movement.immatriculation] === true ? 1 : undefined;
+    airstatRecord.HOME_BASE = aircrafts.homeBase[movement.immatriculation] === true ? 1 : undefined;
     airstatRecord.ORIGINAL_ORIDE = airstatRecord.ORIDE === MovementReport.LOCATION_DEFAULT
       ? movement.location
       : undefined;
@@ -208,8 +208,8 @@ MovementReport.internalHeader = [
   'MEMBERNR',
   'LASTNAME',
   'MTOW',
-  'MFGT',
-  'LSZT',
+  'CLUB',
+  'HOME_BASE',
   'ORIGINAL_ORIDE',
   'REMARKS',
 ];
