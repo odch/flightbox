@@ -1,29 +1,17 @@
-import jsonp from 'jsonp';
 
-export default {
-
-  loadIpToken() {
-    return new Promise((resolve, reject) => {
-      jsonp(__IP_AUTH__, null, (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result.token);
-        }
-      });
+const post = (url, data) =>
+  new Promise((resolve, reject) => {
+    fetch(url, {
+      method: 'POST',
+      body: data ? JSON.stringify(data) : null
+    }).then(response => {
+      response.json().then(json => resolve(json.token));
+    }).catch(e => {
+      reject(e);
     });
-  },
+  });
 
-  loadCredentialsToken(credentials) {
-    return () => new Promise((resolve, reject) => {
-      const url = __CREDENTIALS_AUTH__ + '?username=' + credentials.username + '&password=' + credentials.password;
-      jsonp(url, null, (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result.token);
-        }
-      });
-    });
-  },
-};
+
+export const loadIpToken = () => post(__IP_AUTH__);
+
+export const loadCredentialsToken = credentials => post(__CREDENTIALS_AUTH__, credentials);

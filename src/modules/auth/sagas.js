@@ -1,9 +1,10 @@
 import { takeEvery, takeLatest } from 'redux-saga';
 import { call, put, fork } from 'redux-saga/effects'
 import * as actions from './actions';
-import auth from '../../util/auth';
+import { loadIpToken, loadCredentialsToken } from '../../util/auth';
 import createChannel from '../../util/createChannel';
-import firebase, { authenticate as fbAuth, unauth as fbUnauth } from '../../util/firebase.js';
+import firebase, { authenticate as fbAuth, unauth as fbUnauth } from '../../util/firebase';
+import { error } from '../../util/log';
 
 
 function isAdmin(uid) {
@@ -23,26 +24,36 @@ function isAdmin(uid) {
 }
 
 function* doIpAuthentication() {
-  const ipToken = yield call(auth.loadIpToken);
-  if (ipToken) {
-    yield put(actions.requestFirebaseAuthentication(ipToken));
-  } else {
+  try {
+    const ipToken = yield call(loadIpToken);
+    if (ipToken) {
+      yield put(actions.requestFirebaseAuthentication(ipToken));
+    } else {
+      yield put(actions.ipAuthenticationFailure());
+    }
+  } catch(e) {
+    error('Failed to execute IP authentication', e);
     yield put(actions.ipAuthenticationFailure());
   }
 }
 
 function* doUsernamePasswordAuthentication(action) {
-  yield put(actions.setSubmitting());
-  const { username, password } = action.payload;
-  if (isNotEmptyString(username) && isNotEmptyString(password)) {
-    const credentials = {username, password};
-    const credentialsToken = yield call(auth.loadCredentialsToken(credentials));
-    if (credentialsToken) {
-      yield put(actions.requestFirebaseAuthentication(credentialsToken));
+  try {
+    yield put(actions.setSubmitting());
+    const { username, password } = action.payload;
+    if (isNotEmptyString(username) && isNotEmptyString(password)) {
+      const credentials = {username, password};
+      const credentialsToken = yield call(loadCredentialsToken, credentials);
+      if (credentialsToken) {
+        yield put(actions.requestFirebaseAuthentication(credentialsToken));
+      } else {
+        yield put(actions.usernamePasswordAuthenticationFailure());
+      }
     } else {
       yield put(actions.usernamePasswordAuthenticationFailure());
     }
-  } else {
+  } catch(e) {
+    error('Failed to execute credentials authentication', e);
     yield put(actions.usernamePasswordAuthenticationFailure());
   }
 }
