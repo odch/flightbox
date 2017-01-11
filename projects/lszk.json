@@ -30,13 +30,13 @@
   "environments": {
     "test": {
       "firebase": "https://lszk-test.firebaseio.com",
-      "ipAuth": "https://lszk-api.app.mfgt.ch/api/v1/firebaseauth/ip-test",
-      "credentialsAuth": "https://lszk-api.app.mfgt.ch/api/v1/firebaseauth/mfgt-test"
+      "ipAuth": "https://fgzo-55d43.appspot.com/api/v1/firebaseauth/ip-test",
+      "credentialsAuth": "https://fgzo-55d43.appspot.com/api/v1/firebaseauth/mfgt-test"
     },
     "production": {
-      "firebase": "https://lszk-test.firebaseio.com",
-      "ipAuth": "https://lszk-api.app.mfgt.ch/api/v1/firebaseauth/ip-test",
-      "credentialsAuth": "https://lszk-api.app.mfgt.ch/api/v1/firebaseauth/mfgt-test"
+      "firebase": "https://lszk-prod.firebaseio.com",
+      "ipAuth": "https://fgzo-55d43.appspot.com/api/v1/firebaseauth/ip",
+      "credentialsAuth": "https://fgzo-55d43.appspot.com/api/v1/firebaseauth/mfgt"
     }
   },
   "theme": "lszk",
