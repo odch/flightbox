@@ -29,9 +29,9 @@
   },
   "environments": {
     "test": {
-      "firebase": "https://mfgt-flights-redux.firebaseio.com",
-      "ipAuth": "https://mfgt-flights-auth-test.appspot.com/ip",
-      "credentialsAuth": "https://mfgt-flights-auth-test.appspot.com/mfgt"
+      "firebase": "https://mfgt-flights.firebaseio.com",
+      "ipAuth": "https://api.mfgt.ch/api/v1/firebaseauth/ip-test",
+      "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/mfgt-test"
     },
     "production": {
       "firebase": "https://lszt.firebaseio.com",
