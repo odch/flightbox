@@ -1,5 +1,6 @@
 import React, { PropTypes, Component } from 'react';
-import './IncrementationField.scss';
+import Button from './Button';
+import Value from './Value';
 
 class IncrementationField extends Component {
 
@@ -17,17 +18,17 @@ class IncrementationField extends Component {
   render() {
     if (this.props.readOnly === true) {
       return (
-        <div className="IncrementationField readonly">
-          <span className="value">{this.state.value}</span>
+        <div>
+          <Value>{this.state.value}</Value>
         </div>
       );
     }
 
     return (
-      <div className="IncrementationField">
-        <a className="decrement" onClick={this.decrement.bind(this)}>-</a>
-        <span className="value">{this.state.value}</span>
-        <a className="increment" onClick={this.increment.bind(this)}>+</a>
+      <div>
+        <Button type="button" onClick={this.decrement.bind(this)}>-</Button>
+        <Value>{this.state.value}</Value>
+        <Button type="button" onClick={this.increment.bind(this)}>+</Button>
       </div>
     );
   }

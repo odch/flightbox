@@ -15,7 +15,7 @@ describe('IncrementationField', () => {
     const element = ReactDOM.findDOMNode(component);
 
     expect(component.state.value).toBe(42);
-    expect(bro.$('.value', element).html()).toBe('42');
+    expect(bro.$('span', element).html()).toBe('42');
   });
 
   it('is initialized with value if value and min value is specified', () => {
@@ -23,7 +23,7 @@ describe('IncrementationField', () => {
     const element = ReactDOM.findDOMNode(component);
 
     expect(component.state.value).toBe(42);
-    expect(bro.$('.value', element).html()).toBe('42');
+    expect(bro.$('span', element).html()).toBe('42');
   });
 
   it('throws error if specified value is lower than min value', () => {
@@ -36,7 +36,7 @@ describe('IncrementationField', () => {
     const element = ReactDOM.findDOMNode(component);
 
     expect(component.state.value).toBe(0);
-    expect(bro.$('.value', element).html()).toBe('0');
+    expect(bro.$('span', element).html()).toBe('0');
   });
 
   it('is initialized with min value if no value is specified', () => {
@@ -44,47 +44,47 @@ describe('IncrementationField', () => {
     const element = ReactDOM.findDOMNode(component);
 
     expect(component.state.value).toBe(3);
-    expect(bro.$('.value', element).html()).toBe('3');
+    expect(bro.$('span', element).html()).toBe('3');
   });
 
   it('is incremented by 1 on increment button click', () => {
     const component = TestUtils.renderIntoDocument(<IncrementationField/>);
     const element = ReactDOM.findDOMNode(component);
-    const button = bro.$('.increment', element).get(0);
+    const button = bro.$('button:last-child', element).get(0);
 
     TestUtils.Simulate.click(button);
 
     expect(component.state.value).toBe(1);
-    expect(bro.$('.value', element).html()).toBe('1');
+    expect(bro.$('span', element).html()).toBe('1');
   });
 
   it('is decremented by 1 on decrement button click', () => {
     const component = TestUtils.renderIntoDocument(<IncrementationField value={42}/>);
     const element = ReactDOM.findDOMNode(component);
-    const button = bro.$('.decrement', element).get(0);
+    const button = bro.$('button:first-child', element).get(0);
 
     TestUtils.Simulate.click(button);
 
     expect(component.state.value).toBe(41);
-    expect(bro.$('.value', element).html()).toBe('41');
+    expect(bro.$('span', element).html()).toBe('41');
   });
 
   it('cannot have value lower than min value', () => {
     const component = TestUtils.renderIntoDocument(<IncrementationField minValue={3}/>);
     const element = ReactDOM.findDOMNode(component);
-    const button = bro.$('.decrement', element).get(0);
+    const button = bro.$('button:first-child', element).get(0);
 
     TestUtils.Simulate.click(button);
 
     expect(component.state.value).toBe(3);
-    expect(bro.$('.value', element).html()).toBe('3');
+    expect(bro.$('span', element).html()).toBe('3');
   });
 
   it('calls onChange handler on increment', () => {
     const handler = Utils.callTracker();
     const component = TestUtils.renderIntoDocument(<IncrementationField value={42} onChange={handler}/>);
     const element = ReactDOM.findDOMNode(component);
-    const button = bro.$('.increment', element).get(0);
+    const button = bro.$('button:last-child', element).get(0);
 
     TestUtils.Simulate.click(button);
 
@@ -97,7 +97,7 @@ describe('IncrementationField', () => {
     const handler = Utils.callTracker();
     const component = TestUtils.renderIntoDocument(<IncrementationField value={42} onChange={handler}/>);
     const element = ReactDOM.findDOMNode(component);
-    const button = bro.$('.decrement', element).get(0);
+    const button = bro.$('button:first-child', element).get(0);
 
     TestUtils.Simulate.click(button);
 
