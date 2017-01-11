@@ -1,0 +1,44 @@
+{
+  "aerodrome": {
+    "name": "Speck-Fehraltorf",
+    "ICAO": "LSZK",
+    "runways": [
+      "12",
+      "30"
+    ],
+    "departureRoutes": [
+      {
+        "name": "S",
+        "label": "S"
+      },
+      {
+        "name": "W",
+        "label": "W"
+      }
+    ],
+    "arrivalRoutes": [
+      {
+        "name": "E",
+        "label": "E"
+      },
+      {
+        "name": "W",
+        "label": "W"
+      }
+    ]
+  },
+  "environments": {
+    "test": {
+      "firebase": "https://lszk-test.firebaseio.com",
+      "ipAuth": "https://fgzo-55d43.appspot.com/api/v1/firebaseauth/ip-test",
+      "credentialsAuth": "https://fgzo-55d43.appspot.com/api/v1/firebaseauth/mfgt-test"
+    },
+    "production": {
+      "firebase": "https://lszk-prod.firebaseio.com",
+      "ipAuth": "https://fgzo-55d43.appspot.com/api/v1/firebaseauth/ip",
+      "credentialsAuth": "https://fgzo-55d43.appspot.com/api/v1/firebaseauth/mfgt"
+    }
+  },
+  "theme": "lszk",
+  "title": "FGZO Bewegungen"
+}

@@ -1,5 +1,4 @@
 import Firebase from 'firebase';
-import auth from './auth.js';
 
 /**
  * Get a firebase ref.
@@ -13,22 +12,42 @@ function firebase(path, callback) {
     path = '/';
   }
   const ref = new Firebase(__FIREBASE_URL__ + path);
-  callback(null, ref);
+  if (typeof callback === 'function') {
+    callback(null, ref);
+  } else {
+    return ref;
+  }
 }
 
-export function authenticate(token, callback) {
-  const ref = new Firebase(__FIREBASE_URL__);
-  ref.authWithCustomToken(token, (error, authData) => {
-    if (error) {
-      callback(error);
-    } else {
-      callback(null, authData);
-    }
+export function authenticate(token) {
+  return () => new Promise((resolve, reject) => {
+    const ref = new Firebase(__FIREBASE_URL__);
+    ref.authWithCustomToken(token, (error, authData) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(authData);
+      }
+    }, {
+      remember: 'sessionOnly',
+    });
   });
 }
 
 export function unauth() {
-  new Firebase(__FIREBASE_URL__).unauth();
+  return () => new Promise((resolve) => {
+    new Firebase(__FIREBASE_URL__).unauth();
+    resolve();
+  });
+}
+
+export function loadValue(path) {
+  return new Promise(resolve => {
+    const ref = firebase(path);
+    ref.orderByKey().once('value', snapshot => {
+      resolve(snapshot);
+    });
+  });
 }
 
 export default firebase;

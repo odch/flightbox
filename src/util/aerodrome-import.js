@@ -1,6 +1,6 @@
 import importCsv from './csv-import.js';
 
-function importAerodromes(csvString, callback) {
+function importAerodromes(csvString) {
   const options = {
     path: '/aerodromes',
     columns: [
@@ -10,7 +10,7 @@ function importAerodromes(csvString, callback) {
       { csv: 'IsoCountry', firebase: 'country' },
     ],
   };
-  importCsv(csvString, options, callback);
+  return importCsv(csvString, options);
 }
 
 export default importAerodromes;

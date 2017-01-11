@@ -1,5 +1,5 @@
-import dates from '../core/dates.js';
-import { filter } from '../core/filter.js';
+import dates from '../util/dates';
+import { filter } from '../util/filter';
 import update from 'react-addons-update';
 import moment from 'moment';
 
@@ -36,17 +36,17 @@ function addNegativeTimestamp(movement) {
   });
 }
 
-function firebaseToLocal(movement) {
+export function firebaseToLocal(movement) {
   const withLocalDate = convertUtcToLocalDate(movement);
   return removeNegativeTimestamp(withLocalDate);
 }
 
-function localToFirebase(movement) {
+export function localToFirebase(movement) {
   const withUtc = convertLocalDateToUtc(movement);
   return addNegativeTimestamp(withUtc);
 }
 
-function isLocked(movement, lockDate) {
+export function isLocked(movement, lockDate) {
   if (typeof lockDate === 'number') {
     const movementDayTimestamp = dates.isoUtcToMilliseconds(dates.localToIsoUtc(movement.date, '00:00'));
     return movementDayTimestamp <= lockDate;
@@ -54,7 +54,7 @@ function isLocked(movement, lockDate) {
   return false;
 }
 
-function transferValues(from, to, properties) {
+export function transferValues(from, to, properties) {
   properties.forEach(prop => {
     if (typeof prop === 'string') {
       prop = {
@@ -104,7 +104,7 @@ function compareDateAscending(a, b) {
  * If two movements take place at the same time, they are sorted lexicographically
  * by immatriculation (ascending).
  */
-function compareDescending(a, b) {
+export function compareDescending(a, b) {
   const dateCompare = compareDateDescending(a, b);
 
   if (dateCompare !== 0) {
@@ -119,7 +119,7 @@ function compareDescending(a, b) {
  *
  * Still ordered by immatriculation ascending if movements take place at the same time.
  */
-function compareAscending(a, b) {
+export function compareAscending(a, b) {
   const dateCompare = compareDateAscending(a, b);
 
   if (dateCompare !== 0) {
@@ -128,12 +128,3 @@ function compareAscending(a, b) {
 
   return a.immatriculation.localeCompare(b.immatriculation);
 }
-
-module.exports = {
-  firebaseToLocal,
-  localToFirebase,
-  compareDescending,
-  compareAscending,
-  isLocked,
-  transferValues,
-};

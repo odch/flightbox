@@ -1,9 +1,9 @@
 import React, { PropTypes, Component } from 'react';
-import Predicates from './Predicates.js';
-import MovementGroup from '../MovementGroup';
+import Predicates from './Predicates';
+import MovementGroup from './MovementGroup';
+import LoadingInfo from './LoadingInfo';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
-import firebase from '../../util/firebase.js';
-import { AutoLoad } from '../../util/AutoLoad.js';
+import { AutoLoad } from '../../util/AutoLoad';
 
 /**
  * today
@@ -13,33 +13,17 @@ import { AutoLoad } from '../../util/AutoLoad.js';
  */
 class MovementList extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
-  onListDeleteTrigger(item) {
-    this.setState({
-      deleteConfirmation: item,
-    });
-  }
-
-  onDeleteConfirmation(item) {
-    firebase(this.props.firebaseUri, (error, ref) => {
-      ref.child(item.key).remove();
-      this.setState({
-        deleteConfirmation: null,
-      });
-    });
-  }
-
-  onDeleteCancel() {
-    this.setState({
-      deleteConfirmation: null,
-    });
+  componentWillMount() {
+    if (this.props.items.length === 0) {
+      this.props.loadItems();
+    }
   }
 
   render() {
+    if (this.props.lockDate.loading === true) {
+      return <LoadingInfo/>;
+    }
+
     const movements = this.props.items;
 
     const movementsAfterToday = movements.filter(Predicates.newerThanSameDay());
@@ -55,16 +39,16 @@ class MovementList extends Component {
       Predicates.not(Predicates.dayBefore())
     ));
 
-    const confirmationDialog = this.state.deleteConfirmation ?
+    const confirmationDialog = this.props.deleteConfirmation ?
       (<MovementDeleteConfirmationDialog
-        item={this.state.deleteConfirmation}
-        onConfirm={this.onDeleteConfirmation.bind(this)}
-        onCancel={this.onDeleteCancel.bind(this)}
+        item={this.props.deleteConfirmation}
+        confirm={this.props.deleteItem}
+        hide={this.props.hideDeleteConfirmationDialog}
       />) : null;
 
     return (
       <div>
-        <MovementGroup
+        {movementsAfterToday.length > 0 && <MovementGroup
           label="Ab morgen"
           items={movementsAfterToday}
           onClick={this.props.onClick}
@@ -72,10 +56,10 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
-          onDelete={this.onListDeleteTrigger.bind(this)}
-          lockDate={this.props.lockDate}
-        />
-        <MovementGroup
+          onDelete={this.props.showDeleteConfirmationDialog}
+          lockDate={this.props.lockDate.date}
+        />}
+        {movementsOfToday.length > 0 && <MovementGroup
           label="Heute"
           items={movementsOfToday}
           onClick={this.props.onClick}
@@ -83,10 +67,10 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
-          onDelete={this.onListDeleteTrigger.bind(this)}
-          lockDate={this.props.lockDate}
-        />
-        <MovementGroup
+          onDelete={this.props.showDeleteConfirmationDialog}
+          lockDate={this.props.lockDate.date}
+        />}
+        {movementsOfYesterday.length > 0 && <MovementGroup
           label="Gestern"
           items={movementsOfYesterday}
           onClick={this.props.onClick}
@@ -94,29 +78,30 @@ class MovementList extends Component {
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
-          onDelete={this.onListDeleteTrigger.bind(this)}
-          lockDate={this.props.lockDate}
-        />
-        <MovementGroup
+          onDelete={this.props.showDeleteConfirmationDialog}
+          lockDate={this.props.lockDate.date}
+        />}
+        {movementsOfThisMonth.length > 0 && <MovementGroup
           label="Dieser Monat"
           items={movementsOfThisMonth}
           onClick={this.props.onClick}
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
-          onDelete={this.onListDeleteTrigger.bind(this)}
-          lockDate={this.props.lockDate}
-        />
-        <MovementGroup
+          onDelete={this.props.showDeleteConfirmationDialog}
+          lockDate={this.props.lockDate.date}
+        />}
+        {olderMovements.length > 0 && <MovementGroup
           label="Älter"
           items={olderMovements}
           onClick={this.props.onClick}
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
-          onDelete={this.onListDeleteTrigger.bind(this)}
-          lockDate={this.props.lockDate}
-        />
+          onDelete={this.props.showDeleteConfirmationDialog}
+          lockDate={this.props.lockDate.date}
+        />}
+        {this.props.loading && <LoadingInfo/>}
         {confirmationDialog}
       </div>
     );
@@ -124,13 +109,18 @@ class MovementList extends Component {
 }
 
 MovementList.propTypes = {
+  loadItems: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
-  firebaseUri: PropTypes.string,
+  loading: PropTypes.bool.isRequired,
+  deleteConfirmation: PropTypes.object,
+  deleteItem: PropTypes.func.isRequired,
+  hideDeleteConfirmationDialog: PropTypes.func.isRequired,
+  showDeleteConfirmationDialog: React.PropTypes.func.isRequired,
   onClick: PropTypes.func,
   onAction: PropTypes.func,
   actionIcon: PropTypes.string,
   actionLabel: PropTypes.string,
-  lockDate: PropTypes.number,
+  lockDate: PropTypes.object.isRequired,
 };
 
 export default AutoLoad(MovementList);

@@ -1,45 +1,40 @@
 import React, { Component } from 'react';
-import './AdminPage.scss';
-import BorderLayout from '../BorderLayout';
-import BorderLayoutItem from '../BorderLayoutItem';
-import AirstatReportForm from '../AirstatReportForm';
-import LandingsReportForm from '../LandingsReportForm';
-import LockMovementsForm from '../LockMovementsForm';
-import MessageList from '../MessageList';
 import LabeledBox from '../LabeledBox';
-import UserImportForm from '../UserImportForm';
-import AerodromeImportForm from '../AerodromeImportForm';
-import AircraftImportForm from '../AircraftImportForm';
-import FirebaseKeyList from '../FirebaseKeyList';
 import JumpNavigation from '../JumpNavigation';
+import VerticalHeaderLayout from '../VerticalHeaderLayout';
+import AirstatReportForm from '../../containers/AirstatReportFormContainer';
+import LandingsReportForm from '../../containers/LandingsReportFormContainer';
+import LockMovementsForm from '../../containers/LockMovementsFormContainer';
+import MessageList from '../../containers/MessageListContainer';
+import UserImportForm from '../../containers/UserImportFormContainer';
+import AerodromeImportForm from '../../containers/AerodromeImportFormContainer';
+import AircraftImportForm from '../../containers/AircraftImportFormContainer';
+import AircraftsItemList from '../../containers/AircraftsItemListContainer';
+import Content from './Content';
 
 class AdminPage extends Component {
 
   componentWillMount() {
-    if (this.props.auth.admin !== true) {
+    if (this.props.auth.data.admin !== true) {
       this.context.router.push('/');
     }
   }
 
   render() {
-    const logoImagePath = require('../../resources/mfgt_logo_transp.png');
     return (
-      <BorderLayout className="AdminPage">
-        <BorderLayoutItem region="west">
-          <header>
-            <a href="#/">
-              <img className="logo" src={logoImagePath}/>
-            </a>
-          </header>
-        </BorderLayoutItem>
-        {this.props.auth.admin === true &&
-          <BorderLayoutItem region="middle">
+      <VerticalHeaderLayout>
+        {this.props.auth.data.admin === true &&
+          <Content>
             <JumpNavigation/>
-            <AirstatReportForm/>
-            <LandingsReportForm/>
+            <LabeledBox label="BAZL-Report herunterladen (CSV)" className="AirstatReportForm">
+              <AirstatReportForm/>
+            </LabeledBox>
+            <LabeledBox label="Landeliste herunterladen (CSV)">
+              <LandingsReportForm/>
+            </LabeledBox>
             <LockMovementsForm/>
-            <LabeledBox label="Nachrichten" className="messages">
-              <MessageList firebaseUri="/messages/"/>
+            <LabeledBox label="Nachrichten" className="messages" contentMaxHeight={400} contentPadding={0}>
+              <MessageList/>
             </LabeledBox>
             <LabeledBox label="Benutzerliste importieren" className="user-import">
               <UserImportForm/>
@@ -50,20 +45,20 @@ class AdminPage extends Component {
             <LabeledBox label="Flugzeugliste importieren" className="aircraft-import">
               <AircraftImportForm/>
             </LabeledBox>
-            <LabeledBox label="Flugzeuge der MFGT" className="mfgt-aircrafts">
-              <FirebaseKeyList path="/settings/aircraftsMFGT"/>
+            <LabeledBox label="Club-Flugzeuge">
+              <AircraftsItemList type="club"/>
             </LabeledBox>
-            <LabeledBox label="In Lommis stationierte Flugzeuge (ohne Flugzeuge der MFGT)" className="lszt-aircrafts">
-              <FirebaseKeyList path="/settings/aircraftsLSZT"/>
+            <LabeledBox label="Auf diesem Flugplatz stationierte Flugzeuge (ohne Club-Flugzeuge)">
+              <AircraftsItemList type="homeBase"/>
             </LabeledBox>
-          </BorderLayoutItem>}
-      </BorderLayout>
+          </Content>}
+      </VerticalHeaderLayout>
     );
   }
 }
 
 AdminPage.propTypes = {
-  auth: React.PropTypes.object,
+  auth: React.PropTypes.object.isRequired,
 };
 
 AdminPage.contextTypes = {

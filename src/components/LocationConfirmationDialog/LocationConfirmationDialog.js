@@ -1,5 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import ModalDialog from '../ModalDialog';
+import MaterialIcon from '../MaterialIcon';
 import './LocationConfirmationDialog.scss';
 
 class LocationConfirmationDialog extends Component {
@@ -16,7 +17,7 @@ class LocationConfirmationDialog extends Component {
         <div className="actions">
           <button className="cancel" onClick={this.props.onCancel}>Flugplatz ändern</button>
           <button className="confirm" onClick={this.props.onConfirm}>
-            <i className="material-icons">done</i>&nbsp;Eingegebenen Flugplatz verwenden
+            <MaterialIcon icon="done"/>&nbsp;Eingegebenen Flugplatz verwenden
           </button>
         </div>
       </div>

@@ -1,6 +1,0 @@
-{
-  "name": "CommitRequirementsDialog",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./CommitRequirementsDialog.js"
-}

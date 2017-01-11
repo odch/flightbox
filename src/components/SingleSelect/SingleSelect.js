@@ -1,5 +1,6 @@
 import React, { PropTypes, Component } from 'react';
-import './SingleSelect.scss';
+import Wrapper from './Wrapper';
+import Item from './Item';
 
 class SingleSelect extends Component {
 
@@ -11,38 +12,33 @@ class SingleSelect extends Component {
   }
 
   render() {
-    const orientation = this.props.orientation || 'horizontal';
-
-    const buttonStyle = {};
-
-    if (orientation === 'horizontal') {
-      buttonStyle.width = (100 / this.props.items.length) + '%';
-    }
-
-    let className = 'SingleSelect ' + orientation;
     if (this.props.readOnly === true) {
-      className += ' readonly';
+      return (
+        <div>{this.state.value}</div>
+      )
     }
+
+    const orientation = this.props.orientation;
+
+    const widthPercentage = orientation === 'horizontal'
+      ? 100 / this.props.items.length
+      : null;
 
     return (
-      <div className={className}>
-        {this.props.items.map((item, index) => {
-          const className = this.state.value === item.value ? 'selected' : '';
-          return (
-            <button
-              key={index}
-              className={className}
-              style={buttonStyle}
-              onClick={this.clickHandler.bind(this, item.value)}
-            >
-              <div className="label-wrap">
-                <div className="label">{item.label}</div>
-                {item.description ? <div className="description">{item.description}</div> : null}
-              </div>
-            </button>
-          );
-        })}
-      </div>
+      <Wrapper orientation={orientation}>
+        {this.props.items.map((item, index) => (
+          <Item
+            key={index}
+            value={item.value}
+            label={item.label}
+            description={item.description}
+            selected={this.state.value === item.value}
+            widthPercentage={widthPercentage}
+            orientation={orientation}
+            onClick={this.clickHandler.bind(this)}
+          />
+        ))}
+      </Wrapper>
     );
   }
 
@@ -66,11 +62,18 @@ class SingleSelect extends Component {
 }
 
 SingleSelect.propTypes = {
-  items: PropTypes.array.isRequired,
+  items: PropTypes.arrayOf(PropTypes.shape({
+    value: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired
+  })).isRequired,
   value: PropTypes.string,
   onChange: PropTypes.func,
-  orientation: PropTypes.string,
+  orientation: PropTypes.oneOf(['horizontal', 'vertical']),
   readOnly: PropTypes.bool,
+};
+
+SingleSelect.defaultProps = {
+  orientation: 'horizontal'
 };
 
 export default SingleSelect;

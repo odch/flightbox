@@ -1,6 +1,6 @@
 import importCsv from './csv-import.js';
 
-function importAircrafts(csvString, callback) {
+function importAircrafts(csvString) {
   const options = {
     path: '/aircrafts',
     columns: [
@@ -9,7 +9,7 @@ function importAircrafts(csvString, callback) {
       { csv: 'MTOW', firebase: 'mtow', modifications: ['parseint'] },
     ],
   };
-  importCsv(csvString, options, callback);
+  return importCsv(csvString, options);
 }
 
 export default importAircrafts;

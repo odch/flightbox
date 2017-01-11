@@ -36,6 +36,9 @@
     border-radius: 5px;
     font-size: 1.2em;
     background-color: white;
+  }
+
+  button.import:enabled {
     cursor: pointer;
   }
 
@@ -43,6 +46,11 @@
     color: #ed351c;
   }
 
+  .import-in-progress-msg {
+    color: #999;
+    margin-left: 1em;
+    font-style: italic;
+  }
 
   .ModalDialog {
 

@@ -1,101 +1,21 @@
-import React, { Component } from 'react';
-import LabeledComponent from '../LabeledComponent';
-import ModalDialog from '../ModalDialog';
-import firebase from '../../util/firebase.js';
-import update from 'react-addons-update';
-import validate from '../../util/validate.js';
+import React from 'react';
+import { Field, reduxForm } from 'redux-form';
+import MaterialIcon from '../MaterialIcon';
+import validate from './validate.js';
+import { renderInputField, renderTextArea } from '../../util/renderField';
+import MessageSentDialog from './MessageSentDialog';
+import CommitErrorDialog from './CommitErrorDialog';
 import './MessageForm.scss';
 
-class MessageForm extends Component {
+class MessageForm extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: {},
-      sent: false,
-      validationErrors: [],
-    };
-    this.validationConfig = {
-      name: {
-        types: {
-          required: true,
-        },
-        message: 'Geben Sie hier Ihren Namen ein.',
-      },
-      phone: {
-        types: {
-          required: true,
-        },
-        message: 'Geben Sie hier Ihre Telefonnummer ein.',
-      },
-      email: {
-        types: {
-          required: true,
-          match: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-        },
-        message: 'Geben Sie hier Ihre E-Mail-Adresse ein.',
-      },
-      message: {
-        types: {
-          required: true,
-        },
-        message: 'Geben Sie hier Ihre Nachricht ein.',
-      },
-    };
-  }
-
-  updateData(e) {
-    const name = e.target.name;
-    const value = e.target.value;
-
-    const data = update(this.state.data, {
-      [name]: { $set: value },
-    });
-
-    this.setState({
-      data,
-    }, () => {
-      if (this.state.showValidationErrors === true) {
-        this.validate();
-      }
-    });
+  componentWillUnmount() {
+    this.props.resetMessageForm();
   }
 
   render() {
-    const messageSentDialog = this.getMessageSentDialog();
-    const commitErrorDialog = this.getCommitErrorDialog();
-
-    const nameField = (
-      <input
-        name="name"
-        type="text"
-        onChange={this.updateData.bind(this)}
-      />
-    );
-    const emailField = (
-      <input
-        name="email"
-        type="email"
-        onChange={this.updateData.bind(this)}
-      />
-    );
-    const phoneField = (
-      <input
-        name="phone"
-        type="tel"
-        onChange={this.updateData.bind(this)}
-      />
-    );
-    const messageField = (
-      <textarea
-        name="message"
-        rows="10"
-        onChange={this.updateData.bind(this)}
-      />
-    );
-
     return (
-      <div className="MessageForm">
+      <form className="MessageForm" onSubmit={this.props.handleSubmit}>
         <h1>Benachrichtigen Sie uns</h1>
         <div className="intro">
           Haben Sie Fragen, Anregungen oder ein anderes Anliegen bezüglich
@@ -103,132 +23,49 @@ class MessageForm extends Component {
           bitte über das untenstehende Formular.
         </div>
         <div>
-          <LabeledComponent
+          <Field
+            name="name"
+            type="text"
+            component={renderInputField}
             label="Name"
-            component={nameField}
-            validationError={this.getValidationError('name')}
           />
-          <LabeledComponent
+          <Field
+            name="email"
+            type="email"
+            component={renderInputField}
             label="E-Mail"
-            component={emailField}
-            validationError={this.getValidationError('email')}
           />
-          <LabeledComponent
+          <Field
+            name="phone"
+            type="tel"
+            component={renderInputField}
             label="Telefon"
-            component={phoneField}
-            validationError={this.getValidationError('phone')}
           />
-          <LabeledComponent
+          <Field
+            name="message"
+            component={renderTextArea}
             label="Nachricht"
-            component={messageField}
-            validationError={this.getValidationError('message')}
           />
         </div>
-        <button
-          onClick={this.buttonClickHandler.bind(this)}
-          className="send"
-        >
-          <i className="material-icons">send</i>&nbsp;Senden
+        <button type="submit" className="send">
+          <MaterialIcon icon="send"/>&nbsp;Senden
         </button>
-        {commitErrorDialog}
-        {messageSentDialog}
-      </div>
+        {this.props.sent && <MessageSentDialog onClose={this.props.confirmSaveMessageSuccess}/>}
+        {this.props.commitFailed && <CommitErrorDialog onClose={this.props.resetMessageForm}/>}
+      </form>
     );
-  }
-
-  getMessageSentDialog() {
-    if (this.state.sent === true) {
-      const content = (
-        <div>
-          <div className="heading">Nachricht gesendet</div>
-          <div className="message">Vielen Dank! Ihre Nachricht wurde gesendet.</div>
-          <button className="close" onClick={this.closeSentDialogHandler.bind(this)}><i className="material-icons">close</i>&nbsp;Schliessen</button>
-        </div>
-      );
-      return (
-        <ModalDialog
-          content={content}
-          onBlur={this.closeSentDialogHandler.bind(this)}
-        />
-      );
-    }
-    return null;
-  }
-
-  getCommitErrorDialog() {
-    if (this.state.commitError) {
-      const content = (
-        <div>
-          <div className="heading">Fehler</div>
-          <div className="message">Ihre Nachricht konnte nicht gesendet werden.</div>
-          <button className="close" onClick={this.closeErrorHandler.bind(this)}><i className="material-icons">close</i>&nbsp;Schliessen</button>
-        </div>
-      );
-      return (
-        <ModalDialog
-          content={content}
-          onBlur={this.closeErrorHandler.bind(this)}
-        />
-      );
-    }
-    return null;
-  }
-
-  buttonClickHandler() {
-    const valid = this.validate();
-    if (valid === true) {
-      const timestamp = new Date().getTime();
-      const withDate = update(this.state.data, {
-        timestamp: { $set: timestamp },
-        negativeTimestamp: { $set: timestamp * -1 },
-      });
-      firebase('/messages/', (error, ref) => {
-        ref.push(withDate, commitError => {
-          if (error) {
-            this.setState({
-              commitError,
-            });
-          } else {
-            this.setState({
-              sent: true,
-            });
-          }
-        });
-      });
-    } else {
-      this.setState({
-        showValidationErrors: true,
-      });
-    }
-  }
-
-  validate() {
-    const validationErrors = validate(this.state.data, this.validationConfig);
-    this.setState({
-      validationErrors,
-    });
-    return validationErrors.length === 0;
-  }
-
-  getValidationError(key) {
-    if (this.state.showValidationErrors === true) {
-      const error = this.state.validationErrors.find(validationError => validationError.key === key);
-      if (error) {
-        return error.message;
-      }
-    }
-    return null;
-  }
-
-  closeErrorHandler() {
-    this.setState({
-      commitError: null,
-    });
-  }
-
-  closeSentDialogHandler() {
-    window.location.hash = '/';
   }
 }
 
-export default MessageForm;
+MessageForm.propTypes = {
+  sent: React.PropTypes.bool.isRequired,
+  commitFailed: React.PropTypes.bool.isRequired,
+  handleSubmit: React.PropTypes.func.isRequired,
+  resetMessageForm: React.PropTypes.func.isRequired,
+  confirmSaveMessageSuccess: React.PropTypes.func.isRequired,
+};
+
+export default reduxForm({
+  form: 'message',
+  validate,
+})(MessageForm);

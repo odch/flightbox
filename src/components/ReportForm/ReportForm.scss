@@ -1,41 +1,41 @@
 .ReportForm {
-
-  > div {
-    display: flex;
-
-    > .LabeledComponent {
-      width: 45%;
-      margin-bottom: 1.8em;
-      margin-right: 5%;
-      border-bottom: 1px solid #000;
-
-      label {
-        display: block;
-        margin-bottom: 1.5em;
-      }
-    }
-  }
-
-  button.generate {
-    padding: 0;
-    border: none;
-    border-radius: 5px;
-    font-size: 1.2em;
-    background-color: white;
-    cursor: pointer;
-  }
-
-  button.generate:hover:enabled {
-    color: #ed351c;
-  }
-
-  @media screen and (max-width: 768px) {
-
+  > fieldset {
     > div {
-      display: block;
+      display: flex;
 
       > .LabeledComponent {
-        width: 100%;
+        width: 45%;
+        margin-bottom: 1.8em;
+        margin-right: 5%;
+
+        label {
+          display: block;
+          margin-bottom: 1.5em;
+        }
+      }
+    }
+
+    button.generate {
+      padding: 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2em;
+      background-color: white;
+      cursor: pointer;
+    }
+
+    button.generate:hover:enabled {
+      color: #ed351c;
+    }
+
+    @media screen and (max-width: 768px) {
+
+      > div {
+        display: block;
+
+        > .LabeledComponent {
+          width: 100%;
+        }
       }
     }
   }

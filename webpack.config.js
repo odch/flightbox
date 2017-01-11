@@ -1,25 +1,32 @@
+const projects = require('./projects');
 const path = require('path');
 const webpack = require('webpack');
 
+const projectName = process.env.npm_config_project || 'lszt';
+
+const projectConf = projects.load(projectName);
+
+const theme = projectConf.theme || 'lszt';
+
+const env = process.env.ENV === 'production'
+  ? projectConf.environments.production
+  : projectConf.environments.test;
+
 const globals = {
   __DEV__: process.env.DEV || false,
+  __CONF__: projects.packinize(projectConf),
+  __THEME__: JSON.stringify(theme),
+  __FIREBASE_URL__: JSON.stringify(env.firebase),
+  __IP_AUTH__: JSON.stringify(env.ipAuth),
+  __CREDENTIALS_AUTH__: JSON.stringify(env.credentialsAuth),
 };
-
-if (process.env.ENV === 'production') {
-  globals.__FIREBASE_URL__ = JSON.stringify('https://lszt.firebaseio.com');
-  globals.__IP_AUTH__ = JSON.stringify('https://api.mfgt.ch/api/v1/firebaseauth/ip');
-  globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://api.mfgt.ch/api/v1/firebaseauth/mfgt');
-} else {
-  globals.__FIREBASE_URL__ = JSON.stringify('https://mfgt-flights.firebaseio.com');
-  globals.__IP_AUTH__ = JSON.stringify('https://api.mfgt.ch/api/v1/firebaseauth/ip-test');
-  globals.__CREDENTIALS_AUTH__ = JSON.stringify('https://api.mfgt.ch/api/v1/firebaseauth/mfgt-test');
-}
 
 module.exports = {
   entry: [
     'babel-polyfill',
     'whatwg-fetch',
     path.resolve(__dirname, './src/app.js'),
+    path.resolve(__dirname, './theme/' + theme)
   ],
   output: {
     path: path.resolve(__dirname, './build'),
@@ -29,9 +36,6 @@ module.exports = {
     loaders: [
       {
         test: /\.jsx?$/,
-        include: [
-          path.resolve(__dirname, './src'),
-        ],
         exclude: /node_modules/,
         loader: 'babel',
         query: {

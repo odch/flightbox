@@ -1,0 +1,70 @@
+$options-background-color: #fff;
+$options-border-color: #ddd;
+$options-max-height: 200px;
+$focused-option-background-color: #fafafa;
+$focused-option-color: #ed351c;
+$input-border-bottom-color: #000;
+$no-options-color: #999;
+$no-options-font-size: 0.7em;
+$no-options-padding: 0.4em;
+$more-options-color: #999;
+$more-options-font-size: 0.7em;
+$more-options-padding: 0.4em;
+$more-options-line-height: 1.3em;
+
+.Dropdown {
+  position: relative;
+  border: 0;
+  border-bottom: 1px solid $input-border-bottom-color;
+  padding: 1px;
+
+  .Dropdown-input {
+    box-sizing: border-box;
+    width: 100%;
+    font-size: inherit;
+    border: 0;
+    padding: 0;
+  }
+
+  .Dropdown-options {
+    box-sizing: border-box;
+    position: absolute;
+    top: calc(100% - 1px);
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: $options-background-color;
+    border: 1px solid $options-border-color;
+    max-height: $options-max-height;
+    overflow: auto;
+
+    .Dropdown-option {
+      cursor: pointer;
+    }
+
+    .Dropdown-option.focused {
+      background-color: $focused-option-background-color;
+
+      * {
+        color: $focused-option-color;
+      }
+    }
+  }
+
+  .Dropdown-no-options {
+    padding: $no-options-padding;
+    color: $no-options-color;
+    font-size: $no-options-font-size;
+    cursor: default;
+    font-style: italic;
+  }
+
+  .Dropdown-more-options {
+    padding: $more-options-padding;
+    color: $more-options-color;
+    font-size: $more-options-font-size;
+    cursor: default;
+    font-style: italic;
+    line-height: $more-options-line-height;
+  }
+}

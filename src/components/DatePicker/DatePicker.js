@@ -1,10 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import ModalDialog from '../ModalDialog';
+import MaterialIcon from '../MaterialIcon';
 import ReactDatePicker from 'react-date-picker';
 import classNames from 'classnames';
 import 'react-date-picker/base.css';
 import './DatePicker.scss';
-import dates from '../../core/dates.js';
+import dates from '../../util/dates';
 
 class DatePicker extends Component {
 
@@ -46,7 +47,7 @@ class DatePicker extends Component {
           {this.state.value ? this.renderValue() : '\u00a0'}
           {this.props.clearable === true && this.state.value
             ? <button className="clear" onClick={this.clearButtonHandler.bind(this)}>
-                <i className="material-icons">clear</i>
+                <MaterialIcon icon="clear"/>
               </button>
             : null}
         </div>

@@ -1,39 +1,14 @@
 import React, { Component } from 'react';
-import './MovementsPage.scss';
+import Content from './Content';
 import MovementList from '../MovementList';
 import TabPanel from '../TabPanel';
-import BorderLayout from '../BorderLayout';
-import BorderLayoutItem from '../BorderLayoutItem';
 import JumpNavigation from '../JumpNavigation';
-import firebase from '../../util/firebase.js';
-import { firebaseToLocal, localToFirebase, compareDescending } from '../../util/movements.js';
+import VerticalHeaderLayout from '../VerticalHeaderLayout';
 
 class MovementsPage extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      lockDate: null,
-    };
-  }
-
   componentWillMount() {
-    firebase('/settings/lockDate', (error, ref) => {
-      this.firebaseRef = ref;
-      this.firebaseRef.on('value', this.onLockDateValue, this);
-    });
-  }
-
-  componentWillUnmount() {
-    if (this.firebaseRef) {
-      this.firebaseRef.off('value', this.onLockDateValue, this);
-    }
-  }
-
-  onLockDateValue(data) {
-    this.setState({
-      lockDate: data.val(),
-    });
+    this.props.loadLockDate();
   }
 
   departuresListClick(item) {
@@ -53,35 +28,40 @@ class MovementsPage extends Component {
   }
 
   render() {
-    const logoImagePath = require('../../resources/mfgt_logo_transp.png');
     const departuresList = (
       <MovementList
         key="departures"
         className="departures"
-        firebaseUri="/departures/"
-        comparator={compareDescending}
-        localToFirebase={localToFirebase}
-        firebaseToLocal={firebaseToLocal}
+        loadItems={this.props.loadDepartures}
+        items={this.props.movements.departures.data.array}
+        loading={this.props.movements.departures.loading}
         onClick={this.departuresListClick.bind(this)}
         onAction={this.departuresActionClick.bind(this)}
         actionIcon="flight_land"
         actionLabel="Ankunft erfassen"
-        lockDate={this.state.lockDate}
+        lockDate={this.props.lockDate}
+        deleteConfirmation={this.props.deleteConfirmation}
+        deleteItem={this.props.deleteDeparture}
+        hideDeleteConfirmationDialog={this.props.hideDeleteConfirmationDialog}
+        showDeleteConfirmationDialog={this.props.showDeleteConfirmationDialog}
       />
     );
     const arrivalsList = (
       <MovementList
         key="arrivals"
         className="arrivals"
-        firebaseUri="/arrivals/"
-        comparator={compareDescending}
-        localToFirebase={localToFirebase}
-        firebaseToLocal={firebaseToLocal}
+        loadItems={this.props.loadArrivals}
+        items={this.props.movements.arrivals.data.array}
+        loading={this.props.movements.arrivals.loading}
         onClick={this.arrivalsListClick.bind(this)}
         onAction={this.arrivalsActionClick.bind(this)}
         actionIcon="flight_takeoff"
         actionLabel="Abflug erfassen"
-        lockDate={this.state.lockDate}
+        lockDate={this.props.lockDate}
+        deleteConfirmation={this.props.deleteConfirmation}
+        deleteItem={this.props.deleteArrival}
+        hideDeleteConfirmationDialog={this.props.hideDeleteConfirmationDialog}
+        showDeleteConfirmationDialog={this.props.showDeleteConfirmationDialog}
       />
     );
     const tabs = [{
@@ -92,21 +72,27 @@ class MovementsPage extends Component {
       component: arrivalsList,
     }];
     return (
-      <BorderLayout className="MovementsPage">
-        <BorderLayoutItem region="west">
-          <header>
-            <a href="#/">
-              <img className="logo" src={logoImagePath}/>
-            </a>
-          </header>
-        </BorderLayoutItem>
-        <BorderLayoutItem region="middle">
+      <VerticalHeaderLayout>
+        <Content>
           <JumpNavigation/>
           <TabPanel tabs={tabs}/>
-        </BorderLayoutItem>
-      </BorderLayout>
+        </Content>
+      </VerticalHeaderLayout>
     );
   }
 }
+
+MovementsPage.propTypes = {
+  movements: React.PropTypes.object.isRequired,
+  loadDepartures: React.PropTypes.func.isRequired,
+  deleteDeparture: React.PropTypes.func.isRequired,
+  loadArrivals: React.PropTypes.func.isRequired,
+  deleteArrival: React.PropTypes.func.isRequired,
+  lockDate: React.PropTypes.object.isRequired,
+  loadLockDate: React.PropTypes.func.isRequired,
+  deleteConfirmation: React.PropTypes.object,
+  showDeleteConfirmationDialog: React.PropTypes.func.isRequired,
+  hideDeleteConfirmationDialog: React.PropTypes.func.isRequired,
+};
 
 export default MovementsPage;

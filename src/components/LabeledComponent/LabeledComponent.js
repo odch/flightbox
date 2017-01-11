@@ -1,4 +1,5 @@
 import React, { PropTypes, Component } from 'react';
+import MaterialIcon from '../MaterialIcon';
 import './LabeledComponent.scss';
 
 class LabeledComponent extends Component {
@@ -20,7 +21,7 @@ class LabeledComponent extends Component {
 
       validationMsg = (
         <div className="validation-msg">
-          <div className="icon"><i className="material-icons">error</i></div>
+          <div className="icon"><MaterialIcon icon="error"/></div>
           <div className="text">{this.props.validationError}</div>
         </div>
       );

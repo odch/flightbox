@@ -1,30 +1,30 @@
 import React, { Component } from 'react';
-import './MessagePage.scss';
-import BorderLayout from '../BorderLayout';
-import BorderLayoutItem from '../BorderLayoutItem';
+import Content from './Content';
+import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import MessageForm from '../MessageForm';
 import JumpNavigation from '../JumpNavigation';
 
-class MessagePage extends Component {
+const MessagePage = props => (
+  <VerticalHeaderLayout>
+    <Content>
+      <JumpNavigation/>
+      <MessageForm
+        sent={props.sent}
+        commitFailed={props.commitFailed}
+        onSubmit={props.saveMessage}
+        resetMessageForm={props.resetMessageForm}
+        confirmSaveMessageSuccess={props.confirmSaveMessageSuccess}
+      />
+    </Content>
+  </VerticalHeaderLayout>
+);
 
-  render() {
-    const logoImagePath = require('../../resources/mfgt_logo_transp.png');
-    return (
-      <BorderLayout className="MessagePage">
-        <BorderLayoutItem region="west">
-          <header>
-            <a href="#/">
-              <img className="logo" src={logoImagePath}/>
-            </a>
-          </header>
-        </BorderLayoutItem>
-        <BorderLayoutItem region="middle">
-          <JumpNavigation/>
-          <MessageForm/>
-        </BorderLayoutItem>
-      </BorderLayout>
-    );
-  }
-}
+MessagePage.propTypes = {
+  sent: React.PropTypes.bool.isRequired,
+  commitFailed: React.PropTypes.bool.isRequired,
+  saveMessage: React.PropTypes.func.isRequired,
+  resetMessageForm: React.PropTypes.func.isRequired,
+  confirmSaveMessageSuccess: React.PropTypes.func.isRequired,
+};
 
 export default MessagePage;
