@@ -31,12 +31,12 @@
     "test": {
       "firebase": "https://mfgt-flights.firebaseio.com",
       "ipAuth": "https://api.mfgt.ch/api/v1/firebaseauth/ip-test",
-      "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/mfgt-test"
+      "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/flightnet/lszt-test"
     },
     "production": {
       "firebase": "https://lszt.firebaseio.com",
       "ipAuth": "https://api.mfgt.ch/api/v1/firebaseauth/ip",
-      "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/mfgt"
+      "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/flightnet/lszt"
     }
   },
   "theme": "lszt",
