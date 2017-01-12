@@ -3,6 +3,9 @@ const post = (url, data) =>
   new Promise((resolve, reject) => {
     fetch(url, {
       method: 'POST',
+      headers: new Headers({
+        'Content-Type': 'application/json'
+      }),
       body: data ? JSON.stringify(data) : null
     }).then(response => {
       response.json().then(json => resolve(json.token));
