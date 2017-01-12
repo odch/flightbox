@@ -1,6 +1,7 @@
 # MFGT Fluganmeldungen
 
 [![wercker status](https://app.wercker.com/status/b9fc0aac2d1ad59ac7d88d1ade1581f3/s/master "wercker status")](https://app.wercker.com/project/byKey/b9fc0aac2d1ad59ac7d88d1ade1581f3)
+[![devDependencies Status](https://david-dm.org/lszt/flights-react/dev-status.svg)](https://david-dm.org/lszt/flights-react?type=dev)
 
 ### Getting Started
 
