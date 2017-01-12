@@ -30,13 +30,13 @@
   "environments": {
     "test": {
       "firebase": "https://lszk-test.firebaseio.com",
-      "ipAuth": "https://lszk-prod.appspot.com/api/v1/firebaseauth/flightnet/ip-test",
-      "credentialsAuth": "https://lszk-prod.appspot.com/api/v1/firebaseauth/flightnet/lszk-test"
+      "ipAuth": "https://lszk-prod.appspot-preview.com/api/v1/firebaseauth/ip-test",
+      "credentialsAuth": "https://lszk-prod.appspot-preview.com/api/v1/firebaseauth/flightnet/lszk-test"
     },
     "production": {
       "firebase": "https://lszk-prod.firebaseio.com",
-      "ipAuth": "https://lszk-prod.appspot.com/api/v1/firebaseauth/flightnet/ip",
-      "credentialsAuth": "https://lszk-prod.appspot.com/api/v1/firebaseauth/flightnet/lszk"
+      "ipAuth": "https://lszk-prod.appspot-preview.com/api/v1/firebaseauth/ip",
+      "credentialsAuth": "https://lszk-prod.appspot-preview.com/api/v1/firebaseauth/flightnet/lszk"
     }
   },
   "theme": "lszk",
