@@ -1,6 +1,10 @@
 import React, { PropTypes, Component } from 'react';
-import MaterialIcon from '../MaterialIcon';
-import './LabeledComponent.scss';
+import classNames from 'classnames';
+import Label from './Label';
+import ComponentContainer from './ComponentContainer';
+import Tooltip from './Tooltip';
+import ValidationMessage from './ValidationMessage';
+import Wrapper from './Wrapper';
 
 class LabeledComponent extends Component {
 
@@ -12,28 +16,13 @@ class LabeledComponent extends Component {
   }
 
   render() {
-    let className = 'LabeledComponent ' + this.props.className;
-
-    let validationMsg;
-
-    if (this.props.validationError) {
-      className += ' invalid';
-
-      validationMsg = (
-        <div className="validation-msg">
-          <div className="icon"><MaterialIcon icon="error"/></div>
-          <div className="text">{this.props.validationError}</div>
-        </div>
-      );
-    }
-
     return (
-      <div className={className} onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)}>
-        <label>{this.props.label}</label>
-        {validationMsg}
-        <div className="component-wrap">{this.props.component}</div>
-        {this.state.tooltipVisible && this.props.tooltip && <div className="tooltip">{this.props.tooltip}</div>}
-      </div>
+      <Wrapper className={classNames('LabeledComponent', this.props.className)} onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)}>
+        <Label>{this.props.label}</Label>
+        {this.props.validationError && <ValidationMessage error={this.props.validationError}/>}
+        <ComponentContainer>{this.props.component}</ComponentContainer>
+        {this.state.tooltipVisible && this.props.tooltip && <Tooltip>{this.props.tooltip}</Tooltip>}
+      </Wrapper>
     );
   }
 

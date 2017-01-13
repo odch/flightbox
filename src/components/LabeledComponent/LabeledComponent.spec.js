@@ -14,9 +14,10 @@ describe('LabeledComponent', () => {
     const component = TestUtils.renderIntoDocument(labeledComponent);
     const element = ReactDOM.findDOMNode(component);
 
-    expect(element.className).toBe('LabeledComponent my-class');
+    expect(element.className).toContain('LabeledComponent');
+    expect(element.className).toContain('my-class');
     expect(bro.$('label', element).html()).toBe('My label');
-    expect(bro.$('.component-wrap input', element).length).toBe(1);
-    expect(bro.$('.component-wrap input', element).get(0).id).toBe('my-input');
+    expect(bro.$('input', element).length).toBe(1);
+    expect(bro.$('input', element).get(0).id).toBe('my-input');
   });
 });
