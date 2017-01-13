@@ -123,7 +123,7 @@
           ".validate": "newData.isString()"
         },
         "runway": {
-          ".validate": "newData.val() === '06' || newData.val() === '24'"
+          ".validate": "{runway}"
         },
         "$other": {
           ".validate": false

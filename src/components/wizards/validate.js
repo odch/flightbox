@@ -1,4 +1,5 @@
 import validateUtil from '../../util/validate';
+import objectToArray from '../../util/objectToArray';
 
 const config = {
   immatriculation: {
@@ -79,7 +80,7 @@ const config = {
   runway: {
     types: {
       required: true,
-      values: ['06', '24'],
+      values: objectToArray(__CONF__.aerodrome.runways),
     },
     message: {
       departure: 'Wählen Sie hier die Pistenrichtung für den Abflug aus.',
@@ -89,14 +90,14 @@ const config = {
   departureRoute: {
     types: {
       required: true,
-      values: ['south', 'matzingen', 'circuits'],
+      values: objectToArray(__CONF__.aerodrome.departureRoutes).map(route => route.name).concat('circuits'),
     },
     message: 'Wählen Sie hier die Abflugroute aus.',
   },
   arrivalRoute: {
     types: {
       required: true,
-      values: ['north', 'south', 'circuits'],
+      values: objectToArray(__CONF__.aerodrome.arrivalRoutes).map(route => route.name).concat('circuits'),
     },
     message: 'Wählen Sie hier die Ankunftsroute aus.',
   },
