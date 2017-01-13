@@ -70,6 +70,7 @@ export function* saveMovement(path, successAction, failureAction) {
   } catch(e) {
     if (console && typeof console.error === 'function') {
       console.error('Failed to save movement', e);
+      console.error('movement', movement);
     }
     yield put(failureAction(e))
   }
