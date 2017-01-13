@@ -32,11 +32,12 @@ const I = styled.i`
 `;
 
 const MaterialIcon = props => (
-  <I>{props.icon}</I>
+  <I className={props.className}>{props.icon}</I>
 );
 
 MaterialIcon.propTypes = {
-  icon: React.PropTypes.string.isRequired
+  icon: React.PropTypes.string.isRequired,
+  className: React.PropTypes.string
 };
 
 export default MaterialIcon;
