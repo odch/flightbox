@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import classNames from 'classnames';
 import scrollIntoView from 'scroll-into-view';
 import Wrapper from './Wrapper';
 import Input from './Input';
@@ -38,7 +37,7 @@ class Dropdown extends Component {
   render() {
     return (
       <Wrapper
-        className={classNames('Dropdown', this.props.className)}
+        className={this.props.className}
         onKeyDown={this.handleContainerKeyDown.bind(this)}
         onBlur={this.handleContainerBlur.bind(this)}
         tabIndex="1"
@@ -85,7 +84,6 @@ class Dropdown extends Component {
 
     return (
       <OptionsContainer
-        className="Dropdown-options"
         onMouseLeave={this.handleOptionsMouseLeave.bind(this)}
       >
         {options}
@@ -97,7 +95,6 @@ class Dropdown extends Component {
     const focussed = this.state.focusedOption === option.key;
     return (
       <Option
-        className="Dropdown-option"
         key={option.key}
         focussed={focussed}
         onMouseDown={this.handleOptionClick.bind(this, option)}
