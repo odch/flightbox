@@ -1,7 +1,9 @@
 import React from 'react';
-import classNames from 'classnames';
-import './TextArea.scss';
+import styled from 'styled-components';
 
-const TextArea = props => <textarea {...props} className={classNames('TextArea', props.className)}/>;
+const TextArea = styled.textarea`
+  border: 0;
+  border-bottom: 1px solid #000;
+`;
 
 export default TextArea;
