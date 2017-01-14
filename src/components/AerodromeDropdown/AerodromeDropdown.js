@@ -1,12 +1,9 @@
 import React from 'react';
 import Dropdown from '../Dropdown';
-import './AerodromeDropdown.scss';
+import Option from './Option';
 
-const optionRenderer = option => (
-  <div>
-    <div className="code">{option.key}</div>
-    <div className="name">{option.name}</div>
-  </div>
+const optionRenderer = (option, focussed) => (
+  <Option code={option.key} name={option.name} focussed={focussed}/>
 );
 
 const aerodromesComparator = filter =>
