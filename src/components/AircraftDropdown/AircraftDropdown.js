@@ -1,17 +1,18 @@
 import React from 'react';
 import Dropdown from '../Dropdown';
-import './AircraftDropdown.scss';
+import Option from './Option';
 
 const optionRenderer = aircrafts => {
   const map = aircrafts.reduce((map, obj) => {
     map[obj.key] = obj;
     return map;
   }, {});
-  return option => (
-    <div>
-      <div className="immatriculation">{option.key}</div>
-      <div className="type">{map[option.key].type}</div>
-    </div>
+  return (option, focussed) => (
+    <Option
+      immatriculation={option.key}
+      type={map[option.key].type}
+      focussed={focussed}
+    />
   );
 };
 
@@ -39,7 +40,6 @@ const callWithValue = (delegate, aircrafts, value) => {
 
 const AircraftDropdown = props => (
   <Dropdown
-    className="AircraftDropdown"
     options={props.aircrafts.data.array.sort(aircraftsComparator).map(aircraftToOption)}
     optionRenderer={optionRenderer(props.aircrafts.data.array)}
     onChange={callWithValue.bind(null, props.onChange, props.aircrafts.data.array)}
