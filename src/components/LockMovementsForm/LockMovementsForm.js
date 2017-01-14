@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import LabeledComponent from '../LabeledComponent';
+import LabeledComponent from './StyledLabeledComponent';
 import LabeledBox from '../LabeledBox';
 import DatePicker from '../DatePicker';
 import moment from 'moment';
-import './LockMovementsForm.scss';
 
 class LockMovementsForm extends Component {
 

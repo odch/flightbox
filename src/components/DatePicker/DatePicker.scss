@@ -7,6 +7,14 @@
     box-sizing: border-box;
   }
 
+  button.clear {
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    float: right;
+  }
+
   .date-picker {
     .dp-table.dp-month-view {
       width: 400px;
