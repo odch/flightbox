@@ -1,17 +1,18 @@
 import React from 'react';
 import Dropdown from '../Dropdown';
-import './UserDropdown.scss';
+import Option from './Option';
 
 const optionRenderer = users => {
   const map = users.reduce((map, obj) => {
     map[obj.memberNr] = obj;
     return map;
   }, {});
-  return option => (
-    <div>
-      <div className="name">{map[option.key].lastname} {map[option.key].firstname}</div>
-      <div className="memberNr">{option.key}</div>
-    </div>
+  return (option, focussed) => (
+    <Option
+      name={map[option.key].lastname + ' ' + map[option.key].firstname}
+      memberNr={option.key}
+      focussed={focussed}
+    />
   );
 };
 
