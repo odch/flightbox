@@ -1,7 +1,12 @@
 import React, {Component} from 'react';
 import classNames from 'classnames';
 import scrollIntoView from 'scroll-into-view';
-import './Dropdown.scss';
+import Wrapper from './Wrapper';
+import Input from './Input';
+import OptionsContainer from './OptionsContainer';
+import Option from './Option';
+import NoOptions from './NoOptions';
+import MoreOptions from './MoreOptions';
 
 const KEY_CODE_ARROW_DOWN = 40;
 const KEY_CODE_ARROW_UP = 38;
@@ -21,6 +26,7 @@ class Dropdown extends Component {
       inputFocused: false,
       optionsVisible: false,
     };
+    this.options = [];
   }
 
   componentWillReceiveProps(nextProps) {
@@ -31,30 +37,29 @@ class Dropdown extends Component {
 
   render() {
     return (
-      <div
+      <Wrapper
         className={classNames('Dropdown', this.props.className)}
         onKeyDown={this.handleContainerKeyDown.bind(this)}
         onBlur={this.handleContainerBlur.bind(this)}
         tabIndex="1"
-        ref="container"
+        innerRef={comp => this.container = comp}
       >
         {this.renderInput()}
         {this.renderOptions()}
-      </div>
+      </Wrapper>
     );
   }
 
   renderInput() {
     return (
-      <input
-        className="Dropdown-input"
+      <Input
         type="text"
         value={this.state.inputFocused === true ? this.state.filter : this.state.value}
         placeholder={this.state.value}
         onChange={this.handleInputChange.bind(this)}
         onFocus={this.handleInputFocus.bind(this)}
         onBlur={this.handleInputBlur.bind(this)}
-        ref="input"
+        innerRef={comp => this.input = comp}
         readOnly={this.props.readOnly}
       />
     );
@@ -79,35 +84,36 @@ class Dropdown extends Component {
     }
 
     return (
-      <div
+      <OptionsContainer
         className="Dropdown-options"
         onMouseLeave={this.handleOptionsMouseLeave.bind(this)}
       >
         {options}
-      </div>
+      </OptionsContainer>
     );
   }
 
   renderOption(option) {
     return (
-      <div
-        className={classNames('Dropdown-option', this.state.focusedOption === option.key ? 'focused' : null)}
+      <Option
+        className="Dropdown-option"
         key={option.key}
+        focussed={this.state.focusedOption === option.key}
         onMouseDown={this.handleOptionClick.bind(this, option)}
         onMouseEnter={this.handleOptionMouseEnter.bind(this, option)}
-        ref={option.key}
+        innerRef={comp => this.options[option.key] = comp}
       >
         {this.props.optionRenderer(option)}
-      </div>
+      </Option>
     );
   }
 
   renderNoOptionsLabel() {
-    return <div className="Dropdown-no-options">{this.props.noOptionsText}</div>;
+    return <NoOptions>{this.props.noOptionsText}</NoOptions>;
   }
 
   renderMoreOptionsLabel() {
-    return <div className="Dropdown-more-options" key="more-options">{this.props.moreOptionsText}</div>;
+    return <MoreOptions key="more-options">{this.props.moreOptionsText}</MoreOptions>;
   }
 
   handleInputChange(e) {
@@ -178,12 +184,12 @@ class Dropdown extends Component {
     }
 
     if (e.which === KEY_CODE_ESCAPE) {
-      window.requestAnimationFrame(() => this.refs.container.focus());
+      window.requestAnimationFrame(() => this.container.focus());
       return;
     }
 
     if (e.which === KEY_CODE_ARROW_DOWN && this.state.optionsVisible === false) {
-      this.refs.input.focus();
+      this.input.focus();
       return;
     }
 
@@ -234,7 +240,7 @@ class Dropdown extends Component {
   setFocusedOption(focusedOption) {
     this.setState({
       focusedOption,
-    }, () => scrollIntoView(this.refs[focusedOption]));
+    }, () => scrollIntoView(this.options[focusedOption]));
   }
 
   handleOptionClick(option) {
@@ -260,7 +266,7 @@ class Dropdown extends Component {
     });
     this.props.onChange(value);
     if (focusContainer === true) {
-      window.requestAnimationFrame(() => this.refs.container.focus());
+      window.requestAnimationFrame(() => this.container.focus());
     }
   }
 
@@ -277,11 +283,9 @@ class Dropdown extends Component {
   }
 
   isComponentElement(element) {
-    const container = this.refs.container;
-
     let node = element;
     while (node !== null) {
-      if (node === container) {
+      if (node === this.container) {
         return true;
       }
       node = node.parentNode;
