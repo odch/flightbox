@@ -14,7 +14,7 @@ class SingleSelect extends Component {
   render() {
     if (this.props.readOnly === true) {
       return (
-        <div>{this.state.value}</div>
+        <div>{this.getReadOnlyValue()}</div>
       )
     }
 
@@ -58,6 +58,19 @@ class SingleSelect extends Component {
         },
       });
     }
+  }
+
+  getReadOnlyValue() {
+    if (!this.state.value) {
+      return '-';
+    }
+
+    const selectedItem = this.props.items.find(item => item.value === this.state.value);
+    if (selectedItem) {
+      return selectedItem.label;
+    }
+
+    return this.state.value;
   }
 }
 
