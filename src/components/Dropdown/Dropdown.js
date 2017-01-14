@@ -94,16 +94,17 @@ class Dropdown extends Component {
   }
 
   renderOption(option) {
+    const focussed = this.state.focusedOption === option.key;
     return (
       <Option
         className="Dropdown-option"
         key={option.key}
-        focussed={this.state.focusedOption === option.key}
+        focussed={focussed}
         onMouseDown={this.handleOptionClick.bind(this, option)}
         onMouseEnter={this.handleOptionMouseEnter.bind(this, option)}
         innerRef={comp => this.options[option.key] = comp}
       >
-        {this.props.optionRenderer(option)}
+        {this.props.optionRenderer(option, focussed)}
       </Option>
     );
   }
