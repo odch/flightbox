@@ -1,6 +1,6 @@
 import React from 'react';
+import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
-import './FileInput.scss';
 
 const getSelectedFile = e => {
   const files = e.target.files;
@@ -23,20 +23,28 @@ const handleFileChange = (onChange, e) => {
   }
 };
 
+const RemoveButton = styled.button`
+  cursor: pointer;
+  border: none;
+  background: none;
+  vertical-align: middle;
+  
+  &:hover {
+    color: ${props => props.theme.colors.main};
+  }
+`;
+
 const FileInput = props => (
-  <div className="FileInput">
+  <div>
     {props.value
     ? (
       <div>
         {!props.disabled && (
-          <button
-            onClick={() => props.onChange(event(null))}
-            className="remove"
-          >
+          <RemoveButton onClick={() => props.onChange(event(null))}>
             <MaterialIcon icon="block"/>
-          </button>
+          </RemoveButton>
         )}
-        {props.value.name}
+        <span>{props.value.name}</span>
       </div>
     )
     : (
