@@ -4,6 +4,7 @@ import * as actions from './actions';
 import aerodromeImport from '../../util/aerodrome-import';
 import aircraftImport from '../../util/aircraft-import';
 import userImport from '../../util/user-import';
+import { error } from '../../util/log';
 
 export const selectImport = importName => state => state.imports[importName];
 
@@ -31,15 +32,19 @@ export function getString(file) {
 
 export function* importSaga(action) {
   const importName = action.payload.importName;
+  try {
+    yield put(actions.setImportInProgress(importName, true));
 
-  yield put(actions.setImportInProgress(importName, true));
+    const state = yield select(selectImport(importName));
+    const csvString = yield call(getString, state.file);
 
-  const state = yield select(selectImport(importName));
-  const csvString = yield call(getString, state.file);
+    yield call(doImport, importName, csvString);
 
-  yield call(doImport, importName, csvString);
-
-  yield put(actions.importSuccess(importName));
+    yield put(actions.importSuccess(importName));
+  } catch(e) {
+    error('Failed to import data (import: ' + importName + ')', e);
+    yield put(actions.importFailure(importName));
+  }
 }
 
 export default function* sagas() {

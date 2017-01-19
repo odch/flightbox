@@ -9,6 +9,7 @@ function initImport(state, action) {
       file: null,
       inProgress: false,
       done: false,
+      failed: false,
     },
   });
 }
@@ -46,11 +47,23 @@ function importSuccess(state, action) {
   });
 }
 
+function importFailure(state, action) {
+  const { importName } = action.payload;
+  const newImportObj = Object.assign({}, state[importName], {
+    inProgress: false,
+    failed: true,
+  });
+  return Object.assign({}, state, {
+    [importName]: newImportObj,
+  });
+}
+
 const ACTION_HANDLERS = {
   [actions.INIT_IMPORT]: initImport,
   [actions.SELECT_IMPORT_FILE]: setImportFile,
   [actions.SET_IMPORT_IN_PROGRESS]: setImportInProgress,
   [actions.IMPORT_SUCCESS]: importSuccess,
+  [actions.IMPORT_FAILURE]: importFailure,
 };
 
 export default reducer(INITIAL_STATE, ACTION_HANDLERS);

@@ -18,6 +18,7 @@ class AerodromeImportFormContainer extends React.Component {
         selectedFile={this.props.selectedFile}
         importInProgress={this.props.inProgress}
         importDone={this.props.importDone}
+        importFailed={this.props.importFailed}
         selectFile={this.props.selectFile}
         startImport={this.props.startImport}
         closeDoneDialog={this.props.initImport}
@@ -30,6 +31,7 @@ AerodromeImportFormContainer.propTypes = {
   initialized: React.PropTypes.bool.isRequired,
   inProgress: React.PropTypes.bool.isRequired,
   importDone: React.PropTypes.bool.isRequired,
+  importFailed: React.PropTypes.bool.isRequired,
   selectedFile: React.PropTypes.object,
   initImport: React.PropTypes.func.isRequired,
   selectFile: React.PropTypes.func.isRequired,
@@ -50,6 +52,7 @@ const mapStateToProps = state => {
     selectedFile: importObj.file,
     inProgress: importObj.inProgress === true,
     importDone: importObj.done === true,
+    importFailed: importObj.failed === true,
   };
 };
 

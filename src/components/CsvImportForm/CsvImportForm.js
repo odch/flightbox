@@ -40,6 +40,9 @@ const CsvImportForm = props => {
           {props.importInProgress && (
             <span className="import-in-progress-msg">Import wird ausgeführt. Bitte warten ...</span>
           )}
+          {props.importFailed && (
+            <span className="import-failed-msg">Der Import ist fehlgeschlagen.</span>
+          )}
         </form>
       </div>
       {importDoneDialog}
@@ -51,6 +54,7 @@ CsvImportForm.propTypes = {
   disabled: PropTypes.bool,
   importInProgress: PropTypes.bool.isRequired,
   importDone: PropTypes.bool.isRequired,
+  importFailed: PropTypes.bool.isRequired,
   selectedFile: PropTypes.object,
   description: PropTypes.element.isRequired,
   doneHeading: PropTypes.string.isRequired,

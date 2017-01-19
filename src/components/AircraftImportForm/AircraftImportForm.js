@@ -30,6 +30,7 @@ const AircraftImportForm = props => {
         disabled={props.disabled}
         importInProgress={props.importInProgress}
         importDone={props.importDone}
+        importFailed={props.importFailed}
         selectFile={props.selectFile}
         startImport={props.startImport}
         closeDoneDialog={props.closeDoneDialog}
@@ -42,6 +43,7 @@ AircraftImportForm.propTypes = {
   disabled: React.PropTypes.bool,
   importInProgress: React.PropTypes.bool.isRequired,
   importDone: React.PropTypes.bool.isRequired,
+  importFailed: React.PropTypes.bool.isRequired,
   selectedFile: React.PropTypes.object,
   selectFile: React.PropTypes.func.isRequired,
   startImport: React.PropTypes.func.isRequired,
