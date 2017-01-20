@@ -3,6 +3,8 @@ import LabeledComponent from '../LabeledComponent';
 import FileInput from '../FileInput';
 import Button from '../Button';
 import ImportDoneDialog from './ImportDoneDialog';
+import FailureMessage from './FailureMessage';
+import ProgressMessage from './ProgressMessage';
 import './CsvImportForm.scss';
 
 const handleFormSubmit = (startImport, e) => {
@@ -40,12 +42,8 @@ const CsvImportForm = props => {
             icon="file_upload"
             disabled={props.disabled || props.importInProgress || !props.selectedFile}
           />
-          {props.importInProgress && (
-            <span className="import-in-progress-msg">Import wird ausgeführt. Bitte warten ...</span>
-          )}
-          {props.importFailed && (
-            <span className="import-failed-msg">Der Import ist fehlgeschlagen.</span>
-          )}
+          {props.importInProgress && <ProgressMessage>Import wird ausgeführt. Bitte warten ...</ProgressMessage>}
+          {props.importFailed && <FailureMessage>Der Import ist fehlgeschlagen.</FailureMessage>}
         </form>
       </div>
       {importDoneDialog}
