@@ -1,23 +1,19 @@
-import React, { PropTypes, Component } from 'react';
-import './ModalDialog.scss';
+import React, {PropTypes, Component} from 'react';
+import Mask from './Mask';
+import Content from './Content';
 
-class ModalDialog extends Component {
-
-  maskClickHandler() {
-    if (typeof this.props.onBlur === 'function') {
-      this.props.onBlur();
-    }
+const handleMaskClick = onBlur => {
+  if (typeof onBlur === 'function') {
+    onBlur();
   }
+};
 
-  render() {
-    return (
-      <div className="ModalDialog">
-        <div className="mask" onClick={this.maskClickHandler.bind(this)}></div>
-        <div className="content">{this.props.content}</div>
-      </div>
-    );
-  }
-}
+const ModalDialog = props => (
+  <div className="ModalDialog">
+    <Mask onClick={handleMaskClick.bind(props.onBlur)}/>
+    <Content>{props.content}</Content>
+  </div>
+);
 
 ModalDialog.propTypes = {
   content: PropTypes.element.isRequired,
