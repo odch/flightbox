@@ -1,22 +1,25 @@
 import React from 'react';
-import CsvImportForm from '../CsvImportForm';
+import CsvImportForm, { Example } from '../CsvImportForm';
+import P from '../P';
+import Em from '../Em';
+import Strong from '../Strong';
 
 const AircraftImportForm = props => {
   const description = (
     <div>
-      <p>Für den Import wird eine CSV-Datei benötigt, die alle Flugzeuge enthält. Beim Import werden
-        alle Flugzeuge aus der Datenbank entfernt, die nicht in der CSV-Datei enthalten sind.</p>
-      <p>
-        Die Datei muss aus den Spalten <em>Registration</em>, <em>Type</em> und <em>MTOW</em> bestehen.
+      <P>Für den Import wird eine CSV-Datei benötigt, die alle Flugzeuge enthält. Beim Import werden
+        alle Flugzeuge aus der Datenbank entfernt, die nicht in der CSV-Datei enthalten sind.</P>
+      <P>
+        Die Datei muss aus den Spalten <Em>Registration</Em>, <Em>Type</Em> und <Em>MTOW</Em> bestehen.
         Die Sortierung ist nicht relevant.
-        Die CSV-Datei muss als <strong>UTF-8</strong>-Datei gespeichert sein.
-      </p>
-      <p>Muster mit zwei Flugzeugen:</p>
-          <pre className="example">
+        Die CSV-Datei muss als <Strong>UTF-8</Strong>-Datei gespeichert sein.
+      </P>
+      <P>Muster mit zwei Flugzeugen:</P>
+          <Example>
             Registration,Type,MTOW<br/>
             HBKOF,ROBIN DR 400/140 B,1000<br/>
             HBSGU,AT01,750<br/>
-          </pre>
+          </Example>
     </div>
   );
 

@@ -1,6 +1,0 @@
-{
-  "name": "CsvImportForm",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./CsvImportForm.js"
-}
