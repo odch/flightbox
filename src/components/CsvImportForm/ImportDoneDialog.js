@@ -1,15 +1,27 @@
 import React from 'react';
+import styled from 'styled-components';
 import ModalDialog from '../ModalDialog';
-import MaterialIcon from '../MaterialIcon';
+import Button from '../Button';
+
+const Heading = styled.div`
+  font-size: 1.5em;
+  margin-bottom: 1em;
+`;
+
+const Message = styled.div`
+  margin-bottom: 1em;
+`;
+
+const CloseButton = styled(Button)`
+  float: right;
+`;
 
 const ImportDoneDialog = props => {
   const content = (
     <div>
-      <div className="heading">{props.doneHeading}</div>
-      <div className="message">{props.doneMessage}</div>
-      <button className="close" onClick={props.onClose}>
-        <MaterialIcon icon="close"/>&nbsp;Schliessen
-      </button>
+      <Heading>{props.doneHeading}</Heading>
+      <Message>{props.doneMessage}</Message>
+      <CloseButton label="Schliessen" icon="close" onClick={props.onClose}/>
     </div>
   );
   return (

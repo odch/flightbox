@@ -7,6 +7,7 @@ const Button = props => (
     type={props.type}
     className={props.className}
     disabled={props.disabled}
+    onClick={props.onClick}
   >
     {props.icon && <MaterialIcon icon={props.icon}/>}{props.label}
   </StyledButton>
@@ -17,7 +18,8 @@ Button.propTypes = {
   label: React.PropTypes.string.isRequired,
   icon: React.PropTypes.string,
   className: React.PropTypes.string,
-  disabled: React.PropTypes.bool
+  disabled: React.PropTypes.bool,
+  onClick: React.PropTypes.func
 };
 
 Button.defaultProps = {
