@@ -26,13 +26,15 @@ class Button extends React.Component {
   }
 
   render() {
-    const { type, className, disabled, onClick, icon, label } = this.props;
+    const { type, className, disabled, onClick, icon, label, primary, flat } = this.props;
     return (
       <StyledButton
         type={type}
         className={className}
         onClick={onClick}
         disabled={disabled}
+        primary={primary}
+        flat={flat}
         onMouseEnter={this.handleMouseEnter.bind(this)}
         onMouseLeave={this.handleMouseLeave.bind(this)}
       >
@@ -53,7 +55,9 @@ Button.propTypes = {
   icon: React.PropTypes.string,
   className: React.PropTypes.string,
   disabled: React.PropTypes.bool,
-  onClick: React.PropTypes.func
+  onClick: React.PropTypes.func,
+  primary: React.PropTypes.bool,
+  flat: React.PropTypes.bool,
 };
 
 Button.defaultProps = {
