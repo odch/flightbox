@@ -40,6 +40,7 @@ const CsvImportForm = props => {
             label="Importieren"
             icon="file_upload"
             disabled={props.disabled || props.importInProgress || !props.selectedFile}
+            primary
           />
           {props.importInProgress && <ProgressMessage>Import wird ausgeführt. Bitte warten ...</ProgressMessage>}
           {props.importFailed && <FailureMessage>Der Import ist fehlgeschlagen.</FailureMessage>}
