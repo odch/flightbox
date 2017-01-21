@@ -9,7 +9,7 @@ const handleMaskClick = onBlur => {
 };
 
 const ModalDialog = props => (
-  <div className="ModalDialog">
+  <div>
     <Mask onClick={handleMaskClick.bind(props.onBlur)}/>
     <Content>{props.content}</Content>
   </div>
