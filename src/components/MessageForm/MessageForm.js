@@ -1,11 +1,11 @@
 import React from 'react';
 import { Field, reduxForm } from 'redux-form';
-import MaterialIcon from '../MaterialIcon';
+import H1 from '../H1';
+import Button from '../Button';
 import validate from './validate.js';
-import { renderInputField, renderTextArea } from '../../util/renderField';
-import MessageSentDialog from './MessageSentDialog';
-import CommitErrorDialog from './CommitErrorDialog';
-import './MessageForm.scss';
+import { renderInputField, renderTextArea } from './renderField';
+import Intro from './Intro';
+import Dialog from './Dialog';
 
 class MessageForm extends React.Component {
 
@@ -16,12 +16,12 @@ class MessageForm extends React.Component {
   render() {
     return (
       <form className="MessageForm" onSubmit={this.props.handleSubmit}>
-        <h1>Benachrichtigen Sie uns</h1>
-        <div className="intro">
+        <H1>Benachrichtigen Sie uns</H1>
+        <Intro>
           Haben Sie Fragen, Anregungen oder ein anderes Anliegen bezüglich
           der Erfassung der Abflüge und Ankünfte, benachrichtigen Sie uns
           bitte über das untenstehende Formular.
-        </div>
+        </Intro>
         <div>
           <Field
             name="name"
@@ -47,11 +47,21 @@ class MessageForm extends React.Component {
             label="Nachricht"
           />
         </div>
-        <button type="submit" className="send">
-          <MaterialIcon icon="send"/>&nbsp;Senden
-        </button>
-        {this.props.sent && <MessageSentDialog onClose={this.props.confirmSaveMessageSuccess}/>}
-        {this.props.commitFailed && <CommitErrorDialog onClose={this.props.resetMessageForm}/>}
+        <Button type="submit" icon="send" label="Senden" primary/>
+        {this.props.sent && (
+          <Dialog
+            heading="Nachricht gesendet"
+            message="Vielen Dank! Ihre Nachricht wurde gesendet."
+            onClose={this.props.confirmSaveMessageSuccess}
+          />
+        )}
+        {this.props.commitFailed && (
+          <Dialog
+            heading="Fehler"
+            message="Ihre Nachricht konnte nicht gesendet werden."
+            onClose={this.props.resetMessageForm}
+          />
+        )}
       </form>
     );
   }
