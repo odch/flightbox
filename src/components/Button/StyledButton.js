@@ -8,9 +8,20 @@ const colors = props => {
     `;
   }
 
+  if (props.danger) {
+    return `
+      background-color: ${props.disabled ? `#ccc` : props.theme.colors.danger};
+      color: #fff;
+    `;
+  }
+
   return `
     background-color: #fff;
-    color: ${props.disabled ? `#ccc` : props.theme.colors.main};
+    color: ${props.disabled
+      ? `#ccc`
+      : props.neutral
+        ? `#000`
+        : props.theme.colors.main};
   `;
 };
 

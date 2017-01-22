@@ -26,7 +26,7 @@ class Button extends React.Component {
   }
 
   render() {
-    const { type, className, disabled, onClick, icon, label, primary, flat } = this.props;
+    const { type, className, disabled, onClick, icon, label, primary, flat, danger, neutral } = this.props;
     return (
       <StyledButton
         type={type}
@@ -35,12 +35,15 @@ class Button extends React.Component {
         disabled={disabled}
         primary={primary}
         flat={flat}
+        danger={danger}
+        neutral={neutral}
         onMouseEnter={this.handleMouseEnter.bind(this)}
         onMouseLeave={this.handleMouseLeave.bind(this)}
       >
         <Overlay
           disabled={disabled}
           hovered={this.state.hovered}
+          danger={danger}
         >
           {icon && <MaterialIcon icon={icon}/>}<Label>{label}</Label>
         </Overlay>
@@ -58,6 +61,8 @@ Button.propTypes = {
   onClick: React.PropTypes.func,
   primary: React.PropTypes.bool,
   flat: React.PropTypes.bool,
+  danger: React.PropTypes.bool,
+  neutral: React.PropTypes.bool
 };
 
 Button.defaultProps = {
