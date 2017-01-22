@@ -6,11 +6,11 @@ import CloseButton from './CloseButton';
 
 const CommitFailureDialog = props => {
   const content = (
-    <div className="CommitFailureDialog">
+    <div>
       <Heading>Speichern fehlgeschlagen</Heading>
       <div>Die Daten konnten nicht gespeichert werden.</div>
       {props.errorMsg && <ErrorMessage>{props.errorMsg}</ErrorMessage>}
-      <div className="actions">
+      <div>
         <CloseButton label="Schliessen" onClick={props.onClose} flat/>
       </div>
     </div>

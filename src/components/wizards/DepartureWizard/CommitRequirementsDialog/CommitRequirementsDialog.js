@@ -8,7 +8,7 @@ import ConfirmButton from './ConfirmButton';
 
 const CommitRequirementsDialog = props => {
   const content = (
-    <div className="CommitRequirementsDialog">
+    <div>
       <Heading>Bitte bestätigen</Heading>
       <Items>
         <Item>Meine Ausweise sind gültig.</Item>
@@ -17,7 +17,7 @@ const CommitRequirementsDialog = props => {
         <Item>Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.</Item>
         <Item>Der Preflight-Check wurde ausgeführt.</Item>
       </Items>
-      <div className="actions">
+      <div>
         <CancelButton label="Abbrechen" onClick={props.onCancel} flat/>
         <ConfirmButton label="Bestätigen" icon="done_all" onClick={props.onConfirm} primary/>
       </div>
