@@ -1,22 +1,25 @@
 import React, { PropTypes } from 'react';
 import ModalDialog from '../../../ModalDialog';
-import MaterialIcon from '../../../MaterialIcon';
-import './CommitRequirementsDialog.scss';
+import Heading from './Heading';
+import Items from './Items';
+import Item from './Item';
+import CancelButton from './CancelButton';
+import ConfirmButton from './ConfirmButton';
 
 const CommitRequirementsDialog = props => {
   const content = (
     <div className="CommitRequirementsDialog">
-      <div className="heading">Bitte bestätigen</div>
-      <ul className="items">
-        <li>Meine Ausweise sind gültig.</li>
-        <li>Das maximale Abfluggewicht und der Schwerpunkt sind innerhalb der zulässigen Limiten.</li>
-        <li>Die verfügbare Pistenlänge ist ausreichend.</li>
-        <li>Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.</li>
-        <li>Der Preflight-Check wurde ausgeführt.</li>
-      </ul>
+      <Heading>Bitte bestätigen</Heading>
+      <Items>
+        <Item>Meine Ausweise sind gültig.</Item>
+        <Item>Das maximale Abfluggewicht und der Schwerpunkt sind innerhalb der zulässigen Limiten.</Item>
+        <Item>Die verfügbare Pistenlänge ist ausreichend.</Item>
+        <Item>Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.</Item>
+        <Item>Der Preflight-Check wurde ausgeführt.</Item>
+      </Items>
       <div className="actions">
-        <button className="cancel" onClick={props.onCancel}>Abbrechen</button>
-        <button className="confirm" onClick={props.onConfirm}><MaterialIcon icon="done_all"/>&nbsp;Bestätigen</button>
+        <CancelButton label="Abbrechen" onClick={props.onCancel} flat/>
+        <ConfirmButton label="Bestätigen" icon="done_all" onClick={props.onConfirm} primary/>
       </div>
     </div>
   );
