@@ -1,8 +1,6 @@
 import React from 'react';
-import LabeledComponent from '../LabeledComponent';
-import { MonthPicker } from '../DatePicker';
-import MaterialIcon from '../MaterialIcon';
-import './ReportForm.scss';
+import Button from '../Button';
+import LabeledMonthPicker from './LabeledMonthPicker';
 
 const handleSubmit = (generate, date, parameters, e) => {
   e.preventDefault();
@@ -10,26 +8,15 @@ const handleSubmit = (generate, date, parameters, e) => {
 };
 
 const ReportForm = props => {
-  const monthPicker = (
-    <MonthPicker
-      value={props.date}
-      onChange={(e) => props.setDate(e.value)}
-    />
-  );
-
   return (
     <form
       className="ReportForm"
       onSubmit={handleSubmit.bind(null, props.generate, props.date, props.parameters)}
     >
       <fieldset disabled={props.disabled}>
-        <div>
-          <LabeledComponent label="Monat" component={monthPicker}/>
-        </div>
+        <LabeledMonthPicker date={props.date} setDate={props.setDate}/>
         {props.children}
-        <button type="submit" className="generate">
-          <MaterialIcon icon="file_download"/>&nbsp;Herunterladen
-        </button>
+        <Button type="submit" label="Herunterladen" icon="file_download" primary/>
       </fieldset>
     </form>
   );
