@@ -1,6 +1,0 @@
-{
-  "name": "MessageList",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./MessageList.js"
-}
