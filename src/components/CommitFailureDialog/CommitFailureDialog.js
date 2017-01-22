@@ -1,15 +1,17 @@
 import React, { PropTypes } from 'react';
 import ModalDialog from '../ModalDialog';
-import './CommitFailureDialog.scss';
+import Heading from './Heading';
+import ErrorMessage from './ErrorMessage';
+import CloseButton from './CloseButton';
 
 const CommitFailureDialog = props => {
   const content = (
     <div className="CommitFailureDialog">
-      <div className="heading">Speichern fehlgeschlagen</div>
-      <div className="msg">Die Daten konnten nicht gespeichert werden.</div>
-      {props.errorMsg && <div className="error-msg">{props.errorMsg}</div>}
+      <Heading>Speichern fehlgeschlagen</Heading>
+      <div>Die Daten konnten nicht gespeichert werden.</div>
+      {props.errorMsg && <ErrorMessage>{props.errorMsg}</ErrorMessage>}
       <div className="actions">
-        <button className="close" onClick={props.onClose}>Schliessen</button>
+        <CloseButton label="Schliessen" onClick={props.onClose} flat/>
       </div>
     </div>
   );
