@@ -1,37 +1,51 @@
-import React, { PropTypes, Component } from 'react';
-import './MovementDeleteConfirmationDialog.scss';
+import React, {PropTypes, Component} from 'react';
+import styled from 'styled-components';
+import Button from '../Button';
 import ModalDialog from '../ModalDialog';
-import MaterialIcon from '../MaterialIcon';
 import dates from '../../util/dates';
 
-class MovementDeleteConfirmationDialog extends Component {
+const Question = styled.div`
+  font-size: 1.5em;
+  margin-bottom: 1em;
+`;
 
-  render() {
-    const { item, hide, confirm } = this.props;
+const Data = styled.div`
+  margin-bottom: 1em;
+`;
 
-    const date = dates.formatDate(item.date);
-    const time = dates.formatTime(item.date, item.time);
+const DataItem = styled.div`
+  margin-bottom: 0.3em;
+`;
 
-    const content = (
-      <div className="MovementDeleteConfirmationDialog">
-        <div className="question">Möchten Sie diese Bewegung wirklich löschen?</div>
-        <div className="data">
-          <div>Immatrikulation: {item.immatriculation}</div>
-          <div>Pilot: {item.lastname}</div>
-          <div>Datum: {date}</div>
-          <div>Uhrzeit: {time}</div>
-        </div>
-        <div className="actions">
-          <button className="cancel" onClick={hide}>Abbrechen</button>
-          <button className="confirm" onClick={() => { confirm(item.key, hide); }}>
-            <MaterialIcon icon="delete"/>&nbsp;Bewegung löschen
-          </button>
-        </div>
+const DeleteButton = styled(Button)`
+  float: right;
+`;
+
+const MovementDeleteConfirmationDialog = props => {
+  const {item, hide, confirm} = props;
+
+  const date = dates.formatDate(item.date);
+  const time = dates.formatTime(item.date, item.time);
+
+  const content = (
+    <div>
+      <Question>Möchten Sie diese Bewegung wirklich löschen?</Question>
+      <Data>
+        <DataItem>Immatrikulation: {item.immatriculation}</DataItem>
+        <DataItem>Pilot: {item.lastname}</DataItem>
+        <DataItem>Datum: {date}</DataItem>
+        <DataItem>Uhrzeit: {time}</DataItem>
+      </Data>
+      <div>
+        <Button label="Abbrechen" onClick={hide} flat neutral/>
+        <DeleteButton label="Bewegung löschen" icon="delete" onClick={() => {
+          confirm(item.key, hide);
+        }} danger/>
       </div>
-    );
-    return <ModalDialog content={content} onBlur={hide}/>;
-  }
-}
+    </div>
+  );
+  return <ModalDialog content={content} onBlur={hide}/>;
+};
 
 MovementDeleteConfirmationDialog.propTypes = {
   item: PropTypes.object.isRequired,
