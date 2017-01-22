@@ -1,34 +1,35 @@
 import React, {PropTypes, Component} from 'react';
 import styled from 'styled-components';
+import Button from '../Button';
 
 const Wrapper = styled.div`
-  padding: 10px 20px 0 20px;
+  padding: 10px 20px 10px 20px;
   overflow: hidden;
 `;
 
-const Button = styled.button`
-  color: #000;
-  text-decoration: none;
-  cursor: pointer;
-  user-select: none;
-  border: none;
-  background: none;
-  font-size: 1.5em;
-`;
-
-const Next = styled(Button)`
-  color: ${props => props.theme.colors.main};
+const NextButton = styled(Button)`
   float: right;
   margin-left: 20px;
 `;
 
-const Prev = styled(Button)`
-`;
-
 const WizardNavigation = props => (
   <Wrapper>
-    {props.previousVisible && <Prev type="button" onMouseDown={props.previousStep} tabIndex="-1">Zurück</Prev>}
-    {props.nextVisible && <Next type="submit" onMouseDown={props.nextStep} tabIndex="-1">{props.nextLabel || 'Weiter'}</Next>}
+    {props.previousVisible && (
+      <Button
+        type="button"
+        label="Zurück"
+        onClick={props.previousStep}
+      />
+    )}
+    {props.nextVisible && (
+      <NextButton
+        type="submit"
+        label={props.nextLabel || 'Weiter'}
+        icon="navigate_next"
+        onClick={props.nextStep}
+        primary
+      />
+    )}
   </Wrapper>
 );
 
