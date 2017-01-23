@@ -6,7 +6,7 @@ const UserName = styled.span`
   margin-right: 0.3em;
 `;
 
-const LogoutButton = styled.button`
+const Button = styled.button`
   padding: 0;
   border: none;
   border-radius: 5px;
@@ -22,14 +22,14 @@ const LoginInfo = props => {
       <div className={props.className}>
         <MaterialIcon icon="account_box"/>
         <UserName>{props.auth.data.uid}</UserName>
-        <LogoutButton onClick={props.logout}>Abmelden</LogoutButton>
+        <Button onClick={props.logout}>Abmelden</Button>
       </div>
     );
   }
 
   return (
     <div className={props.className}>
-      <button onClick={props.showLogin}>Anmelden</button>
+      <Button onClick={props.showLogin}>Anmelden</Button>
     </div>
   );
 };
