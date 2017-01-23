@@ -1,29 +1,33 @@
-import React, { PropTypes, Component } from 'react';
-import classNames from 'classnames';
-import './ImageButton.scss';
+import React, {PropTypes} from 'react';
+import styled from 'styled-components';
 
-class ImageButton extends Component {
-
-  render() {
-    return (
-      <div className={classNames(this.props.className, 'ImageButton')}>
-        <a className="img-link" href={this.props.href} onClick={this.clickHandler.bind(this)}><img src={this.props.img}/></a>
-        <a className="text-link" href={this.props.href} onClick={this.clickHandler.bind(this)}>{this.props.label}</a>
-      </div>
-    );
+const handleClick = onClick => {
+  if (typeof onClick === 'function') {
+    onClick();
   }
+};
 
-  clickHandler() {
-    if (typeof this.props.onClick === 'function') {
-      this.props.onClick();
-    }
-  }
-}
+const Wrapper = styled.div`
+  text-align: center;
+  font-size: 2em;
+`;
+
+const Link = styled.a`
+  display: block;
+  cursor: pointer;
+`;
+
+const ImageButton = props => (
+  <Wrapper className={props.className}>
+    <Link href={props.href} onClick={handleClick.bind(null, props.onClick)}><img src={props.img}/></Link>
+    <Link href={props.href} onClick={handleClick.bind(null, props.onClick)}>{props.label}</Link>
+  </Wrapper>
+);
 
 ImageButton.propTypes = {
   className: PropTypes.string,
-  label: PropTypes.string,
-  img: PropTypes.string,
+  label: PropTypes.string.isRequired,
+  img: PropTypes.string.isRequired,
   href: PropTypes.string,
   onClick: PropTypes.func,
 };
