@@ -1,7 +1,10 @@
 import React, { PropTypes } from 'react';
-import './Finish.scss';
-import ImageButton from '../../../ImageButton';
 import { getFromItemKey } from '../../../../util/reference-number';
+import Wrapper from './Wrapper';
+import Heading from './Heading';
+import Message from './Message';
+import ActionsWrapper from './ActionsWrapper';
+import ActionButton from './ActionButton';
 
 const getHeading = isUpdate =>
   isUpdate === true
@@ -22,22 +25,22 @@ const Finish = props => {
   const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
 
   return (
-    <div className="ArrivalFinish">
-      <div className="heading">{heading}</div>
-      {msg && <div className="msg">{msg}</div>}
-      <div className="wrapper">
-        <ImageButton
+    <Wrapper>
+      <Heading>{heading}</Heading>
+      {msg && <Message>{msg}</Message>}
+      <ActionsWrapper>
+        <ActionButton
           label="Abflug erfassen"
           img={departureImagePath}
           onClick={props.createDepartureFromArrival.bind(null, props.itemKey)}
         />
-        <ImageButton
+        <ActionButton
           label="Beenden"
           img={exitImagePath}
           onClick={props.finish}
         />
-      </div>
-    </div>
+      </ActionsWrapper>
+    </Wrapper>
   );
 };
 

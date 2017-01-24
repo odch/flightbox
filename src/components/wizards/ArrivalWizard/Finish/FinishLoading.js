@@ -1,10 +1,6 @@
 import React from 'react';
-import './Finish.scss';
+import Centered from '../../../Centered';
 
-const FinishLoading = () => (
-  <div className="ArrivalFinish">
-    <div className="loading">Bitte warten ...</div>
-  </div>
-);
+const FinishLoading = () => <Centered>Bitte warten ...</Centered>;
 
 export default FinishLoading;
