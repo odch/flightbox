@@ -4,8 +4,8 @@ import {
   nextPage,
   previousPage,
   finish,
-  showCommitRequirementsDialog,
-  hideCommitRequirementsDialog,
+  showDialog,
+  hideDialog,
   unsetCommitError,
 } from '../modules/ui/wizard';
 import { initNewDeparture, initNewDepartureFromArrival, editDeparture, saveDeparture } from '../modules/movements/departures';
@@ -39,8 +39,8 @@ const mapActionCreators = {
   nextPage,
   previousPage,
   finish,
-  showCommitRequirementsDialog,
-  hideCommitRequirementsDialog,
+  showDialog,
+  hideDialog,
   saveMovement: saveDeparture,
   unsetCommitError,
   destroyForm: destroy,

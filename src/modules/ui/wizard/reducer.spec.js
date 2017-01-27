@@ -5,10 +5,10 @@ import * as actions from './actions';
 const INITIAL_STATE = {
   initialized: false,
   page: 1,
-  showCommitRequirementsDialog: false,
   committed: false,
   values: null,
   commitError: null,
+  dialogs: {}
 };
 
 describe('wizard reducer', () => {
@@ -62,26 +62,37 @@ describe('wizard reducer', () => {
     });
   });
 
-  describe('WIZARD_SHOW_COMMIT_REQUIREMENTS_DIALOG', () => {
+  describe('WIZARD_SHOW_DIALOG', () => {
     it('should show requirements dialog', () => {
       expect(
         wizard({
-          showCommitRequirementsDialog: false,
-        }, actions.showCommitRequirementsDialog())
+          dialogs: {
+            'DIALOG1': true
+          },
+        }, actions.showDialog('DIALOG2'))
       ).toEqual({
-        showCommitRequirementsDialog: true,
+        dialogs: {
+          'DIALOG1': true,
+          'DIALOG2': true
+        }
       });
     });
   });
 
-  describe('WIZARD_HIDE_COMMIT_REQUIREMENTS_DIALOG', () => {
+  describe('WIZARD_HIDE_DIALOG', () => {
     it('should hide requirements dialog', () => {
       expect(
         wizard({
-          showCommitRequirementsDialog: true,
-        }, actions.hideCommitRequirementsDialog())
+          dialogs: {
+            'DIALOG1': true,
+            'DIALOG2': true
+          }
+        }, actions.hideDialog('DIALOG2'))
       ).toEqual({
-        showCommitRequirementsDialog: false,
+        dialogs: {
+          'DIALOG1': true,
+          'DIALOG2': false
+        }
       });
     });
   });

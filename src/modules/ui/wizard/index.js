@@ -6,8 +6,8 @@ export {
   previousPage,
   finish,
   reset,
-  showCommitRequirementsDialog,
-  hideCommitRequirementsDialog,
+  showDialog,
+  hideDialog,
   setCommitted,
   unsetCommitError,
 } from './actions';

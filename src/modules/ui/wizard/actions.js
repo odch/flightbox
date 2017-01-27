@@ -3,8 +3,8 @@ export const WIZARD_NEXT_PAGE = 'WIZARD_NEXT_PAGE';
 export const WIZARD_PREVIOUS_PAGE = 'WIZARD_PREVIOUS_PAGE';
 export const WIZARD_FINISH = 'WIZARD_FINISH';
 export const WIZARD_RESET = 'WIZARD_RESET';
-export const WIZARD_SHOW_COMMIT_REQUIREMENTS_DIALOG = 'WIZARD_SHOW_COMMIT_REQUIREMENTS_DIALOG';
-export const WIZARD_HIDE_COMMIT_REQUIREMENTS_DIALOG = 'WIZARD_HIDE_COMMIT_REQUIREMENTS_DIALOG';
+export const WIZARD_SHOW_DIALOG = 'WIZARD_SHOW_DIALOG';
+export const WIZARD_HIDE_DIALOG = 'WIZARD_HIDE_DIALOG';
 export const WIZARD_SET_COMMITTED = 'WIZARD_SET_COMMITTED';
 export const WIZARD_SET_COMMIT_ERROR = 'WIZARD_SET_COMMIT_ERROR';
 export const WIZARD_UNSET_COMMIT_ERROR = 'WIZARD_UNSET_COMMIT_ERROR';
@@ -39,15 +39,21 @@ export function reset() {
   };
 }
 
-export function showCommitRequirementsDialog() {
+export function showDialog(name) {
   return {
-    type: WIZARD_SHOW_COMMIT_REQUIREMENTS_DIALOG,
+    type: WIZARD_SHOW_DIALOG,
+    payload: {
+      name
+    }
   };
 }
 
-export function hideCommitRequirementsDialog() {
+export function hideDialog(name) {
   return {
-    type: WIZARD_HIDE_COMMIT_REQUIREMENTS_DIALOG,
+    type: WIZARD_HIDE_DIALOG,
+    payload: {
+      name
+    }
   };
 }
 

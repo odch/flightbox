@@ -4,10 +4,10 @@ import reducer from '../../../util/reducer';
 const INITIAL_STATE = {
   initialized: false,
   page: 1,
-  showCommitRequirementsDialog: false,
   committed: false,
   values: null,
   commitError: null,
+  dialogs: {}
 };
 
 function setInitialized(state) {
@@ -32,15 +32,21 @@ function reset() {
   return INITIAL_STATE;
 }
 
-function showCommitRequirementsDialog(state) {
+function showDialog(state, action) {
+  const dialogs = Object.assign({}, state.dialogs, {
+    [action.payload.name]: true
+  });
   return Object.assign({}, state, {
-    showCommitRequirementsDialog: true,
+    dialogs
   });
 }
 
-function hideCommitRequirementsDialog(state) {
+function hideDialog(state, action) {
+  const dialogs = Object.assign({}, state.dialogs, {
+    [action.payload.name]: false
+  });
   return Object.assign({}, state, {
-    showCommitRequirementsDialog: false,
+    dialogs
   });
 }
 
@@ -70,8 +76,8 @@ const ACTION_HANDLERS = {
   [actions.WIZARD_NEXT_PAGE]: nextPage,
   [actions.WIZARD_PREVIOUS_PAGE]: previousPage,
   [actions.WIZARD_RESET]: reset,
-  [actions.WIZARD_SHOW_COMMIT_REQUIREMENTS_DIALOG]: showCommitRequirementsDialog,
-  [actions.WIZARD_HIDE_COMMIT_REQUIREMENTS_DIALOG]: hideCommitRequirementsDialog,
+  [actions.WIZARD_SHOW_DIALOG]: showDialog,
+  [actions.WIZARD_HIDE_DIALOG]: hideDialog,
   [actions.WIZARD_SET_COMMITTED]: setCommitted,
   [actions.WIZARD_SET_COMMIT_ERROR]: setCommitError,
   [actions.WIZARD_UNSET_COMMIT_ERROR]: unsetCommitError,

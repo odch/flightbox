@@ -53,10 +53,10 @@ class MovementWizard extends Component {
       />
     );
 
-    const commitRequirementsDialog = isLast && this.props.wizard.showCommitRequirementsDialog === true
+    const commitRequirementsDialog = isLast && this.props.wizard.dialogs['COMMIT_REQUIREMENTS'] === true
       ? (
         <this.props.commitRequirementsDialogClass
-          onCancel={this.props.hideCommitRequirementsDialog}
+          onCancel={this.props.hideDialog.bind(null, 'COMMIT_REQUIREMENTS')}
           onConfirm={this.props.saveMovement}
         />
       ) : null;
@@ -80,10 +80,10 @@ class MovementWizard extends Component {
 
   getSubmitHandler(isLast) {
     if (isLast) {
-      if (this.isUpdate() || !this.props.showCommitRequirementsDialog) {
+      if (this.isUpdate() || !this.props.showDialog) {
         return this.props.saveMovement;
       } else {
-        return this.props.showCommitRequirementsDialog;
+        return this.props.showDialog.bind(null, 'COMMIT_REQUIREMENTS');
       }
     } else {
       return this.props.nextPage;
@@ -128,8 +128,8 @@ MovementWizard.propTypes = {
   nextPage: React.PropTypes.func.isRequired,
   previousPage: React.PropTypes.func.isRequired,
   finish: React.PropTypes.func.isRequired,
-  showCommitRequirementsDialog: React.PropTypes.func,
-  hideCommitRequirementsDialog: React.PropTypes.func,
+  showDialog: React.PropTypes.func,
+  hideDialog: React.PropTypes.func,
   saveMovement: React.PropTypes.func.isRequired,
   unsetCommitError: React.PropTypes.func,
   destroyForm: React.PropTypes.func.isRequired,
