@@ -37,6 +37,15 @@ const AircraftPage = (props) => {
           component={renderInputField}
           label="Maximales Abfluggewicht (in Kilogramm)"
           readOnly={props.readOnly}
+          parse={input => {
+            if (typeof input === 'number') {
+              return input;
+            }
+            if (typeof input === 'string' && /^\d+$/.test(input)) {
+              return parseInt(input);
+            }
+            return null;
+          }}
         />
       </FieldSet>
       <WizardNavigation previousVisible={false}/>
