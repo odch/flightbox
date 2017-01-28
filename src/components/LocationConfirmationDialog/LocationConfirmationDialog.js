@@ -1,35 +1,48 @@
-import React, { PropTypes, Component } from 'react';
+import React, {PropTypes, Component} from 'react';
+import styled from 'styled-components';
 import ModalDialog from '../ModalDialog';
-import MaterialIcon from '../MaterialIcon';
-import './LocationConfirmationDialog.scss';
+import Button from '../Button';
+import Strong from '../Strong';
 
-class LocationConfirmationDialog extends Component {
+const Heading = styled.div`
+  font-size: 1.5em;
+  margin-bottom: 1em;
+`;
 
-  render() {
-    const content = (
-      <div className="LocationConfirmationDialog">
-        <div className="heading">Flugplatz-ICAO-Kürzel nicht gefunden</div>
-        <div className="msg">Das von Ihnen eingegebene Flugplatz-ICAO-Kürzel wurde in der Datenbank nicht gefunden.<br/>
-          Geben Sie wenn möglich das ICAO-Kürzel und nicht den ausgeschriebenen Namen des Flugplatzes ein.<br/><br/>
-          <b>Lokalflüge:</b> Für Lokalflüge ohne Zwischenlandung geben Sie bitte <b>{__CONF__.aerodrome.ICAO}</b> ein.<br/><br/>
-          Möchten Sie Ihre Eingabe ändern oder möchten Sie wirklich den eingegebenen Flugplatz verwenden?
-        </div>
-        <div className="actions">
-          <button className="cancel" onClick={this.props.onCancel}>Flugplatz ändern</button>
-          <button className="confirm" onClick={this.props.onConfirm}>
-            <MaterialIcon icon="done"/>&nbsp;Eingegebenen Flugplatz verwenden
-          </button>
-        </div>
+const Message = styled.div`
+  margin-bottom: 2em;
+`;
+
+const CancelButton = styled(Button)`
+  float: left;
+`;
+
+const ConfirmButton = styled(Button)`
+  float: right;
+`;
+
+const LocationConfirmationDialog = props => {
+  const content = (
+    <div>
+      <Heading>Flugplatz-ICAO-Kürzel nicht gefunden</Heading>
+      <Message>Das von Ihnen eingegebene Flugplatz-ICAO-Kürzel wurde in der Datenbank nicht gefunden.<br/>
+        Geben Sie wenn möglich das ICAO-Kürzel und nicht den ausgeschriebenen Namen des Flugplatzes ein.<br/><br/>
+        <Strong>Lokalflüge:</Strong> Für Lokalflüge ohne Zwischenlandung geben Sie bitte <Strong>{__CONF__.aerodrome.ICAO}</Strong> ein.<br/><br/>
+        Möchten Sie Ihre Eingabe ändern oder möchten Sie wirklich den eingegebenen Flugplatz verwenden?
+      </Message>
+      <div>
+        <CancelButton label="Eingabe ändern" onClick={props.onCancel} flat neutral/>
+        <ConfirmButton label="Eingegebenen Flugplatz verwenden" icon="done" onClick={props.onConfirm} danger/>
       </div>
-    );
+    </div>
+  );
 
-    return <ModalDialog content={content} onBlur={this.props.onCancel}/>;
-  }
-}
+  return <ModalDialog content={content} onBlur={props.onCancel}/>;
+};
 
 LocationConfirmationDialog.propTypes = {
-  onConfirm: PropTypes.func,
-  onCancel: PropTypes.func,
+  onConfirm: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
 };
 
 export default LocationConfirmationDialog;

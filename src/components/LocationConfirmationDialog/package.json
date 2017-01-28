@@ -1,6 +1,0 @@
-{
-  "name": "LocationConfirmationDialog",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./LocationConfirmationDialog.js"
-}
