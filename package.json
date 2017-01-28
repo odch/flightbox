@@ -55,6 +55,6 @@
     "styled-components": "^1.4.1",
     "url-loader": "~0.5.7",
     "webpack-dev-server": "^1.16.2",
-    "whatwg-fetch": "^2.0.1"
+    "whatwg-fetch": "^2.0.2"
   }
 }
