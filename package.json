@@ -52,7 +52,7 @@
     "sass-loader": "^4.1.1",
     "scroll-into-view": "^1.7.1",
     "style-loader": "~0.13.0",
-    "styled-components": "^1.3.0",
+    "styled-components": "^1.4.1",
     "url-loader": "~0.5.7",
     "webpack-dev-server": "^1.16.2",
     "whatwg-fetch": "^2.0.1"
