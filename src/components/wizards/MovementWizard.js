@@ -40,26 +40,16 @@ class MovementWizard extends Component {
       return <this.props.finishComponentClass finish={this.props.finish} isUpdate={this.isUpdate()}/>;
     }
 
-    const isLast = this.props.wizard.page === this.props.pages.length;
-
-    const submitHandler = this.getSubmitHandler(isLast);
-
     const pageObj = this.props.pages[this.props.wizard.page - 1];
     const pageComponent = (
       <pageObj.component
         previousPage={this.props.previousPage}
-        onSubmit={submitHandler}
+        onSubmit={this.submitPage.bind(this)}
         readOnly={this.props.locked}
       />
     );
 
-    const commitRequirementsDialog = isLast && this.props.wizard.dialogs['COMMIT_REQUIREMENTS'] === true
-      ? (
-        <this.props.commitRequirementsDialogClass
-          onCancel={this.props.hideDialog.bind(null, 'COMMIT_REQUIREMENTS')}
-          onConfirm={this.props.saveMovement}
-        />
-      ) : null;
+    const dialog = this.getDialog();
 
     const commitFailureDialog = this.props.wizard.commitError
       ? (
@@ -72,22 +62,58 @@ class MovementWizard extends Component {
     return (
       <div>
         {pageComponent}
-        {commitRequirementsDialog}
+        {dialog}
         {commitFailureDialog}
       </div>
     );
   }
 
-  getSubmitHandler(isLast) {
-    if (isLast) {
-      if (this.isUpdate() || !this.props.showDialog) {
-        return this.props.saveMovement;
-      } else {
-        return this.props.showDialog.bind(null, 'COMMIT_REQUIREMENTS');
-      }
-    } else {
-      return this.props.nextPage;
+  getDialog() {
+    const dialogConf = this.props.pages[this.props.wizard.page - 1].dialog;
+    if (dialogConf && this.props.wizard.dialogs[dialogConf.name] === true) {
+      const isLast = this.props.wizard.page === this.props.pages.length;
+      const nextAction = isLast
+        ? this.props.saveMovement
+        : this.props.nextPage;
+      return (
+        <dialogConf.component
+          onCancel={this.props.hideDialog.bind(null, dialogConf.name)}
+          onConfirm={() => {
+            this.props.hideDialog(dialogConf.name);
+            nextAction();
+          }}
+        />
+      );
     }
+    return null;
+  }
+
+  submitPage(data) {
+    const isLast = this.props.wizard.page === this.props.pages.length;
+
+    const nextAction = isLast
+      ? this.props.saveMovement
+      : this.props.nextPage;
+
+    const dialogConf = this.props.pages[this.props.wizard.page - 1].dialog;
+
+    if (!dialogConf) {
+      nextAction();
+      return;
+    }
+
+    if (!dialogConf.predicate) {
+      this.props.showDialog(dialogConf.name);
+      return;
+    }
+
+    dialogConf.predicate(data).then(show => {
+      if (show === true) {
+        this.props.showDialog(dialogConf.name);
+      } else {
+        nextAction();
+      }
+    });
   }
 
   buildBreadcrumbItems() {
@@ -111,8 +137,12 @@ MovementWizard.propTypes = {
   pages: React.PropTypes.arrayOf(React.PropTypes.shape({
     component: React.PropTypes.func.isRequired,
     label: React.PropTypes.string.isRequired,
+    dialog: {
+      name: React.PropTypes.string.isRequired,
+      component: React.PropTypes.func.isRequired,
+      predicate: React.PropTypes.func,
+    }
   })).isRequired,
-  commitRequirementsDialogClass: React.PropTypes.func,
   finishComponentClass: React.PropTypes.func.isRequired,
   wizard: React.PropTypes.object.isRequired,
   params: React.PropTypes.object.isRequired,

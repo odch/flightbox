@@ -6,7 +6,9 @@ import PassengerPage from './pages/PassengerPage';
 import DepartureArrivalPage from './pages/DepartureArrivalPage';
 import FlightPage from '../../../containers/DepartureFlightPageContainer';
 import CommitRequirementsDialog from './CommitRequirementsDialog';
+import LocationConfirmationDialog from '../../LocationConfirmationDialog';
 import Finish from './Finish';
+import { exists as aerodromeExists } from '../../../util/aerodromes';
 
 const pages = [
   {
@@ -24,10 +26,20 @@ const pages = [
   {
     component: DepartureArrivalPage,
     label: 'Start und Ziel',
+    dialog: {
+      predicate: data => data.location ? aerodromeExists(data.location) : Promise.resolve(false),
+      name: 'LOCATION_CONFIRMATION',
+      component: LocationConfirmationDialog,
+    }
   },
   {
     component: FlightPage,
     label: 'Flug',
+    dialog: {
+      predicate: data => data.key ? Promise.resolve(false) : Promise.resolve(true),
+      name: 'COMMIT_REQUIREMENTS',
+      component: CommitRequirementsDialog,
+    }
   },
 ];
 
@@ -38,7 +50,6 @@ const DepartureWizard = props => (
     pages={pages}
     className="DepartureWizard"
     finishComponentClass={Finish}
-    commitRequirementsDialogClass={CommitRequirementsDialog}
     newMovementLabel="Neuer Abflug"
     updateMovementLabel="Abflug bearbeiten"
   />

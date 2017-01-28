@@ -1,6 +1,13 @@
 import { connect } from 'react-redux';
 import { destroy, getFormValues } from 'redux-form';
-import { nextPage, previousPage, finish, unsetCommitError } from '../modules/ui/wizard';
+import {
+  nextPage,
+  previousPage,
+  finish,
+  unsetCommitError,
+  showDialog,
+  hideDialog,
+} from '../modules/ui/wizard';
 import { initNewArrival, initNewArrivalFromDeparture, editArrival, saveArrival } from '../modules/movements/arrivals';
 import { loadLockDate } from '../modules/settings/lockDate';
 import { isLocked } from '../util/movements';
@@ -36,6 +43,8 @@ const mapActionCreators = {
   unsetCommitError,
   destroyForm: destroy,
   loadLockDate,
+  showDialog,
+  hideDialog,
 };
 
 export default connect(mapStateToProps, mapActionCreators)(ArrivalWizard);

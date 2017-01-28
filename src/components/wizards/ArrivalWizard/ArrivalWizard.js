@@ -6,6 +6,8 @@ import PassengerPage from './pages/PassengerPage';
 import DepartureArrivalPage from './pages/DepartureArrivalPage';
 import FlightPage from '../../../containers/ArrivalFlightPageContainer';
 import Finish from '../../../containers/ArrivalFinishContainer';
+import LocationConfirmationDialog from '../../LocationConfirmationDialog';
+import { exists as aerodromeExists } from '../../../util/aerodromes';
 
 const pages = [
   {
@@ -23,6 +25,11 @@ const pages = [
   {
     component: DepartureArrivalPage,
     label: 'Start und Ziel',
+    dialog: {
+      predicate: data => data.location ? aerodromeExists(data.location) : Promise.resolve(false),
+      name: 'LOCATION_CONFIRMATION',
+      component: LocationConfirmationDialog,
+    }
   },
   {
     component: FlightPage,
@@ -54,6 +61,8 @@ ArrivalWizard.propTypes = {
   saveMovement: React.PropTypes.func.isRequired,
   unsetCommitError: React.PropTypes.func.isRequired,
   destroyForm: React.PropTypes.func.isRequired,
+  showDialog: React.PropTypes.func.isRequired,
+  hideDialog: React.PropTypes.func.isRequired,
 };
 
 ArrivalWizard.contextTypes = {
