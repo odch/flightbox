@@ -137,11 +137,11 @@ MovementWizard.propTypes = {
   pages: React.PropTypes.arrayOf(React.PropTypes.shape({
     component: React.PropTypes.func.isRequired,
     label: React.PropTypes.string.isRequired,
-    dialog: {
+    dialog: React.PropTypes.shape({
       name: React.PropTypes.string.isRequired,
       component: React.PropTypes.func.isRequired,
       predicate: React.PropTypes.func,
-    }
+    })
   })).isRequired,
   finishComponentClass: React.PropTypes.func.isRequired,
   wizard: React.PropTypes.object.isRequired,
