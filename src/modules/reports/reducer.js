@@ -5,9 +5,13 @@ import reducer from '../../util/reducer';
 const INITIAL_STATE = {};
 
 function initReport(state, action) {
+  const date = moment().subtract(1, 'month');
   return Object.assign({}, state, {
     [action.payload.name]: {
-      date: moment().subtract(1, 'month').startOf('month').format('YYYY-MM-DD'),
+      date: {
+        year: date.year(),
+        month: date.month() + 1,
+      },
       parameters: {},
     },
   });

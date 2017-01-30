@@ -25,7 +25,10 @@ class AirstatReportFormContainer extends React.Component {
 
 AirstatReportFormContainer.propTypes = {
   initialized: React.PropTypes.bool.isRequired,
-  date: React.PropTypes.string,
+  date: React.PropTypes.shape({
+    year: React.PropTypes.number,
+    month: React.PropTypes.number,
+  }),
   internal: React.PropTypes.bool,
   generationInProgress: React.PropTypes.bool,
   initReport: React.PropTypes.func.isRequired,

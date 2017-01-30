@@ -23,7 +23,10 @@ class LandingsReportFormContainer extends React.Component {
 
 LandingsReportFormContainer.propTypes = {
   initialized: React.PropTypes.bool.isRequired,
-  date: React.PropTypes.string,
+  date: React.PropTypes.shape({
+    year: React.PropTypes.number,
+    month: React.PropTypes.number,
+  }),
   generationInProgress: React.PropTypes.bool,
   initReport: React.PropTypes.func.isRequired,
   setDate: React.PropTypes.func.isRequired,

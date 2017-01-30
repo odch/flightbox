@@ -27,8 +27,13 @@ export function* generateReport(action) {
   yield put(actions.setReportGenerationInProgress(report, true));
 
   const state = yield select(selectReport(report));
-  const startDate = state.date;
-  const endDate = moment(state.date).endOf('month').format('YYYY-MM-DD');
+
+  const year = state.date.year;
+  const month = state.date.month < 10 ? '0' + state.date.month : state.date.month;
+  const day = '01';
+
+  const startDate = year + '-' + month + '-' + day;
+  const endDate = moment(startDate).endOf('month').format('YYYY-MM-DD');
 
   const download = yield call(generate, report, startDate, endDate, state.parameters);
 

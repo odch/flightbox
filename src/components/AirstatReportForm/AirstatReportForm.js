@@ -17,7 +17,10 @@ const AirstatReportForm = props => (
 
 AirstatReportForm.propTypes = {
   disabled: React.PropTypes.bool,
-  date: React.PropTypes.string,
+  date: React.PropTypes.shape({
+    year: React.PropTypes.number,
+    month: React.PropTypes.number,
+  }),
   internal: React.PropTypes.bool,
   setDate: React.PropTypes.func.isRequired,
   setInternal: React.PropTypes.func.isRequired,
