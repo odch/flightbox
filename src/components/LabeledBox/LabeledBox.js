@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   margin: 0 0 2em 0;
-  overflow: hidden;
   border: 1px solid #eee;
   box-shadow: 3px;
 `;
@@ -16,7 +15,6 @@ const Label = styled.div`
 
 const Content = styled.div`
   padding: ${props => typeof props.padding === 'number' ? `${props.padding}px` : '1em'};
-  overflow: auto;
   ${props => props.contentMaxHeight > 0 && `max-height: ${props.contentMaxHeight}px;`}
   
   a {

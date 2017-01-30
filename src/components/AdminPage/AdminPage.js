@@ -33,7 +33,7 @@ class AdminPage extends Component {
               <LandingsReportForm/>
             </LabeledBox>
             <LockMovementsForm/>
-            <LabeledBox label="Nachrichten" className="messages" contentMaxHeight={400} contentPadding={0}>
+            <LabeledBox label="Nachrichten" className="messages" contentPadding={0}>
               <MessageList/>
             </LabeledBox>
             <LabeledBox label="Benutzerliste importieren" className="user-import">

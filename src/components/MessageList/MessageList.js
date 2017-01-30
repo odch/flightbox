@@ -1,5 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import MessageShape from './MessageShape';
+import MessagesWrapper from './MessagesWrapper';
 import Message from './Message';
 import MessageHeader from './MessageHeader';
 import MessageContent from './MessageContent';
@@ -17,7 +18,7 @@ class MessageList extends Component {
     }
 
     return (
-      <div>
+      <MessagesWrapper>
         {this.props.messages.data.array.map((item, index) => {
           const isSelected = this.props.messages.selected === item.key;
           return (
@@ -31,7 +32,7 @@ class MessageList extends Component {
             </Message>
           );
         })}
-      </div>
+      </MessagesWrapper>
     );
   }
 
