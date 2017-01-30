@@ -50,11 +50,12 @@ class Dropdown extends Component {
   }
 
   renderInput() {
+    const value = this.renderValue();
     return (
       <Input
         type="text"
-        value={this.state.inputFocused === true ? this.state.filter : this.state.value}
-        placeholder={this.state.value}
+        value={this.state.inputFocused === true ? this.state.filter : value}
+        placeholder={value}
         onChange={this.handleInputChange.bind(this)}
         onFocus={this.handleInputFocus.bind(this)}
         onBlur={this.handleInputBlur.bind(this)}
@@ -62,6 +63,18 @@ class Dropdown extends Component {
         readOnly={this.props.readOnly}
       />
     );
+  }
+
+  renderValue() {
+    const value = this.state.value;
+    if (value) {
+      if (typeof this.props.valueRenderer === 'function') {
+        const option = this.props.options.find(option => option.key === value);
+        return this.props.valueRenderer(option);
+      }
+      return value;
+    }
+    return '';
   }
 
   renderOptions() {
@@ -74,8 +87,8 @@ class Dropdown extends Component {
     let options;
 
     if (filteredOptions.length > 0) {
-      options = filteredOptions.slice(0, OPTIONS_RENDER_LIMIT).map(option => this.renderOption(option));
-      if (filteredOptions.length > OPTIONS_RENDER_LIMIT) {
+      options = filteredOptions.slice(0, this.props.optionsRenderLimit).map(option => this.renderOption(option));
+      if (filteredOptions.length > this.props.optionsRenderLimit) {
         options.push(this.renderMoreOptionsLabel());
       }
     } else {
@@ -153,7 +166,9 @@ class Dropdown extends Component {
       filter: '',
     });
     this.setFocusedOption(this.getInitiallyFocusedOption());
-    this.props.onFocus();
+    if (typeof this.props.onFocus === 'function') {
+      this.props.onFocus();
+    }
   }
 
   handleInputBlur() {
@@ -168,7 +183,8 @@ class Dropdown extends Component {
 
   handleContainerBlur() {
     window.requestAnimationFrame(() => {
-      if (this.isComponentElement(document.activeElement) === false) {
+      if (this.isComponentElement(document.activeElement) === false
+        && typeof this.props.onBlur === 'function') {
         this.props.onBlur(this.state.value);
       }
     });
@@ -298,6 +314,7 @@ Dropdown.propTypes = {
   options: React.PropTypes.array.isRequired,
   value: React.PropTypes.string,
   optionRenderer: React.PropTypes.func.isRequired,
+  valueRenderer: React.PropTypes.func,
   optionFilter: React.PropTypes.func,
   noOptionsText: React.PropTypes.string,
   moreOptionsText: React.PropTypes.string,
@@ -307,12 +324,14 @@ Dropdown.propTypes = {
   onFocus: React.PropTypes.func,
   onBlur: React.PropTypes.func,
   readOnly: React.PropTypes.bool,
+  optionsRenderLimit: React.PropTypes.number,
 };
 
 Dropdown.defaultProps = {
   noOptionsText: 'No options found',
   moreOptionsText: 'Too many options available. Type to filter...',
   mustSelect: false,
+  optionsRenderLimit: OPTIONS_RENDER_LIMIT,
 };
 
 export default Dropdown;
