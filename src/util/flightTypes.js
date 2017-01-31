@@ -20,7 +20,7 @@ const flightTypes = [
     value: 'aerotow',
     airstatType: 42,
   }, {
-    label: 'Fallschirm',
+    label: 'Paradrop',
     value: 'paradrop',
     airstatType: 42,
   },
