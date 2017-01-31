@@ -3,7 +3,8 @@ const through = require('gulp-through');
 const processors = {
   "runway": processRunway,
   "departureRoute": processDepartureRoute,
-  "arrivalRoute": processArrivalRoute
+  "arrivalRoute": processArrivalRoute,
+  "flightType": processFlightType,
 };
 
 function newValEquals(val) {
@@ -11,21 +12,25 @@ function newValEquals(val) {
 }
 
 function processRunway(config) {
-  return config.runways.map(runway => newValEquals(runway)).join(" || ");
+  return config.aerodrome.runways.map(runway => newValEquals(runway)).join(" || ");
 }
 
 function processDepartureRoute(config) {
-  return processRoute(config.departureRoutes, config.ICAO);
+  return processRoute(config.aerodrome.departureRoutes, config.ICAO);
 }
 
 function processArrivalRoute(config) {
-  return processRoute(config.arrivalRoutes, config.ICAO);
+  return processRoute(config.aerodrome.arrivalRoutes, config.ICAO);
 }
 
 function processRoute(routes, aerodrome) {
   const conditions = routes.map(route => newValEquals(route.name));
   conditions.push(newValEquals("circuits") + " && newData.parent().child('location').val().toUpperCase() === '" + aerodrome + "'");
   return conditions.join(" || ");
+}
+
+function processFlightType(config) {
+  return config.enabledFlightTypes.map(type => newValEquals(type)).join(" || ");
 }
 
 function processValidationString(rules, config, key, value) {

@@ -28,7 +28,7 @@
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "flightType": {
-          ".validate": "newData.val() === 'private' || newData.val() === 'commercial' || newData.val() === 'instruction'"
+          ".validate": "{flightType}"
         },
         "immatriculation": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -90,7 +90,7 @@
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "flightType": {
-          ".validate": "newData.val() === 'private' || newData.val() === 'commercial' || newData.val() === 'instruction'"
+          ".validate": "{flightType}"
         },
         "immatriculation": {
           ".validate": "newData.isString() && newData.val().length > 0"

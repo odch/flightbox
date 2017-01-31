@@ -2,19 +2,7 @@ import { connect } from 'react-redux';
 import { getFormValues } from 'redux-form';
 import FlightPage from '../components/wizards/ArrivalWizard/pages/FlightPage';
 import objectToArray from '../util/objectToArray';
-
-const flightTypes = [
-  {
-    label: 'Privat',
-    value: 'private',
-  }, {
-    label: 'Gewerblich',
-    value: 'commercial',
-  }, {
-    label: 'Schulung',
-    value: 'instruction',
-  },
-];
+import {getEnabledFlightTypes} from '../util/flightTypes';
 
 const runways = objectToArray(__CONF__.aerodrome.runways)
   .map(runway => ({
@@ -40,7 +28,7 @@ const filter = (items, values) => items.filter(item => !item.available || item.a
 const mapStateToProps = (state, ownProps) => {
   const values = getFormValues('wizard')(state);
   return Object.assign({}, ownProps, {
-    flightTypes: filter(flightTypes, values),
+    flightTypes: filter(getEnabledFlightTypes(), values),
     runways: filter(runways, values),
     arrivalRoutes: filter(arrivalRoutes, values),
   });

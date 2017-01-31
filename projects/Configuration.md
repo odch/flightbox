@@ -18,6 +18,7 @@ project.
   * `production`
 * `theme`
 * `title`
+* `enabledFlightTypes`
 
 ### `aerodrome`
 
@@ -102,6 +103,16 @@ The title of the browser window.
 
 Example: `"MFGT Bewegungen"`
 
+### `enabledFlightTypes`
+
+A list of the enabled flight types.
+
+Available flight types: `private`, `commercial`, `instruction`, `aerotow`, `paradrop`.
+
+Enabled by default: `private`, `commercial`, `instruction`.
+
+Example: `["private", "commercial"]`
+
 ## Full example
 
 
@@ -148,6 +159,13 @@ Example: `"MFGT Bewegungen"`
     }
   },
   "theme": "lszt",
-  "title": "MFGT Bewegungen"
+  "title": "MFGT Bewegungen",
+  "enabledFlightTypes": [
+      "private",
+      "commercial",
+      "instruction",
+      "aerotow",
+      "paradrop"
+    ]
 }
 ```

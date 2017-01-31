@@ -6,8 +6,6 @@ const projectName = process.env.npm_config_project || 'lszt';
 
 const projectConf = projects.load(projectName);
 
-const theme = projectConf.theme || 'lszt';
-
 const env = process.env.ENV === 'production'
   ? projectConf.environments.production
   : projectConf.environments.test;
@@ -15,7 +13,7 @@ const env = process.env.ENV === 'production'
 const globals = {
   __DEV__: process.env.DEV || false,
   __CONF__: projects.packinize(projectConf),
-  __THEME__: JSON.stringify(theme),
+  __THEME__: JSON.stringify(projectConf.theme),
   __FIREBASE_URL__: JSON.stringify(env.firebase),
   __IP_AUTH__: JSON.stringify(env.ipAuth),
   __CREDENTIALS_AUTH__: JSON.stringify(env.credentialsAuth),
@@ -26,7 +24,7 @@ module.exports = {
     'babel-polyfill',
     'whatwg-fetch',
     path.resolve(__dirname, './src/app.js'),
-    path.resolve(__dirname, './theme/' + theme)
+    path.resolve(__dirname, './theme/' + projectConf.theme)
   ],
   output: {
     path: path.resolve(__dirname, './build'),

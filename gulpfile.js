@@ -35,7 +35,7 @@ gulp.task('build', ['clean'], function () {
     .pipe(gulp.dest(config.output.path));
 
   const rules = gulp.src(['./firebase-rules.json'], { base: './' })
-    .pipe(processFirebaseRules(projectConf.aerodrome))
+    .pipe(processFirebaseRules(projectConf))
     .pipe(gulp.dest(config.output.path));
 
   return merge(bundle, copy, favicons, rules);

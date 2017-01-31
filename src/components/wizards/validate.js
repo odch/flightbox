@@ -73,7 +73,7 @@ const config = {
   flightType: {
     types: {
       required: true,
-      values: ['private', 'commercial', 'instruction'],
+      values: objectToArray(__CONF__.enabledFlightTypes),
     },
     message: 'Wählen Sie hier den Typ des Fluges aus.',
   },

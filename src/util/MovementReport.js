@@ -4,8 +4,9 @@ import { firebaseToLocal, compareAscending } from './movements.js';
 import { fetch as fetchAircrafts } from './aircrafts';
 import { fetch as fetchAerodromes } from './aerodromes';
 import { getFromItemKey } from './reference-number';
-import dates from '../util/dates';
+import dates from './dates';
 import ItemsArray from './ItemsArray';
+import {getAirstatType} from './flightTypes';
 import moment from 'moment';
 
 class MovementReport {
@@ -134,12 +135,7 @@ class MovementReport {
   }
 
   getTypeOfTraffic(movement) {
-    const types = {
-      'private': 42,
-      'instruction': 43,
-      'commercial': 32,
-    };
-    return types[movement.flightType];
+    return getAirstatType(movement.flightType);
   }
 
   getNumberOfMovements(movement) {

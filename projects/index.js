@@ -1,9 +1,15 @@
 const fs = require('fs');
 var path = require('path');
 
-function load(project) {
-  const filePath = path.join(__dirname, project + '.json');
+function loadJsonFile(name) {
+  const filePath = path.join(__dirname, name + '.json');
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+function load(project) {
+  const defaultConf = loadJsonFile('default');
+  const projectConf = loadJsonFile(project);
+  return Object.assign({}, defaultConf, projectConf);
 }
 
 function packinize(obj) {

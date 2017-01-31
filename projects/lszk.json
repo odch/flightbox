@@ -40,5 +40,12 @@
     }
   },
   "theme": "lszk",
-  "title": "FGZO Bewegungen"
+  "title": "FGZO Bewegungen",
+  "enabledFlightTypes": [
+    "private",
+    "commercial",
+    "instruction",
+    "aerotow",
+    "paradrop"
+  ]
 }
