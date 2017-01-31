@@ -18,11 +18,11 @@ const flightTypes = [
   }, {
     label: 'Flugzeugschlepp',
     value: 'aerotow',
-    airstatType: 42,
+    airstatType: 52,
   }, {
     label: 'Paradrop',
     value: 'paradrop',
-    airstatType: 42,
+    airstatType: 35,
   },
 ];
 
