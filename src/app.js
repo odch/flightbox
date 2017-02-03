@@ -10,6 +10,7 @@ import { ThemeProvider, withTheme } from 'styled-components';
 import 'moment/locale/de';
 
 import reducer, { sagas } from './modules';
+import autoRestart from './util/autoRestartSaga';
 
 import App from './containers/AppContainer';
 import StartPage from './containers/StartPageContainer';
@@ -35,7 +36,7 @@ if (window.devToolsExtension) {
 
 const store = createStore(reducer, {}, middleware);
 
-sagaMiddleware.run(sagas);
+sagaMiddleware.run(autoRestart(sagas));
 
 ReactDOM.render((
   <Provider store={store}>
