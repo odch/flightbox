@@ -2,6 +2,7 @@ import React, { PropTypes, Component } from 'react';
 import Predicates from './Predicates';
 import MovementGroup from './MovementGroup';
 import LoadingInfo from './LoadingInfo';
+import LoadingFailureInfo from './LoadingFailureInfo';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
 import { AutoLoad } from '../../util/AutoLoad';
 
@@ -102,6 +103,7 @@ class MovementList extends Component {
           lockDate={this.props.lockDate.date}
         />}
         {this.props.loading && <LoadingInfo/>}
+        {this.props.loadingFailed && <LoadingFailureInfo/>}
         {confirmationDialog}
       </div>
     );
@@ -112,6 +114,7 @@ MovementList.propTypes = {
   loadItems: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
   loading: PropTypes.bool.isRequired,
+  loadingFailed: PropTypes.bool.isRequired,
   deleteConfirmation: PropTypes.object,
   deleteItem: PropTypes.func.isRequired,
   hideDeleteConfirmationDialog: PropTypes.func.isRequired,

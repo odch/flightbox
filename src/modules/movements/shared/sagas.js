@@ -4,30 +4,36 @@ import { initialize, destroy, getFormValues } from 'redux-form'
 import * as actions from './actions';
 import * as remote from './remote';
 import { localToFirebase, firebaseToLocal } from '../../../util/movements';
+import { error } from '../../../util/log';
 
-export function* loadMovements(setLoadingAction, stateSelector, firebasePath, channel, successAction,
+export function* loadMovements(setLoadingAction, failureAction, stateSelector, firebasePath, channel, successAction,
                                childAddedAction, childChangedAction, childRemovedAction) {
-  const movements = yield select(stateSelector);
-  if (movements.loading !== true) {
-    yield put(setLoadingAction());
+  try {
+    const movements = yield select(stateSelector);
+    if (movements.loading !== true) {
+      yield put(setLoadingAction());
 
-    const pagination = getPagination(movements.data.array);
+      const pagination = getPagination(movements.data.array);
 
-    const childAdded = snapshot => channel.put(childAddedAction(snapshot));
-    const childChanged = snapshot => channel.put(childChangedAction(snapshot));
-    const childRemoved = snapshot => channel.put(childRemovedAction(snapshot));
+      const childAdded = snapshot => channel.put(childAddedAction(snapshot));
+      const childChanged = snapshot => channel.put(childChangedAction(snapshot));
+      const childRemoved = snapshot => channel.put(childRemovedAction(snapshot));
 
-    const snapshot = yield call(
-      remote.loadLimited,
-      firebasePath,
-      pagination.start,
-      pagination.limit,
-      childAdded,
-      childChanged,
-      childRemoved
-    );
+      const snapshot = yield call(
+        remote.loadLimited,
+        firebasePath,
+        pagination.start,
+        pagination.limit,
+        childAdded,
+        childChanged,
+        childRemoved
+      );
 
-    channel.put(successAction(snapshot));
+      channel.put(successAction(snapshot));
+    }
+  } catch(e) {
+    error('Failed to load movements', e);
+    channel.put(failureAction());
   }
 }
 

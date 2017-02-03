@@ -48,6 +48,7 @@ export function* getDefaultValuesFromDeparture(departureKey) {
 function* loadArrivals(channel) {
   yield sharedSagas.loadMovements(
     actions.setArrivalsLoading,
+    actions.loadArrivalsFailure,
     state => state.movements.arrivals,
     '/arrivals',
     channel,

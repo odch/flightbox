@@ -1,5 +1,6 @@
 export const LOAD_DEPARTURES = 'LOAD_DEPARTURES';
 export const SET_DEPARTURES_LOADING = 'SET_DEPARTURES_LOADING';
+export const LOAD_DEPARTURES_FAILURE = 'LOAD_DEPARTURES_FAILURE';
 export const DEPARTURES_ADDED = 'DEPARTURES_ADDED';
 export const DEPARTURE_ADDED = 'DEPARTURE_ADDED';
 export const DEPARTURE_CHANGED = 'DEPARTURE_CHANGED';
@@ -21,6 +22,12 @@ export function loadDepartures() {
 export function setDeparturesLoading() {
   return {
     type: SET_DEPARTURES_LOADING,
+  };
+}
+
+export function loadDeparturesFailure() {
+  return {
+    type: LOAD_DEPARTURES_FAILURE,
   };
 }
 

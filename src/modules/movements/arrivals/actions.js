@@ -1,5 +1,6 @@
 export const LOAD_ARRIVALS = 'LOAD_ARRIVALS';
 export const SET_ARRIVALS_LOADING = 'SET_ARRIVALS_LOADING';
+export const LOAD_ARRIVALS_FAILURE = 'LOAD_ARRIVALS_FAILURE';
 export const ARRIVALS_ADDED = 'ARRIVALS_ADDED';
 export const ARRIVAL_ADDED = 'ARRIVAL_ADDED';
 export const ARRIVAL_CHANGED = 'ARRIVAL_CHANGED';
@@ -21,6 +22,12 @@ export function loadArrivals() {
 export function setArrivalsLoading() {
   return {
     type: SET_ARRIVALS_LOADING,
+  };
+}
+
+export function loadArrivalsFailure() {
+  return {
+    type: LOAD_ARRIVALS_FAILURE,
   };
 }
 

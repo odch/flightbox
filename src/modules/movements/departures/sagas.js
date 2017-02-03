@@ -45,6 +45,7 @@ export function* loadDepartures(channel) {
   yield call(
     sharedSagas.loadMovements,
     actions.setDeparturesLoading,
+    actions.loadDeparturesFailure,
     state => state.movements.departures,
     '/departures',
     channel,

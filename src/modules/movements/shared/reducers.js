@@ -60,5 +60,13 @@ export function childRemoved(state, action) {
 export function setLoading(state) {
   return Object.assign({}, state, {
     loading: true,
+    loadingFailed: false
+  });
+}
+
+export function setLoadingFailure(state) {
+  return Object.assign({}, state, {
+    loadingFailed: true,
+    loading: false
   });
 }
