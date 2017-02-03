@@ -10,11 +10,11 @@ const flightTypes = [
   }, {
     label: 'Gewerblich',
     value: 'commercial',
-    airstatType: 43,
+    airstatType: 32,
   }, {
     label: 'Schulung',
     value: 'instruction',
-    airstatType: 32,
+    airstatType: 43,
   }, {
     label: 'Flugzeugschlepp',
     value: 'aerotow',
