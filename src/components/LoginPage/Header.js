@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router'
 import Logo from '../Logo';
 
 const Wrapper = styled.header`
@@ -17,7 +18,7 @@ const StyledLogo = styled(Logo)`
 
 const Header = () => (
   <Wrapper>
-    <a href="#/"><StyledLogo className="logo"/></a>
+    <Link to="/"><StyledLogo className="logo"/></Link>
   </Wrapper>
 );
 

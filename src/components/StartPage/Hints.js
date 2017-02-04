@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router'
 
 const Wrapper = styled.div`
   border-radius: 10px;
@@ -32,7 +33,7 @@ const I = styled.i`
   font-style: italic;
 `;
 
-const A = styled.a`
+const StyledLink = styled(Link)`
   text-decoration: underline;
 `;
 
@@ -43,11 +44,11 @@ const Hints = () => (
       <Hint>Bitte erfassen Sie Ihre <Strong>Ankunft immer nach der Landung</Strong>.</Hint>
       <Hint>Möchten Sie eine Ankunft für einen bereits erfassten Abflug erfassen
         (oder umgekehrt), nutzen Sie den Link <I>Ankunft erfassen</I> (bzw. <I>Abflug erfassen</I>)
-        bei der bereits <A href="#/movements">erfassten Bewegung</A>.
+        bei der bereits <StyledLink to="/movements">erfassten Bewegung</StyledLink>.
       </Hint>
       <Hint>Haben Sie Fragen, Anregungen oder ein anderes Anliegen bezüglich
         der Erfassung der Abflüge und Ankünfte, benachrichtigen Sie uns
-        bitte über das <A href="#/message">Rückmeldungsformular</A>.
+        bitte über das <StyledLink to="/message">Rückmeldungsformular</StyledLink>.
       </Hint>
     </ul>
   </Wrapper>

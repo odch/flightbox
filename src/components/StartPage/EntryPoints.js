@@ -28,12 +28,12 @@ const EntryPoints = props => {
 
   return (
     <Wrapper>
-      <EntryPoint img={departureImagePath} label="Abflug" href="#/departure/new"/>
-      <EntryPoint img={arrivalImagePath} label="Ankunft" href="#/arrival/new"/>
-      <EntryPoint img={movementsImagePath} label="Erfasste Bewegungen" href="#/movements"/>
-      <EntryPoint img={messageImagePath} label="Rückmeldung" href="#/message"/>
-      <EntryPoint img={helpImagePath} label="Hilfe" href="#/help"/>
-      {props.admin === true && <EntryPoint img={adminImagePath} label="Administration" href="#/admin"/>}
+      <EntryPoint img={departureImagePath} label="Abflug" href="/departure/new"/>
+      <EntryPoint img={arrivalImagePath} label="Ankunft" href="/arrival/new"/>
+      <EntryPoint img={movementsImagePath} label="Erfasste Bewegungen" href="/movements"/>
+      <EntryPoint img={messageImagePath} label="Rückmeldung" href="/message"/>
+      <EntryPoint img={helpImagePath} label="Hilfe" href="/help"/>
+      {props.admin === true && <EntryPoint img={adminImagePath} label="Administration" href="/admin"/>}
     </Wrapper>
   );
 };

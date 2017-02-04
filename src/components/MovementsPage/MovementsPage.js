@@ -12,19 +12,19 @@ class MovementsPage extends Component {
   }
 
   departuresListClick(item) {
-    window.location.hash = '/departure/' + item.key;
+    this.props.showDepartureWizard(item.key);
   }
 
   arrivalsListClick(item) {
-    window.location.hash = '/arrival/' + item.key;
+    this.props.showArrivalWizard(item.key);
   }
 
   departuresActionClick(item) {
-    window.location.hash = '/arrival/new/' + item.key;
+    this.props.createArrivalFromDeparture(item.key);
   }
 
   arrivalsActionClick(item) {
-    window.location.hash = '/departure/new/' + item.key;
+    this.props.createDepartureFromArrival(item.key);
   }
 
   render() {
@@ -95,6 +95,10 @@ MovementsPage.propTypes = {
   deleteConfirmation: React.PropTypes.object,
   showDeleteConfirmationDialog: React.PropTypes.func.isRequired,
   hideDeleteConfirmationDialog: React.PropTypes.func.isRequired,
+  createDepartureFromArrival: React.PropTypes.func.isRequired,
+  createArrivalFromDeparture: React.PropTypes.func.isRequired,
+  showDepartureWizard: React.PropTypes.func.isRequired,
+  showArrivalWizard: React.PropTypes.func.isRequired,
 };
 
 export default MovementsPage;

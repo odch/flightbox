@@ -4,7 +4,10 @@ import sagas from './sagas';
 export {
   showDeleteConfirmationDialog,
   hideDeleteConfirmationDialog,
+  showDepartureWizard,
+  showArrivalWizard,
   createDepartureFromArrival,
+  createArrivalFromDeparture,
 } from './actions';
 
 export { sagas };

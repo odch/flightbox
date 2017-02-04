@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router'
 
 export default [
   { question: 'Wann muss ich einen Abflug und wann eine Ankunft erfassen?',
@@ -71,7 +72,7 @@ export default [
           Die Personendaten werden regelmässig aus dem Flightnet importiert. Prüfen Sie die Daten
           im Flightnet auf Richtigkeit. Sind die Daten im Flightnet korrekt, aber in diesem
           System über längere Zeit nicht aktuell, kontaktieren Sie uns über
-          das <a href="#/message">Rückmeldungsformular</a>.
+          das <Link to="/message">Rückmeldungsformular</Link>.
         </p>
       </div>
     ),
@@ -83,7 +84,7 @@ export default [
           Die Flugzeugdaten werden regelmässig aus dem Luftfahrzeugregister des BAZL importiert.
           Prüfen Sie die Daten im Luftfahrzeugregister des BAZL auf Richtigkeit.
           Sind die Daten dort korrekt, aber in diesem System über längere Zeit nicht aktuell,
-          kontaktieren Sie uns über das <a href="#/message">Rückmeldungsformular</a>.
+          kontaktieren Sie uns über das <Link to="/message">Rückmeldungsformular</Link>.
         </p>
       </div>
     ),
@@ -92,7 +93,7 @@ export default [
     answer: (
       <div>
         <p>
-          Ja. Wählen Sie hierfür die entsprechende Bewegung aus der <a href="#/movements">Liste</a> aus,
+          Ja. Wählen Sie hierfür die entsprechende Bewegung aus der <Link to="/movements">Liste</Link> aus,
           korrigieren Sie die fehlerhaften Daten und speichern Sie die Bewegung neu.
         </p>
       </div>
@@ -102,7 +103,7 @@ export default [
     answer: (
       <div>
         <p>
-          Ja. Wählen Sie hierfür die entsprechende Bewegung aus der <a href="#/movements">Liste</a> aus
+          Ja. Wählen Sie hierfür die entsprechende Bewegung aus der <Link to="/movements">Liste</Link> aus
           und betätigen Sie die Schaltfläche "Löschen". Bitte überprüfen Sie die Bestätigungsabfrage
           sorgfältig, damit Sie aus Versehen nicht die falsche Bewegung löschen.
         </p>
@@ -124,7 +125,7 @@ export default [
       <div>
         <p>
           Wenden Sie sich an den diensthabenden Flugdienstleiter oder lassen Sie uns über
-          das <a href="#/message">Rückmeldungsformular</a> eine Nachricht zukommen.
+          das <Link to="/message">Rückmeldungsformular</Link> eine Nachricht zukommen.
         </p>
       </div>
     ),

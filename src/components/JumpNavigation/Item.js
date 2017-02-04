@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router'
 import MaterialIcon from '../MaterialIcon';
 
 const Wrapper = styled.div`
@@ -15,7 +16,7 @@ const Wrapper = styled.div`
   }
 `;
 
-const A = styled.a`
+const StyledLink = styled(Link)`
   &:hover {
     color: ${props => props.theme.colors.main}
   }
@@ -29,9 +30,9 @@ const Label = styled.span`
 
 const Item = props => (
   <Wrapper>
-    <A href={props.href}>
+    <StyledLink to={props.href}>
       <MaterialIcon icon={props.icon}/> <Label>{props.label}</Label>
-    </A>
+    </StyledLink>
   </Wrapper>
 );
 

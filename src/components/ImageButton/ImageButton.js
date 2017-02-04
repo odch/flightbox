@@ -1,5 +1,6 @@
 import React, {PropTypes} from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router'
 
 const handleClick = onClick => {
   if (typeof onClick === 'function') {
@@ -12,15 +13,15 @@ const Wrapper = styled.div`
   font-size: 2em;
 `;
 
-const Link = styled.a`
+const StyledLink = styled(Link)`
   display: block;
   cursor: pointer;
 `;
 
 const ImageButton = props => (
   <Wrapper className={props.className}>
-    <Link href={props.href} onClick={handleClick.bind(null, props.onClick)}><img src={props.img}/></Link>
-    <Link href={props.href} onClick={handleClick.bind(null, props.onClick)}>{props.label}</Link>
+    <StyledLink to={props.href} onClick={handleClick.bind(null, props.onClick)}><img src={props.img}/></StyledLink>
+    <StyledLink to={props.href} onClick={handleClick.bind(null, props.onClick)}>{props.label}</StyledLink>
   </Wrapper>
 );
 

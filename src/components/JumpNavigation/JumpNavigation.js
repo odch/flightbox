@@ -13,9 +13,9 @@ const Wrapper = styled.div`
 
 const JumpNavigation = () => (
   <Wrapper>
-    <Item href="#/" icon="home" label="Startseite"/>
-    <Item href="#/departure/new" icon="flight_takeoff" label="Abflug erfassen"/>
-    <Item href="#/arrival/new" icon="flight_land" label="Ankunft erfassen"/>
+    <Item href="/" icon="home" label="Startseite"/>
+    <Item href="/departure/new" icon="flight_takeoff" label="Abflug erfassen"/>
+    <Item href="/arrival/new" icon="flight_land" label="Ankunft erfassen"/>
   </Wrapper>
 );
 
