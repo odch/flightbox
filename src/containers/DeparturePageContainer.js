@@ -8,6 +8,7 @@ import {
   hideDialog,
   unsetCommitError,
 } from '../modules/ui/wizard';
+import { cancelWizard } from '../modules/ui/movements';
 import { initNewDeparture, initNewDepartureFromArrival, editDeparture, saveDeparture } from '../modules/movements/departures';
 import { loadLockDate } from '../modules/settings/lockDate';
 import DepartureWizard from '../components/wizards/DepartureWizard';
@@ -38,6 +39,7 @@ const mapActionCreators = {
   editMovement: editDeparture,
   nextPage,
   previousPage,
+  cancel: cancelWizard,
   finish,
   showDialog,
   hideDialog,

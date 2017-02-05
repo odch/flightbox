@@ -7,6 +7,10 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
+const BackButton = styled(Button)`
+  float: right;
+`;
+
 const NextButton = styled(Button)`
   float: right;
   margin-left: 20px;
@@ -14,11 +18,11 @@ const NextButton = styled(Button)`
 
 const WizardNavigation = props => (
   <Wrapper>
-    {props.previousVisible && (
+    {props.cancel && (
       <Button
         type="button"
-        label="Zurück"
-        onClick={props.previousStep}
+        label="Abbrechen"
+        onClick={props.cancel}
       />
     )}
     {props.nextVisible && (
@@ -30,6 +34,13 @@ const WizardNavigation = props => (
         primary
       />
     )}
+    {props.previousVisible && (
+      <BackButton
+        type="button"
+        label="Zurück"
+        onClick={props.previousStep}
+      />
+    )}
   </Wrapper>
 );
 
@@ -39,6 +50,7 @@ WizardNavigation.propTypes = {
   nextLabel: PropTypes.string,
   nextVisible: PropTypes.bool,
   previousVisible: PropTypes.bool,
+  cancel: PropTypes.func
 };
 
 WizardNavigation.defaultProps = {

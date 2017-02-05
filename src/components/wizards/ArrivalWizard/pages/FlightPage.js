@@ -43,7 +43,12 @@ const FlightPage = (props) => {
           readOnly={props.readOnly}
         />
       </FieldSet>
-      <WizardNavigation previousStep={previousPage} nextLabel="Speichern" nextVisible={!props.readOnly}/>
+      <WizardNavigation
+        previousStep={previousPage}
+        nextLabel="Speichern"
+        nextVisible={!props.readOnly}
+        cancel={props.cancel}
+      />
     </form>
   );
 };
@@ -51,6 +56,7 @@ const FlightPage = (props) => {
 FlightPage.propTypes = {
   previousPage: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
+  cancel: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
   flightTypes: PropTypes.arrayOf(PropTypes.shape({
     label: PropTypes.string.isRequired,

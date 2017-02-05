@@ -8,6 +8,7 @@ import {
   showDialog,
   hideDialog,
 } from '../modules/ui/wizard';
+import { cancelWizard } from '../modules/ui/movements';
 import { initNewArrival, initNewArrivalFromDeparture, editArrival, saveArrival } from '../modules/movements/arrivals';
 import { loadLockDate } from '../modules/settings/lockDate';
 import { isLocked } from '../util/movements';
@@ -38,6 +39,7 @@ const mapActionCreators = {
   editMovement: editArrival,
   nextPage,
   previousPage,
+  cancel: cancelWizard,
   finish,
   saveMovement: saveArrival,
   unsetCommitError,

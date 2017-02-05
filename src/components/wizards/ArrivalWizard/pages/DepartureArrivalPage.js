@@ -50,7 +50,7 @@ const DepartureArrivalPage = (props) => {
           readOnly={props.readOnly}
         />
       </FieldSet>
-      <WizardNavigation previousStep={previousPage}/>
+      <WizardNavigation previousStep={previousPage} cancel={props.cancel}/>
     </form>
   );
 };
@@ -58,6 +58,7 @@ const DepartureArrivalPage = (props) => {
 DepartureArrivalPage.propTypes = {
   previousPage: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
+  cancel: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
 };
 

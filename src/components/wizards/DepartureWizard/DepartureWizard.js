@@ -63,6 +63,7 @@ DepartureWizard.propTypes = {
   editMovement: React.PropTypes.func.isRequired,
   nextPage: React.PropTypes.func.isRequired,
   previousPage: React.PropTypes.func.isRequired,
+  cancel: React.PropTypes.func.isRequired,
   finish: React.PropTypes.func.isRequired,
   showDialog: React.PropTypes.func.isRequired,
   hideDialog: React.PropTypes.func.isRequired,

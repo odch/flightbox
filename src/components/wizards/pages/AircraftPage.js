@@ -48,13 +48,14 @@ const AircraftPage = (props) => {
           }}
         />
       </FieldSet>
-      <WizardNavigation previousVisible={false}/>
+      <WizardNavigation previousVisible={false} cancel={props.cancel}/>
     </form>
   );
 };
 
 AircraftPage.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
+  cancel: PropTypes.func.isRequired,
   change: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
 };

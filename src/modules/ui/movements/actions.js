@@ -4,6 +4,7 @@ export const SHOW_DEPARTURE_WIZARD = 'SHOW_DEPARTURE_WIZARD';
 export const SHOW_ARRIVAL_WIZARD = 'SHOW_ARRIVAL_WIZARD';
 export const CREATE_DEPARTURE_FROM_ARRIVAL = 'CREATE_DEPARTURE_FROM_ARRIVAL';
 export const CREATE_ARRIVAL_FROM_DEPARTURE = 'CREATE_ARRIVAL_FROM_DEPARTURE';
+export const CANCEL_WIZARD = 'CANCEL_WIZARD';
 
 export function showDeleteConfirmationDialog(item) {
   return {
@@ -54,4 +55,10 @@ export function createArrivalFromDeparture(departureKey) {
       departureKey,
     },
   };
+}
+
+export function cancelWizard() {
+  return {
+    type: CANCEL_WIZARD,
+  }
 }

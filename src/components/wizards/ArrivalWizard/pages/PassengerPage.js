@@ -29,7 +29,7 @@ const PassengerPage = props => {
           readOnly={props.readOnly}
         />
       </FieldSet>
-      <WizardNavigation previousStep={previousPage}/>
+      <WizardNavigation previousStep={previousPage} cancel={props.cancel}/>
     </form>
   );
 };
@@ -37,6 +37,7 @@ const PassengerPage = props => {
 PassengerPage.propTypes = {
   previousPage: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
+  cancel: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
 };
 

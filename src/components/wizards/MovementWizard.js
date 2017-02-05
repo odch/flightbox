@@ -45,6 +45,7 @@ class MovementWizard extends Component {
       <pageObj.component
         previousPage={this.props.previousPage}
         onSubmit={this.submitPage.bind(this)}
+        cancel={this.props.cancel}
         readOnly={this.props.locked}
       />
     );
@@ -157,6 +158,7 @@ MovementWizard.propTypes = {
   initMovement: React.PropTypes.func,
   nextPage: React.PropTypes.func.isRequired,
   previousPage: React.PropTypes.func.isRequired,
+  cancel: React.PropTypes.func.isRequired,
   finish: React.PropTypes.func.isRequired,
   showDialog: React.PropTypes.func,
   hideDialog: React.PropTypes.func,
