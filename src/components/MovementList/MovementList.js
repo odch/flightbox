@@ -6,13 +6,27 @@ import LoadingFailureInfo from './LoadingFailureInfo';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
 import { AutoLoad } from '../../util/AutoLoad';
 
+const afterTodayPredicate = Predicates.newerThanSameDay();
+const todayPredicate = Predicates.sameDay();
+const yesterdayPredicate = Predicates.dayBefore();
+const thisMonthPredicate = Predicates.and(
+  Predicates.sameMonth(),
+  Predicates.olderThanSameDay(),
+  Predicates.not(Predicates.dayBefore())
+);
+const olderPredicate = Predicates.and(
+  Predicates.olderThanSameMonth(),
+  Predicates.not(Predicates.dayBefore())
+);
+
 /**
+ * future
  * today
  * yesterday
  * this month
  * older
  */
-class MovementList extends Component {
+class MovementList extends React.PureComponent {
 
   componentWillMount() {
     if (this.props.items.length === 0) {
@@ -25,21 +39,6 @@ class MovementList extends Component {
       return <LoadingInfo/>;
     }
 
-    const movements = this.props.items;
-
-    const movementsAfterToday = movements.filter(Predicates.newerThanSameDay());
-    const movementsOfToday = movements.filter(Predicates.sameDay());
-    const movementsOfYesterday = movements.filter(Predicates.dayBefore());
-    const movementsOfThisMonth = movements.filter(Predicates.and(
-      Predicates.sameMonth(),
-      Predicates.olderThanSameDay(),
-      Predicates.not(Predicates.dayBefore())
-    ));
-    const olderMovements = movements.filter(Predicates.and(
-      Predicates.olderThanSameMonth(),
-      Predicates.not(Predicates.dayBefore())
-    ));
-
     const confirmationDialog = this.props.deleteConfirmation ?
       (<MovementDeleteConfirmationDialog
         item={this.props.deleteConfirmation}
@@ -49,9 +48,10 @@ class MovementList extends Component {
 
     return (
       <div>
-        {movementsAfterToday.length > 0 && <MovementGroup
+        <MovementGroup
           label="Ab morgen"
-          items={movementsAfterToday}
+          items={this.props.items}
+          predicate={afterTodayPredicate}
           onClick={this.props.onClick}
           timeWithDate={true}
           onAction={this.props.onAction}
@@ -59,10 +59,11 @@ class MovementList extends Component {
           actionLabel={this.props.actionLabel}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
-        />}
-        {movementsOfToday.length > 0 && <MovementGroup
+        />
+        <MovementGroup
           label="Heute"
-          items={movementsOfToday}
+          items={this.props.items}
+          predicate={todayPredicate}
           onClick={this.props.onClick}
           timeWithDate={false}
           onAction={this.props.onAction}
@@ -70,10 +71,11 @@ class MovementList extends Component {
           actionLabel={this.props.actionLabel}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
-        />}
-        {movementsOfYesterday.length > 0 && <MovementGroup
+        />
+        <MovementGroup
           label="Gestern"
-          items={movementsOfYesterday}
+          items={this.props.items}
+          predicate={yesterdayPredicate}
           onClick={this.props.onClick}
           timeWithDate={false}
           onAction={this.props.onAction}
@@ -81,27 +83,29 @@ class MovementList extends Component {
           actionLabel={this.props.actionLabel}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
-        />}
-        {movementsOfThisMonth.length > 0 && <MovementGroup
+        />
+        <MovementGroup
           label="Dieser Monat"
-          items={movementsOfThisMonth}
+          items={this.props.items}
+          predicate={thisMonthPredicate}
           onClick={this.props.onClick}
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
-        />}
-        {olderMovements.length > 0 && <MovementGroup
+        />
+        <MovementGroup
           label="Älter"
-          items={olderMovements}
+          items={this.props.items}
+          predicate={olderPredicate}
           onClick={this.props.onClick}
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
-        />}
+        />
         {this.props.loading && <LoadingInfo/>}
         {this.props.loadingFailed && <LoadingFailureInfo/>}
         {confirmationDialog}
