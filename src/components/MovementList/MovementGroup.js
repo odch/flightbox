@@ -20,32 +20,45 @@ const ItemsContainer = styled.div`
   overflow: hidden;
 `;
 
-const MovementGroup = props => (
-  <GroupWrapper>
-    <GroupLabel>{props.label}</GroupLabel>
-    <ItemsContainer>
-      {props.items.map((item, index) => {
-        return (
-          <Movement
-            key={index}
-            data={item}
-            onClick={props.onClick.bind(null, item)}
-            timeWithDate={props.timeWithDate}
-            onAction={props.onAction}
-            actionIcon={props.actionIcon}
-            actionLabel={props.actionLabel}
-            onDelete={props.onDelete}
-            locked={isLocked(item, props.lockDate)}
-          />
-        );
-      })}
-    </ItemsContainer>
-  </GroupWrapper>
-);
+class MovementGroup extends React.PureComponent {
+
+  render() {
+    const props = this.props;
+    const items = props.items.filter(props.predicate);
+
+    if (items.length === 0) {
+      return null;
+    }
+
+    return (
+      <GroupWrapper>
+        <GroupLabel>{props.label}</GroupLabel>
+        <ItemsContainer>
+          {items.map(item => {
+            return (
+              <Movement
+                key={item.key}
+                data={item}
+                onClick={props.onClick}
+                timeWithDate={props.timeWithDate}
+                onAction={props.onAction}
+                actionIcon={props.actionIcon}
+                actionLabel={props.actionLabel}
+                onDelete={props.onDelete}
+                locked={isLocked(item, props.lockDate)}
+              />
+            );
+          })}
+        </ItemsContainer>
+      </GroupWrapper>
+    );
+  }
+}
 
 MovementGroup.propTypes = {
   label: PropTypes.string,
   items: PropTypes.array,
+  predicate: PropTypes.func,
   onClick: PropTypes.func,
   timeWithDate: PropTypes.bool,
   onAction: PropTypes.func,

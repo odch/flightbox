@@ -1,4 +1,4 @@
-import React, { PropTypes, Component } from 'react';
+import React, {PropTypes} from 'react';
 import MaterialIcon from '../MaterialIcon';
 import styled from 'styled-components';
 import dates from '../../util/dates';
@@ -73,25 +73,15 @@ const ActionLabel = styled.span`
   }
 `;
 
-const Action = props => (
-  <StyledAction onClick={props.onClick} className={props.className}>
-    <MaterialIcon icon={props.icon}/><ActionLabel>&nbsp;{props.label}</ActionLabel>
-  </StyledAction>
-);
-
-const handleActionClick = (onAction, data, e) => {
-  e.stopPropagation(); // prevent call of onClick handler
-  if (typeof onAction === 'function') {
-    onAction(data);
+class Action extends React.PureComponent {
+  render() {
+    return (
+      <StyledAction onClick={this.props.onClick} className={this.props.className}>
+        <MaterialIcon icon={this.props.icon}/><ActionLabel>&nbsp;{this.props.label}</ActionLabel>
+      </StyledAction>
+    );
   }
-};
-
-const handleDeleteClick = (onDelete, data, e) => {
-  e.stopPropagation(); // prevent call of onClick handler
-  if (typeof onDelete === 'function') {
-    onDelete(data);
-  }
-};
+}
 
 const getLocation = data => {
   if (data.location.toUpperCase() === __CONF__.aerodrome.ICAO) {
@@ -103,40 +93,71 @@ const getLocation = data => {
   return data.location;
 };
 
-const Movement = props =>{
-  const date = props.timeWithDate === true
-    ? dates.formatDate(props.data.date)
-    : null;
-  const time = dates.formatTime(props.data.date, props.data.time);
+class Movement extends React.PureComponent {
 
-  return (
-    <Wrapper onClick={props.onClick} locked={props.locked}>
-      <Column className="immatriculation">{props.data.immatriculation}</Column>
-      <Column className="pilot">{props.data.lastname}</Column>
-      <Column className="datetime">
-        {date && <Date className="date">{date}</Date>}
-        <div className="time">{time}</div>
-      </Column>
-      <Column className="location">{getLocation(props.data)}</Column>
-      <ActionColumn className="action">
-        <Action
-          label={props.actionLabel}
-          icon={props.actionIcon}
-          onClick={handleActionClick.bind(null, props.onAction, props.data)}
-        />
-      </ActionColumn>
-      <ActionColumn className="delete">
-        {!props.locked && (
+  constructor(props) {
+    super(props);
+    this.handleClick = this.handleClick.bind(this);
+    this.handleActionClick = this.handleActionClick.bind(this);
+    this.handleDeleteClick = this.handleDeleteClick.bind(this);
+  }
+
+  render() {
+    const props = this.props;
+    const date = props.timeWithDate === true
+      ? dates.formatDate(props.data.date)
+      : null;
+    const time = dates.formatTime(props.data.date, props.data.time);
+
+    return (
+      <Wrapper onClick={this.handleClick} locked={props.locked}>
+        <Column className="immatriculation">{props.data.immatriculation}</Column>
+        <Column className="pilot">{props.data.lastname}</Column>
+        <Column className="datetime">
+          {date && <Date className="date">{date}</Date>}
+          <div className="time">{time}</div>
+        </Column>
+        <Column className="location">{getLocation(props.data)}</Column>
+        <ActionColumn className="action">
           <Action
-            label="Löschen"
-            icon="delete"
-            onClick={handleDeleteClick.bind(null, props.onDelete, props.data)}
+            label={props.actionLabel}
+            icon={props.actionIcon}
+            onClick={this.handleActionClick}
           />
-        )}
-      </ActionColumn>
-    </Wrapper>
-  );
-};
+        </ActionColumn>
+        <ActionColumn className="delete">
+          {!props.locked && (
+            <Action
+              label="Löschen"
+              icon="delete"
+              onClick={this.handleDeleteClick}
+            />
+          )}
+        </ActionColumn>
+      </Wrapper>
+    );
+  }
+
+  handleClick() {
+    if (typeof this.props.onClick === 'function') {
+      this.props.onClick(this.props.data.key);
+    }
+  }
+
+  handleActionClick(e) {
+    e.stopPropagation(); // prevent call of onClick handler
+    if (typeof this.props.onAction === 'function') {
+      this.props.onAction(this.props.data.key);
+    }
+  }
+
+  handleDeleteClick(e) {
+    e.stopPropagation(); // prevent call of onClick handler
+    if (typeof this.props.onDelete === 'function') {
+      this.props.onDelete(this.props.data);
+    }
+  }
+}
 
 Movement.propTypes = {
   data: PropTypes.object,

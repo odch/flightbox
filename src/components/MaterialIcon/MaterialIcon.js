@@ -31,9 +31,11 @@ const I = styled.i`
   vertical-align: middle;
 `;
 
-const MaterialIcon = props => (
-  <I className={props.className}>{props.icon}</I>
-);
+class MaterialIcon extends React.PureComponent {
+  render() {
+    return <I className={this.props.className}>{this.props.icon}</I>;
+  }
+}
 
 MaterialIcon.propTypes = {
   icon: React.PropTypes.string.isRequired,
