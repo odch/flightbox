@@ -1,18 +1,22 @@
-import React, {PropTypes, Component} from 'react';
+import React, {PropTypes} from 'react';
 import LoginPage from '../../containers/LoginPageContainer';
 import Centered from '../Centered';
 
-const App = props => {
-  if (props.auth.initialized !== true) {
-    return <Centered>Bitte warten ...</Centered>;
-  }
+class App extends React.PureComponent {
 
-  if (props.auth.authenticated !== true || props.showLogin === true) {
-    return <LoginPage/>;
-  }
+  render() {
+    const props = this.props;
+    if (props.auth.initialized !== true) {
+      return <Centered>Bitte warten ...</Centered>;
+    }
 
-  return <div>{props.children}</div>;
-};
+    if (props.auth.authenticated !== true || props.showLogin === true) {
+      return <LoginPage/>;
+    }
+
+    return <div>{props.children}</div>;
+  }
+}
 
 App.propTypes = {
   children: PropTypes.element.isRequired,

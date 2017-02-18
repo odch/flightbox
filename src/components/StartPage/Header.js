@@ -20,12 +20,18 @@ const StyledLogo = styled(Logo)`
   height: 85%;
 `;
 
-const Header = props => (
-  <StyledHeader>
-    <StyledLoginInfo logout={props.logout} auth={props.auth} showLogin={props.showLogin}/>
-    <StyledLogo/>
-  </StyledHeader>
-);
+class Header extends React.PureComponent {
+
+  render() {
+    const props = this.props;
+    return (
+      <StyledHeader>
+        <StyledLoginInfo logout={props.logout} auth={props.auth} showLogin={props.showLogin}/>
+        <StyledLogo/>
+      </StyledHeader>
+    );
+  }
+}
 
 Header.propTypes = {
   auth: React.PropTypes.object.isRequired,
