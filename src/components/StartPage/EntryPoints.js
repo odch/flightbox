@@ -2,6 +2,13 @@ import React from 'react';
 import styled from 'styled-components';
 import ImageButton from '../ImageButton';
 
+const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
+const arrivalImagePath = require('./ic_flight_land_black_48dp_2x.png');
+const movementsImagePath = require('./ic_list_black_48dp_2x.png');
+const messageImagePath = require('./ic_message_black_48dp_2x.png');
+const helpImagePath = require('./ic_help_outline_black_48dp_2x.png');
+const adminImagePath = require('./ic_settings_black_48dp_2x.png');
+
 const Wrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -21,13 +28,6 @@ const EntryPoint = styled(ImageButton)`
 class EntryPoints extends React.PureComponent {
 
   render() {
-    const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
-    const arrivalImagePath = require('./ic_flight_land_black_48dp_2x.png');
-    const movementsImagePath = require('./ic_list_black_48dp_2x.png');
-    const messageImagePath = require('./ic_message_black_48dp_2x.png');
-    const helpImagePath = require('./ic_help_outline_black_48dp_2x.png');
-    const adminImagePath = require('./ic_settings_black_48dp_2x.png');
-
     return (
       <Wrapper>
         <EntryPoint img={departureImagePath} label="Abflug" href="/departure/new"/>
