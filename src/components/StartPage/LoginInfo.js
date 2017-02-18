@@ -16,27 +16,37 @@ const Button = styled.button`
   cursor: pointer;
 `;
 
-const LoginInfo = props => {
-  if (props.auth.authenticated === true && typeof props.auth.data.uid === 'string') {
+class LoginInfo extends React.PureComponent {
+
+  render() {
+    const props = this.props;
+
+    if (props.auth.authenticated === true && typeof props.auth.data.uid === 'string') {
+      return (
+        <div className={props.className}>
+          <MaterialIcon icon="account_box"/>
+          <UserName>{props.auth.data.uid}</UserName>
+          <Button onClick={props.logout}>Abmelden</Button>
+        </div>
+      );
+    }
+
     return (
       <div className={props.className}>
-        <MaterialIcon icon="account_box"/>
-        <UserName>{props.auth.data.uid}</UserName>
-        <Button onClick={props.logout}>Abmelden</Button>
+        <Button onClick={props.showLogin}>Anmelden</Button>
       </div>
     );
   }
-
-  return (
-    <div className={props.className}>
-      <Button onClick={props.showLogin}>Anmelden</Button>
-    </div>
-  );
-};
+}
 
 LoginInfo.propTypes = {
   className: React.PropTypes.string,
-  auth: React.PropTypes.object.isRequired,
+  auth: React.PropTypes.shape({
+    authenticated: React.PropTypes.bool.isRequired,
+    data: React.PropTypes.shape({
+      uid: React.PropTypes.string
+    })
+  }).isRequired,
   logout: React.PropTypes.func.isRequired,
   showLogin: React.PropTypes.func.isRequired,
 };

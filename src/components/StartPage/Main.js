@@ -9,12 +9,17 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
-const Main = props => (
-  <Wrapper className="main">
-    <Hints/>
-    <EntryPoints admin={props.admin}/>
-  </Wrapper>
-);
+class Main extends React.PureComponent {
+
+  render() {
+    return (
+      <Wrapper>
+        <Hints/>
+        <EntryPoints admin={this.props.admin}/>
+      </Wrapper>
+    );
+  }
+}
 
 Main.propTypes = {
   admin: React.PropTypes.bool,

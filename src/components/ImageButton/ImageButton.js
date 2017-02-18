@@ -1,12 +1,6 @@
 import React, {PropTypes} from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router'
-
-const handleClick = onClick => {
-  if (typeof onClick === 'function') {
-    onClick();
-  }
-};
+import {Link} from 'react-router'
 
 const Wrapper = styled.div`
   text-align: center;
@@ -18,12 +12,18 @@ const StyledLink = styled(Link)`
   cursor: pointer;
 `;
 
-const ImageButton = props => (
-  <Wrapper className={props.className}>
-    <StyledLink to={props.href} onClick={handleClick.bind(null, props.onClick)}><img src={props.img}/></StyledLink>
-    <StyledLink to={props.href} onClick={handleClick.bind(null, props.onClick)}>{props.label}</StyledLink>
-  </Wrapper>
-);
+class ImageButton extends React.PureComponent {
+
+  render() {
+    const props = this.props;
+    return (
+      <Wrapper className={props.className}>
+        <StyledLink to={props.href} onClick={props.onClick}><img src={props.img}/></StyledLink>
+        <StyledLink to={props.href} onClick={props.onClick}>{props.label}</StyledLink>
+      </Wrapper>
+    )
+  }
+}
 
 ImageButton.propTypes = {
   className: PropTypes.string,
