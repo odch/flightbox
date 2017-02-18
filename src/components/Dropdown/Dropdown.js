@@ -26,6 +26,13 @@ class Dropdown extends Component {
       optionsVisible: false,
     };
     this.options = [];
+    this.handleContainerKeyDown = this.handleContainerKeyDown.bind(this);
+    this.handleContainerBlur = this.handleContainerBlur.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleInputFocus = this.handleInputFocus.bind(this);
+    this.handleInputBlur = this.handleInputBlur.bind(this);
+    this.refContainerDom = this.refContainerDom.bind(this);
+    this.refInputDom = this.refInputDom.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -38,10 +45,10 @@ class Dropdown extends Component {
     return (
       <Wrapper
         className={this.props.className}
-        onKeyDown={this.handleContainerKeyDown.bind(this)}
-        onBlur={this.handleContainerBlur.bind(this)}
+        onKeyDown={this.handleContainerKeyDown}
+        onBlur={this.handleContainerBlur}
         tabIndex="1"
-        innerRef={comp => this.container = comp}
+        innerRef={this.refContainerDom}
       >
         {this.renderInput()}
         {this.renderOptions()}
@@ -56,10 +63,10 @@ class Dropdown extends Component {
         type="text"
         value={this.state.inputFocused === true ? this.state.filter : value}
         placeholder={value}
-        onChange={this.handleInputChange.bind(this)}
-        onFocus={this.handleInputFocus.bind(this)}
-        onBlur={this.handleInputBlur.bind(this)}
-        innerRef={comp => this.input = comp}
+        onChange={this.handleInputChange}
+        onFocus={this.handleInputFocus}
+        onBlur={this.handleInputBlur}
+        innerRef={this.refInputDom}
         readOnly={this.props.readOnly}
       />
     );
@@ -125,6 +132,14 @@ class Dropdown extends Component {
 
   renderMoreOptionsLabel() {
     return <MoreOptions key="more-options">{this.props.moreOptionsText}</MoreOptions>;
+  }
+
+  refContainerDom(comp) {
+    this.container = comp;
+  }
+
+  refInputDom(comp) {
+    this.input = comp;
   }
 
   handleInputChange(e) {

@@ -1,5 +1,4 @@
 import React, { PropTypes, Component } from 'react';
-import classNames from 'classnames';
 import Label from './Label';
 import ComponentContainer from './ComponentContainer';
 import Tooltip from './Tooltip';
@@ -13,11 +12,13 @@ class LabeledComponent extends Component {
     this.state = {
       tooltipVisible: false,
     };
+    this.handleFocus = this.handleFocus.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
   }
 
   render() {
     return (
-      <Wrapper className={classNames('LabeledComponent', this.props.className)} onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)}>
+      <Wrapper className={this.props.className} onFocus={this.handleFocus} onBlur={this.handleBlur}>
         <Label>{this.props.label}</Label>
         {this.props.validationError && <ValidationMessage error={this.props.validationError}/>}
         <ComponentContainer>{this.props.component}</ComponentContainer>
@@ -26,13 +27,13 @@ class LabeledComponent extends Component {
     );
   }
 
-  onFocus() {
+  handleFocus() {
     this.setState({
       tooltipVisible: true,
     });
   }
 
-  onBlur() {
+  handleBlur() {
     this.setState({
       tooltipVisible: false,
     });

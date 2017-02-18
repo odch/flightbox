@@ -11,12 +11,18 @@ const Legend = styled.legend`
   margin-bottom: 1em;
 `;
 
-const FieldSet = props => (
-  <Wrapper>
-    {props.legend && <Legend>{props.legend}</Legend>}
-    {props.children}
-  </Wrapper>
-);
+class FieldSet extends React.PureComponent {
+
+  render() {
+    const props = this.props;
+    return (
+      <Wrapper>
+        {props.legend && <Legend>{props.legend}</Legend>}
+        {props.children}
+      </Wrapper>
+    );
+  }
+}
 
 FieldSet.propTypes = {
   legend: React.PropTypes.string,
