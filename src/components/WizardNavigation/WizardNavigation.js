@@ -1,4 +1,4 @@
-import React, {PropTypes, Component} from 'react';
+import React, {PropTypes} from 'react';
 import styled from 'styled-components';
 import Button from '../Button';
 
@@ -16,33 +16,38 @@ const NextButton = styled(Button)`
   margin-left: 20px;
 `;
 
-const WizardNavigation = props => (
-  <Wrapper>
-    {props.cancel && (
-      <Button
-        type="button"
-        label="Abbrechen"
-        onClick={props.cancel}
-      />
-    )}
-    {props.nextVisible && (
-      <NextButton
-        type="submit"
-        label={props.nextLabel || 'Weiter'}
-        icon="navigate_next"
-        onClick={props.nextStep}
-        primary
-      />
-    )}
-    {props.previousVisible && (
-      <BackButton
-        type="button"
-        label="Zurück"
-        onClick={props.previousStep}
-      />
-    )}
-  </Wrapper>
-);
+class WizardNavigation extends React.PureComponent {
+
+  render() {
+    const props = this.props;
+    return (
+      <Wrapper>
+        {props.cancel && (
+          <Button
+            type="button"
+            label="Abbrechen"
+            onClick={props.cancel}
+          />
+        )}
+        {props.nextVisible && (
+          <NextButton
+            type="submit"
+            label={props.nextLabel || 'Weiter'}
+            icon="navigate_next"
+            onClick={props.nextStep}
+            primary
+          />
+        )}
+        {props.previousVisible && (
+          <BackButton
+            type="button"
+            label="Zurück"
+            onClick={props.previousStep}
+          />
+        )}
+      </Wrapper>)
+  }
+}
 
 WizardNavigation.propTypes = {
   previousStep: PropTypes.func,

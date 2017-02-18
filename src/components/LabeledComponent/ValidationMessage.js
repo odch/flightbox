@@ -17,12 +17,17 @@ const Text = styled.div`
   margin-left: 2em;
 `;
 
-const ValidationMessage = props => (
-  <Wrapper>
-    <Icon icon="error"/>
-    <Text>{props.error}</Text>
-  </Wrapper>
-);
+class ValidationMessage extends React.PureComponent {
+
+  render() {
+    return (
+      <Wrapper>
+        <Icon icon="error"/>
+        <Text>{this.props.error}</Text>
+      </Wrapper>
+    );
+  }
+}
 
 ValidationMessage.propTypes = {
   error: React.PropTypes.string.isRequired,
