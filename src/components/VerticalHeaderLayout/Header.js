@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router'
+import {Link} from 'react-router'
 import Logo from '../Logo';
 
 const Wrapper = styled.header`
@@ -23,12 +23,17 @@ const StyledLogo = styled(Logo)`
   margin-top: 10px;
 `;
 
-const Header = () => (
-  <Wrapper>
-    <Link to="/">
-      <StyledLogo/>
-    </Link>
-  </Wrapper>
-);
+class Header extends React.PureComponent {
+
+  render() {
+    return (
+      <Wrapper>
+        <Link to="/">
+          <StyledLogo/>
+        </Link>
+      </Wrapper>
+    );
+  }
+}
 
 export default Header;
