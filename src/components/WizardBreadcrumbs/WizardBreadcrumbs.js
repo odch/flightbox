@@ -1,4 +1,4 @@
-import React, { PropTypes, Component } from 'react';
+import React, {PropTypes} from 'react';
 import styled from 'styled-components';
 
 const Wrapper = styled.nav`
@@ -35,21 +35,27 @@ const arePreviousItemsValid = (items, index) => {
   return true;
 };
 
-const WizardBreadcrumbs = props => (
-  <Wrapper>
-    <List>
-      {props.items.map((item, index) => {
-        const active = index === props.activeItem;
-        const handler = arePreviousItemsValid(props.items, index) ? item.handler : undefined;
-        return (
-          <Item key={index}>
-            <A onMouseDown={handler} tabIndex="-1" active={active} noHandler={!handler}>{item.label}</A>
-          </Item>
-        );
-      })}
-    </List>
-  </Wrapper>
-);
+class WizardBreadcrumbs extends React.PureComponent {
+
+  render() {
+    const props = this.props;
+    return (
+      <Wrapper>
+        <List>
+          {props.items.map((item, index) => {
+            const active = index === props.activeItem;
+            const handler = arePreviousItemsValid(props.items, index) ? item.handler : undefined;
+            return (
+              <Item key={index}>
+                <A onMouseDown={handler} tabIndex="-1" active={active} noHandler={!handler}>{item.label}</A>
+              </Item>
+            );
+          })}
+        </List>
+      </Wrapper>
+    );
+  }
+}
 
 WizardBreadcrumbs.propTypes = {
   items: PropTypes.arrayOf(
