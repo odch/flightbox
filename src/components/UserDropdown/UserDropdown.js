@@ -48,6 +48,7 @@ const UserDropdown = props => (
     onFocus={props.onFocus}
     onBlur={callWithValue.bind(null, props.onBlur, props.users.data.array)}
     readOnly={props.readOnly}
+    clearable
   />
 );
 
