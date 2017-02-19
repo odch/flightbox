@@ -1,11 +1,13 @@
 import React, {Component} from 'react';
 import scrollIntoView from 'scroll-into-view';
+import MaterialIcon from '../MaterialIcon';
 import Wrapper from './Wrapper';
 import Input from './Input';
 import OptionsContainer from './OptionsContainer';
 import Option from './Option';
 import NoOptions from './NoOptions';
 import MoreOptions from './MoreOptions';
+import ClearButton from './ClearButton';
 
 const KEY_CODE_ARROW_DOWN = 40;
 const KEY_CODE_ARROW_UP = 38;
@@ -31,6 +33,7 @@ class Dropdown extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleInputFocus = this.handleInputFocus.bind(this);
     this.handleInputBlur = this.handleInputBlur.bind(this);
+    this.handleClear = this.handleClear.bind(this);
     this.refContainerDom = this.refContainerDom.bind(this);
     this.refInputDom = this.refInputDom.bind(this);
   }
@@ -59,16 +62,23 @@ class Dropdown extends Component {
   renderInput() {
     const value = this.renderValue();
     return (
-      <Input
-        type="text"
-        value={this.state.inputFocused === true ? this.state.filter : value}
-        placeholder={value}
-        onChange={this.handleInputChange}
-        onFocus={this.handleInputFocus}
-        onBlur={this.handleInputBlur}
-        innerRef={this.refInputDom}
-        readOnly={this.props.readOnly}
-      />
+      <div>
+        <Input
+          type="text"
+          value={this.state.inputFocused === true ? this.state.filter : value}
+          placeholder={value}
+          onChange={this.handleInputChange}
+          onFocus={this.handleInputFocus}
+          onBlur={this.handleInputBlur}
+          innerRef={this.refInputDom}
+          readOnly={this.props.readOnly}
+        />
+        {this.props.clearable && this.state.value && (
+          <ClearButton onClick={this.handleClear}>
+            <MaterialIcon icon="clear"/>
+          </ClearButton>
+        )}
+      </div>
     );
   }
 
@@ -194,6 +204,10 @@ class Dropdown extends Component {
     if (this.state.filter && this.props.mustSelect !== true) {
       this.setValue(this.state.filter);
     }
+  }
+
+  handleClear() {
+    this.setValue('');
   }
 
   handleContainerBlur() {
@@ -334,6 +348,7 @@ Dropdown.propTypes = {
   noOptionsText: React.PropTypes.string,
   moreOptionsText: React.PropTypes.string,
   mustSelect: React.PropTypes.bool,
+  clearable: React.PropTypes.bool,
   onChange: React.PropTypes.func,
   onBeforeInputChange: React.PropTypes.func,
   onFocus: React.PropTypes.func,
@@ -346,6 +361,7 @@ Dropdown.defaultProps = {
   noOptionsText: 'No options found',
   moreOptionsText: 'Too many options available. Type to filter...',
   mustSelect: false,
+  clearable: false,
   optionsRenderLimit: OPTIONS_RENDER_LIMIT,
 };
 
