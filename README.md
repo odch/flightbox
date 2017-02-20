@@ -17,7 +17,6 @@ Then open [http://0.0.0.0:8080/webpack-dev-server/](http://0.0.0.0:8080/webpack-
 * `project` (optional): Name of the project. There must a configuration file called `{PROJECT_NAME}.json` be available
                         in the `projects` directory. The default project is `lszt`.
 
-
 ### How to Test
 
 ```
