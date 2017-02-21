@@ -16,11 +16,11 @@ function processRunway(config) {
 }
 
 function processDepartureRoute(config) {
-  return processRoute(config.aerodrome.departureRoutes, config.ICAO);
+  return processRoute(config.aerodrome.departureRoutes, config.aerodrome.ICAO);
 }
 
 function processArrivalRoute(config) {
-  return processRoute(config.aerodrome.arrivalRoutes, config.ICAO);
+  return processRoute(config.aerodrome.arrivalRoutes, config.aerodrome.ICAO);
 }
 
 function processRoute(routes, aerodrome) {
