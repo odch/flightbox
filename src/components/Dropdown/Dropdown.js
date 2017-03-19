@@ -73,7 +73,7 @@ class Dropdown extends Component {
           innerRef={this.refInputDom}
           readOnly={this.props.readOnly}
         />
-        {this.props.clearable && this.state.value && (
+        {this.props.clearable && !this.props.readOnly && this.state.value && (
           <ClearButton onClick={this.handleClear}>
             <MaterialIcon icon="clear"/>
           </ClearButton>
