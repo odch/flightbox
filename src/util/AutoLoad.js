@@ -38,8 +38,8 @@ export const AutoLoad = (List) => class extends Component {
         return element;
       }
       element = element.parentNode;
-    } while (element);
-    return null;
+    } while (element && element !== document);
+    return window;
   }
 
   handleScroll(e) {
@@ -49,6 +49,9 @@ export const AutoLoad = (List) => class extends Component {
   }
 
   isEndReached(element) {
+    if (element === document) {
+      return (window.innerHeight + window.scrollY) >= document.body.offsetHeight;
+    }
     return element.offsetHeight + element.scrollTop === element.scrollHeight;
   }
 

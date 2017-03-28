@@ -2,15 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  position: absolute;
-  left: 17%;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  overflow: auto;
+  margin-left: 17%;
   
   @media screen and (max-width: 768px) {
-    left: 0;
+    margin-left: 0;
   }
 `;
 
