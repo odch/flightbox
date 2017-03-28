@@ -38,11 +38,17 @@ const store = createStore(reducer, {}, middleware);
 
 sagaMiddleware.run(autoRestart(sagas));
 
+const handleRouteChange = (prevState, nextState) => {
+  if (nextState.location.action !== 'POP') {
+    window.scrollTo(0, 0);
+  }
+};
+
 ReactDOM.render((
   <Provider store={store}>
     <ThemeProvider theme={theme}>
       <Router history={hashHistory}>
-        <Route path="/" component={App}>
+        <Route path="/" component={App} onChange={handleRouteChange}>
           <IndexRoute component={StartPage}/>
           <Route path="departure/new" component={DeparturePage}/>
           <Route path="departure/new/:arrivalKey" component={DeparturePage}/>

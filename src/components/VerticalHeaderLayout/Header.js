@@ -4,7 +4,7 @@ import {Link} from 'react-router'
 import Logo from '../Logo';
 
 const Wrapper = styled.header`
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   height: 100%;
@@ -14,7 +14,7 @@ const Wrapper = styled.header`
   text-align: center;
   
   @media screen and (max-width: 768px) {
-    width: 0;
+    display: none;
   }
 `;
 
