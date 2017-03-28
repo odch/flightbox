@@ -50,7 +50,8 @@ export const AutoLoad = (List) => class extends Component {
 
   isEndReached(element) {
     if (element === document) {
-      return (window.innerHeight + window.scrollY) >= document.body.offsetHeight;
+      const scrollY = window.scrollY || window.pageYOffset;
+      return (window.innerHeight + scrollY) >= document.body.offsetHeight;
     }
     return element.offsetHeight + element.scrollTop === element.scrollHeight;
   }
