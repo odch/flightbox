@@ -4,7 +4,6 @@ import Centered from '../Centered';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import { getFromItemKey } from '../../util/reference-number';
 import Breadcrumbs from './Breadcrumbs';
-import Content from './Content';
 
 class MovementWizard extends Component {
 
@@ -25,7 +24,7 @@ class MovementWizard extends Component {
         <div>
           {this.props.wizard.initialized === true && this.props.wizard.committed !== true &&
             <Breadcrumbs items={this.buildBreadcrumbItems()} activeItem={this.props.wizard.page}/>}
-          <Content>{this.getMiddleItem()}</Content>
+          <div>{this.getMiddleItem()}</div>
         </div>
       </VerticalHeaderLayout>
     );
