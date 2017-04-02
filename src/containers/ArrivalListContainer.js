@@ -17,7 +17,7 @@ const mapStateToProps = state => {
     lockDate: state.settings.lockDate,
     deleteConfirmation: state.ui.movements.deleteConfirmation,
     actionIcon: 'flight_takeoff',
-    actionLabel: 'Abflug'
+    actionLabel: 'Abflug erfassen'
   };
 };
 
