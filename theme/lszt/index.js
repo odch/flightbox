@@ -1,10 +1,10 @@
-const logo = require('./logo.svg');
+const logo = require('./logo.png');
 
 const theme = {
   colors: {
-    main: '#ed351c',
+    main: '#003863',
     background: '#f6f6f6',
-    danger: '#ed351c'
+    danger: '#e00f00'
   },
   images: {
     logo
