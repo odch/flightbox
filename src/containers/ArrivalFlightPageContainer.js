@@ -3,6 +3,7 @@ import { getFormValues } from 'redux-form';
 import FlightPage from '../components/wizards/ArrivalWizard/pages/FlightPage';
 import objectToArray from '../util/objectToArray';
 import {getEnabledFlightTypes} from '../util/flightTypes';
+import {getArrivalRoutes} from '../util/routes';
 
 const runways = objectToArray(__CONF__.aerodrome.runways)
   .map(runway => ({
@@ -10,18 +11,7 @@ const runways = objectToArray(__CONF__.aerodrome.runways)
     value: runway,
   }));
 
-const arrivalRoutes = objectToArray(__CONF__.aerodrome.arrivalRoutes)
-  .map(route => ({
-    label: route.label,
-    value: route.name,
-  }));
-
-arrivalRoutes.push({
-  label: 'Platzrunden',
-  value: 'circuits',
-  description: 'Ohne Verlassen des Platzverkehrs',
-  available: values => values.location && values.location.toUpperCase() === __CONF__.aerodrome.ICAO,
-});
+const arrivalRoutes = getArrivalRoutes();
 
 const filter = (items, values) => items.filter(item => !item.available || item.available(values) === true);
 
