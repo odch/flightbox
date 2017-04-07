@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import MessageShape from './MessageShape';
+import newLineToBr from '../../util/newLineToBr';
 
 const Wrapper = styled.div`
   padding-top: 1em;
@@ -25,7 +26,7 @@ const MessageContent = props => (
         <label>Telefon: <a href={'tel:' + props.item.phone} target="_blank">{props.item.phone}</a></label>
       </div>
     </Contact>
-    <Message>{props.item.message.split('\n').map((line, index) => <span key={index}>{line}<br/></span>)}</Message>
+    <Message>{newLineToBr(props.item.message)}</Message>
   </Wrapper>
 );
 

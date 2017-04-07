@@ -29,6 +29,7 @@ const olderPredicate = Predicates.and(
 class MovementList extends React.PureComponent {
 
   componentWillMount() {
+    this.props.onSelect(null);
     if (this.props.items.length === 0) {
       this.props.loadItems();
     }
@@ -51,8 +52,11 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Ab morgen"
           items={this.props.items}
+          movementType={this.props.movementType}
+          selected={this.props.selected}
+          onSelect={this.props.onSelect}
           predicate={afterTodayPredicate}
-          onClick={this.props.onClick}
+          onEdit={this.props.onEdit}
           timeWithDate={true}
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
@@ -63,8 +67,11 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Heute"
           items={this.props.items}
+          movementType={this.props.movementType}
+          selected={this.props.selected}
+          onSelect={this.props.onSelect}
           predicate={todayPredicate}
-          onClick={this.props.onClick}
+          onEdit={this.props.onEdit}
           timeWithDate={false}
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
@@ -75,8 +82,11 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Gestern"
           items={this.props.items}
+          movementType={this.props.movementType}
+          selected={this.props.selected}
+          onSelect={this.props.onSelect}
           predicate={yesterdayPredicate}
-          onClick={this.props.onClick}
+          onEdit={this.props.onEdit}
           timeWithDate={false}
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
@@ -87,8 +97,11 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Dieser Monat"
           items={this.props.items}
+          movementType={this.props.movementType}
+          selected={this.props.selected}
+          onSelect={this.props.onSelect}
           predicate={thisMonthPredicate}
-          onClick={this.props.onClick}
+          onEdit={this.props.onEdit}
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
@@ -98,8 +111,11 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Älter"
           items={this.props.items}
+          movementType={this.props.movementType}
+          selected={this.props.selected}
+          onSelect={this.props.onSelect}
           predicate={olderPredicate}
-          onClick={this.props.onClick}
+          onEdit={this.props.onEdit}
           onAction={this.props.onAction}
           actionIcon={this.props.actionIcon}
           actionLabel={this.props.actionLabel}
@@ -115,15 +131,18 @@ class MovementList extends React.PureComponent {
 }
 
 MovementList.propTypes = {
+  movementType: PropTypes.oneOf(['departure', 'arrival']),
   loadItems: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
+  selected: PropTypes.string,
+  onSelect: PropTypes.func,
   loading: PropTypes.bool.isRequired,
   loadingFailed: PropTypes.bool.isRequired,
   deleteConfirmation: PropTypes.object,
   deleteItem: PropTypes.func.isRequired,
   hideDeleteConfirmationDialog: PropTypes.func.isRequired,
   showDeleteConfirmationDialog: React.PropTypes.func.isRequired,
-  onClick: PropTypes.func,
+  onEdit: PropTypes.func,
   onAction: PropTypes.func,
   actionIcon: PropTypes.string,
   actionLabel: PropTypes.string,

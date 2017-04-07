@@ -8,7 +8,8 @@ export {
   showArrivalWizard,
   createDepartureFromArrival,
   createArrivalFromDeparture,
-  cancelWizard
+  cancelWizard,
+  selectMovement
 } from './actions';
 
 export { sagas };

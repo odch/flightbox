@@ -1,97 +1,25 @@
 import React, {PropTypes} from 'react';
-import MaterialIcon from '../MaterialIcon';
 import styled from 'styled-components';
-import dates from '../../util/dates';
+import MovementHeader from './MovementHeader';
+import MovementDetails from './MovementDetails';
+import Action from './Action';
 
 const Wrapper = styled.div`
-  padding: 1em;
-  overflow: hidden;
-  cursor: pointer;
-  ${props => props.locked && `color: #555;`}
+  background-color: #fbfbfb;
+  box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.24);
   
-  &:hover {
-    background-color: ${props => props.theme.colors.background};
-  }
-  
-  .immatriculation, .pilot, .datetime, .location, .delete {
-    width: 15%;
-  }
-
-  .action {
-    width: 25%;
-  }
-    
-  @media (max-width: 980px) {
-    .immatriculation, .pilot, .datetime, .location {
-      width: 21.25%;
-    }
-
-    .action, .delete {
-      width: 7.5%;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .location {
-      display: none;
-    }
-
-    .immatriculation, .pilot, .datetime {
-      width: 26%;
-    }
-
-    .action, .delete {
-      width: 11%;
-    }
-  }
+  ${props => props.selected && `
+    margin: 20px -10px 20px -10px;
+  `}
 `;
 
-const Column = styled.div`
-  display: inline-block;
-  vertical-align: top;
-  width: ${props => props.width};
-`;
-
-const ActionColumn = styled(Column)`
+const Footer = styled.div`
+  background-color: #fff;
   text-align: right;
-  font-size: 1.2em;
+  padding-right: 0.7em;
+  padding-bottom: 0.7em;
+  font-size: 1.3em;
 `;
-
-const Date = styled.div`
-  margin-bottom: 0.2em;
-`;
-
-const StyledAction = styled.span`
-  &:hover {
-    color: ${props => props.theme.colors.main};
-  }
-`;
-
-const ActionLabel = styled.span`
-  @media (max-width: 980px) {
-    display: none;
-  }
-`;
-
-class Action extends React.PureComponent {
-  render() {
-    return (
-      <StyledAction onClick={this.props.onClick} className={this.props.className}>
-        <MaterialIcon icon={this.props.icon}/><ActionLabel>&nbsp;{this.props.label}</ActionLabel>
-      </StyledAction>
-    );
-  }
-}
-
-const getLocation = data => {
-  if (data.location.toUpperCase() === __CONF__.aerodrome.ICAO) {
-    if (data.departureRoute === 'circuits' || data.arrivalRoute === 'circuits') {
-      return 'Platzrunden';
-    }
-    return 'Lokalflug';
-  }
-  return data.location;
-};
 
 class Movement extends React.PureComponent {
 
@@ -100,73 +28,78 @@ class Movement extends React.PureComponent {
     this.handleClick = this.handleClick.bind(this);
     this.handleActionClick = this.handleActionClick.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
+    this.handleEditClick = this.handleEditClick.bind(this);
   }
 
   render() {
     const props = this.props;
-    const date = props.timeWithDate === true
-      ? dates.formatDate(props.data.date)
-      : null;
-    const time = dates.formatTime(props.data.date, props.data.time);
 
     return (
-      <Wrapper onClick={this.handleClick} locked={props.locked}>
-        <Column className="immatriculation">{props.data.immatriculation}</Column>
-        <Column className="pilot">{props.data.lastname}</Column>
-        <Column className="datetime">
-          {date && <Date className="date">{date}</Date>}
-          <div className="time">{time}</div>
-        </Column>
-        <Column className="location">{getLocation(props.data)}</Column>
-        <ActionColumn className="action">
-          <Action
-            label={props.actionLabel}
-            icon={props.actionIcon}
-            onClick={this.handleActionClick}
-          />
-        </ActionColumn>
-        <ActionColumn className="delete">
-          {!props.locked && (
-            <Action
-              label="Löschen"
-              icon="delete"
-              onClick={this.handleDeleteClick}
+      <Wrapper selected={props.selected}>
+        <MovementHeader
+          onClick={this.handleClick}
+          selected={props.selected}
+          data={props.data}
+          timeWithDate={props.timeWithDate}
+          onAction={props.onAction}
+          actionIcon={props.actionIcon}
+          actionLabel={props.actionLabel}
+          onDelete={props.onDelete}
+          locked={props.locked}
+        />
+        {props.selected && (
+          <div>
+            <MovementDetails
+              data={props.data}
+              movementType={props.movementType}
+              locked={props.locked}
             />
-          )}
-        </ActionColumn>
+            {!props.locked && (
+              <Footer>
+                <Action
+                  label="Bearbeiten"
+                  icon="edit"
+                  onClick={this.handleEditClick}
+                />
+              </Footer>
+            )}
+          </div>
+        )}
       </Wrapper>
     );
   }
 
   handleClick() {
-    if (typeof this.props.onClick === 'function') {
-      this.props.onClick(this.props.data.key);
-    }
+    const selected = this.props.selected ? null : this.props.data.key;
+    this.props.onSelect(selected);
   }
 
   handleActionClick(e) {
     e.stopPropagation(); // prevent call of onClick handler
-    if (typeof this.props.onAction === 'function') {
-      this.props.onAction(this.props.data.key);
-    }
+    this.props.onAction(this.props.data.key);
   }
 
   handleDeleteClick(e) {
     e.stopPropagation(); // prevent call of onClick handler
-    if (typeof this.props.onDelete === 'function') {
-      this.props.onDelete(this.props.data);
-    }
+    this.props.onDelete(this.props.data);
+  }
+
+  handleEditClick() {
+    this.props.onEdit(this.props.data.key);
   }
 }
 
 Movement.propTypes = {
-  data: PropTypes.object,
-  onClick: PropTypes.func,
+  data: PropTypes.object.isRequired,
+  movementType: PropTypes.oneOf(['departure', 'arrival']),
+  selected: PropTypes.bool,
+  onEdit: PropTypes.func.isRequired,
+  onSelect: PropTypes.func.isRequired,
   timeWithDate: PropTypes.bool,
-  onAction: PropTypes.func,
-  actionIcon: PropTypes.string,
-  actionLabel: PropTypes.string,
-  onDelete: PropTypes.func,
+  onAction: PropTypes.func.isRequired,
+  actionIcon: PropTypes.string.isRequired,
+  actionLabel: PropTypes.string.isRequired,
+  onDelete: PropTypes.func.isRequired,
   locked: PropTypes.bool,
 };
 

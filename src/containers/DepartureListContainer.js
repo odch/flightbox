@@ -4,18 +4,21 @@ import {
   showDeleteConfirmationDialog,
   hideDeleteConfirmationDialog,
   showDepartureWizard,
-  createArrivalFromDeparture
+  createArrivalFromDeparture,
+  selectMovement
 } from '../modules/ui/movements';
 
 import MovementList from '../components/MovementList';
 
 const mapStateToProps = state => {
   return {
+    movementType: 'departure',
     items: state.movements.departures.data.array,
     loading: state.movements.departures.loading,
     loadingFailed: state.movements.departures.loadingFailed,
     lockDate: state.settings.lockDate,
     deleteConfirmation: state.ui.movements.deleteConfirmation,
+    selected: state.ui.movements.selected,
     actionIcon: 'flight_land',
     actionLabel: 'Ankunft erfassen'
   };
@@ -26,8 +29,9 @@ const mapActionCreators = {
   hideDeleteConfirmationDialog,
   loadItems: loadDepartures,
   deleteItem: deleteDeparture,
-  onClick: showDepartureWizard,
-  onAction: createArrivalFromDeparture
+  onEdit: showDepartureWizard,
+  onAction: createArrivalFromDeparture,
+  onSelect: selectMovement,
 };
 
 export default connect(mapStateToProps, mapActionCreators)(MovementList);

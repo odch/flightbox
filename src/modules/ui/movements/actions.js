@@ -5,6 +5,7 @@ export const SHOW_ARRIVAL_WIZARD = 'SHOW_ARRIVAL_WIZARD';
 export const CREATE_DEPARTURE_FROM_ARRIVAL = 'CREATE_DEPARTURE_FROM_ARRIVAL';
 export const CREATE_ARRIVAL_FROM_DEPARTURE = 'CREATE_ARRIVAL_FROM_DEPARTURE';
 export const CANCEL_WIZARD = 'CANCEL_WIZARD';
+export const SELECT_MOVEMENT = 'SELECT_MOVEMENT';
 
 export function showDeleteConfirmationDialog(item) {
   return {
@@ -60,5 +61,14 @@ export function createArrivalFromDeparture(departureKey) {
 export function cancelWizard() {
   return {
     type: CANCEL_WIZARD,
+  }
+}
+
+export function selectMovement(key) {
+  return {
+    type: SELECT_MOVEMENT,
+    payload: {
+      key,
+    }
   }
 }
