@@ -5,19 +5,14 @@ import { isLocked } from '../../util/movements.js';
 
 const GroupWrapper = styled.div`
   margin: 0 0 2em 0;
-  overflow: hidden;
-  border: 1px solid #eee;
   box-shadow: 3px;
 `;
 
 const GroupLabel = styled.div`
-  border-bottom: 1px solid ${props => props.theme.colors.main};
   padding: 1em;
-  background-color: ${props => props.theme.colors.background};
 `;
 
 const ItemsContainer = styled.div`
-  overflow: hidden;
 `;
 
 class MovementGroup extends React.PureComponent {
@@ -38,8 +33,11 @@ class MovementGroup extends React.PureComponent {
             return (
               <Movement
                 key={item.key}
+                movementType={props.movementType}
                 data={item}
-                onClick={props.onClick}
+                selected={item.key === props.selected}
+                onSelect={props.onSelect}
+                onEdit={props.onEdit}
                 timeWithDate={props.timeWithDate}
                 onAction={props.onAction}
                 actionIcon={props.actionIcon}
@@ -56,10 +54,13 @@ class MovementGroup extends React.PureComponent {
 }
 
 MovementGroup.propTypes = {
+  movementType: PropTypes.oneOf(['departure', 'arrival']),
   label: PropTypes.string,
   items: PropTypes.array,
+  selected: PropTypes.string,
+  onSelect: PropTypes.func,
   predicate: PropTypes.func,
-  onClick: PropTypes.func,
+  onEdit: PropTypes.func,
   timeWithDate: PropTypes.bool,
   onAction: PropTypes.func,
   actionIcon: PropTypes.string,

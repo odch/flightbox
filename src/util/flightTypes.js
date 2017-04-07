@@ -26,6 +26,16 @@ const flightTypes = [
   },
 ];
 
+const findByValue = type => {
+  const obj = flightTypes.find(item => item.value === type);
+  if (!obj) {
+    throw new Error('Flight type "' + type + '" not found');
+  }
+  return obj;
+};
+
 export const getEnabledFlightTypes = () => flightTypes.filter(type => enabledTypes.includes(type.value));
 
-export const getAirstatType = type => flightTypes.find(item => item.value === type).airstatType;
+export const getAirstatType = type => findByValue(type).airstatType;
+
+export const getLabel = type => findByValue(type).label;
