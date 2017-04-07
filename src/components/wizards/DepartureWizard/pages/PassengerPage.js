@@ -4,16 +4,7 @@ import validate from '../../validate';
 import { renderIncrementationField, renderSingleSelect } from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
-
-const carriageVoucherItems = [
-  {
-    label: 'Ja',
-    value: 'yes',
-  }, {
-    label: 'Nein',
-    value: 'no',
-  },
-];
+import {ITEMS} from '../../../../util/carriageVoucher';
 
 const toNumber = value => {
   if (typeof value === 'number') {
@@ -41,7 +32,7 @@ const PassengerPage = (props) => {
         <Field
           name="carriageVoucher"
           parse={e => e.target.value}
-          items={carriageVoucherItems}
+          items={ITEMS}
           label="Beförderungsschein"
           component={renderSingleSelect}
           readOnly={props.readOnly}
