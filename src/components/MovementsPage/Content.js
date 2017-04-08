@@ -5,7 +5,7 @@ const Content = styled.div`
   padding: 2em;
   
   @media (max-width: 768px) {
-    padding: 1em;
+    padding: 0.5em;
   }
 `;
 

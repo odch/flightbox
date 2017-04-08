@@ -10,6 +10,10 @@ const Wrapper = styled.div`
   
   ${props => props.selected && `
     margin: 20px -10px 20px -10px;
+    
+    @media (max-width: 768px) {
+      margin: 10px -3px 10px -3px;
+    }
   `}
 `;
 
