@@ -1,7 +1,16 @@
 import moment from 'moment-timezone';
 
+const checkPattern = (value, pattern, errorMsg) => {
+  if (!pattern.test(value)) {
+    throw new Error(errorMsg);
+  }
+};
+
 const dates = {
   localToIsoUtc(localDate, localTime) {
+    checkPattern(localDate, /^\d{4}-\d{2}-\d{2}$/, `Date "${localDate}" does not match pattern YYYY-MM-DD`);
+    checkPattern(localTime, /^\d{2}:\d{2}$/, `Time "${localTime}" does not match pattern HH:mm`);
+
     const dateTime = localDate + ' ' + localTime;
     return moment.tz(dateTime, 'Europe/Zurich').toISOString();
   },

@@ -46,13 +46,13 @@ describe('modules', () => {
             const formValues = {
               immatriculation: 'HBABC',
               date: '2016-10-09',
-              time: '16:00:00Z',
+              time: '16:00',
             };
 
             const formValuesForFirebase = {
               immatriculation: 'HBABC',
-              dateTime: '2016-10-09T16:00:00.000Z',
-              negativeTimestamp: -1476028800000,
+              dateTime: '2016-10-09T14:00:00.000Z',
+              negativeTimestamp: -1476021600000,
             };
 
             expect(generator.next(formValues).value).toEqual(call(remote.saveMovement, '/departures', undefined, formValuesForFirebase));
