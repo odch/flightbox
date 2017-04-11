@@ -19,7 +19,7 @@ describe('modules', () => {
             const emptyItem = {};
 
             expect(() => getPagination([emptyItem]))
-              .toThrow('Property negativeTimestamp missing on item with index 0');
+              .toThrow('Date "undefined" does not match pattern YYYY-MM-DD');
           });
 
           it('should return the next page if array not empty', () => {

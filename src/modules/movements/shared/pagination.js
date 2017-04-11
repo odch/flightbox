@@ -14,10 +14,6 @@ export function getPagination(items) {
   while (i > 0) {
     const negTs = localToFirebase(items[i - 1]).negativeTimestamp;
 
-    if (typeof negTs !== 'number' || negTs === 0) {
-      throw new Error('Property negativeTimestamp missing on item with index ' + (i - 1));
-    }
-
     if (start === undefined) {
       start = negTs;
       limit++;
