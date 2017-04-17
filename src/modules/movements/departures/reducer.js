@@ -21,7 +21,8 @@ const ACTION_HANDLERS = {
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
   loading: false,
-  loadingFailed: false
+  loadingFailed: false,
+  refs: []
 };
 
 export default reducer(INITIAL_STATE, ACTION_HANDLERS);

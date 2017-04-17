@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { loadArrivals, deleteArrival } from '../modules/movements/arrivals';
+import { loadArrivals, monitorArrivals, deleteArrival } from '../modules/movements/arrivals';
 import {
   showDeleteConfirmationDialog,
   hideDeleteConfirmationDialog,
@@ -28,6 +28,7 @@ const mapActionCreators = {
   showDeleteConfirmationDialog,
   hideDeleteConfirmationDialog,
   loadItems: loadArrivals,
+  monitorItems: monitorArrivals,
   deleteItem: deleteArrival,
   onEdit: showArrivalWizard,
   onAction: createDepartureFromArrival,
