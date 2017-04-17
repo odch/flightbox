@@ -1,27 +1,16 @@
 import firebase from '../../../util/firebase';
 
-export function loadLimited(path, start, limit, childAdded, childChanged, childRemoved) {
+export function loadLimited(path, start, limit) {
   return new Promise(resolve => {
     const ref = firebase(path)
       .orderByChild('negativeTimestamp')
       .limitToFirst(limit)
       .startAt(start);
-    let newItems = false;
     ref.once('value', snapshot => {
-      newItems = true;
-      resolve(snapshot);
-    });
-    ref.on('child_added', snapshot => {
-      if (!newItems) return;
-      childAdded(snapshot);
-    });
-    ref.on('child_changed', snapshot => {
-      if (!newItems) return;
-      childChanged(snapshot);
-    });
-    ref.on('child_removed', snapshot => {
-      if (!newItems) return;
-      childRemoved(snapshot);
+      resolve({
+        snapshot,
+        ref
+      });
     });
   });
 }

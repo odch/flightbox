@@ -29,6 +29,7 @@ const olderPredicate = Predicates.and(
 class MovementList extends React.PureComponent {
 
   componentWillMount() {
+    this.props.monitorItems();
     this.props.onSelect(null);
     if (this.props.items.length === 0) {
       this.props.loadItems();
@@ -133,6 +134,7 @@ class MovementList extends React.PureComponent {
 MovementList.propTypes = {
   movementType: PropTypes.oneOf(['departure', 'arrival']),
   loadItems: PropTypes.func.isRequired,
+  monitorItems: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
   selected: PropTypes.string,
   onSelect: PropTypes.func,
