@@ -3,6 +3,7 @@ import sagas from './sagas.js';
 
 export {
   loadDepartures,
+  monitorDepartures,
   deleteDeparture,
   initNewDeparture,
   initNewDepartureFromArrival,

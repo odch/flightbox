@@ -11,7 +11,7 @@ export default function (initialState, actionHandlers) {
 }
 
 export function childrenAdded(state, action) {
-  const snapshot = action.payload.snapshot;
+  const {snapshot, ref} = action.payload;
 
   const movements = [];
 
@@ -24,6 +24,7 @@ export function childrenAdded(state, action) {
   return Object.assign({}, state, {
     data: state.data.insertAll(movements, compareDescending),
     loading: false,
+    refs: state.refs.concat(ref)
   });
 }
 

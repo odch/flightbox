@@ -59,6 +59,17 @@ function* loadArrivals(channel) {
   );
 }
 
+export function* monitorArrivals(channel) {
+  yield call(
+    sharedSagas.monitorMovements,
+    state => state.movements.arrivals,
+    channel,
+    actions.arrivalAdded,
+    actions.arrivalChanged,
+    actions.arrivalDeleted
+  );
+}
+
 function* deleteArrival(action) {
   yield sharedSagas.deleteMovement('/arrivals', action.payload.key, action.payload.successAction);
 }
@@ -85,6 +96,7 @@ export default function* sagas() {
   yield [
     fork(monitor, channel),
     fork(takeEvery, actions.LOAD_ARRIVALS, loadArrivals, channel),
+    fork(takeEvery, actions.MONITOR_ARRIVALS, monitorArrivals, channel),
     fork(takeEvery, actions.DELETE_ARRIVAL, deleteArrival),
     fork(takeEvery, actions.INIT_NEW_ARRIVAL, initNewArrival),
     fork(takeEvery, actions.INIT_NEW_ARRIVAL_FROM_DEPARTURE, initNewArrivalFromDeparture),

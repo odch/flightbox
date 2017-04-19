@@ -1,4 +1,5 @@
 export const LOAD_ARRIVALS = 'LOAD_ARRIVALS';
+export const MONITOR_ARRIVALS = 'MONITOR_ARRIVALS';
 export const SET_ARRIVALS_LOADING = 'SET_ARRIVALS_LOADING';
 export const LOAD_ARRIVALS_FAILURE = 'LOAD_ARRIVALS_FAILURE';
 export const ARRIVALS_ADDED = 'ARRIVALS_ADDED';
@@ -19,6 +20,12 @@ export function loadArrivals() {
   };
 }
 
+export function monitorArrivals() {
+  return {
+    type: MONITOR_ARRIVALS,
+  };
+}
+
 export function setArrivalsLoading() {
   return {
     type: SET_ARRIVALS_LOADING,
@@ -31,11 +38,12 @@ export function loadArrivalsFailure() {
   };
 }
 
-export function arrivalsAdded(snapshot) {
+export function arrivalsAdded(snapshot, ref) {
   return {
     type: ARRIVALS_ADDED,
     payload: {
       snapshot,
+      ref
     },
   };
 }
