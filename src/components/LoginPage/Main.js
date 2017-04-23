@@ -1,10 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import LabeledComponent from '../LabeledComponent';
-import MaterialIcon from '../MaterialIcon';
 import Centered from '../Centered';
 import Failure from './Failure';
-import Button from './Button';
+import Button from '../Button';
 
 const handleSubmit = (authenticate, username, password, e) => {
   e.preventDefault();
@@ -37,8 +36,15 @@ const StyledInput = styled.input`
   padding: 1px;
 `;
 
-const SubmitButton = styled(Button)`
+const LoginDialogButton = styled(Button)`
+  @media(max-width: 600px) {
+    width: 100%;
+  }
+`;
+
+const SubmitButton = styled(LoginDialogButton)`
   float: right;
+  margin-bottom: 1em;
 `;
 
 const Main = props => {
@@ -68,10 +74,16 @@ const Main = props => {
         <StyledLabeledComponent label="Benutzername" component={usernameInput}/>
         <StyledLabeledComponent label="Passwort" component={passwordInput}/>
         <Failure failure={failure}/>
-        {props.showCancel === true && <Button type="button" onClick={props.onCancel}>Abbrechen</Button>}
-        <SubmitButton type="submit" disabled={submitting || username.length === 0 || password.length === 0}>
-          <MaterialIcon icon="send"/>&nbsp;Anmelden
-        </SubmitButton>
+        <SubmitButton
+          type="submit"
+          label="Anmelden"
+          icon="send"
+          disabled={submitting || username.length === 0 || password.length === 0}
+          primary
+        />
+        {props.showCancel === true && (
+          <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel}/>
+        )}
       </form>
     </Wrapper>
   );
