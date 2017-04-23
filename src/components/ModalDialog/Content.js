@@ -10,7 +10,7 @@ const Content = styled(Centered)`
   box-shadow: 0 0 2em 0 #aaa;
   z-index: 10000;
   
-  @media(max-width: 600px) {
+  @media(max-width: ${props => props.fullWidthThreshold}px) {
     width: 85%;
   }
 `;

@@ -24,7 +24,7 @@ const CommitRequirementsDialog = props => {
     </div>
   );
 
-  return <ModalDialog content={content} onBlur={props.onCancel}/>;
+  return <ModalDialog content={content} onBlur={props.onCancel} fullWidthThreshold={800}/>;
 };
 
 CommitRequirementsDialog.propTypes = {
