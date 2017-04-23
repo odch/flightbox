@@ -19,11 +19,14 @@ class MovementWizard extends Component {
   }
 
   render() {
+    const breadcrumbsTitle = this.isUpdate()
+      ? this.props.updateMovementLabel + ' (' + getFromItemKey(this.props.params.key) + ')'
+      : this.props.newMovementLabel;
     return (
       <VerticalHeaderLayout>
         <div>
           {this.props.wizard.initialized === true && this.props.wizard.committed !== true &&
-            <Breadcrumbs items={this.buildBreadcrumbItems()} activeItem={this.props.wizard.page}/>}
+            <Breadcrumbs title={breadcrumbsTitle} items={this.buildBreadcrumbItems()} activeItem={this.props.wizard.page - 1}/>}
           <div>{this.getMiddleItem()}</div>
         </div>
       </VerticalHeaderLayout>
@@ -117,15 +120,9 @@ class MovementWizard extends Component {
   }
 
   buildBreadcrumbItems() {
-    const label = this.isUpdate()
-      ? this.props.updateMovementLabel + ' (' + getFromItemKey(this.props.params.key) + ')'
-      : this.props.newMovementLabel;
-
-    return [{
-      label,
-    }].concat(this.props.pages.map(page => ({
+    return this.props.pages.map(page => ({
       label: page.label,
-    })));
+    }));
   }
 
   isUpdate() {

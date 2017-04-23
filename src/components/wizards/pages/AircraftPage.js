@@ -9,7 +9,7 @@ const AircraftPage = (props) => {
   const { handleSubmit } = props;
   return (
     <form onSubmit={handleSubmit} className="AircraftPage">
-      <FieldSet legend="Flugzeugdaten">
+      <FieldSet>
         <Field
           name="immatriculation"
           component={renderAircraftDropdown}

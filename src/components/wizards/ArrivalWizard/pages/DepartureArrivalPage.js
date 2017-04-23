@@ -19,7 +19,7 @@ const DepartureArrivalPage = (props) => {
   const { previousPage, handleSubmit } = props;
   return (
     <form onSubmit={handleSubmit} className="DepartureArrivalPage">
-      <FieldSet legend="Start und Ziel">
+      <FieldSet>
         <Field
           name="location"
           component={renderAerodromeDropdown}

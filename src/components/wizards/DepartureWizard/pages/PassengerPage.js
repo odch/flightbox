@@ -20,7 +20,7 @@ const PassengerPage = (props) => {
   const { previousPage, handleSubmit } = props;
   return (
     <form onSubmit={handleSubmit} className="PassengerPage">
-      <FieldSet legend="Passagiere">
+      <FieldSet>
         <Field
           name="passengerCount"
           format={toNumber}

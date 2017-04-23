@@ -9,7 +9,7 @@ const FlightPage = (props) => {
   const { previousPage, handleSubmit, flightTypes, arrivalRoutes, runways } = props;
   return (
     <form onSubmit={handleSubmit} className="FlightPage">
-      <FieldSet legend="Flug">
+      <FieldSet>
         <Field
           name="flightType"
           component={renderSingleSelect}

@@ -9,31 +9,81 @@ const List = styled.ol`
   list-style-type: none;
   display: flex;
   justify-content: space-between;
+  margin-bottom: 1em;
+`;
+
+const Title = styled.div`
+  line-height: 2em;
+  color: ${props => props.theme.colors.main};
+  font-weight: bold;
+  font-size: 1.5em;
+  margin-bottom: 1em;
+  
+  @media (min-width: 1000px) {
+    float: left;
+    margin-right: 3em;
+  }
 `;
 
 const Item = styled.li`
+  position: relative;
   float: left;
   display: block;
+  text-align: center;
 `;
 
-const A = styled.a`
-  color: #000;
-  text-decoration: none;
-  cursor: pointer;
+const Number = styled.div`
+  position: relative;
+  display: inline-block;
+  margin-bottom: 0.4em;
+  width: 2em;
+  line-height: 2em;
+  border-radius: 50%;
   
-  ${props => props.noHandler && `cursor: default;`}
-  ${props => props.active && `color: ${props.theme.colors.main};`}
-`;
-
-
-const arePreviousItemsValid = (items, index) => {
-  for (let i = 0; i < index; i++) {
-    if (items[i].valid === false) {
-      return false;
+  ${props => props.active
+    ? `
+      background-color: ${props.theme.colors.main};
+      color: #fff;
+    `
+    :`
+      background-color: ${props.theme.colors.background};
+    `
+  }
+  
+  &:before {
+    content: '';
+    position: absolute;
+    top: .9em;
+    left: -100em;
+    width: 100em;
+    height: .2em;
+    
+    ${props => props.first
+      ? `
+        background-color: #fff;
+        z-index: -1;
+      `
+      : `
+        background-color: ${props.theme.colors.background};
+        z-index: -2;
+      `
     }
   }
-  return true;
-};
+`;
+
+const Text = styled.div`
+  color: #000;
+  text-decoration: none;
+
+  ${props => props.active && `
+    color: ${props.theme.colors.main};
+    font-size: 1.3em;
+  `}
+  
+  @media (max-width: 540px) {
+    ${props => !props.active && `display: none;`}
+  }
+`;
 
 class WizardBreadcrumbs extends React.PureComponent {
 
@@ -41,13 +91,14 @@ class WizardBreadcrumbs extends React.PureComponent {
     const props = this.props;
     return (
       <Wrapper>
+        {props.title && <Title>{props.title}</Title>}
         <List>
           {props.items.map((item, index) => {
             const active = index === props.activeItem;
-            const handler = arePreviousItemsValid(props.items, index) ? item.handler : undefined;
             return (
               <Item key={index}>
-                <A onMouseDown={handler} tabIndex="-1" active={active} noHandler={!handler}>{item.label}</A>
+                <Number active={active} first={index === 0}>{index + 1}</Number>
+                <Text active={active}>{item.label.replace(/ /g, '\u00a0')}</Text>
               </Item>
             );
           })}
@@ -58,11 +109,10 @@ class WizardBreadcrumbs extends React.PureComponent {
 }
 
 WizardBreadcrumbs.propTypes = {
+  title: PropTypes.string,
   items: PropTypes.arrayOf(
     PropTypes.shape({
-      label: PropTypes.string.isRequired,
-      handler: PropTypes.func,
-      valid: PropTypes.bool,
+      label: PropTypes.string.isRequired
     })
   ).isRequired,
   activeItem: PropTypes.number,
