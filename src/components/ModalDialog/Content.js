@@ -9,6 +9,10 @@ const Content = styled(Centered)`
   background-color: #fff;
   box-shadow: 0 0 2em 0 #aaa;
   z-index: 10000;
+  
+  @media(max-width: 600px) {
+    width: 85%;
+  }
 `;
 
 export default Content;

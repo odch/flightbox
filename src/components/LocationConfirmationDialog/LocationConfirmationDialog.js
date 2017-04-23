@@ -13,12 +13,23 @@ const Message = styled.div`
   margin-bottom: 2em;
 `;
 
-const CancelButton = styled(Button)`
+const DialogButton = styled(Button)`
+  @media(max-width: 600px) {
+    width: 100%;
+  }
+`;
+
+const CancelButton = styled(DialogButton)`
   float: left;
 `;
 
-const ConfirmButton = styled(Button)`
+const ConfirmButton = styled(DialogButton)`
   float: right;
+  
+  @media(max-width: 600px) {
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
 `;
 
 const LocationConfirmationDialog = props => {
@@ -31,8 +42,8 @@ const LocationConfirmationDialog = props => {
         Möchten Sie Ihre Eingabe ändern oder möchten Sie wirklich den eingegebenen Flugplatz verwenden?
       </Message>
       <div>
-        <CancelButton label="Eingabe ändern" onClick={props.onCancel} flat neutral/>
         <ConfirmButton label="Eingegebenen Flugplatz verwenden" icon="done" onClick={props.onConfirm} danger/>
+        <CancelButton label="Eingabe ändern" onClick={props.onCancel} neutral/>
       </div>
     </div>
   );
