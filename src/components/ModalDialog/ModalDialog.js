@@ -11,13 +11,18 @@ const handleMaskClick = onBlur => {
 const ModalDialog = props => (
   <div>
     <Mask onClick={handleMaskClick.bind(props.onBlur)}/>
-    <Content>{props.content}</Content>
+    <Content fullWidthThreshold={props.fullWidthThreshold}>{props.content}</Content>
   </div>
 );
 
 ModalDialog.propTypes = {
   content: PropTypes.element.isRequired,
   onBlur: PropTypes.func,
+  fullWidthThreshold: PropTypes.number
+};
+
+ModalDialog.defaultProps = {
+  fullWidthThreshold: 600
 };
 
 export default ModalDialog;

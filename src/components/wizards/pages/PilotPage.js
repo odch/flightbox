@@ -9,7 +9,7 @@ const PilotPage = (props) => {
   const { previousPage, handleSubmit } = props;
   return (
     <form onSubmit={handleSubmit} className="PilotPage">
-      <FieldSet legend="Pilot">
+      <FieldSet>
         <Field
           name="memberNr"
           label="Mitgliedernummer"
