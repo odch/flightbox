@@ -17,8 +17,19 @@ const DataItem = styled.div`
   margin-bottom: 0.3em;
 `;
 
-const DeleteButton = styled(Button)`
+const DialogButton = styled(Button)`
+  @media(max-width: 600px) {
+    width: 100%;
+  }
+`;
+
+const DeleteButton = styled(DialogButton)`
   float: right;
+  
+  @media(max-width: 600px) {
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
 `;
 
 const MovementDeleteConfirmationDialog = props => {
@@ -37,10 +48,10 @@ const MovementDeleteConfirmationDialog = props => {
         <DataItem>Uhrzeit: {time}</DataItem>
       </Data>
       <div>
-        <Button label="Abbrechen" onClick={hide} flat neutral/>
         <DeleteButton label="Bewegung löschen" icon="delete" onClick={() => {
           confirm(item.key, hide);
         }} danger/>
+        <DialogButton label="Abbrechen" onClick={hide} neutral/>
       </div>
     </div>
   );

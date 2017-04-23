@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import Button from '../../../Button';
+import DialogButton from './DialogButton';
 
-const CancelButton = styled(Button)`
+const CancelButton = styled(DialogButton)`
   float: left;
 `;
 

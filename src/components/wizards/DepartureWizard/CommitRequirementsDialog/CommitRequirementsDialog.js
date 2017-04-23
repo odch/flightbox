@@ -18,8 +18,8 @@ const CommitRequirementsDialog = props => {
         <Item>Der Preflight-Check wurde ausgeführt.</Item>
       </Items>
       <div>
-        <CancelButton label="Abbrechen" onClick={props.onCancel} flat/>
         <ConfirmButton label="Bestätigen" icon="done_all" onClick={props.onConfirm} primary/>
+        <CancelButton label="Abbrechen" onClick={props.onCancel}/>
       </div>
     </div>
   );
