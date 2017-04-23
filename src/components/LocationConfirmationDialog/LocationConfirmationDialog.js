@@ -14,7 +14,7 @@ const Message = styled.div`
 `;
 
 const DialogButton = styled(Button)`
-  @media(max-width: 600px) {
+  @media(max-width: 800px) {
     width: 100%;
   }
 `;
@@ -26,7 +26,7 @@ const CancelButton = styled(DialogButton)`
 const ConfirmButton = styled(DialogButton)`
   float: right;
   
-  @media(max-width: 600px) {
+  @media(max-width: 800px) {
     margin-top: 1em;
     margin-bottom: 1em;
   }
@@ -48,7 +48,7 @@ const LocationConfirmationDialog = props => {
     </div>
   );
 
-  return <ModalDialog content={content} onBlur={props.onCancel}/>;
+  return <ModalDialog content={content} onBlur={props.onCancel} fullWidthThreshold={800}/>;
 };
 
 LocationConfirmationDialog.propTypes = {
