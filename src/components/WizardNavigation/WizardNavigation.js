@@ -7,13 +7,26 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-const BackButton = styled(Button)`
+const WizardButton = styled(Button)`
+  @media(max-width: 600px) {
+    width: 100%;
+    margin-bottom: 1em;
+  }
+`;
+
+const BackButton = styled(WizardButton)`
   float: right;
 `;
 
-const NextButton = styled(Button)`
+const NextButton = styled(WizardButton)`
   float: right;
   margin-left: 20px;
+`;
+
+const CancelButton = styled(WizardButton)`
+  @media(max-width: 600px) {
+    margin-top: 1.5em;
+  }
 `;
 
 class WizardNavigation extends React.PureComponent {
@@ -22,13 +35,6 @@ class WizardNavigation extends React.PureComponent {
     const props = this.props;
     return (
       <Wrapper>
-        {props.cancel && (
-          <Button
-            type="button"
-            label="Abbrechen"
-            onClick={props.cancel}
-          />
-        )}
         {props.nextVisible && (
           <NextButton
             type="submit"
@@ -43,6 +49,13 @@ class WizardNavigation extends React.PureComponent {
             type="button"
             label="Zurück"
             onClick={props.previousStep}
+          />
+        )}
+        {props.cancel && (
+          <CancelButton
+            type="button"
+            label="Abbrechen"
+            onClick={props.cancel}
           />
         )}
       </Wrapper>)
