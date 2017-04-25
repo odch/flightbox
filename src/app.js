@@ -5,7 +5,8 @@ import { Provider } from 'react-redux';
 import { createStore, applyMiddleware, compose } from 'redux';
 import { routerMiddleware } from 'react-router-redux';
 import createSagaMiddleware from 'redux-saga';
-import { ThemeProvider, withTheme } from 'styled-components';
+import { ThemeProvider } from 'styled-components';
+import moment from 'moment';
 
 import 'moment/locale/de';
 
@@ -65,3 +66,8 @@ ReactDOM.render((
     </ThemeProvider>
   </Provider>
 ), document.getElementById('app'));
+
+setTimeout(
+  () => window.location.reload(),
+  moment('24:00:00', 'hh:mm:ss').diff(moment(), 'milliseconds')
+);
