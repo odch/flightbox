@@ -26,8 +26,8 @@
   "environments": {
     "test": {
       "firebase": "https://lspv-test.firebaseio.com",
-      "ipAuth": "xxx",
-      "credentialsAuth": "xxx"
+      "ipAuth": "https://auth.opendigital.ch/api/v1/firebaseauth/ip-test",
+      "credentialsAuth": "https://auth.opendigital.ch/api/v1/firebaseauth/flightnet/lspv-test"
     },
     "production": {
       "firebase": "xxx",
