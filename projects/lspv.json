@@ -1,0 +1,40 @@
+{
+  "aerodrome": {
+    "name": "Wangen-Lachen",
+    "ICAO": "LSPV",
+    "runways": [
+      "08",
+      "26"
+    ],
+    "departureRoutes": [
+      {
+        "name": "uznach",
+        "label": "Uznach"
+      },
+      {
+        "name": "seedamm",
+        "label": "Seedamm"
+      }
+    ],
+    "arrivalRoutes": [
+      {
+        "name": "S",
+        "label": "Sektor Süd"
+      }
+    ]
+  },
+  "environments": {
+    "test": {
+      "firebase": "https://lspv-test.firebaseio.com",
+      "ipAuth": "xxx",
+      "credentialsAuth": "xxx"
+    },
+    "production": {
+      "firebase": "xxx",
+      "ipAuth": "xxx",
+      "credentialsAuth": "xxx"
+    }
+  },
+  "theme": "lspv",
+  "title": "LSPV Bewegungen"
+}
