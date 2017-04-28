@@ -91,6 +91,8 @@ export function* saveMovement(path, successAction, failureAction) {
   let key = movement.key;
   delete movement.key;
 
+  delete movement.type;
+
   try {
     key = yield call(remote.saveMovement, path, key, movement);
     yield put(successAction(key, values))

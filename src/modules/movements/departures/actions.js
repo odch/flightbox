@@ -43,7 +43,8 @@ export function departuresAdded(snapshot, ref) {
     type: DEPARTURES_ADDED,
     payload: {
       snapshot,
-      ref
+      ref,
+      movementType: 'departure'
     },
   };
 }
@@ -53,6 +54,7 @@ export function departureAdded(snapshot) {
     type: DEPARTURE_ADDED,
     payload: {
       snapshot,
+      movementType: 'departure'
     },
   };
 }
@@ -62,6 +64,7 @@ export function departureChanged(snapshot) {
     type: DEPARTURE_CHANGED,
     payload: {
       snapshot,
+      movementType: 'departure'
     },
   };
 }
@@ -71,6 +74,7 @@ export function departureDeleted(snapshot) {
     type: DEPARTURE_DELETED,
     payload: {
       snapshot,
+      movementType: 'departure'
     },
   };
 }

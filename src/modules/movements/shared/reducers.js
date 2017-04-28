@@ -11,13 +11,14 @@ export default function (initialState, actionHandlers) {
 }
 
 export function childrenAdded(state, action) {
-  const {snapshot, ref} = action.payload;
+  const {snapshot, ref, movementType} = action.payload;
 
   const movements = [];
 
   snapshot.forEach(item => {
     const movement = firebaseToLocal(item.val());
     movement.key = item.key();
+    movement.type = movementType;
     movements.push(movement);
   });
 
@@ -29,10 +30,11 @@ export function childrenAdded(state, action) {
 }
 
 export function childAdded(state, action) {
-  const snapshot = action.payload.snapshot;
+  const {snapshot, movementType} = action.payload;
 
   const movement = firebaseToLocal(snapshot.val());
   movement.key = snapshot.key();
+  movement.type = movementType;
 
   return Object.assign({}, state, {
     data: state.data.insert(movement, compareDescending),
@@ -40,10 +42,11 @@ export function childAdded(state, action) {
 }
 
 export function childChanged(state, action) {
-  const snapshot = action.payload.snapshot;
+  const {snapshot, movementType} = action.payload;
 
   const movement = firebaseToLocal(snapshot.val());
   movement.key = snapshot.key();
+  movement.type = movementType;
 
   return Object.assign({}, state, {
     data: state.data.update(movement, compareDescending),

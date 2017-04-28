@@ -12,7 +12,6 @@ import MovementList from '../components/MovementList';
 
 const mapStateToProps = state => {
   return {
-    movementType: 'arrival',
     items: state.movements.arrivals.data.array,
     loading: state.movements.arrivals.loading,
     loadingFailed: state.movements.arrivals.loadingFailed,

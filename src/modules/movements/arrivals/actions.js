@@ -43,7 +43,8 @@ export function arrivalsAdded(snapshot, ref) {
     type: ARRIVALS_ADDED,
     payload: {
       snapshot,
-      ref
+      ref,
+      movementType: 'arrival'
     },
   };
 }
@@ -53,6 +54,7 @@ export function arrivalAdded(snapshot) {
     type: ARRIVAL_ADDED,
     payload: {
       snapshot,
+      movementType: 'arrival'
     },
   };
 }
@@ -62,6 +64,7 @@ export function arrivalChanged(snapshot) {
     type: ARRIVAL_CHANGED,
     payload: {
       snapshot,
+      movementType: 'arrival'
     },
   };
 }
@@ -71,6 +74,7 @@ export function arrivalDeleted(snapshot) {
     type: ARRIVAL_DELETED,
     payload: {
       snapshot,
+      movementType: 'arrival'
     },
   };
 }

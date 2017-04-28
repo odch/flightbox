@@ -55,7 +55,6 @@ class Movement extends React.PureComponent {
           <div>
             <MovementDetails
               data={props.data}
-              movementType={props.movementType}
               locked={props.locked}
             />
             {!props.locked && (
@@ -95,7 +94,6 @@ class Movement extends React.PureComponent {
 
 Movement.propTypes = {
   data: PropTypes.object.isRequired,
-  movementType: PropTypes.oneOf(['departure', 'arrival']),
   selected: PropTypes.bool,
   onEdit: PropTypes.func.isRequired,
   onSelect: PropTypes.func.isRequired,

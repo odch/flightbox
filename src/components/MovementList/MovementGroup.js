@@ -33,7 +33,6 @@ class MovementGroup extends React.PureComponent {
             return (
               <Movement
                 key={item.key}
-                movementType={props.movementType}
                 data={item}
                 selected={item.key === props.selected}
                 onSelect={props.onSelect}
@@ -54,7 +53,6 @@ class MovementGroup extends React.PureComponent {
 }
 
 MovementGroup.propTypes = {
-  movementType: PropTypes.oneOf(['departure', 'arrival']),
   label: PropTypes.string,
   items: PropTypes.array,
   selected: PropTypes.string,

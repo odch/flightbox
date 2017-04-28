@@ -47,7 +47,7 @@ class MovementDetails extends React.PureComponent {
             <MovementField label="Vorname" value={props.data.firstname}/>
             <MovementField label="Telefon" value={props.data.phone}/>
           </DetailsBox>
-          {props.movementType === 'departure'
+          {props.data.type === 'departure'
             ? (
               <DetailsBox label="Passagiere">
                 <MovementField label="Anzahl Passagiere" value={props.data.passengerCount} defaultValue={0}/>
@@ -59,7 +59,7 @@ class MovementDetails extends React.PureComponent {
               </DetailsBox>
             )
           }
-          {props.movementType === 'departure'
+          {props.data.type === 'departure'
             ? (
               <DetailsBox label="Start und Ziel">
                 <MovementField label="Datum" value={date}/>
@@ -76,7 +76,7 @@ class MovementDetails extends React.PureComponent {
               </DetailsBox>
             )
           }
-          {props.movementType === 'departure'
+          {props.data.type === 'departure'
             ? (
               <DetailsBox label="Flug">
                 <MovementField label="Flugtyp" value={getFlightTypeLabel(props.data.flightType)}/>
@@ -101,7 +101,6 @@ class MovementDetails extends React.PureComponent {
 
 MovementDetails.propTypes = {
   data: PropTypes.object.isRequired,
-  movementType: PropTypes.oneOf(['departure', 'arrival']),
   locked: PropTypes.bool,
 };
 

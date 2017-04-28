@@ -53,7 +53,6 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Ab morgen"
           items={this.props.items}
-          movementType={this.props.movementType}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={afterTodayPredicate}
@@ -68,7 +67,6 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Heute"
           items={this.props.items}
-          movementType={this.props.movementType}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={todayPredicate}
@@ -83,7 +81,6 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Gestern"
           items={this.props.items}
-          movementType={this.props.movementType}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={yesterdayPredicate}
@@ -98,7 +95,6 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Dieser Monat"
           items={this.props.items}
-          movementType={this.props.movementType}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={thisMonthPredicate}
@@ -112,7 +108,6 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Älter"
           items={this.props.items}
-          movementType={this.props.movementType}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={olderPredicate}
@@ -132,7 +127,6 @@ class MovementList extends React.PureComponent {
 }
 
 MovementList.propTypes = {
-  movementType: PropTypes.oneOf(['departure', 'arrival']),
   loadItems: PropTypes.func.isRequired,
   monitorItems: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,

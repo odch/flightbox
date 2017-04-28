@@ -47,6 +47,7 @@ describe('modules', () => {
             expect(generator.next().value).toEqual(select(getFormValues('wizard')));
 
             const formValues = {
+              type: 'departure',
               immatriculation: 'HBABC',
               date: '2016-10-09',
               time: '16:00',
