@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import Content from './Content';
-import DepartureList from '../../containers/DepartureListContainer';
-import ArrivalList from '../../containers/ArrivalListContainer';
-import TabPanel from '../TabPanel';
+import MovementList from '../../containers/MovementListContainer';
 import JumpNavigation from '../JumpNavigation';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
 
@@ -13,18 +11,11 @@ class MovementsPage extends Component {
   }
 
   render() {
-    const tabs = [{
-      label: 'Abflüge',
-      component: <DepartureList/>,
-    }, {
-      label: 'Ankünfte',
-      component: <ArrivalList/>,
-    }];
     return (
       <VerticalHeaderLayout>
         <Content>
           <JumpNavigation/>
-          <TabPanel tabs={tabs}/>
+          <MovementList/>
         </Content>
       </VerticalHeaderLayout>
     );

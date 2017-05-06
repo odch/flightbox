@@ -9,7 +9,12 @@ import {
   hideDialog,
 } from '../modules/ui/wizard';
 import { cancelWizard } from '../modules/ui/movements';
-import { initNewArrival, initNewArrivalFromDeparture, editArrival, saveArrival } from '../modules/movements/arrivals';
+import {
+  initNewMovement,
+  initNewMovementFromMovement,
+  editMovement,
+  saveMovement
+} from '../modules/movements';
 import { loadLockDate } from '../modules/settings/lockDate';
 import { isLocked } from '../util/movements';
 import ArrivalWizard from '../components/wizards/ArrivalWizard';
@@ -34,14 +39,14 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapActionCreators = {
-  initNewMovement: initNewArrival,
-  initNewArrivalFromDeparture,
-  editMovement: editArrival,
+  initNewMovement,
+  initNewMovementFromMovement,
+  editMovement,
   nextPage,
   previousPage,
   cancel: cancelWizard,
   finish,
-  saveMovement: saveArrival,
+  saveMovement,
   unsetCommitError,
   destroyForm: destroy,
   loadLockDate,

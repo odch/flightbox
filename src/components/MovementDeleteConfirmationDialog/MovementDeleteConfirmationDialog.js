@@ -49,7 +49,7 @@ const MovementDeleteConfirmationDialog = props => {
       </Data>
       <div>
         <DeleteButton label="Bewegung löschen" icon="delete" onClick={() => {
-          confirm(item.key, hide);
+          confirm(item.type, item.key, hide);
         }} danger/>
         <DialogButton label="Abbrechen" onClick={hide} neutral/>
       </div>

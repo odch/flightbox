@@ -1,4 +1,4 @@
-import { localToFirebase } from '../../../util/movements';
+import { localToFirebase } from '../../util/movements';
 
 export const LIMIT = 10;
 

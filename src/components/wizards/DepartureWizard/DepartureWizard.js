@@ -46,7 +46,11 @@ const pages = [
 const DepartureWizard = props => (
   <MovementWizard
     {...props}
-    initMovement={props.params.arrivalKey ? props.initNewDepartureFromArrival.bind(null, props.params.arrivalKey) : null}
+    initNewMovement={props.initNewMovement.bind(null, 'departure')}
+    initMovement={props.params.arrivalKey
+      ? props.initNewMovementFromMovement.bind(null, 'departure', 'arrival', props.params.arrivalKey)
+      : null}
+    editMovement={props.editMovement.bind(null, 'departure')}
     pages={pages}
     className="DepartureWizard"
     finishComponentClass={Finish}
@@ -59,7 +63,7 @@ DepartureWizard.propTypes = {
   wizard: React.PropTypes.object.isRequired,
   params: React.PropTypes.object.isRequired,
   initNewMovement: React.PropTypes.func.isRequired,
-  initNewDepartureFromArrival: React.PropTypes.func.isRequired,
+  initNewMovementFromMovement: React.PropTypes.func.isRequired,
   editMovement: React.PropTypes.func.isRequired,
   nextPage: React.PropTypes.func.isRequired,
   previousPage: React.PropTypes.func.isRequired,

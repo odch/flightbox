@@ -53,73 +53,58 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Ab morgen"
           items={this.props.items}
-          movementType={this.props.movementType}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={afterTodayPredicate}
           onEdit={this.props.onEdit}
           timeWithDate={true}
-          onAction={this.props.onAction}
-          actionIcon={this.props.actionIcon}
-          actionLabel={this.props.actionLabel}
+          createMovementFromMovement={this.props.createMovementFromMovement}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
         <MovementGroup
           label="Heute"
           items={this.props.items}
-          movementType={this.props.movementType}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={todayPredicate}
           onEdit={this.props.onEdit}
           timeWithDate={false}
-          onAction={this.props.onAction}
-          actionIcon={this.props.actionIcon}
-          actionLabel={this.props.actionLabel}
+          createMovementFromMovement={this.props.createMovementFromMovement}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
         <MovementGroup
           label="Gestern"
           items={this.props.items}
-          movementType={this.props.movementType}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={yesterdayPredicate}
           onEdit={this.props.onEdit}
           timeWithDate={false}
-          onAction={this.props.onAction}
-          actionIcon={this.props.actionIcon}
-          actionLabel={this.props.actionLabel}
+          createMovementFromMovement={this.props.createMovementFromMovement}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
         <MovementGroup
           label="Dieser Monat"
           items={this.props.items}
-          movementType={this.props.movementType}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={thisMonthPredicate}
           onEdit={this.props.onEdit}
-          onAction={this.props.onAction}
-          actionIcon={this.props.actionIcon}
-          actionLabel={this.props.actionLabel}
+          createMovementFromMovement={this.props.createMovementFromMovement}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
         <MovementGroup
           label="Älter"
           items={this.props.items}
-          movementType={this.props.movementType}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={olderPredicate}
           onEdit={this.props.onEdit}
-          onAction={this.props.onAction}
-          actionIcon={this.props.actionIcon}
-          actionLabel={this.props.actionLabel}
+          createMovementFromMovement={this.props.createMovementFromMovement}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
@@ -132,7 +117,6 @@ class MovementList extends React.PureComponent {
 }
 
 MovementList.propTypes = {
-  movementType: PropTypes.oneOf(['departure', 'arrival']),
   loadItems: PropTypes.func.isRequired,
   monitorItems: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
@@ -145,9 +129,7 @@ MovementList.propTypes = {
   hideDeleteConfirmationDialog: PropTypes.func.isRequired,
   showDeleteConfirmationDialog: React.PropTypes.func.isRequired,
   onEdit: PropTypes.func,
-  onAction: PropTypes.func,
-  actionIcon: PropTypes.string,
-  actionLabel: PropTypes.string,
+  createMovementFromMovement: PropTypes.func.isRequired,
   lockDate: PropTypes.object.isRequired,
 };
 
