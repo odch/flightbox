@@ -32,7 +32,7 @@ const Finish = props => {
         <ActionButton
           label="Abflug erfassen"
           img={departureImagePath}
-          onClick={props.createDepartureFromArrival.bind(null, props.itemKey)}
+          onClick={props.createMovementFromMovement.bind(null, 'arrival', props.itemKey)}
         />
         <ActionButton
           label="Beenden"
@@ -46,7 +46,7 @@ const Finish = props => {
 
 Finish.propTypes = {
   finish: PropTypes.func.isRequired,
-  createDepartureFromArrival: PropTypes.func.isRequired,
+  createMovementFromMovement: PropTypes.func.isRequired,
   isUpdate: PropTypes.bool.isRequired,
   isHomeBase: PropTypes.bool.isRequired,
   itemKey: PropTypes.string.isRequired,

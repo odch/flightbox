@@ -38,7 +38,7 @@ class MovementGroup extends React.PureComponent {
                 onSelect={props.onSelect}
                 onEdit={props.onEdit}
                 timeWithDate={props.timeWithDate}
-                onAction={props.onAction}
+                createMovementFromMovement={props.createMovementFromMovement}
                 actionIcon={props.actionIcon}
                 actionLabel={props.actionLabel}
                 onDelete={props.onDelete}
@@ -60,9 +60,7 @@ MovementGroup.propTypes = {
   predicate: PropTypes.func,
   onEdit: PropTypes.func,
   timeWithDate: PropTypes.bool,
-  onAction: PropTypes.func,
-  actionIcon: PropTypes.string,
-  actionLabel: PropTypes.string,
+  createMovementFromMovement: PropTypes.func.isRequired,
   onDelete: PropTypes.func,
   lockDate: PropTypes.number,
 };

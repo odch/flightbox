@@ -9,7 +9,12 @@ import {
   unsetCommitError,
 } from '../modules/ui/wizard';
 import { cancelWizard } from '../modules/ui/movements';
-import { initNewDeparture, initNewDepartureFromArrival, editDeparture, saveDeparture } from '../modules/movements/departures';
+import {
+  initNewMovement,
+  initNewMovementFromMovement,
+  editMovement,
+  saveMovement
+} from '../modules/movements';
 import { loadLockDate } from '../modules/settings/lockDate';
 import DepartureWizard from '../components/wizards/DepartureWizard';
 import { isLocked } from '../util/movements';
@@ -34,16 +39,16 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapActionCreators = {
-  initNewMovement: initNewDeparture,
-  initNewDepartureFromArrival,
-  editMovement: editDeparture,
+  initNewMovement,
+  initNewMovementFromMovement,
+  editMovement,
   nextPage,
   previousPage,
   cancel: cancelWizard,
   finish,
   showDialog,
   hideDialog,
-  saveMovement: saveDeparture,
+  saveMovement,
   unsetCommitError,
   destroyForm: destroy,
   loadLockDate,

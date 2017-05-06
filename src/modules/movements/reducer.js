@@ -1,14 +1,6 @@
-import { firebaseToLocal, compareDescending } from '../../../util/movements';
-
-export default function (initialState, actionHandlers) {
-  return (state = initialState, action) => {
-    const handler = actionHandlers[action.type];
-    if (handler) {
-      return handler(state, action);
-    }
-    return state;
-  };
-}
+import ImmutableItemsArray from '../../util/ImmutableItemsArray';
+import * as actions from './actions';
+import { firebaseToLocal, compareDescending } from '../../util/movements';
 
 export function childrenAdded(state, action) {
   const {snapshot, ref, movementType} = action.payload;
@@ -25,7 +17,10 @@ export function childrenAdded(state, action) {
   return Object.assign({}, state, {
     data: state.data.insertAll(movements, compareDescending),
     loading: false,
-    refs: state.refs.concat(ref)
+    refs: state.refs.concat({
+      type: movementType,
+      ref
+    })
   });
 }
 
@@ -74,3 +69,31 @@ export function setLoadingFailure(state) {
     loading: false
   });
 }
+
+const ACTION_HANDLERS = {
+  [actions.MOVEMENTS_ADDED]: childrenAdded,
+  [actions.MOVEMENT_ADDED]: childAdded,
+  [actions.MOVEMENT_CHANGED]: childChanged,
+  [actions.MOVEMENT_DELETED]: childRemoved,
+  [actions.SET_MOVEMENTS_LOADING]: setLoading,
+  [actions.LOAD_MOVEMENTS_FAILURE]: setLoadingFailure,
+};
+
+const INITIAL_STATE = {
+  data: new ImmutableItemsArray(),
+  loading: false,
+  loadingFailed: false,
+  refs: []
+};
+
+const reducer = (initialState, actionHandlers) => {
+  return (state = initialState, action) => {
+    const handler = actionHandlers[action.type];
+    if (handler) {
+      return handler(state, action);
+    }
+    return state;
+  };
+};
+
+export default reducer(INITIAL_STATE, ACTION_HANDLERS);

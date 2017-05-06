@@ -1,19 +1,20 @@
-import { combineReducers } from 'redux';
-import { fork } from 'redux-saga/effects'
+import reducer from './reducer';
+import sagas from './sagas.js';
 
-import departures, { sagas as departureSagas } from './departures';
-import arrivals, { sagas as arrivalSagas } from './arrivals';
+export {
+  SAVE_MOVEMENT_SUCCESS,
+  SAVE_MOVEMENT_FAILED,
+  START_INITIALIZE_WIZARD,
+  WIZARD_INITIALIZED,
+  loadMovements,
+  monitorMovements,
+  deleteMovement,
+  initNewMovement,
+  initNewMovementFromMovement,
+  editMovement,
+  saveMovement
+} from './actions';
 
-const reducer = combineReducers({
-  departures,
-  arrivals
-});
-
-export function* sagas() {
-  yield [
-    fork(departureSagas),
-    fork(arrivalSagas),
-  ]
-}
+export { sagas };
 
 export default reducer;

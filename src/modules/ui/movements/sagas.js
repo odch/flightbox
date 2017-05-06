@@ -3,20 +3,15 @@ import { put, fork } from 'redux-saga/effects'
 import { push, goBack } from 'react-router-redux'
 import * as actions from './actions';
 
-export function* showDepartureWizard(action) {
-  yield put(push('/departure/' + action.payload.departureKey));
+export function* showMovementWizard(action) {
+  const {movementType, key} = action.payload;
+  yield put(push(`/${movementType}/${key}`));
 }
 
-export function* showArrivalWizard(action) {
-  yield put(push('/arrival/' + action.payload.arrivalKey));
-}
-
-export function* createDepartureFromArrival(action) {
-  yield put(push('/departure/new/' + action.payload.arrivalKey));
-}
-
-export function* createArrivalFromDeparture(action) {
-  yield put(push('/arrival/new/' + action.payload.departureKey));
+export function* createMovementFromMovement(action) {
+  const {sourceMovementType, sourceMovementKey} = action.payload;
+  const targetMovementType = sourceMovementType === 'departure' ? 'arrival' : 'departure';
+  yield put(push(`/${targetMovementType}/new/${sourceMovementKey}`));
 }
 
 export function* cancelWizard() {
@@ -25,10 +20,8 @@ export function* cancelWizard() {
 
 export default function* sagas() {
   yield [
-    fork(takeEvery, actions.SHOW_DEPARTURE_WIZARD, showDepartureWizard),
-    fork(takeEvery, actions.SHOW_ARRIVAL_WIZARD, showArrivalWizard),
-    fork(takeEvery, actions.CREATE_DEPARTURE_FROM_ARRIVAL, createDepartureFromArrival),
-    fork(takeEvery, actions.CREATE_ARRIVAL_FROM_DEPARTURE, createArrivalFromDeparture),
+    fork(takeEvery, actions.SHOW_MOVEMENT_WIZARD, showMovementWizard),
+    fork(takeEvery, actions.CREATE_MOVEMENT_FROM_MOVEMENT, createMovementFromMovement),
     fork(takeEvery, actions.CANCEL_WIZARD, cancelWizard),
   ]
 }

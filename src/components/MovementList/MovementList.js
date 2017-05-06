@@ -58,9 +58,7 @@ class MovementList extends React.PureComponent {
           predicate={afterTodayPredicate}
           onEdit={this.props.onEdit}
           timeWithDate={true}
-          onAction={this.props.onAction}
-          actionIcon={this.props.actionIcon}
-          actionLabel={this.props.actionLabel}
+          createMovementFromMovement={this.props.createMovementFromMovement}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
@@ -72,9 +70,7 @@ class MovementList extends React.PureComponent {
           predicate={todayPredicate}
           onEdit={this.props.onEdit}
           timeWithDate={false}
-          onAction={this.props.onAction}
-          actionIcon={this.props.actionIcon}
-          actionLabel={this.props.actionLabel}
+          createMovementFromMovement={this.props.createMovementFromMovement}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
@@ -86,9 +82,7 @@ class MovementList extends React.PureComponent {
           predicate={yesterdayPredicate}
           onEdit={this.props.onEdit}
           timeWithDate={false}
-          onAction={this.props.onAction}
-          actionIcon={this.props.actionIcon}
-          actionLabel={this.props.actionLabel}
+          createMovementFromMovement={this.props.createMovementFromMovement}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
@@ -99,9 +93,7 @@ class MovementList extends React.PureComponent {
           onSelect={this.props.onSelect}
           predicate={thisMonthPredicate}
           onEdit={this.props.onEdit}
-          onAction={this.props.onAction}
-          actionIcon={this.props.actionIcon}
-          actionLabel={this.props.actionLabel}
+          createMovementFromMovement={this.props.createMovementFromMovement}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
@@ -112,9 +104,7 @@ class MovementList extends React.PureComponent {
           onSelect={this.props.onSelect}
           predicate={olderPredicate}
           onEdit={this.props.onEdit}
-          onAction={this.props.onAction}
-          actionIcon={this.props.actionIcon}
-          actionLabel={this.props.actionLabel}
+          createMovementFromMovement={this.props.createMovementFromMovement}
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
         />
@@ -139,9 +129,7 @@ MovementList.propTypes = {
   hideDeleteConfirmationDialog: PropTypes.func.isRequired,
   showDeleteConfirmationDialog: React.PropTypes.func.isRequired,
   onEdit: PropTypes.func,
-  onAction: PropTypes.func,
-  actionIcon: PropTypes.string,
-  actionLabel: PropTypes.string,
+  createMovementFromMovement: PropTypes.func.isRequired,
   lockDate: PropTypes.object.isRequired,
 };
 
