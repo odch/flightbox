@@ -30,7 +30,6 @@ class Movement extends React.PureComponent {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
-    this.handleActionClick = this.handleActionClick.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleEditClick = this.handleEditClick.bind(this);
   }
@@ -45,7 +44,7 @@ class Movement extends React.PureComponent {
           selected={props.selected}
           data={props.data}
           timeWithDate={props.timeWithDate}
-          onAction={props.onAction}
+          createMovementFromMovement={props.createMovementFromMovement}
           actionIcon={props.actionIcon}
           actionLabel={props.actionLabel}
           onDelete={props.onDelete}
@@ -55,7 +54,6 @@ class Movement extends React.PureComponent {
           <div>
             <MovementDetails
               data={props.data}
-              movementType={props.movementType}
               locked={props.locked}
             />
             {!props.locked && (
@@ -78,31 +76,23 @@ class Movement extends React.PureComponent {
     this.props.onSelect(selected);
   }
 
-  handleActionClick(e) {
-    e.stopPropagation(); // prevent call of onClick handler
-    this.props.onAction(this.props.data.key);
-  }
-
   handleDeleteClick(e) {
     e.stopPropagation(); // prevent call of onClick handler
     this.props.onDelete(this.props.data);
   }
 
   handleEditClick() {
-    this.props.onEdit(this.props.data.key);
+    this.props.onEdit(this.props.data.type, this.props.data.key);
   }
 }
 
 Movement.propTypes = {
   data: PropTypes.object.isRequired,
-  movementType: PropTypes.oneOf(['departure', 'arrival']),
   selected: PropTypes.bool,
   onEdit: PropTypes.func.isRequired,
   onSelect: PropTypes.func.isRequired,
   timeWithDate: PropTypes.bool,
-  onAction: PropTypes.func.isRequired,
-  actionIcon: PropTypes.string.isRequired,
-  actionLabel: PropTypes.string.isRequired,
+  createMovementFromMovement: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   locked: PropTypes.bool,
 };

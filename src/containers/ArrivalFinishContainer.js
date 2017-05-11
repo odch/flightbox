@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { loadAircraftSettings } from '../modules/settings/aircrafts';
-import { createDepartureFromArrival } from '../modules/ui/movements';
+import { createMovementFromMovement } from '../modules/ui/movements';
 import Finish, { FinishLoading } from '../components/wizards/ArrivalWizard/Finish';
 
 class ArrivalFinishContainer extends Component {
@@ -22,7 +22,7 @@ class ArrivalFinishContainer extends Component {
 
     return (
       <Finish
-        createDepartureFromArrival={this.props.createDepartureFromArrival}
+        createMovementFromMovement={this.props.createMovementFromMovement}
         finish={this.props.finish}
         isUpdate={this.props.isUpdate}
         isHomeBase={isHomeBase}
@@ -37,7 +37,7 @@ ArrivalFinishContainer.propTypes = {
     club: PropTypes.object,
     homeBase: PropTypes.object,
   }).isRequired,
-  createDepartureFromArrival: PropTypes.func.isRequired,
+  createMovementFromMovement: PropTypes.func.isRequired,
   loadAircraftSettings: PropTypes.func.isRequired,
 
   finish: PropTypes.func.isRequired,
@@ -57,7 +57,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapActionCreators = {
-  createDepartureFromArrival,
+  createMovementFromMovement,
   loadAircraftSettings,
 };
 

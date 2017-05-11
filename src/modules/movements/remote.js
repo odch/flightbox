@@ -1,15 +1,17 @@
-import firebase from '../../../util/firebase';
+import firebase from '../../util/firebase';
 
-export function loadLimited(path, start, limit) {
+export function loadLimited(path, start, limit, endAt) {
   return new Promise(resolve => {
     const ref = firebase(path)
       .orderByChild('negativeTimestamp')
-      .limitToFirst(limit)
       .startAt(start);
-    ref.once('value', snapshot => {
+    const limitedRef = limit
+      ? ref.limitToFirst(limit)
+      : ref.endAt(endAt);
+    limitedRef.once('value', snapshot => {
       resolve({
         snapshot,
-        ref
+        ref: limitedRef
       });
     });
   });

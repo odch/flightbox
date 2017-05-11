@@ -4,10 +4,8 @@ import sagas from './sagas';
 export {
   showDeleteConfirmationDialog,
   hideDeleteConfirmationDialog,
-  showDepartureWizard,
-  showArrivalWizard,
-  createDepartureFromArrival,
-  createArrivalFromDeparture,
+  showMovementWizard,
+  createMovementFromMovement,
   cancelWizard,
   selectMovement
 } from './actions';

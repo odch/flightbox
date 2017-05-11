@@ -5,7 +5,7 @@ const I = styled.i`
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;  /* Preferred icon size */
+  font-size: ${props => props.size}px;
   display: inline-block;
   width: 1em;
   height: 1em;
@@ -33,13 +33,19 @@ const I = styled.i`
 
 class MaterialIcon extends React.PureComponent {
   render() {
-    return <I className={this.props.className}>{this.props.icon}</I>;
+    return <I className={this.props.className} size={this.props.size} title={this.props.title}>{this.props.icon}</I>;
   }
 }
 
 MaterialIcon.propTypes = {
   icon: React.PropTypes.string.isRequired,
-  className: React.PropTypes.string
+  className: React.PropTypes.string,
+  size: React.PropTypes.number,
+  title: React.PropTypes.string
+};
+
+MaterialIcon.defaultProps = {
+  size: 24
 };
 
 export default MaterialIcon;

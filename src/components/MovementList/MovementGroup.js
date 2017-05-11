@@ -33,13 +33,12 @@ class MovementGroup extends React.PureComponent {
             return (
               <Movement
                 key={item.key}
-                movementType={props.movementType}
                 data={item}
                 selected={item.key === props.selected}
                 onSelect={props.onSelect}
                 onEdit={props.onEdit}
                 timeWithDate={props.timeWithDate}
-                onAction={props.onAction}
+                createMovementFromMovement={props.createMovementFromMovement}
                 actionIcon={props.actionIcon}
                 actionLabel={props.actionLabel}
                 onDelete={props.onDelete}
@@ -54,7 +53,6 @@ class MovementGroup extends React.PureComponent {
 }
 
 MovementGroup.propTypes = {
-  movementType: PropTypes.oneOf(['departure', 'arrival']),
   label: PropTypes.string,
   items: PropTypes.array,
   selected: PropTypes.string,
@@ -62,9 +60,7 @@ MovementGroup.propTypes = {
   predicate: PropTypes.func,
   onEdit: PropTypes.func,
   timeWithDate: PropTypes.bool,
-  onAction: PropTypes.func,
-  actionIcon: PropTypes.string,
-  actionLabel: PropTypes.string,
+  createMovementFromMovement: PropTypes.func.isRequired,
   onDelete: PropTypes.func,
   lockDate: PropTypes.number,
 };

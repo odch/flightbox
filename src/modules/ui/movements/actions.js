@@ -1,9 +1,7 @@
 export const SHOW_DELETE_CONFIRMATION_DIALOG = 'SHOW_DELETE_CONFIRMATION_DIALOG';
 export const HIDE_DELETE_CONFIRMATION_DIALOG = 'HIDE_DELETE_CONFIRMATION_DIALOG';
-export const SHOW_DEPARTURE_WIZARD = 'SHOW_DEPARTURE_WIZARD';
-export const SHOW_ARRIVAL_WIZARD = 'SHOW_ARRIVAL_WIZARD';
-export const CREATE_DEPARTURE_FROM_ARRIVAL = 'CREATE_DEPARTURE_FROM_ARRIVAL';
-export const CREATE_ARRIVAL_FROM_DEPARTURE = 'CREATE_ARRIVAL_FROM_DEPARTURE';
+export const SHOW_MOVEMENT_WIZARD = 'SHOW_MOVEMENT_WIZARD';
+export const CREATE_MOVEMENT_FROM_MOVEMENT = 'CREATE_MOVEMENT_FROM_MOVEMENT';
 export const CANCEL_WIZARD = 'CANCEL_WIZARD';
 export const SELECT_MOVEMENT = 'SELECT_MOVEMENT';
 
@@ -22,38 +20,22 @@ export function hideDeleteConfirmationDialog() {
   };
 }
 
-export function showDepartureWizard(departureKey) {
+export function showMovementWizard(movementType, key) {
   return {
-    type: SHOW_DEPARTURE_WIZARD,
+    type: SHOW_MOVEMENT_WIZARD,
     payload: {
-      departureKey,
+      movementType,
+      key,
     },
   };
 }
 
-export function showArrivalWizard(arrivalKey) {
+export function createMovementFromMovement(sourceMovementType, sourceMovementKey) {
   return {
-    type: SHOW_ARRIVAL_WIZARD,
+    type: CREATE_MOVEMENT_FROM_MOVEMENT,
     payload: {
-      arrivalKey,
-    },
-  };
-}
-
-export function createDepartureFromArrival(arrivalKey) {
-  return {
-    type: CREATE_DEPARTURE_FROM_ARRIVAL,
-    payload: {
-      arrivalKey,
-    },
-  };
-}
-
-export function createArrivalFromDeparture(departureKey) {
-  return {
-    type: CREATE_ARRIVAL_FROM_DEPARTURE,
-    payload: {
-      departureKey,
+      sourceMovementType,
+      sourceMovementKey
     },
   };
 }
