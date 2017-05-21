@@ -1,6 +1,7 @@
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
 import { firebaseToLocal, compareDescending } from '../../util/movements';
+import associate from './associate';
 
 export function childrenAdded(state, action) {
   const {snapshot, ref, movementType} = action.payload;
@@ -14,13 +15,18 @@ export function childrenAdded(state, action) {
     movements.push(movement);
   });
 
+  let newData = state.data.insertAll(movements, compareDescending);
+  newData = associate(newData, compareDescending);
+
+  const newRefs = state.refs.concat({
+    type: movementType,
+    ref
+  });
+
   return Object.assign({}, state, {
-    data: state.data.insertAll(movements, compareDescending),
+    data: newData,
     loading: false,
-    refs: state.refs.concat({
-      type: movementType,
-      ref
-    })
+    refs: newRefs
   });
 }
 
@@ -31,8 +37,11 @@ export function childAdded(state, action) {
   movement.key = snapshot.key();
   movement.type = movementType;
 
+  let newData = state.data.insert(movement, compareDescending);
+  newData = associate(newData, compareDescending);
+
   return Object.assign({}, state, {
-    data: state.data.insert(movement, compareDescending),
+    data: newData
   });
 }
 
@@ -43,16 +52,22 @@ export function childChanged(state, action) {
   movement.key = snapshot.key();
   movement.type = movementType;
 
+  let newData = state.data.update(movement, compareDescending);
+  newData = associate(newData, compareDescending);
+
   return Object.assign({}, state, {
-    data: state.data.update(movement, compareDescending),
+    data: newData
   });
 }
 
 export function childRemoved(state, action) {
   const snapshot = action.payload.snapshot;
 
+  let newData = state.data.remove(snapshot.key());
+  newData = associate(newData, compareDescending);
+
   return Object.assign({}, state, {
-    data: state.data.remove(snapshot.key()),
+    data: newData
   });
 }
 

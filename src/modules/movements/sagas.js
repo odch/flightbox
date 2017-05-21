@@ -223,6 +223,7 @@ export function* saveMovement() {
   delete movement.key;
 
   delete movement.type;
+  delete movement.associations;
 
   try {
     key = yield call(remote.saveMovement, path, key, movement);
