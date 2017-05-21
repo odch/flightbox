@@ -1,5 +1,19 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, {keyframes} from 'styled-components';
+
+const rotate360 = direction => {
+  const start = direction === 'left' ? 360 : 0;
+  const end = direction === 'left' ? 0 : 360;
+  return keyframes`
+    from {
+      transform: rotate(${start}deg);
+    }
+  
+    to {
+      transform: rotate(${end}deg);
+    }
+  `;
+};
 
 const I = styled.i`
   font-family: 'Material Icons';
@@ -29,11 +43,22 @@ const I = styled.i`
   
   /* align vertically with text */
   vertical-align: middle;
+  
+  ${props => props.rotate && `animation: ${rotate360(props.rotate)} 2s linear infinite;`}
 `;
 
 class MaterialIcon extends React.PureComponent {
   render() {
-    return <I className={this.props.className} size={this.props.size} title={this.props.title}>{this.props.icon}</I>;
+    return (
+      <I
+        className={this.props.className}
+        size={this.props.size}
+        title={this.props.title}
+        rotate={this.props.rotate}
+      >
+        {this.props.icon}
+      </I>
+    );
   }
 }
 
@@ -41,7 +66,8 @@ MaterialIcon.propTypes = {
   icon: React.PropTypes.string.isRequired,
   className: React.PropTypes.string,
   size: React.PropTypes.number,
-  title: React.PropTypes.string
+  title: React.PropTypes.string,
+  rotate: React.PropTypes.oneOf(['left', 'right'])
 };
 
 MaterialIcon.defaultProps = {
