@@ -7,12 +7,16 @@ import {getItemLabel as getCarriageVoucherItemLabel} from '../../util/carriageVo
 import newLineToBr from '../../util/newLineToBr';
 import DetailsBox from './DetailsBox';
 import MovementField from './MovementField';
+import HomeBaseIcon from './HomeBaseIcon';
 
 const Content = styled.div`
   padding: 1.5em 1em 0 1em;
-  background-color: #fff;
   display: flex;
   flex-wrap: wrap;
+`;
+
+const StyledHomeBaseIcon = styled(HomeBaseIcon)`
+  margin-top: 1em;
 `;
 
 const getCarriageVoucher = props => {
@@ -35,11 +39,12 @@ class MovementDetails extends React.PureComponent {
     const time = dates.formatTime(props.data.date, props.data.time);
 
     return (
-        <Content>
+        <Content className={props.className}>
           <DetailsBox label="Flugzeugdaten">
             <MovementField label="Immatrikulation" value={props.data.immatriculation}/>
             <MovementField label="Flugzeugtyp" value={props.data.aircraftType}/>
             <MovementField label="MTOW" value={props.data.mtow}/>
+            <StyledHomeBaseIcon isHomeBase={props.isHomeBase} showText/>
           </DetailsBox>
           <DetailsBox label="Pilot">
             <MovementField label="Mitgliedernummer" value={props.data.memberNr}/>
@@ -100,8 +105,10 @@ class MovementDetails extends React.PureComponent {
 }
 
 MovementDetails.propTypes = {
+  className: PropTypes.string,
   data: PropTypes.object.isRequired,
   locked: PropTypes.bool,
+  isHomeBase: PropTypes.bool.isRequired
 };
 
 export default MovementDetails;

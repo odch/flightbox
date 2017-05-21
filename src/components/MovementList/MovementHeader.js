@@ -3,30 +3,10 @@ import styled from 'styled-components';
 import dates from '../../util/dates';
 import Action from './Action';
 import MaterialIcon from '../MaterialIcon';
+import HomeBaseIcon from './HomeBaseIcon';
+import {TYPE_LABELS, ACTION_LABELS} from './labels';
 
 const ICON_HEIGHT = 30;
-
-const LABELS = {
-  departure: {
-    label: 'Abflug',
-    icon: 'flight_takeoff'
-  },
-  arrival: {
-    label: 'Ankunft',
-    icon: 'flight_land'
-  }
-};
-
-const CREATE_LABELS = {
-  departure: {
-    label: 'Ankunft erfassen',
-    icon: 'flight_land'
-  },
-  arrival: {
-    label: 'Abflug erfassen',
-    icon: 'flight_takeoff'
-  }
-};
 
 const Wrapper = styled.div`
   padding: 1em;
@@ -37,13 +17,26 @@ const Wrapper = styled.div`
     font-weight: bold;
   `}
   ${props => props.locked && `color: #555;`}
+  ${props => !props.hasAssociatedMovement && `
+    font-weight: bold;
+  `}
   
   .type {
     width: 50px;
   }
   
-  .immatriculation, .pilot, .datetime, .location {
+  .immatriculation {
+    width: 70px;
+    padding-right: 10px;
+  }
+  
+  .homebase {
+    flex: 0.5;
+  }
+  
+  .pilot, .datetime, .location {
     flex: 1;
+    padding-right: 10px;
   }
   
   .delete {
@@ -54,15 +47,10 @@ const Wrapper = styled.div`
     width: 200px;
   }
   
-  .immatriculation {
-    padding-right: 5px;
-  }
-    
-  .pilot {
+  .pilot, .location {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding-right: 5px;
   }
   
   @media (max-width: 980px) {
@@ -78,11 +66,19 @@ const Wrapper = styled.div`
     }
   }
   
-  @media (max-width: 450px) {
+  @media (max-width: 480px) {
     padding: 1em 0.5em;
     
     .type {
       width: 40px;
+    }
+    
+    .immatriculation {
+      flex: 1;
+    }
+    
+    .homebase {
+      display: none;
     }
     
     .action, .delete {
@@ -96,6 +92,7 @@ const Column = styled.div`
   vertical-align: top;
   width: ${props => props.width};
   ${props => props.alignMiddle && `line-height: ${ICON_HEIGHT}px;`}
+  ${props => props.highlight && `color: ${props.theme.colors.main};`}
 `;
 
 const ActionColumn = styled(Column)`
@@ -134,27 +131,38 @@ class MovementHeader extends React.PureComponent {
     const time = dates.formatTime(props.data.date, props.data.time);
 
     return (
-      <Wrapper onClick={props.onClick} selected={props.selected} locked={props.locked}>
+      <Wrapper
+        onClick={props.onClick}
+        selected={props.selected}
+        locked={props.locked}
+        hasAssociatedMovement={props.hasAssociatedMovement}
+      >
         <Column className="type">
           <MaterialIcon
-            icon={LABELS[props.data.type].icon}
+            icon={TYPE_LABELS[props.data.type].icon}
             size={ICON_HEIGHT}
-            title={LABELS[props.data.type].label}
+            title={TYPE_LABELS[props.data.type].label}
           />
         </Column>
         <Column className="immatriculation" alignMiddle>{props.data.immatriculation}</Column>
+        <Column className="homebase" alignMiddle>
+          <HomeBaseIcon isHomeBase={props.isHomeBase}/>
+        </Column>
         <Column className="pilot" alignMiddle>{props.data.lastname}</Column>
         <Column className="datetime" alignMiddle={!date}>
           {date && <Date className="date">{date}</Date>}
           <div className="time">{time}</div>
         </Column>
         <Column className="location" alignMiddle>{getLocation(props.data)}</Column>
-        <ActionColumn className="action" alignMiddle>
-          <Action
-            label={CREATE_LABELS[props.data.type].label}
-            icon={CREATE_LABELS[props.data.type].icon}
-            onClick={this.handleActionClick}
-          />
+        <ActionColumn className="action" alignMiddle highlight>
+          {!props.hasAssociatedMovement && (
+            <Action
+              label={ACTION_LABELS[props.data.type].label}
+              icon={ACTION_LABELS[props.data.type].icon}
+              onClick={this.handleActionClick}
+              responsive
+            />
+          )}
         </ActionColumn>
         <ActionColumn className="delete" alignMiddle>
           {!props.locked && (
@@ -162,6 +170,7 @@ class MovementHeader extends React.PureComponent {
               label="Löschen"
               icon="delete"
               onClick={this.handleDeleteClick}
+              responsive
             />
           )}
         </ActionColumn>
@@ -169,13 +178,11 @@ class MovementHeader extends React.PureComponent {
     );
   }
 
-  handleActionClick(e) {
-    e.stopPropagation(); // prevent call of onClick handler
+  handleActionClick() {
     this.props.createMovementFromMovement(this.props.data.type, this.props.data.key);
   }
 
-  handleDeleteClick(e) {
-    e.stopPropagation(); // prevent call of onClick handler
+  handleDeleteClick() {
     this.props.onDelete(this.props.data);
   }
 }
@@ -187,6 +194,8 @@ MovementHeader.propTypes = {
   onDelete: PropTypes.func.isRequired,
   locked: PropTypes.bool,
   onClick: PropTypes.func,
+  hasAssociatedMovement: PropTypes.bool.isRequired,
+  isHomeBase: PropTypes.bool.isRequired
 };
 
 export default MovementHeader;
