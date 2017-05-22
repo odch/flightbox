@@ -4,7 +4,7 @@ import { firebaseToLocal, compareDescending } from '../../util/movements';
 import associate from './associate';
 
 export function childrenAdded(state, action) {
-  const {snapshot, ref, movementType} = action.payload;
+  const {snapshot, movementType, clear} = action.payload;
 
   const movements = [];
 
@@ -15,18 +15,14 @@ export function childrenAdded(state, action) {
     movements.push(movement);
   });
 
-  let newData = state.data.insertAll(movements, compareDescending);
-  newData = associate(newData, compareDescending);
+  const existingMovements = clear ? new ImmutableItemsArray() : state.data;
 
-  const newRefs = state.refs.concat({
-    type: movementType,
-    ref
-  });
+  let newData = existingMovements.insertAll(movements, compareDescending);
+  newData = associate(newData, compareDescending);
 
   return Object.assign({}, state, {
     data: newData,
-    loading: false,
-    refs: newRefs
+    loading: false
   });
 }
 
@@ -97,8 +93,7 @@ const ACTION_HANDLERS = {
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
   loading: false,
-  loadingFailed: false,
-  refs: []
+  loadingFailed: false
 };
 
 const reducer = (initialState, actionHandlers) => {

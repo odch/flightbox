@@ -1,5 +1,4 @@
 export const LOAD_MOVEMENTS = 'LOAD_MOVEMENTS';
-export const MONITOR_MOVEMENTS = 'MONITOR_MOVEMENTS';
 export const SET_MOVEMENTS_LOADING = 'SET_MOVEMENTS_LOADING';
 export const LOAD_MOVEMENTS_FAILURE = 'LOAD_MOVEMENTS_FAILURE';
 export const MOVEMENTS_ADDED = 'MOVEMENTS_ADDED';
@@ -16,15 +15,12 @@ export const EDIT_MOVEMENT = 'EDIT_MOVEMENT';
 export const START_INITIALIZE_WIZARD = 'START_INITIALIZE_WIZARD';
 export const WIZARD_INITIALIZED = 'WIZARD_INITIALIZED';
 
-export function loadMovements() {
+export function loadMovements(clear) {
   return {
     type: LOAD_MOVEMENTS,
-  };
-}
-
-export function monitorMovements() {
-  return {
-    type: MONITOR_MOVEMENTS,
+    payload: {
+      clear
+    }
   };
 }
 
@@ -40,13 +36,13 @@ export function loadMovementsFailure() {
   };
 }
 
-export function movementsAdded(snapshot, ref, movementType) {
+export function movementsAdded(snapshot, movementType, clear) {
   return {
     type: MOVEMENTS_ADDED,
     payload: {
       snapshot,
-      ref,
-      movementType
+      movementType,
+      clear
     },
   };
 }

@@ -180,12 +180,14 @@ describe('modules', () => {
       });
 
       describe('loadMovements', () => {
-        it('should load new movements range', () => {
+        const testFn = clear => {
           const channel = {
             put: Utils.callTracker()
           };
 
-          const generator = sagas.loadMovements(channel);
+          const action = actions.loadMovements(clear);
+
+          const generator = sagas.loadMovements(channel, action);
 
           expect(generator.next().value).toEqual(select(sagas.stateSelector));
 
@@ -241,9 +243,17 @@ describe('modules', () => {
           expect(channelPutCalls.length).toBe(2);
 
           expect(channelPutCalls[0][0])
-            .toEqual(actions.movementsAdded(departuresResult.snapshot, departuresResult.ref, 'departure'));
+            .toEqual(actions.movementsAdded(departuresResult.snapshot, 'departure', clear));
           expect(channelPutCalls[1][0])
-            .toEqual(actions.movementsAdded(arrivalsResult.snapshot, arrivalsResult.ref, 'arrival'));
+            .toEqual(actions.movementsAdded(arrivalsResult.snapshot, 'arrival', clear));
+        };
+
+        it('should load new movements range', () => {
+          testFn(undefined)
+        });
+
+        it('should load new movements range and clear already loaded data', () => {
+          testFn(true)
         });
       });
 
@@ -277,40 +287,6 @@ describe('modules', () => {
 
           expect(onCalls[2][0]).toBe('child_removed');
           expect(typeof onCalls[2][1]).toBe('function');
-        });
-      });
-
-      describe('monitorMovements', () => {
-        it('should add listener on all refs', () => {
-          const channel = {};
-
-          const generator = sagas.monitorMovements(channel);
-
-          expect(generator.next().value).toEqual(select(sagas.stateSelector));
-
-          const ref1 = {
-            type: 'departure',
-            ref: {
-              name: 'ref1'
-            }
-          };
-          const ref2 = {
-            type: 'arrival',
-            ref: {
-              name: 'ref2'
-            }
-          };
-
-          const state = {
-            refs: [ref1, ref2]
-          };
-
-          expect(generator.next(state).value)
-            .toEqual(call(sagas.monitorRef, ref1.ref, channel, 'departure'));
-          expect(generator.next().value)
-            .toEqual(call(sagas.monitorRef, ref2.ref, channel, 'arrival'));
-
-          expect(generator.next().done).toEqual(true);
         });
       });
 

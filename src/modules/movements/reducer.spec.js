@@ -10,12 +10,6 @@ describe('modules', () => {
       describe('childrenAdded', () => {
         it('should add children', () => {
           const state = {
-            refs: [{
-              type: 'departure',
-              ref: {
-                name: 'ref1'
-              }
-            }],
             loading: true,
             data: new ImmutableItemsArray([{
               key: 'dep2',
@@ -42,23 +36,11 @@ describe('modules', () => {
               dateTime: '2017-04-28T15:00:00.000Z'
             })
           ]);
-          const action = actions.movementsAdded(snapshot, {name: 'ref2'}, 'arrival');
+          const action = actions.movementsAdded(snapshot, 'arrival');
 
           const newState = reducer.childrenAdded(state, action);
 
           expect(newState.loading).toEqual(false);
-
-          expect(newState.refs).toEqual([{
-            type: 'departure',
-            ref: {
-              name: 'ref1'
-            }
-          }, {
-            type: 'arrival',
-            ref: {
-              name: 'ref2'
-            }
-          }]);
 
           // `key` must have been added
           // `type: 'departure'` must have been added
@@ -104,6 +86,69 @@ describe('modules', () => {
             associations: {
               preceding: null,
               subsequent: 'arr2'
+            }
+          }]);
+        });
+
+        it('should clear existing children if flag set', () => {
+          const state = {
+            loading: true,
+            data: new ImmutableItemsArray([{
+              key: 'dep2',
+              type: 'departure',
+              immatriculation: 'HBKOF',
+              date: '2017-04-28',
+              time: '15:00'
+            }, {
+              key: 'dep1',
+              type: 'departure',
+              immatriculation: 'HBKFW',
+              date: '2017-04-28',
+              time: '14:00'
+            }])
+          };
+
+          const snapshot = new FakeFirebaseSnapshot(null, [
+            new FakeFirebaseSnapshot('arr1', {
+              immatriculation: 'HBKOF',
+              dateTime: '2017-04-28T14:00:00.000Z'
+            }),
+            new FakeFirebaseSnapshot('arr2', {
+              immatriculation: 'HBKFW',
+              dateTime: '2017-04-28T15:00:00.000Z'
+            })
+          ]);
+          const action = actions.movementsAdded(snapshot, 'arrival', true);
+
+          const newState = reducer.childrenAdded(state, action);
+
+          expect(newState.loading).toEqual(false);
+
+          // `key` must have been added
+          // `type: 'departure'` must have been added
+          // `dateTime` must have been converted to `date` and `time` in local time
+          // existing items must have been removed
+          // items must have been inserted in the right order
+          // associations must have been added
+          expect(newState.data.array).toEqual([{
+            key: 'arr2',
+            date: '2017-04-28',
+            immatriculation: 'HBKFW',
+            time: '17:00',
+            type: 'arrival',
+            associations: {
+              preceding: null,
+              subsequent: null
+            }
+          }, {
+            key: 'arr1',
+            date: '2017-04-28',
+            immatriculation: 'HBKOF',
+            time: '16:00',
+            type: 'arrival',
+            associations: {
+              preceding: null,
+              subsequent: null
             }
           }]);
         });

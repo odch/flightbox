@@ -29,7 +29,6 @@ const mapActionCreators = {
   createMovementFromMovement,
   loadAircraftSettings,
   loadItems: loadMovements,
-  monitorItems: monitorMovements,
   deleteItem: deleteMovement,
   onEdit: showMovementWizard,
   onSelect: selectMovement,
