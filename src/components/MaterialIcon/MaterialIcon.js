@@ -1,18 +1,15 @@
 import React from 'react';
 import styled, {keyframes} from 'styled-components';
 
-const rotate360 = direction => {
-  const start = direction === 'left' ? 360 : 0;
-  const end = direction === 'left' ? 0 : 360;
-  return keyframes`
-    from {
-      transform: rotate(${start}deg);
-    }
-  
-    to {
-      transform: rotate(${end}deg);
-    }
-  `;
+const animations = {
+  left: keyframes`
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
+  `,
+  right: keyframes`
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  `
 };
 
 const I = styled.i`
@@ -44,7 +41,7 @@ const I = styled.i`
   /* align vertically with text */
   vertical-align: middle;
   
-  ${props => props.rotate && `animation: ${rotate360(props.rotate)} 2s linear infinite;`}
+  ${props => props.rotate && `animation: ${animations[props.rotate]} 2s linear infinite;`}
 `;
 
 class MaterialIcon extends React.PureComponent {
