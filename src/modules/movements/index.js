@@ -7,7 +7,6 @@ export {
   START_INITIALIZE_WIZARD,
   WIZARD_INITIALIZED,
   loadMovements,
-  monitorMovements,
   deleteMovement,
   initNewMovement,
   initNewMovementFromMovement,

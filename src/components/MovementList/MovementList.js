@@ -31,11 +31,8 @@ class MovementList extends React.PureComponent {
 
   componentWillMount() {
     this.props.loadAircraftSettings();
-    this.props.monitorItems();
     this.props.onSelect(null);
-    if (this.props.items.array.length === 0) {
-      this.props.loadItems();
-    }
+    this.props.loadItems(true);
   }
 
   getDateString(movement) {
@@ -153,7 +150,6 @@ class MovementList extends React.PureComponent {
 MovementList.propTypes = {
   loadItems: PropTypes.func.isRequired,
   loadAircraftSettings: PropTypes.func.isRequired,
-  monitorItems: PropTypes.func.isRequired,
   items: PropTypes.object.isRequired,
   selected: PropTypes.string,
   onSelect: PropTypes.func,
