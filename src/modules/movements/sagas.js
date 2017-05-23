@@ -94,13 +94,15 @@ export function getOldest(snapshot) {
   return oldest;
 }
 
-export function* loadMovements(channel) {
+export function* loadMovements(channel, action) {
   try {
+    const {clear} = action.payload;
+
     const movements = yield select(stateSelector);
     if (movements.loading !== true) {
       yield put(actions.setMovementsLoading());
 
-      const pagination = getPagination(movements.data.array);
+      const pagination = getPagination(clear ? [] : movements.data.array);
 
       const departures = yield call(
         remote.loadLimited,
@@ -131,8 +133,8 @@ export function* loadMovements(channel) {
       yield call(monitorRef, departures.ref, channel, 'departure');
       yield call(monitorRef, arrivals.ref, channel, 'arrival');
 
-      channel.put(actions.movementsAdded(departures.snapshot, departures.ref, 'departure'));
-      channel.put(actions.movementsAdded(arrivals.snapshot, arrivals.ref, 'arrival'));
+      channel.put(actions.movementsAdded(departures.snapshot, 'departure', clear));
+      channel.put(actions.movementsAdded(arrivals.snapshot, 'arrival', clear));
     }
   } catch(e) {
     error('Failed to load movements', e);
@@ -156,14 +158,6 @@ export function* monitorRef(ref, channel, movementType) {
 
 export function createDelegate(channel, action, movementType) {
   return snapshot => channel.put(action(snapshot, movementType))
-}
-
-export function* monitorMovements(channel) {
-  const state = yield select(stateSelector);
-
-  for (const ref of state.refs) {
-    yield call(monitorRef, ref.ref, channel, ref.type);
-  }
 }
 
 export function* deleteMovement(action) {
@@ -223,6 +217,7 @@ export function* saveMovement() {
   delete movement.key;
 
   delete movement.type;
+  delete movement.associations;
 
   try {
     key = yield call(remote.saveMovement, path, key, movement);
@@ -253,7 +248,6 @@ export default function* sagas() {
   yield [
     fork(monitor, channel),
     fork(takeEvery, actions.LOAD_MOVEMENTS, loadMovements, channel),
-    fork(takeEvery, actions.MONITOR_MOVEMENTS, monitorMovements, channel),
     fork(takeEvery, actions.DELETE_MOVEMENT, deleteMovement),
     fork(takeEvery, actions.INIT_NEW_MOVEMENT, initNewMovement),
     fork(takeEvery, actions.INIT_NEW_MOVEMENT_FROM_MOVEMENT, initNewMovementFromMovement),

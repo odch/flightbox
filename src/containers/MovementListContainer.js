@@ -7,15 +7,17 @@ import {
   createMovementFromMovement,
   selectMovement
 } from '../modules/ui/movements';
+import { loadAircraftSettings } from '../modules/settings/aircrafts'
 
 import MovementList from '../components/MovementList';
 
 const mapStateToProps = state => {
   return {
-    items: state.movements.data.array,
+    items: state.movements.data,
     loading: state.movements.loading,
     loadingFailed: state.movements.loadingFailed,
     lockDate: state.settings.lockDate,
+    aircraftSettings: state.settings.aircrafts,
     deleteConfirmation: state.ui.movements.deleteConfirmation,
     selected: state.ui.movements.selected
   };
@@ -25,8 +27,8 @@ const mapActionCreators = {
   showDeleteConfirmationDialog,
   hideDeleteConfirmationDialog,
   createMovementFromMovement,
+  loadAircraftSettings,
   loadItems: loadMovements,
-  monitorItems: monitorMovements,
   deleteItem: deleteMovement,
   onEdit: showMovementWizard,
   onSelect: selectMovement,

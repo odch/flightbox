@@ -2,6 +2,7 @@ import React, {PropTypes} from 'react';
 import styled from 'styled-components';
 import MovementHeader from './MovementHeader';
 import MovementDetails from './MovementDetails';
+import AssociatedMovement from './AssociatedMovement';
 import Action from './Action';
 
 const Wrapper = styled.div`
@@ -15,6 +16,10 @@ const Wrapper = styled.div`
       margin: 10px -3px 10px -3px;
     }
   `}
+`;
+
+const StyledMovementDetails = styled(MovementDetails)`
+  background-color: #fff;
 `;
 
 const Footer = styled.div`
@@ -34,8 +39,43 @@ class Movement extends React.PureComponent {
     this.handleEditClick = this.handleEditClick.bind(this);
   }
 
+  getAssociatedMovement(movementType, isHomeBase, preceding, subsequent) {
+    if (movementType === 'departure') {
+      if (isHomeBase) {
+        if (subsequent && subsequent.type === 'arrival') {
+          return subsequent;
+        }
+      } else {
+        if (preceding && preceding.type === 'arrival') {
+          return preceding;
+        }
+      }
+    } else if (movementType === 'arrival') {
+      if (isHomeBase) {
+        if (preceding && preceding.type === 'departure') {
+          return preceding;
+        }
+      } else {
+        if (subsequent && subsequent.type === 'departure') {
+          return subsequent;
+        }
+      }
+    }
+    return null;
+  }
+
   render() {
     const props = this.props;
+
+    const isHomeBase = props.aircraftSettings.club[props.data.immatriculation] === true
+      || props.aircraftSettings.homeBase[props.data.immatriculation] === true;
+
+    const associatedMovement = this.getAssociatedMovement(
+      props.data.type,
+      isHomeBase,
+      props.preceding,
+      props.subsequent
+    );
 
     return (
       <Wrapper selected={props.selected}>
@@ -45,16 +85,18 @@ class Movement extends React.PureComponent {
           data={props.data}
           timeWithDate={props.timeWithDate}
           createMovementFromMovement={props.createMovementFromMovement}
-          actionIcon={props.actionIcon}
-          actionLabel={props.actionLabel}
           onDelete={props.onDelete}
           locked={props.locked}
+          hasAssociatedMovement={!!associatedMovement}
+          isHomeBase={isHomeBase}
         />
         {props.selected && (
           <div>
-            <MovementDetails
+            <StyledMovementDetails
               data={props.data}
+              associations={props.associations}
               locked={props.locked}
+              isHomeBase={isHomeBase}
             />
             {!props.locked && (
               <Footer>
@@ -65,6 +107,16 @@ class Movement extends React.PureComponent {
                 />
               </Footer>
             )}
+            <AssociatedMovement
+              movementType={props.data.type}
+              movementKey={props.data.key}
+              isHomeBase={isHomeBase}
+              oldestMovementDate={props.oldestMovementDate}
+              associatedMovement={associatedMovement}
+              createMovementFromMovement={props.createMovementFromMovement}
+              loadMovements={props.loadMovements}
+              loading={props.loading}
+            />
           </div>
         )}
       </Wrapper>
@@ -88,6 +140,8 @@ class Movement extends React.PureComponent {
 
 Movement.propTypes = {
   data: PropTypes.object.isRequired,
+  preceding: PropTypes.object,
+  subsequent: PropTypes.object,
   selected: PropTypes.bool,
   onEdit: PropTypes.func.isRequired,
   onSelect: PropTypes.func.isRequired,
@@ -95,6 +149,13 @@ Movement.propTypes = {
   createMovementFromMovement: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   locked: PropTypes.bool,
+  aircraftSettings: PropTypes.shape({
+    club: PropTypes.objectOf(PropTypes.bool),
+    homeBase: PropTypes.objectOf(PropTypes.bool)
+  }).isRequired,
+  oldestMovementDate: PropTypes.string.isRequired,
+  loadMovements: React.PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired
 };
 
 Movement.defaultProps = {

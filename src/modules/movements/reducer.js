@@ -1,9 +1,10 @@
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
 import { firebaseToLocal, compareDescending } from '../../util/movements';
+import associate from './associate';
 
 export function childrenAdded(state, action) {
-  const {snapshot, ref, movementType} = action.payload;
+  const {snapshot, movementType, clear} = action.payload;
 
   const movements = [];
 
@@ -14,13 +15,14 @@ export function childrenAdded(state, action) {
     movements.push(movement);
   });
 
+  const existingMovements = clear ? new ImmutableItemsArray() : state.data;
+
+  let newData = existingMovements.insertAll(movements, compareDescending);
+  newData = associate(newData, compareDescending);
+
   return Object.assign({}, state, {
-    data: state.data.insertAll(movements, compareDescending),
-    loading: false,
-    refs: state.refs.concat({
-      type: movementType,
-      ref
-    })
+    data: newData,
+    loading: false
   });
 }
 
@@ -31,8 +33,11 @@ export function childAdded(state, action) {
   movement.key = snapshot.key();
   movement.type = movementType;
 
+  let newData = state.data.insert(movement, compareDescending);
+  newData = associate(newData, compareDescending);
+
   return Object.assign({}, state, {
-    data: state.data.insert(movement, compareDescending),
+    data: newData
   });
 }
 
@@ -43,16 +48,22 @@ export function childChanged(state, action) {
   movement.key = snapshot.key();
   movement.type = movementType;
 
+  let newData = state.data.update(movement, compareDescending);
+  newData = associate(newData, compareDescending);
+
   return Object.assign({}, state, {
-    data: state.data.update(movement, compareDescending),
+    data: newData
   });
 }
 
 export function childRemoved(state, action) {
   const snapshot = action.payload.snapshot;
 
+  let newData = state.data.remove(snapshot.key());
+  newData = associate(newData, compareDescending);
+
   return Object.assign({}, state, {
-    data: state.data.remove(snapshot.key()),
+    data: newData
   });
 }
 
@@ -82,8 +93,7 @@ const ACTION_HANDLERS = {
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
   loading: false,
-  loadingFailed: false,
-  refs: []
+  loadingFailed: false
 };
 
 const reducer = (initialState, actionHandlers) => {

@@ -10,12 +10,6 @@ describe('modules', () => {
       describe('childrenAdded', () => {
         it('should add children', () => {
           const state = {
-            refs: [{
-              type: 'departure',
-              ref: {
-                name: 'ref1'
-              }
-            }],
             loading: true,
             data: new ImmutableItemsArray([{
               key: 'dep2',
@@ -33,61 +27,129 @@ describe('modules', () => {
           };
 
           const snapshot = new FakeFirebaseSnapshot(null, [
-            new FakeFirebaseSnapshot('dep3', {
-              immatriculation: 'HBPGM',
+            new FakeFirebaseSnapshot('arr1', {
+              immatriculation: 'HBKOF',
               dateTime: '2017-04-28T14:00:00.000Z'
             }),
-            new FakeFirebaseSnapshot('dep4', {
-              immatriculation: 'HBSGU',
+            new FakeFirebaseSnapshot('arr2', {
+              immatriculation: 'HBKFW',
               dateTime: '2017-04-28T15:00:00.000Z'
             })
           ]);
-          const action = actions.movementsAdded(snapshot, {name: 'ref2'}, 'departure');
+          const action = actions.movementsAdded(snapshot, 'arrival');
 
           const newState = reducer.childrenAdded(state, action);
 
           expect(newState.loading).toEqual(false);
 
-          expect(newState.refs).toEqual([{
-            type: 'departure',
-            ref: {
-              name: 'ref1'
-            }
-          }, {
-            type: 'departure',
-            ref: {
-              name: 'ref2'
-            }
-          }]);
-
           // `key` must have been added
           // `type: 'departure'` must have been added
           // `dateTime` must have been converted to `date` and `time` in local time
           // items must have been inserted in the right order
+          // associations must have been added
           expect(newState.data.array).toEqual([{
-            key: 'dep4',
+            key: 'arr2',
             date: '2017-04-28',
-            immatriculation: 'HBSGU',
+            immatriculation: 'HBKFW',
             time: '17:00',
-            type: 'departure'
+            type: 'arrival',
+            associations: {
+              preceding: 'dep1',
+              subsequent: null
+            }
           }, {
-            key: 'dep3',
+            key: 'arr1',
             date: '2017-04-28',
-            immatriculation: 'HBPGM',
+            immatriculation: 'HBKOF',
             time: '16:00',
-            type: 'departure'
+            type: 'arrival',
+            associations: {
+              preceding: 'dep2',
+              subsequent: null
+            }
           }, {
             key: 'dep2',
             date: '2017-04-28',
             immatriculation: 'HBKOF',
             time: '15:00',
-            type: 'departure'
+            type: 'departure',
+            associations: {
+              preceding: null,
+              subsequent: 'arr1'
+            }
           }, {
             key: 'dep1',
             time: '14:00',
             date: '2017-04-28',
             immatriculation: 'HBKFW',
-            type: 'departure'
+            type: 'departure',
+            associations: {
+              preceding: null,
+              subsequent: 'arr2'
+            }
+          }]);
+        });
+
+        it('should clear existing children if flag set', () => {
+          const state = {
+            loading: true,
+            data: new ImmutableItemsArray([{
+              key: 'dep2',
+              type: 'departure',
+              immatriculation: 'HBKOF',
+              date: '2017-04-28',
+              time: '15:00'
+            }, {
+              key: 'dep1',
+              type: 'departure',
+              immatriculation: 'HBKFW',
+              date: '2017-04-28',
+              time: '14:00'
+            }])
+          };
+
+          const snapshot = new FakeFirebaseSnapshot(null, [
+            new FakeFirebaseSnapshot('arr1', {
+              immatriculation: 'HBKOF',
+              dateTime: '2017-04-28T14:00:00.000Z'
+            }),
+            new FakeFirebaseSnapshot('arr2', {
+              immatriculation: 'HBKFW',
+              dateTime: '2017-04-28T15:00:00.000Z'
+            })
+          ]);
+          const action = actions.movementsAdded(snapshot, 'arrival', true);
+
+          const newState = reducer.childrenAdded(state, action);
+
+          expect(newState.loading).toEqual(false);
+
+          // `key` must have been added
+          // `type: 'departure'` must have been added
+          // `dateTime` must have been converted to `date` and `time` in local time
+          // existing items must have been removed
+          // items must have been inserted in the right order
+          // associations must have been added
+          expect(newState.data.array).toEqual([{
+            key: 'arr2',
+            date: '2017-04-28',
+            immatriculation: 'HBKFW',
+            time: '17:00',
+            type: 'arrival',
+            associations: {
+              preceding: null,
+              subsequent: null
+            }
+          }, {
+            key: 'arr1',
+            date: '2017-04-28',
+            immatriculation: 'HBKOF',
+            time: '16:00',
+            type: 'arrival',
+            associations: {
+              preceding: null,
+              subsequent: null
+            }
           }]);
         });
       });
@@ -110,11 +172,11 @@ describe('modules', () => {
             }])
           };
 
-          const snapshot = new FakeFirebaseSnapshot('dep3', {
-            immatriculation: 'HBPGM',
+          const snapshot = new FakeFirebaseSnapshot('arr1', {
+            immatriculation: 'HBKFW',
             dateTime: '2017-04-28T12:30:00.000Z'
           });
-          const action = actions.movementAdded(snapshot, 'departure');
+          const action = actions.movementAdded(snapshot, 'arrival');
 
           const newState = reducer.childAdded(state, action);
 
@@ -122,24 +184,37 @@ describe('modules', () => {
           // `type: 'departure'` must have been added
           // `dateTime` must have been converted to `date` and `time` in local time
           // item must have been inserted in the right order
+          // associations must have been added
           expect(newState.data.array).toEqual([{
             key: 'dep2',
             date: '2017-04-28',
             immatriculation: 'HBKOF',
             time: '15:00',
-            type: 'departure'
+            type: 'departure',
+            associations: {
+              preceding: null,
+              subsequent: null
+            }
           }, {
-            key: 'dep3',
+            key: 'arr1',
             date: '2017-04-28',
-            immatriculation: 'HBPGM',
+            immatriculation: 'HBKFW',
             time: '14:30',
-            type: 'departure'
+            type: 'arrival',
+            associations: {
+              preceding: 'dep1',
+              subsequent: null
+            }
           }, {
             key: 'dep1',
             time: '14:00',
             date: '2017-04-28',
             immatriculation: 'HBKFW',
-            type: 'departure'
+            type: 'departure',
+            associations: {
+              preceding: null,
+              subsequent: 'arr1'
+            }
           }]);
         });
       });
@@ -148,9 +223,9 @@ describe('modules', () => {
         it('should change child', () => {
           const state = {
             data: new ImmutableItemsArray([{
-              key: 'dep2',
-              type: 'departure',
-              immatriculation: 'HBKOF',
+              key: 'arr1',
+              type: 'arrival',
+              immatriculation: 'HBKFW',
               date: '2017-04-28',
               time: '15:00'
             }, {
@@ -172,18 +247,27 @@ describe('modules', () => {
 
           // item must have been updated
           // item must have put to the right place (ordered chronologically)
+          // associations must have been added
           expect(newState.data.array).toEqual([{
             key: 'dep1',
             time: '15:30',
             date: '2017-04-28',
             immatriculation: 'HBKFW',
-            type: 'departure'
+            type: 'departure',
+            associations: {
+              preceding: 'arr1',
+              subsequent: null
+            }
           }, {
-            key: 'dep2',
+            key: 'arr1',
             date: '2017-04-28',
-            immatriculation: 'HBKOF',
+            immatriculation: 'HBKFW',
             time: '15:00',
-            type: 'departure'
+            type: 'arrival',
+            associations: {
+              preceding: null,
+              subsequent: 'dep1'
+            }
           }]);
         });
       });
@@ -216,7 +300,11 @@ describe('modules', () => {
             date: '2017-04-28',
             immatriculation: 'HBKOF',
             time: '15:00',
-            type: 'departure'
+            type: 'departure',
+            associations: {
+              preceding: null,
+              subsequent: null
+            }
           }]);
         });
       });

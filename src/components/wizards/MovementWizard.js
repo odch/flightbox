@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import CommitFailureDialog from '../CommitFailureDialog';
 import Centered from '../Centered';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
+import MaterialIcon from '../MaterialIcon';
 import { getFromItemKey } from '../../util/reference-number';
 import Breadcrumbs from './Breadcrumbs';
 
@@ -35,7 +36,7 @@ class MovementWizard extends Component {
 
   getMiddleItem() {
     if (this.props.wizard.initialized !== true || this.props.lockDateLoading === true) {
-      return <Centered>Bitte warten ...</Centered>;
+      return <Centered><MaterialIcon icon="sync" rotate="left"/> Bitte warten ...</Centered>;
     }
 
     if (this.props.wizard.committed === true) {
