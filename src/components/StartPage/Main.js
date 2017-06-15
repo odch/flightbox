@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import MarketingLink from '../MarketingLink';
 import Hints from './Hints';
 import EntryPoints from './EntryPoints';
 
@@ -16,6 +17,7 @@ class Main extends React.PureComponent {
       <Wrapper>
         <Hints/>
         <EntryPoints admin={this.props.admin}/>
+        <MarketingLink/>
       </Wrapper>
     );
   }
