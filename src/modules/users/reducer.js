@@ -32,7 +32,6 @@ const ACTION_HANDLERS = {
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
   loading: false,
-  selected: null,
 };
 
 export default reducer(INITIAL_STATE, ACTION_HANDLERS);
