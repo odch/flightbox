@@ -69,7 +69,7 @@ const ReportForm = props => {
     >
       <fieldset disabled={props.disabled}>
         <StyledLabeledComponent label="Jahr" component={yearInput}/>
-        <StyledLabeledComponent label="Monat" component={monthInput}/>
+        {props.withMonth && <StyledLabeledComponent label="Monat" component={monthInput}/>}
         {props.children}
         <Button
           type="submit"
@@ -90,8 +90,13 @@ ReportForm.propTypes = {
     month: React.PropTypes.number,
   }),
   parameters: React.PropTypes.object,
+  withMonth: React.PropTypes.bool,
   setDate: React.PropTypes.func.isRequired,
   generate: React.PropTypes.func.isRequired,
+};
+
+ReportForm.defaultProps = {
+  withMonth: true,
 };
 
 export default ReportForm;
