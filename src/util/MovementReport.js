@@ -11,9 +11,13 @@ import moment from 'moment';
 
 class MovementReport {
 
-  constructor(startDate, endDate, options = {}) {
-    this.startDate = startDate;
-    this.endDate = endDate;
+  constructor(year, month, options = {}) {
+    month = month < 10 ? '0' + month : month;
+    const day = '01';
+
+    this.startDate = year + '-' + month + '-' + day;
+    this.endDate = moment(this.startDate).endOf('month').format('YYYY-MM-DD');
+
     this.options = options;
 
     this.creationDate = moment();
@@ -53,10 +57,15 @@ class MovementReport {
   }
 
   build(snapshots, aircrafts, aerodromes, callback) {
-    const content = 'data:text/csv;charset=utf-8,' + this.buildContent(snapshots, aircrafts, aerodromes);
-    const filename = this.getFileName();
-    const download = new Download(filename, 'text/csv;charset=utf-8;', content);
-    callback(download);
+    const content = this.buildContent(snapshots, aircrafts, aerodromes);
+    if (this.options.download === false) {
+      callback(content)
+    } else {
+      const downloadContent = 'data:text/csv;charset=utf-8,' + content;
+      const filename = this.getFileName();
+      const download = new Download(filename, 'text/csv;charset=utf-8;', downloadContent);
+      callback(download);
+    }
   }
 
   getFileName() {

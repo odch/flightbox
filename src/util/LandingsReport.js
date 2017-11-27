@@ -7,9 +7,12 @@ import moment from 'moment';
 
 class LandingsReport {
 
-  constructor(startDate, endDate) {
-    this.startDate = startDate;
-    this.endDate = endDate;
+  constructor(year, month) {
+    month = month < 10 ? '0' + month : month;
+    const day = '01';
+
+    this.startDate = year + '-' + month + '-' + day;
+    this.endDate = moment(this.startDate).endOf('month').format('YYYY-MM-DD');
 
     this.creationDate = moment();
   }

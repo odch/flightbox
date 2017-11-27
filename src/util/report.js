@@ -1,18 +1,28 @@
 import MovementReport from './MovementReport';
 import LandingsReport from './LandingsReport';
+import YearlySummaryReport from './YearlySummaryReport';
 
-export function airstat(startDate, endDate, options) {
+export function airstat(year, month, options) {
   return new Promise(resolve => {
-    new MovementReport(startDate, endDate, options)
+    new MovementReport(year, month, options)
       .generate(download => {
         resolve(download);
       });
   });
 }
 
-export function landings(startDate, endDate) {
+export function landings(year, month) {
   return new Promise(resolve => {
-    new LandingsReport(startDate, endDate)
+    new LandingsReport(year, month)
+      .generate(download => {
+        resolve(download);
+      });
+  });
+}
+
+export function yearlySummary(year) {
+  return new Promise(resolve => {
+    new YearlySummaryReport(year)
       .generate(download => {
         resolve(download);
       });

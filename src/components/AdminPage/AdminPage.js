@@ -5,6 +5,7 @@ import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import AirstatReportForm from '../../containers/AirstatReportFormContainer';
 import LandingsReportForm from '../../containers/LandingsReportFormContainer';
 import LockMovementsForm from '../../containers/LockMovementsFormContainer';
+import YearlySummaryReportForm from '../../containers/YearlySummaryReportFormContainer';
 import MessageList from '../../containers/MessageListContainer';
 import UserImportForm from '../../containers/UserImportFormContainer';
 import AerodromeImportForm from '../../containers/AerodromeImportFormContainer';
@@ -31,6 +32,9 @@ class AdminPage extends Component {
             </LabeledBox>
             <LabeledBox label="Landeliste herunterladen (CSV)">
               <LandingsReportForm/>
+            </LabeledBox>
+            <LabeledBox label="Jahreszusammenfassung herunterladen (CSV)">
+              <YearlySummaryReportForm/>
             </LabeledBox>
             <LockMovementsForm/>
             <LabeledBox label="Nachrichten" className="messages" contentPadding={0}>
