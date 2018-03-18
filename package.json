@@ -35,7 +35,6 @@
     "moment": "^2.21.0",
     "moment-timezone": "^0.5.11",
     "node-sass": "^4.3.0",
-    "postcss-loader": "^1.2.2",
     "ramda": "^0.23.0",
     "react": "^15.4.2",
     "react-addons-test-utils": "^15.4.2",
