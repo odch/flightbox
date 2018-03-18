@@ -1,4 +1,4 @@
-import importCsv from './csv-import.js';
+import importCsv from './importCsv.js';
 
 function importAircrafts(csvString) {
   const options = {

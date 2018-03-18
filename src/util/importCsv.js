@@ -1,5 +1,5 @@
 import firebase from './firebase.js';
-import parse from 'csv-parse';
+import parseCsv from "./parseCsv.js";
 
 function findIndex(row, name) {
   const index = row.indexOf(name);
@@ -126,12 +126,9 @@ function addNew(firebaseRef, itemMap, existing, options) {
  */
 function importCsv(csvString, options) {
   return new Promise((resolve, reject) => {
-    const parseOptions = {
-      skip_empty_lines: true,
-    };
-    parse(csvString, parseOptions, (err, output) => {
+    parseCsv(csvString).then(data => {
       try {
-        const itemMap = getMap(output, options);
+        const itemMap = getMap(data, options);
 
         firebase(options.path, (error, ref) => {
           updateExisting(ref, itemMap, options, existing => {
