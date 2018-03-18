@@ -1,9 +1,9 @@
 import { takeEvery } from 'redux-saga';
 import { fork, call, put, select } from 'redux-saga/effects';
 import * as actions from './actions';
-import aerodromeImport from '../../util/aerodrome-import';
-import aircraftImport from '../../util/aircraft-import';
-import userImport from '../../util/user-import';
+import importAerodromes from '../../util/importAerodromes';
+import importAircrafts from '../../util/importAircrafts';
+import importUsers from '../../util/importUsers';
 import { error } from '../../util/log';
 
 export const selectImport = importName => state => state.imports[importName];
@@ -11,11 +11,11 @@ export const selectImport = importName => state => state.imports[importName];
 export function doImport(importName, csvString) {
   switch (importName) {
     case 'aerodromes':
-      return aerodromeImport(csvString);
+      return importAerodromes(csvString);
     case 'aircrafts':
-      return aircraftImport(csvString);
+      return importAircrafts(csvString);
     case 'users':
-      return userImport(csvString);
+      return importUsers(csvString);
     default:
       throw new Error('Unknown import ' + importName);
   }
