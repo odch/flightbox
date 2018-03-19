@@ -429,7 +429,7 @@ describe('modules', () => {
         it('should save movement', () => {
           const generator = sagas.saveMovement();
 
-          expect(generator.next().value).toEqual(select(getFormValues('wizard')));
+          expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
 
           const formValues = {
             type: 'departure',
