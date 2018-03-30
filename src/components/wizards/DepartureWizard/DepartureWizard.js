@@ -48,7 +48,7 @@ const DepartureWizard = props => (
     {...props}
     initNewMovement={props.initNewMovement.bind(null, 'departure')}
     initMovement={props.match.params.arrivalKey
-      ? props.initNewMovementFromMovement.bind(null, 'departure', 'arrival', props.params.arrivalKey)
+      ? props.initNewMovementFromMovement.bind(null, 'departure', 'arrival', props.match.params.arrivalKey)
       : null}
     editMovement={props.editMovement.bind(null, 'departure')}
     pages={pages}
