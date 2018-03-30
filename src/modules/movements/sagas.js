@@ -13,6 +13,8 @@ export const stateSelector = (state, key) => state.movements;
 
 export const movementSelector = (state, key) => state.movements.data.getByKey(key);
 
+export const wizardFormValuesSelector = getFormValues('wizard');
+
 export function* getDepartureDefaultValues() {
   return {
     type: 'departure',
@@ -207,7 +209,7 @@ export function* editMovement(action) {
 }
 
 export function* saveMovement() {
-  const values = yield select(getFormValues('wizard'));
+  const values = yield select(wizardFormValuesSelector);
 
   const movement = localToFirebase(values);
 
