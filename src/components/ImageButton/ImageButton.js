@@ -12,14 +12,23 @@ const StyledLink = styled(Link)`
   cursor: pointer;
 `;
 
+const ClickableChild = styled.div`
+  cursor: pointer;
+`;
+
+const OptionalLink = props =>
+  props.href
+    ? <StyledLink to={props.href} onClick={props.onClick}>{props.children}</StyledLink>
+    : <ClickableChild onClick={props.onClick}>{props.children}</ClickableChild>;
+
 class ImageButton extends React.PureComponent {
 
   render() {
     const props = this.props;
     return (
       <Wrapper className={props.className}>
-        <StyledLink to={props.href} onClick={props.onClick}><img src={props.img}/></StyledLink>
-        <StyledLink to={props.href} onClick={props.onClick}>{props.label}</StyledLink>
+        <OptionalLink href={props.href} onClick={props.onClick}><img src={props.img}/></OptionalLink>
+        <OptionalLink href={props.href} onClick={props.onClick}>{props.label}</OptionalLink>
       </Wrapper>
     )
   }
