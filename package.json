@@ -17,7 +17,7 @@
     "css-loader": "^0.28.11",
     "csv-parse": "^2.0.4",
     "del": "^3.0.0",
-    "expect": "^22.4.0",
+    "expect": "^22.4.3",
     "file-loader": "^1.1.11",
     "firebase": "~2.3.2",
     "gulp": "~3.9.0",
