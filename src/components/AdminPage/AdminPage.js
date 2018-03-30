@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from "react-router-dom";
 import LabeledBox from '../LabeledBox';
 import JumpNavigation from '../JumpNavigation';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
@@ -17,7 +18,7 @@ class AdminPage extends Component {
 
   componentWillMount() {
     if (this.props.auth.data.admin !== true) {
-      this.context.router.push('/');
+      this.props.history.push('/');
     }
   }
 
@@ -65,8 +66,4 @@ AdminPage.propTypes = {
   auth: React.PropTypes.object.isRequired,
 };
 
-AdminPage.contextTypes = {
-  router: React.PropTypes.object.isRequired,
-};
-
-export default AdminPage;
+export default withRouter(AdminPage);

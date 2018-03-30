@@ -1,7 +1,15 @@
 import React, {PropTypes} from 'react';
+import {Switch, Route, Redirect} from 'react-router-dom';
 import LoginPage from '../../containers/LoginPageContainer';
 import Centered from '../Centered';
 import MaterialIcon from '../MaterialIcon';
+import MessagePage from "../../containers/MessagePageContainer";
+import StartPage from "../../containers/StartPageContainer";
+import DeparturePage from "../../containers/DeparturePageContainer";
+import HelpPage from "../../containers/HelpPageContainer";
+import MovementsPage from "../../containers/MovementsPageContainer";
+import AdminPage from "../../containers/AdminPageContainer";
+import ArrivalPage from "../../containers/ArrivalPageContainer";
 
 class App extends React.PureComponent {
 
@@ -15,12 +23,26 @@ class App extends React.PureComponent {
       return <LoginPage/>;
     }
 
-    return <div>{props.children}</div>;
+    return (
+      <Switch>
+        <Route exact path='/' component={StartPage}/>
+        <Route exact path="/departure/new" component={DeparturePage}/>
+        <Route exact path="/departure/new/:arrivalKey" component={DeparturePage}/>
+        <Route exact path="/departure/:key" component={DeparturePage}/>
+        <Route exact path="/arrival/new" component={ArrivalPage}/>
+        <Route exact path="/arrival/new/:departureKey" component={ArrivalPage}/>
+        <Route exact path="/arrival/:key" component={ArrivalPage}/>
+        <Route exact path="/movements" component={MovementsPage}/>
+        <Route exact path="/admin" component={AdminPage}/>
+        <Route exact path="/message" component={MessagePage}/>
+        <Route exact path="/help" component={HelpPage}/>
+        <Redirect to="/"/>
+      </Switch>
+    );
   }
 }
 
 App.propTypes = {
-  children: PropTypes.element.isRequired,
   auth: PropTypes.object.isRequired,
   showLogin: PropTypes.bool.isRequired,
 };
