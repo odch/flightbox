@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react';
 import styled from 'styled-components';
-import {Link} from 'react-router'
+import {Link} from 'react-router-dom';
 
 const Wrapper = styled.div`
   text-align: center;

@@ -41,8 +41,8 @@ const ArrivalWizard = props => (
   <MovementWizard
     {...props}
     initNewMovement={props.initNewMovement.bind(null, 'arrival')}
-    initMovement={props.params.departureKey
-      ? props.initNewMovementFromMovement.bind(null, 'arrival', 'departure', props.params.departureKey)
+    initMovement={props.match.params.departureKey
+      ? props.initNewMovementFromMovement.bind(null, 'arrival', 'departure', props.match.params.departureKey)
       : null}
     editMovement={props.editMovement.bind(null, 'arrival')}
     pages={pages}
@@ -55,7 +55,9 @@ const ArrivalWizard = props => (
 
 ArrivalWizard.propTypes = {
   wizard: React.PropTypes.object.isRequired,
-  params: React.PropTypes.object.isRequired,
+  match: React.PropTypes.shape({
+    params: React.PropTypes.object.isRequired
+  }).isRequired,
   initNewMovement: React.PropTypes.func.isRequired,
   initNewMovementFromMovement: React.PropTypes.func.isRequired,
   editMovement: React.PropTypes.func.isRequired,
@@ -68,10 +70,6 @@ ArrivalWizard.propTypes = {
   destroyForm: React.PropTypes.func.isRequired,
   showDialog: React.PropTypes.func.isRequired,
   hideDialog: React.PropTypes.func.isRequired,
-};
-
-ArrivalWizard.contextTypes = {
-  router: React.PropTypes.object.isRequired,
 };
 
 export default ArrivalWizard;

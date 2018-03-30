@@ -12,8 +12,8 @@ class MovementWizard extends Component {
     this.props.loadLockDate();
     if (typeof this.props.initMovement === 'function') {
       this.props.initMovement();
-    } else if (this.props.params.key) {
-      this.props.editMovement(this.props.params.key);
+    } else if (this.props.match.params.key) {
+      this.props.editMovement(this.props.match.params.key);
     } else {
       this.props.initNewMovement();
     }
@@ -21,7 +21,7 @@ class MovementWizard extends Component {
 
   render() {
     const breadcrumbsTitle = this.isUpdate()
-      ? this.props.updateMovementLabel + ' (' + getFromItemKey(this.props.params.key) + ')'
+      ? this.props.updateMovementLabel + ' (' + getFromItemKey(this.props.match.params.key) + ')'
       : this.props.newMovementLabel;
     return (
       <VerticalHeaderLayout>
@@ -127,7 +127,7 @@ class MovementWizard extends Component {
   }
 
   isUpdate() {
-    return typeof this.props.params.key === 'string' && this.props.params.key.length > 0;
+    return typeof this.props.match.params.key === 'string' && this.props.match.params.key.length > 0;
   }
 }
 
@@ -143,7 +143,9 @@ MovementWizard.propTypes = {
   })).isRequired,
   finishComponentClass: React.PropTypes.func.isRequired,
   wizard: React.PropTypes.object.isRequired,
-  params: React.PropTypes.object.isRequired,
+  match: React.PropTypes.shape({
+    params: React.PropTypes.object.isRequired
+  }).isRequired,
   newMovementLabel: React.PropTypes.string.isRequired,
   updateMovementLabel: React.PropTypes.string.isRequired,
   lockDateLoading: React.PropTypes.bool.isRequired,
@@ -163,10 +165,6 @@ MovementWizard.propTypes = {
   unsetCommitError: React.PropTypes.func,
   destroyForm: React.PropTypes.func.isRequired,
   loadLockDate: React.PropTypes.func.isRequired,
-};
-
-MovementWizard.contextTypes = {
-  router: React.PropTypes.object.isRequired,
 };
 
 export default MovementWizard;
