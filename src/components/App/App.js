@@ -13,6 +13,12 @@ import ArrivalPage from "../../containers/ArrivalPageContainer";
 
 class App extends React.PureComponent {
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.history.action !== 'POP') {
+      window.scrollTo(0, 0);
+    }
+  }
+
   render() {
     const props = this.props;
     if (props.auth.initialized !== true) {
@@ -45,6 +51,9 @@ class App extends React.PureComponent {
 App.propTypes = {
   auth: PropTypes.object.isRequired,
   showLogin: PropTypes.bool.isRequired,
+  history: PropTypes.shape({
+    action: PropTypes.string.isRequired
+  }).isRequired
 };
 
 export default App;

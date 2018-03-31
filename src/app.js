@@ -35,12 +35,6 @@ const store = createStore(reducer, {}, middleware);
 
 sagaMiddleware.run(autoRestart(sagas));
 
-const handleRouteChange = (prevState, nextState) => {
-  if (nextState.location.action !== 'POP') {
-    window.scrollTo(0, 0);
-  }
-};
-
 ReactDOM.render((
   <Provider store={store}>
     <ThemeProvider theme={theme}>
