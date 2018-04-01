@@ -59,5 +59,9 @@
     "webpack-dev-server": "^2.11.2",
     "webpack-stream": "^4.0.3",
     "whatwg-fetch": "^2.0.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/odch/flightbox.git"
   }
 }
