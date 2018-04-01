@@ -1,6 +1,6 @@
 const gulp = require('gulp');
 const mocha = require('gulp-mocha');
-const webpack = require('gulp-webpack');
+const webpack = require('webpack-stream');
 const del = require('del');
 const env = require('gulp-env');
 const merge = require('merge-stream');

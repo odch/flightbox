@@ -31,18 +31,18 @@ module.exports = {
     filename: 'bundle.js',
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
-        loader: 'babel',
+        loader: 'babel-loader',
         query: {
           presets: ['react', 'es2015'],
         },
       },
       {
         test: /\.s?css$/,
-        loader: 'style!css!sass',
+        use: ['style-loader', 'css-loader', 'sass-loader'],
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg|woff|woff2)$/,
