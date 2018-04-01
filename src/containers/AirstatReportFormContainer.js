@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 import { initReport, setReportDate, setReportParameter, generateReport } from '../modules/reports';
@@ -24,17 +25,17 @@ class AirstatReportFormContainer extends React.Component {
 }
 
 AirstatReportFormContainer.propTypes = {
-  initialized: React.PropTypes.bool.isRequired,
-  date: React.PropTypes.shape({
-    year: React.PropTypes.number,
-    month: React.PropTypes.number,
+  initialized: PropTypes.bool.isRequired,
+  date: PropTypes.shape({
+    year: PropTypes.number,
+    month: PropTypes.number,
   }),
-  internal: React.PropTypes.bool,
-  generationInProgress: React.PropTypes.bool,
-  initReport: React.PropTypes.func.isRequired,
-  setDate: React.PropTypes.func.isRequired,
-  setInternal: React.PropTypes.func.isRequired,
-  generate: React.PropTypes.func.isRequired,
+  internal: PropTypes.bool,
+  generationInProgress: PropTypes.bool,
+  initReport: PropTypes.func.isRequired,
+  setDate: PropTypes.func.isRequired,
+  setInternal: PropTypes.func.isRequired,
+  generate: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = state => {

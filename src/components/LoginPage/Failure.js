@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -11,7 +12,7 @@ const Failure = props => (
 );
 
 Failure.propTypes = {
-  failure: React.PropTypes.bool.isRequired
+  failure: PropTypes.bool.isRequired
 };
 
 export default Failure;

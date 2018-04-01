@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { loadUsers } from '../modules/users';
@@ -24,13 +25,13 @@ class UserDropdownContainer extends Component {
 }
 
 UserDropdownContainer.propTypes = {
-  loadUsers: React.PropTypes.func.isRequired,
-  users: React.PropTypes.object.isRequired,
-  value: React.PropTypes.string,
-  onChange: React.PropTypes.func.isRequired,
-  onFocus: React.PropTypes.func.isRequired,
-  onBlur: React.PropTypes.func.isRequired,
-  readOnly: React.PropTypes.bool,
+  loadUsers: PropTypes.func.isRequired,
+  users: PropTypes.object.isRequired,
+  value: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  onFocus: PropTypes.func.isRequired,
+  onBlur: PropTypes.func.isRequired,
+  readOnly: PropTypes.bool,
 };
 
 const mapStateToProps = (state, ownProps) => {

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -35,7 +36,7 @@ class DetailsBox extends React.PureComponent {
 }
 
 DetailsBox.propTypes = {
-  label: React.PropTypes.string
+  label: PropTypes.string
 };
 
 export default DetailsBox;

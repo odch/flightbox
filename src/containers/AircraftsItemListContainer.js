@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 import { changeNewItem } from '../modules/ui/settings/aircrafts';
@@ -24,12 +25,12 @@ class AircraftsItemListContainer extends React.Component {
 }
 
 AircraftsItemListContainer.propTypes = {
-  items: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-  newItem: React.PropTypes.string.isRequired,
-  loadAircraftSettings: React.PropTypes.func.isRequired,
-  changeNewItem: React.PropTypes.func.isRequired,
-  addItem: React.PropTypes.func.isRequired,
-  removeItem: React.PropTypes.func.isRequired,
+  items: PropTypes.arrayOf(PropTypes.string).isRequired,
+  newItem: PropTypes.string.isRequired,
+  loadAircraftSettings: PropTypes.func.isRequired,
+  changeNewItem: PropTypes.func.isRequired,
+  addItem: PropTypes.func.isRequired,
+  removeItem: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state, ownProps) => {

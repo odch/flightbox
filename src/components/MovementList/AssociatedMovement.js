@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import MovementDetails from './MovementDetails';
@@ -94,14 +95,14 @@ class AssociatedMovement extends React.PureComponent {
 }
 
 AssociatedMovement.propTypes = {
-  movementType: React.PropTypes.oneOf(['departure', 'arrival']),
-  movementKey: React.PropTypes.string.isRequired,
-  isHomeBase: React.PropTypes.bool.isRequired,
-  associatedMovement: React.PropTypes.object,
-  oldestMovementDate: React.PropTypes.string.isRequired,
-  loading: React.PropTypes.bool.isRequired,
-  createMovementFromMovement: React.PropTypes.func.isRequired,
-  loadMovements: React.PropTypes.func.isRequired
+  movementType: PropTypes.oneOf(['departure', 'arrival']),
+  movementKey: PropTypes.string.isRequired,
+  isHomeBase: PropTypes.bool.isRequired,
+  associatedMovement: PropTypes.object,
+  oldestMovementDate: PropTypes.string.isRequired,
+  loading: PropTypes.bool.isRequired,
+  createMovementFromMovement: PropTypes.func.isRequired,
+  loadMovements: PropTypes.func.isRequired
 };
 
 export default AssociatedMovement;

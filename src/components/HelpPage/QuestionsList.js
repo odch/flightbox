@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -22,10 +23,10 @@ const QuestionsList = props => (
 );
 
 QuestionsList.propTypes = {
-  questions: React.PropTypes.arrayOf(React.PropTypes.shape({
-    question: React.PropTypes.string.isRequired
+  questions: PropTypes.arrayOf(PropTypes.shape({
+    question: PropTypes.string.isRequired
   })).isRequired,
-  onClick: React.PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired
 };
 
 export default QuestionsList;

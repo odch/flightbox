@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import { Field, reduxForm } from 'redux-form';
 import H1 from '../H1';
@@ -68,11 +69,11 @@ class MessageForm extends React.Component {
 }
 
 MessageForm.propTypes = {
-  sent: React.PropTypes.bool.isRequired,
-  commitFailed: React.PropTypes.bool.isRequired,
-  handleSubmit: React.PropTypes.func.isRequired,
-  resetMessageForm: React.PropTypes.func.isRequired,
-  confirmSaveMessageSuccess: React.PropTypes.func.isRequired,
+  sent: PropTypes.bool.isRequired,
+  commitFailed: PropTypes.bool.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  resetMessageForm: PropTypes.func.isRequired,
+  confirmSaveMessageSuccess: PropTypes.func.isRequired,
 };
 
 export default reduxForm({

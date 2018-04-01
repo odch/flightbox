@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import MovementWizard from '../MovementWizard';
 import AircraftPage from '../pages/AircraftPage';
@@ -54,22 +55,22 @@ const ArrivalWizard = props => (
 );
 
 ArrivalWizard.propTypes = {
-  wizard: React.PropTypes.object.isRequired,
-  match: React.PropTypes.shape({
-    params: React.PropTypes.object.isRequired
+  wizard: PropTypes.object.isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.object.isRequired
   }).isRequired,
-  initNewMovement: React.PropTypes.func.isRequired,
-  initNewMovementFromMovement: React.PropTypes.func.isRequired,
-  editMovement: React.PropTypes.func.isRequired,
-  nextPage: React.PropTypes.func.isRequired,
-  previousPage: React.PropTypes.func.isRequired,
-  cancel: React.PropTypes.func.isRequired,
-  finish: React.PropTypes.func.isRequired,
-  saveMovement: React.PropTypes.func.isRequired,
-  unsetCommitError: React.PropTypes.func.isRequired,
-  destroyForm: React.PropTypes.func.isRequired,
-  showDialog: React.PropTypes.func.isRequired,
-  hideDialog: React.PropTypes.func.isRequired,
+  initNewMovement: PropTypes.func.isRequired,
+  initNewMovementFromMovement: PropTypes.func.isRequired,
+  editMovement: PropTypes.func.isRequired,
+  nextPage: PropTypes.func.isRequired,
+  previousPage: PropTypes.func.isRequired,
+  cancel: PropTypes.func.isRequired,
+  finish: PropTypes.func.isRequired,
+  saveMovement: PropTypes.func.isRequired,
+  unsetCommitError: PropTypes.func.isRequired,
+  destroyForm: PropTypes.func.isRequired,
+  showDialog: PropTypes.func.isRequired,
+  hideDialog: PropTypes.func.isRequired,
 };
 
 export default ArrivalWizard;

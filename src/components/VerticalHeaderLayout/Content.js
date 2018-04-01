@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -17,7 +18,7 @@ class Content extends React.PureComponent {
 }
 
 Content.propTypes = {
-  children: React.PropTypes.element.isRequired
+  children: PropTypes.element.isRequired
 };
 
 export default Content;

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { withRouter } from "react-router-dom";
 import LabeledBox from '../LabeledBox';
@@ -63,7 +64,7 @@ class AdminPage extends Component {
 }
 
 AdminPage.propTypes = {
-  auth: React.PropTypes.object.isRequired,
+  auth: PropTypes.object.isRequired,
 };
 
 export default withRouter(AdminPage);

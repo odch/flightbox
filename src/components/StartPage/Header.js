@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import LoginInfo from './LoginInfo';
@@ -34,9 +35,9 @@ class Header extends React.PureComponent {
 }
 
 Header.propTypes = {
-  auth: React.PropTypes.object.isRequired,
-  logout: React.PropTypes.func.isRequired,
-  showLogin: React.PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired,
+  logout: PropTypes.func.isRequired,
+  showLogin: PropTypes.func.isRequired,
 };
 
 export default Header;

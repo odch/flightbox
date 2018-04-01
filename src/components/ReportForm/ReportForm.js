@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Input from '../Input';
@@ -83,16 +84,16 @@ const ReportForm = props => {
 };
 
 ReportForm.propTypes = {
-  disabled: React.PropTypes.bool,
-  children: React.PropTypes.node,
-  date: React.PropTypes.shape({
-    year: React.PropTypes.number,
-    month: React.PropTypes.number,
+  disabled: PropTypes.bool,
+  children: PropTypes.node,
+  date: PropTypes.shape({
+    year: PropTypes.number,
+    month: PropTypes.number,
   }),
-  parameters: React.PropTypes.object,
-  withMonth: React.PropTypes.bool,
-  setDate: React.PropTypes.func.isRequired,
-  generate: React.PropTypes.func.isRequired,
+  parameters: PropTypes.object,
+  withMonth: PropTypes.bool,
+  setDate: PropTypes.func.isRequired,
+  generate: PropTypes.func.isRequired,
 };
 
 ReportForm.defaultProps = {

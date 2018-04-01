@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CommitFailureDialog from '../CommitFailureDialog';
 import Centered from '../Centered';
@@ -132,39 +133,39 @@ class MovementWizard extends Component {
 }
 
 MovementWizard.propTypes = {
-  pages: React.PropTypes.arrayOf(React.PropTypes.shape({
-    component: React.PropTypes.func.isRequired,
-    label: React.PropTypes.string.isRequired,
-    dialog: React.PropTypes.shape({
-      name: React.PropTypes.string.isRequired,
-      component: React.PropTypes.func.isRequired,
-      predicate: React.PropTypes.func,
+  pages: PropTypes.arrayOf(PropTypes.shape({
+    component: PropTypes.func.isRequired,
+    label: PropTypes.string.isRequired,
+    dialog: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      component: PropTypes.func.isRequired,
+      predicate: PropTypes.func,
     })
   })).isRequired,
-  finishComponentClass: React.PropTypes.func.isRequired,
-  wizard: React.PropTypes.object.isRequired,
-  match: React.PropTypes.shape({
-    params: React.PropTypes.object.isRequired
+  finishComponentClass: PropTypes.func.isRequired,
+  wizard: PropTypes.object.isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.object.isRequired
   }).isRequired,
-  newMovementLabel: React.PropTypes.string.isRequired,
-  updateMovementLabel: React.PropTypes.string.isRequired,
-  lockDateLoading: React.PropTypes.bool.isRequired,
-  locked: React.PropTypes.bool.isRequired,
-  className: React.PropTypes.string,
+  newMovementLabel: PropTypes.string.isRequired,
+  updateMovementLabel: PropTypes.string.isRequired,
+  lockDateLoading: PropTypes.bool.isRequired,
+  locked: PropTypes.bool.isRequired,
+  className: PropTypes.string,
 
-  initNewMovement: React.PropTypes.func.isRequired,
-  editMovement: React.PropTypes.func.isRequired,
-  initMovement: React.PropTypes.func,
-  nextPage: React.PropTypes.func.isRequired,
-  previousPage: React.PropTypes.func.isRequired,
-  cancel: React.PropTypes.func.isRequired,
-  finish: React.PropTypes.func.isRequired,
-  showDialog: React.PropTypes.func,
-  hideDialog: React.PropTypes.func,
-  saveMovement: React.PropTypes.func.isRequired,
-  unsetCommitError: React.PropTypes.func,
-  destroyForm: React.PropTypes.func.isRequired,
-  loadLockDate: React.PropTypes.func.isRequired,
+  initNewMovement: PropTypes.func.isRequired,
+  editMovement: PropTypes.func.isRequired,
+  initMovement: PropTypes.func,
+  nextPage: PropTypes.func.isRequired,
+  previousPage: PropTypes.func.isRequired,
+  cancel: PropTypes.func.isRequired,
+  finish: PropTypes.func.isRequired,
+  showDialog: PropTypes.func,
+  hideDialog: PropTypes.func,
+  saveMovement: PropTypes.func.isRequired,
+  unsetCommitError: PropTypes.func,
+  destroyForm: PropTypes.func.isRequired,
+  loadLockDate: PropTypes.func.isRequired,
 };
 
 export default MovementWizard;

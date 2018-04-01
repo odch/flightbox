@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import ReportForm from '../ReportForm';
 import InternalReportCheckbox from './InternalReportCheckbox';
@@ -16,15 +17,15 @@ const AirstatReportForm = props => (
 );
 
 AirstatReportForm.propTypes = {
-  disabled: React.PropTypes.bool,
-  date: React.PropTypes.shape({
-    year: React.PropTypes.number,
-    month: React.PropTypes.number,
+  disabled: PropTypes.bool,
+  date: PropTypes.shape({
+    year: PropTypes.number,
+    month: PropTypes.number,
   }),
-  internal: React.PropTypes.bool,
-  setDate: React.PropTypes.func.isRequired,
-  setInternal: React.PropTypes.func.isRequired,
-  generate: React.PropTypes.func.isRequired,
+  internal: PropTypes.bool,
+  setDate: PropTypes.func.isRequired,
+  setInternal: PropTypes.func.isRequired,
+  generate: PropTypes.func.isRequired,
 };
 
 export default AirstatReportForm;

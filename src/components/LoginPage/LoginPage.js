@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Header from './Header';
 import Main from './Main';
@@ -20,15 +21,15 @@ const LoginPage = props => (
 );
 
 LoginPage.propTypes = {
-  authenticate: React.PropTypes.func.isRequired,
-  updateUsername: React.PropTypes.func.isRequired,
-  updatePassword: React.PropTypes.func.isRequired,
-  onCancel: React.PropTypes.func.isRequired,
-  showCancel: React.PropTypes.bool.isRequired,
-  username: React.PropTypes.string.isRequired,
-  password: React.PropTypes.string.isRequired,
-  submitting: React.PropTypes.bool.isRequired,
-  failure: React.PropTypes.bool.isRequired
+  authenticate: PropTypes.func.isRequired,
+  updateUsername: PropTypes.func.isRequired,
+  updatePassword: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  showCancel: PropTypes.bool.isRequired,
+  username: PropTypes.string.isRequired,
+  password: PropTypes.string.isRequired,
+  submitting: PropTypes.bool.isRequired,
+  failure: PropTypes.bool.isRequired
 };
 
 export default LoginPage;

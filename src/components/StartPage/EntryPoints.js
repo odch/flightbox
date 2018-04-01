@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import ImageButton from '../ImageButton';
@@ -42,7 +43,7 @@ class EntryPoints extends React.PureComponent {
 }
 
 EntryPoints.propTypes = {
-  admin: React.PropTypes.bool,
+  admin: PropTypes.bool,
 };
 
 export default EntryPoints;
