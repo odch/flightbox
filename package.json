@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "babel-core": "^6.22.1",
-    "babel-loader": "^6.2.0",
+    "babel-loader": "^7.1.4",
     "babel-plugin-transform-object-rest-spread": "^6.22.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.22.0",
@@ -26,7 +26,6 @@
     "gulp-mocha": "^5.0.0",
     "gulp-replace": "^0.6.1",
     "gulp-through": "^0.4.0",
-    "gulp-webpack": "~1.5.0",
     "history": "^4.7.2",
     "ignore-styles": "^5.0.1",
     "jsdom-test-browser": "~4.0.2",
@@ -54,7 +53,9 @@
     "style-loader": "^0.20.3",
     "styled-components": "^3.2.5",
     "url-loader": "^1.0.1",
-    "webpack-dev-server": "^1.16.2",
+    "webpack": "^3.1.0",
+    "webpack-dev-server": "^2.11.2",
+    "webpack-stream": "^4.0.3",
     "whatwg-fetch": "^2.0.4"
   }
 }
