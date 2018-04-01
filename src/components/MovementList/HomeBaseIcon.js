@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
@@ -58,9 +59,9 @@ class HomeBaseIcon extends React.PureComponent {
 }
 
 HomeBaseIcon.propTypes = {
-  className: React.PropTypes.string,
-  isHomeBase: React.PropTypes.bool.isRequired,
-  showText: React.PropTypes.bool
+  className: PropTypes.string,
+  isHomeBase: PropTypes.bool.isRequired,
+  showText: PropTypes.bool
 };
 
 export default HomeBaseIcon;

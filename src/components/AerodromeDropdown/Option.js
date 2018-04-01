@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -23,9 +24,9 @@ const Option = props => (
 );
 
 Option.propTypes = {
-  code: React.PropTypes.string.isRequired,
-  name: React.PropTypes.string.isRequired,
-  focussed: React.PropTypes.bool
+  code: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  focussed: PropTypes.bool
 };
 
 export default Option;

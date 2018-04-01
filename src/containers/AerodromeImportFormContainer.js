@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 import { initImport, selectImportFile, startImport } from '../modules/imports';
@@ -28,14 +29,14 @@ class AerodromeImportFormContainer extends React.Component {
 }
 
 AerodromeImportFormContainer.propTypes = {
-  initialized: React.PropTypes.bool.isRequired,
-  inProgress: React.PropTypes.bool.isRequired,
-  importDone: React.PropTypes.bool.isRequired,
-  importFailed: React.PropTypes.bool.isRequired,
-  selectedFile: React.PropTypes.object,
-  initImport: React.PropTypes.func.isRequired,
-  selectFile: React.PropTypes.func.isRequired,
-  startImport: React.PropTypes.func.isRequired,
+  initialized: PropTypes.bool.isRequired,
+  inProgress: PropTypes.bool.isRequired,
+  importDone: PropTypes.bool.isRequired,
+  importFailed: PropTypes.bool.isRequired,
+  selectedFile: PropTypes.object,
+  initImport: PropTypes.func.isRequired,
+  selectFile: PropTypes.func.isRequired,
+  startImport: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = state => {

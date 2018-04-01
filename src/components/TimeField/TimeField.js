@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { parse, normalize } from '../../util/time.js';
 import Wrapper from './Wrapper';
 import NumberBlock from './NumberBlock';

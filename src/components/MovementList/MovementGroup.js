@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import styled from 'styled-components';
 import Movement from './Movement';
 import { isLocked } from '../../util/movements.js';
@@ -79,7 +80,7 @@ MovementGroup.propTypes = {
     homeBase: PropTypes.objectOf(PropTypes.bool)
   }).isRequired,
   oldestMovementDate: PropTypes.string,
-  loadMovements: React.PropTypes.func.isRequired,
+  loadMovements: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired
 };
 

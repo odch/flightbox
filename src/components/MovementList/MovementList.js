@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import Predicates from './Predicates';
 import MovementGroup from './MovementGroup';
 import LoadingInfo from './LoadingInfo';
@@ -158,7 +159,7 @@ MovementList.propTypes = {
   deleteConfirmation: PropTypes.object,
   deleteItem: PropTypes.func.isRequired,
   hideDeleteConfirmationDialog: PropTypes.func.isRequired,
-  showDeleteConfirmationDialog: React.PropTypes.func.isRequired,
+  showDeleteConfirmationDialog: PropTypes.func.isRequired,
   onEdit: PropTypes.func,
   createMovementFromMovement: PropTypes.func.isRequired,
   lockDate: PropTypes.object.isRequired,

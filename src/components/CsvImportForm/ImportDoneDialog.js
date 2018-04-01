@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import ModalDialog from '../ModalDialog';
@@ -33,9 +34,9 @@ const ImportDoneDialog = props => {
 };
 
 ImportDoneDialog.propTypes = {
-  doneHeading: React.PropTypes.string.isRequired,
-  doneMessage: React.PropTypes.string.isRequired,
-  onClose: React.PropTypes.func.isRequired,
+  doneHeading: PropTypes.string.isRequired,
+  doneMessage: PropTypes.string.isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
 export default ImportDoneDialog;

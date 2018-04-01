@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -25,10 +26,10 @@ class FieldSet extends React.PureComponent {
 }
 
 FieldSet.propTypes = {
-  legend: React.PropTypes.string,
-  children: React.PropTypes.oneOfType([
-    React.PropTypes.arrayOf(React.PropTypes.node),
-    React.PropTypes.node
+  legend: PropTypes.string,
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node
   ])
 };
 

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 import { initReport, setReportDate, generateReport } from '../modules/reports';
@@ -22,14 +23,14 @@ class YearlySummaryReportFormContainer extends React.Component {
 }
 
 YearlySummaryReportFormContainer.propTypes = {
-  initialized: React.PropTypes.bool.isRequired,
-  date: React.PropTypes.shape({
-    year: React.PropTypes.number,
+  initialized: PropTypes.bool.isRequired,
+  date: PropTypes.shape({
+    year: PropTypes.number,
   }),
-  generationInProgress: React.PropTypes.bool,
-  initReport: React.PropTypes.func.isRequired,
-  setDate: React.PropTypes.func.isRequired,
-  generate: React.PropTypes.func.isRequired,
+  generationInProgress: PropTypes.bool,
+  initReport: PropTypes.func.isRequired,
+  setDate: PropTypes.func.isRequired,
+  generate: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = state => {

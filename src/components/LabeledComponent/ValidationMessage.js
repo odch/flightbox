@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
@@ -30,7 +31,7 @@ class ValidationMessage extends React.PureComponent {
 }
 
 ValidationMessage.propTypes = {
-  error: React.PropTypes.string.isRequired,
+  error: PropTypes.string.isRequired,
 };
 
 export default ValidationMessage;

@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import ModalDialog from '../ModalDialog';
 import MaterialIcon from '../MaterialIcon';
 import ReactDatePicker from 'react-date-picker';

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Button from './Button';
@@ -28,13 +29,13 @@ const Item = props => (
 );
 
 Item.propTypes = {
-  value: React.PropTypes.string.isRequired,
-  label: React.PropTypes.string.isRequired,
-  description: React.PropTypes.string,
-  selected: React.PropTypes.bool,
-  widthPercentage: React.PropTypes.number,
-  orientation: React.PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
-  onClick: React.PropTypes.func.isRequired
+  value: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  description: PropTypes.string,
+  selected: PropTypes.bool,
+  widthPercentage: PropTypes.number,
+  orientation: PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
+  onClick: PropTypes.func.isRequired
 };
 
 export default Item;

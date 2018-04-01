@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
@@ -58,11 +59,11 @@ const FileInput = props => (
 );
 
 FileInput.propTypes = {
-  value: React.PropTypes.shape({
-    name: React.PropTypes.string.isRequired,
+  value: PropTypes.shape({
+    name: PropTypes.string.isRequired,
   }),
-  onChange: React.PropTypes.func,
-  disabled: React.PropTypes.bool,
+  onChange: PropTypes.func,
+  disabled: PropTypes.bool,
 };
 
 export default FileInput;

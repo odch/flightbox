@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import NumberBlockWrapper from './NumberBlockWrapper';
 import Button from './Button';
@@ -80,8 +81,8 @@ class NumberBlock extends React.Component {
 }
 
 NumberBlock.propTypes = {
-  value: React.PropTypes.number.isRequired,
-  onChange: React.PropTypes.func.isRequired,
+  value: PropTypes.number.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 
 export default NumberBlock;

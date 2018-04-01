@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import ReportForm from '../ReportForm';
 import Description from './Description';
@@ -15,12 +16,12 @@ const YearlySummaryReportForm = props => (
 );
 
 YearlySummaryReportForm.propTypes = {
-  disabled: React.PropTypes.bool,
-  date: React.PropTypes.shape({
-    year: React.PropTypes.number,
+  disabled: PropTypes.bool,
+  date: PropTypes.shape({
+    year: PropTypes.number,
   }),
-  setDate: React.PropTypes.func.isRequired,
-  generate: React.PropTypes.func.isRequired,
+  setDate: PropTypes.func.isRequired,
+  generate: PropTypes.func.isRequired,
 };
 
 export default YearlySummaryReportForm;

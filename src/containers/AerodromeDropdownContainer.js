@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { loadAerodromes } from '../modules/aerodromes';
@@ -24,13 +25,13 @@ class AerodromeDropdownContainer extends Component {
 }
 
 AerodromeDropdownContainer.propTypes = {
-  loadAerodromes: React.PropTypes.func.isRequired,
-  aerodromes: React.PropTypes.object.isRequired,
-  value: React.PropTypes.string,
-  onChange: React.PropTypes.func.isRequired,
-  onFocus: React.PropTypes.func.isRequired,
-  onBlur: React.PropTypes.func.isRequired,
-  readOnly: React.PropTypes.bool,
+  loadAerodromes: PropTypes.func.isRequired,
+  aerodromes: PropTypes.object.isRequired,
+  value: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  onFocus: PropTypes.func.isRequired,
+  onBlur: PropTypes.func.isRequired,
+  readOnly: PropTypes.bool,
 };
 
 const mapStateToProps = (state, ownProps) => {

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import CsvImportForm, { Example } from '../CsvImportForm';
 import P from '../P';
@@ -43,14 +44,14 @@ const UserImportForm = props => {
 };
 
 UserImportForm.propTypes = {
-  disabled: React.PropTypes.bool,
-  importInProgress: React.PropTypes.bool.isRequired,
-  importDone: React.PropTypes.bool.isRequired,
-  importFailed: React.PropTypes.bool.isRequired,
-  selectedFile: React.PropTypes.object,
-  selectFile: React.PropTypes.func.isRequired,
-  startImport: React.PropTypes.func.isRequired,
-  closeDoneDialog: React.PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
+  importInProgress: PropTypes.bool.isRequired,
+  importDone: PropTypes.bool.isRequired,
+  importFailed: PropTypes.bool.isRequired,
+  selectedFile: PropTypes.object,
+  selectFile: PropTypes.func.isRequired,
+  startImport: PropTypes.func.isRequired,
+  closeDoneDialog: PropTypes.func.isRequired,
 };
 
 export default UserImportForm;

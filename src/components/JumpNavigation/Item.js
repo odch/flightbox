@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
@@ -37,9 +38,9 @@ const Item = props => (
 );
 
 Item.propTypes = {
-  href: React.PropTypes.string,
-  icon: React.PropTypes.string,
-  label: React.PropTypes.string
+  href: PropTypes.string,
+  icon: PropTypes.string,
+  label: PropTypes.string
 };
 
 export default Item;

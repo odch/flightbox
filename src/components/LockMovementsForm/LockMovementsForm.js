@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import LabeledComponent from './StyledLabeledComponent';
 import LabeledBox from '../LabeledBox';
@@ -37,9 +38,9 @@ class LockMovementsForm extends Component {
 }
 
 LockMovementsForm.propTypes = {
-  lockDate: React.PropTypes.object.isRequired,
-  loadLockDate: React.PropTypes.func.isRequired,
-  setLockDate: React.PropTypes.func.isRequired,
+  lockDate: PropTypes.object.isRequired,
+  loadLockDate: PropTypes.func.isRequired,
+  setLockDate: PropTypes.func.isRequired,
 };
 
 export default LockMovementsForm;

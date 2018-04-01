@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import ModalDialog from '../ModalDialog';
@@ -28,9 +29,9 @@ const Dialog = props => {
 };
 
 Dialog.propTypes = {
-  heading: React.PropTypes.string.isRequired,
-  message: React.PropTypes.string.isRequired,
-  onClose: React.PropTypes.func.isRequired
+  heading: PropTypes.string.isRequired,
+  message: PropTypes.string.isRequired,
+  onClose: PropTypes.func.isRequired
 };
 
 export default Dialog;

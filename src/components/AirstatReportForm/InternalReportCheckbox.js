@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -23,8 +24,8 @@ const InternalReportCheckbox = props => (
 );
 
 InternalReportCheckbox.propTypes = {
-  internal: React.PropTypes.bool.isRequired,
-  setInternal: React.PropTypes.func.isRequired
+  internal: PropTypes.bool.isRequired,
+  setInternal: PropTypes.func.isRequired
 };
 
 export default InternalReportCheckbox;
