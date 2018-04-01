@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { Field, reduxForm } from 'redux-form';
 import validate from '../../validate';
 import { renderIncrementationField, renderSingleSelect } from '../../renderField';

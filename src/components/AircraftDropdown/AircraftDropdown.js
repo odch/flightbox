@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import Dropdown from '../Dropdown';
 import Option from './Option';
@@ -54,12 +55,12 @@ const AircraftDropdown = props => (
 );
 
 AircraftDropdown.propTypes = {
-  value: React.PropTypes.string.isRequired,
-  aircrafts: React.PropTypes.object.isRequired,
-  onChange: React.PropTypes.func.isRequired,
-  onFocus: React.PropTypes.func.isRequired,
-  onBlur: React.PropTypes.func.isRequired,
-  readOnly: React.PropTypes.bool,
+  value: PropTypes.string.isRequired,
+  aircrafts: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onFocus: PropTypes.func.isRequired,
+  onBlur: PropTypes.func.isRequired,
+  readOnly: PropTypes.bool,
 };
 
 export default AircraftDropdown;

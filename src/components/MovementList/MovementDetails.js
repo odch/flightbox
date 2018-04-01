@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import styled from 'styled-components';
 import dates from '../../util/dates';
 import {getLabel as getFlightTypeLabel} from '../../util/flightTypes';

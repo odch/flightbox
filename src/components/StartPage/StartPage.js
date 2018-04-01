@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import Header from './Header';
 import Main from './Main';
@@ -16,9 +17,9 @@ class StartPage extends React.PureComponent {
 }
 
 StartPage.propTypes = {
-  auth: React.PropTypes.object.isRequired,
-  logout: React.PropTypes.func.isRequired,
-  showLogin: React.PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired,
+  logout: PropTypes.func.isRequired,
+  showLogin: PropTypes.func.isRequired,
 };
 
 export default StartPage;

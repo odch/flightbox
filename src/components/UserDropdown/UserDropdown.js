@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import Dropdown from '../Dropdown';
 import Option from './Option';
@@ -53,12 +54,12 @@ const UserDropdown = props => (
 );
 
 UserDropdown.propTypes = {
-  value: React.PropTypes.string.isRequired,
-  users: React.PropTypes.object.isRequired,
-  readOnly: React.PropTypes.bool,
-  onChange: React.PropTypes.func.isRequired,
-  onFocus: React.PropTypes.func.isRequired,
-  onBlur: React.PropTypes.func.isRequired,
+  value: PropTypes.string.isRequired,
+  users: PropTypes.object.isRequired,
+  readOnly: PropTypes.bool,
+  onChange: PropTypes.func.isRequired,
+  onFocus: PropTypes.func.isRequired,
+  onBlur: PropTypes.func.isRequired,
 };
 
 export default UserDropdown;

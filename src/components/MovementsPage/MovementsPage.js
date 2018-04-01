@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Content from './Content';
 import MovementList from '../../containers/MovementListContainer';
@@ -23,7 +24,7 @@ class MovementsPage extends Component {
 }
 
 MovementsPage.propTypes = {
-  loadLockDate: React.PropTypes.func.isRequired,
+  loadLockDate: PropTypes.func.isRequired,
 };
 
 export default MovementsPage;

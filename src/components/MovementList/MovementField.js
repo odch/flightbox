@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -32,9 +33,9 @@ class MovementField extends React.PureComponent {
 }
 
 MovementField.propTypes = {
-  label: React.PropTypes.string.isRequired,
-  value: React.PropTypes.any,
-  defaultValue: React.PropTypes.any,
+  label: PropTypes.string.isRequired,
+  value: PropTypes.any,
+  defaultValue: PropTypes.any,
 };
 
 MovementField.defaultProps = {

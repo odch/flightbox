@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
@@ -67,11 +68,11 @@ const ItemList = props => (
 );
 
 ItemList.propTypes = {
-  items: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-  newItem: React.PropTypes.string.isRequired,
-  changeNewItem: React.PropTypes.func.isRequired,
-  addItem: React.PropTypes.func.isRequired,
-  removeItem: React.PropTypes.func.isRequired,
+  items: PropTypes.arrayOf(PropTypes.string).isRequired,
+  newItem: PropTypes.string.isRequired,
+  changeNewItem: PropTypes.func.isRequired,
+  addItem: PropTypes.func.isRequired,
+  removeItem: PropTypes.func.isRequired,
 };
 
 export default ItemList;

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import dates from '../../util/dates';
@@ -24,7 +25,7 @@ const MessageHeader = props => (
 
 MessageHeader.propTypes = {
   item: MessageShape.isRequired,
-  selected: React.PropTypes.bool.isRequired
+  selected: PropTypes.bool.isRequired
 };
 
 export default MessageHeader;

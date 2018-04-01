@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Content from './Content';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
@@ -20,11 +21,11 @@ const MessagePage = props => (
 );
 
 MessagePage.propTypes = {
-  sent: React.PropTypes.bool.isRequired,
-  commitFailed: React.PropTypes.bool.isRequired,
-  saveMessage: React.PropTypes.func.isRequired,
-  resetMessageForm: React.PropTypes.func.isRequired,
-  confirmSaveMessageSuccess: React.PropTypes.func.isRequired,
+  sent: PropTypes.bool.isRequired,
+  commitFailed: PropTypes.bool.isRequired,
+  saveMessage: PropTypes.func.isRequired,
+  resetMessageForm: PropTypes.func.isRequired,
+  confirmSaveMessageSuccess: PropTypes.func.isRequired,
 };
 
 export default MessagePage;

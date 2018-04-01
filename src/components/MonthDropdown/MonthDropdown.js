@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Dropdown from '../Dropdown';
@@ -86,10 +87,10 @@ const MonthDropdown = props => (
 );
 
 MonthDropdown.propTypes = {
-  className: React.PropTypes.string,
-  value: React.PropTypes.number,
-  onChange: React.PropTypes.func,
-  readOnly: React.PropTypes.bool,
+  className: PropTypes.string,
+  value: PropTypes.number,
+  onChange: PropTypes.func,
+  readOnly: PropTypes.bool,
 };
 
 export default MonthDropdown;

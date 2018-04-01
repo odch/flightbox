@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, {Component} from 'react';
 import scrollIntoView from 'scroll-into-view';
 import MaterialIcon from '../MaterialIcon';
@@ -339,22 +340,22 @@ class Dropdown extends Component {
 }
 
 Dropdown.propTypes = {
-  className: React.PropTypes.string,
-  options: React.PropTypes.array.isRequired,
-  value: React.PropTypes.string,
-  optionRenderer: React.PropTypes.func.isRequired,
-  valueRenderer: React.PropTypes.func,
-  optionFilter: React.PropTypes.func,
-  noOptionsText: React.PropTypes.string,
-  moreOptionsText: React.PropTypes.string,
-  mustSelect: React.PropTypes.bool,
-  clearable: React.PropTypes.bool,
-  onChange: React.PropTypes.func,
-  onBeforeInputChange: React.PropTypes.func,
-  onFocus: React.PropTypes.func,
-  onBlur: React.PropTypes.func,
-  readOnly: React.PropTypes.bool,
-  optionsRenderLimit: React.PropTypes.number,
+  className: PropTypes.string,
+  options: PropTypes.array.isRequired,
+  value: PropTypes.string,
+  optionRenderer: PropTypes.func.isRequired,
+  valueRenderer: PropTypes.func,
+  optionFilter: PropTypes.func,
+  noOptionsText: PropTypes.string,
+  moreOptionsText: PropTypes.string,
+  mustSelect: PropTypes.bool,
+  clearable: PropTypes.bool,
+  onChange: PropTypes.func,
+  onBeforeInputChange: PropTypes.func,
+  onFocus: PropTypes.func,
+  onBlur: PropTypes.func,
+  readOnly: PropTypes.bool,
+  optionsRenderLimit: PropTypes.number,
 };
 
 Dropdown.defaultProps = {

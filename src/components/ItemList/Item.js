@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
@@ -31,8 +32,8 @@ const Item = props => (
 );
 
 Item.propTypes = {
-  name: React.PropTypes.string.isRequired,
-  onRemoveClick: React.PropTypes.func,
+  name: PropTypes.string.isRequired,
+  onRemoveClick: PropTypes.func,
 };
 
 export default Item;

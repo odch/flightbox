@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import MaterialIcon from '../MaterialIcon';
 import StyledButton from './StyledButton';
@@ -53,16 +54,16 @@ class Button extends React.Component {
 }
 
 Button.propTypes = {
-  type: React.PropTypes.oneOf(['submit', 'button', 'reset']),
-  label: React.PropTypes.string.isRequired,
-  icon: React.PropTypes.string,
-  className: React.PropTypes.string,
-  disabled: React.PropTypes.bool,
-  onClick: React.PropTypes.func,
-  primary: React.PropTypes.bool,
-  flat: React.PropTypes.bool,
-  danger: React.PropTypes.bool,
-  neutral: React.PropTypes.bool
+  type: PropTypes.oneOf(['submit', 'button', 'reset']),
+  label: PropTypes.string.isRequired,
+  icon: PropTypes.string,
+  className: PropTypes.string,
+  disabled: PropTypes.bool,
+  onClick: PropTypes.func,
+  primary: PropTypes.bool,
+  flat: PropTypes.bool,
+  danger: PropTypes.bool,
+  neutral: PropTypes.bool
 };
 
 Button.defaultProps = {

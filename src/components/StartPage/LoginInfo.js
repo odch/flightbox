@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
@@ -40,15 +41,15 @@ class LoginInfo extends React.PureComponent {
 }
 
 LoginInfo.propTypes = {
-  className: React.PropTypes.string,
-  auth: React.PropTypes.shape({
-    authenticated: React.PropTypes.bool.isRequired,
-    data: React.PropTypes.shape({
-      uid: React.PropTypes.string
+  className: PropTypes.string,
+  auth: PropTypes.shape({
+    authenticated: PropTypes.bool.isRequired,
+    data: PropTypes.shape({
+      uid: PropTypes.string
     })
   }).isRequired,
-  logout: React.PropTypes.func.isRequired,
-  showLogin: React.PropTypes.func.isRequired,
+  logout: PropTypes.func.isRequired,
+  showLogin: PropTypes.func.isRequired,
 };
 
 export default LoginInfo;

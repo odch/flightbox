@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import styled from 'styled-components';
 import MovementHeader from './MovementHeader';
 import MovementDetails from './MovementDetails';
@@ -154,7 +155,7 @@ Movement.propTypes = {
     homeBase: PropTypes.objectOf(PropTypes.bool)
   }).isRequired,
   oldestMovementDate: PropTypes.string.isRequired,
-  loadMovements: React.PropTypes.func.isRequired,
+  loadMovements: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired
 };
 

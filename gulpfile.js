@@ -1,7 +1,6 @@
 const gulp = require('gulp');
 const mocha = require('gulp-mocha');
-const babel = require('babel-core/register');
-const webpack = require('gulp-webpack');
+const webpack = require('webpack-stream');
 const del = require('del');
 const env = require('gulp-env');
 const merge = require('merge-stream');
@@ -55,8 +54,8 @@ gulp.task('test', function () {
   return gulp
     .src('./src/**/*.spec.js')
     .pipe(mocha({
-      compilers: {
-        js: babel,
-      },
+      compilers: [
+        'js:babel-core/register',
+      ]
     }));
 });

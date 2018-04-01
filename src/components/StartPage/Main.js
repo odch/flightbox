@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import MarketingLink from '../MarketingLink';
@@ -24,7 +25,7 @@ class Main extends React.PureComponent {
 }
 
 Main.propTypes = {
-  admin: React.PropTypes.bool,
+  admin: PropTypes.bool,
 };
 
 export default Main;

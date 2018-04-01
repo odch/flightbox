@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled, {keyframes} from 'styled-components';
 
@@ -60,11 +61,11 @@ class MaterialIcon extends React.PureComponent {
 }
 
 MaterialIcon.propTypes = {
-  icon: React.PropTypes.string.isRequired,
-  className: React.PropTypes.string,
-  size: React.PropTypes.number,
-  title: React.PropTypes.string,
-  rotate: React.PropTypes.oneOf(['left', 'right'])
+  icon: PropTypes.string.isRequired,
+  className: PropTypes.string,
+  size: PropTypes.number,
+  title: PropTypes.string,
+  rotate: PropTypes.oneOf(['left', 'right'])
 };
 
 MaterialIcon.defaultProps = {

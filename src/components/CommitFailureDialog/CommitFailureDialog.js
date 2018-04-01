@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import ModalDialog from '../ModalDialog';
 import Heading from './Heading';
 import ErrorMessage from './ErrorMessage';

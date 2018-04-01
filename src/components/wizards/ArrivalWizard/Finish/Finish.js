@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { getFromItemKey } from '../../../../util/reference-number';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
