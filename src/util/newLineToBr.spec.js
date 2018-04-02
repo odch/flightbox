@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import expect from 'expect';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
 import bro from 'jsdom-test-browser';
 import newLineToBr from './newLineToBr';
 
@@ -29,10 +29,10 @@ describe('util', () => {
       const element = ReactDOM.findDOMNode(component);
 
       expect(bro.$(element).html()).toBe(
-        '<span><!-- react-text: 3 -->my<!-- /react-text --><br></span>' +
-        '<span><!-- react-text: 6 -->multi<!-- /react-text --><br></span>' +
-        '<span><!-- react-text: 9 -->line<!-- /react-text --><br></span>' +
-        '<span><!-- react-text: 12 -->text<!-- /react-text --><br></span>'
+        '<span>my<br></span>' +
+        '<span>multi<br></span>' +
+        '<span>line<br></span>' +
+        '<span>text<br></span>'
       );
     });
   });
