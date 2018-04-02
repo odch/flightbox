@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import Mask from './Mask';
 import Content from './Content';
 
@@ -11,7 +11,7 @@ const handleMaskClick = onBlur => {
 
 const ModalDialog = props => (
   <div>
-    <Mask onClick={handleMaskClick.bind(props.onBlur)}/>
+    <Mask onClick={handleMaskClick.bind(null, props.onBlur)}/>
     <Content fullWidthThreshold={props.fullWidthThreshold}>{props.content}</Content>
   </div>
 );
