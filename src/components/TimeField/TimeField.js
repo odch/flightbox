@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { parse, normalize } from '../../util/time.js';
 import Wrapper from './Wrapper';
 import NumberBlock from './NumberBlock';
-import update from 'react-addons-update';
+import update from 'immutability-helper';
 
 class TimeField extends Component {
 
