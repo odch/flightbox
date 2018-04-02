@@ -2,11 +2,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import ModalDialog from '../ModalDialog';
 import MaterialIcon from '../MaterialIcon';
-import ReactDatePicker from 'react-date-picker';
-import classNames from 'classnames';
-import 'react-date-picker/base.css';
-import './DatePicker.scss';
+import MomentLocaleUtils from 'react-day-picker/moment';
 import dates from '../../util/dates';
+import Wrapper from './Wrapper';
+import DayPicker from './DayPicker';
+import ClearButton from './ClearButton';
+import Value from './Value';
 
 class DatePicker extends Component {
 
@@ -16,6 +17,11 @@ class DatePicker extends Component {
       showPicker: false,
       value: props.value,
     };
+
+    this.handleDayClick = this.handleDayClick.bind(this);
+    this.showPicker = this.showPicker.bind(this);
+    this.hidePicker = this.hidePicker.bind(this);
+    this.handleClear = this.handleClear.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -27,11 +33,11 @@ class DatePicker extends Component {
   render() {
     if (this.props.readOnly === true) {
       return (
-        <div className="DateTimePicker readonly">
-          <div className="value">
+        <Wrapper readOnly>
+          <Value>
             {this.state.value ? dates.formatDate(this.state.value) : '\u00a0'}
-          </div>
-        </div>
+          </Value>
+        </Wrapper>
       );
     }
 
@@ -39,26 +45,22 @@ class DatePicker extends Component {
     if (this.state.showPicker === true) {
       const picker = this.renderPicker();
       dialog = (
-        <ModalDialog content={picker} onBlur={this.hidePicker.bind(this)}/>
+        <ModalDialog content={picker} onBlur={this.hidePicker} fullWidthThreshold={0}/>
       );
     }
     return (
-      <div className={classNames('DatePicker', this.getClassName())}>
-        <div className="value" onClick={this.showPicker.bind(this)}>
+      <Wrapper>
+        <Value onClick={this.showPicker}>
           {this.state.value ? this.renderValue() : '\u00a0'}
           {this.props.clearable === true && this.state.value
-            ? <button className="clear" onClick={this.clearButtonHandler.bind(this)}>
+            ? <ClearButton onClick={this.handleClear}>
                 <MaterialIcon icon="clear"/>
-              </button>
+            </ClearButton>
             : null}
-        </div>
+        </Value>
         {dialog}
-      </div>
+      </Wrapper>
     );
-  }
-
-  getClassName() {
-    return null;
   }
 
   renderValue() {
@@ -66,17 +68,20 @@ class DatePicker extends Component {
   }
 
   renderPicker() {
+    const date = this.state.value ? new Date(this.state.value) : undefined;
     return (
-      <ReactDatePicker
-        date={this.state.value}
-        onChange={this.updateValueHandler.bind(this)}
-        hideFooter={true}
+      <DayPicker
+        selectedDays={date}
+        initialMonth={date}
+        onDayClick={this.handleDayClick}
+        localeUtils={MomentLocaleUtils}
         locale="de"
       />
     );
   }
 
-  updateValueHandler(dateString) {
+  handleDayClick(date) {
+    const dateString = date ? dates.localDate(date) : null;
     this.setState({
       showPicker: false,
       value: dateString,
@@ -88,9 +93,9 @@ class DatePicker extends Component {
     }
   }
 
-  clearButtonHandler(e) {
+  handleClear(e) {
     e.stopPropagation(); // prevent call of outer div onClick handler
-    this.updateValueHandler(null);
+    this.handleDayClick(null);
   }
 
   showPicker() {
@@ -117,34 +122,4 @@ DatePicker.defaultProps = {
   clearable: false,
 };
 
-class MonthPicker extends DatePicker {
-
-  getClassName() {
-    return 'month';
-  }
-
-  renderValue() {
-    return dates.formatMonth(this.state.value);
-  }
-
-  renderPicker() {
-    return (
-      <ReactDatePicker
-        date={this.state.value}
-        hideFooter={true}
-        locale="de"
-        view="year"
-        onSelect={this.selectHandler.bind(this)}
-      />
-    );
-  }
-
-  selectHandler(dateString, moment, view) {
-    if (view === 'month') {
-      this.updateValueHandler(dateString);
-    }
-  }
-}
-
 export default DatePicker;
-export { MonthPicker };
