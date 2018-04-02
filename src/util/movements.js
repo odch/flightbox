@@ -1,6 +1,6 @@
 import dates from '../util/dates';
 import { filter } from '../util/filter';
-import update from 'react-addons-update';
+import update from 'immutability-helper';
 import moment from 'moment';
 
 function removeValues(movement, values) {
