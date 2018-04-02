@@ -8,6 +8,7 @@ import dates from './dates';
 import ItemsArray from './ItemsArray';
 import {getAirstatType} from './flightTypes';
 import moment from 'moment';
+import writeCsv from './writeCsv';
 
 class MovementReport {
 
@@ -57,15 +58,16 @@ class MovementReport {
   }
 
   build(snapshots, aircrafts, aerodromes, callback) {
-    const content = this.buildContent(snapshots, aircrafts, aerodromes);
-    if (this.options.download === false) {
-      callback(content)
-    } else {
-      const downloadContent = 'data:text/csv;charset=utf-8,' + content;
-      const filename = this.getFileName();
-      const download = new Download(filename, 'text/csv;charset=utf-8;', downloadContent);
-      callback(download);
-    }
+    this.buildContent(snapshots, aircrafts, aerodromes).then(content => {
+      if (this.options.download === false) {
+        callback(content)
+      } else {
+        const downloadContent = 'data:text/csv;charset=utf-8,' + content;
+        const filename = this.getFileName();
+        const download = new Download(filename, 'text/csv;charset=utf-8;', downloadContent);
+        callback(download);
+      }
+    });
   }
 
   getFileName() {
@@ -80,16 +82,16 @@ class MovementReport {
   buildContent(snapshots, aircrafts, aerodromes) {
     const movements = this.getMovementsArray(snapshots);
 
-    const csvRecords = movements
+    const records = movements
       .filter(movement => !(movement.type === 'D' && movement.departureRoute === 'circuits'))
-      .map(movement => this.getMovementString(movement, aircrafts, aerodromes), this);
+      .map(movement => this.getMovementRecord(movement, aircrafts, aerodromes), this);
 
     const header = (this.options.internal === true)
       ? MovementReport.header.concat(MovementReport.internalHeader)
       : MovementReport.header;
-    csvRecords.unshift(header.join(','));
+    records.unshift(header);
 
-    return csvRecords.join('\n');
+    return writeCsv(records);
   }
 
   getMovementsArray(snapshots) {
@@ -108,7 +110,7 @@ class MovementReport {
     return movements.array;
   }
 
-  getMovementString(movement, aircrafts, aerodromes) {
+  getMovementRecord(movement, aircrafts, aerodromes) {
     const airstatRecord = {
       ARP: __CONF__.aerodrome.ICAO,
       TYPMO: this.getMovementType(movement),
@@ -134,9 +136,7 @@ class MovementReport {
       headerRow = headerRow.concat(MovementReport.internalHeader);
     }
 
-    return headerRow
-      .map(header => airstatRecord[header])
-      .join(',');
+    return headerRow.map(header => airstatRecord[header]);
   }
 
   getMovementType(movement) {
