@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Dropdown from '../Dropdown';
 import Option from './Option';
+import {REGISTRATION_REGEX} from '../../util/aircrafts';
 
 const optionRenderer = aircrafts => {
   const map = aircrafts.reduce((map, obj) => {
@@ -24,7 +25,7 @@ const toOption = key => ({
 
 const aircraftToOption = aircraft => toOption(aircraft.key);
 
-const normalizeImmatriculation = value => value.toUpperCase().replace(/[^A-Z0-9]/, '');
+const normalizeImmatriculation = value => value.toUpperCase().replace(REGISTRATION_REGEX, '');
 
 const aircraftsComparator = (aircraft1, aircraft2) => aircraft1.key.localeCompare(aircraft2.key);
 

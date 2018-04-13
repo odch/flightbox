@@ -29,3 +29,5 @@ export function fetch() {
       });
   });
 }
+
+export const REGISTRATION_REGEX = /[^A-Z0-9]/g;

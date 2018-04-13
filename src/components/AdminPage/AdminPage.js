@@ -14,6 +14,7 @@ import AerodromeImportForm from '../../containers/AerodromeImportFormContainer';
 import AircraftImportForm from '../../containers/AircraftImportFormContainer';
 import AircraftsItemList from '../../containers/AircraftsItemListContainer';
 import Content from './Content';
+import DescriptionText from './DescriptionText';
 
 class AdminPage extends Component {
 
@@ -52,9 +53,18 @@ class AdminPage extends Component {
               <AircraftImportForm/>
             </LabeledBox>
             <LabeledBox label="Club-Flugzeuge">
+              <DescriptionText>
+                Geben Sie hier die Immatrikulationen der Club-Flugzeuge ein.
+                Die Immatrikulationen dürfen nur Grossbuchstaben und Zahlen enthalten.
+              </DescriptionText>
               <AircraftsItemList type="club"/>
             </LabeledBox>
             <LabeledBox label="Auf diesem Flugplatz stationierte Flugzeuge (ohne Club-Flugzeuge)">
+              <DescriptionText>
+                Geben Sie hier die Immatrikulationen aller auf diesem Flugplatz stationierten Flugzeuge ein
+                (ohne die Club-Flugzeuge).
+                Die Immatrikulationen dürfen nur Grossbuchstaben und Zahlen enthalten.
+              </DescriptionText>
               <AircraftsItemList type="homeBase"/>
             </LabeledBox>
           </Content>}
