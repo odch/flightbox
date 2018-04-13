@@ -1,6 +1,7 @@
 import * as actions from './actions';
 import { ADD_AIRCRAFT_SUCCESS } from '../../../settings/aircrafts';
 import reducer from '../../../../util/reducer';
+import { REGISTRATION_REGEX } from '../../../../util/aircrafts';
 
 const INITIAL_STATE = {
   newItem: {},
@@ -8,7 +9,7 @@ const INITIAL_STATE = {
 
 function changeNewItem(state, action) {
   const newItem = Object.assign({}, state.newItem, {
-    [action.payload.type]: action.payload.item.toUpperCase().replace(/[^A-Z]/g, ''),
+    [action.payload.type]: action.payload.item.toUpperCase().replace(REGISTRATION_REGEX, ''),
   });
   return Object.assign({}, state, {
     newItem,
