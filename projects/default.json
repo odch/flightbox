@@ -2,7 +2,6 @@
   "theme": "lszt",
   "enabledFlightTypes": [
     "private",
-    "commercial",
     "instruction"
   ]
 }
