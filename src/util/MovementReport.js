@@ -150,10 +150,15 @@ class MovementReport {
   getNumberOfMovements(movement) {
     if (movement.type === 'A') {
       const landingCount = movement.landingCount || 1;
+      const goAroundCount = movement.goAroundCount || 0;
+
+      const landingAndGoAroundSum = landingCount + goAroundCount;
+
+      const totalMovements = landingAndGoAroundSum * 2;
 
       return (movement.arrivalRoute === 'circuits')
-        ? landingCount * 2
-        : landingCount * 2 - 1;
+        ? totalMovements // circuits: there is only 1 record in the report (containing all take offs and all landings)
+        : totalMovements - 1; // there will be a separate record for the departure (we subtract this movement here)
     }
 
     return 1;

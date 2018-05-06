@@ -75,10 +75,11 @@ class MovementDetails extends React.PureComponent {
               </DetailsBox>
             ) : (
               <DetailsBox label="Start und Ziel">
+                <MovementField label="Startflugplatz" value={props.data.location}/>
                 <MovementField label="Datum" value={date}/>
                 <MovementField label="Landezeit (Lokalzeit)" value={time}/>
-                <MovementField label="Startflugplatz" value={props.data.location}/>
                 <MovementField label="Anzahl Landungen" value={props.data.landingCount}/>
+                <MovementField label="Anzahl Durchstarts" value={props.data.goAroundCount} defaultValue={0}/>
               </DetailsBox>
             )
           }

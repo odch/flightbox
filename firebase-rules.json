@@ -92,6 +92,9 @@
         "flightType": {
           ".validate": "{flightType}"
         },
+        "goAroundCount": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
         "immatriculation": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
