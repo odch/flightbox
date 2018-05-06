@@ -28,6 +28,8 @@ const DepartureArrivalPage = (props) => {
           label="Startflugplatz"
           readOnly={props.readOnly}
         />
+      </FieldSet>
+      <FieldSet>
         <Field
           name="date"
           component={renderDateField}
@@ -42,12 +44,22 @@ const DepartureArrivalPage = (props) => {
           label="Landezeit (Lokalzeit)"
           readOnly={props.readOnly}
         />
+      </FieldSet>
+      <FieldSet>
         <Field
           name="landingCount"
           format={toNumber}
           component={renderIncrementationField}
           parse={e => e.target.value}
           label="Anzahl Landungen"
+          readOnly={props.readOnly}
+        />
+        <Field
+          name="goAroundCount"
+          format={toNumber}
+          component={renderIncrementationField}
+          parse={e => e.target.value}
+          label="Anzahl Durchstarts (ohne Aufsetzen)"
           readOnly={props.readOnly}
         />
       </FieldSet>
