@@ -43,7 +43,6 @@
   "title": "FGZO Bewegungen",
   "enabledFlightTypes": [
     "private",
-    "commercial",
     "instruction",
     "aerotow",
     "paradrop"
