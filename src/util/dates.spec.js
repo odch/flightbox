@@ -1,4 +1,3 @@
-import expect from 'expect';
 import dates from './dates';
 
 describe('util', () => {

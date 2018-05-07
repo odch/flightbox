@@ -1,4 +1,3 @@
-import expect from 'expect';
 import messages from './reducer';
 import * as actions from './actions';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';

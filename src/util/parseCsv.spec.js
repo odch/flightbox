@@ -1,4 +1,3 @@
-import expect from 'expect';
 import parseCsv from './parseCsv';
 
 const TEST_CSV_STRING =

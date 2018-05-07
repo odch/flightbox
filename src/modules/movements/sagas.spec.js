@@ -1,13 +1,11 @@
-import expect from 'expect';
 import {select, put, call} from 'redux-saga/effects';
-import {initialize, getFormValues, destroy} from 'redux-form';
+import {initialize, destroy} from 'redux-form';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
 import {LIMIT} from './pagination';
-import Utils from '../../../test/Utils';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
 
 describe('modules', () => {
@@ -182,7 +180,7 @@ describe('modules', () => {
       describe('loadMovements', () => {
         const testFn = clear => {
           const channel = {
-            put: Utils.callTracker()
+            put: jest.fn()
           };
 
           const action = actions.loadMovements(clear);
@@ -239,7 +237,7 @@ describe('modules', () => {
 
           expect(generator.next().done).toEqual(true);
 
-          const channelPutCalls = channel.put.calls();
+          const channelPutCalls = channel.put.mock.calls;
           expect(channelPutCalls.length).toBe(2);
 
           expect(channelPutCalls[0][0])
@@ -260,8 +258,8 @@ describe('modules', () => {
       describe('monitorRef', () => {
         it('should remove old listeners and attach new ones', () => {
           const ref = {
-            off: Utils.callTracker(),
-            on: Utils.callTracker()
+            off: jest.fn(),
+            on: jest.fn()
           };
 
           const channel = {};
@@ -270,13 +268,13 @@ describe('modules', () => {
 
           expect(generator.next().done).toEqual(true);
 
-          const offCalls = ref.off.calls();
+          const offCalls = ref.off.mock.calls;
           expect(offCalls.length).toBe(3);
           expect(offCalls[0]).toEqual(['child_added']);
           expect(offCalls[1]).toEqual(['child_changed']);
           expect(offCalls[2]).toEqual(['child_removed']);
 
-          const onCalls = ref.on.calls();
+          const onCalls = ref.on.mock.calls;
           expect(onCalls.length).toBe(3);
 
           expect(onCalls[0][0]).toBe('child_added');

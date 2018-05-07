@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components ModalDialog renders given content 1`] = `
+"<div>
+  <styled.div onClick={[Function: bound handleMaskClick]} />
+  <Styled(styled.div) fullWidthThreshold={600}>
+    <div>
+      My test content
+    </div>
+  </Styled(styled.div)>
+</div>"
+`;
