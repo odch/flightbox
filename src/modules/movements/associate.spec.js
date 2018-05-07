@@ -1,4 +1,3 @@
-import expect from 'expect';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import {compareDescending} from '../../util/movements';
 import associate from './associate';

@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components ImageButton propagates href to OptionalLink 1`] = `
+"<styled.div className={[undefined]}>
+  <OptionalLink href=\\"/some/path\\" onClick={[undefined]}>
+    <img src=\\"\\" />
+  </OptionalLink>
+  <OptionalLink href=\\"/some/path\\" onClick={[undefined]} />
+</styled.div>"
+`;
+
+exports[`components ImageButton propagates onClick to OptionalLink 1`] = `
+"<styled.div className={[undefined]}>
+  <OptionalLink href={[undefined]} onClick={[Function: onClick]}>
+    <img src=\\"\\" />
+  </OptionalLink>
+  <OptionalLink href={[undefined]} onClick={[Function: onClick]} />
+</styled.div>"
+`;
+
+exports[`components ImageButton renders label and image 1`] = `
+"<styled.div className={[undefined]}>
+  <OptionalLink href={[undefined]} onClick={[undefined]}>
+    <img src=\\"imgsource.jpg\\" />
+  </OptionalLink>
+  <OptionalLink href={[undefined]} onClick={[undefined]}>
+    my label
+  </OptionalLink>
+</styled.div>"
+`;

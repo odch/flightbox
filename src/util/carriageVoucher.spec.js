@@ -1,4 +1,3 @@
-import expect from 'expect';
 import {getItemLabel} from './carriageVoucher';
 
 describe('util', () => {

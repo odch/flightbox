@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`util newLineToBr should return a span with <br> for each line 1`] = `
+"<div>
+  <span>
+    my
+    <br />
+  </span>
+  <span>
+    multi
+    <br />
+  </span>
+  <span>
+    line
+    <br />
+  </span>
+  <span>
+    text
+    <br />
+  </span>
+</div>"
+`;

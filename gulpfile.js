@@ -1,5 +1,4 @@
 const gulp = require('gulp');
-const mocha = require('gulp-mocha');
 const webpack = require('webpack-stream');
 const del = require('del');
 const env = require('gulp-env');
@@ -49,13 +48,3 @@ gulp.task('prod-env', function () {
 });
 
 gulp.task('build:prod', ['prod-env', 'build']);
-
-gulp.task('test', function () {
-  return gulp
-    .src('./src/**/*.spec.js')
-    .pipe(mocha({
-      compilers: [
-        'js:babel-core/register',
-      ]
-    }));
-});

@@ -1,4 +1,3 @@
-import expect from 'expect';
 import {getPagination, LIMIT} from './pagination';
 
 describe('modules', () => {

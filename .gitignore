@@ -4,6 +4,7 @@
 *.iws
 
 build/
+coverage/
 .wercker
 
 node_modules/

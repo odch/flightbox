@@ -4,7 +4,9 @@
     "start": "DEV=1 webpack-dev-server --progress --colors --host 0.0.0.0",
     "build": "gulp build",
     "build:prod": "gulp build:prod",
-    "test": "gulp test"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "devDependencies": {
     "babel-core": "^6.22.1",
@@ -19,21 +21,20 @@
     "csv-parse": "^2.1.0",
     "csv-stringify": "^2.0.4",
     "del": "^3.0.0",
-    "expect": "^22.4.3",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
     "file-loader": "^1.1.11",
     "firebase": "~2.3.2",
     "gulp": "~3.9.0",
     "gulp-env": "~0.4.0",
-    "gulp-mocha": "^5.0.0",
     "gulp-replace": "^0.6.1",
     "gulp-through": "^0.4.0",
     "history": "^4.7.2",
     "ignore-styles": "^5.0.1",
     "immutability-helper": "^2.6.6",
-    "jsdom-test-browser": "~4.0.2",
+    "jest": "^22.4.3",
     "json-loader": "~0.5.4",
     "merge-stream": "~1.0.0",
-    "mocha": "^5.0.5",
     "moment": "^2.22.0",
     "moment-timezone": "^0.5.11",
     "node-sass": "^4.8.3",
@@ -62,5 +63,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/odch/flightbox.git"
+  },
+  "jest": {
+    "setupTestFrameworkScriptFile": "<rootDir>/test/testSetup.js"
   }
 }
