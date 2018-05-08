@@ -6,7 +6,8 @@
     "build:prod": "gulp build:prod",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "codecov": "codecov"
   },
   "devDependencies": {
     "babel-core": "^6.22.1",
@@ -17,6 +18,7 @@
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-react": "^6.22.0",
     "binary-search": "^1.3.3",
+    "codecov": "^3.0.1",
     "css-loader": "^0.28.11",
     "csv-parse": "^2.1.0",
     "csv-stringify": "^2.0.4",
@@ -65,6 +67,12 @@
     "url": "https://github.com/odch/flightbox.git"
   },
   "jest": {
-    "setupTestFrameworkScriptFile": "<rootDir>/test/testSetup.js"
+    "setupTestFrameworkScriptFile": "<rootDir>/test/testSetup.js",
+    "coverageDirectory": "./coverage/",
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}",
+      "!<rootDir>/node_modules/",
+      "!<rootDir>/test/"
+    ]
   }
 }
