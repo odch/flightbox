@@ -27,5 +27,5 @@ coverage:
     - npm-install
     - script:
         code: |-
-        npm run test:coverage
-        npm run codecov
+          npm run test:coverage
+          npm run codecov
