@@ -21,3 +21,11 @@ deploy:
         code: |-
           firebase use $FIREBASE_PROJECT --token $FIREBASE_TOKEN
           firebase deploy --token $FIREBASE_TOKEN
+
+coverage:
+  steps:
+    - npm-install
+    - script:
+        code: |-
+        npm run test:coverage
+        npm run codecov
