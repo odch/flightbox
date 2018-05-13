@@ -8,6 +8,11 @@ dev:
         reload: true
 build:
   steps:
+    - script:
+        name: enable root/sudo for npm
+        code: |
+          # https://docs.npmjs.com/misc/config#unsafe-perm
+          npm config set unsafe-perm true
     - npm-install
     - npm-test
     - script:
