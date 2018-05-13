@@ -59,3 +59,53 @@ Prerequisites: Firebase Tools must be installed (`npm install -g firebase-tools`
 ```
 $ firebase deploy
 ```
+## Cloud functions
+
+### `auth`
+
+Can be called to create a custom authentication token. Has to be called via **`POST`**.
+
+You need to set the configuration properties `serviceaccount.clientemail` and `serviceaccount.privatekey`
+before you'll be able to deploy the function (and the private key needs to be wrapped in double quotes - see example
+below). You'll find the credentials for the service account in the console of your Firebase project.
+
+```
+$ firebase functions:config:set serviceaccount.clientemail="<EMAIL>"
+$ firebase functions:config:set serviceaccount.privatekey="\"-----BEGIN PRIVATE KEY-----\n<PRIVATE KEY>\n-----END PRIVATE KEY-----\n\""
+```
+
+There are two authentication modes implemented: `ip` and `flightnet`.
+
+#### Mode *ip*
+
+Returns a token if the request comes from one of the allowed IP addresses. The allowed addresses can be configured
+via the configuration property `auth.ips`. The following example sets the IP addresses `109.205.200.60` and
+`77.59.197.122` as allowed IP addresses.
+
+```
+$ firebase functions:config:set auth.ips="109.205.200.60,77.59.197.122" 
+```
+
+Request example:
+```
+$ curl
+    -X POST
+    -H "Content-Type: application/json"
+    -d '{"mode": "ip"}'
+    https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
+```
+
+#### Mode *flightnet*
+
+Returns a token if the given credentials are valid Flightnet credentials. You have to send the flightnet company,
+the username and the password in the request body.
+
+Request example:
+
+```
+$ curl
+    -X POST
+    -H "Content-Type: application/json"
+    -d '{"mode": "flightnet", "company": "<FLIGHTNET_COMPANY>", "username": "<FLIGHTNET_USERNAME>", "password": "<FLIGHTNET_PASSWORD>"}'
+    https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
+```
