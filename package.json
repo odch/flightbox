@@ -69,9 +69,14 @@
   },
   "jest": {
     "setupTestFrameworkScriptFile": "<rootDir>/test/testSetup.js",
+    "moduleDirectories": [
+      "node_modules",
+      "functions/node_modules"
+    ],
     "coverageDirectory": "./coverage/",
     "collectCoverageFrom": [
       "src/**/*.{js,jsx}",
+      "functions/**/*.{js,jsx}",
       "!<rootDir>/node_modules/",
       "!<rootDir>/test/"
     ]
