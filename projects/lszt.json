@@ -29,16 +29,15 @@
   },
   "environments": {
     "test": {
-      "firebase": "https://mfgt-flights.firebaseio.com",
-      "ipAuth": "https://api.mfgt.ch/api/v1/firebaseauth/ip-test",
-      "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/flightnet/lszt-test"
+      "firebaseProjectId": "mfgt-flights",
+      "firebaseApiKey": "AIzaSyDy63Y8GP6GExoP07KWJ6qneAeQalu9pK8"
     },
     "production": {
-      "firebase": "https://lszt.firebaseio.com",
-      "ipAuth": "https://api.mfgt.ch/api/v1/firebaseauth/ip",
-      "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/flightnet/lszt"
+      "firebaseProjectId": "lszt",
+      "firebaseApiKey": "AIzaSyBNL_8OjB26xYYmjWbTCiPcxKgHs73FxGc"
     }
   },
+  "flightnetCompany": "mfgt",
   "theme": "lszt",
   "title": "MFGT Bewegungen"
 }

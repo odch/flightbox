@@ -1,12 +1,8 @@
 export default class FakeFirebaseSnapshot {
 
   constructor(key, val) {
-    this._key = key;
+    this.key = key;
     this._val = val;
-  }
-
-  key() {
-    return this._key;
   }
 
   val() {

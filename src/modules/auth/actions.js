@@ -47,11 +47,12 @@ export function usernamePasswordAuthenticationFailure() {
   };
 }
 
-export function requestFirebaseAuthentication(token) {
+export function requestFirebaseAuthentication(token, failureAction) {
   return {
     type: REQUEST_FIREBASE_AUTHENTICATION,
     payload: {
       token,
+      failureAction
     },
   };
 }

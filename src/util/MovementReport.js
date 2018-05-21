@@ -100,7 +100,7 @@ class MovementReport {
     snapshots.forEach(snapshot => {
       snapshot.snapshot.forEach(record => {
         const movement = firebaseToLocal(record.val());
-        movement.key = record.key();
+        movement.key = record.key;
         movement.type = snapshot.type.key;
 
         movements.insert(movement);

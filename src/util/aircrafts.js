@@ -6,7 +6,7 @@ function read(path) {
       ref.once('value', snapshot => {
         const aircrafts = {};
         snapshot.forEach(record => {
-          aircrafts[record.key()] = true;
+          aircrafts[record.key] = true;
         });
         resolve(aircrafts);
       });

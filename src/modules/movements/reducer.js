@@ -10,7 +10,7 @@ export function childrenAdded(state, action) {
 
   snapshot.forEach(item => {
     const movement = firebaseToLocal(item.val());
-    movement.key = item.key();
+    movement.key = item.key;
     movement.type = movementType;
     movements.push(movement);
   });
@@ -30,7 +30,7 @@ export function childAdded(state, action) {
   const {snapshot, movementType} = action.payload;
 
   const movement = firebaseToLocal(snapshot.val());
-  movement.key = snapshot.key();
+  movement.key = snapshot.key;
   movement.type = movementType;
 
   let newData = state.data.insert(movement, compareDescending);
@@ -45,7 +45,7 @@ export function childChanged(state, action) {
   const {snapshot, movementType} = action.payload;
 
   const movement = firebaseToLocal(snapshot.val());
-  movement.key = snapshot.key();
+  movement.key = snapshot.key;
   movement.type = movementType;
 
   let newData = state.data.update(movement, compareDescending);
@@ -59,7 +59,7 @@ export function childChanged(state, action) {
 export function childRemoved(state, action) {
   const snapshot = action.payload.snapshot;
 
-  let newData = state.data.remove(snapshot.key());
+  let newData = state.data.remove(snapshot.key);
   newData = associate(newData, compareDescending);
 
   return Object.assign({}, state, {
