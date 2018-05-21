@@ -88,10 +88,10 @@ $ firebase functions:config:set auth.ips="109.205.200.60,77.59.197.122"
 
 Request example:
 ```
-$ curl
-    -X POST
-    -H "Content-Type: application/json"
-    -d '{"mode": "ip"}'
+$ curl \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"mode": "ip"}' \
     https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
 ```
 
@@ -103,9 +103,9 @@ the username and the password in the request body.
 Request example:
 
 ```
-$ curl
-    -X POST
-    -H "Content-Type: application/json"
-    -d '{"mode": "flightnet", "company": "<FLIGHTNET_COMPANY>", "username": "<FLIGHTNET_USERNAME>", "password": "<FLIGHTNET_PASSWORD>"}'
+$ curl \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"mode": "flightnet", "company": "<FLIGHTNET_COMPANY>", "username": "<FLIGHTNET_USERNAME>", "password": "<FLIGHTNET_PASSWORD>"}' \
     https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
 ```
