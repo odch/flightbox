@@ -6,7 +6,7 @@ export function fetch() {
       ref.once('value', snapshot => {
         const aerodromes = {};
         snapshot.forEach(record => {
-          aerodromes[record.key()] = record.val();
+          aerodromes[record.key] = record.val();
         });
         resolve(aerodromes);
       });

@@ -3,9 +3,8 @@ import { call, put, fork } from 'redux-saga/effects'
 import * as actions from './actions';
 import { loadIpToken, loadCredentialsToken } from '../../util/auth';
 import createChannel from '../../util/createChannel';
-import firebase, { authenticate as fbAuth, unauth as fbUnauth } from '../../util/firebase';
-import { error } from '../../util/log';
-
+import firebase, { authenticate as fbAuth, unauth as fbUnauth, watchAuthState } from '../../util/firebase';
+import { error as logError } from '../../util/log';
 
 function isAdmin(uid) {
   return () => new Promise((resolve, reject) => {
@@ -45,7 +44,10 @@ function* doUsernamePasswordAuthentication(action) {
       const credentials = {username, password};
       const credentialsToken = yield call(loadCredentialsToken, credentials);
       if (credentialsToken) {
-        yield put(actions.requestFirebaseAuthentication(credentialsToken));
+        yield put(actions.requestFirebaseAuthentication(
+          credentialsToken,
+          actions.usernamePasswordAuthenticationFailure()
+        ));
       } else {
         yield put(actions.usernamePasswordAuthenticationFailure());
       }
@@ -59,7 +61,12 @@ function* doUsernamePasswordAuthentication(action) {
 }
 
 function* doFirebaseAuthentication(action) {
-  yield call(fbAuth(action.payload.token));
+  try {
+    yield call(fbAuth, action.payload.token);
+  } catch (e) {
+    logError('Firebase authentication failed', e);
+    yield put(action.payload.failureAction);
+  }
 }
 
 function* doLogout() {
@@ -108,11 +115,13 @@ function* monitorFirebaseAuthentication(channel) {
 }
 
 function createFbAuthenticationChannel() {
-  const channel = createChannel();
-  firebase((error, ref) => {
-    ref.onAuth(channel.put);
-  });
-  return channel;
+  try {
+    const channel = createChannel();
+    watchAuthState(channel.put);
+    return channel;
+  } catch(e) {
+    logError('Failed to create authentication watch channel', e);
+  }
 }
 
 export default function* sagas() {

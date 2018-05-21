@@ -19,7 +19,7 @@ function messagesLoaded(state, action) {
 
   snapshot.forEach(item => {
     const message = item.val();
-    message.key = item.key();
+    message.key = item.key;
     messages.unshift(message);
   });
 
