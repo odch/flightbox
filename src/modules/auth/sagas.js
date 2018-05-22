@@ -70,7 +70,7 @@ function* doFirebaseAuthentication(action) {
 }
 
 function* doLogout() {
-  yield call(fbUnauth());
+  yield call(fbUnauth);
 }
 
 function* doListenFirebaseAuthentication(action) {

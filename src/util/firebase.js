@@ -57,7 +57,7 @@ export function authenticate(token) {
 }
 
 export function unauth() {
-  return () => Firebase.auth().signOut();
+  Firebase.auth().signOut();
 }
 
 export function loadValue(path) {
@@ -70,3 +70,10 @@ export function loadValue(path) {
 }
 
 export default firebase;
+
+if (window.Cypress) {
+  window.firebase = {
+    authenticate: authenticate,
+    unauth: unauth
+  };
+}

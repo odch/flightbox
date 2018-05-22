@@ -8,7 +8,11 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "codecov": "codecov"
+    "codecov": "codecov",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "start-cy-testing": "npm start --project=cypress-testing",
+    "cy:test": "start-server-and-test start-cy-testing http://0.0.0.0:8080 cy:run"
   },
   "devDependencies": {
     "babel-core": "^6.22.1",
@@ -23,6 +27,7 @@
     "css-loader": "^0.28.11",
     "csv-parse": "^2.1.0",
     "csv-stringify": "^2.0.4",
+    "cypress": "^2.1.0",
     "del": "^3.0.0",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
@@ -55,6 +60,7 @@
     "redux-saga": "^0.16.0",
     "sass-loader": "^6.0.7",
     "scroll-into-view": "^1.9.3",
+    "start-server-and-test": "^1.4.1",
     "style-loader": "^0.20.3",
     "styled-components": "^3.2.5",
     "url-loader": "^1.0.1",
