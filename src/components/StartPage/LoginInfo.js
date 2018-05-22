@@ -24,10 +24,10 @@ class LoginInfo extends React.PureComponent {
 
     if (props.auth.authenticated === true && typeof props.auth.data.uid === 'string') {
       return (
-        <div className={props.className}>
+        <div className={props.className} data-cy="login-info">
           <MaterialIcon icon="account_box"/>
           <UserName>{props.auth.data.uid}</UserName>
-          <Button onClick={props.logout}>Abmelden</Button>
+          <Button onClick={props.logout} data-cy="logout">Abmelden</Button>
         </div>
       );
     }
