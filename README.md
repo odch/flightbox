@@ -109,3 +109,23 @@ $ curl \
     -d '{"mode": "flightnet", "company": "<FLIGHTNET_COMPANY>", "username": "<FLIGHTNET_USERNAME>", "password": "<FLIGHTNET_PASSWORD>"}' \
     https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
 ```
+
+##### Test credentials #####
+
+For testing purposes, test credentials can be set for this mode. If test credentials are set, authentication will
+**never** be delegated to the Flightnet authentication service.
+
+Set the test credentials in the function config:
+```
+$ firebase functions:config:set auth.testcredentials.username="foo"
+$ firebase functions:config:set auth.testcredentials.password="bar"
+```
+
+Request example (`company` not needed in request body):
+```
+curl \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"mode": "flightnet", "username": "foo", "password": "bar"}' \
+    https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
+```
