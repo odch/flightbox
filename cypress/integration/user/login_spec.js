@@ -1,7 +1,11 @@
 describe('user', () => {
   describe('login', () => {
     beforeEach(() => {
-      cy.visit('/');
+      cy.visit('#');
+    });
+
+    after(() => {
+      cy.logout();
     });
 
     it('requires valid username and password', () => {
@@ -15,8 +19,6 @@ describe('user', () => {
       cy.get('[data-cy=password]').type('bar');
       cy.get('[data-cy=submit]').should('be.enabled').click();
       cy.get('[data-cy=login-info]').contains('foo');
-
-      cy.logout();
     });
   });
 });

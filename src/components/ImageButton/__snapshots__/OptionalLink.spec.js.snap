@@ -1,5 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components ImageButton OptionalLink renders Link component if \`href\` prop is set 1`] = `"<Styled(Link) to=\\"/some/path\\" onClick={[undefined]} />"`;
+exports[`components ImageButton OptionalLink renders Link component if \`href\` prop is set 1`] = `"<Styled(Link) to=\\"/some/path\\" onClick={[undefined]} data-cy={[undefined]} />"`;
 
-exports[`components ImageButton OptionalLink renders no Link component if \`href\` prop is not set 1`] = `"<styled.div onClick={[Function: onClick]} />"`;
+exports[`components ImageButton OptionalLink renders no Link component if \`href\` prop is not set 1`] = `"<styled.div onClick={[Function: onClick]} data-cy={[undefined]} />"`;

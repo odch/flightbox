@@ -13,7 +13,7 @@ function isAdmin(uid) {
         reject(error);
       } else {
         ref.once('value', snapshot => {
-          resolve(snapshot.exists());
+          resolve(snapshot.exists() && snapshot.val() === true);
         }, () => {
           resolve(false);
         });
@@ -24,11 +24,15 @@ function isAdmin(uid) {
 
 function* doIpAuthentication() {
   try {
-    const ipToken = yield call(loadIpToken);
-    if (ipToken) {
-      yield put(actions.requestFirebaseAuthentication(ipToken));
-    } else {
+    if (__DISABLE_IP_AUTHENTICATION__) {
       yield put(actions.ipAuthenticationFailure());
+    } else {
+      const ipToken = yield call(loadIpToken);
+      if (ipToken) {
+        yield put(actions.requestFirebaseAuthentication(ipToken));
+      } else {
+        yield put(actions.ipAuthenticationFailure());
+      }
     }
   } catch(e) {
     error('Failed to execute IP authentication', e);

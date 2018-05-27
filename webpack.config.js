@@ -16,6 +16,7 @@ const globals = {
   __THEME__: JSON.stringify(projectConf.theme),
   __FIREBASE_PROJECT_ID__: JSON.stringify(env.firebaseProjectId),
   __FIREBASE_API_KEY__: JSON.stringify(env.firebaseApiKey),
+  __DISABLE_IP_AUTHENTICATION__: env.disableIpAuthentication === true,
   __FLIGHTNET_COMPANY__: JSON.stringify(projectConf.flightnetCompany),
 };
 

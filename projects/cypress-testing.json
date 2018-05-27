@@ -30,7 +30,8 @@
   "environments": {
     "test": {
       "firebaseProjectId": "cypress-testing",
-      "firebaseApiKey": "AIzaSyCqFmRzGWHTsUarhSoqzHvJLMjzq6uZNCw"
+      "firebaseApiKey": "AIzaSyCqFmRzGWHTsUarhSoqzHvJLMjzq6uZNCw",
+      "disableIpAuthentication": true
     }
   },
   "title": "Cypress Testing"
