@@ -31,12 +31,12 @@ class EntryPoints extends React.PureComponent {
   render() {
     return (
       <Wrapper>
-        <EntryPoint img={departureImagePath} label="Abflug" href="/departure/new"/>
-        <EntryPoint img={arrivalImagePath} label="Ankunft" href="/arrival/new"/>
-        <EntryPoint img={movementsImagePath} label="Erfasste Bewegungen" href="/movements"/>
-        <EntryPoint img={messageImagePath} label="Rückmeldung" href="/message"/>
-        <EntryPoint img={helpImagePath} label="Hilfe" href="/help"/>
-        {this.props.admin === true && <EntryPoint img={adminImagePath} label="Administration" href="/admin"/>}
+        <EntryPoint img={departureImagePath} label="Abflug" href="/departure/new" dataCy="new-departure"/>
+        <EntryPoint img={arrivalImagePath} label="Ankunft" href="/arrival/new" dataCy="new-arrival"/>
+        <EntryPoint img={movementsImagePath} label="Erfasste Bewegungen" href="/movements" dataCy="movements"/>
+        <EntryPoint img={messageImagePath} label="Rückmeldung" href="/message" dataCy="message"/>
+        <EntryPoint img={helpImagePath} label="Hilfe" href="/help" dataCy="help"/>
+        {this.props.admin === true && <EntryPoint img={adminImagePath} label="Administration" href="/admin" dataCy="admin"/>}
       </Wrapper>
     );
   }

@@ -1,7 +1,12 @@
 describe('user', () => {
   describe('logout', () => {
-    beforeEach(() => {
+    before(() => {
+      cy.visit('#');
       cy.login();
+    });
+
+    after(() => {
+      cy.logout();
     });
 
     it('logs out successfully', () => {

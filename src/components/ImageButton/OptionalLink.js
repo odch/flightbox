@@ -14,13 +14,14 @@ const ClickableChild = styled.div`
 
 const OptionalLink = props =>
   props.href
-    ? <StyledLink to={props.href} onClick={props.onClick}>{props.children}</StyledLink>
-    : <ClickableChild onClick={props.onClick}>{props.children}</ClickableChild>;
+    ? <StyledLink to={props.href} onClick={props.onClick} data-cy={props.dataCy}>{props.children}</StyledLink>
+    : <ClickableChild onClick={props.onClick} data-cy={props.dataCy}>{props.children}</ClickableChild>;
 
 OptionalLink.propTypes = {
   href: PropTypes.string,
   onClick: PropTypes.func,
   children: PropTypes.node,
+  dataCy: PropTypes.string
 };
 
 export default OptionalLink;

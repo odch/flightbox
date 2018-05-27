@@ -2,7 +2,7 @@
 
 exports[`components ImageButton propagates href to OptionalLink 1`] = `
 "<styled.div className={[undefined]}>
-  <OptionalLink href=\\"/some/path\\" onClick={[undefined]}>
+  <OptionalLink href=\\"/some/path\\" onClick={[undefined]} dataCy={[undefined]}>
     <img src=\\"\\" />
   </OptionalLink>
   <OptionalLink href=\\"/some/path\\" onClick={[undefined]} />
@@ -11,7 +11,7 @@ exports[`components ImageButton propagates href to OptionalLink 1`] = `
 
 exports[`components ImageButton propagates onClick to OptionalLink 1`] = `
 "<styled.div className={[undefined]}>
-  <OptionalLink href={[undefined]} onClick={[Function: onClick]}>
+  <OptionalLink href={[undefined]} onClick={[Function: onClick]} dataCy={[undefined]}>
     <img src=\\"\\" />
   </OptionalLink>
   <OptionalLink href={[undefined]} onClick={[Function: onClick]} />
@@ -20,7 +20,7 @@ exports[`components ImageButton propagates onClick to OptionalLink 1`] = `
 
 exports[`components ImageButton renders label and image 1`] = `
 "<styled.div className={[undefined]}>
-  <OptionalLink href={[undefined]} onClick={[undefined]}>
+  <OptionalLink href={[undefined]} onClick={[undefined]} dataCy={[undefined]}>
     <img src=\\"imgsource.jpg\\" />
   </OptionalLink>
   <OptionalLink href={[undefined]} onClick={[undefined]}>

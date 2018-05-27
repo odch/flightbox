@@ -74,6 +74,7 @@ export default firebase;
 if (window.Cypress) {
   window.firebase = {
     authenticate: authenticate,
-    unauth: unauth
+    unauth: unauth,
+    getRef: firebase
   };
 }

@@ -14,7 +14,7 @@ class ImageButton extends React.PureComponent {
     const props = this.props;
     return (
       <Wrapper className={props.className}>
-        <OptionalLink href={props.href} onClick={props.onClick}><img src={props.img}/></OptionalLink>
+        <OptionalLink href={props.href} onClick={props.onClick} dataCy={props.dataCy}><img src={props.img}/></OptionalLink>
         <OptionalLink href={props.href} onClick={props.onClick}>{props.label}</OptionalLink>
       </Wrapper>
     )
@@ -27,6 +27,7 @@ ImageButton.propTypes = {
   img: PropTypes.string.isRequired,
   href: PropTypes.string,
   onClick: PropTypes.func,
+  dataCy: PropTypes.string
 };
 
 export default ImageButton;
