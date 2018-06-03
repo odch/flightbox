@@ -10,7 +10,13 @@ const requireBodyProperty = (req, property)  => {
   return value;
 };
 
-const getIp = req => req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+const getIp = req => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  if (ip) {
+    return ip.split(',')[0].trim();
+  }
+  return null;
+};
 
 module.exports = {
   requireBodyProperty: requireBodyProperty,

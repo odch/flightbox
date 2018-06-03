@@ -20,7 +20,7 @@ module.exports = req =>
     const requestIp = requestHelper.getIp(req);
     console.info('Request IP', requestIp);
     console.info('Allowed IPs', ips);
-    if (ips.includes(requestIp)) {
+    if (requestIp && ips.includes(requestIp)) {
       resolve('ipauth');
     } else {
       resolve(null);

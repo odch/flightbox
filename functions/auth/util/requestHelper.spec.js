@@ -48,6 +48,39 @@ describe('functions', () => {
             };
             expect(requestHelper.getIp(request)).toEqual('10.27.1.5');
           });
+
+          it('should return the first IP from the x-forwarded-for` header', () => {
+            const request = {
+              headers: {
+                'x-forwarded-for': '10.27.1.4, 10.27.1.4'
+              },
+              connection: {
+                remoteAddress: '10.27.1.5'
+              }
+            };
+            expect(requestHelper.getIp(request)).toEqual('10.27.1.4');
+          });
+
+          it('should return the first IP from remoteAddress', () => {
+            const request = {
+              headers: {
+              },
+              connection: {
+                remoteAddress: '10.27.1.4, 10.27.1.4'
+              }
+            };
+            expect(requestHelper.getIp(request)).toEqual('10.27.1.4');
+          });
+
+          it('should return null if no IP address is set', () => {
+            const request = {
+              headers: {
+              },
+              connection: {
+              }
+            };
+            expect(requestHelper.getIp(request)).toEqual(null)
+          });
         });
       });
     });
