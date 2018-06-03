@@ -10,3 +10,4 @@ cypress/videos
 
 node_modules/
 npm-debug.log
+.runtimeconfig.json
