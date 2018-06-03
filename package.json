@@ -62,7 +62,7 @@
     "scroll-into-view": "^1.9.3",
     "start-server-and-test": "^1.4.1",
     "style-loader": "^0.21.0",
-    "styled-components": "^3.2.5",
+    "styled-components": "^3.3.0",
     "url-loader": "^1.0.1",
     "webpack": "^3.1.0",
     "webpack-dev-server": "^2.11.2",
