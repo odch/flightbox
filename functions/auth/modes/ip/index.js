@@ -18,6 +18,8 @@ if (!config.auth || !config.auth.ips) {
 module.exports = req =>
   new Promise(resolve => {
     const requestIp = requestHelper.getIp(req);
+    console.info('Request IP', requestIp);
+    console.info('Allowed IPs', ips);
     if (ips.includes(requestIp)) {
       resolve('ipauth');
     } else {
