@@ -19,6 +19,7 @@ class UserDropdownContainer extends Component {
         onFocus={this.props.onFocus}
         onBlur={this.props.onBlur}
         readOnly={this.props.readOnly}
+        dataCy={this.props.dataCy}
       />
     );
   }
@@ -32,6 +33,7 @@ UserDropdownContainer.propTypes = {
   onFocus: PropTypes.func.isRequired,
   onBlur: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
+  dataCy: PropTypes.string
 };
 
 const mapStateToProps = (state, ownProps) => {

@@ -2,13 +2,13 @@
 
 exports[`components IncrementationField cannot have value lower than min value 1`] = `
 "<div>
-  <styled.button type=\\"button\\" onClick={[Function: bound decrement]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound decrement]} data-cy=\\"undefined-decrement\\">
     -
   </styled.button>
   <styled.span>
     3
   </styled.span>
-  <styled.button type=\\"button\\" onClick={[Function: bound increment]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound increment]} data-cy=\\"undefined-increment\\">
     +
   </styled.button>
 </div>"
@@ -16,13 +16,13 @@ exports[`components IncrementationField cannot have value lower than min value 1
 
 exports[`components IncrementationField cannot have value lower than min value 2`] = `
 "<div>
-  <styled.button type=\\"button\\" onClick={[Function: bound decrement]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound decrement]} data-cy=\\"undefined-decrement\\">
     -
   </styled.button>
   <styled.span>
     3
   </styled.span>
-  <styled.button type=\\"button\\" onClick={[Function: bound increment]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound increment]} data-cy=\\"undefined-increment\\">
     +
   </styled.button>
 </div>"
@@ -30,13 +30,13 @@ exports[`components IncrementationField cannot have value lower than min value 2
 
 exports[`components IncrementationField is decremented by 1 on decrement button click 1`] = `
 "<div>
-  <styled.button type=\\"button\\" onClick={[Function: bound decrement]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound decrement]} data-cy=\\"undefined-decrement\\">
     -
   </styled.button>
   <styled.span>
     42
   </styled.span>
-  <styled.button type=\\"button\\" onClick={[Function: bound increment]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound increment]} data-cy=\\"undefined-increment\\">
     +
   </styled.button>
 </div>"
@@ -44,13 +44,13 @@ exports[`components IncrementationField is decremented by 1 on decrement button 
 
 exports[`components IncrementationField is decremented by 1 on decrement button click 2`] = `
 "<div>
-  <styled.button type=\\"button\\" onClick={[Function: bound decrement]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound decrement]} data-cy=\\"undefined-decrement\\">
     -
   </styled.button>
   <styled.span>
     41
   </styled.span>
-  <styled.button type=\\"button\\" onClick={[Function: bound increment]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound increment]} data-cy=\\"undefined-increment\\">
     +
   </styled.button>
 </div>"
@@ -58,13 +58,13 @@ exports[`components IncrementationField is decremented by 1 on decrement button 
 
 exports[`components IncrementationField is incremented by 1 on increment button click 1`] = `
 "<div>
-  <styled.button type=\\"button\\" onClick={[Function: bound decrement]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound decrement]} data-cy=\\"undefined-decrement\\">
     -
   </styled.button>
   <styled.span>
     0
   </styled.span>
-  <styled.button type=\\"button\\" onClick={[Function: bound increment]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound increment]} data-cy=\\"undefined-increment\\">
     +
   </styled.button>
 </div>"
@@ -72,13 +72,13 @@ exports[`components IncrementationField is incremented by 1 on increment button 
 
 exports[`components IncrementationField is incremented by 1 on increment button click 2`] = `
 "<div>
-  <styled.button type=\\"button\\" onClick={[Function: bound decrement]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound decrement]} data-cy=\\"undefined-decrement\\">
     -
   </styled.button>
   <styled.span>
     1
   </styled.span>
-  <styled.button type=\\"button\\" onClick={[Function: bound increment]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound increment]} data-cy=\\"undefined-increment\\">
     +
   </styled.button>
 </div>"
@@ -86,13 +86,13 @@ exports[`components IncrementationField is incremented by 1 on increment button 
 
 exports[`components IncrementationField is initialized with 0 if no value and min value is specified 1`] = `
 "<div>
-  <styled.button type=\\"button\\" onClick={[Function: bound decrement]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound decrement]} data-cy=\\"undefined-decrement\\">
     -
   </styled.button>
   <styled.span>
     0
   </styled.span>
-  <styled.button type=\\"button\\" onClick={[Function: bound increment]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound increment]} data-cy=\\"undefined-increment\\">
     +
   </styled.button>
 </div>"
@@ -100,13 +100,13 @@ exports[`components IncrementationField is initialized with 0 if no value and mi
 
 exports[`components IncrementationField is initialized with min value if no value is specified 1`] = `
 "<div>
-  <styled.button type=\\"button\\" onClick={[Function: bound decrement]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound decrement]} data-cy=\\"undefined-decrement\\">
     -
   </styled.button>
   <styled.span>
     3
   </styled.span>
-  <styled.button type=\\"button\\" onClick={[Function: bound increment]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound increment]} data-cy=\\"undefined-increment\\">
     +
   </styled.button>
 </div>"
@@ -114,13 +114,13 @@ exports[`components IncrementationField is initialized with min value if no valu
 
 exports[`components IncrementationField is initialized with value 1`] = `
 "<div>
-  <styled.button type=\\"button\\" onClick={[Function: bound decrement]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound decrement]} data-cy=\\"undefined-decrement\\">
     -
   </styled.button>
   <styled.span>
     42
   </styled.span>
-  <styled.button type=\\"button\\" onClick={[Function: bound increment]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound increment]} data-cy=\\"undefined-increment\\">
     +
   </styled.button>
 </div>"
@@ -128,13 +128,13 @@ exports[`components IncrementationField is initialized with value 1`] = `
 
 exports[`components IncrementationField is initialized with value if value and min value is specified 1`] = `
 "<div>
-  <styled.button type=\\"button\\" onClick={[Function: bound decrement]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound decrement]} data-cy=\\"undefined-decrement\\">
     -
   </styled.button>
   <styled.span>
     42
   </styled.span>
-  <styled.button type=\\"button\\" onClick={[Function: bound increment]}>
+  <styled.button type=\\"button\\" onClick={[Function: bound increment]} data-cy=\\"undefined-increment\\">
     +
   </styled.button>
 </div>"

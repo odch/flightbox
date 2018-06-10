@@ -50,7 +50,7 @@ class DatePicker extends Component {
     }
     return (
       <Wrapper>
-        <Value onClick={this.showPicker}>
+        <Value onClick={this.showPicker} data-cy={this.props.dataCy}>
           {this.state.value ? this.renderValue() : '\u00a0'}
           {this.props.clearable === true && this.state.value
             ? <ClearButton onClick={this.handleClear}>

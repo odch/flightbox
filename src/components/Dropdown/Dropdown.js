@@ -73,6 +73,7 @@ class Dropdown extends Component {
           onBlur={this.handleInputBlur}
           innerRef={this.refInputDom}
           readOnly={this.props.readOnly}
+          data-cy={this.props.dataCy}
         />
         {this.props.clearable && !this.props.readOnly && this.state.value && (
           <ClearButton onClick={this.handleClear}>
@@ -356,6 +357,7 @@ Dropdown.propTypes = {
   onBlur: PropTypes.func,
   readOnly: PropTypes.bool,
   optionsRenderLimit: PropTypes.number,
+  dataCy: PropTypes.string
 };
 
 Dropdown.defaultProps = {

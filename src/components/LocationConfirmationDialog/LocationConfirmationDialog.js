@@ -43,7 +43,13 @@ const LocationConfirmationDialog = props => {
         Möchten Sie Ihre Eingabe ändern oder möchten Sie wirklich den eingegebenen Flugplatz verwenden?
       </Message>
       <div>
-        <ConfirmButton label="Eingegebenen Flugplatz verwenden" icon="done" onClick={props.onConfirm} danger/>
+        <ConfirmButton
+          label="Eingegebenen Flugplatz verwenden"
+          icon="done"
+          onClick={props.onConfirm}
+          dataCy="location-confirmation-dialog-confirm"
+          danger
+        />
         <CancelButton label="Eingabe ändern" onClick={props.onCancel} neutral/>
       </div>
     </div>

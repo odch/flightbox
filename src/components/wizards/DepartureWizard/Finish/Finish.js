@@ -22,7 +22,7 @@ const Finish = props => {
   return (
     <Wrapper>
       <Message>{getMessage(props.isUpdate)}</Message>
-      <ImageButton label="Beenden" img={exitImagePath} onClick={props.finish}/>
+      <ImageButton label="Beenden" img={exitImagePath} onClick={props.finish} dataCy="finish-button"/>
     </Wrapper>
   );
 };
