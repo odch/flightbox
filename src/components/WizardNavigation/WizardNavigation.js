@@ -42,6 +42,7 @@ class WizardNavigation extends React.PureComponent {
             label={props.nextLabel || 'Weiter'}
             icon="navigate_next"
             onClick={props.nextStep}
+            dataCy="next-button"
             primary
           />
         )}

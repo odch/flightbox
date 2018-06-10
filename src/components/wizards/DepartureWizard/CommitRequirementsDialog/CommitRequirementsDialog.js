@@ -19,7 +19,13 @@ const CommitRequirementsDialog = props => {
         <Item>Der Preflight-Check wurde ausgeführt.</Item>
       </Items>
       <div>
-        <ConfirmButton label="Bestätigen" icon="done_all" onClick={props.onConfirm} primary/>
+        <ConfirmButton
+          label="Bestätigen"
+          icon="done_all"
+          onClick={props.onConfirm}
+          dataCy="commit-requirement-dialog-confirm"
+          primary
+        />
         <CancelButton label="Abbrechen" onClick={props.onCancel}/>
       </div>
     </div>

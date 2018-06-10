@@ -54,6 +54,7 @@ const AerodromeDropdown = props => (
     onFocus={props.onFocus}
     onBlur={callWithValue.bind(null, props.onBlur, props.aerodromes.data.array)}
     readOnly={props.readOnly}
+    dataCy={props.dataCy}
   />
 );
 
@@ -64,6 +65,7 @@ AerodromeDropdown.propTypes = {
   onFocus: PropTypes.func.isRequired,
   onBlur: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
+  dataCy: PropTypes.string
 };
 
 export default AerodromeDropdown;

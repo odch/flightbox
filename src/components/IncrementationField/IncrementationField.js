@@ -27,9 +27,9 @@ class IncrementationField extends Component {
 
     return (
       <div>
-        <Button type="button" onClick={this.decrement.bind(this)}>-</Button>
+        <Button type="button" onClick={this.decrement.bind(this)} data-cy={`${this.props.dataCy}-decrement`}>-</Button>
         <Value>{this.state.value}</Value>
-        <Button type="button" onClick={this.increment.bind(this)}>+</Button>
+        <Button type="button" onClick={this.increment.bind(this)} data-cy={`${this.props.dataCy}-increment`}>+</Button>
       </div>
     );
   }
@@ -64,6 +64,7 @@ IncrementationField.propTypes = {
   minValue: PropTypes.number,
   onChange: PropTypes.func,
   readOnly: PropTypes.bool,
+  dataCy: PropTypes.string
 };
 
 IncrementationField.defaultProps = {

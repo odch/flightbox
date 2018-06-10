@@ -20,6 +20,7 @@ const Item = props => (
     selected={props.selected}
     widthPercentage={props.widthPercentage}
     orientation={props.orientation}
+    data-cy={props.dataCy}
   >
     <LabelWrap orientation={props.orientation}>
       <div>{props.label}</div>
@@ -35,7 +36,8 @@ Item.propTypes = {
   selected: PropTypes.bool,
   widthPercentage: PropTypes.number,
   orientation: PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
+  dataCy: PropTypes.string
 };
 
 export default Item;
