@@ -85,6 +85,9 @@
       "functions/**/*.{js,jsx}",
       "!<rootDir>/node_modules/",
       "!<rootDir>/test/"
-    ]
+    ],
+    "globals": {
+      "__DISABLE_IP_AUTHENTICATION__": false
+    }
   }
 }
