@@ -16,7 +16,11 @@ class NumberBlock extends React.Component {
   render() {
     return (
       <NumberBlockWrapper>
-        <Button type="button" onMouseDown={this.handleIncrement.bind(this)}>+</Button>
+        <Button
+          type="button"
+          onMouseDown={this.handleIncrement.bind(this)}
+          data-cy={`${this.props.dataCy}-increment`}
+        >+</Button>
         <Input
           type="text"
           value={this.state.editingValue !== null ? this.state.editingValue : this.formatTwoDigit(this.props.value)}
@@ -24,8 +28,13 @@ class NumberBlock extends React.Component {
           onChange={this.handleChange.bind(this)}
           onBlur={this.handleBlur.bind(this)}
           maxLength={2}
+          data-cy={`${this.props.dataCy}-input`}
         />
-        <Button type="button" onMouseDown={this.handleDecrement.bind(this)}>-</Button>
+        <Button
+          type="button"
+          onMouseDown={this.handleDecrement.bind(this)}
+          data-cy={`${this.props.dataCy}-decrement`}
+        >-</Button>
       </NumberBlockWrapper>
     );
   }
@@ -83,6 +92,7 @@ class NumberBlock extends React.Component {
 NumberBlock.propTypes = {
   value: PropTypes.number.isRequired,
   onChange: PropTypes.func.isRequired,
+  dataCy: PropTypes.string
 };
 
 export default NumberBlock;

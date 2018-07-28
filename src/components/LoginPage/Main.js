@@ -58,6 +58,7 @@ const Main = props => {
       autoFocus={true}
       readOnly={submitting}
       onChange={e => { updateUsername(e.target.value); }}
+      data-cy="username"
     />
   );
   const passwordInput = (
@@ -66,12 +67,17 @@ const Main = props => {
       value={password}
       readOnly={submitting}
       onChange={e => { updatePassword(e.target.value); }}
+      data-cy="password"
     />
   );
 
   return (
-    <Wrapper className="main">
-      <form onSubmit={handleSubmit.bind(null, authenticate, username, password)} disabled={props.submitting}>
+    <Wrapper>
+      <form
+        onSubmit={handleSubmit.bind(null, authenticate, username, password)}
+        disabled={props.submitting}
+        data-cy="login-form"
+      >
         <StyledLabeledComponent label="Benutzername" component={usernameInput}/>
         <StyledLabeledComponent label="Passwort" component={passwordInput}/>
         <Failure failure={failure}/>
@@ -81,9 +87,10 @@ const Main = props => {
           icon="send"
           disabled={submitting || username.length === 0 || password.length === 0}
           primary
+          dataCy="submit"
         />
         {props.showCancel === true && (
-          <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel}/>
+          <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel} dataCy="cancel"/>
         )}
       </form>
     </Wrapper>

@@ -1,0 +1,38 @@
+{
+  "aerodrome": {
+    "name": "Cypress",
+    "ICAO": "LSXX",
+    "runways": [
+      "36",
+      "18"
+    ],
+    "departureRoutes": [
+      {
+        "name": "west",
+        "label": "Sektor West"
+      },
+      {
+        "name": "east",
+        "label": "Sektor Ost"
+      }
+    ],
+    "arrivalRoutes": [
+      {
+        "name": "west",
+        "label": "Sektor West"
+      },
+      {
+        "name": "east",
+        "label": "Sektor Ost"
+      }
+    ]
+  },
+  "environments": {
+    "test": {
+      "firebaseProjectId": "cypress-testing",
+      "firebaseApiKey": "AIzaSyCqFmRzGWHTsUarhSoqzHvJLMjzq6uZNCw",
+      "disableIpAuthentication": true
+    }
+  },
+  "title": "Cypress Testing"
+}

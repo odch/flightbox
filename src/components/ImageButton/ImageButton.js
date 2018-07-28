@@ -1,26 +1,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
-import {Link} from 'react-router-dom';
+import OptionalLink from './OptionalLink';
 
 const Wrapper = styled.div`
   text-align: center;
   font-size: 2em;
 `;
-
-const StyledLink = styled(Link)`
-  display: block;
-  cursor: pointer;
-`;
-
-const ClickableChild = styled.div`
-  cursor: pointer;
-`;
-
-const OptionalLink = props =>
-  props.href
-    ? <StyledLink to={props.href} onClick={props.onClick}>{props.children}</StyledLink>
-    : <ClickableChild onClick={props.onClick}>{props.children}</ClickableChild>;
 
 class ImageButton extends React.PureComponent {
 
@@ -28,7 +14,7 @@ class ImageButton extends React.PureComponent {
     const props = this.props;
     return (
       <Wrapper className={props.className}>
-        <OptionalLink href={props.href} onClick={props.onClick}><img src={props.img}/></OptionalLink>
+        <OptionalLink href={props.href} onClick={props.onClick} dataCy={props.dataCy}><img src={props.img}/></OptionalLink>
         <OptionalLink href={props.href} onClick={props.onClick}>{props.label}</OptionalLink>
       </Wrapper>
     )
@@ -41,6 +27,7 @@ ImageButton.propTypes = {
   img: PropTypes.string.isRequired,
   href: PropTypes.string,
   onClick: PropTypes.func,
+  dataCy: PropTypes.string
 };
 
 export default ImageButton;

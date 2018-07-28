@@ -1,108 +1,87 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
-import bro from 'jsdom-test-browser';
-import expect from 'expect';
+import {shallow} from 'enzyme';
 import IncrementationField from './IncrementationField';
-import Utils from '../../../test/Utils';
+import Button from './Button';
 
-describe('IncrementationField', () => {
-  before((done) => { bro.newBrowser(done); });
-  before((done) => { bro.jQueryify(done); });
+describe('components', () => {
+  describe('IncrementationField', () => {
+    it('is initialized with value', () => {
+      const component = shallow(<IncrementationField value={42}/>);
+      expect(component.debug()).toMatchSnapshot();
+    });
 
-  it('is initialized with value', () => {
-    const component = TestUtils.renderIntoDocument(<IncrementationField value={42}/>);
-    const element = ReactDOM.findDOMNode(component);
+    it('is initialized with value if value and min value is specified', () => {
+      const component = shallow(<IncrementationField value={42} minValue={3}/>);
+      expect(component.debug()).toMatchSnapshot();
+    });
 
-    expect(component.state.value).toBe(42);
-    expect(bro.$('span', element).html()).toBe('42');
-  });
+    it('throws error if specified value is lower than min value', () => {
+      expect(() => shallow(<IncrementationField value={2} minValue={3}/>))
+        .toThrow('Given value 2 is lower than min value 3');
+    });
 
-  it('is initialized with value if value and min value is specified', () => {
-    const component = TestUtils.renderIntoDocument(<IncrementationField value={42} minValue={3}/>);
-    const element = ReactDOM.findDOMNode(component);
+    it('is initialized with 0 if no value and min value is specified', () => {
+      const component = shallow(<IncrementationField/>);
+      expect(component.debug()).toMatchSnapshot();
+    });
 
-    expect(component.state.value).toBe(42);
-    expect(bro.$('span', element).html()).toBe('42');
-  });
+    it('is initialized with min value if no value is specified', () => {
+      const component = shallow(<IncrementationField minValue={3}/>);
+      expect(component.debug()).toMatchSnapshot();
+    });
 
-  it('throws error if specified value is lower than min value', () => {
-    expect(() => TestUtils.renderIntoDocument(<IncrementationField value={2} minValue={3}/>))
-      .toThrow('Given value 2 is lower than min value 3');
-  });
+    it('is incremented by 1 on increment button click', () => {
+      const incrementationField = shallow(<IncrementationField/>);
 
-  it('is initialized with 0 if no value and min value is specified', () => {
-    const component = TestUtils.renderIntoDocument(<IncrementationField/>);
-    const element = ReactDOM.findDOMNode(component);
+      expect(incrementationField.debug()).toMatchSnapshot();
 
-    expect(component.state.value).toBe(0);
-    expect(bro.$('span', element).html()).toBe('0');
-  });
+      incrementationField.find(Button).at(1).simulate('click');
 
-  it('is initialized with min value if no value is specified', () => {
-    const component = TestUtils.renderIntoDocument(<IncrementationField minValue={3}/>);
-    const element = ReactDOM.findDOMNode(component);
+      expect(incrementationField.debug()).toMatchSnapshot();
+    });
 
-    expect(component.state.value).toBe(3);
-    expect(bro.$('span', element).html()).toBe('3');
-  });
+    it('is decremented by 1 on decrement button click', () => {
+      const incrementationField = shallow(<IncrementationField value={42}/>);
 
-  it('is incremented by 1 on increment button click', () => {
-    const component = TestUtils.renderIntoDocument(<IncrementationField/>);
-    const element = ReactDOM.findDOMNode(component);
-    const button = bro.$('button:last-child', element).get(0);
+      expect(incrementationField.debug()).toMatchSnapshot();
 
-    TestUtils.Simulate.click(button);
+      incrementationField.find(Button).at(0).simulate('click');
 
-    expect(component.state.value).toBe(1);
-    expect(bro.$('span', element).html()).toBe('1');
-  });
+      expect(incrementationField.debug()).toMatchSnapshot();
+    });
 
-  it('is decremented by 1 on decrement button click', () => {
-    const component = TestUtils.renderIntoDocument(<IncrementationField value={42}/>);
-    const element = ReactDOM.findDOMNode(component);
-    const button = bro.$('button:first-child', element).get(0);
+    it('cannot have value lower than min value', () => {
+      const incrementationField = shallow(<IncrementationField minValue={3}/>);
 
-    TestUtils.Simulate.click(button);
+      expect(incrementationField.debug()).toMatchSnapshot();
 
-    expect(component.state.value).toBe(41);
-    expect(bro.$('span', element).html()).toBe('41');
-  });
+      incrementationField.find(Button).at(0).simulate('click');
 
-  it('cannot have value lower than min value', () => {
-    const component = TestUtils.renderIntoDocument(<IncrementationField minValue={3}/>);
-    const element = ReactDOM.findDOMNode(component);
-    const button = bro.$('button:first-child', element).get(0);
+      expect(incrementationField.debug()).toMatchSnapshot();
+    });
 
-    TestUtils.Simulate.click(button);
+    it('calls onChange handler on increment', () => {
+      const handler = jest.fn();
 
-    expect(component.state.value).toBe(3);
-    expect(bro.$('span', element).html()).toBe('3');
-  });
+      const incrementationField = shallow(<IncrementationField value={42} onChange={handler}/>);
 
-  it('calls onChange handler on increment', () => {
-    const handler = Utils.callTracker();
-    const component = TestUtils.renderIntoDocument(<IncrementationField value={42} onChange={handler}/>);
-    const element = ReactDOM.findDOMNode(component);
-    const button = bro.$('button:last-child', element).get(0);
+      incrementationField.find(Button).at(1).simulate('click');
 
-    TestUtils.Simulate.click(button);
+      const calls = handler.mock.calls;
+      expect(calls.length).toBe(1);
+      expect(calls[0][0].target.value).toBe(43);
+    });
 
-    const calls = handler.calls();
-    expect(calls.length).toBe(1);
-    expect(calls[0][0].target.value).toBe(43);
-  });
+    it('calls onChange handler on decrement', () => {
+      const handler = jest.fn();
 
-  it('calls onChange handler on decrement', () => {
-    const handler = Utils.callTracker();
-    const component = TestUtils.renderIntoDocument(<IncrementationField value={42} onChange={handler}/>);
-    const element = ReactDOM.findDOMNode(component);
-    const button = bro.$('button:first-child', element).get(0);
+      const incrementationField = shallow(<IncrementationField value={42} onChange={handler}/>);
 
-    TestUtils.Simulate.click(button);
+      incrementationField.find(Button).at(0).simulate('click');
 
-    const calls = handler.calls();
-    expect(calls.length).toBe(1);
-    expect(calls[0][0].target.value).toBe(41);
+      const calls = handler.mock.calls;
+      expect(calls.length).toBe(1);
+      expect(calls[0][0].target.value).toBe(41);
+    });
   });
 });

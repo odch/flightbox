@@ -49,6 +49,7 @@ const UserDropdown = props => (
     onFocus={props.onFocus}
     onBlur={callWithValue.bind(null, props.onBlur, props.users.data.array)}
     readOnly={props.readOnly}
+    dataCy={props.dataCy}
     clearable
   />
 );
@@ -60,6 +61,7 @@ UserDropdown.propTypes = {
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func.isRequired,
   onBlur: PropTypes.func.isRequired,
+  dataCy: PropTypes.string
 };
 
 export default UserDropdown;

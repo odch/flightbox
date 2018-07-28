@@ -1,4 +1,3 @@
-import expect from 'expect';
 import ItemsArray from './ItemsArray';
 import { compareDescending } from './movements';
 

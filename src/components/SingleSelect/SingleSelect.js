@@ -37,6 +37,7 @@ class SingleSelect extends Component {
             widthPercentage={widthPercentage}
             orientation={orientation}
             onClick={this.clickHandler.bind(this)}
+            dataCy={`${this.props.dataCy}-${item.value}`}
           />
         ))}
       </Wrapper>
@@ -84,6 +85,7 @@ SingleSelect.propTypes = {
   onChange: PropTypes.func,
   orientation: PropTypes.oneOf(['horizontal', 'vertical']),
   readOnly: PropTypes.bool,
+  dataCy: PropTypes.string
 };
 
 SingleSelect.defaultProps = {

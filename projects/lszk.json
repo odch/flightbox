@@ -29,16 +29,15 @@
   },
   "environments": {
     "test": {
-      "firebase": "https://lszk-test.firebaseio.com",
-      "ipAuth": "https://lszk-prod.appspot-preview.com/api/v1/firebaseauth/ip-test",
-      "credentialsAuth": "https://lszk-prod.appspot-preview.com/api/v1/firebaseauth/flightnet/lszk-test"
+      "firebaseProjectId": "lszk-test",
+      "firebaseApiKey": "AIzaSyBnrEgL_rLPHCwS6-ksX7eOTETXQtgYST0"
     },
     "production": {
-      "firebase": "https://lszk-prod.firebaseio.com",
-      "ipAuth": "https://lszk-prod.appspot-preview.com/api/v1/firebaseauth/ip",
-      "credentialsAuth": "https://lszk-prod.appspot-preview.com/api/v1/firebaseauth/flightnet/lszk"
+      "firebaseProjectId": "lszk-prod",
+      "firebaseApiKey": "AIzaSyDQxZJ7DuBc4VtF2c2ndo8QJZ29sl04BAI"
     }
   },
+  "flightnetCompany": "fgzo",
   "theme": "lszk",
   "title": "FGZO Bewegungen",
   "enabledFlightTypes": [

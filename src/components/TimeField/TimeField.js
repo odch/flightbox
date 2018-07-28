@@ -34,11 +34,13 @@ class TimeField extends Component {
         <NumberBlock
           value={this.state.value.hours}
           onChange={this.updateHours.bind(this)}
+          dataCy={`${this.props.dataCy}-hours`}
         />
         <span>:</span>
         <NumberBlock
           value={this.state.value.minutes}
           onChange={this.updateMinutes.bind(this)}
+          dataCy={`${this.props.dataCy}-minutes`}
         />
       </Wrapper>
     );
@@ -90,6 +92,7 @@ TimeField.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   readOnly: PropTypes.bool,
+  dataCy: PropTypes.string
 };
 
 export default TimeField;

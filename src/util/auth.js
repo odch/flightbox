@@ -1,7 +1,7 @@
 
-const post = (url, data) =>
+const post = (data) =>
   new Promise((resolve, reject) => {
-    fetch(url, {
+    fetch(`https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/auth`, {
       method: 'POST',
       headers: new Headers({
         'Content-Type': 'application/json'
@@ -15,6 +15,12 @@ const post = (url, data) =>
   });
 
 
-export const loadIpToken = () => post(__IP_AUTH__);
+export const loadIpToken = () => post({
+  mode: 'ip'
+});
 
-export const loadCredentialsToken = credentials => post(__CREDENTIALS_AUTH__, credentials);
+export const loadCredentialsToken = credentials =>
+  post(Object.assign({}, credentials, {
+    mode: 'flightnet',
+    company: __FLIGHTNET_COMPANY__
+  }));

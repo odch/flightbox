@@ -81,7 +81,7 @@ function updateExisting(firebaseRef, itemMap, options, callback) {
 
       const item = itemMap[keyValue];
 
-      const childRef = firebaseRef.child(firebaseRow.key());
+      const childRef = firebaseRef.child(firebaseRow.key);
 
       if (!item) {
         childRef.remove();

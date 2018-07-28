@@ -201,7 +201,7 @@ export function* editMovement(action) {
     const path = getPathByMovementType(movementType);
     const snapshot = yield(call(remote.loadByKey, path, key));
     movement = firebaseToLocal(snapshot.val());
-    movement.key = snapshot.key();
+    movement.key = snapshot.key;
     movement.type = movementType;
   }
   yield put(initialize('wizard', movement));

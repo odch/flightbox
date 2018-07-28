@@ -8,6 +8,11 @@ dev:
         reload: true
 build:
   steps:
+    - script:
+        name: enable root/sudo for npm
+        code: |
+          # https://docs.npmjs.com/misc/config#unsafe-perm
+          npm config set unsafe-perm true
     - npm-install
     - npm-test
     - script:
@@ -21,3 +26,27 @@ deploy:
         code: |-
           firebase use $FIREBASE_PROJECT --token $FIREBASE_TOKEN
           firebase deploy --token $FIREBASE_TOKEN
+
+coverage:
+  steps:
+    - script:
+        name: enable root/sudo for npm
+        code: |
+          # https://docs.npmjs.com/misc/config#unsafe-perm
+          npm config set unsafe-perm true
+    - npm-install
+    - script:
+        code: |-
+          npm run test:coverage
+          npm run codecov
+
+cypress:
+  steps:
+    - script:
+        name: enable root/sudo for npm
+        code: |
+          # https://docs.npmjs.com/misc/config#unsafe-perm
+          npm config set unsafe-perm true
+    - npm-install
+    - script:
+        code: npm run cy:test

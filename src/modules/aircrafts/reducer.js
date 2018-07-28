@@ -9,7 +9,7 @@ function aircraftsLoaded(state, action) {
 
   snapshot.forEach(item => {
     const aircraft = item.val();
-    aircraft.key = item.key();
+    aircraft.key = item.key;
     aircrafts.unshift(aircraft);
   });
 

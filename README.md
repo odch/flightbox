@@ -1,7 +1,8 @@
-# MFGT Fluganmeldungen
+# open digital Flightbox
 
 [![wercker status](https://app.wercker.com/status/0fe66b2964c401ddbc2b7b17d2e9f3d0/s/master "wercker status")](https://app.wercker.com/project/byKey/0fe66b2964c401ddbc2b7b17d2e9f3d0)
 [![devDependencies Status](https://david-dm.org/lszt/flights-react/dev-status.svg)](https://david-dm.org/lszt/flights-react?type=dev)
+[![GitHub release](https://img.shields.io/github/release/odch/flightbox.svg)](https://www.github.com/odch/flightbox/releases/)
 
 ### Getting Started
 
@@ -57,4 +58,74 @@ Prerequisites: Firebase Tools must be installed (`npm install -g firebase-tools`
 
 ```
 $ firebase deploy
+```
+## Cloud functions
+
+### `auth`
+
+Can be called to create a custom authentication token. Has to be called via **`POST`**.
+
+You need to set the configuration properties `serviceaccount.clientemail` and `serviceaccount.privatekey`
+before you'll be able to deploy the function (and the private key needs to be wrapped in double quotes - see example
+below). You'll find the credentials for the service account in the console of your Firebase project.
+
+```
+$ firebase functions:config:set serviceaccount.clientemail="<EMAIL>"
+$ firebase functions:config:set serviceaccount.privatekey="\"-----BEGIN PRIVATE KEY-----\n<PRIVATE KEY>\n-----END PRIVATE KEY-----\n\""
+```
+
+There are two authentication modes implemented: `ip` and `flightnet`.
+
+#### Mode *ip*
+
+Returns a token if the request comes from one of the allowed IP addresses. The allowed addresses can be configured
+via the configuration property `auth.ips`. The following example sets the IP addresses `109.205.200.60` and
+`77.59.197.122` as allowed IP addresses.
+
+```
+$ firebase functions:config:set auth.ips="109.205.200.60,77.59.197.122" 
+```
+
+Request example:
+```
+$ curl \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"mode": "ip"}' \
+    https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
+```
+
+#### Mode *flightnet*
+
+Returns a token if the given credentials are valid Flightnet credentials. You have to send the flightnet company,
+the username and the password in the request body.
+
+Request example:
+
+```
+$ curl \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"mode": "flightnet", "company": "<FLIGHTNET_COMPANY>", "username": "<FLIGHTNET_USERNAME>", "password": "<FLIGHTNET_PASSWORD>"}' \
+    https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
+```
+
+##### Test credentials #####
+
+For testing purposes, test credentials can be set for this mode. If test credentials are set, authentication will
+**never** be delegated to the Flightnet authentication service.
+
+Set the test credentials in the function config:
+```
+$ firebase functions:config:set auth.testcredentials.username="foo"
+$ firebase functions:config:set auth.testcredentials.password="bar"
+```
+
+Request example (`company` not needed in request body):
+```
+curl \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"mode": "flightnet", "username": "foo", "password": "bar"}' \
+    https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
 ```

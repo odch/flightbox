@@ -1,20 +1,19 @@
-import { takeEvery, takeLatest } from 'redux-saga';
+import { takeEvery } from 'redux-saga';
 import { call, put, fork } from 'redux-saga/effects'
 import * as actions from './actions';
 import { loadIpToken, loadCredentialsToken } from '../../util/auth';
 import createChannel from '../../util/createChannel';
-import firebase, { authenticate as fbAuth, unauth as fbUnauth } from '../../util/firebase';
-import { error } from '../../util/log';
+import firebase, { authenticate as fbAuth, unauth as fbUnauth, watchAuthState } from '../../util/firebase';
+import { error as logError } from '../../util/log';
 
-
-function isAdmin(uid) {
-  return () => new Promise((resolve, reject) => {
+export function isAdmin(uid) {
+  return new Promise((resolve, reject) => {
     firebase('/admins/' + uid, (error, ref) => {
       if (error) {
         reject(error);
       } else {
         ref.once('value', snapshot => {
-          resolve(snapshot.exists());
+          resolve(snapshot.exists() && snapshot.val() === true);
         }, () => {
           resolve(false);
         });
@@ -23,21 +22,25 @@ function isAdmin(uid) {
   });
 }
 
-function* doIpAuthentication() {
+export function* doIpAuthentication() {
   try {
-    const ipToken = yield call(loadIpToken);
-    if (ipToken) {
-      yield put(actions.requestFirebaseAuthentication(ipToken));
-    } else {
+    if (__DISABLE_IP_AUTHENTICATION__) {
       yield put(actions.ipAuthenticationFailure());
+    } else {
+      const ipToken = yield call(loadIpToken);
+      if (ipToken) {
+        yield put(actions.requestFirebaseAuthentication(ipToken));
+      } else {
+        yield put(actions.ipAuthenticationFailure());
+      }
     }
   } catch(e) {
-    error('Failed to execute IP authentication', e);
+    logError('Failed to execute IP authentication', e);
     yield put(actions.ipAuthenticationFailure());
   }
 }
 
-function* doUsernamePasswordAuthentication(action) {
+export function* doUsernamePasswordAuthentication(action) {
   try {
     yield put(actions.setSubmitting());
     const { username, password } = action.payload;
@@ -45,7 +48,10 @@ function* doUsernamePasswordAuthentication(action) {
       const credentials = {username, password};
       const credentialsToken = yield call(loadCredentialsToken, credentials);
       if (credentialsToken) {
-        yield put(actions.requestFirebaseAuthentication(credentialsToken));
+        yield put(actions.requestFirebaseAuthentication(
+          credentialsToken,
+          actions.usernamePasswordAuthenticationFailure()
+        ));
       } else {
         yield put(actions.usernamePasswordAuthenticationFailure());
       }
@@ -53,20 +59,25 @@ function* doUsernamePasswordAuthentication(action) {
       yield put(actions.usernamePasswordAuthenticationFailure());
     }
   } catch(e) {
-    error('Failed to execute credentials authentication', e);
+    logError('Failed to execute credentials authentication', e);
     yield put(actions.usernamePasswordAuthenticationFailure());
   }
 }
 
-function* doFirebaseAuthentication(action) {
-  yield call(fbAuth(action.payload.token));
+export function* doFirebaseAuthentication(action) {
+  try {
+    yield call(fbAuth, action.payload.token);
+  } catch (e) {
+    logError('Firebase authentication failed', e);
+    yield put(action.payload.failureAction);
+  }
 }
 
-function* doLogout() {
-  yield call(fbUnauth());
+export function* doLogout() {
+  yield call(fbUnauth);
 }
 
-function* doListenFirebaseAuthentication(action) {
+export function* doListenFirebaseAuthentication(action) {
   const authenticated = !!action.payload.authData;
 
   let authData = null;
@@ -84,7 +95,7 @@ function* doListenFirebaseAuthentication(action) {
         uid,
         expiration: expires * 1000,
         token,
-        admin: yield call(isAdmin(uid)),
+        admin: yield call(isAdmin, uid),
       }
     }
   }
@@ -108,11 +119,13 @@ function* monitorFirebaseAuthentication(channel) {
 }
 
 function createFbAuthenticationChannel() {
-  const channel = createChannel();
-  firebase((error, ref) => {
-    ref.onAuth(channel.put);
-  });
-  return channel;
+  try {
+    const channel = createChannel();
+    watchAuthState(channel.put);
+    return channel;
+  } catch(e) {
+    logError('Failed to create authentication watch channel', e);
+  }
 }
 
 export default function* sagas() {

@@ -1,4 +1,3 @@
-import expect from 'expect';
 import reducer from './reducer';
 import * as actions from './actions';
 

@@ -14,9 +14,10 @@ const globals = {
   __DEV__: process.env.DEV || false,
   __CONF__: projects.packinize(projectConf),
   __THEME__: JSON.stringify(projectConf.theme),
-  __FIREBASE_URL__: JSON.stringify(env.firebase),
-  __IP_AUTH__: JSON.stringify(env.ipAuth),
-  __CREDENTIALS_AUTH__: JSON.stringify(env.credentialsAuth),
+  __FIREBASE_PROJECT_ID__: JSON.stringify(env.firebaseProjectId),
+  __FIREBASE_API_KEY__: JSON.stringify(env.firebaseApiKey),
+  __DISABLE_IP_AUTHENTICATION__: env.disableIpAuthentication === true,
+  __FLIGHTNET_COMPANY__: JSON.stringify(projectConf.flightnetCompany),
 };
 
 module.exports = {
