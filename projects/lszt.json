@@ -34,6 +34,7 @@
     },
     "production": {
       "firebaseProjectId": "project-8979611309653332047",
+      "firebaseDatabaseName": "lszt",
       "firebaseApiKey": "AIzaSyBNL_8OjB26xYYmjWbTCiPcxKgHs73FxGc"
     }
   },
