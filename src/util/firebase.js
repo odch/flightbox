@@ -9,7 +9,7 @@ function initialize() {
 
   const config = {
     apiKey: __FIREBASE_API_KEY__,
-    databaseURL: `https://${__FIREBASE_PROJECT_ID__}.firebaseio.com`
+    databaseURL: `https://${__FIREBASE_DATABASE_NAME__ || __FIREBASE_PROJECT_ID__}.firebaseio.com`
   };
 
   Firebase.initializeApp(config);
