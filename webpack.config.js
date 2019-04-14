@@ -19,6 +19,7 @@ const globals = {
   __FIREBASE_API_KEY__: JSON.stringify(env.firebaseApiKey),
   __DISABLE_IP_AUTHENTICATION__: env.disableIpAuthentication === true,
   __FLIGHTNET_COMPANY__: JSON.stringify(projectConf.flightnetCompany),
+  __LANDING_FEES__: JSON.stringify(projectConf.aerodrome.landingFees),
 };
 
 module.exports = {

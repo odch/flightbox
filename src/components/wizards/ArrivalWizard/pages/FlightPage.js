@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Field, reduxForm } from 'redux-form';
+import { connect } from 'react-redux';
+import {Field, getFormValues, reduxForm} from 'redux-form';
 import validate from '../../validate';
 import { renderSingleSelect, renderTextArea } from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
+import {updateMovementFees} from "../../../../util/landingFees"
 
 const FlightPage = (props) => {
-  const { previousPage, handleSubmit, flightTypes, arrivalRoutes, runways } = props;
+  const { previousPage, handleSubmit, flightTypes, arrivalRoutes, runways, formValues } = props;
   return (
     <form onSubmit={handleSubmit} className="FlightPage">
       <FieldSet>
@@ -19,6 +21,14 @@ const FlightPage = (props) => {
           parse={e => e.target.value}
           label="Typ"
           readOnly={props.readOnly}
+          normalize={flightType => {
+            const mtow = formValues['mtow']
+            const landingCount = formValues['landingCount']
+
+            updateMovementFees(props.change, mtow, flightType, landingCount)
+
+            return flightType
+          }}
         />
         <Field
           name="arrivalRoute"
@@ -54,6 +64,10 @@ const FlightPage = (props) => {
   );
 };
 
+const mapStateToProps = state => ({
+  formValues: getFormValues('wizard')(state)
+});
+
 FlightPage.propTypes = {
   previousPage: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
@@ -72,10 +86,11 @@ FlightPage.propTypes = {
     value: PropTypes.string.isRequired,
     description: PropTypes.string,
   })).isRequired,
+  formValues: PropTypes.object.isRequired
 };
 
 export default reduxForm({
   form: 'wizard',
   destroyOnUnmount: false,
   validate: validate('arrival', ['flightType', 'arrivalRoute', 'remarks', 'runway']),
-})(FlightPage);
+})(connect(mapStateToProps)(FlightPage));

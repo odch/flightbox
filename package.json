@@ -89,7 +89,36 @@
       "!<rootDir>/test/"
     ],
     "globals": {
-      "__DISABLE_IP_AUTHENTICATION__": false
+      "__DISABLE_IP_AUTHENTICATION__": false,
+      "__LANDING_FEES__": {
+        "instruction": [
+          {
+            "mtowMin": 0,
+            "mtowMax": 750,
+            "fee": 11
+          },
+          {
+            "mtowMin": 751,
+            "fee": 15
+          }
+        ],
+        "default": [
+          {
+            "mtowMin": 0,
+            "mtowMax": 750,
+            "fee": 16
+          },
+          {
+            "mtowMin": 751,
+            "mtowMax": 1499,
+            "fee": 20
+          },
+          {
+            "mtowMin": 1500,
+            "fee": 50
+          }
+        ]
+      }
     }
   }
 }
