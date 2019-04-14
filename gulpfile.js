@@ -8,7 +8,7 @@ const projects = require('./projects');
 const processFirebaseRules = require('./tasks/processFirebaseRules');
 
 require('ignore-styles');
-require('babel-polyfill');
+require('@babel/polyfill');
 
 gulp.task('clean', function () {
   const config = require('./webpack.config.js');
