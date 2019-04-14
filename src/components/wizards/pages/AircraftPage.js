@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Field, reduxForm } from 'redux-form';
+import { connect } from 'react-redux';
+import { Field, reduxForm, getFormValues } from 'redux-form';
 import validate from '../validate';
 import { renderInputField, renderAircraftDropdown } from '../renderField';
 import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
+import { updateMovementFees } from '../../../util/landingFees'
 
 const AircraftPage = (props) => {
-  const { handleSubmit } = props;
+  const { handleSubmit, formValues } = props;
   return (
     <form onSubmit={handleSubmit} className="AircraftPage">
       <FieldSet>
@@ -20,6 +22,12 @@ const AircraftPage = (props) => {
             if (aircraft) {
               props.change('aircraftType', aircraft.type);
               props.change('mtow', aircraft.mtow);
+
+              const flightType = formValues['flightType']
+              const landingCount = formValues['landingCount']
+
+              updateMovementFees(props.change, aircraft.mtow, flightType, landingCount)
+
               return aircraft.key;
             }
             return null;
@@ -47,6 +55,14 @@ const AircraftPage = (props) => {
             }
             return null;
           }}
+          normalize={mtow => {
+            const flightType = formValues['flightType']
+            const landingCount = formValues['landingCount']
+
+            updateMovementFees(props.change, mtow, flightType, landingCount)
+
+            return mtow
+          }}
         />
       </FieldSet>
       <WizardNavigation previousVisible={false} cancel={props.cancel}/>
@@ -59,10 +75,15 @@ AircraftPage.propTypes = {
   cancel: PropTypes.func.isRequired,
   change: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
+  formValues: PropTypes.object.isRequired
 };
+
+const mapStateToProps = state => ({
+  formValues: getFormValues('wizard')(state)
+});
 
 export default reduxForm({
   form: 'wizard',
   destroyOnUnmount: false,
   validate: validate(null, ['immatriculation', 'aircraftType', 'mtow']),
-})(AircraftPage);
+})(connect(mapStateToProps)(AircraftPage));

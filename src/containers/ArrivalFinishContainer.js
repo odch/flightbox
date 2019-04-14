@@ -12,22 +12,37 @@ class ArrivalFinishContainer extends Component {
   }
 
   render() {
-    if (!this.props.aircraftSettings.club || !this.props.aircraftSettings.homeBase) {
+    const {
+      aircraftSettings,
+      immatriculation,
+      landings,
+      landingFeeSingle,
+      landingFeeTotal,
+      createMovementFromMovement,
+      finish,
+      isUpdate,
+      itemKey
+    } = this.props
+
+    if (!aircraftSettings.club || !aircraftSettings.homeBase) {
       return (
         <FinishLoading/>
       );
     }
 
-    const isHomeBase = this.props.aircraftSettings.club[this.props.immatriculation] === true
-        || this.props.aircraftSettings.homeBase[this.props.immatriculation] === true;
+    const isHomeBase = aircraftSettings.club[immatriculation] === true
+        || aircraftSettings.homeBase[immatriculation] === true;
 
     return (
       <Finish
-        createMovementFromMovement={this.props.createMovementFromMovement}
-        finish={this.props.finish}
-        isUpdate={this.props.isUpdate}
+        createMovementFromMovement={createMovementFromMovement}
+        finish={finish}
+        isUpdate={isUpdate}
         isHomeBase={isHomeBase}
-        itemKey={this.props.itemKey}
+        itemKey={itemKey}
+        landings={landings}
+        landingFeeSingle={landingFeeSingle}
+        landingFeeTotal={landingFeeTotal}
       />
     );
   }
@@ -45,6 +60,9 @@ ArrivalFinishContainer.propTypes = {
   isUpdate: PropTypes.bool.isRequired,
   itemKey: PropTypes.string.isRequired,
   immatriculation: PropTypes.string.isRequired,
+  landings: PropTypes.number.isRequired,
+  landingFeeSingle: PropTypes.number,
+  landingFeeTotal: PropTypes.number,
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -54,6 +72,9 @@ const mapStateToProps = (state, ownProps) => {
     isUpdate: ownProps.isUpdate,
     itemKey: state.ui.wizard.itemKey,
     immatriculation: state.ui.wizard.values.immatriculation,
+    landings: state.ui.wizard.values.landingCount,
+    landingFeeSingle: state.ui.wizard.values.landingFeeSingle,
+    landingFeeTotal: state.ui.wizard.values.landingFeeTotal
   });
 };
 
