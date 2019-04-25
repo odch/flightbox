@@ -2,6 +2,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import isElementInViewport from '../util/isElementInViewport';
 
+const DEFAULT_BOTTOM_THRESHOLD = 50
+
 export const AutoLoad = (List) => class extends Component {
 
   constructor(props) {
@@ -52,9 +54,15 @@ export const AutoLoad = (List) => class extends Component {
   isEndReached(element) {
     if (element === document) {
       const scrollY = window.scrollY || window.pageYOffset;
-      return (window.innerHeight + scrollY) >= document.body.offsetHeight;
+      return (window.innerHeight + scrollY + this.getBottomThreshold()) >= document.body.offsetHeight;
     }
     return element.offsetHeight + element.scrollTop === element.scrollHeight;
+  }
+
+  getBottomThreshold() {
+    return typeof this.props.bottomThreshold === 'number'
+      ? this.props.bottomThreshold
+      : DEFAULT_BOTTOM_THRESHOLD
   }
 
   render() {
@@ -70,5 +78,6 @@ export const AutoLoad = (List) => class extends Component {
 AutoLoad.propTypes = {
   loadItems: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
+  bottomThreshold: PropTypes.number,
   className: PropTypes.string,
 };
