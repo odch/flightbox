@@ -19,11 +19,12 @@ const globals = {
   __FIREBASE_API_KEY__: JSON.stringify(env.firebaseApiKey),
   __DISABLE_IP_AUTHENTICATION__: env.disableIpAuthentication === true,
   __FLIGHTNET_COMPANY__: JSON.stringify(projectConf.flightnetCompany),
+  __LANDING_FEES__: JSON.stringify(projectConf.aerodrome.landingFees),
 };
 
 module.exports = {
   entry: [
-    'babel-polyfill',
+    '@babel/polyfill',
     'whatwg-fetch',
     path.resolve(__dirname, './src/app.js'),
     path.resolve(__dirname, './theme/' + projectConf.theme)
@@ -37,10 +38,12 @@ module.exports = {
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
-        query: {
-          presets: ['react', 'es2015'],
-        },
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
       },
       {
         test: /\.s?css$/,
