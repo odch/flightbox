@@ -1,4 +1,4 @@
-box: node
+box: node:10
 dev:
   steps:
     - npm-install
