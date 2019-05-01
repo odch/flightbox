@@ -11,6 +11,7 @@ class MovementWizard extends Component {
 
   componentWillMount() {
     this.props.loadLockDate();
+    this.props.loadAircraftSettings();
     if (typeof this.props.initMovement === 'function') {
       this.props.initMovement();
     } else if (this.props.match.params.key) {
@@ -166,6 +167,7 @@ MovementWizard.propTypes = {
   unsetCommitError: PropTypes.func,
   destroyForm: PropTypes.func.isRequired,
   loadLockDate: PropTypes.func.isRequired,
+  loadAircraftSettings: PropTypes.func.isRequired,
 };
 
 export default MovementWizard;

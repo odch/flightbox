@@ -6,7 +6,7 @@ import validate from '../../validate';
 import { renderAerodromeDropdown, renderDateField, renderTimeField, renderIncrementationField } from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
-import {updateMovementFees} from "../../../../util/landingFees"
+import {getAircraftOrigin, updateMovementFees} from "../../../../util/landingFees"
 
 const toNumber = value => {
   if (typeof value === 'number') {
@@ -19,7 +19,7 @@ const toNumber = value => {
 };
 
 const DepartureArrivalPage = (props) => {
-  const { previousPage, handleSubmit, formValues } = props;
+  const { previousPage, handleSubmit, formValues, aircraftSettings } = props;
   return (
     <form onSubmit={handleSubmit} className="DepartureArrivalPage">
       <FieldSet>
@@ -56,12 +56,13 @@ const DepartureArrivalPage = (props) => {
           label="Anzahl Landungen"
           readOnly={props.readOnly}
           normalize={landingCount => {
-            const mtow = formValues['mtow']
-            const flightType = formValues['flightType']
+            const mtow = formValues['mtow'];
+            const flightType = formValues['flightType'];
+            const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], aircraftSettings);
 
-            updateMovementFees(props.change, mtow, flightType, landingCount)
+            updateMovementFees(props.change, mtow, flightType, aircraftOrigin, landingCount);
 
-            return landingCount
+            return landingCount;
           }}
         />
         <Field
@@ -83,11 +84,16 @@ DepartureArrivalPage.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   cancel: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
-  formValues: PropTypes.object.isRequired
+  formValues: PropTypes.object.isRequired,
+  aircraftSettings: PropTypes.shape({
+    club: PropTypes.objectOf(PropTypes.bool),
+    homeBase: PropTypes.objectOf(PropTypes.bool)
+  }).isRequired
 };
 
 const mapStateToProps = state => ({
-  formValues: getFormValues('wizard')(state)
+  formValues: getFormValues('wizard')(state),
+  aircraftSettings: state.settings.aircrafts
 });
 
 export default reduxForm({

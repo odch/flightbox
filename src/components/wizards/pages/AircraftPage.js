@@ -6,10 +6,10 @@ import validate from '../validate';
 import { renderInputField, renderAircraftDropdown } from '../renderField';
 import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
-import { updateMovementFees } from '../../../util/landingFees'
+import { updateMovementFees, getAircraftOrigin } from '../../../util/landingFees'
 
 const AircraftPage = (props) => {
-  const { handleSubmit, formValues } = props;
+  const { handleSubmit, formValues, aircraftSettings } = props;
   return (
     <form onSubmit={handleSubmit} className="AircraftPage">
       <FieldSet>
@@ -23,10 +23,11 @@ const AircraftPage = (props) => {
               props.change('aircraftType', aircraft.type);
               props.change('mtow', aircraft.mtow);
 
-              const flightType = formValues['flightType']
-              const landingCount = formValues['landingCount']
+              const flightType = formValues['flightType'];
+              const landingCount = formValues['landingCount'];
+              const aircraftOrigin = getAircraftOrigin(aircraft.key, aircraftSettings);
 
-              updateMovementFees(props.change, aircraft.mtow, flightType, landingCount)
+              updateMovementFees(props.change, aircraft.mtow, flightType, aircraftOrigin, landingCount);
 
               return aircraft.key;
             }
@@ -58,8 +59,9 @@ const AircraftPage = (props) => {
           normalize={mtow => {
             const flightType = formValues['flightType']
             const landingCount = formValues['landingCount']
+            const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], props.aircraftSettings);
 
-            updateMovementFees(props.change, mtow, flightType, landingCount)
+            updateMovementFees(props.change, mtow, flightType, aircraftOrigin, landingCount)
 
             return mtow
           }}
@@ -75,11 +77,16 @@ AircraftPage.propTypes = {
   cancel: PropTypes.func.isRequired,
   change: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
-  formValues: PropTypes.object.isRequired
+  formValues: PropTypes.object.isRequired,
+  aircraftSettings: PropTypes.shape({
+    club: PropTypes.objectOf(PropTypes.bool),
+    homeBase: PropTypes.objectOf(PropTypes.bool)
+  }).isRequired
 };
 
 const mapStateToProps = state => ({
-  formValues: getFormValues('wizard')(state)
+  formValues: getFormValues('wizard')(state),
+  aircraftSettings: state.settings.aircrafts
 });
 
 export default reduxForm({
