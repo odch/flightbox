@@ -6,10 +6,10 @@ import validate from '../../validate';
 import { renderSingleSelect, renderTextArea } from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
-import {updateMovementFees} from "../../../../util/landingFees"
+import {updateMovementFees, getAircraftOrigin} from "../../../../util/landingFees"
 
 const FlightPage = (props) => {
-  const { previousPage, handleSubmit, flightTypes, arrivalRoutes, runways, formValues } = props;
+  const { previousPage, handleSubmit, flightTypes, arrivalRoutes, runways, formValues, aircraftSettings } = props;
   return (
     <form onSubmit={handleSubmit} className="FlightPage">
       <FieldSet>
@@ -22,10 +22,11 @@ const FlightPage = (props) => {
           label="Typ"
           readOnly={props.readOnly}
           normalize={flightType => {
-            const mtow = formValues['mtow']
-            const landingCount = formValues['landingCount']
+            const mtow = formValues['mtow'];
+            const landingCount = formValues['landingCount'];
+            const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], aircraftSettings);
 
-            updateMovementFees(props.change, mtow, flightType, landingCount)
+            updateMovementFees(props.change, mtow, flightType, aircraftOrigin, landingCount)
 
             return flightType
           }}
@@ -65,7 +66,8 @@ const FlightPage = (props) => {
 };
 
 const mapStateToProps = state => ({
-  formValues: getFormValues('wizard')(state)
+  formValues: getFormValues('wizard')(state),
+  aircraftSettings: state.settings.aircrafts
 });
 
 FlightPage.propTypes = {
@@ -86,7 +88,11 @@ FlightPage.propTypes = {
     value: PropTypes.string.isRequired,
     description: PropTypes.string,
   })).isRequired,
-  formValues: PropTypes.object.isRequired
+  formValues: PropTypes.object.isRequired,
+  aircraftSettings: PropTypes.shape({
+    club: PropTypes.objectOf(PropTypes.bool),
+    homeBase: PropTypes.objectOf(PropTypes.bool)
+  }).isRequired
 };
 
 export default reduxForm({

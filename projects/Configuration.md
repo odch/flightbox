@@ -78,6 +78,89 @@ Example:
 ]
 ```
 
+#### `landingFees`
+
+Configuration of the landing fees is structured as follows:
+
+1. map of flight types (and `default` as default for all flight types which aren't handled explicitly)
+2. `club` | `homeBase` | `default`
+3. Array of MTOW ranges with fee consisting of the properties `mtowMin` (optional), `mtowMax` (optional) and `fee`.
+
+Minimal configuration example for fee of `10` for all flight types, aircraft origins and MTOW ranges:
+
+```
+"default": {
+  "default": [
+    {
+      "fee": 10
+    }
+  ] 
+}
+```
+
+Example configuration for LSZT (Lommis):
+
+Definition for humans:
+
+|                                     |	MTOM 0 - 750 kg | MTOM 751 - 1499 kg | MTOM > 1500 kg |
+|-------------------------------------|-----------------|--------------------|----------------|
+| Clubflugzeuge Schulung (exkl. MwSt) |       CHF 11.00 |          CHF 15.00 |              - |
+| Alle anderen Flugzeuge (inkl. MwSt) |       CHF 16.00 |          CHF 20.00 |      CHF 50.00 |
+
+Configuration:
+
+```json
+{
+  "instruction": {
+    "club": [
+      {
+        "mtowMin": 0,
+        "mtowMax": 750,
+        "fee": 11
+      },
+      {
+        "mtowMin": 751,
+        "fee": 15
+      }
+    ],
+    "default": [
+      {
+        "mtowMin": 0,
+        "mtowMax": 750,
+        "fee": 16
+      },
+      {
+        "mtowMin": 751,
+        "mtowMax": 1499,
+        "fee": 20
+      },
+      {
+        "mtowMin": 1500,
+        "fee": 50
+      }
+    ]
+  },
+  "default": {
+    "default": [
+      {
+        "mtowMin": 0,
+        "mtowMax": 750,
+        "fee": 16
+      },
+      {
+        "mtowMin": 751,
+        "mtowMax": 1499,
+        "fee": 20
+      },
+      {
+        "mtowMin": 1500,
+        "fee": 50
+      }
+    ]
+  }
+}
+```
+
 ### `environments`
 
 Description of the environments. Each environment description consists of the following properties:

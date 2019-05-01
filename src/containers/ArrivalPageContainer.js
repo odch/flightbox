@@ -16,6 +16,7 @@ import {
   saveMovement
 } from '../modules/movements';
 import { loadLockDate } from '../modules/settings/lockDate';
+import { loadAircraftSettings } from '../modules/settings/aircrafts';
 import { isLocked } from '../util/movements';
 import ArrivalWizard from '../components/wizards/ArrivalWizard';
 
@@ -50,6 +51,7 @@ const mapActionCreators = {
   unsetCommitError,
   destroyForm: destroy,
   loadLockDate,
+  loadAircraftSettings,
   showDialog,
   hideDialog,
 };
