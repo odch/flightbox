@@ -103,6 +103,24 @@ class MovementReport {
         movement.key = record.key;
         movement.type = snapshot.type.key;
 
+        if (movement.type === 'A'
+          && movement.arrivalRoute !== 'circuits'
+          && (movement.landingCount > 1 || movement.goAroundCount > 0)) {
+          const circuitMovement = Object.assign({}, movement);
+
+          circuitMovement.key += '_circuits'
+          circuitMovement.arrivalRoute = 'circuits'
+          circuitMovement.location = __CONF__.aerodrome.ICAO
+
+          movement.landingCount = movement.landingCount > 1 ? 1 : 0
+          movement.goAroundCount = movement.landingCount === 1 ? 0 : 1
+
+          circuitMovement.landingCount -= movement.landingCount
+          circuitMovement.goAroundCount -= movement.goAroundCount
+
+          movements.insert(circuitMovement)
+        }
+
         movements.insert(movement);
       });
     });
@@ -148,17 +166,13 @@ class MovementReport {
   }
 
   getNumberOfMovements(movement) {
-    if (movement.type === 'A') {
+    if (movement.type === 'A' && movement.arrivalRoute === 'circuits') {
       const landingCount = movement.landingCount || 1;
       const goAroundCount = movement.goAroundCount || 0;
 
       const landingAndGoAroundSum = landingCount + goAroundCount;
 
-      const totalMovements = landingAndGoAroundSum * 2;
-
-      return (movement.arrivalRoute === 'circuits')
-        ? totalMovements // circuits: there is only 1 record in the report (containing all take offs and all landings)
-        : totalMovements - 1; // there will be a separate record for the departure (we subtract this movement here)
+      return landingAndGoAroundSum * 2
     }
 
     return 1;
