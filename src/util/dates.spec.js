@@ -101,5 +101,17 @@ describe('util', () => {
     it('formats local time with given locale (en)', () => {
       expect(dates.formatTime('2015-12-29', '13:13', 'en')).toBe('1:13 PM');
     });
+
+    describe('formatDateTime', () => {
+      it('formats the given timestamp as date time', () => {
+        const timestamp = new Date('2020-03-22T13:48:00.000Z')
+        expect(dates.formatDateTime(timestamp)).toBe('22.03.2020 14:48')
+      })
+
+      it('formats the given timestamp as date time with given locale (en)', () => {
+        const timestamp = new Date('2020-03-22T13:48:00.000Z')
+        expect(dates.formatDateTime(timestamp, 'en')).toBe('03/22/2020 2:48 PM')
+      })
+    })
   });
 });
