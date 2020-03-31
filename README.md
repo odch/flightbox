@@ -65,15 +65,6 @@ $ firebase deploy
 
 Can be called to create a custom authentication token. Has to be called via **`POST`**.
 
-You need to set the configuration properties `serviceaccount.clientemail` and `serviceaccount.privatekey`
-before you'll be able to deploy the function (and the private key needs to be wrapped in double quotes - see example
-below). You'll find the credentials for the service account in the console of your Firebase project.
-
-```
-$ firebase functions:config:set serviceaccount.clientemail="<EMAIL>"
-$ firebase functions:config:set serviceaccount.privatekey="\"-----BEGIN PRIVATE KEY-----\n<PRIVATE KEY>\n-----END PRIVATE KEY-----\n\""
-```
-
 There are two authentication modes implemented: `ip` and `flightnet`.
 
 #### Mode *ip*
