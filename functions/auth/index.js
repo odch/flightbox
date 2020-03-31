@@ -10,24 +10,10 @@ const modes = require('./modes');
 const requestHelper = require('./util/requestHelper');
 const errors = require('./util/errors');
 
-const config = functions.config();
-
-if (!config.serviceaccount || !config.serviceaccount.clientemail) {
-  throw new Error('Required configuration property `serviceaccount.clientemail` not defined');
-}
-
-if (!config.serviceaccount || !config.serviceaccount.privatekey) {
-  throw new Error('Required configuration property `serviceaccount.privatekey` not defined');
-} else if (!config.serviceaccount.privatekey.match(/^".*"$/)) {
-  throw new Error('Configuration property `serviceaccount.privatekey` must be wrapped in double quotes')
-}
-
-admin.initializeApp({
-  credential: admin.credential.cert({
-    clientEmail: config.serviceaccount.clientemail,
-    privateKey: JSON.parse(config.serviceaccount.privatekey)
-  })
-});
+// Prevent firebase from initializing twice
+try {
+  admin.initializeApp()
+} catch (e) {}
 
 const sendToken = (res, token) => {
   res.send({
