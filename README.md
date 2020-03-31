@@ -120,3 +120,25 @@ curl \
     -d '{"mode": "flightnet", "username": "foo", "password": "bar"}' \
     https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
 ```
+
+### API
+
+URL: `https://us-central1-<PROJECT_ID>.cloudfunctions.net/api`
+
+#### Aerodrome status ####
+
+Returns the current aerodrome status.
+
+`GET /api/aerodrome/status`
+
+Returns (example):
+```
+{
+  by: "30004",
+  details: "Flugplatz geschlossen. Kinderspielplatz und Restaurant geschlossen.",
+  status: "closed",
+  timestamp: 1585682371359
+}
+```
+
+If no status is set, `{}` is returned.
