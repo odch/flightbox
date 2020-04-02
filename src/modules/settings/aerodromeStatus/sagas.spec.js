@@ -66,7 +66,8 @@ describe('modules', () => {
 
             const auth = {
               admin: true,
-              uid: '30004'
+              uid: '30004',
+              name: 'Hans Meier'
             }
 
             const saveEffect = generator.next(auth).value
@@ -74,7 +75,7 @@ describe('modules', () => {
 
             expect(data.status).toEqual('restricted');
             expect(data.details).toEqual('Eine Landung pro Person pro Tag.');
-            expect(data.by).toEqual('30004');
+            expect(data.by).toEqual('Hans Meier');
             expect(data.timestamp).toEqual(now.getTime());
 
             expect(generator.next().value).toEqual(put(actions.saveAerodromeStatusSuccess()));
