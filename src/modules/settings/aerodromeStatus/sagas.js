@@ -54,7 +54,7 @@ export function* saveAerodromeStatus(action) {
     const data = {
       ...action.payload.data,
       timestamp: new Date().getTime(),
-      by: auth.uid
+      by: auth.name ? auth.name : auth.uid
     };
 
     yield call(remote.save, data);
