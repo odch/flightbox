@@ -7,7 +7,18 @@ const fetchAerodromeStatus = async firebase => {
     .once('value')
   const map = snapshot.val()
   const arr = map ? Object.values(map) : []
-  return arr.length > 0 ? arr[0] : {}
+
+  if (arr.length > 0) {
+    const status = arr[0]
+    return {
+      status: status.status,
+      last_update_date: new Date(status.timestamp).toISOString(),
+      last_update_by: status.by,
+      message: status.details
+    }
+  }
+
+  return {}
 }
 
 module.exports = fetchAerodromeStatus
