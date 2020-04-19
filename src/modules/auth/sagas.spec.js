@@ -2,8 +2,8 @@ import { put, call } from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import { loadIpToken, loadCredentialsToken } from '../../util/auth';
-import { expectDoneWithoutReturn } from '../../../test/sagaUtils';
-import { authenticate as fbAuth, unauth as fbUnauth } from '../../util/firebase';
+import { expectDoneWithoutReturn, expectDoneWithReturn } from '../../../test/sagaUtils';
+import firebase, { authenticate as fbAuth, unauth as fbUnauth } from '../../util/firebase';
 
 describe('modules', () => {
   describe('auth', () => {
@@ -121,11 +121,13 @@ describe('modules', () => {
           }));
 
           expect(generator.next().value).toEqual(call(sagas.isAdmin, 'myadminuser'));
-          expect(generator.next(true).value).toEqual(put(actions.firebaseAuthenticationEvent({
+          expect(generator.next(true).value).toEqual(call(sagas.getName, 'myadminuser'));
+          expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
             admin: true,
             expiration: 1000,
             token: 'validtoken',
-            uid: 'myadminuser'
+            uid: 'myadminuser',
+            name: 'Hans Muster'
           })));
 
           expectDoneWithoutReturn(generator);
@@ -139,11 +141,13 @@ describe('modules', () => {
           }));
 
           expect(generator.next().value).toEqual(call(sagas.isAdmin, 'testuser'));
-          expect(generator.next(false).value).toEqual(put(actions.firebaseAuthenticationEvent({
+          expect(generator.next(false).value).toEqual(call(sagas.getName, 'testuser'));
+          expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
             admin: false,
             expiration: 1000,
             token: 'validtoken',
-            uid: 'testuser'
+            uid: 'testuser',
+            name: 'Hans Muster'
           })));
 
           expectDoneWithoutReturn(generator);
@@ -162,6 +166,55 @@ describe('modules', () => {
           })));
 
           expectDoneWithoutReturn(generator);
+        });
+      });
+
+      describe('getName', () => {
+        it('should return the name of the user', () => {
+          const generator = sagas.getName('userid');
+          expect(generator.next().value).toEqual(call(sagas.loadUser, 'userid'));
+          const user = {
+            firstname: 'Hans',
+            lastname: 'Meier'
+          };
+          expectDoneWithReturn(generator, user, 'Hans Meier');
+        })
+
+        it('should return null if user not found', () => {
+          const generator = sagas.getName('userid');
+          expect(generator.next().value).toEqual(call(sagas.loadUser, 'userid'));
+          expectDoneWithReturn(generator, null, null);
+        });
+      });
+
+      describe('loadUser', () => {
+        it('should return the user as object', () => {
+          const generator = sagas.loadUser('userid');
+          expect(generator.next().value).toEqual(call(firebase, '/users'));
+          const usersRef = {};
+          expect(generator.next(usersRef).value).toEqual(call(sagas.findByMemberNr, usersRef, 'userid'));
+          const userObject = {
+            firstname: 'Hans',
+            lastname: 'Meier',
+            memberNr: 'userid'
+          };
+          const snapshot = {
+            val: () => ({
+              'xyz': userObject
+            })
+          };
+          expectDoneWithReturn(generator, snapshot, userObject);
+        })
+
+        it('should return null if user not found', () => {
+          const generator = sagas.loadUser('userid');
+          expect(generator.next().value).toEqual(call(firebase, '/users'));
+          const usersRef = {};
+          expect(generator.next(usersRef).value).toEqual(call(sagas.findByMemberNr, usersRef, 'userid'));
+          const snapshot = {
+            val: () => ({})
+          };
+          expectDoneWithReturn(generator, snapshot, null);
         });
       });
     });

@@ -11,6 +11,11 @@ import HelpPage from "../../containers/HelpPageContainer";
 import MovementsPage from "../../containers/MovementsPageContainer";
 import AdminPage from "../../containers/AdminPageContainer";
 import ArrivalPage from "../../containers/ArrivalPageContainer";
+import AerodromeStatusPage from '../../containers/AerodromeStatusPageContainer';
+
+const UNPROTECTED_ROUTES = [
+  '/aerodrome-status'
+]
 
 class App extends React.PureComponent {
 
@@ -26,7 +31,8 @@ class App extends React.PureComponent {
       return <Centered><MaterialIcon icon="sync" rotate="left"/> Bitte warten ...</Centered>;
     }
 
-    if (props.auth.authenticated !== true || props.showLogin === true) {
+    if ((props.auth.authenticated !== true || props.showLogin === true)
+      && !UNPROTECTED_ROUTES.includes(props.location.pathname)) {
       return <LoginPage/>;
     }
 
@@ -43,6 +49,7 @@ class App extends React.PureComponent {
         <Route exact path="/admin" component={AdminPage}/>
         <Route exact path="/message" component={MessagePage}/>
         <Route exact path="/help" component={HelpPage}/>
+        <Route exact path="/aerodrome-status" component={AerodromeStatusPage}/>
         <Redirect to="/"/>
       </Switch>
     );

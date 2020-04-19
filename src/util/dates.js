@@ -6,6 +6,8 @@ const checkPattern = (value, pattern, errorMsg) => {
   }
 };
 
+const parseWithLocale = (timestamp, locale) => moment.tz(timestamp, 'Europe/Zurich').locale(locale);
+
 const dates = {
   localToIsoUtc(localDate, localTime) {
     checkPattern(localDate, /^\d{4}-\d{2}-\d{2}$/, `Date "${localDate}" does not match pattern YYYY-MM-DD`);
@@ -83,7 +85,7 @@ const dates = {
    */
   formatDate(localDate, locale) {
     locale = locale || 'de';
-    return moment.tz(localDate, 'Europe/Zurich').locale(locale).format('L');
+    return parseWithLocale(localDate, locale).format('L');
   },
 
   /**
@@ -93,7 +95,7 @@ const dates = {
    * @param locale optional locale to format the date (if missing: de)
      */
   formatMonth(localDate, locale = 'de') {
-    return moment.tz(localDate, 'Europe/Zurich').locale(locale).format('MMMM YYYY');
+    return parseWithLocale(localDate, locale).format('MMMM YYYY');
   },
 
   /**
@@ -105,7 +107,21 @@ const dates = {
    */
   formatTime(localDate, localTime, locale) {
     locale = locale || 'de';
-    return moment.tz(localDate + ' ' + localTime, 'Europe/Zurich').locale(locale).format('LT');
+    const timestamp = localDate + ' ' + localTime;
+    return parseWithLocale(timestamp, locale).format('LT');
+  },
+
+  /**
+   * Get the local date time in format for given locale or locale 'de'.
+   *
+   * @param timestamp A timestamp that MomentJS understands
+   * @param locale optional locale to format the date (if missing: de)
+   */
+  formatDateTime(timestamp, locale) {
+    locale = locale || 'de';
+    const date = parseWithLocale(timestamp, locale).format('L');
+    const time = parseWithLocale(timestamp, locale).format('LT');
+    return date + ' ' + time
   },
 };
 

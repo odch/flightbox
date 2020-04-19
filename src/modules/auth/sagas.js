@@ -22,6 +22,22 @@ export function isAdmin(uid) {
   });
 }
 
+export const findByMemberNr = (usersRef, uid) =>
+  usersRef.orderByChild('memberNr').equalTo(uid).limitToFirst(1).once('value')
+
+export function* loadUser(uid) {
+  const usersRef = yield call(firebase, '/users');
+  const snapshot = yield call(findByMemberNr, usersRef, uid)
+  const map = snapshot.val()
+  const arr = map ? Object.values(map) : []
+  return arr.length > 0 ? arr[0] : null
+}
+
+export function* getName(uid) {
+  const user = yield call(loadUser, uid)
+  return user ? `${user.firstname} ${user.lastname}` : null
+}
+
 export function* doIpAuthentication() {
   try {
     if (__DISABLE_IP_AUTHENTICATION__) {
@@ -96,6 +112,7 @@ export function* doListenFirebaseAuthentication(action) {
         expiration: expires * 1000,
         token,
         admin: yield call(isAdmin, uid),
+        name: yield call(getName, uid)
       }
     }
   }

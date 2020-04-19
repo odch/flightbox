@@ -219,6 +219,31 @@
         ".read": "auth !== null && $admin_id === auth.uid",
         ".validate": "newData.exists() && newData.isBoolean()"
       }
+    },
+    "status": {
+      ".read": "true",
+      ".indexOn": [
+        "timestamp"
+      ],
+      "$status_id": {
+        ".write": "auth !== null && root.child('admins/' + auth.uid).exists() && !data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['status', 'details', 'timestamp', 'by'])",
+        "status": {
+          ".validate": "newData.val() === 'open' || newData.val() === 'restricted' || newData.val() === 'closed'"
+        },
+        "details": {
+          ".validate": "newData.isString()"
+        },
+        "timestamp": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "by": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     }
   }
 }
