@@ -6,6 +6,8 @@ export const SAVE_AERODROME_STATUS = 'SAVE_AERODROME_STATUS';
 export const SAVE_AERODROME_STATUS_SUCCESS = 'SAVE_AERODROME_STATUS_SUCCESS';
 export const SET_AERODROME_STATUS_SAVING = 'SET_AERODROME_STATUS_SAVING';
 export const SELECT_AERODROME_STATUS = 'SELECT_AERODROME_STATUS';
+export const WATCH_CURRENT_AERODROME_STATUS = 'WATCH_CURRENT_AERODROME_STATUS';
+export const SET_CURRENT_AERODROME_STATUS = 'SET_CURRENT_AERODROME_STATUS';
 
 export const loadAerodromeStatus = () => ({
   type: LOAD_AERODROME_STATUS,
@@ -50,5 +52,16 @@ export const selectAerodromeStatus = key => ({
   type: SELECT_AERODROME_STATUS,
   payload: {
     key,
+  }
+});
+
+export const watchCurrentAerodromeStatus = () => ({
+  type: WATCH_CURRENT_AERODROME_STATUS,
+});
+
+export const setCurrentAerodromeStatus = status => ({
+  type: SET_CURRENT_AERODROME_STATUS,
+  payload: {
+    status
   }
 });

@@ -47,7 +47,7 @@ describe('modules', () => {
               status: 'restricted',
               details: 'Eine Landung pro Pilot pro Tag.',
               timestamp: new Date('2020-03-29T13:45:00.000Z').getTime(),
-              by: '30004'
+              by: 'Hans Meier'
             }]);
 
             expect(
@@ -149,6 +149,33 @@ describe('modules', () => {
               }, actions.selectAerodromeStatus(null))
             ).toEqual({
               selected: null
+            });
+          });
+        });
+
+        describe('SET_CURRENT_AERODROME_STATUS', () => {
+          it('should update the current status', () => {
+            expect(
+              reducer({
+                current: {
+                  status: 'closed',
+                  details: '',
+                  by: 'Hans Meier',
+                  timestamp: new Date('2020-03-29T13:45:00.000Z').getTime()
+                },
+              }, actions.setCurrentAerodromeStatus({
+                status: 'open',
+                details: 'Willkommen!',
+                by: 'Kurt Keller',
+                timestamp: new Date('2020-04-12T12:18:00.000Z').getTime()
+              }))
+            ).toEqual({
+              current: {
+                status: 'open',
+                details: 'Willkommen!',
+                by: 'Kurt Keller',
+                timestamp: new Date('2020-04-12T12:18:00.000Z').getTime()
+              }
             });
           });
         });
