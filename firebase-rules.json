@@ -221,7 +221,7 @@
       }
     },
     "status": {
-      ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+      ".read": "true",
       ".indexOn": [
         "timestamp"
       ],

@@ -1,8 +1,14 @@
 import reducer from './reducer';
 import sagas from './sagas.js';
 
-export { loadAerodromeStatus, updateAerodromeStatus, saveAerodromeStatus, selectAerodromeStatus } from './actions';
+export {
+  loadAerodromeStatus,
+  updateAerodromeStatus,
+  saveAerodromeStatus,
+  selectAerodromeStatus,
+  watchCurrentAerodromeStatus
+} from './actions';
 
-export { sagas };
+export {sagas};
 
 export default reducer;
