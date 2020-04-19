@@ -13,7 +13,7 @@ try {
 
 api.use(cors)
 
-api.get('/aerodrome/status', async (req, res) => {
+api.get('(/api)?/aerodrome/status', async (req, res) => {
   const status = await fetchAerodromeStatus(admin.database())
 
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
