@@ -134,10 +134,10 @@ Returns the current aerodrome status.
 Returns (example):
 ```
 {
-  by: "30004",
-  details: "Flugplatz geschlossen. Kinderspielplatz und Restaurant geschlossen.",
   status: "closed",
-  timestamp: 1585682371359
+  last_update_by: "Hans Meier",
+  last_update_date: "2020-04-12T22:29:01.565Z",
+  message: "Flugplatz geschlossen. Kinderspielplatz und Restaurant geschlossen."
 }
 ```
 
