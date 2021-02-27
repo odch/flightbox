@@ -160,7 +160,7 @@ class YearlySummaryReport {
   }
 
   isHelicopter(registration) {
-    return /HB[XYZ].*/.test(registration);
+    return /HB[XZ].*/.test(registration);
   }
 }
 
