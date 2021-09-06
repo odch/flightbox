@@ -1,5 +1,12 @@
 import objectToArray from './objectToArray';
 
+const helicopterCondition = values => /HB[XZ].*/.test(values.immatriculation)
+
+const conditions = {
+  helicopter: helicopterCondition,
+  notHelicopter: values => !helicopterCondition(values)
+}
+
 const circuitRoute = {
   label: 'Platzrunden',
   value: 'circuits',
@@ -11,6 +18,7 @@ const buildArray = routes => objectToArray(routes)
   .map(route => ({
     label: route.label,
     value: route.name,
+    available: route.condition ? conditions[route.condition] : undefined
   }));
 
 const arrivalRoutes = buildArray(__CONF__.aerodrome.arrivalRoutes);
