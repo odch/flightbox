@@ -8,31 +8,36 @@
     ],
     "departureRoutes": [
       {
-        "name": "uznach",
-        "label": "Uznach"
+        "name": "E",
+        "label": "E",
+        "condition": "notHelicopter"
       },
       {
-        "name": "seedamm",
-        "label": "Seedamm"
+        "name": "W",
+        "label": "W",
+        "condition": "notHelicopter"
+      },
+      {
+        "name": "S",
+        "label": "S",
+        "condition": "helicopter"
       }
     ],
     "arrivalRoutes": [
       {
         "name": "S",
-        "label": "Sektor Süd"
+        "label": "S"
       }
     ]
   },
   "environments": {
     "test": {
-      "firebase": "https://lspv-test.firebaseio.com",
-      "ipAuth": "https://auth.app.opendigital.ch/api/v1/firebaseauth/flightnet/lspv-test",
-      "credentialsAuth": "https://auth.app.opendigital.ch/api/v1/firebaseauth/flightnet/lspv-test"
+      "firebaseProjectId": "lspv-test",
+      "firebaseApiKey": "AIzaSyB93F1Vre17fHxc5RruEGbW3T4JY5LJy3g"
     },
     "production": {
-      "firebase": "xxx",
-      "ipAuth": "xxx",
-      "credentialsAuth": "xxx"
+      "firebaseProjectId": "xxx",
+      "firebaseApiKey": "xxx"
     }
   },
   "theme": "lspv",
