@@ -6,6 +6,7 @@
       "08",
       "26"
     ],
+    "noRunwayIfHelicopter": true,
     "departureRoutes": [
       {
         "name": "E",

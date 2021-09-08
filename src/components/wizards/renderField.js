@@ -25,7 +25,10 @@ const StyledLabeledComponent = styled(LabeledComponent)`
 `;
 
 const renderLabeledComponent = (props, component) => {
-  const { name, label, tooltip, meta: { touched, error } } = props;
+  const { name, label, tooltip, hidden, meta: { touched, error } } = props;
+  if (hidden) {
+    return null
+  }
   return (
     <StyledLabeledComponent
       label={label}

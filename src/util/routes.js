@@ -1,6 +1,7 @@
 import objectToArray from './objectToArray';
+import isHelicopter from "./isHelicopter"
 
-const helicopterCondition = values => /HB[XZ].*/.test(values.immatriculation)
+const helicopterCondition = values => isHelicopter(values.immatriculation)
 
 const conditions = {
   helicopter: helicopterCondition,
