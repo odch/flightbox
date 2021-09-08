@@ -1,6 +1,7 @@
 import Download from './Download.js';
 import MovementReport from "./MovementReport";
 import {getAirstatType} from './flightTypes';
+import isHelicopter from "./isHelicopter"
 
 class YearlySummaryReport {
 
@@ -160,7 +161,7 @@ class YearlySummaryReport {
   }
 
   isHelicopter(registration) {
-    return /HB[XZ].*/.test(registration);
+    return isHelicopter(registration);
   }
 }
 

@@ -4,6 +4,7 @@ import FlightPage from '../components/wizards/ArrivalWizard/pages/FlightPage';
 import objectToArray from '../util/objectToArray';
 import {getEnabledFlightTypes} from '../util/flightTypes';
 import {getArrivalRoutes} from '../util/routes';
+import isHelicopter from "../util/isHelicopter"
 
 const runways = objectToArray(__CONF__.aerodrome.runways)
   .map(runway => ({
@@ -15,12 +16,21 @@ const arrivalRoutes = getArrivalRoutes();
 
 const filter = (items, values) => items.filter(item => !item.available || item.available(values) === true);
 
+const getHiddenFields = values => {
+  const hiddenFields = []
+  if (isHelicopter(values.immatriculation)) {
+    hiddenFields.push('runway')
+  }
+  return hiddenFields
+}
+
 const mapStateToProps = (state, ownProps) => {
   const values = getFormValues('wizard')(state);
   return Object.assign({}, ownProps, {
     flightTypes: filter(getEnabledFlightTypes(), values),
     runways: filter(runways, values),
     arrivalRoutes: filter(arrivalRoutes, values),
+    hiddenFields: getHiddenFields(values)
   });
 };
 
