@@ -26,7 +26,7 @@ const PassengerPage = (props) => {
           name="passengerCount"
           format={toNumber}
           parse={e => e.target.value}
-          label="Anzahl"
+          label="Anzahl Passagiere"
           component={renderIncrementationField}
           readOnly={props.readOnly}
         />
