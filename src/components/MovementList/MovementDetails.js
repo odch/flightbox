@@ -9,6 +9,7 @@ import newLineToBr from '../../util/newLineToBr';
 import DetailsBox from './DetailsBox';
 import MovementField from './MovementField';
 import HomeBaseIcon from './HomeBaseIcon';
+import {getFromItemKey} from "../../util/reference-number"
 
 const Content = styled.div`
   padding: 1.5em 1em 0 1em;
@@ -91,6 +92,7 @@ class MovementDetails extends React.PureComponent {
                 <MovementField label="Abflugroute" value={getDepartureRouteLabel(props.data.departureRoute)}/>
                 <MovementField label="Routing" value={newLineToBr(props.data.route)}/>
                 <MovementField label="Bemerkungen" value={newLineToBr(props.data.remarks)}/>
+                <MovementField label="Referenznummer" value={getFromItemKey(props.data.key)}/>
               </DetailsBox>
             ) : (
               <DetailsBox label="Flug">
@@ -98,6 +100,7 @@ class MovementDetails extends React.PureComponent {
                 <MovementField label="Pistenrichtung" value={props.data.runway}/>
                 <MovementField label="Ankunftsroute" value={getArrivalRouteLabel(props.data.arrivalRoute)}/>
                 <MovementField label="Bemerkungen" value={newLineToBr(props.data.remarks)}/>
+                <MovementField label="Referenznummer" value={getFromItemKey(props.data.key)}/>
               </DetailsBox>
             )
           }
