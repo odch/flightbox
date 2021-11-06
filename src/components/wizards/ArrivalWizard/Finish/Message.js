@@ -6,4 +6,10 @@ const Message = styled.div`
   margin-bottom: 1.5em;
 `;
 
+const ReferenceNumber = styled.span`
+  font-weight: bold;
+  background-color: rgba(255, 255, 0, 0.3);
+`
+
+export {ReferenceNumber}
 export default Message;
