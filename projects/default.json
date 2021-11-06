@@ -3,5 +3,12 @@
   "enabledFlightTypes": [
     "private",
     "instruction"
+  ],
+  "departureCommitRequirements": [
+    "Meine Ausweise sind gültig.",
+    "Das maximale Abfluggewicht und der Schwerpunkt sind innerhalb der zulässigen Limiten.",
+    "Die verfügbare Pistenlänge ist ausreichend.",
+    "Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.",
+    "Der Preflight-Check wurde ausgeführt."
   ]
 }

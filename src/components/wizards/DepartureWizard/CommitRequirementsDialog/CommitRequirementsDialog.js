@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import objectToArray from "../../../../util/objectToArray"
 import ModalDialog from '../../../ModalDialog';
 import Heading from './Heading';
 import Items from './Items';
@@ -12,11 +13,9 @@ const CommitRequirementsDialog = props => {
     <div>
       <Heading>Bitte bestätigen</Heading>
       <Items>
-        <Item>Meine Ausweise sind gültig.</Item>
-        <Item>Das maximale Abfluggewicht und der Schwerpunkt sind innerhalb der zulässigen Limiten.</Item>
-        <Item>Die verfügbare Pistenlänge ist ausreichend.</Item>
-        <Item>Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.</Item>
-        <Item>Der Preflight-Check wurde ausgeführt.</Item>
+        {objectToArray(__CONF__.departureCommitRequirements).map((req, index) => (
+          <Item key={index}>{req}</Item>
+        ))}
       </Items>
       <div>
         <ConfirmButton
