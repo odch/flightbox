@@ -29,7 +29,27 @@
         "name": "S",
         "label": "S"
       }
-    ]
+    ],
+    "landingFees": {
+      "default": {
+        "default": [
+          {
+            "mtowMin": 0,
+            "mtowMax": 1000,
+            "fee": 20
+          },
+          {
+            "mtowMin": 1001,
+            "mtowMax": 2000,
+            "fee": 25
+          },
+          {
+            "mtowMin": 2001,
+            "fee": 30
+          }
+        ]
+      }
+    }
   },
   "environments": {
     "test": {
