@@ -9,6 +9,7 @@ import ItemsArray from './ItemsArray';
 import {getAirstatType} from './flightTypes';
 import moment from 'moment';
 import writeCsv from './writeCsv';
+import isHelicopter from './isHelicopter'
 
 class MovementReport {
 
@@ -162,7 +163,7 @@ class MovementReport {
   }
 
   getTypeOfTraffic(movement) {
-    return getAirstatType(movement.flightType);
+    return getAirstatType(movement.flightType, isHelicopter(movement.immatriculation));
   }
 
   getNumberOfMovements(movement) {
