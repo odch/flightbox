@@ -1,4 +1,7 @@
-box: node:10
+box:
+  id: node:10
+  username: $DOCKERHUB_USERNAME
+  password: $DOCKERHUB_ACCESS_TOKEN
 dev:
   steps:
     - npm-install
