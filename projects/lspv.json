@@ -62,5 +62,19 @@
     }
   },
   "theme": "lspv",
-  "title": "LSPV Bewegungen"
+  "title": "LSPV Bewegungen",
+  "departureCommitRequirements": [
+    {
+      "text": "Keine Starts auf RWY 26 von 12:00h bis 13:30h LT!",
+      "styles": {
+        "color": "#fa4214",
+        "font-weight": "bold"
+      }
+    },
+    "Meine Ausweise sind gültig.",
+    "Das maximale Abfluggewicht und der Schwerpunkt sind innerhalb der zulässigen Limiten.",
+    "Die verfügbare Pistenlänge ist ausreichend.",
+    "Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.",
+    "Der Preflight-Check wurde ausgeführt."
+  ]
 }

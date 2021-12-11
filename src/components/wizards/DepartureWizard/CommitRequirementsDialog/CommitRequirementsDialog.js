@@ -14,7 +14,9 @@ const CommitRequirementsDialog = props => {
       <Heading>Bitte bestätigen</Heading>
       <Items>
         {objectToArray(__CONF__.departureCommitRequirements).map((req, index) => (
-          <Item key={index}>{req}</Item>
+          typeof req === 'string'
+            ? <Item key={index}>{req}</Item>
+            : <Item key={index} styles={req.styles}>{req.text}</Item>
         ))}
       </Items>
       <div>
