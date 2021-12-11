@@ -27,6 +27,7 @@ const FlightPage = (props) => {
           parse={e => e.target.value}
           label="Pistenrichtung"
           readOnly={props.readOnly}
+          hidden={props.hiddenFields && props.hiddenFields.includes('runway')}
         />
         <Field
           name="departureRoute"
@@ -78,6 +79,7 @@ FlightPage.propTypes = {
     value: PropTypes.string.isRequired,
     description: PropTypes.string,
   })).isRequired,
+  hiddenFields: PropTypes.arrayOf(PropTypes.string)
 };
 
 export default reduxForm({

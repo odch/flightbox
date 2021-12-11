@@ -53,6 +53,7 @@ const FlightPage = (props) => {
           parse={e => e.target.value}
           label="Pistenrichtung"
           readOnly={props.readOnly}
+          hidden={props.hiddenFields && props.hiddenFields.includes('runway')}
         />
       </FieldSet>
       <WizardNavigation
@@ -92,7 +93,8 @@ FlightPage.propTypes = {
   aircraftSettings: PropTypes.shape({
     club: PropTypes.objectOf(PropTypes.bool),
     homeBase: PropTypes.objectOf(PropTypes.bool)
-  }).isRequired
+  }).isRequired,
+  hiddenFields: PropTypes.arrayOf(PropTypes.string)
 };
 
 export default reduxForm({

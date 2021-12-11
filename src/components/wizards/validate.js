@@ -117,8 +117,16 @@ const getConfig = (fields = []) => Object.keys(config)
     return obj;
   }, {});
 
-const validate = (type, fields) => values => {
-  const errorArr = validateUtil(values, getConfig(fields), type);
+const getRelevantFields = (fields, hiddenFields = []) => {
+  if (hiddenFields.length === 0) {
+    return fields
+  }
+  return fields.filter(field => !hiddenFields.includes(field))
+}
+
+const validate = (type, fields) => (values, props) => {
+  const relevantFields = getRelevantFields(fields, props.hiddenFields)
+  const errorArr = validateUtil(values, getConfig(relevantFields), type);
 
   const errors = {};
 

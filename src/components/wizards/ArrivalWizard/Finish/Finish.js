@@ -3,7 +3,7 @@ import React from 'react';
 import { getFromItemKey } from '../../../../util/reference-number';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
-import Message from './Message';
+import Message, {ReferenceNumber, ReferenceNumberMessage} from './Message';
 import ActionsWrapper from './ActionsWrapper';
 import ActionButton from './ActionButton';
 
@@ -14,15 +14,9 @@ const getHeading = isUpdate =>
 
 const formatMoney = value => parseFloat(Math.round(value * 100) / 100).toFixed(2);
 
-const getLandingFeeMsg = (isUpdate, isHomeBase, landings, landingFeeSingle, landingFeeTotal) =>
-  isUpdate === false && isHomeBase === false && landingFeeTotal !== undefined
+const getLandingFeeMsg = (isHomeBase, landings, landingFeeSingle, landingFeeTotal) =>
+  isHomeBase === false && landingFeeTotal !== undefined
     ? `Landetaxe: CHF ${formatMoney(landingFeeTotal)} ${landings > 1 ? `(${landings} mal CHF ${formatMoney(landingFeeSingle)})` : ''}`
-    : null;
-
-const getMessage = (isUpdate, isHomeBase, itemKey) =>
-  isUpdate === false && isHomeBase === false
-    ? 'Bitte deponieren Sie die fällige Landetaxe im Briefkasten vor dem C-Büro ' +
-      'und kennzeichnen Sie den Umschlag mit der Referenznummer ' + getFromItemKey(itemKey) + '.'
     : null;
 
 const Finish = props => {
@@ -38,8 +32,7 @@ const Finish = props => {
   } = props
 
   const heading = getHeading(isUpdate);
-  const landingFeeMsg = getLandingFeeMsg(isUpdate, isHomeBase, landings, landingFeeSingle, landingFeeTotal);
-  const msg = getMessage(isUpdate, isHomeBase, itemKey);
+  const landingFeeMsg = getLandingFeeMsg(isHomeBase, landings, landingFeeSingle, landingFeeTotal);
 
   const exitImagePath = require('./ic_exit_to_app_black_48dp_2x.png');
   const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
@@ -47,8 +40,16 @@ const Finish = props => {
   return (
     <Wrapper>
       <Heading>{heading}</Heading>
-      {landingFeeMsg && <Message>{landingFeeMsg}</Message>}
-      {msg && <Message>{msg}</Message>}
+      {landingFeeMsg && (
+        <>
+          <ReferenceNumberMessage>Referenznummer: {getFromItemKey(itemKey)}</ReferenceNumberMessage>
+          <Message>{landingFeeMsg}</Message>
+        </>
+      )}
+      {isHomeBase === false && <Message>
+        Bitte deponieren Sie die fällige Landetaxe im Briefkasten vor dem C-Büro und kennzeichnen Sie den Umschlag
+        mit der Referenznummer <ReferenceNumber>{getFromItemKey(itemKey)}</ReferenceNumber>.
+      </Message>}
       <ActionsWrapper>
         <ActionButton
           label="Abflug erfassen"
