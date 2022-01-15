@@ -39,6 +39,8 @@ const InternalDescription = () => (
         und durch <emph>LSZZ</emph> ersetzt wurde</Dd>
       <Dt>REMARKS</Dt>
       <Dd>Bemerkungen</Dd>
+      <Dt>FEES</Dt>
+      <Dd>Total der Landegebühren</Dd>
     </Dl>
   </div>
 );
