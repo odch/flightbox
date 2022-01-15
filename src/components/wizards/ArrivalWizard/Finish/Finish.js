@@ -3,7 +3,7 @@ import React from 'react';
 import { getFromItemKey } from '../../../../util/reference-number';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
-import Message, {ReferenceNumber, ReferenceNumberMessage} from './Message';
+import Message, {ReferenceNumberMessage} from './Message';
 import ActionsWrapper from './ActionsWrapper';
 import ActionButton from './ActionButton';
 
@@ -48,7 +48,7 @@ const Finish = props => {
       )}
       {isHomeBase === false && <Message>
         Bitte deponieren Sie die fällige Landetaxe im Briefkasten vor dem C-Büro und kennzeichnen Sie den Umschlag
-        mit der Referenznummer <ReferenceNumber>{getFromItemKey(itemKey)}</ReferenceNumber>.
+        mit der Referenznummer {getFromItemKey(itemKey)}.
       </Message>}
       <ActionsWrapper>
         <ActionButton
