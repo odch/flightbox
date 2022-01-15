@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { getFromItemKey } from '../../../../util/reference-number';
+import formatMoney from '../../../../util/formatMoney';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
 import Message, {ReferenceNumberMessage} from './Message';
@@ -11,8 +12,6 @@ const getHeading = isUpdate =>
   isUpdate === true
     ? 'Die Ankunft wurde erfolgreich aktualisiert!'
     : 'Ihre Ankunft wurde erfolgreich erfasst!';
-
-const formatMoney = value => parseFloat(Math.round(value * 100) / 100).toFixed(2);
 
 const getLandingFeeMsg = (isHomeBase, landings, landingFeeSingle, landingFeeTotal) =>
   isHomeBase === false && landingFeeTotal !== undefined
