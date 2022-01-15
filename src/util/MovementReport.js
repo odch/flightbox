@@ -205,6 +205,7 @@ class MovementReport {
       ? movement.location
       : undefined;
     airstatRecord.REMARKS = movement.remarks;
+    airstatRecord.FEES = movement.landingFeeTotal;
 
     return airstatRecord;
   }
@@ -237,6 +238,7 @@ MovementReport.internalHeader = [
   'HOME_BASE',
   'ORIGINAL_ORIDE',
   'REMARKS',
+  'FEES'
 ];
 
 MovementReport.LOCATION_DEFAULT = 'LSZZ';
