@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { getFromItemKey } from '../../../../util/reference-number';
+import formatMoney from '../../../../util/formatMoney';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
-import Message, {ReferenceNumber, ReferenceNumberMessage} from './Message';
+import Message, {ReferenceNumberMessage} from './Message';
 import ActionsWrapper from './ActionsWrapper';
 import ActionButton from './ActionButton';
 
@@ -11,8 +12,6 @@ const getHeading = isUpdate =>
   isUpdate === true
     ? 'Die Ankunft wurde erfolgreich aktualisiert!'
     : 'Ihre Ankunft wurde erfolgreich erfasst!';
-
-const formatMoney = value => parseFloat(Math.round(value * 100) / 100).toFixed(2);
 
 const getLandingFeeMsg = (isHomeBase, landings, landingFeeSingle, landingFeeTotal) =>
   isHomeBase === false && landingFeeTotal !== undefined
@@ -48,7 +47,7 @@ const Finish = props => {
       )}
       {isHomeBase === false && <Message>
         Bitte deponieren Sie die fällige Landetaxe im Briefkasten vor dem C-Büro und kennzeichnen Sie den Umschlag
-        mit der Referenznummer <ReferenceNumber>{getFromItemKey(itemKey)}</ReferenceNumber>.
+        mit der Referenznummer {getFromItemKey(itemKey)}.
       </Message>}
       <ActionsWrapper>
         <ActionButton
