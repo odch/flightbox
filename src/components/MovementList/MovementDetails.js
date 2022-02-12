@@ -10,7 +10,7 @@ import DetailsBox from './DetailsBox';
 import MovementField from './MovementField';
 import HomeBaseIcon from './HomeBaseIcon';
 import {getFromItemKey} from '../../util/reference-number';
-import formatMoney from '../../util/formatMoney';
+import {getLandingFeeText} from '../../util/landingFees';
 
 const Content = styled.div`
   padding: 1.5em 1em 0 1em;
@@ -29,8 +29,14 @@ const getCarriageVoucher = props => {
   return null;
 };
 
-const getLandingFee = (landings, landingFeeSingle, landingFeeTotal) =>
-  `CHF ${formatMoney(landingFeeTotal)} ${landings > 1 ? `(${landings} mal CHF ${formatMoney(landingFeeSingle)})` : ''}`
+const getLandingFee = data => getLandingFeeText(
+  data.landingCount,
+  data.landingFeeSingle,
+  data.landingFeeTotal,
+  data.goAroundCount,
+  data.goAroundFeeSingle,
+  data.goAroundFeeTotal
+)
 
 class MovementDetails extends React.PureComponent {
 
@@ -109,9 +115,7 @@ class MovementDetails extends React.PureComponent {
           {props.data.type === 'arrival' && props.isHomeBase === false && props.data.landingFeeTotal !== undefined && (
             <DetailsBox label="Gebühren">
               <MovementField label="Referenznummer" value={getFromItemKey(props.data.key)}/>
-              <MovementField label="Landetaxe" value={
-                getLandingFee(props.data.landingCount, props.data.landingFeeSingle, props.data.landingFeeTotal)
-              }/>
+              <MovementField label="Landetaxe" value={getLandingFee(props.data)}/>
             </DetailsBox>
           )}
         </Content>

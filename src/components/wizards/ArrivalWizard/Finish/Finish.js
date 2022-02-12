@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { getFromItemKey } from '../../../../util/reference-number';
-import formatMoney from '../../../../util/formatMoney';
+import {getLandingFeeText} from '../../../../util/landingFees';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
 import Message, {ReferenceNumberMessage} from './Message';
@@ -13,11 +13,6 @@ const getHeading = isUpdate =>
     ? 'Die Ankunft wurde erfolgreich aktualisiert!'
     : 'Ihre Ankunft wurde erfolgreich erfasst!';
 
-const getLandingFeeMsg = (isHomeBase, landings, landingFeeSingle, landingFeeTotal) =>
-  isHomeBase === false && landingFeeTotal !== undefined
-    ? `Landetaxe: CHF ${formatMoney(landingFeeTotal)} ${landings > 1 ? `(${landings} mal CHF ${formatMoney(landingFeeSingle)})` : ''}`
-    : null;
-
 const Finish = props => {
   const {
     isUpdate,
@@ -26,12 +21,17 @@ const Finish = props => {
     landings,
     landingFeeSingle,
     landingFeeTotal,
+    goArounds,
+    goAroundFeeSingle,
+    goAroundFeeTotal,
     createMovementFromMovement,
     finish
   } = props
 
   const heading = getHeading(isUpdate);
-  const landingFeeMsg = getLandingFeeMsg(isHomeBase, landings, landingFeeSingle, landingFeeTotal);
+  const landingFeeMsg = isHomeBase === false
+    ? getLandingFeeText(landings, landingFeeSingle, landingFeeTotal, goArounds, goAroundFeeSingle, goAroundFeeTotal)
+    : null;
 
   const exitImagePath = require('./ic_exit_to_app_black_48dp_2x.png');
   const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
@@ -42,7 +42,7 @@ const Finish = props => {
       {landingFeeMsg && (
         <>
           <ReferenceNumberMessage>Referenznummer: {getFromItemKey(itemKey)}</ReferenceNumberMessage>
-          <Message>{landingFeeMsg}</Message>
+          <Message>Landetaxe: {landingFeeMsg}</Message>
         </>
       )}
       {isHomeBase === false && <Message>
@@ -74,6 +74,9 @@ Finish.propTypes = {
   landings: PropTypes.number.isRequired,
   landingFeeSingle: PropTypes.number,
   landingFeeTotal: PropTypes.number,
+  goArounds: PropTypes.number,
+  goAroundFeeSingle: PropTypes.number,
+  goAroundFeeTotal: PropTypes.number
 };
 
 export default Finish;
