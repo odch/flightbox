@@ -11,6 +11,8 @@ import moment from 'moment';
 import writeCsv from './writeCsv';
 import isHelicopter from './isHelicopter'
 
+const CIRCUITS_KEY_SUFFIX = '_circuits';
+
 class MovementReport {
 
   constructor(year, month, options = {}) {
@@ -109,7 +111,7 @@ class MovementReport {
           && (movement.landingCount > 1 || movement.goAroundCount > 0)) {
           const circuitMovement = Object.assign({}, movement);
 
-          circuitMovement.key += '_circuits'
+          circuitMovement.key += CIRCUITS_KEY_SUFFIX
           circuitMovement.arrivalRoute = 'circuits'
           circuitMovement.location = __CONF__.aerodrome.ICAO
 
@@ -118,6 +120,10 @@ class MovementReport {
 
           circuitMovement.landingCount -= movement.landingCount
           circuitMovement.goAroundCount -= movement.goAroundCount
+
+          // fees are set on original/parent movement only
+          circuitMovement.landingFeeTotal = 0
+          circuitMovement.goAroundFeeTotal = 0
 
           movements.insert(circuitMovement)
         }
@@ -194,8 +200,16 @@ class MovementReport {
     return (movement.type === 'D') ? movement.departureRoute : '';
   }
 
+  getMovementKey(movement) {
+    if (movement.key.endsWith(CIRCUITS_KEY_SUFFIX)) {
+      const key = movement.key.substring(0, movement.key.length - CIRCUITS_KEY_SUFFIX.length)
+      return getFromItemKey(key) + CIRCUITS_KEY_SUFFIX.toUpperCase()
+    }
+    return getFromItemKey(movement.key);
+  }
+
   addInternalFields(airstatRecord, movement, aircrafts) {
-    airstatRecord.KEY = getFromItemKey(movement.key);
+    airstatRecord.KEY = this.getMovementKey(movement)
     airstatRecord.MEMBERNR = movement.memberNr;
     airstatRecord.LASTNAME = movement.lastname;
     airstatRecord.MTOW = movement.mtow;
@@ -205,7 +219,9 @@ class MovementReport {
       ? movement.location
       : undefined;
     airstatRecord.REMARKS = movement.remarks;
-    airstatRecord.FEES = movement.landingFeeTotal;
+    airstatRecord.FEES = (movement.landingFeeTotal || 0) + (movement.goAroundFeeTotal || 0);
+    airstatRecord.LDG_COUNT = movement.landingCount || 0;
+    airstatRecord.GA_COUNT = movement.goAroundCount || 0;
 
     return airstatRecord;
   }
@@ -238,7 +254,9 @@ MovementReport.internalHeader = [
   'HOME_BASE',
   'ORIGINAL_ORIDE',
   'REMARKS',
-  'FEES'
+  'FEES',
+  'LDG_COUNT',
+  'GA_COUNT'
 ];
 
 MovementReport.LOCATION_DEFAULT = 'LSZZ';
