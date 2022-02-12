@@ -6,7 +6,7 @@ import validate from '../../validate';
 import { renderAerodromeDropdown, renderDateField, renderTimeField, renderIncrementationField } from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
-import {getAircraftOrigin, updateMovementFees} from "../../../../util/landingFees"
+import {getAircraftOrigin, updateLandingFees, updateGoAroundFees} from '../../../../util/landingFees'
 
 const toNumber = value => {
   if (typeof value === 'number') {
@@ -18,8 +18,18 @@ const toNumber = value => {
   return undefined;
 };
 
+const updateFees = (updateFn, count, changeAction, formValues, aircraftSettings) => {
+  const mtow = formValues['mtow'];
+  const flightType = formValues['flightType'];
+  const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], aircraftSettings);
+
+  updateFn(changeAction, mtow, flightType, aircraftOrigin, count);
+
+  return count;
+}
+
 const DepartureArrivalPage = (props) => {
-  const { previousPage, handleSubmit, formValues, aircraftSettings } = props;
+  const { previousPage, handleSubmit, formValues, aircraftSettings, change } = props;
   return (
     <form onSubmit={handleSubmit} className="DepartureArrivalPage">
       <FieldSet>
@@ -55,15 +65,7 @@ const DepartureArrivalPage = (props) => {
           parse={e => e.target.value}
           label="Anzahl Landungen"
           readOnly={props.readOnly}
-          normalize={landingCount => {
-            const mtow = formValues['mtow'];
-            const flightType = formValues['flightType'];
-            const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], aircraftSettings);
-
-            updateMovementFees(props.change, mtow, flightType, aircraftOrigin, landingCount);
-
-            return landingCount;
-          }}
+          normalize={landingCount => updateFees(updateLandingFees, landingCount, change, formValues, aircraftSettings)}
         />
         <Field
           name="goAroundCount"
@@ -72,6 +74,7 @@ const DepartureArrivalPage = (props) => {
           parse={e => e.target.value}
           label="Anzahl Durchstarts (ohne Aufsetzen)"
           readOnly={props.readOnly}
+          normalize={goAroundCount => updateFees(updateGoAroundFees, goAroundCount, change, formValues, aircraftSettings)}
         />
       </FieldSet>
       <WizardNavigation previousStep={previousPage} cancel={props.cancel}/>

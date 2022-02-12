@@ -13,6 +13,8 @@ project.
   * `runways`
   * `departureRoutes`
   * `arrivalRoutes`
+  * `landingFees`
+  * `goAroundFees`
 * `environments`
   * `test`
   * `production`
@@ -160,6 +162,11 @@ Configuration:
   }
 }
 ```
+
+#### `goAroundFees`
+
+Same structure for the go arounds as for the landings. If no go around fees are defined, the pilots won't be charged
+for go arounds.
 
 ### `environments`
 

@@ -6,7 +6,7 @@ import validate from '../../validate';
 import { renderSingleSelect, renderTextArea } from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
-import {updateMovementFees, getAircraftOrigin} from "../../../../util/landingFees"
+import {updateLandingFees, updateGoAroundFees, getAircraftOrigin} from '../../../../util/landingFees';
 
 const FlightPage = (props) => {
   const { previousPage, handleSubmit, flightTypes, arrivalRoutes, runways, formValues, aircraftSettings } = props;
@@ -24,9 +24,11 @@ const FlightPage = (props) => {
           normalize={flightType => {
             const mtow = formValues['mtow'];
             const landingCount = formValues['landingCount'];
+            const goAroundCount = formValues['goAroundCount'];
             const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], aircraftSettings);
 
-            updateMovementFees(props.change, mtow, flightType, aircraftOrigin, landingCount)
+            updateLandingFees(props.change, mtow, flightType, aircraftOrigin, landingCount);
+            updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, goAroundCount);
 
             return flightType
           }}

@@ -95,6 +95,12 @@
         "goAroundCount": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
         },
+        "goAroundFeeSingle": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "goAroundFeeTotal": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
         "immatriculation": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },

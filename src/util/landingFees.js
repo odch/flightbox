@@ -1,18 +1,20 @@
+import formatMoney from './formatMoney';
+
 export const AircraftOrigin = Object.freeze({
   CLUB: 'club',
   HOME_BASE: 'homeBase',
   OTHER: 'other'
 });
 
-export const getLandingFee = (mtow, flightType, aircraftOrigin) => {
-  if (typeof __LANDING_FEES__ === 'undefined') {
+const getFee = (feesDefinition, mtow, flightType, aircraftOrigin) => {
+  if (typeof feesDefinition === 'undefined') {
     return undefined;
   }
 
-  const feesForType = __LANDING_FEES__[flightType] || __LANDING_FEES__['default'];
+  const feesForType = feesDefinition[flightType] || feesDefinition['default'];
 
   if (!feesForType) {
-    throw new Error(`No landing fees defined for flight type '${flightType}'`);
+    throw new Error(`No fees defined for flight type '${flightType}'`);
   }
 
   const feesForAircraftOrigin = feesForType[aircraftOrigin] || feesForType['default'];
@@ -28,25 +30,44 @@ export const getLandingFee = (mtow, flightType, aircraftOrigin) => {
   })
 
   if (!mtowRange) {
-    throw new Error(`No landing fees defined for MTOW ${mtow} and flight type '${flightType}'`);
+    throw new Error(`No fees defined for MTOW ${mtow} and flight type '${flightType}'`);
   }
 
   return mtowRange.fee;
 }
 
-export const updateMovementFees = (changeAction, mtow, flightType, aircraftOrigin, landingCount) => {
-  if (mtow && flightType && aircraftOrigin) {
-    const landingFeeSingle = getLandingFee(mtow, flightType, aircraftOrigin);
+export const getLandingFee = (mtow, flightType, aircraftOrigin) =>
+  getFee(__LANDING_FEES__, mtow, flightType, aircraftOrigin)
 
-    if (typeof landingFeeSingle === 'number') {
-      changeAction('landingFeeSingle', landingFeeSingle);
+export const getGoAroundFee = (mtow, flightType, aircraftOrigin) =>
+  getFee(__GO_AROUND_FEES__, mtow, flightType, aircraftOrigin)
 
-      if (typeof landingCount === 'number') {
-        const landingFeeTotal = landingFeeSingle * landingCount
-        changeAction('landingFeeTotal', landingFeeTotal);
+const updateFeeFn = (feeGetter, feeSingleField, feeTotalField) =>
+  (changeAction, mtow, flightType, aircraftOrigin, count) => {
+    if (mtow && flightType && aircraftOrigin) {
+      const feeSingle = feeGetter(mtow, flightType, aircraftOrigin);
+
+      if (typeof feeSingle === 'number') {
+        changeAction(feeSingleField, feeSingle);
+
+        if (typeof count === 'number') {
+          const landingFeeTotal = feeSingle * count;
+          changeAction(feeTotalField, landingFeeTotal);
+        }
       }
     }
   }
+
+export const updateLandingFees = (changeAction, mtow, flightType, aircraftOrigin, landingCount) => {
+  updateFeeFn(getLandingFee, 'landingFeeSingle', 'landingFeeTotal')(
+    changeAction, mtow, flightType, aircraftOrigin, landingCount
+  );
+}
+
+export const updateGoAroundFees = (changeAction, mtow, flightType, aircraftOrigin, goAroundCount) => {
+  updateFeeFn(getGoAroundFee, 'goAroundFeeSingle', 'goAroundFeeTotal')(
+    changeAction, mtow, flightType, aircraftOrigin, goAroundCount
+  );
 }
 
 export const getAircraftOrigin = (immatriculation, {club, homeBase}) => {
@@ -60,4 +81,31 @@ export const getAircraftOrigin = (immatriculation, {club, homeBase}) => {
     return AircraftOrigin.HOME_BASE;
   }
   return AircraftOrigin.OTHER;
+}
+
+export const getLandingFeeText = (
+  landings,
+  landingFeeSingle,
+  landingFeeTotal,
+  goArounds,
+  goAroundFeeSingle,
+  goAroundFeeTotal
+) => {
+  if (landingFeeTotal === undefined) {
+    return null;
+  }
+
+  if (goArounds > 0 && goAroundFeeTotal !== undefined) {
+    const total = formatMoney(landingFeeTotal + goAroundFeeTotal);
+    const landingFee = formatMoney(landingFeeSingle);
+    const goAroundFee = formatMoney(goAroundFeeSingle);
+    return `CHF ${total} (${landings} Landung(en) à CHF ${landingFee} und ${goArounds} Durchstart(s) à CHF ${goAroundFee})`;
+  }
+
+  const total = formatMoney(landingFeeTotal);
+  if (landings > 1) {
+    const landingFee = formatMoney(landingFeeSingle);
+    return `CHF ${total} (${landings} Landung(en) à CHF ${landingFee})`;
+  }
+  return `CHF ${total}`;
 }
