@@ -147,7 +147,7 @@ class MovementReport {
       PAX: movement.passengerCount || 0,
       DATMO: movement.date.replace(/-/g, ''),
       TIMMO: movement.time.replace(/:/g, ''),
-      PIMO: movement.runway,
+      PIMO: this.getRunway(movement),
       TYPPI: this.getTypeOfRunway(movement),
       DIRDE: this.getDirectionOfDeparture(movement),
       CID: __CONF__.aerodrome.ICAO,
@@ -199,6 +199,10 @@ class MovementReport {
 
   getDirectionOfDeparture(movement) {
     return (movement.type === 'D') ? movement.departureRoute : '';
+  }
+
+  getRunway(movement) {
+    return movement.runway ? movement.runway : isHelicopter(movement.immatriculation) ? '0' : '';
   }
 
   getTypeOfRunway(movement) {
