@@ -219,11 +219,19 @@
         }
       }
     },
-    "admins": {
+    "logins": {
       ".write": false,
-      "$admin_id": {
+      "$login_id": {
         ".read": "auth !== null && $admin_id === auth.uid",
-        ".validate": "newData.exists() && newData.isBoolean()"
+        "admin": {
+          ".validate": "newData.isBoolean()"
+        },
+        "links": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     },
     "status": {

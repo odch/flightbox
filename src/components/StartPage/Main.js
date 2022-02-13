@@ -17,15 +17,20 @@ class Main extends React.PureComponent {
     return (
       <Wrapper>
         <Hints/>
-        <EntryPoints admin={this.props.admin}/>
-        <MarketingLink/>
+        <EntryPoints admin={this.props.auth.data.admin}/>
+        <MarketingLink linked={this.props.auth.data.links}/>
       </Wrapper>
     );
   }
 }
 
 Main.propTypes = {
-  admin: PropTypes.bool,
+  auth: PropTypes.shape({
+    data: PropTypes.shape({
+      admin: PropTypes.bool,
+      links: PropTypes.bool
+    })
+  }).isRequired,
 };
 
 export default Main;
