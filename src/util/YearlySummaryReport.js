@@ -42,8 +42,8 @@ class YearlySummaryReport {
     const summary = {
       Month: monthNr,
 
-      ['RWY' + __CONF__.aerodrome.runways[0]]: 0,
-      ['RWY' + __CONF__.aerodrome.runways[1]]: 0,
+      ['RWY' + __CONF__.aerodrome.runways[0].name]: 0,
+      ['RWY' + __CONF__.aerodrome.runways[1].name]: 0,
 
       PrivatePax: 0,
       PrivateLocal: 0,
@@ -152,7 +152,8 @@ class YearlySummaryReport {
       }
     }
 
-    summary.Total = summary['RWY' + __CONF__.aerodrome.runways[0]] + summary['RWY' + __CONF__.aerodrome.runways[1]];
+    summary.Total = summary['RWY' + __CONF__.aerodrome.runways[0].name] +
+      summary['RWY' + __CONF__.aerodrome.runways[1].name];
     summary.TotalCircuits = summary.PrivateCircuits + summary.InstructionCircuits;
 
     return YearlySummaryReport.header
@@ -168,8 +169,8 @@ class YearlySummaryReport {
 YearlySummaryReport.header = [
   'Month',
 
-  'RWY' + __CONF__.aerodrome.runways[0],
-  'RWY' + __CONF__.aerodrome.runways[1],
+  'RWY' + __CONF__.aerodrome.runways[0].name,
+  'RWY' + __CONF__.aerodrome.runways[1].name,
 
   'PrivatePax',
   'PrivateLocal',

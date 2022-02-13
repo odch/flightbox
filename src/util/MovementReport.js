@@ -9,7 +9,8 @@ import ItemsArray from './ItemsArray';
 import {getAirstatType} from './flightTypes';
 import moment from 'moment';
 import writeCsv from './writeCsv';
-import isHelicopter from './isHelicopter'
+import isHelicopter from './isHelicopter';
+import objectToArray from './objectToArray';
 
 const CIRCUITS_KEY_SUFFIX = '_circuits';
 
@@ -147,7 +148,7 @@ class MovementReport {
       DATMO: movement.date.replace(/-/g, ''),
       TIMMO: movement.time.replace(/:/g, ''),
       PIMO: movement.runway,
-      TYPPI: 'G',
+      TYPPI: this.getTypeOfRunway(movement),
       DIRDE: this.getDirectionOfDeparture(movement),
       CID: __CONF__.aerodrome.ICAO,
       CDT: this.creationDate.format('YYYYMMDD'),
@@ -198,6 +199,11 @@ class MovementReport {
 
   getDirectionOfDeparture(movement) {
     return (movement.type === 'D') ? movement.departureRoute : '';
+  }
+
+  getTypeOfRunway(movement) {
+    const runway = objectToArray(__CONF__.aerodrome.runways).find(rwy => rwy.name === movement.runway);
+    return runway ? runway.type : '';
   }
 
   getMovementKey(movement) {

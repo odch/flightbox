@@ -24,10 +24,10 @@ const Description = () => (
     <Dl>
       <Dt>Month</Dt>
       <Dd>Der Monat</Dd>
-      <Dt>RWY{__CONF__.aerodrome.runways[0]}</Dt>
-      <Dd>Anzahl Bewegungen auf Piste {__CONF__.aerodrome.runways[0]}</Dd>
-      <Dt>RWY{__CONF__.aerodrome.runways[1]}</Dt>
-      <Dd>Anzahl Bewegungen auf Piste {__CONF__.aerodrome.runways[1]}</Dd>
+      <Dt>RWY{__CONF__.aerodrome.runways[0].name}</Dt>
+      <Dd>Anzahl Bewegungen auf Piste {__CONF__.aerodrome.runways[0].name}</Dd>
+      <Dt>RWY{__CONF__.aerodrome.runways[1].name}</Dt>
+      <Dd>Anzahl Bewegungen auf Piste {__CONF__.aerodrome.runways[1].name}</Dd>
       <Dt>PrivatePax</Dt>
       <Dd>Anzahl Passagiere bei privaten Bewegungen</Dd>
       <Dt>PrivateLocal</Dt>
