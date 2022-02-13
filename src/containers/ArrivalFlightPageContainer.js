@@ -18,7 +18,7 @@ const filter = (items, values) => items.filter(item => !item.available || item.a
 
 const getHiddenFields = values => {
   const hiddenFields = []
-  if (isHelicopter(values.immatriculation)) {
+  if (__CONF__.aerodrome.noRunwayIfHelicopter === true && isHelicopter(values.immatriculation)) {
     hiddenFields.push('runway')
   }
   return hiddenFields
