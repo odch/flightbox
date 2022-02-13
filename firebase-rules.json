@@ -222,7 +222,7 @@
     "logins": {
       ".write": false,
       "$login_id": {
-        ".read": "auth !== null && $admin_id === auth.uid",
+        ".read": "auth !== null && $login_id === auth.uid",
         "admin": {
           ".validate": "newData.isBoolean()"
         },
