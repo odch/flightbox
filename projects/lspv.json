@@ -3,8 +3,14 @@
     "name": "Wangen-Lachen",
     "ICAO": "LSPV",
     "runways": [
-      "08",
-      "26"
+      {
+        "name": "08",
+        "type": "A"
+      },
+      {
+        "name": "26",
+        "type": "A"
+      }
     ],
     "noRunwayIfHelicopter": true,
     "departureRoutes": [

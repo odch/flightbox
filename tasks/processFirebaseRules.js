@@ -12,7 +12,7 @@ function newValEquals(val) {
 }
 
 function processRunway(config) {
-  return config.aerodrome.runways.map(runway => newValEquals(runway)).join(" || ");
+  return config.aerodrome.runways.map(runway => newValEquals(runway.name)).join(" || ");
 }
 
 function processDepartureRoute(config) {

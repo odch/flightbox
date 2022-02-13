@@ -80,7 +80,7 @@ const config = {
   runway: {
     types: {
       required: true,
-      values: objectToArray(__CONF__.aerodrome.runways),
+      values: objectToArray(__CONF__.aerodrome.runways).map(runway => runway.name),
     },
     message: {
       departure: 'Wählen Sie hier die Pistenrichtung für den Abflug aus.',

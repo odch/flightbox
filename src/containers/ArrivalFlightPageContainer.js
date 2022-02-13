@@ -8,8 +8,8 @@ import isHelicopter from "../util/isHelicopter"
 
 const runways = objectToArray(__CONF__.aerodrome.runways)
   .map(runway => ({
-    label: runway,
-    value: runway,
+    label: runway.name,
+    value: runway.name,
   }));
 
 const arrivalRoutes = getArrivalRoutes();
