@@ -198,7 +198,16 @@ class MovementReport {
   }
 
   getDirectionOfDeparture(movement) {
-    return (movement.type === 'D') ? movement.departureRoute : '';
+    switch (movement.type) {
+      case 'D':
+        return movement.departureRoute;
+      case 'A':
+        if (movement.arrivalRoute !== 'circuits') {
+          return movement.arrivalRoute;
+        }
+      default:
+        return '';
+    }
   }
 
   getRunway(movement) {
