@@ -15,25 +15,25 @@
     "noRunwayIfHelicopter": true,
     "departureRoutes": [
       {
-        "name": "E",
-        "label": "E",
+        "name": "O",
+        "label": "Ost",
         "condition": "notHelicopter"
       },
       {
         "name": "W",
-        "label": "W",
+        "label": "West",
         "condition": "notHelicopter"
       },
       {
         "name": "S",
-        "label": "S",
+        "label": "Süd",
         "condition": "helicopter"
       }
     ],
     "arrivalRoutes": [
       {
         "name": "S",
-        "label": "S"
+        "label": "Süd"
       }
     ],
     "landingFees": {
