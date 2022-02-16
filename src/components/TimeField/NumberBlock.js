@@ -24,7 +24,7 @@ class NumberBlock extends React.Component {
         <Input
           type="text"
           value={this.state.editingValue !== null ? this.state.editingValue : this.formatTwoDigit(this.props.value)}
-          onFocus={e => e.target.select()}
+          onFocus={this.handleFocus.bind(this)}
           onChange={this.handleChange.bind(this)}
           onBlur={this.handleBlur.bind(this)}
           maxLength={2}
@@ -37,6 +37,13 @@ class NumberBlock extends React.Component {
         >-</Button>
       </NumberBlockWrapper>
     );
+  }
+
+  handleFocus(e) {
+    e.target.select();
+    this.setState({
+      editingValue: e.target.value
+    });
   }
 
   handleChange(e) {
