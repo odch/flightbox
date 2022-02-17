@@ -27,7 +27,7 @@ class LoginInfo extends React.PureComponent {
         <div className={props.className} data-cy="login-info">
           <MaterialIcon icon="account_box"/>
           <UserName>{props.auth.data.uid}</UserName>
-          <Button onClick={props.logout} data-cy="logout">Abmelden</Button>
+          {props.auth.data.links !== false && <Button onClick={props.logout} data-cy="logout">Abmelden</Button>}
         </div>
       );
     }
@@ -45,7 +45,8 @@ LoginInfo.propTypes = {
   auth: PropTypes.shape({
     authenticated: PropTypes.bool.isRequired,
     data: PropTypes.shape({
-      uid: PropTypes.string
+      uid: PropTypes.string,
+      links: PropTypes.bool
     })
   }).isRequired,
   logout: PropTypes.func.isRequired,

@@ -1,4 +1,11 @@
-import {getLandingFee, updateMovementFees, AircraftOrigin, getAircraftOrigin} from './landingFees'
+import {
+  getLandingFee,
+  updateLandingFees,
+  AircraftOrigin,
+  getAircraftOrigin,
+  updateGoAroundFees,
+  getLandingFeeText
+} from './landingFees'
 
 /**
  * Test landing fees defined as Jest global:
@@ -68,15 +75,15 @@ describe('util', () => {
 
       test('throws error if no range found', () => {
         expect(() => getLandingFee(-1, 'instruction', AircraftOrigin.CLUB))
-          .toThrow(`No landing fees defined for MTOW -1 and flight type 'instruction'`);
+          .toThrow(`No fees defined for MTOW -1 and flight type 'instruction'`);
       })
     })
 
-    describe('updateMovementFees', () => {
+    describe('updateLandingFees', () => {
       test('does nothing if mtow not defined', () => {
         const changeAction = jest.fn();
 
-        updateMovementFees(changeAction, undefined, 'private', AircraftOrigin.HOME_BASE, 2);
+        updateLandingFees(changeAction, undefined, 'private', AircraftOrigin.HOME_BASE, 2);
 
         expect(changeAction.mock.calls.length).toBe(0);
       })
@@ -84,7 +91,7 @@ describe('util', () => {
       test('does nothing if flight type not defined', () => {
         const changeAction = jest.fn();
 
-        updateMovementFees(changeAction, 1000, undefined, AircraftOrigin.HOME_BASE, 2);
+        updateLandingFees(changeAction, 1000, undefined, AircraftOrigin.HOME_BASE, 2);
 
         expect(changeAction.mock.calls.length).toBe(0);
       })
@@ -92,7 +99,7 @@ describe('util', () => {
       test('does nothing if aircraft origin not defined', () => {
         const changeAction = jest.fn();
 
-        updateMovementFees(changeAction, 1000, 'private', undefined, 2);
+        updateLandingFees(changeAction, 1000, 'private', undefined, 2);
 
         expect(changeAction.mock.calls.length).toBe(0);
       })
@@ -100,7 +107,7 @@ describe('util', () => {
       test('updates single landing fee if single landing fee could be calculated', () => {
         const changeAction = jest.fn();
 
-        updateMovementFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, undefined);
+        updateLandingFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, undefined);
 
         expect(changeAction.mock.calls.length).toBe(1);
 
@@ -110,12 +117,59 @@ describe('util', () => {
       test('also updates total landing fee if landing count set', () => {
         const changeAction = jest.fn();
 
-        updateMovementFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 2);
+        updateLandingFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 2);
 
         expect(changeAction.mock.calls.length).toBe(2);
 
         expect(changeAction.mock.calls[0]).toEqual(['landingFeeSingle', 20])
         expect(changeAction.mock.calls[1]).toEqual(['landingFeeTotal', 40])
+      })
+    })
+
+    describe('updateGoAroundFees', () => {
+      test('does nothing if mtow not defined', () => {
+        const changeAction = jest.fn();
+
+        updateGoAroundFees(changeAction, undefined, 'private', AircraftOrigin.HOME_BASE, 2);
+
+        expect(changeAction.mock.calls.length).toBe(0);
+      })
+
+      test('does nothing if flight type not defined', () => {
+        const changeAction = jest.fn();
+
+        updateGoAroundFees(changeAction, 1000, undefined, AircraftOrigin.HOME_BASE, 2);
+
+        expect(changeAction.mock.calls.length).toBe(0);
+      })
+
+      test('does nothing if aircraft origin not defined', () => {
+        const changeAction = jest.fn();
+
+        updateGoAroundFees(changeAction, 1000, 'private', undefined, 2);
+
+        expect(changeAction.mock.calls.length).toBe(0);
+      })
+
+      test('updates single go around fee if single go around fee could be calculated', () => {
+        const changeAction = jest.fn();
+
+        updateGoAroundFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, undefined);
+
+        expect(changeAction.mock.calls.length).toBe(1);
+
+        expect(changeAction.mock.calls[0]).toEqual(['goAroundFeeSingle', 20])
+      })
+
+      test('also updates total go around fee if go around count set', () => {
+        const changeAction = jest.fn();
+
+        updateGoAroundFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 2);
+
+        expect(changeAction.mock.calls.length).toBe(2);
+
+        expect(changeAction.mock.calls[0]).toEqual(['goAroundFeeSingle', 20])
+        expect(changeAction.mock.calls[1]).toEqual(['goAroundFeeTotal', 40])
       })
     })
 
@@ -140,6 +194,26 @@ describe('util', () => {
       test('returns AircraftOrigin.OTHER if is foreign aircraft', () => {
         expect(getAircraftOrigin('HBCIY', aircraftSettings)).toBe(AircraftOrigin.OTHER);
       })
+    })
+
+    describe('getLandingFeeText', () => {
+      describe.each([
+        [undefined, undefined, undefined, undefined, undefined, undefined, null],
+        [1, 20, 20, undefined, undefined, undefined, 'CHF 20.00'],
+        [1, 20, 20, 0, 15, 0, 'CHF 20.00'],
+        [2, 20, 40, undefined, undefined, undefined, 'CHF 40.00 (2 Landung(en) à CHF 20.00)'],
+        [2, 20, 40, 0, 15, 0, 'CHF 40.00 (2 Landung(en) à CHF 20.00)'],
+        [1, 20, 20, 1, 15, 15, 'CHF 35.00 (1 Landung(en) à CHF 20.00 und 1 Durchstart(s) à CHF 15.00)'],
+        [1, 20, 20, 2, 15, 30, 'CHF 50.00 (1 Landung(en) à CHF 20.00 und 2 Durchstart(s) à CHF 15.00)'],
+        [2, 20, 40, 2, 15, 30, 'CHF 70.00 (2 Landung(en) à CHF 20.00 und 2 Durchstart(s) à CHF 15.00)']
+      ])(
+        'getLandingFeeText(%i, %i, %i, %i, %i, %i)',
+        (landings, landingFeeSingle, landingFeeTotal, goArounds, goAroundFeeSingle, goAroundFeeTotal, expected) => {
+          test(`returns ${expected}`, () => {
+            expect(getLandingFeeText(landings, landingFeeSingle, landingFeeTotal, goArounds, goAroundFeeSingle, goAroundFeeTotal)).toBe(expected);
+          });
+        }
+      );
     })
   })
 })

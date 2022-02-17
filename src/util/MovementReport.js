@@ -9,7 +9,10 @@ import ItemsArray from './ItemsArray';
 import {getAirstatType} from './flightTypes';
 import moment from 'moment';
 import writeCsv from './writeCsv';
-import isHelicopter from './isHelicopter'
+import isHelicopter from './isHelicopter';
+import objectToArray from './objectToArray';
+
+const CIRCUITS_KEY_SUFFIX = '_circuits';
 
 class MovementReport {
 
@@ -109,7 +112,7 @@ class MovementReport {
           && (movement.landingCount > 1 || movement.goAroundCount > 0)) {
           const circuitMovement = Object.assign({}, movement);
 
-          circuitMovement.key += '_circuits'
+          circuitMovement.key += CIRCUITS_KEY_SUFFIX
           circuitMovement.arrivalRoute = 'circuits'
           circuitMovement.location = __CONF__.aerodrome.ICAO
 
@@ -118,6 +121,10 @@ class MovementReport {
 
           circuitMovement.landingCount -= movement.landingCount
           circuitMovement.goAroundCount -= movement.goAroundCount
+
+          // fees are set on original/parent movement only
+          circuitMovement.landingFeeTotal = 0
+          circuitMovement.goAroundFeeTotal = 0
 
           movements.insert(circuitMovement)
         }
@@ -140,8 +147,8 @@ class MovementReport {
       PAX: movement.passengerCount || 0,
       DATMO: movement.date.replace(/-/g, ''),
       TIMMO: movement.time.replace(/:/g, ''),
-      PIMO: movement.runway,
-      TYPPI: 'G',
+      PIMO: this.getRunway(movement),
+      TYPPI: this.getTypeOfRunway(movement),
       DIRDE: this.getDirectionOfDeparture(movement),
       CID: __CONF__.aerodrome.ICAO,
       CDT: this.creationDate.format('YYYYMMDD'),
@@ -191,11 +198,37 @@ class MovementReport {
   }
 
   getDirectionOfDeparture(movement) {
-    return (movement.type === 'D') ? movement.departureRoute : '';
+    switch (movement.type) {
+      case 'D':
+        return movement.departureRoute;
+      case 'A':
+        if (movement.arrivalRoute !== 'circuits') {
+          return movement.arrivalRoute;
+        }
+      default:
+        return '';
+    }
+  }
+
+  getRunway(movement) {
+    return movement.runway ? movement.runway : isHelicopter(movement.immatriculation) ? '0' : '';
+  }
+
+  getTypeOfRunway(movement) {
+    const runway = objectToArray(__CONF__.aerodrome.runways).find(rwy => rwy.name === movement.runway);
+    return runway ? runway.type : '';
+  }
+
+  getMovementKey(movement) {
+    if (movement.key.endsWith(CIRCUITS_KEY_SUFFIX)) {
+      const key = movement.key.substring(0, movement.key.length - CIRCUITS_KEY_SUFFIX.length)
+      return getFromItemKey(key) + CIRCUITS_KEY_SUFFIX.toUpperCase()
+    }
+    return getFromItemKey(movement.key);
   }
 
   addInternalFields(airstatRecord, movement, aircrafts) {
-    airstatRecord.KEY = getFromItemKey(movement.key);
+    airstatRecord.KEY = this.getMovementKey(movement)
     airstatRecord.MEMBERNR = movement.memberNr;
     airstatRecord.LASTNAME = movement.lastname;
     airstatRecord.MTOW = movement.mtow;
@@ -205,7 +238,9 @@ class MovementReport {
       ? movement.location
       : undefined;
     airstatRecord.REMARKS = movement.remarks;
-    airstatRecord.FEES = movement.landingFeeTotal;
+    airstatRecord.FEES = (movement.landingFeeTotal || 0) + (movement.goAroundFeeTotal || 0);
+    airstatRecord.LDG_COUNT = movement.landingCount || 0;
+    airstatRecord.GA_COUNT = movement.goAroundCount || 0;
 
     return airstatRecord;
   }
@@ -238,7 +273,9 @@ MovementReport.internalHeader = [
   'HOME_BASE',
   'ORIGINAL_ORIDE',
   'REMARKS',
-  'FEES'
+  'FEES',
+  'LDG_COUNT',
+  'GA_COUNT'
 ];
 
 MovementReport.LOCATION_DEFAULT = 'LSZZ';

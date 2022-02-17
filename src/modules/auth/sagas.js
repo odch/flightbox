@@ -6,16 +6,20 @@ import createChannel from '../../util/createChannel';
 import firebase, { authenticate as fbAuth, unauth as fbUnauth, watchAuthState } from '../../util/firebase';
 import { error as logError } from '../../util/log';
 
-export function isAdmin(uid) {
+export function getLoginData(uid) {
   return new Promise((resolve, reject) => {
-    firebase('/admins/' + uid, (error, ref) => {
+    firebase('/logins/' + uid, (error, ref) => {
       if (error) {
         reject(error);
       } else {
         ref.once('value', snapshot => {
-          resolve(snapshot.exists() && snapshot.val() === true);
+          if (snapshot.exists()) {
+            resolve(snapshot.val());
+          } else {
+            resolve(null);
+          }
         }, () => {
-          resolve(false);
+          resolve(null);
         });
       }
     });
@@ -107,11 +111,13 @@ export function* doListenFirebaseAuthentication(action) {
         token,
       }
     } else {
+      const loginData = yield call(getLoginData, uid)
       authData = {
         uid,
         expiration: expires * 1000,
         token,
-        admin: yield call(isAdmin, uid),
+        admin: loginData && loginData.admin === true,
+        links: !loginData || loginData.links !== false,
         name: yield call(getName, uid)
       }
     }

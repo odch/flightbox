@@ -95,6 +95,12 @@
         "goAroundCount": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
         },
+        "goAroundFeeSingle": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "goAroundFeeTotal": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
         "immatriculation": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
@@ -213,11 +219,19 @@
         }
       }
     },
-    "admins": {
+    "logins": {
       ".write": false,
-      "$admin_id": {
-        ".read": "auth !== null && $admin_id === auth.uid",
-        ".validate": "newData.exists() && newData.isBoolean()"
+      "$login_id": {
+        ".read": "auth !== null && $login_id === auth.uid",
+        "admin": {
+          ".validate": "newData.isBoolean()"
+        },
+        "links": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     },
     "status": {

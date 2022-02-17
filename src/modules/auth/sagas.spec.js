@@ -120,10 +120,14 @@ describe('modules', () => {
             token: 'validtoken'
           }));
 
-          expect(generator.next().value).toEqual(call(sagas.isAdmin, 'myadminuser'));
-          expect(generator.next(true).value).toEqual(call(sagas.getName, 'myadminuser'));
+          expect(generator.next().value).toEqual(call(sagas.getLoginData, 'myadminuser'));
+          expect(generator.next({
+            admin: true,
+            links: false
+          }).value).toEqual(call(sagas.getName, 'myadminuser'));
           expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
             admin: true,
+            links: false,
             expiration: 1000,
             token: 'validtoken',
             uid: 'myadminuser',
@@ -140,10 +144,13 @@ describe('modules', () => {
             token: 'validtoken'
           }));
 
-          expect(generator.next().value).toEqual(call(sagas.isAdmin, 'testuser'));
-          expect(generator.next(false).value).toEqual(call(sagas.getName, 'testuser'));
+          expect(generator.next().value).toEqual(call(sagas.getLoginData, 'testuser'));
+          expect(generator.next({
+            admin: false
+          }).value).toEqual(call(sagas.getName, 'testuser'));
           expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
             admin: false,
+            links: true,
             expiration: 1000,
             token: 'validtoken',
             uid: 'testuser',
