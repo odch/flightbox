@@ -7,7 +7,7 @@ import moment from 'moment';
 
 class LandingsReport {
 
-  constructor(year, month) {
+  constructor(year, month, options = {}) {
     month = month < 10 ? '0' + month : month;
     const day = '01';
 
@@ -15,6 +15,9 @@ class LandingsReport {
     this.endDate = moment(this.startDate).endOf('month').format('YYYY-MM-DD');
 
     this.creationDate = moment();
+
+    this.options = options;
+    this.delimiter = this.options.delimiter || ',';
   }
 
   generate(callback) {
@@ -48,7 +51,7 @@ class LandingsReport {
   buildContent(arrivals, aircrafts) {
     const summary = this.getAircraftsSummary(arrivals);
     const csvRecords = summary.map(record => this.getRecordString(record, aircrafts), this);
-    csvRecords.unshift(LandingsReport.header.join(','));
+    csvRecords.unshift(LandingsReport.header.join(this.delimiter));
     return csvRecords.join('\n');
   }
 
@@ -98,7 +101,7 @@ class LandingsReport {
 
     return LandingsReport.header
       .map(header => csvRecord[header])
-      .join(',');
+      .join(this.delimiter);
   }
 }
 

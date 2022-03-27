@@ -95,7 +95,9 @@ class MovementReport {
       : MovementReport.header;
     records.unshift(header);
 
-    return writeCsv(records);
+    return writeCsv(records, {
+      delimiter: this.options.delimiter || ','
+    });
   }
 
   getMovementsArray(snapshots) {

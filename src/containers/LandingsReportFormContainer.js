@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
-import { initReport, setReportDate, generateReport } from '../modules/reports';
+import {initReport, setReportDate, generateReport, setReportParameter} from '../modules/reports';
 import ReportForm from '../components/ReportForm';
 
 class LandingsReportFormContainer extends React.Component {
@@ -15,7 +15,9 @@ class LandingsReportFormContainer extends React.Component {
       <ReportForm
         disabled={!this.props.initialized || this.props.generationInProgress}
         date={this.props.date}
+        delimiter={this.props.delimiter}
         setDate={this.props.setDate}
+        setDelimiter={this.props.setDelimiter}
         generate={this.props.generate}
       />
     );
@@ -28,9 +30,11 @@ LandingsReportFormContainer.propTypes = {
     year: PropTypes.number,
     month: PropTypes.number,
   }),
+  delimiter: PropTypes.string,
   generationInProgress: PropTypes.bool,
   initReport: PropTypes.func.isRequired,
   setDate: PropTypes.func.isRequired,
+  setDelimiter: PropTypes.func.isRequired,
   generate: PropTypes.func.isRequired,
 };
 
@@ -48,6 +52,7 @@ const mapStateToProps = state => {
   return {
     initialized,
     date: report.date,
+    delimiter: report.parameters.delimiter,
     generationInProgress: report.generationInProgress === true,
   };
 };
@@ -57,6 +62,7 @@ const mapDispatchToProps = dispatch => {
     initReport: () => dispatch(initReport('landings')),
     setDate: date => dispatch(setReportDate('landings', date)),
     generate: () => dispatch(generateReport('landings')),
+    setDelimiter: delimiter => dispatch(setReportParameter('landings', 'delimiter', delimiter)),
   };
 };
 

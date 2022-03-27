@@ -5,11 +5,12 @@ import Input from '../Input';
 import Button from '../Button';
 import LabeledComponent from '../LabeledComponent';
 import MonthDropdown from '../MonthDropdown';
+import DelimiterDropdown from './DelimiterDropdown';
 
 const StyledLabeledComponent = styled(LabeledComponent)`
   width: 50%;
   margin-bottom: 1.5em;
-  
+
   @media (max-width: 768px) {
     width: 100%;
   }
@@ -48,6 +49,7 @@ const handleMonthChange = (props, value) => props.setDate({
 const ReportForm = props => {
   const year = props.date && props.date.year ? props.date.year : '';
   const month = props.date && props.date.month ? props.date.month : null;
+  const delimiter = props.delimiter || ',';
 
   const yearInput = (
     <Input
@@ -63,6 +65,13 @@ const ReportForm = props => {
     />
   );
 
+  const delimiterInput = (
+    <DelimiterDropdown
+      value={delimiter}
+      onChange={props.setDelimiter}
+    />
+  )
+
   return (
     <form
       className="ReportForm"
@@ -71,6 +80,7 @@ const ReportForm = props => {
       <fieldset disabled={props.disabled}>
         <StyledLabeledComponent label="Jahr" component={yearInput}/>
         {props.withMonth && <StyledLabeledComponent label="Monat" component={monthInput}/>}
+        <StyledLabeledComponent label="Trennzeichen" component={delimiterInput}/>
         {props.children}
         <Button
           type="submit"
@@ -90,9 +100,10 @@ ReportForm.propTypes = {
     year: PropTypes.number,
     month: PropTypes.number,
   }),
-  parameters: PropTypes.object,
+  delimiter: PropTypes.string,
   withMonth: PropTypes.bool,
   setDate: PropTypes.func.isRequired,
+  setDelimiter: PropTypes.func.isRequired,
   generate: PropTypes.func.isRequired,
 };
 
