@@ -1,69 +1,10 @@
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
-import { firebaseToLocal, compareDescending } from '../../util/movements';
-import associate from './associate';
 
-export function childrenAdded(state, action) {
-  const {snapshot, movementType, clear} = action.payload;
-
-  const movements = [];
-
-  snapshot.forEach(item => {
-    const movement = firebaseToLocal(item.val());
-    movement.key = item.key;
-    movement.type = movementType;
-    movements.push(movement);
-  });
-
-  const existingMovements = clear ? new ImmutableItemsArray() : state.data;
-
-  let newData = existingMovements.insertAll(movements, compareDescending);
-  newData = associate(newData, compareDescending);
-
+export function setMovements(state, action) {
   return Object.assign({}, state, {
-    data: newData,
+    data: action.payload.movements,
     loading: false
-  });
-}
-
-export function childAdded(state, action) {
-  const {snapshot, movementType} = action.payload;
-
-  const movement = firebaseToLocal(snapshot.val());
-  movement.key = snapshot.key;
-  movement.type = movementType;
-
-  let newData = state.data.insert(movement, compareDescending);
-  newData = associate(newData, compareDescending);
-
-  return Object.assign({}, state, {
-    data: newData
-  });
-}
-
-export function childChanged(state, action) {
-  const {snapshot, movementType} = action.payload;
-
-  const movement = firebaseToLocal(snapshot.val());
-  movement.key = snapshot.key;
-  movement.type = movementType;
-
-  let newData = state.data.update(movement, compareDescending);
-  newData = associate(newData, compareDescending);
-
-  return Object.assign({}, state, {
-    data: newData
-  });
-}
-
-export function childRemoved(state, action) {
-  const snapshot = action.payload.snapshot;
-
-  let newData = state.data.remove(snapshot.key);
-  newData = associate(newData, compareDescending);
-
-  return Object.assign({}, state, {
-    data: newData
   });
 }
 
@@ -81,11 +22,26 @@ export function setLoadingFailure(state) {
   });
 }
 
+export const setAssociatedMovements = (state, action) => ({
+  ...state,
+  associatedMovements: {
+    ...state.associatedMovements,
+    ...action.payload.associatedMovements
+  }
+});
+
+export const setMovementsByImmatriculation = (state, action) => ({
+  ...state,
+  byImmatriculation: {
+    ...state.byImmatriculation,
+    [action.payload.immatriculation]: action.payload.movements
+  }
+});
+
 const ACTION_HANDLERS = {
-  [actions.MOVEMENTS_ADDED]: childrenAdded,
-  [actions.MOVEMENT_ADDED]: childAdded,
-  [actions.MOVEMENT_CHANGED]: childChanged,
-  [actions.MOVEMENT_DELETED]: childRemoved,
+  [actions.SET_MOVEMENTS]: setMovements,
+  [actions.SET_ASSOCIATED_MOVEMENTS]: setAssociatedMovements,
+  [actions.SET_MOVEMENTS_BY_IMMATRICULATION]: setMovementsByImmatriculation,
   [actions.SET_MOVEMENTS_LOADING]: setLoading,
   [actions.LOAD_MOVEMENTS_FAILURE]: setLoadingFailure,
 };
@@ -93,7 +49,9 @@ const ACTION_HANDLERS = {
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
   loading: false,
-  loadingFailed: false
+  loadingFailed: false,
+  associatedMovements: {},
+  byImmatriculation: {},
 };
 
 const reducer = (initialState, actionHandlers) => {

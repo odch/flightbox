@@ -7,6 +7,7 @@ import * as sagas from './sagas';
 import * as remote from './remote';
 import {LIMIT} from './pagination';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
+import {addMovements} from "./sagas";
 
 describe('modules', () => {
   describe('movements', () => {
@@ -230,20 +231,23 @@ describe('modules', () => {
             }
           };
 
+          const eventActions = {
+            added: actions.movementAdded,
+            changed: actions.movementChanged,
+            removed: actions.movementDeleted
+          };
+
           expect(generator.next(arrivalsResult).value)
-            .toEqual(call(sagas.monitorRef, departuresResult.ref, channel, 'departure'));
+            .toEqual(call(sagas.monitorRef, departuresResult.ref, channel, 'departure', eventActions));
           expect(generator.next().value)
-            .toEqual(call(sagas.monitorRef, arrivalsResult.ref, channel, 'arrival'));
+            .toEqual(call(sagas.monitorRef, arrivalsResult.ref, channel, 'arrival', eventActions));
+
+          const existingMovements = clear ? new ImmutableItemsArray() : state.data;
+
+          expect(generator.next().value)
+            .toEqual(call(sagas.addMovements, departuresResult.snapshot, arrivalsResult.snapshot, existingMovements, channel));
 
           expect(generator.next().done).toEqual(true);
-
-          const channelPutCalls = channel.put.mock.calls;
-          expect(channelPutCalls.length).toBe(2);
-
-          expect(channelPutCalls[0][0])
-            .toEqual(actions.movementsAdded(departuresResult.snapshot, 'departure', clear));
-          expect(channelPutCalls[1][0])
-            .toEqual(actions.movementsAdded(arrivalsResult.snapshot, 'arrival', clear));
         };
 
         it('should load new movements range', () => {
@@ -264,7 +268,13 @@ describe('modules', () => {
 
           const channel = {};
 
-          const generator = sagas.monitorRef(ref, channel, 'departure');
+          const eventActions = {
+            added: () => {},
+            changed: () => {},
+            removed: () => {}
+          }
+
+          const generator = sagas.monitorRef(ref, channel, 'departure', eventActions);
 
           expect(generator.next().done).toEqual(true);
 

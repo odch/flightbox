@@ -1,11 +1,16 @@
 export const LOAD_MOVEMENTS = 'LOAD_MOVEMENTS';
 export const SET_MOVEMENTS_LOADING = 'SET_MOVEMENTS_LOADING';
 export const LOAD_MOVEMENTS_FAILURE = 'LOAD_MOVEMENTS_FAILURE';
-export const MOVEMENTS_ADDED = 'MOVEMENTS_ADDED';
+export const SET_MOVEMENTS = 'SET_MOVEMENTS';
 export const MOVEMENT_ADDED = 'MOVEMENT_ADDED';
 export const MOVEMENT_CHANGED = 'MOVEMENT_CHANGED';
 export const MOVEMENT_DELETED = 'MOVEMENT_DELETED';
+export const IMMATRICULATION_MOVEMENT_ADDED = 'IMMATRICULATION_MOVEMENT_ADDED';
+export const IMMATRICULATION_MOVEMENT_CHANGED = 'IMMATRICULATION_MOVEMENT_CHANGED';
+export const IMMATRICULATION_MOVEMENT_DELETED = 'IMMATRICULATION_MOVEMENT_DELETED';
 export const DELETE_MOVEMENT = 'DELETE_MOVEMENT';
+export const SET_ASSOCIATED_MOVEMENTS = 'SET_ASSOCIATED_MOVEMENTS';
+export const SET_MOVEMENTS_BY_IMMATRICULATION = 'SET_MOVEMENTS_BY_IMMATRICULATION';
 export const INIT_NEW_MOVEMENT = 'INIT_NEW_MOVEMENT';
 export const INIT_NEW_MOVEMENT_FROM_MOVEMENT = 'INIT_NEW_MOVEMENT_FROM_MOVEMENT';
 export const SAVE_MOVEMENT = 'SAVE_MOVEMENT';
@@ -36,13 +41,11 @@ export function loadMovementsFailure() {
   };
 }
 
-export function movementsAdded(snapshot, movementType, clear) {
+export function setMovements(movements) {
   return {
-    type: MOVEMENTS_ADDED,
+    type: SET_MOVEMENTS,
     payload: {
-      snapshot,
-      movementType,
-      clear
+      movements
     },
   };
 }
@@ -77,6 +80,36 @@ export function movementDeleted(snapshot, movementType) {
   };
 }
 
+export function immatriculationMovementAdded(snapshot, movementType) {
+  return {
+    type: IMMATRICULATION_MOVEMENT_ADDED,
+    payload: {
+      snapshot,
+      movementType
+    },
+  };
+}
+
+export function immatriculationMovementChanged(snapshot, movementType) {
+  return {
+    type: IMMATRICULATION_MOVEMENT_CHANGED,
+    payload: {
+      snapshot,
+      movementType
+    },
+  };
+}
+
+export function immatriculationMovementDeleted(snapshot, movementType) {
+  return {
+    type: IMMATRICULATION_MOVEMENT_DELETED,
+    payload: {
+      snapshot,
+      movementType
+    },
+  };
+}
+
 export function deleteMovement(movementType, key, successAction) {
   return {
     type: DELETE_MOVEMENT,
@@ -86,6 +119,25 @@ export function deleteMovement(movementType, key, successAction) {
       successAction,
     },
   };
+}
+
+export function setAssociatiatedMovements(associatedMovements) {
+  return {
+    type: SET_ASSOCIATED_MOVEMENTS,
+    payload: {
+      associatedMovements
+    }
+  }
+}
+
+export function setMovementsByImmatriculation(immatriculation, movements) {
+  return {
+    type: SET_MOVEMENTS_BY_IMMATRICULATION,
+    payload: {
+      immatriculation,
+      movements
+    }
+  }
 }
 
 export function initNewMovement(movementType) {

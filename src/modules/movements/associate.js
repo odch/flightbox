@@ -16,28 +16,23 @@ const getMovementsPerAircraft = movements => {
   return movementsPerAircraft;
 };
 
-const getAssociations = movements => {
+const getAssociations = (movements, homeBaseAircrafts) => {
   const movementsPerAircraft = getMovementsPerAircraft(movements);
 
   const associations = {};
 
   for (const immatriculation in movementsPerAircraft) {
     if (movementsPerAircraft.hasOwnProperty(immatriculation)) {
+      const isHomeBase = homeBaseAircrafts.has(immatriculation);
       const aircraftMovements = movementsPerAircraft[immatriculation];
 
-      let currentMovementKey = null;
+      let currentMovement = null;
 
       for (let i = 0; i < aircraftMovements.length; i++) {
         const movement = aircraftMovements[i];
-
         const preceding = i < aircraftMovements.length - 1 ? aircraftMovements[i + 1] : null;
-
-        associations[movement.key] = {
-          preceding: preceding ? preceding.key : null,
-          subsequent: currentMovementKey
-        };
-
-        currentMovementKey = movement.key;
+        associations[movement.key] = getAssociatedMovement(movement.type, isHomeBase, preceding, currentMovement);
+        currentMovement = movement;
       }
     }
   }
@@ -45,34 +40,34 @@ const getAssociations = movements => {
   return associations;
 };
 
-const associate = (movements, comparator) => {
-  const associations = getAssociations(movements.array);
+const ifType = (movement, expectedType) => {
+  if (movement) {
+    if (movement.type === expectedType) {
+      return movement;
+    }
+    return null; // movement missing in database for sure (no need to try to find it)
+  }
+  return undefined; // movement could be in the database, but not yet loaded
+}
 
-  const updatedMovements = [];
-
-  for (let i = 0; i < movements.array.length; i++) {
-    const movement = movements.array[i];
-
-    const newMovementAssociations = associations[movement.key];
-
-    if (!movement.associations
-      || movement.associations.preceding !== newMovementAssociations.preceding
-      || movement.associations.subsequent !== newMovementAssociations.subsequent) {
-
-      const updatedMovement = Object.assign({}, movement, {
-        associations: newMovementAssociations
-      });
-      updatedMovements.push(updatedMovement);
+/**
+ * return null if wrong
+ */
+export const getAssociatedMovement = (movementType, isHomeBase, preceding, subsequent) => {
+  if (movementType === 'departure') {
+    if (isHomeBase) {
+      return ifType(subsequent, 'arrival');
+    } else {
+      return ifType(preceding, 'arrival');
+    }
+  } else if (movementType === 'arrival') {
+    if (isHomeBase) {
+      return ifType(preceding, 'departure');
+    } else {
+      return ifType(subsequent, 'departure');
     }
   }
+  throw new Error('Code should not be reached');
+}
 
-  let newMovementsArray = movements;
-
-  updatedMovements.forEach(movement => {
-    newMovementsArray = newMovementsArray.update(movement, comparator)
-  });
-
-  return newMovementsArray;
-};
-
-export default associate;
+export default getAssociations;
