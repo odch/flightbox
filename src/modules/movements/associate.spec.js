@@ -1,174 +1,168 @@
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
-import {compareDescending} from '../../util/movements';
-import associate from './associate';
+import getAssociations from './associate';
 
 describe('modules', () => {
   describe('movements', () => {
     describe('associate', () => {
+      const homeBaseAicrafts = new Set(['HBABC', 'HBERT']);
+
       it('should return same movements object if no movements', () => {
+        const homeBaseAicrafts = new Set();
         const movements = new ImmutableItemsArray([]);
-        const associated = associate(movements, compareDescending);
-        expect(associated).toBe(movements);
+        const associations = getAssociations(movements.array, homeBaseAicrafts);
+        expect(associations).toEqual({});
       });
 
-      it('should set empty associations for single movement', () => {
-        const associated = associate(new ImmutableItemsArray([{
-          key: 'dep1',
-          immatriculation: 'HBABC'
-        }]), compareDescending);
-
-        expect(associated.array).toEqual([{
+      it('should return undefined for single movement', () => {
+        const movements = new ImmutableItemsArray([{
           key: 'dep1',
           immatriculation: 'HBABC',
-          associations: {
-            preceding: null,
-            subsequent: null
-          }
+          type: 'departure'
         }]);
+
+        const associations = getAssociations(movements.array, homeBaseAicrafts);
+
+        expect(associations).toEqual({
+          dep1: undefined
+        });
       });
 
       it('should associate two movements of certain aircraft', () => {
-        const associated = associate(new ImmutableItemsArray([{
-          key: 'arr1',
-          immatriculation: 'HBABC',
-          date: '2017-05-21',
-          time: '14:00'
-        }, {
-          key: 'dep1',
-          immatriculation: 'HBABC',
-          date: '2017-05-21',
-          time: '13:30'
-        }]), compareDescending);
-
-        expect(associated.array).toEqual([{
+        const movements = new ImmutableItemsArray([{
           key: 'arr1',
           immatriculation: 'HBABC',
           date: '2017-05-21',
           time: '14:00',
-          associations: {
-            preceding: 'dep1',
-            subsequent: null
-          }
+          type: 'arrival'
         }, {
           key: 'dep1',
           immatriculation: 'HBABC',
           date: '2017-05-21',
           time: '13:30',
-          associations: {
-            preceding: null,
-            subsequent: 'arr1'
-          }
+          type: 'departure'
         }]);
+
+        const associations = getAssociations(movements.array, homeBaseAicrafts);
+
+        expect(associations).toEqual({
+          arr1: {
+            key: 'dep1',
+            immatriculation: 'HBABC',
+            date: '2017-05-21',
+            time: '13:30',
+            type: 'departure'
+          },
+          dep1: {
+            key: 'arr1',
+            immatriculation: 'HBABC',
+            date: '2017-05-21',
+            time: '14:00',
+            type: 'arrival'
+          }
+        });
       });
 
       it('should associate movements of multiple aircrafts (grouped by aircraft)', () => {
-        const associated = associate(new ImmutableItemsArray([{
-          key: 'arr1',
-          immatriculation: 'HBABC',
-          date: '2017-05-21',
-          time: '15:30'
-        }, {
-          key: 'arr2',
-          immatriculation: 'HBERT',
-          date: '2017-05-21',
-          time: '15:00'
-        }, {
-          key: 'dep1',
-          immatriculation: 'HBABC',
-          date: '2017-05-21',
-          time: '11:30'
-        }, {
-          key: 'dep2',
-          immatriculation: 'HBERT',
-          date: '2017-05-21',
-          time: '10:30'
-        }]), compareDescending);
-
-        expect(associated.array).toEqual([{
+        const movements = new ImmutableItemsArray([{
           key: 'arr1',
           immatriculation: 'HBABC',
           date: '2017-05-21',
           time: '15:30',
-          associations: {
-            preceding: 'dep1',
-            subsequent: null
-          }
+          type: 'arrival'
         }, {
           key: 'arr2',
           immatriculation: 'HBERT',
           date: '2017-05-21',
           time: '15:00',
-          associations: {
-            preceding: 'dep2',
-            subsequent: null
-          }
+          type: 'arrival'
         }, {
           key: 'dep1',
           immatriculation: 'HBABC',
           date: '2017-05-21',
           time: '11:30',
-          associations: {
-            preceding: null,
-            subsequent: 'arr1'
-          }
+          type: 'departure'
         }, {
           key: 'dep2',
           immatriculation: 'HBERT',
           date: '2017-05-21',
           time: '10:30',
-          associations: {
-            preceding: null,
-            subsequent: 'arr2'
-          }
+          type: 'departure'
         }]);
+
+        const associations = getAssociations(movements.array, homeBaseAicrafts);
+
+        expect(associations).toEqual({
+          arr1: {
+            key: 'dep1',
+            immatriculation: 'HBABC',
+            date: '2017-05-21',
+            time: '11:30',
+            type: 'departure'
+          },
+          arr2: {
+            key: 'dep2',
+            immatriculation: 'HBERT',
+            date: '2017-05-21',
+            time: '10:30',
+            type: 'departure'
+          },
+          dep1: {
+            key: 'arr1',
+            immatriculation: 'HBABC',
+            date: '2017-05-21',
+            time: '15:30',
+            type: 'arrival'
+          },
+          dep2: {
+            key: 'arr2',
+            immatriculation: 'HBERT',
+            date: '2017-05-21',
+            time: '15:00',
+            type: 'arrival'
+          }
+        });
       });
 
       it('should associate three movements of certain aircraft', () => {
-        const associated = associate(new ImmutableItemsArray([{
-          key: 'dep2',
-          immatriculation: 'HBABC',
-          date: '2017-05-21',
-          time: '13:30'
-        }, {
-          key: 'arr1',
-          immatriculation: 'HBABC',
-          date: '2017-05-21',
-          time: '12:00'
-        }, {
-          key: 'dep1',
-          immatriculation: 'HBABC',
-          date: '2017-05-21',
-          time: '11:00'
-        }]), compareDescending);
-
-        expect(associated.array).toEqual([{
+        const movements = new ImmutableItemsArray([{
           key: 'dep2',
           immatriculation: 'HBABC',
           date: '2017-05-21',
           time: '13:30',
-          associations: {
-            preceding: 'arr1',
-            subsequent: null
-          }
+          type: 'departure'
         }, {
           key: 'arr1',
           immatriculation: 'HBABC',
           date: '2017-05-21',
           time: '12:00',
-          associations: {
-            preceding: 'dep1',
-            subsequent: 'dep2'
-          }
+          type: 'arrival'
         }, {
           key: 'dep1',
           immatriculation: 'HBABC',
           date: '2017-05-21',
           time: '11:00',
-          associations: {
-            preceding: null,
-            subsequent: 'arr1'
-          }
+          type: 'departure'
         }]);
+
+        const associations = getAssociations(movements.array, homeBaseAicrafts);
+
+        expect(associations).toEqual({
+          dep2: undefined,
+          arr1: {
+            key: 'dep1',
+            immatriculation: 'HBABC',
+            date: '2017-05-21',
+            time: '11:00',
+            type: 'departure'
+          },
+          dep1: {
+            key: 'arr1',
+            immatriculation: 'HBABC',
+            date: '2017-05-21',
+            time: '12:00',
+            type: 'arrival'
+          }
+        });
       });
     });
   });

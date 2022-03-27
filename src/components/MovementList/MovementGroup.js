@@ -30,34 +30,22 @@ class MovementGroup extends React.PureComponent {
       <GroupWrapper>
         <GroupLabel>{props.label}</GroupLabel>
         <ItemsContainer>
-          {filteredItems.map(item => {
-            const preceding = item.associations && item.associations.preceding
-              ? props.items.getByKey(item.associations.preceding)
-              : null;
-            const subsequent = item.associations && item.associations.subsequent
-              ? props.items.getByKey(item.associations.subsequent)
-              : null;
-
-            return (
-              <Movement
-                key={item.key}
-                data={item}
-                preceding={preceding}
-                subsequent={subsequent}
-                selected={item.key === props.selected}
-                onSelect={props.onSelect}
-                onEdit={props.onEdit}
-                timeWithDate={props.timeWithDate}
-                createMovementFromMovement={props.createMovementFromMovement}
-                onDelete={props.onDelete}
-                locked={isLocked(item, props.lockDate)}
-                aircraftSettings={props.aircraftSettings}
-                oldestMovementDate={props.oldestMovementDate}
-                loadMovements={props.loadMovements}
-                loading={props.loading}
-              />
-            );
-          })}
+          {filteredItems.map(item =>
+            <Movement
+              key={item.key}
+              data={item}
+              associatedMovement={props.associatedMovements[item.key]}
+              selected={item.key === props.selected}
+              onSelect={props.onSelect}
+              onEdit={props.onEdit}
+              timeWithDate={props.timeWithDate}
+              createMovementFromMovement={props.createMovementFromMovement}
+              onDelete={props.onDelete}
+              locked={isLocked(item, props.lockDate)}
+              aircraftSettings={props.aircraftSettings}
+              loading={props.loading}
+            />
+          )}
         </ItemsContainer>
       </GroupWrapper>
     );
@@ -67,6 +55,7 @@ class MovementGroup extends React.PureComponent {
 MovementGroup.propTypes = {
   label: PropTypes.string,
   items: PropTypes.object.isRequired,
+  associatedMovements: PropTypes.object.isRequired,
   selected: PropTypes.string,
   onSelect: PropTypes.func,
   predicate: PropTypes.func,
@@ -79,8 +68,6 @@ MovementGroup.propTypes = {
     club: PropTypes.objectOf(PropTypes.bool),
     homeBase: PropTypes.objectOf(PropTypes.bool)
   }).isRequired,
-  oldestMovementDate: PropTypes.string,
-  loadMovements: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired
 };
 

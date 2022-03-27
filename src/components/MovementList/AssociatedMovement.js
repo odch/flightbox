@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
+import MaterialIcon from '../MaterialIcon';
 import MovementDetails from './MovementDetails';
 import Action from './Action';
 import {ACTION_LABELS} from './labels';
@@ -33,11 +34,10 @@ class AssociatedMovement extends React.PureComponent {
   constructor(props) {
     super(props);
     this.handleCreateMovement = this.handleCreateMovement.bind(this);
-    this.handleLoadMovements = this.handleLoadMovements.bind(this);
   }
 
   render() {
-    const {movementType, associatedMovement, oldestMovementDate} = this.props;
+    const {movementType, associatedMovement} = this.props;
 
     let label;
     let text;
@@ -46,40 +46,38 @@ class AssociatedMovement extends React.PureComponent {
       label = 'Zugeordnete Ankunft';
       text = associatedMovement
         ? 'Die folgende Ankunft wurde diesem Abflug automatisch zugeordnet:'
-        : `Es konnte keine Ankunft zugeordnet werden. Es wurden alle Bewegungen seit ${oldestMovementDate} berücksichtigt.`
+        : associatedMovement === null
+          ? 'Es konnte keine Ankunft zugeordnet werden.'
+          : null;
     } else {
       label = 'Zugeordneter Abflug';
       text = associatedMovement
         ? 'Der folgende Abflug wurde dieser Ankunft automatisch zugeordnet:'
-        : `Es konnte kein Abflug zugeordnet werden. Es wurden alle Bewegungen seit ${oldestMovementDate} berücksichtigt.`
+        : associatedMovement === null
+          ? 'Es konnte kein Abflug zugeordnet werden.'
+          : null;
     }
 
     return (
       <Wrapper>
         <div>
           <Label>{label}</Label>
-          <div>{text}</div>
-          {associatedMovement && <StyledDetails data={associatedMovement} isHomeBase={this.props.isHomeBase}/>}
-          {!associatedMovement && (
-            <ActionsContainer>
-              <ActionContainer>
-                <Action
-                  label={ACTION_LABELS[movementType].label}
-                  icon={ACTION_LABELS[movementType].icon}
-                  onClick={this.handleCreateMovement}
-                />
-              </ActionContainer>
-              <ActionContainer>
-                <Action
-                  label="Ältere Bewegungen laden"
-                  icon={this.props.loading ? 'sync' : 'history'}
-                  onClick={this.handleLoadMovements}
-                  disabled={this.props.loading}
-                  rotateIcon={this.props.loading ? 'left' : null}
-                />
-              </ActionContainer>
-            </ActionsContainer>
-          )}
+          {text && <div>{text}</div>}
+          {associatedMovement
+            ? <StyledDetails data={associatedMovement} isHomeBase={this.props.isHomeBase}/>
+            : associatedMovement === undefined
+              ? <MaterialIcon icon="sync" rotate="left"/>
+              : (
+                <ActionsContainer>
+                  <ActionContainer>
+                    <Action
+                      label={ACTION_LABELS[movementType].label}
+                      icon={ACTION_LABELS[movementType].icon}
+                      onClick={this.handleCreateMovement}
+                    />
+                  </ActionContainer>
+                </ActionsContainer>
+              )}
         </div>
       </Wrapper>
     )
@@ -88,10 +86,6 @@ class AssociatedMovement extends React.PureComponent {
   handleCreateMovement() {
     this.props.createMovementFromMovement(this.props.movementType, this.props.movementKey);
   }
-
-  handleLoadMovements() {
-    this.props.loadMovements();
-  }
 }
 
 AssociatedMovement.propTypes = {
@@ -99,10 +93,8 @@ AssociatedMovement.propTypes = {
   movementKey: PropTypes.string.isRequired,
   isHomeBase: PropTypes.bool.isRequired,
   associatedMovement: PropTypes.object,
-  oldestMovementDate: PropTypes.string.isRequired,
   loading: PropTypes.bool.isRequired,
-  createMovementFromMovement: PropTypes.func.isRequired,
-  loadMovements: PropTypes.func.isRequired
+  createMovementFromMovement: PropTypes.func.isRequired
 };
 
 export default AssociatedMovement;
