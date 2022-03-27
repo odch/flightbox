@@ -1,6 +1,5 @@
 import { takeEvery } from 'redux-saga';
 import { fork, call, put, select } from 'redux-saga/effects';
-import moment from 'moment';
 import * as actions from './actions';
 import { airstat, landings, yearlySummary } from '../../util/report';
 
@@ -13,7 +12,7 @@ function generate(report, year, month, options) {
     case 'landings':
       return landings(year, month, options);
     case 'yearlySummary':
-      return yearlySummary(year);
+      return yearlySummary(year, options);
     default:
       throw new Error('Unknown report ' + report);
   }

@@ -5,8 +5,10 @@ import isHelicopter from "./isHelicopter"
 
 class YearlySummaryReport {
 
-  constructor(year) {
+  constructor(year, options) {
     this.year = year;
+    this.options = options;
+    this.delimiter = this.options.delimiter || ',';
   }
 
   generate(callback) {
@@ -34,7 +36,7 @@ class YearlySummaryReport {
 
   buildContent(months) {
     const csvRecords = months.map((movements, index) => this.getMonthSummary(index + 1, movements), this);
-    csvRecords.unshift(YearlySummaryReport.header.join(','));
+    csvRecords.unshift(YearlySummaryReport.header.join(this.delimiter));
     return csvRecords.join('\n');
   }
 
@@ -158,7 +160,7 @@ class YearlySummaryReport {
 
     return YearlySummaryReport.header
       .map(header => summary[header])
-      .join(',');
+      .join(this.delimiter);
   }
 
   isHelicopter(registration) {

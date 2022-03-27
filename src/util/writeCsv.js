@@ -1,8 +1,8 @@
 import stringify from 'csv-stringify';
 
-function writeCsv(records) {
+function writeCsv(records, options) {
   return new Promise((resolve, reject) => {
-    stringify(records, function(err, csv){
+    stringify(records, options, function(err, csv){
       if (err) {
         reject(err);
       } else {
