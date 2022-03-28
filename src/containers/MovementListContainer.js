@@ -14,6 +14,7 @@ import MovementList from '../components/MovementList';
 const mapStateToProps = state => {
   return {
     items: state.movements.data,
+    associatedMovements: state.movements.associatedMovements,
     loading: state.movements.loading,
     loadingFailed: state.movements.loadingFailed,
     lockDate: state.settings.lockDate,

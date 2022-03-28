@@ -16,8 +16,10 @@ class AirstatReportFormContainer extends React.Component {
         disabled={!this.props.initialized || this.props.generationInProgress}
         date={this.props.date}
         internal={this.props.internal}
+        delimiter={this.props.delimiter}
         setDate={this.props.setDate}
         setInternal={this.props.setInternal}
+        setDelimiter={this.props.setDelimiter}
         generate={this.props.generate}
       />
     );
@@ -31,10 +33,12 @@ AirstatReportFormContainer.propTypes = {
     month: PropTypes.number,
   }),
   internal: PropTypes.bool,
+  delimiter: PropTypes.string,
   generationInProgress: PropTypes.bool,
   initReport: PropTypes.func.isRequired,
   setDate: PropTypes.func.isRequired,
   setInternal: PropTypes.func.isRequired,
+  setDelimiter: PropTypes.func.isRequired,
   generate: PropTypes.func.isRequired,
 };
 
@@ -53,6 +57,7 @@ const mapStateToProps = state => {
     initialized,
     date: report.date,
     internal: report.parameters.internal === true,
+    delimiter: report.parameters.delimiter,
     generationInProgress: report.generationInProgress === true,
   };
 };
@@ -62,6 +67,7 @@ const mapDispatchToProps = dispatch => {
     initReport: () => dispatch(initReport('airstat')),
     setDate: date => dispatch(setReportDate('airstat', date)),
     setInternal: internal => dispatch(setReportParameter('airstat', 'internal', internal)),
+    setDelimiter: delimiter => dispatch(setReportParameter('airstat', 'delimiter', delimiter)),
     generate: () => dispatch(generateReport('airstat')),
   };
 };

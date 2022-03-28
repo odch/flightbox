@@ -21,67 +21,67 @@ const Wrapper = styled.div`
   ${props => !props.hasAssociatedMovement && `
     font-weight: bold;
   `}
-  
+
   .type {
     width: 50px;
   }
-  
+
   .immatriculation {
     width: 70px;
     padding-right: 10px;
   }
-  
+
   .homebase {
     flex: 0.5;
   }
-  
+
   .pilot, .datetime, .location {
     flex: 1;
     padding-right: 10px;
   }
-  
+
   .delete {
     width: 110px;
   }
-  
+
   .action {
     width: 200px;
   }
-  
+
   .pilot, .location {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  
+
   @media (max-width: 980px) {
     .action, .delete {
       width: 40px;
       text-align: center;
     }
   }
-  
+
   @media (max-width: 600px) {
     .location {
       display: none;
     }
   }
-  
+
   @media (max-width: 480px) {
     padding: 1em 0.5em;
-    
+
     .type {
       width: 40px;
     }
-    
+
     .immatriculation {
       flex: 1;
     }
-    
+
     .homebase {
       display: none;
     }
-    
+
     .action, .delete {
       width: 30px;
     }
@@ -136,7 +136,7 @@ class MovementHeader extends React.PureComponent {
         onClick={props.onClick}
         selected={props.selected}
         locked={props.locked}
-        hasAssociatedMovement={props.hasAssociatedMovement}
+        hasAssociatedMovement={!!props.associatedMovement}
       >
         <Column className="type">
           <MaterialIcon
@@ -156,14 +156,17 @@ class MovementHeader extends React.PureComponent {
         </Column>
         <Column className="location" alignMiddle>{getLocation(props.data)}</Column>
         <ActionColumn className="action" alignMiddle highlight>
-          {!props.hasAssociatedMovement && (
+          {props.associatedMovement === null ? (
             <Action
               label={ACTION_LABELS[props.data.type].label}
               icon={ACTION_LABELS[props.data.type].icon}
               onClick={this.handleActionClick}
               responsive
             />
-          )}
+          ) : props.associatedMovement === undefined
+            ? <MaterialIcon icon="sync" rotate="left"/>
+            : null
+          }
         </ActionColumn>
         <ActionColumn className="delete" alignMiddle>
           {!props.locked && (
@@ -195,7 +198,7 @@ MovementHeader.propTypes = {
   onDelete: PropTypes.func.isRequired,
   locked: PropTypes.bool,
   onClick: PropTypes.func,
-  hasAssociatedMovement: PropTypes.bool.isRequired,
+  associatedMovement: PropTypes.object,
   isHomeBase: PropTypes.bool.isRequired
 };
 

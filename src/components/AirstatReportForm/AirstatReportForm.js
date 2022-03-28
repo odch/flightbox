@@ -8,7 +8,9 @@ const AirstatReportForm = props => (
   <ReportForm
     disabled={props.disabled}
     date={props.date}
+    delimiter={props.delimiter}
     setDate={props.setDate}
+    setDelimiter={props.setDelimiter}
     generate={props.generate}
   >
     <InternalReportCheckbox internal={props.internal} setInternal={props.setInternal}/>
@@ -23,8 +25,10 @@ AirstatReportForm.propTypes = {
     month: PropTypes.number,
   }),
   internal: PropTypes.bool,
+  delimiter: PropTypes.string,
   setDate: PropTypes.func.isRequired,
   setInternal: PropTypes.func.isRequired,
+  setDelimiter: PropTypes.func.isRequired,
   generate: PropTypes.func.isRequired,
 };
 
