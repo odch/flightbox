@@ -54,3 +54,7 @@ export const getAirstatType = (type, isHelicopter) =>
   findByValue(type).airstatType[isHelicopter ? 'helicopter' : 'aircraft'];
 
 export const getLabel = type => findByValue(type).label;
+
+export const isHelicopterAirstatType = airstatType => !!flightTypes.find(
+  flightType => flightType.airstatType.helicopter && flightType.airstatType.helicopter === airstatType
+)

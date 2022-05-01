@@ -1,7 +1,7 @@
 import objectToArray from './objectToArray';
 import isHelicopter from "./isHelicopter"
 
-const helicopterCondition = values => isHelicopter(values.immatriculation)
+const helicopterCondition = values => isHelicopter(values.immatriculation, values.aircraftCategory)
 
 const conditions = {
   helicopter: helicopterCondition,

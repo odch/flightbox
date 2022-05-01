@@ -1,7 +1,6 @@
 import Download from './Download.js';
 import MovementReport from "./MovementReport";
-import {getAirstatType} from './flightTypes';
-import isHelicopter from "./isHelicopter"
+import {getAirstatType, isHelicopterAirstatType} from './flightTypes';
 
 class YearlySummaryReport {
 
@@ -74,7 +73,6 @@ class YearlySummaryReport {
       const columns = line.split(',');
 
       const movTrafficType = columns[1];
-      const movReg = columns[2];
       const movFlightType = parseInt(columns[3]);
       const movLocation = columns[5];
       const movPax = parseInt(columns[6]);
@@ -149,7 +147,7 @@ class YearlySummaryReport {
 
       summary['RWY' + movRwy] += (movCount + circuitsCount);
 
-      if (this.isHelicopter(movReg)) {
+      if (isHelicopterAirstatType(movFlightType)) {
         summary.Helicopter += (movCount + circuitsCount)
       }
     }
@@ -161,10 +159,6 @@ class YearlySummaryReport {
     return YearlySummaryReport.header
       .map(header => summary[header])
       .join(this.delimiter);
-  }
-
-  isHelicopter(registration) {
-    return isHelicopter(registration);
   }
 }
 
