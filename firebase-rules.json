@@ -182,6 +182,10 @@
           ".read": "auth !== null",
           ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
         },
+        "custom": {
+          ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+          ".write": false
+        },
         "$other": {
           ".validate": false
         }
