@@ -3,7 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Field, reduxForm, getFormValues } from 'redux-form';
 import validate from '../validate';
-import { renderInputField, renderAircraftDropdown } from '../renderField';
+import { renderInputField, renderAircraftDropdown, renderAircraftCategoryDropdown } from '../renderField';
 import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
 import {getAircraftOrigin, updateLandingFees, updateGoAroundFees} from '../../../util/landingFees'
@@ -22,6 +22,7 @@ const AircraftPage = (props) => {
             if (aircraft) {
               props.change('aircraftType', aircraft.type);
               props.change('mtow', aircraft.mtow);
+              props.change('aircraftCategory', aircraft.category)
 
               const flightType = formValues['flightType'];
               const landingCount = formValues['landingCount'];
@@ -70,6 +71,12 @@ const AircraftPage = (props) => {
             return mtow
           }}
         />
+        <Field
+          name="aircraftCategory"
+          component={renderAircraftCategoryDropdown}
+          label="Kategorie"
+          readOnly={props.readOnly}
+        />
       </FieldSet>
       <WizardNavigation previousVisible={false} cancel={props.cancel}/>
     </form>
@@ -96,5 +103,5 @@ const mapStateToProps = state => ({
 export default reduxForm({
   form: 'wizard',
   destroyOnUnmount: false,
-  validate: validate(null, ['immatriculation', 'aircraftType', 'mtow']),
+  validate: validate(null, ['immatriculation', 'aircraftType', 'mtow', 'aircraftCategory']),
 })(connect(mapStateToProps)(AircraftPage));

@@ -1,5 +1,6 @@
 import validateUtil from '../../util/validate';
 import objectToArray from '../../util/objectToArray';
+import {categories as aircraftCategories} from '../../util/aircraftCategories';
 
 const config = {
   immatriculation: {
@@ -22,6 +23,13 @@ const config = {
       integer: true,
     },
     message: 'Geben Sie hier das maximale Abfluggewicht des Flugzeugs ein (in Kilogramm).',
+  },
+  aircraftCategory: {
+    types: {
+      required: true,
+      values: aircraftCategories
+    },
+    message: 'Wählen Sie hier die Kategorie des Flugzeugs aus.',
   },
   lastname: {
     types: {
