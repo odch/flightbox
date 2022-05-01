@@ -7,6 +7,7 @@ function importAircrafts(csvString) {
       { csv: 'Registration', isKey: true, isFirebaseKey: true },
       { csv: 'Type', firebase: 'type' },
       { csv: 'MTOW', firebase: 'mtow', modifications: ['parseint'] },
+      { csv: 'Category', firebase: 'category' },
     ],
   };
   return importCsv(csvString, options);
