@@ -172,7 +172,7 @@ class MovementReport {
   }
 
   getTypeOfTraffic(movement) {
-    return getAirstatType(movement.flightType, isHelicopter(movement.immatriculation));
+    return getAirstatType(movement.flightType, isHelicopter(movement.immatriculation, movement.aircraftCategory));
   }
 
   getNumberOfMovements(movement) {
@@ -213,7 +213,11 @@ class MovementReport {
   }
 
   getRunway(movement) {
-    return movement.runway ? movement.runway : isHelicopter(movement.immatriculation) ? '0' : '';
+    return movement.runway
+      ? movement.runway
+      : isHelicopter(movement.immatriculation, movement.aircraftCategory)
+        ? '0'
+        : '';
   }
 
   getTypeOfRunway(movement) {

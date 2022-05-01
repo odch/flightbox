@@ -16,4 +16,6 @@ const categories = [
   'Eigenbautragschrauber'
 ];
 
-module.exports = {categories} // no ES6 export as this file is also required in build process without ES6 support
+const isHelicopter = aircraftCategory => ['Hubschrauber', 'Eigenbauhubschrauber',].includes(aircraftCategory);
+
+module.exports = {categories, isHelicopter} // no ES6 export as this file is also required in build process without ES6 support
