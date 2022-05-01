@@ -11,15 +11,15 @@ const AircraftImportForm = props => {
       <P>Für den Import wird eine CSV-Datei benötigt, die alle Flugzeuge enthält. Beim Import werden
         alle Flugzeuge aus der Datenbank entfernt, die nicht in der CSV-Datei enthalten sind.</P>
       <P>
-        Die Datei muss aus den Spalten <Em>Registration</Em>, <Em>Type</Em> und <Em>MTOW</Em> bestehen.
+        Die Datei muss aus den Spalten <Em>Registration</Em>, <Em>Type</Em>, <Em>MTOW</Em> und <Em>Category</Em> bestehen.
         Die Sortierung ist nicht relevant.
         Die CSV-Datei muss als <Strong>UTF-8</Strong>-Datei gespeichert sein.
       </P>
       <P>Muster mit zwei Flugzeugen:</P>
           <Example>
-            Registration,Type,MTOW<br/>
-            HBKOF,ROBIN DR 400/140 B,1000<br/>
-            HBSGU,AT01,750<br/>
+            Registration,Type,MTOW,Category<br/>
+            HBKOF,DR40,1000,Flugzeug<br/>
+            HBSGU,A210,750,Flugzeug<br/>
           </Example>
     </div>
   );
