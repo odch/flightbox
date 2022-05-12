@@ -9,6 +9,7 @@ import TimeField from '../../components/TimeField';
 import TextArea from '../../components/TextArea';
 import AerodromeDropdown from '../../containers/AerodromeDropdownContainer';
 import AircraftDropdown from '../../containers/AircraftDropdownContainer';
+import AircraftCategoryDropdown from '../../components/AircraftCategoryDropdown';
 import UserDropdown from '../../containers/UserDropdownContainer';
 
 const StyledLabeledComponent = styled(LabeledComponent)`
@@ -98,6 +99,11 @@ export const renderAerodromeDropdown = (props) => {
 
 export const renderAircraftDropdown = (props) => {
   const cmp = <AircraftDropdown {...props.input} readOnly={props.readOnly} dataCy={props.input.name}/>;
+  return renderLabeledComponent(props, cmp);
+};
+
+export const renderAircraftCategoryDropdown = (props) => {
+  const cmp = <AircraftCategoryDropdown {...props.input} readOnly={props.readOnly} dataCy={props.input.name}/>;
   return renderLabeledComponent(props, cmp);
 };
 

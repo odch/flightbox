@@ -56,6 +56,7 @@ class MovementDetails extends React.PureComponent {
             <MovementField label="Immatrikulation" value={props.data.immatriculation}/>
             <MovementField label="Flugzeugtyp" value={props.data.aircraftType}/>
             <MovementField label="MTOW" value={props.data.mtow}/>
+            {props.data.aircraftCategory && <MovementField label="Kategorie" value={props.data.aircraftCategory}/>}
             <StyledHomeBaseIcon isHomeBase={props.isHomeBase} showText/>
           </DetailsBox>
           <DetailsBox label="Pilot">
