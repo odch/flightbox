@@ -209,7 +209,7 @@ export function* loadAssociatedMovement(movement, homeBaseAircrafts, channel) {
   const preceding = relevantMovements.array[index + 1];
   const subsequent = relevantMovements.array[index - 1];
 
-  const associatedMovement = getAssociatedMovement(movement.type, isHomeBase, preceding, subsequent) || null;
+  const associatedMovement = getAssociatedMovement(movement, isHomeBase, preceding, subsequent) || null;
 
   return {
     movement,

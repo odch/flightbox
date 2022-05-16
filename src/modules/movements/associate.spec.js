@@ -164,6 +164,70 @@ describe('modules', () => {
           }
         });
       });
+
+      it('should not associate circuit movements with non circuit movement', () => {
+        const movements = new ImmutableItemsArray([{
+          key: 'arr1',
+          immatriculation: 'HBABC',
+          date: '2017-05-21',
+          time: '12:00',
+          type: 'arrival',
+          arrivalRoute: 'circuits'
+        }, {
+          key: 'dep1',
+          immatriculation: 'HBABC',
+          date: '2017-05-21',
+          time: '11:00',
+          type: 'departure',
+          departureRoute: 'south'
+        }]);
+
+        const associations = getAssociations(movements.array, homeBaseAicrafts);
+
+        expect(associations).toEqual({
+          arr1: null,
+          dep1: null
+        });
+      });
+
+      it('should associate circuit movement with circuit movement', () => {
+        const movements = new ImmutableItemsArray([{
+          key: 'arr1',
+          immatriculation: 'HBABC',
+          date: '2017-05-21',
+          time: '12:00',
+          type: 'arrival',
+          arrivalRoute: 'circuits'
+        }, {
+          key: 'dep1',
+          immatriculation: 'HBABC',
+          date: '2017-05-21',
+          time: '11:00',
+          type: 'departure',
+          departureRoute: 'circuits'
+        }]);
+
+        const associations = getAssociations(movements.array, homeBaseAicrafts);
+
+        expect(associations).toEqual({
+          arr1: {
+            key: 'dep1',
+            immatriculation: 'HBABC',
+            date: '2017-05-21',
+            time: '11:00',
+            type: 'departure',
+            departureRoute: 'circuits'
+          },
+          dep1: {
+            key: 'arr1',
+            immatriculation: 'HBABC',
+            date: '2017-05-21',
+            time: '12:00',
+            type: 'arrival',
+            arrivalRoute: 'circuits'
+          }
+        });
+      });
     });
   });
 });

@@ -31,7 +31,7 @@ const getAssociations = (movements, homeBaseAircrafts) => {
       for (let i = 0; i < aircraftMovements.length; i++) {
         const movement = aircraftMovements[i];
         const preceding = i < aircraftMovements.length - 1 ? aircraftMovements[i + 1] : null;
-        associations[movement.key] = getAssociatedMovement(movement.type, isHomeBase, preceding, currentMovement);
+        associations[movement.key] = getAssociatedMovement(movement, isHomeBase, preceding, currentMovement);
         currentMovement = movement;
       }
     }
@@ -40,9 +40,19 @@ const getAssociations = (movements, homeBaseAircrafts) => {
   return associations;
 };
 
-const ifType = (movement, expectedType) => {
+const shouldBeCircuits = movement => {
+  const route = movement.departureRoute || movement.arrivalRoute;
+  return route === 'circuits';
+}
+
+const hasValidRoute = (movement, expectCircuits) => {
+  const route = movement.departureRoute || movement.arrivalRoute;
+  return expectCircuits && route === 'circuits' || !expectCircuits && route !== 'circuits';
+}
+
+const ifType = (movement, expectedType, expectCircuits) => {
   if (movement) {
-    if (movement.type === expectedType) {
+    if (movement.type === expectedType && hasValidRoute(movement, expectCircuits)) {
       return movement;
     }
     return null; // movement missing in database for sure (no need to try to find it)
@@ -53,18 +63,19 @@ const ifType = (movement, expectedType) => {
 /**
  * return null if wrong
  */
-export const getAssociatedMovement = (movementType, isHomeBase, preceding, subsequent) => {
-  if (movementType === 'departure') {
+export const getAssociatedMovement = (movement, isHomeBase, preceding, subsequent) => {
+  const expectCircuits = shouldBeCircuits(movement);
+  if (movement.type === 'departure') {
     if (isHomeBase) {
-      return ifType(subsequent, 'arrival');
+      return ifType(subsequent, 'arrival', expectCircuits);
     } else {
-      return ifType(preceding, 'arrival');
+      return ifType(preceding, 'arrival', expectCircuits);
     }
-  } else if (movementType === 'arrival') {
+  } else if (movement.type === 'arrival') {
     if (isHomeBase) {
-      return ifType(preceding, 'departure');
+      return ifType(preceding, 'departure', expectCircuits);
     } else {
-      return ifType(subsequent, 'departure');
+      return ifType(subsequent, 'departure', expectCircuits);
     }
   }
   throw new Error('Code should not be reached');
