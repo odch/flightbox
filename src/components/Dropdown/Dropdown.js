@@ -45,14 +45,6 @@ class Dropdown extends Component {
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.focusedOption !== prevState.focusedOption) {
-      scrollIntoView(this.options[this.state.focusedOption], {
-        validTarget: target => target.classList && target.classList.contains('flightbox-dropdown-options-container')
-      });
-    }
-  }
-
   render() {
     return (
       <Wrapper
@@ -294,6 +286,9 @@ class Dropdown extends Component {
   setFocusedOption(focusedOption) {
     this.setState({
       focusedOption,
+    });
+    scrollIntoView(this.options[focusedOption], {
+      validTarget: target => target.classList && target.classList.contains('flightbox-dropdown-options-container')
     });
   }
 
