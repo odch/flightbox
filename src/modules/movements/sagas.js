@@ -204,12 +204,7 @@ export function* loadAssociatedMovement(movement, homeBaseAircrafts, channel) {
 
   const isHomeBase = homeBaseAircrafts.has(movement.immatriculation);
 
-  const index = relevantMovements.array.findIndex(m => m.key === movement.key);
-
-  const preceding = relevantMovements.array[index + 1];
-  const subsequent = relevantMovements.array[index - 1];
-
-  const associatedMovement = getAssociatedMovement(movement, isHomeBase, preceding, subsequent) || null;
+  const associatedMovement = getAssociatedMovement(movement, isHomeBase, relevantMovements.array) || null;
 
   return {
     movement,
