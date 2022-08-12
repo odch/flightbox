@@ -185,8 +185,8 @@ describe('modules', () => {
         const associations = getAssociations(movements.array, homeBaseAicrafts);
 
         expect(associations).toEqual({
-          arr1: null,
-          dep1: null
+          arr1: undefined,
+          dep1: undefined
         });
       });
 
@@ -223,6 +223,75 @@ describe('modules', () => {
             immatriculation: 'HBABC',
             date: '2017-05-21',
             time: '12:00',
+            type: 'arrival',
+            arrivalRoute: 'circuits'
+          }
+        });
+      });
+
+      it('should associate circuit movement with circuit movement and non-circuit with non-cuircuit', () => {
+        const movements = new ImmutableItemsArray([{
+          key: 'dep2',
+          immatriculation: 'HBEXT',
+          date: '2017-05-21',
+          time: '14:00',
+          type: 'departure',
+          departureRoute: 'south'
+        }, {
+          key: 'arr2',
+          immatriculation: 'HBEXT',
+          date: '2017-05-21',
+          time: '13:00',
+          type: 'arrival',
+          arrivalRoute: 'circuits'
+        }, {
+          key: 'dep1',
+          immatriculation: 'HBEXT',
+          date: '2017-05-21',
+          time: '12:00',
+          type: 'departure',
+          departureRoute: 'circuits'
+        }, {
+          key: 'arr1',
+          immatriculation: 'HBEXT',
+          date: '2017-05-21',
+          time: '11:00',
+          type: 'arrival',
+          arrivalRoute: 'south'
+        }]);
+
+        const associations = getAssociations(movements.array, homeBaseAicrafts);
+
+        expect(associations).toEqual({
+          dep2: {
+            key: 'arr1',
+            immatriculation: 'HBEXT',
+            date: '2017-05-21',
+            time: '11:00',
+            type: 'arrival',
+            arrivalRoute: 'south'
+          },
+          arr1: {
+            key: 'dep2',
+            immatriculation: 'HBEXT',
+            date: '2017-05-21',
+            time: '14:00',
+            type: 'departure',
+            departureRoute: 'south'
+          },
+          arr2: {
+            key: 'dep1',
+            immatriculation: 'HBEXT',
+            date: '2017-05-21',
+            time: '12:00',
+            type: 'departure',
+            departureRoute: 'circuits'
+          },
+          dep1: {
+            key: 'arr2',
+            immatriculation: 'HBEXT',
+            date: '2017-05-21',
+            time: '13:00',
             type: 'arrival',
             arrivalRoute: 'circuits'
           }
