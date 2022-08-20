@@ -5,6 +5,7 @@ import validate from '../../validate';
 import { renderSingleSelect, renderTextArea } from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
+import CircuitsFieldHint from '../../CircuitsFieldHint';
 
 const FlightPage = (props) => {
   const { previousPage, handleSubmit, flightTypes, runways, departureRoutes } = props;
@@ -37,6 +38,7 @@ const FlightPage = (props) => {
           parse={e => e.target.value}
           label="Abflugroute"
           readOnly={props.readOnly}
+          hint={props.departureRoute === 'circuits' && <CircuitsFieldHint/>}
         />
         <Field
           name="route"
@@ -79,6 +81,7 @@ FlightPage.propTypes = {
     value: PropTypes.string.isRequired,
     description: PropTypes.string,
   })).isRequired,
+  departureRoute: PropTypes.string,
   hiddenFields: PropTypes.arrayOf(PropTypes.string)
 };
 
