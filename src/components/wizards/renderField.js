@@ -56,13 +56,16 @@ export const renderInputField = (props) => {
 
 export const renderSingleSelect = (props) => {
   const cmp = (
-    <SingleSelect
-      {...props.input}
-      items={props.items}
-      orientation={props.orientation}
-      readOnly={props.readOnly}
-      dataCy={props.input.name}
-    />
+    <>
+      <SingleSelect
+        {...props.input}
+        items={props.items}
+        orientation={props.orientation}
+        readOnly={props.readOnly}
+        dataCy={props.input.name}
+      />
+      {props.hint}
+    </>
   );
   return renderLabeledComponent(props, cmp);
 };

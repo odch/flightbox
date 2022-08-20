@@ -7,6 +7,7 @@ import { renderSingleSelect, renderTextArea } from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
 import {updateLandingFees, updateGoAroundFees, getAircraftOrigin} from '../../../../util/landingFees';
+import CircuitsFieldHint from '../../CircuitsFieldHint';
 
 const FlightPage = (props) => {
   const { previousPage, handleSubmit, flightTypes, arrivalRoutes, runways, formValues, aircraftSettings } = props;
@@ -41,6 +42,7 @@ const FlightPage = (props) => {
           parse={e => e.target.value}
           label="Ankunftsroute"
           readOnly={props.readOnly}
+          hint={props.arrivalRoute === 'circuits' && <CircuitsFieldHint/>}
         />
         <Field
           name="remarks"
