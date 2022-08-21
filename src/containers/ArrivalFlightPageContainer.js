@@ -30,7 +30,8 @@ const mapStateToProps = (state, ownProps) => {
     flightTypes: filter(getEnabledFlightTypes(), values),
     runways: filter(runways, values),
     arrivalRoutes: filter(arrivalRoutes, values),
-    hiddenFields: getHiddenFields(values)
+    hiddenFields: getHiddenFields(values),
+    arrivalRoute: values.arrivalRoute
   });
 };
 
