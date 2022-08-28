@@ -19,6 +19,7 @@ export const SAVE_MOVEMENT_FAILED = 'SAVE_MOVEMENT_FAILED';
 export const EDIT_MOVEMENT = 'EDIT_MOVEMENT';
 export const START_INITIALIZE_WIZARD = 'START_INITIALIZE_WIZARD';
 export const WIZARD_INITIALIZED = 'WIZARD_INITIALIZED';
+export const SET_MOVEMENTS_FILTER = 'SET_MOVEMENTS_FILTER';
 
 export function loadMovements(clear) {
   return {
@@ -204,5 +205,14 @@ export function startInitializeWizard() {
 export function wizardInitialized() {
   return {
     type: WIZARD_INITIALIZED,
+  };
+}
+
+export function setMovementsFilter(filter) {
+  return {
+    type: SET_MOVEMENTS_FILTER,
+    payload: {
+      filter
+    }
   };
 }

@@ -1,10 +1,32 @@
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
-import * as reducer from './reducer';
+import reducer from './reducer';
+
+const INITIAL_STATE = {
+  data: new ImmutableItemsArray(),
+  loading: false,
+  loadingFailed: false,
+  associatedMovements: {},
+  byImmatriculation: {},
+  filter: {
+    date: { // "end" is the newer date bound ("start" must come before "end")
+      start: null,
+      end: null
+    },
+    immatriculation: '',
+    onlyWithoutAssociatedMovement: false
+  }
+};
 
 describe('modules', () => {
   describe('movements', () => {
     describe('reducers', () => {
+      it('should handle initial state', () => {
+        expect(
+          reducer(undefined, {})
+        ).toEqual(INITIAL_STATE);
+      });
+
       describe('setMovements', () => {
         it('should set movements', () => {
           const state = {
@@ -52,7 +74,7 @@ describe('modules', () => {
 
           const action = actions.setMovements(newMovements);
 
-          const newState = reducer.setMovements(state, action);
+          const newState = reducer(state, action);
 
           expect(newState.loading).toEqual(false);
           expect(newState.data).toEqual(newMovements);
