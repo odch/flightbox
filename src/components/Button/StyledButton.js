@@ -9,7 +9,10 @@ const colors = props => {
   }
 
   if (props.danger) {
-    return `
+    return props.flat ? `
+      background-color: #fff;
+      color: ${props.theme.colors.danger};
+    ` : `
       background-color: ${props.disabled ? `#ccc` : props.theme.colors.danger};
       color: #fff;
     `;

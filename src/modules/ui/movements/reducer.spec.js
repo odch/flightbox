@@ -4,6 +4,7 @@ import * as actions from './actions';
 const INITIAL_STATE = {
   deleteConfirmation: null,
   selected: null,
+  filterExpanded: false
 };
 
 describe('modules', () => {
@@ -44,6 +45,18 @@ describe('modules', () => {
               }, actions.selectMovement(null))
             ).toEqual({
               selected: null
+            });
+          });
+        });
+
+        describe('SET_MOVEMENTS_FILTER_EXPANDED', () => {
+          it('should set the expanded flag', () => {
+            expect(
+              reducer({
+                filterExpanded: false
+              }, actions.setMovementsFilterExpanded(true))
+            ).toEqual({
+              filterExpanded: true
             });
           });
         });
