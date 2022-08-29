@@ -9,7 +9,7 @@ import {localToFirebase, firebaseToLocal, transferValues, compareDescending} fro
 import { error } from '../../util/log';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
-import getAssociations, {getAssociatedMovement} from './associate';
+import getAssociations, {getAssociatedMovement, isCircuit} from './associate';
 import firebase from '../../util/firebase';
 
 export const stateSelector = state => state.movements;
@@ -243,11 +243,14 @@ export function* loadAssociatedMovements(movements, homeBaseAircrafts, channel) 
 }
 
 export function* loadAssociatedMovement(movement, homeBaseAircrafts, channel) {
-  const relevantMovements = yield call(getMovementsByImmatriculation, movement.immatriculation, channel);
+  const aircraftMovements = yield call(getMovementsByImmatriculation, movement.immatriculation, channel);
+
+  const expectCircuit = isCircuit(movement);
+  const relevantMovements = aircraftMovements.array.filter(movement => expectCircuit === isCircuit(movement))
 
   const isHomeBase = homeBaseAircrafts.has(movement.immatriculation);
 
-  const associatedMovement = getAssociatedMovement(movement, isHomeBase, relevantMovements.array) || null;
+  const associatedMovement = getAssociatedMovement(movement, isHomeBase, relevantMovements) || null;
 
   return {
     movement,
