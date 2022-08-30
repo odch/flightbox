@@ -46,7 +46,7 @@ export const AutoLoad = (List) => class extends Component {
   }
 
   handleScroll(e) {
-    if (this.isEndReached(e.target)) {
+    if (this.isEndReached(e.target) && !this.props.autoLoadDisabled) {
       this.props.loadItems();
     }
   }
@@ -80,4 +80,5 @@ AutoLoad.propTypes = {
   items: PropTypes.array.isRequired,
   bottomThreshold: PropTypes.number,
   className: PropTypes.string,
+  autoLoadDisabled: PropTypes.bool,
 };

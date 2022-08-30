@@ -38,12 +38,18 @@ export const setMovementsByImmatriculation = (state, action) => ({
   }
 });
 
+export const setFilter = (state, action) => ({
+  ...state,
+  filter: action.payload.filter
+})
+
 const ACTION_HANDLERS = {
   [actions.SET_MOVEMENTS]: setMovements,
   [actions.SET_ASSOCIATED_MOVEMENTS]: setAssociatedMovements,
   [actions.SET_MOVEMENTS_BY_IMMATRICULATION]: setMovementsByImmatriculation,
   [actions.SET_MOVEMENTS_LOADING]: setLoading,
   [actions.LOAD_MOVEMENTS_FAILURE]: setLoadingFailure,
+  [actions.SET_MOVEMENTS_FILTER]: setFilter,
 };
 
 const INITIAL_STATE = {
@@ -52,6 +58,14 @@ const INITIAL_STATE = {
   loadingFailed: false,
   associatedMovements: {},
   byImmatriculation: {},
+  filter: {
+    date: { // "end" is the newer date bound ("start" must come before "end")
+      start: null,
+      end: null
+    },
+    immatriculation: '',
+    onlyWithoutAssociatedMovement: false
+  }
 };
 
 const reducer = (initialState, actionHandlers) => {

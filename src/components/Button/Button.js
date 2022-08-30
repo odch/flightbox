@@ -46,6 +46,7 @@ class Button extends React.Component {
           disabled={disabled}
           hovered={this.state.hovered}
           danger={danger}
+          flat={flat}
         >
           {icon && <MaterialIcon icon={icon}/>}<Label>{label}</Label>
         </Overlay>

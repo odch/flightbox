@@ -53,7 +53,7 @@ const addAssociatedMovement = (aircraftMovements, predicate, associations, isHom
   })
 }
 
-const isCircuit = movement => {
+export const isCircuit = movement => {
   const route = movement.departureRoute || movement.arrivalRoute;
   return route === 'circuits';
 }

@@ -9,7 +9,7 @@ import {localToFirebase, firebaseToLocal, transferValues, compareDescending} fro
 import { error } from '../../util/log';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
-import getAssociations, {getAssociatedMovement} from './associate';
+import getAssociations, {getAssociatedMovement, isCircuit} from './associate';
 import firebase from '../../util/firebase';
 
 export const stateSelector = state => state.movements;
@@ -102,6 +102,10 @@ export function getOldest(snapshot) {
   return oldest;
 }
 
+export function* filterMovements() {
+  yield put(actions.loadMovements(true));
+}
+
 export function* loadMovements(channel, action) {
   try {
     const {clear} = action.payload;
@@ -110,33 +114,7 @@ export function* loadMovements(channel, action) {
     if (movements.loading !== true) {
       yield put(actions.setMovementsLoading());
 
-      const pagination = getPagination(clear ? [] : movements.data.array);
-
-      const departures = yield call(
-        remote.loadLimited,
-        '/departures',
-        pagination.start,
-        pagination.limit
-      );
-
-      const oldestDeparture = getOldest(departures.snapshot);
-
-      let arrivalsLimit = null;
-      let arrivalsEnd = null;
-
-      if (oldestDeparture) {
-        arrivalsEnd = oldestDeparture.negativeTimestamp;
-      } else {
-        arrivalsLimit = pagination.limit;
-      }
-
-      const arrivals = yield call(
-        remote.loadLimited,
-        '/arrivals',
-        pagination.start,
-        arrivalsLimit,
-        arrivalsEnd
-      );
+      const { departures, arrivals } = yield call(loadDeparturesAndArrivals, movements, clear);
 
       const eventActions = {
         added: actions.movementAdded,
@@ -155,6 +133,71 @@ export function* loadMovements(channel, action) {
     error('Failed to load movements', e);
     channel.put(actions.loadMovementsFailure());
   }
+}
+
+export function* loadDeparturesAndArrivals(movements, clear) {
+  if (movements.filter.date.start && movements.filter.date.end) {
+    return yield call(loadDeparturesAndArrivalsFiltered, movements);
+  } else {
+    return yield call(loadLatestDeparturesAndArrivalsPaged, movements, clear);
+  }
+}
+
+export function* loadDeparturesAndArrivalsFiltered(movements) {
+  // start and end is the other way round because we're sorting (ascending) by negative timestamp
+  // (we can't fetch data sorted descending in firebase)
+  const start = dates.negativeTimestampEndOfDay(movements.filter.date.end);
+  const end = dates.negativeTimestampStartOfDay(movements.filter.date.start);
+
+  const departures = yield call(
+    remote.loadLimited,
+    '/departures',
+    start,
+    null,
+    end
+  );
+
+  const arrivals = yield call(
+    remote.loadLimited,
+    '/arrivals',
+    start,
+    null,
+    end
+  );
+
+  return {departures, arrivals};
+}
+
+export function* loadLatestDeparturesAndArrivalsPaged(movements, clear) {
+  const pagination = getPagination(clear ? [] : movements.data.array);
+
+  const departures = yield call(
+    remote.loadLimited,
+    '/departures',
+    pagination.start,
+    pagination.limit
+  );
+
+  const oldestDeparture = getOldest(departures.snapshot);
+
+  let arrivalsLimit = null;
+  let arrivalsEnd = null;
+
+  if (oldestDeparture) {
+    arrivalsEnd = oldestDeparture.negativeTimestamp;
+  } else {
+    arrivalsLimit = pagination.limit;
+  }
+
+  const arrivals = yield call(
+    remote.loadLimited,
+    '/arrivals',
+    pagination.start,
+    arrivalsLimit,
+    arrivalsEnd
+  );
+
+  return {departures, arrivals};
 }
 
 export function* getHomeBaseAircrafts() {
@@ -200,11 +243,14 @@ export function* loadAssociatedMovements(movements, homeBaseAircrafts, channel) 
 }
 
 export function* loadAssociatedMovement(movement, homeBaseAircrafts, channel) {
-  const relevantMovements = yield call(getMovementsByImmatriculation, movement.immatriculation, channel);
+  const aircraftMovements = yield call(getMovementsByImmatriculation, movement.immatriculation, channel);
+
+  const expectCircuit = isCircuit(movement);
+  const relevantMovements = aircraftMovements.array.filter(movement => expectCircuit === isCircuit(movement))
 
   const isHomeBase = homeBaseAircrafts.has(movement.immatriculation);
 
-  const associatedMovement = getAssociatedMovement(movement, isHomeBase, relevantMovements.array) || null;
+  const associatedMovement = getAssociatedMovement(movement, isHomeBase, relevantMovements) || null;
 
   return {
     movement,
@@ -506,6 +552,7 @@ export default function* sagas() {
   yield [
     fork(monitor, channel),
     fork(takeEvery, actions.LOAD_MOVEMENTS, loadMovements, channel),
+    fork(takeEvery, actions.SET_MOVEMENTS_FILTER, filterMovements, channel),
     fork(takeEvery, actions.SET_MOVEMENTS, associateMovements, channel),
     fork(takeEvery, actions.MOVEMENT_ADDED, movementAdded, channel),
     fork(takeEvery, actions.MOVEMENT_CHANGED, movementChanged, channel),

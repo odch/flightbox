@@ -1,12 +1,13 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import Predicates from './Predicates';
 import MovementGroup from './MovementGroup';
 import LoadingInfo from './LoadingInfo';
 import LoadingFailureInfo from './LoadingFailureInfo';
+import NoMovementsInfo from './NoMovmementsInfo';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
 import { AutoLoad } from '../../util/AutoLoad';
-import dates from '../../util/dates';
+import MovementFilter from '../../containers/MovementFilterContainer';
 
 const afterTodayPredicate = Predicates.newerThanSameDay();
 const todayPredicate = Predicates.sameDay();
@@ -52,6 +53,7 @@ class MovementList extends React.PureComponent {
 
     return (
       <div>
+        {this.props.isAdmin === true && <MovementFilter/>}
         <MovementGroup
           label="Ab morgen"
           items={this.props.items}
@@ -127,6 +129,7 @@ class MovementList extends React.PureComponent {
         />
         {this.props.loading && <LoadingInfo/>}
         {this.props.loadingFailed && <LoadingFailureInfo/>}
+        {!this.props.loading && this.props.items.array.length === 0 && <NoMovementsInfo/>}
         {confirmationDialog}
       </div>
     );
@@ -152,7 +155,8 @@ MovementList.propTypes = {
   aircraftSettings: PropTypes.shape({
     club: PropTypes.objectOf(PropTypes.bool),
     homeBase: PropTypes.objectOf(PropTypes.bool)
-  }).isRequired
+  }).isRequired,
+  isAdmin: PropTypes.bool
 };
 
 export default AutoLoad(MovementList);

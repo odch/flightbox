@@ -19,15 +19,24 @@ function selectMovement(state, action) {
   });
 }
 
+function setMovementsFilterExpanded(state, action) {
+  return {
+    ...state,
+    filterExpanded: action.payload.expanded
+  };
+}
+
 const ACTION_HANDLERS = {
   [actions.SHOW_DELETE_CONFIRMATION_DIALOG]: showDeleteConfirmationDialog,
   [actions.HIDE_DELETE_CONFIRMATION_DIALOG]: hideDeleteConfirmationDialog,
   [actions.SELECT_MOVEMENT]: selectMovement,
+  [actions.SET_MOVEMENTS_FILTER_EXPANDED]: setMovementsFilterExpanded,
 };
 
 const INITIAL_STATE = {
   deleteConfirmation: null,
   selected: null,
+  filterExpanded: false
 };
 
 export default reducer(INITIAL_STATE, ACTION_HANDLERS);
