@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "cors": "^2.8.4",
-    "firebase-admin": "8.4.0",
+    "firebase-admin": "11.4.1",
     "firebase-functions": "^3.13.2",
     "request-promise": "^4.2.6",
     "soap": "^0.24.0"
