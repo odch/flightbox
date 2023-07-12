@@ -1,12 +1,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { getFromItemKey } from '../../../../util/reference-number';
+import {getFromItemKey} from '../../../../util/reference-number';
 import {getLandingFeeText} from '../../../../util/landingFees';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
 import Message, {ReferenceNumberMessage} from './Message';
-import ActionsWrapper from './ActionsWrapper';
-import ActionButton from './ActionButton';
+import CashPaymentMessage from './CashPaymentMessage'
+import FinishActions from './FinishActions'
+import PaymentMethod from '../../../../containers/PaymentMethodContainer'
 
 const getHeading = isUpdate =>
   isUpdate === true
@@ -32,9 +33,7 @@ const Finish = props => {
   const landingFeeMsg = isHomeBase === false
     ? getLandingFeeText(landings, landingFeeSingle, landingFeeTotal, goArounds, goAroundFeeSingle, goAroundFeeTotal)
     : null;
-
-  const exitImagePath = require('./ic_exit_to_app_black_48dp_2x.png');
-  const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
+  const amount =( landingFeeTotal || 0) + (goAroundFeeTotal || 0)
 
   return (
     <Wrapper>
@@ -45,22 +44,17 @@ const Finish = props => {
           <Message>Landetaxe: {landingFeeMsg}</Message>
         </>
       )}
-      {isHomeBase === false && <Message>
-        Bitte deponieren Sie die fällige Landetaxe im Briefkasten vor dem C-Büro und kennzeichnen Sie den Umschlag
-        mit der Referenznummer {getFromItemKey(itemKey)}.
-      </Message>}
-      <ActionsWrapper>
-        <ActionButton
-          label="Abflug erfassen"
-          img={departureImagePath}
-          onClick={createMovementFromMovement.bind(null, 'arrival', itemKey)}
-        />
-        <ActionButton
-          label="Beenden"
-          img={exitImagePath}
-          onClick={finish}
-        />
-      </ActionsWrapper>
+      {isHomeBase === false && (
+        __CARD_PAYMENTS_ENABLED__ ? (
+          <PaymentMethod itemKey={itemKey} createMovementFromMovement={createMovementFromMovement} finish={finish}
+                         amount={amount}/>
+        ) : (
+          <>
+            <CashPaymentMessage itemKey={itemKey}/>
+            <FinishActions itemKey={itemKey} createMovementFromMovement={createMovementFromMovement} finish={finish}/>
+          </>
+        )
+      )}
     </Wrapper>
   );
 };
@@ -76,7 +70,8 @@ Finish.propTypes = {
   landingFeeTotal: PropTypes.number,
   goArounds: PropTypes.number,
   goAroundFeeSingle: PropTypes.number,
-  goAroundFeeTotal: PropTypes.number
+  goAroundFeeTotal: PropTypes.number,
+  cardPaymentsEnabled: PropTypes.bool
 };
 
 export default Finish;

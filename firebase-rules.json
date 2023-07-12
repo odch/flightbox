@@ -270,6 +270,31 @@
           ".validate": false
         }
       }
+    },
+    "card-payments": {
+      "$card_payment_id": {
+        ".read": "auth !== null",
+        ".write": "auth !== null && !data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['amount', 'currency', 'arrivalReference', 'timestamp', 'status'])",
+        "currency": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "amount": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "timestamp": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "arrivalReference": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "status": {
+          ".validate": "newData.val() === 'pending' || newData.val() === 'success' || newData.val() === 'failure'"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     }
   }
 }
