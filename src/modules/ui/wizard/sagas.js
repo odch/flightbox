@@ -8,9 +8,11 @@ import {
   WIZARD_INITIALIZED
 } from '../../movements';
 import * as actions from './actions';
+import {reset as arrivalPaymentReset} from '../arrivalPayment'
 
 export function* init() {
   yield put(actions.reset());
+  yield put(arrivalPaymentReset());
 }
 
 export function* setInitialized() {
