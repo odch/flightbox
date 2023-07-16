@@ -10,7 +10,8 @@ export const Step = {
 const INITIAL_STATE = {
   method: null,
   step: Step.OPTIONS,
-  failure: false
+  failure: false,
+  cardPaymentId: null
 };
 
 const reset = () => ({
@@ -28,6 +29,11 @@ const setStep = (state, action) => ({
   step: action.payload.step
 })
 
+const setCardPaymentId = (state, action) => ({
+  ...state,
+  cardPaymentId: action.payload.id
+})
+
 const setFailure = (state) => ({
   ...state,
   failure: true
@@ -36,6 +42,7 @@ const setFailure = (state) => ({
 const ACTION_HANDLERS = {
   [actions.ARRIVAL_PAYMENT_SET_METHOD]: setMethod,
   [actions.ARRIVAL_PAYMENT_SET_STEP]: setStep,
+  [actions.ARRIVAL_PAYMENT_SET_CARD_PAYMENT_ID]: setCardPaymentId,
   [actions.ARRIVAL_PAYMENT_CARD_PAYMENT_FAILURE]: setFailure,
   [actions.ARRIVAL_PAYMENT_RESET]: reset,
 };
