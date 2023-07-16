@@ -11,18 +11,18 @@ export function airstat(year, month, options) {
   });
 }
 
-export function landings(year, month) {
+export function landings(year, month, options) {
   return new Promise(resolve => {
-    new LandingsReport(year, month)
+    new LandingsReport(year, month, options)
       .generate(download => {
         resolve(download);
       });
   });
 }
 
-export function yearlySummary(year) {
+export function yearlySummary(year, options) {
   return new Promise(resolve => {
-    new YearlySummaryReport(year)
+    new YearlySummaryReport(year, options)
       .generate(download => {
         resolve(download);
       });

@@ -10,7 +10,7 @@ class StartPage extends React.PureComponent {
     return (
       <div>
         <Header logout={props.logout} auth={props.auth} showLogin={props.showLogin}/>
-        <Main admin={props.auth.data.admin === true}/>
+        <Main auth={props.auth}/>
       </div>
     );
   }

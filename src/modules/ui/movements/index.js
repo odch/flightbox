@@ -7,7 +7,8 @@ export {
   showMovementWizard,
   createMovementFromMovement,
   cancelWizard,
-  selectMovement
+  selectMovement,
+  setMovementsFilterExpanded
 } from './actions';
 
 export { sagas };

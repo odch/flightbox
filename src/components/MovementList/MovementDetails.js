@@ -9,6 +9,8 @@ import newLineToBr from '../../util/newLineToBr';
 import DetailsBox from './DetailsBox';
 import MovementField from './MovementField';
 import HomeBaseIcon from './HomeBaseIcon';
+import {getFromItemKey} from '../../util/reference-number';
+import {getLandingFeeText} from '../../util/landingFees';
 
 const Content = styled.div`
   padding: 1.5em 1em 0 1em;
@@ -26,6 +28,15 @@ const getCarriageVoucher = props => {
   }
   return null;
 };
+
+const getLandingFee = data => getLandingFeeText(
+  data.landingCount,
+  data.landingFeeSingle,
+  data.landingFeeTotal,
+  data.goAroundCount,
+  data.goAroundFeeSingle,
+  data.goAroundFeeTotal
+)
 
 class MovementDetails extends React.PureComponent {
 
@@ -45,6 +56,7 @@ class MovementDetails extends React.PureComponent {
             <MovementField label="Immatrikulation" value={props.data.immatriculation}/>
             <MovementField label="Flugzeugtyp" value={props.data.aircraftType}/>
             <MovementField label="MTOW" value={props.data.mtow}/>
+            {props.data.aircraftCategory && <MovementField label="Kategorie" value={props.data.aircraftCategory}/>}
             <StyledHomeBaseIcon isHomeBase={props.isHomeBase} showText/>
           </DetailsBox>
           <DetailsBox label="Pilot">
@@ -101,6 +113,12 @@ class MovementDetails extends React.PureComponent {
               </DetailsBox>
             )
           }
+          {props.data.type === 'arrival' && props.isHomeBase === false && props.data.landingFeeTotal !== undefined && (
+            <DetailsBox label="Gebühren">
+              <MovementField label="Referenznummer" value={getFromItemKey(props.data.key)}/>
+              <MovementField label="Landetaxe" value={getLandingFee(props.data)}/>
+            </DetailsBox>
+          )}
         </Content>
     );
   }

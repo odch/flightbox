@@ -39,6 +39,12 @@ const InternalDescription = () => (
         und durch <emph>LSZZ</emph> ersetzt wurde</Dd>
       <Dt>REMARKS</Dt>
       <Dd>Bemerkungen</Dd>
+      <Dt>FEES</Dt>
+      <Dd>Total der Landegebühren</Dd>
+      <Dt>LDG_COUNT</Dt>
+      <Dd>Anzahl Landungen</Dd>
+      <Dt>GA_COUNT</Dt>
+      <Dd>Anzahl Durchstarts</Dd>
     </Dl>
   </div>
 );

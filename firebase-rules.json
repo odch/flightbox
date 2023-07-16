@@ -4,11 +4,12 @@
       ".read": "auth !== null",
       ".indexOn": [
         "dateTime",
-        "negativeTimestamp"
+        "negativeTimestamp",
+        "immatriculation"
       ],
       "$departure_id": {
         ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24))",
-        ".validate": "newData.hasChildren(['aircraftType', 'dateTime', 'departureRoute', 'duration', 'firstname', 'flightType', 'immatriculation', 'lastname', 'location', 'mtow', 'negativeTimestamp', 'runway'])",
+        ".validate": "newData.hasChildren(['aircraftType', 'dateTime', 'departureRoute', 'duration', 'firstname', 'flightType', 'immatriculation', 'lastname', 'location', 'mtow', 'aircraftCategory', 'negativeTimestamp'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
@@ -45,6 +46,9 @@
         "mtow": {
           ".validate": "newData.isNumber() && newData.val() > 0"
         },
+        "aircraftCategory": {
+          ".validate": "{aircraftCategory}"
+        },
         "negativeTimestamp": {
           ".validate": "newData.isNumber() && newData.val() < 0"
         },
@@ -72,11 +76,12 @@
       ".read": "auth !== null",
       ".indexOn": [
         "dateTime",
-        "negativeTimestamp"
+        "negativeTimestamp",
+        "immatriculation"
       ],
       "$arrival_id": {
         ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24))",
-        ".validate": "newData.hasChildren(['aircraftType', 'arrivalRoute', 'dateTime', 'firstname', 'flightType', 'immatriculation', 'landingCount', 'lastname', 'location', 'mtow', 'negativeTimestamp', 'runway'])",
+        ".validate": "newData.hasChildren(['aircraftType', 'arrivalRoute', 'dateTime', 'firstname', 'flightType', 'immatriculation', 'landingCount', 'lastname', 'location', 'mtow', 'aircraftCategory', 'negativeTimestamp'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
@@ -93,6 +98,12 @@
           ".validate": "{flightType}"
         },
         "goAroundCount": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "goAroundFeeSingle": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "goAroundFeeTotal": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
         },
         "immatriculation": {
@@ -118,6 +129,9 @@
         },
         "mtow": {
           ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "aircraftCategory": {
+          ".validate": "{aircraftCategory}"
         },
         "negativeTimestamp": {
           ".validate": "newData.isNumber() && newData.val() < 0"
@@ -174,6 +188,10 @@
           ".read": "auth !== null",
           ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
         },
+        "custom": {
+          ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+          ".write": false
+        },
         "$other": {
           ".validate": false
         }
@@ -213,11 +231,19 @@
         }
       }
     },
-    "admins": {
+    "logins": {
       ".write": false,
-      "$admin_id": {
-        ".read": "auth !== null && $admin_id === auth.uid",
-        ".validate": "newData.exists() && newData.isBoolean()"
+      "$login_id": {
+        ".read": "auth !== null && $login_id === auth.uid",
+        "admin": {
+          ".validate": "newData.isBoolean()"
+        },
+        "links": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     },
     "status": {
@@ -239,6 +265,31 @@
         },
         "by": {
           ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "card-payments": {
+      "$card_payment_id": {
+        ".read": "auth !== null",
+        ".write": "auth !== null && newData.exists()",
+        ".validate": "newData.hasChildren(['amount', 'currency', 'arrivalReference', 'timestamp', 'status'])",
+        "currency": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "amount": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "timestamp": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "arrivalReference": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "status": {
+          ".validate": "newData.val() === 'pending' || newData.val() === 'success' || newData.val() === 'failure' || newData.val() === 'cancelled'"
         },
         "$other": {
           ".validate": false

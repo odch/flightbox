@@ -3,38 +3,104 @@
     "name": "Wangen-Lachen",
     "ICAO": "LSPV",
     "runways": [
-      "08",
-      "26"
-    ],
-    "departureRoutes": [
       {
-        "name": "uznach",
-        "label": "Uznach"
+        "name": "08",
+        "type": "A"
       },
       {
-        "name": "seedamm",
-        "label": "Seedamm"
+        "name": "26",
+        "type": "A"
+      }
+    ],
+    "noRunwayIfHelicopter": true,
+    "departureRoutes": [
+      {
+        "name": "O",
+        "label": "Ost",
+        "condition": "notHelicopter"
+      },
+      {
+        "name": "W",
+        "label": "West",
+        "condition": "notHelicopter"
+      },
+      {
+        "name": "S",
+        "label": "Süd",
+        "condition": "helicopter"
       }
     ],
     "arrivalRoutes": [
       {
         "name": "S",
-        "label": "Sektor Süd"
+        "label": "Süd"
       }
-    ]
+    ],
+    "landingFees": {
+      "default": {
+        "default": [
+          {
+            "mtowMin": 0,
+            "mtowMax": 1000,
+            "fee": 20
+          },
+          {
+            "mtowMin": 1001,
+            "mtowMax": 2000,
+            "fee": 25
+          },
+          {
+            "mtowMin": 2001,
+            "fee": 30
+          }
+        ]
+      }
+    },
+    "goAroundFees": {
+      "default": {
+        "default": [
+          {
+            "mtowMin": 0,
+            "mtowMax": 1000,
+            "fee": 20
+          },
+          {
+            "mtowMin": 1001,
+            "mtowMax": 2000,
+            "fee": 25
+          },
+          {
+            "mtowMin": 2001,
+            "fee": 30
+          }
+        ]
+      }
+    }
   },
   "environments": {
     "test": {
-      "firebase": "https://lspv-test.firebaseio.com",
-      "ipAuth": "https://auth.app.opendigital.ch/api/v1/firebaseauth/flightnet/lspv-test",
-      "credentialsAuth": "https://auth.app.opendigital.ch/api/v1/firebaseauth/flightnet/lspv-test"
+      "firebaseProjectId": "lspv-test",
+      "firebaseApiKey": "AIzaSyB93F1Vre17fHxc5RruEGbW3T4JY5LJy3g"
     },
     "production": {
-      "firebase": "xxx",
-      "ipAuth": "xxx",
-      "credentialsAuth": "xxx"
+      "firebaseProjectId": "lspv-prod",
+      "firebaseApiKey": "AIzaSyD90-U2s9Ypmzjz66NpMQmr4o9dgU1K2Ys"
     }
   },
   "theme": "lspv",
-  "title": "LSPV Bewegungen"
+  "title": "LSPV Bewegungen",
+  "departureCommitRequirements": [
+    {
+      "text": "Keine Starts auf RWY 26 von 12:00h bis 13:30h LT!",
+      "styles": {
+        "color": "#fa4214",
+        "font-weight": "bold"
+      }
+    },
+    "Meine Ausweise sind gültig.",
+    "Das maximale Abfluggewicht und der Schwerpunkt sind innerhalb der zulässigen Limiten.",
+    "Die verfügbare Pistenlänge ist ausreichend.",
+    "Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.",
+    "Der Preflight-Check wurde ausgeführt."
+  ]
 }

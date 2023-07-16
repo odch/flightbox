@@ -1,12 +1,13 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import Predicates from './Predicates';
 import MovementGroup from './MovementGroup';
 import LoadingInfo from './LoadingInfo';
 import LoadingFailureInfo from './LoadingFailureInfo';
+import NoMovementsInfo from './NoMovmementsInfo';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
 import { AutoLoad } from '../../util/AutoLoad';
-import dates from '../../util/dates';
+import MovementFilter from '../../containers/MovementFilterContainer';
 
 const afterTodayPredicate = Predicates.newerThanSameDay();
 const todayPredicate = Predicates.sameDay();
@@ -36,12 +37,6 @@ class MovementList extends React.PureComponent {
     this.props.loadItems(true);
   }
 
-  getDateString(movement) {
-    const date = dates.formatDate(movement.date);
-    const time = dates.formatTime(movement.date, movement.time);
-    return `${date} ${time}`;
-  }
-
   render() {
     if (this.props.lockDate.loading === true
       || !this.props.aircraftSettings.club
@@ -56,15 +51,13 @@ class MovementList extends React.PureComponent {
         hide={this.props.hideDeleteConfirmationDialog}
       />) : null;
 
-    const oldestMovementDate = this.props.items.array.length > 0
-      ? this.getDateString(this.props.items.array[this.props.items.array.length - 1])
-      : null;
-
     return (
       <div>
+        {this.props.isAdmin === true && <MovementFilter/>}
         <MovementGroup
           label="Ab morgen"
           items={this.props.items}
+          associatedMovements={this.props.associatedMovements}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={afterTodayPredicate}
@@ -74,13 +67,12 @@ class MovementList extends React.PureComponent {
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
           aircraftSettings={this.props.aircraftSettings}
-          oldestMovementDate={oldestMovementDate}
-          loadMovements={this.props.loadItems}
           loading={this.props.loading}
         />
         <MovementGroup
           label="Heute"
           items={this.props.items}
+          associatedMovements={this.props.associatedMovements}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={todayPredicate}
@@ -90,13 +82,12 @@ class MovementList extends React.PureComponent {
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
           aircraftSettings={this.props.aircraftSettings}
-          oldestMovementDate={oldestMovementDate}
-          loadMovements={this.props.loadItems}
           loading={this.props.loading}
         />
         <MovementGroup
           label="Gestern"
           items={this.props.items}
+          associatedMovements={this.props.associatedMovements}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={yesterdayPredicate}
@@ -106,13 +97,12 @@ class MovementList extends React.PureComponent {
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
           aircraftSettings={this.props.aircraftSettings}
-          oldestMovementDate={oldestMovementDate}
-          loadMovements={this.props.loadItems}
           loading={this.props.loading}
         />
         <MovementGroup
           label="Dieser Monat"
           items={this.props.items}
+          associatedMovements={this.props.associatedMovements}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={thisMonthPredicate}
@@ -121,13 +111,12 @@ class MovementList extends React.PureComponent {
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
           aircraftSettings={this.props.aircraftSettings}
-          oldestMovementDate={oldestMovementDate}
-          loadMovements={this.props.loadItems}
           loading={this.props.loading}
         />
         <MovementGroup
           label="Älter"
           items={this.props.items}
+          associatedMovements={this.props.associatedMovements}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={olderPredicate}
@@ -136,12 +125,11 @@ class MovementList extends React.PureComponent {
           onDelete={this.props.showDeleteConfirmationDialog}
           lockDate={this.props.lockDate.date}
           aircraftSettings={this.props.aircraftSettings}
-          oldestMovementDate={oldestMovementDate}
-          loadMovements={this.props.loadItems}
           loading={this.props.loading}
         />
         {this.props.loading && <LoadingInfo/>}
         {this.props.loadingFailed && <LoadingFailureInfo/>}
+        {!this.props.loading && this.props.items.array.length === 0 && <NoMovementsInfo/>}
         {confirmationDialog}
       </div>
     );
@@ -152,6 +140,7 @@ MovementList.propTypes = {
   loadItems: PropTypes.func.isRequired,
   loadAircraftSettings: PropTypes.func.isRequired,
   items: PropTypes.object.isRequired,
+  associatedMovements: PropTypes.object.isRequired,
   selected: PropTypes.string,
   onSelect: PropTypes.func,
   loading: PropTypes.bool.isRequired,
@@ -166,7 +155,8 @@ MovementList.propTypes = {
   aircraftSettings: PropTypes.shape({
     club: PropTypes.objectOf(PropTypes.bool),
     homeBase: PropTypes.objectOf(PropTypes.bool)
-  }).isRequired
+  }).isRequired,
+  isAdmin: PropTypes.bool
 };
 
 export default AutoLoad(MovementList);

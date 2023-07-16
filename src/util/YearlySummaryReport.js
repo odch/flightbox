@@ -1,11 +1,13 @@
 import Download from './Download.js';
 import MovementReport from "./MovementReport";
-import {getAirstatType} from './flightTypes';
+import {getAirstatType, isHelicopterAirstatType} from './flightTypes';
 
 class YearlySummaryReport {
 
-  constructor(year) {
+  constructor(year, options) {
     this.year = year;
+    this.options = options;
+    this.delimiter = this.options.delimiter || ',';
   }
 
   generate(callback) {
@@ -33,7 +35,7 @@ class YearlySummaryReport {
 
   buildContent(months) {
     const csvRecords = months.map((movements, index) => this.getMonthSummary(index + 1, movements), this);
-    csvRecords.unshift(YearlySummaryReport.header.join(','));
+    csvRecords.unshift(YearlySummaryReport.header.join(this.delimiter));
     return csvRecords.join('\n');
   }
 
@@ -41,8 +43,8 @@ class YearlySummaryReport {
     const summary = {
       Month: monthNr,
 
-      ['RWY' + __CONF__.aerodrome.runways[0]]: 0,
-      ['RWY' + __CONF__.aerodrome.runways[1]]: 0,
+      ['RWY' + __CONF__.aerodrome.runways[0].name]: 0,
+      ['RWY' + __CONF__.aerodrome.runways[1].name]: 0,
 
       PrivatePax: 0,
       PrivateLocal: 0,
@@ -71,7 +73,6 @@ class YearlySummaryReport {
       const columns = line.split(',');
 
       const movTrafficType = columns[1];
-      const movReg = columns[2];
       const movFlightType = parseInt(columns[3]);
       const movLocation = columns[5];
       const movPax = parseInt(columns[6]);
@@ -146,29 +147,26 @@ class YearlySummaryReport {
 
       summary['RWY' + movRwy] += (movCount + circuitsCount);
 
-      if (this.isHelicopter(movReg)) {
+      if (isHelicopterAirstatType(movFlightType)) {
         summary.Helicopter += (movCount + circuitsCount)
       }
     }
 
-    summary.Total = summary['RWY' + __CONF__.aerodrome.runways[0]] + summary['RWY' + __CONF__.aerodrome.runways[1]];
+    summary.Total = summary['RWY' + __CONF__.aerodrome.runways[0].name] +
+      summary['RWY' + __CONF__.aerodrome.runways[1].name];
     summary.TotalCircuits = summary.PrivateCircuits + summary.InstructionCircuits;
 
     return YearlySummaryReport.header
       .map(header => summary[header])
-      .join(',');
-  }
-
-  isHelicopter(registration) {
-    return /HB[XZ].*/.test(registration);
+      .join(this.delimiter);
   }
 }
 
 YearlySummaryReport.header = [
   'Month',
 
-  'RWY' + __CONF__.aerodrome.runways[0],
-  'RWY' + __CONF__.aerodrome.runways[1],
+  'RWY' + __CONF__.aerodrome.runways[0].name,
+  'RWY' + __CONF__.aerodrome.runways[1].name,
 
   'PrivatePax',
   'PrivateLocal',

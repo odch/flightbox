@@ -1,5 +1,6 @@
 import validateUtil from '../../util/validate';
 import objectToArray from '../../util/objectToArray';
+import {categories as aircraftCategories} from '../../util/aircraftCategories';
 
 const config = {
   immatriculation: {
@@ -22,6 +23,13 @@ const config = {
       integer: true,
     },
     message: 'Geben Sie hier das maximale Abfluggewicht des Flugzeugs ein (in Kilogramm).',
+  },
+  aircraftCategory: {
+    types: {
+      required: true,
+      values: aircraftCategories
+    },
+    message: 'Wählen Sie hier die Kategorie des Flugzeugs aus.',
   },
   lastname: {
     types: {
@@ -80,7 +88,7 @@ const config = {
   runway: {
     types: {
       required: true,
-      values: objectToArray(__CONF__.aerodrome.runways),
+      values: objectToArray(__CONF__.aerodrome.runways).map(runway => runway.name),
     },
     message: {
       departure: 'Wählen Sie hier die Pistenrichtung für den Abflug aus.',
@@ -117,8 +125,16 @@ const getConfig = (fields = []) => Object.keys(config)
     return obj;
   }, {});
 
-const validate = (type, fields) => values => {
-  const errorArr = validateUtil(values, getConfig(fields), type);
+const getRelevantFields = (fields, hiddenFields = []) => {
+  if (hiddenFields.length === 0) {
+    return fields
+  }
+  return fields.filter(field => !hiddenFields.includes(field))
+}
+
+const validate = (type, fields) => (values, props) => {
+  const relevantFields = getRelevantFields(fields, props.hiddenFields)
+  const errorArr = validateUtil(values, getConfig(relevantFields), type);
 
   const errors = {};
 

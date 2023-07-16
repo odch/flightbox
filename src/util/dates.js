@@ -29,6 +29,14 @@ const dates = {
     return new Date(isoUtc).getTime();
   },
 
+  negativeTimestampStartOfDay(localDateString) {
+    return moment.tz(localDateString, 'Europe/Zurich').startOf('day').valueOf() * -1;
+  },
+
+  negativeTimestampEndOfDay(localDateString) {
+    return moment.tz(localDateString, 'Europe/Zurich').endOf('day').valueOf() * -1;
+  },
+
   /**
    * @param localDateString optional local date string (for timezone 'Europe/Zurich'; if missing: now)
    */

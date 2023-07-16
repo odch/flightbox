@@ -18,6 +18,9 @@ class ArrivalFinishContainer extends Component {
       landings,
       landingFeeSingle,
       landingFeeTotal,
+      goArounds,
+      goAroundFeeSingle,
+      goAroundFeeTotal,
       createMovementFromMovement,
       finish,
       isUpdate,
@@ -43,6 +46,9 @@ class ArrivalFinishContainer extends Component {
         landings={landings}
         landingFeeSingle={landingFeeSingle}
         landingFeeTotal={landingFeeTotal}
+        goArounds={goArounds}
+        goAroundFeeSingle={goAroundFeeSingle}
+        goAroundFeeTotal={goAroundFeeTotal}
       />
     );
   }
@@ -63,6 +69,9 @@ ArrivalFinishContainer.propTypes = {
   landings: PropTypes.number.isRequired,
   landingFeeSingle: PropTypes.number,
   landingFeeTotal: PropTypes.number,
+  goArounds: PropTypes.number,
+  goAroundFeeSingle: PropTypes.number,
+  goAroundFeeTotal: PropTypes.number
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -74,7 +83,10 @@ const mapStateToProps = (state, ownProps) => {
     immatriculation: state.ui.wizard.values.immatriculation,
     landings: state.ui.wizard.values.landingCount,
     landingFeeSingle: state.ui.wizard.values.landingFeeSingle,
-    landingFeeTotal: state.ui.wizard.values.landingFeeTotal
+    landingFeeTotal: state.ui.wizard.values.landingFeeTotal,
+    goArounds: state.ui.wizard.values.goAroundCount,
+    goAroundFeeSingle: state.ui.wizard.values.goAroundFeeSingle,
+    goAroundFeeTotal: state.ui.wizard.values.goAroundFeeTotal
   });
 };
 

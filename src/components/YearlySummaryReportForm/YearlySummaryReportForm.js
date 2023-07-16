@@ -7,7 +7,9 @@ const YearlySummaryReportForm = props => (
   <ReportForm
     disabled={props.disabled}
     date={props.date}
+    delimiter={props.delimiter}
     setDate={props.setDate}
+    setDelimiter={props.setDelimiter}
     generate={props.generate}
     withMonth={false}
   >
@@ -20,7 +22,9 @@ YearlySummaryReportForm.propTypes = {
   date: PropTypes.shape({
     year: PropTypes.number,
   }),
+  delimiter: PropTypes.string,
   setDate: PropTypes.func.isRequired,
+  setDelimiter: PropTypes.func.isRequired,
   generate: PropTypes.func.isRequired,
 };
 

@@ -6,4 +6,11 @@ const Message = styled.div`
   margin-bottom: 1.5em;
 `;
 
+const ReferenceNumberMessage = styled.div`
+  font-size: 1.5em;
+  padding: 0.2em;
+  display: inline-block;
+`;
+
+export {ReferenceNumberMessage}
 export default Message;

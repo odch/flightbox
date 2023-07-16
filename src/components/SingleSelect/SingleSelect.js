@@ -12,6 +12,19 @@ class SingleSelect extends Component {
     };
   }
 
+  componentDidMount() {
+    this.selectSingleItem()
+  }
+
+  componentDidUpdate(prevProps) {
+    this.selectSingleItem()
+    if (prevProps.value !== this.props.value) {
+      this.setState({
+        value: this.props.value
+      })
+    }
+  }
+
   render() {
     if (this.props.readOnly === true) {
       return (
@@ -73,6 +86,16 @@ class SingleSelect extends Component {
     }
 
     return this.state.value;
+  }
+
+  selectSingleItem() {
+    if (this.props.items.length === 1 && !this.props.value && this.props.onChange) {
+      this.props.onChange({
+        target: {
+          value: this.props.items[0].value
+        }
+      })
+    }
   }
 }
 

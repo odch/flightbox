@@ -1,15 +1,19 @@
 import { getPagination } from './pagination';
 import { takeEvery, takeLatest } from 'redux-saga'
-import { put, call, select, fork } from 'redux-saga/effects'
+import { put, call, select, fork, all } from 'redux-saga/effects'
 import { initialize, destroy, getFormValues } from 'redux-form'
 import createChannel, { monitor } from '../../util/createChannel';
 import * as actions from './actions';
 import * as remote from './remote';
-import { localToFirebase, firebaseToLocal, transferValues } from '../../util/movements';
+import {localToFirebase, firebaseToLocal, transferValues, compareDescending} from '../../util/movements';
 import { error } from '../../util/log';
 import dates from '../../util/dates';
+import ImmutableItemsArray from '../../util/ImmutableItemsArray';
+import getAssociations, {getAssociatedMovement, isCircuit} from './associate';
+import firebase from '../../util/firebase';
 
-export const stateSelector = (state, key) => state.movements;
+export const stateSelector = state => state.movements;
+export const settingsSelector = state => state.settings;
 
 export const movementSelector = (state, key) => state.movements.data.getByKey(key);
 
@@ -43,6 +47,7 @@ export function* getDefaultValuesFromArrival(arrivalKey) {
       'immatriculation',
       'aircraftType',
       'mtow',
+      'aircraftCategory',
       'memberNr',
       'lastname',
       'firstname',
@@ -68,6 +73,7 @@ export function* getDefaultValuesFromDeparture(departureKey) {
       'immatriculation',
       'aircraftType',
       'mtow',
+      'aircraftCategory',
       'memberNr',
       'lastname',
       'firstname',
@@ -96,6 +102,10 @@ export function getOldest(snapshot) {
   return oldest;
 }
 
+export function* filterMovements() {
+  yield put(actions.loadMovements(true));
+}
+
 export function* loadMovements(channel, action) {
   try {
     const {clear} = action.payload;
@@ -104,39 +114,20 @@ export function* loadMovements(channel, action) {
     if (movements.loading !== true) {
       yield put(actions.setMovementsLoading());
 
-      const pagination = getPagination(clear ? [] : movements.data.array);
+      const { departures, arrivals } = yield call(loadDeparturesAndArrivals, movements, clear);
 
-      const departures = yield call(
-        remote.loadLimited,
-        '/departures',
-        pagination.start,
-        pagination.limit
-      );
+      const eventActions = {
+        added: actions.movementAdded,
+        changed: actions.movementChanged,
+        removed: actions.movementDeleted
+      };
 
-      const oldestDeparture = getOldest(departures.snapshot);
+      yield call(monitorRef, departures.ref, channel, 'departure', eventActions);
+      yield call(monitorRef, arrivals.ref, channel, 'arrival', eventActions);
 
-      let arrivalsLimit = null;
-      let arrivalsEnd = null;
+      const existingMovements = clear ? new ImmutableItemsArray() : movements.data;
 
-      if (oldestDeparture) {
-        arrivalsEnd = oldestDeparture.negativeTimestamp;
-      } else {
-        arrivalsLimit = pagination.limit;
-      }
-
-      const arrivals = yield call(
-        remote.loadLimited,
-        '/arrivals',
-        pagination.start,
-        arrivalsLimit,
-        arrivalsEnd
-      );
-
-      yield call(monitorRef, departures.ref, channel, 'departure');
-      yield call(monitorRef, arrivals.ref, channel, 'arrival');
-
-      channel.put(actions.movementsAdded(departures.snapshot, 'departure', clear));
-      channel.put(actions.movementsAdded(arrivals.snapshot, 'arrival', clear));
+      yield call(addMovements, departures.snapshot, arrivals.snapshot, existingMovements, channel);
     }
   } catch(e) {
     error('Failed to load movements', e);
@@ -144,14 +135,169 @@ export function* loadMovements(channel, action) {
   }
 }
 
-export function* monitorRef(ref, channel, movementType) {
+export function* loadDeparturesAndArrivals(movements, clear) {
+  if (movements.filter.date.start && movements.filter.date.end) {
+    return yield call(loadDeparturesAndArrivalsFiltered, movements);
+  } else {
+    return yield call(loadLatestDeparturesAndArrivalsPaged, movements, clear);
+  }
+}
+
+export function* loadDeparturesAndArrivalsFiltered(movements) {
+  // start and end is the other way round because we're sorting (ascending) by negative timestamp
+  // (we can't fetch data sorted descending in firebase)
+  const start = dates.negativeTimestampEndOfDay(movements.filter.date.end);
+  const end = dates.negativeTimestampStartOfDay(movements.filter.date.start);
+
+  const departures = yield call(
+    remote.loadLimited,
+    '/departures',
+    start,
+    null,
+    end
+  );
+
+  const arrivals = yield call(
+    remote.loadLimited,
+    '/arrivals',
+    start,
+    null,
+    end
+  );
+
+  return {departures, arrivals};
+}
+
+export function* loadLatestDeparturesAndArrivalsPaged(movements, clear) {
+  const pagination = getPagination(clear ? [] : movements.data.array);
+
+  const departures = yield call(
+    remote.loadLimited,
+    '/departures',
+    pagination.start,
+    pagination.limit
+  );
+
+  const oldestDeparture = getOldest(departures.snapshot);
+
+  let arrivalsLimit = null;
+  let arrivalsEnd = null;
+
+  if (oldestDeparture) {
+    arrivalsEnd = oldestDeparture.negativeTimestamp;
+  } else {
+    arrivalsLimit = pagination.limit;
+  }
+
+  const arrivals = yield call(
+    remote.loadLimited,
+    '/arrivals',
+    pagination.start,
+    arrivalsLimit,
+    arrivalsEnd
+  );
+
+  return {departures, arrivals};
+}
+
+export function* getHomeBaseAircrafts() {
+  const {aircrafts: aircraftSettings} = yield select(settingsSelector);
+
+  const homeBaseAircrafts = new Set();
+  addAircraft(aircraftSettings.club, homeBaseAircrafts);
+  addAircraft(aircraftSettings.homeBase, homeBaseAircrafts);
+
+  return homeBaseAircrafts;
+}
+
+export function* addMovements(departuresSnapshot, arrivalsSnapshot, existingMovements, channel) {
+  const movements = [];
+
+  departuresSnapshot.forEach(transformToLocal(movements, 'departure'));
+  arrivalsSnapshot.forEach(transformToLocal(movements, 'arrival'));
+
+  const newData = existingMovements.insertAll(movements, compareDescending);
+
+  channel.put(actions.setMovements(newData));
+}
+
+export function* associateMovements(channel) {
+  const homeBaseAircrafts = yield call(getHomeBaseAircrafts);
+  const {data} = yield select(stateSelector);
+
+  const associations = getAssociations(data.array, homeBaseAircrafts);
+  channel.put(actions.setAssociatiatedMovements(associations));
+
+  const associationsToLoad = data.array.filter(item => associations[item.key] === undefined);
+  yield call(loadAssociatedMovements, associationsToLoad, homeBaseAircrafts, channel);
+}
+
+export function* loadAssociatedMovements(movements, homeBaseAircrafts, channel) {
+  const callEvents = movements.map(movement => call(loadAssociatedMovement, movement, homeBaseAircrafts, channel));
+  const results = yield all(callEvents);
+  const associatedMovements = results.reduce((acc, result) => ({
+    ...acc,
+    [result.movement.key]: result.associatedMovement
+  }), {});
+  channel.put(actions.setAssociatiatedMovements(associatedMovements));
+}
+
+export function* loadAssociatedMovement(movement, homeBaseAircrafts, channel) {
+  const aircraftMovements = yield call(getMovementsByImmatriculation, movement.immatriculation, channel);
+
+  const expectCircuit = isCircuit(movement);
+  const relevantMovements = aircraftMovements.array.filter(movement => expectCircuit === isCircuit(movement))
+
+  const isHomeBase = homeBaseAircrafts.has(movement.immatriculation);
+
+  const associatedMovement = getAssociatedMovement(movement, isHomeBase, relevantMovements) || null;
+
+  return {
+    movement,
+    associatedMovement
+  };
+}
+
+export function* getMovementsByImmatriculation(immatriculation, channel) {
+  const {byImmatriculation} = yield select(stateSelector);
+
+  if (byImmatriculation[immatriculation]) {
+    return byImmatriculation[immatriculation];
+  }
+
+  const departures = yield call(loadByImmatriculation, '/departures', immatriculation);
+  const arrivals = yield call(loadByImmatriculation, '/arrivals', immatriculation);
+
+  // monitor all loaded movements to remove associated movements which aren't present
+  // in the loaded movement list but are older
+  const eventActions = {
+    added: actions.immatriculationMovementAdded,
+    changed: actions.immatriculationMovementChanged,
+    removed: actions.immatriculationMovementDeleted
+  }
+  yield call(monitorRef, departures.ref, channel, 'departure', eventActions);
+  yield call(monitorRef, arrivals.ref, channel, 'arrival', eventActions);
+
+  const movements = [];
+
+  departures.snapshot.forEach(transformToLocal(movements, 'departure'));
+  arrivals.snapshot.forEach(transformToLocal(movements, 'arrival'));
+
+  const arr = new ImmutableItemsArray().insertAll(movements, compareDescending);
+
+  channel.put(actions.setMovementsByImmatriculation(immatriculation, arr));
+
+  return arr;
+}
+
+export function* monitorRef(ref, channel, movementType, eventActions) {
   ref.off('child_added');
   ref.off('child_changed');
   ref.off('child_removed');
 
-  const childAdded = createDelegate(channel, actions.movementAdded, movementType);
-  const childChanged = createDelegate(channel, actions.movementChanged, movementType);
-  const childRemoved = createDelegate(channel, actions.movementDeleted, movementType);
+  const childAdded = createDelegate(channel, eventActions.added, movementType);
+  const childChanged = createDelegate(channel, eventActions.changed, movementType);
+  const childRemoved = createDelegate(channel, eventActions.removed, movementType);
 
   ref.on('child_added', childAdded);
   ref.on('child_changed', childChanged);
@@ -160,6 +306,127 @@ export function* monitorRef(ref, channel, movementType) {
 
 export function createDelegate(channel, action, movementType) {
   return snapshot => channel.put(action(snapshot, movementType))
+}
+
+export function* movementAdded(channel, action) {
+  const {snapshot, movementType} = action.payload;
+  const state = yield select(stateSelector);
+  yield call(addMovementToState, snapshot, movementType, state, channel);
+}
+
+export function* movementChanged(channel, action) {
+  const {snapshot, movementType} = action.payload;
+  const currentState = yield call(removeMovementFromState, snapshot, channel);
+  yield call(addMovementToState, snapshot, movementType, currentState, channel);
+}
+
+export function* movementDeleted(channel, action) {
+  const {snapshot} = action.payload;
+  yield call(removeMovementFromState, snapshot, channel);
+}
+
+export function* addMovementToState(snapshot, movementType, currentState, channel) {
+  const {data, byImmatriculation} = currentState;
+
+  if (!data.getByKey(snapshot.key)) {
+    const movement = transformSnapshotToLocal(snapshot, movementType);
+
+    const newData = data.insert(movement, compareDescending);
+
+    // if is last element, it was added to the range only because a movement
+    // in the range was deleted. to prevent the `movementAdded` callback
+    // from messing up the state, because it's executed parallel to the
+    // `movementDeleted` callback, we ignore it here.
+    if (newData.array[newData.array.length - 1].key === movement.key) {
+      return;
+    }
+
+    if (byImmatriculation[movement.immatriculation]) {
+      const newByImmatriculation = byImmatriculation[movement.immatriculation].insert(movement, compareDescending);
+      channel.put(actions.setMovementsByImmatriculation(movement.immatriculation, newByImmatriculation));
+    }
+
+    channel.put(actions.setMovements(newData));
+  }
+}
+
+export function* removeMovementFromState(snapshot, channel) {
+  const {data, byImmatriculation} = yield select(stateSelector);
+
+  const newState = {
+    byImmatriculation
+  };
+
+  const immatriculation = snapshot.val().immatriculation;
+
+  if (byImmatriculation[immatriculation]) {
+    newState.byImmatriculation[immatriculation] = byImmatriculation[immatriculation].remove(snapshot.key)
+    channel.put(
+      actions.setMovementsByImmatriculation(
+        immatriculation,
+        newState.byImmatriculation[immatriculation]
+      )
+    );
+  }
+
+  newState.data = data.remove(snapshot.key);
+  channel.put(actions.setMovements(newState.data));
+
+  return newState;
+}
+
+export function* immatriculationMovementAdded(channel, action) {
+  const {snapshot, movementType} = action.payload;
+  const state = yield select(stateSelector);
+  if (!state.data.getByKey(snapshot.key)) { // if movement is in loaded range, it get's handled by the movementAdded action
+    yield call(addImmatriculationMovementToState, snapshot, movementType, state, channel);
+  }
+}
+
+export function* immatriculationMovementChanged(channel, action) {
+  const {snapshot, movementType} = action.payload;
+  const state = yield select(stateSelector);
+  if (!state.data.getByKey(snapshot.key)) { // if movement is in loaded range, it get's handled by the movementChanged action
+    const currentState = yield call(removeImmatriculationMovementFromState, snapshot, channel);
+    yield call(addImmatriculationMovementToState, snapshot, movementType, currentState, channel);
+  }
+}
+
+export function* immatriculationMovementDeleted(channel, action) {
+  const {snapshot} = action.payload;
+  const state = yield select(stateSelector);
+  if (!state.data.getByKey(snapshot.key)) { // if movement is in loaded range, it get's handled by the movementDeleted action
+    yield call(removeImmatriculationMovementFromState, snapshot, channel);
+  }
+}
+
+export function* addImmatriculationMovementToState(snapshot, movementType, currentState, channel) {
+  const {data, byImmatriculation} = currentState;
+
+  if (!byImmatriculation[snapshot.val().immatriculation].getByKey(snapshot.key)) {
+    const movement = transformSnapshotToLocal(snapshot, movementType);
+
+    const newByImmatriculation = byImmatriculation[movement.immatriculation].insert(movement, compareDescending);
+    channel.put(actions.setMovementsByImmatriculation(movement.immatriculation, newByImmatriculation));
+
+    channel.put(actions.setMovements(data)); // put SET_MOVEMENTS action with same data just to trigger `associateMovements`
+  }
+}
+
+export function* removeImmatriculationMovementFromState(snapshot, channel) {
+  const {data, byImmatriculation} = yield select(stateSelector);
+
+  const immatriculation = snapshot.val().immatriculation;
+
+  const newByImmatriculation = byImmatriculation[immatriculation].remove(snapshot.key);
+  channel.put(
+    actions.setMovementsByImmatriculation(
+      immatriculation,
+      newByImmatriculation
+    )
+  );
+
+  channel.put(actions.setMovements(data)); // put SET_MOVEMENTS action with same data just to trigger `associateMovements`
 }
 
 export function* deleteMovement(action) {
@@ -244,12 +511,55 @@ function getPathByMovementType(type) {
   }
 }
 
+
+const transformSnapshotToLocal = (snapshot, movementType) => {
+  const movement = firebaseToLocal(snapshot.val());
+  movement.key = snapshot.key;
+  movement.type = movementType;
+  return movement;
+}
+
+const transformToLocal = (movements, movementType) => item => {
+  const movement = transformSnapshotToLocal(item, movementType);
+  movements.push(movement);
+}
+
+const addAircraft = (map, set) => {
+  Object.keys(map).forEach(aircraft => {
+    if (map[aircraft] === true) {
+      set.add(aircraft);
+    }
+  });
+}
+
+export function loadByImmatriculation(path, immatriculation) {
+  return new Promise(resolve => {
+    const ref = firebase(path)
+      .orderByChild('immatriculation')
+      .equalTo(immatriculation);
+    ref.once('value', snapshot => {
+      resolve({
+        snapshot,
+        ref
+      });
+    });
+  });
+}
+
 export default function* sagas() {
   const channel = createChannel();
 
   yield [
     fork(monitor, channel),
     fork(takeEvery, actions.LOAD_MOVEMENTS, loadMovements, channel),
+    fork(takeEvery, actions.SET_MOVEMENTS_FILTER, filterMovements, channel),
+    fork(takeEvery, actions.SET_MOVEMENTS, associateMovements, channel),
+    fork(takeEvery, actions.MOVEMENT_ADDED, movementAdded, channel),
+    fork(takeEvery, actions.MOVEMENT_CHANGED, movementChanged, channel),
+    fork(takeEvery, actions.MOVEMENT_DELETED, movementDeleted, channel),
+    fork(takeEvery, actions.IMMATRICULATION_MOVEMENT_ADDED, immatriculationMovementAdded, channel),
+    fork(takeEvery, actions.IMMATRICULATION_MOVEMENT_CHANGED, immatriculationMovementChanged, channel),
+    fork(takeEvery, actions.IMMATRICULATION_MOVEMENT_DELETED, immatriculationMovementDeleted, channel),
     fork(takeEvery, actions.DELETE_MOVEMENT, deleteMovement),
     fork(takeEvery, actions.INIT_NEW_MOVEMENT, initNewMovement),
     fork(takeEvery, actions.INIT_NEW_MOVEMENT_FROM_MOVEMENT, initNewMovementFromMovement),

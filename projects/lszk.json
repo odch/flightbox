@@ -3,8 +3,14 @@
     "name": "Speck-Fehraltorf",
     "ICAO": "LSZK",
     "runways": [
-      "12",
-      "30"
+      {
+        "name": "12",
+        "type": "G"
+      },
+      {
+        "name": "30",
+        "type": "G"
+      }
     ],
     "departureRoutes": [
       {

@@ -3,8 +3,14 @@
     "name": "Lommis",
     "ICAO": "LSZT",
     "runways": [
-      "06",
-      "24"
+      {
+        "name": "06",
+        "type": "G"
+      },
+      {
+        "name": "24",
+        "type": "G"
+      }
     ],
     "departureRoutes": [
       {
@@ -89,5 +95,6 @@
   },
   "flightnetCompany": "mfgt",
   "theme": "lszt",
-  "title": "MFGT Bewegungen"
+  "title": "MFGT Bewegungen",
+  "cardPaymentsEnabled": true
 }

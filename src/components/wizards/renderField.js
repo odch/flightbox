@@ -9,6 +9,7 @@ import TimeField from '../../components/TimeField';
 import TextArea from '../../components/TextArea';
 import AerodromeDropdown from '../../containers/AerodromeDropdownContainer';
 import AircraftDropdown from '../../containers/AircraftDropdownContainer';
+import AircraftCategoryDropdown from '../../components/AircraftCategoryDropdown';
 import UserDropdown from '../../containers/UserDropdownContainer';
 
 const StyledLabeledComponent = styled(LabeledComponent)`
@@ -25,7 +26,10 @@ const StyledLabeledComponent = styled(LabeledComponent)`
 `;
 
 const renderLabeledComponent = (props, component) => {
-  const { name, label, tooltip, meta: { touched, error } } = props;
+  const { name, label, tooltip, hidden, meta: { touched, error } } = props;
+  if (hidden) {
+    return null
+  }
   return (
     <StyledLabeledComponent
       label={label}
@@ -52,13 +56,16 @@ export const renderInputField = (props) => {
 
 export const renderSingleSelect = (props) => {
   const cmp = (
-    <SingleSelect
-      {...props.input}
-      items={props.items}
-      orientation={props.orientation}
-      readOnly={props.readOnly}
-      dataCy={props.input.name}
-    />
+    <>
+      <SingleSelect
+        {...props.input}
+        items={props.items}
+        orientation={props.orientation}
+        readOnly={props.readOnly}
+        dataCy={props.input.name}
+      />
+      {props.hint}
+    </>
   );
   return renderLabeledComponent(props, cmp);
 };
@@ -95,6 +102,11 @@ export const renderAerodromeDropdown = (props) => {
 
 export const renderAircraftDropdown = (props) => {
   const cmp = <AircraftDropdown {...props.input} readOnly={props.readOnly} dataCy={props.input.name}/>;
+  return renderLabeledComponent(props, cmp);
+};
+
+export const renderAircraftCategoryDropdown = (props) => {
+  const cmp = <AircraftCategoryDropdown {...props.input} readOnly={props.readOnly} dataCy={props.input.name}/>;
   return renderLabeledComponent(props, cmp);
 };
 

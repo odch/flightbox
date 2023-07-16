@@ -7,6 +7,7 @@ import * as sagas from './sagas';
 import * as remote from './remote';
 import {LIMIT} from './pagination';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
+import {addMovements} from "./sagas";
 
 describe('modules', () => {
   describe('movements', () => {
@@ -197,6 +198,79 @@ describe('modules', () => {
           expect(generator.next(state).value).toEqual(put(actions.setMovementsLoading()));
 
           expect(generator.next().value)
+            .toEqual(call(sagas.loadDeparturesAndArrivals, state, clear));
+
+          const departuresResult = {
+            snapshot: new FakeFirebaseSnapshot(null, [
+              new FakeFirebaseSnapshot('dep1', {
+                negativeTimestamp: -1493802000000 // May 03 2017 11:00:00
+              }),
+              new FakeFirebaseSnapshot('dep2', {
+                negativeTimestamp: -1493791200000 // May 03 2017 08:00:00
+              })
+            ]),
+            ref: {
+              name: 'depRef'
+            }
+          };
+
+          const arrivalsResult = {
+            snapshot: new FakeFirebaseSnapshot(null, [
+              new FakeFirebaseSnapshot('arr1', {
+                negativeTimestamp: -1493798400000 // May 03 2017 10:00:00
+              }),
+              new FakeFirebaseSnapshot('arr2', {
+                negativeTimestamp: -1493794800000 // May 03 2017 09:00:00
+              })
+            ]),
+            ref: {
+              name: 'arrRef'
+            }
+          };
+
+          const loadResult = {
+            departures: departuresResult,
+            arrivals: arrivalsResult
+          }
+
+          const eventActions = {
+            added: actions.movementAdded,
+            changed: actions.movementChanged,
+            removed: actions.movementDeleted
+          };
+
+          expect(generator.next(loadResult).value)
+            .toEqual(call(sagas.monitorRef, departuresResult.ref, channel, 'departure', eventActions));
+          expect(generator.next().value)
+            .toEqual(call(sagas.monitorRef, arrivalsResult.ref, channel, 'arrival', eventActions));
+
+          const existingMovements = clear ? new ImmutableItemsArray() : state.data;
+
+          expect(generator.next().value)
+            .toEqual(call(sagas.addMovements, departuresResult.snapshot, arrivalsResult.snapshot, existingMovements, channel));
+
+          expect(generator.next().done).toEqual(true);
+        };
+
+        it('should load new movements range', () => {
+          testFn(undefined)
+        });
+
+        it('should load new movements range and clear already loaded data', () => {
+          testFn(true)
+        });
+      });
+
+      describe('loadLatestDeparturesAndArrivalsPaged', () => {
+        it('should load departures and arrivals paged', () => {
+          const state = {
+            loading: false,
+            data: new ImmutableItemsArray()
+          };
+
+          const generator = sagas.loadLatestDeparturesAndArrivalsPaged(state, false);
+
+          expect(generator.next().value)
             .toEqual(call(remote.loadLimited, '/departures', undefined, LIMIT));
 
           const departuresResult = {
@@ -230,28 +304,15 @@ describe('modules', () => {
             }
           };
 
-          expect(generator.next(arrivalsResult).value)
-            .toEqual(call(sagas.monitorRef, departuresResult.ref, channel, 'departure'));
-          expect(generator.next().value)
-            .toEqual(call(sagas.monitorRef, arrivalsResult.ref, channel, 'arrival'));
+          const next = generator.next(arrivalsResult);
 
-          expect(generator.next().done).toEqual(true);
+          const expectedResult = {
+            departures: departuresResult,
+            arrivals: arrivalsResult
+          }
 
-          const channelPutCalls = channel.put.mock.calls;
-          expect(channelPutCalls.length).toBe(2);
-
-          expect(channelPutCalls[0][0])
-            .toEqual(actions.movementsAdded(departuresResult.snapshot, 'departure', clear));
-          expect(channelPutCalls[1][0])
-            .toEqual(actions.movementsAdded(arrivalsResult.snapshot, 'arrival', clear));
-        };
-
-        it('should load new movements range', () => {
-          testFn(undefined)
-        });
-
-        it('should load new movements range and clear already loaded data', () => {
-          testFn(true)
+          expect(next.value).toEqual(expectedResult);
+          expect(next.done).toEqual(true);
         });
       });
 
@@ -264,7 +325,13 @@ describe('modules', () => {
 
           const channel = {};
 
-          const generator = sagas.monitorRef(ref, channel, 'departure');
+          const eventActions = {
+            added: () => {},
+            changed: () => {},
+            removed: () => {}
+          }
+
+          const generator = sagas.monitorRef(ref, channel, 'departure', eventActions);
 
           expect(generator.next().done).toEqual(true);
 

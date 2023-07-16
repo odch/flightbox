@@ -11,7 +11,8 @@ export {
   initNewMovement,
   initNewMovementFromMovement,
   editMovement,
-  saveMovement
+  saveMovement,
+  setMovementsFilter
 } from './actions';
 
 export { sagas };

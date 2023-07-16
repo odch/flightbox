@@ -6,7 +6,8 @@ import validate from '../../validate';
 import { renderSingleSelect, renderTextArea } from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
-import {updateMovementFees, getAircraftOrigin} from "../../../../util/landingFees"
+import {updateLandingFees, updateGoAroundFees, getAircraftOrigin} from '../../../../util/landingFees';
+import CircuitsFieldHint from '../../CircuitsFieldHint';
 
 const FlightPage = (props) => {
   const { previousPage, handleSubmit, flightTypes, arrivalRoutes, runways, formValues, aircraftSettings } = props;
@@ -24,9 +25,11 @@ const FlightPage = (props) => {
           normalize={flightType => {
             const mtow = formValues['mtow'];
             const landingCount = formValues['landingCount'];
+            const goAroundCount = formValues['goAroundCount'];
             const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], aircraftSettings);
 
-            updateMovementFees(props.change, mtow, flightType, aircraftOrigin, landingCount)
+            updateLandingFees(props.change, mtow, flightType, aircraftOrigin, landingCount);
+            updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, goAroundCount);
 
             return flightType
           }}
@@ -39,6 +42,7 @@ const FlightPage = (props) => {
           parse={e => e.target.value}
           label="Ankunftsroute"
           readOnly={props.readOnly}
+          hint={props.arrivalRoute === 'circuits' && <CircuitsFieldHint/>}
         />
         <Field
           name="remarks"
@@ -53,6 +57,7 @@ const FlightPage = (props) => {
           parse={e => e.target.value}
           label="Pistenrichtung"
           readOnly={props.readOnly}
+          hidden={props.hiddenFields && props.hiddenFields.includes('runway')}
         />
       </FieldSet>
       <WizardNavigation
@@ -92,7 +97,8 @@ FlightPage.propTypes = {
   aircraftSettings: PropTypes.shape({
     club: PropTypes.objectOf(PropTypes.bool),
     homeBase: PropTypes.objectOf(PropTypes.bool)
-  }).isRequired
+  }).isRequired,
+  hiddenFields: PropTypes.arrayOf(PropTypes.string)
 };
 
 export default reduxForm({

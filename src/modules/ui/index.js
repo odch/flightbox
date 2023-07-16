@@ -5,6 +5,7 @@ import movements, { sagas as movementsSagas } from './movements';
 import settings from './settings';
 import showLogin from './showLogin';
 import wizard, { sagas as wizardSagas } from './wizard';
+import arrivalPayment, { sagas as arrivalPaymentSagas } from './arrivalPayment';
 
 const reducer = combineReducers({
   loginPage,
@@ -12,12 +13,14 @@ const reducer = combineReducers({
   settings,
   showLogin,
   wizard,
+  arrivalPayment,
 });
 
 export function* sagas() {
   yield [
     fork(movementsSagas),
     fork(wizardSagas),
+    fork(arrivalPaymentSagas),
   ]
 }
 

@@ -16,28 +16,20 @@ const getMovementsPerAircraft = movements => {
   return movementsPerAircraft;
 };
 
-const getAssociations = movements => {
+const getAssociations = (movements, homeBaseAircrafts) => {
   const movementsPerAircraft = getMovementsPerAircraft(movements);
 
-  const associations = {};
+  let associations = {};
 
   for (const immatriculation in movementsPerAircraft) {
     if (movementsPerAircraft.hasOwnProperty(immatriculation)) {
+      const isHomeBase = homeBaseAircrafts.has(immatriculation);
       const aircraftMovements = movementsPerAircraft[immatriculation];
 
-      let currentMovementKey = null;
-
-      for (let i = 0; i < aircraftMovements.length; i++) {
-        const movement = aircraftMovements[i];
-
-        const preceding = i < aircraftMovements.length - 1 ? aircraftMovements[i + 1] : null;
-
-        associations[movement.key] = {
-          preceding: preceding ? preceding.key : null,
-          subsequent: currentMovementKey
-        };
-
-        currentMovementKey = movement.key;
+      const aircraftAssociations = getAircraftAssociations(aircraftMovements, isHomeBase);
+      associations = {
+        ...associations,
+        ...aircraftAssociations
       }
     }
   }
@@ -45,34 +37,76 @@ const getAssociations = movements => {
   return associations;
 };
 
-const associate = (movements, comparator) => {
-  const associations = getAssociations(movements.array);
+const getAircraftAssociations = (aircraftMovements, isHomeBase) => {
+  const associations = {};
 
-  const updatedMovements = [];
+  addAssociatedMovement(aircraftMovements, isCircuit, associations, isHomeBase);
+  addAssociatedMovement(aircraftMovements, movement => !isCircuit(movement), associations, isHomeBase);
 
-  for (let i = 0; i < movements.array.length; i++) {
-    const movement = movements.array[i];
+  return associations;
+}
 
-    const newMovementAssociations = associations[movement.key];
+const addAssociatedMovement = (aircraftMovements, predicate, associations, isHomeBase) => {
+  const relevantMovements = aircraftMovements.filter(predicate);
+  relevantMovements.forEach(movement => {
+    associations[movement.key] = getAssociatedMovement(movement, isHomeBase, relevantMovements);
+  })
+}
 
-    if (!movement.associations
-      || movement.associations.preceding !== newMovementAssociations.preceding
-      || movement.associations.subsequent !== newMovementAssociations.subsequent) {
+export const isCircuit = movement => {
+  const route = movement.departureRoute || movement.arrivalRoute;
+  return route === 'circuits';
+}
 
-      const updatedMovement = Object.assign({}, movement, {
-        associations: newMovementAssociations
-      });
-      updatedMovements.push(updatedMovement);
+const hasValidRoute = (movement, expectCircuits) => {
+  const route = movement.departureRoute || movement.arrivalRoute;
+  return expectCircuits && route === 'circuits' || !expectCircuits && route !== 'circuits';
+}
+
+const ifType = (movement, expectedType, expectCircuits) => {
+  if (movement) {
+    if (movement.type === expectedType && hasValidRoute(movement, expectCircuits)) {
+      return movement;
+    }
+    return null; // movement missing in database for sure (no need to try to find it)
+  }
+  return undefined; // movement could be in the database, but not yet loaded
+}
+
+/**
+ * return null if wrong
+ */
+export const getAssociatedMovement = (movement, isHomeBase, aircraftMovements) => {
+  const expectCircuits = isCircuit(movement);
+
+  const index = aircraftMovements.findIndex(m => m.key === movement.key);
+
+  const preceding = aircraftMovements[index + 1];
+  const subsequent = aircraftMovements[index - 1];
+
+  if (expectCircuits) {
+    if (movement.type === 'departure') {
+      return ifType(subsequent, 'arrival', expectCircuits);
+    } else if (movement.type === 'arrival') {
+      return ifType(preceding, 'departure', expectCircuits);
+    }
+  } else {
+    if (movement.type === 'departure') {
+      if (isHomeBase) {
+        return ifType(subsequent, 'arrival', expectCircuits);
+      } else {
+        return ifType(preceding, 'arrival', expectCircuits);
+      }
+    } else if (movement.type === 'arrival') {
+      if (isHomeBase) {
+        return ifType(preceding, 'departure', expectCircuits);
+      } else {
+        return ifType(subsequent, 'departure', expectCircuits);
+      }
     }
   }
 
-  let newMovementsArray = movements;
+  throw new Error('Code should not be reached');
+}
 
-  updatedMovements.forEach(movement => {
-    newMovementsArray = newMovementsArray.update(movement, comparator)
-  });
-
-  return newMovementsArray;
-};
-
-export default associate;
+export default getAssociations;

@@ -6,23 +6,37 @@ const flightTypes = [
   {
     label: 'Privat',
     value: 'private',
-    airstatType: 42,
+    airstatType: {
+      aircraft: 42,
+      helicopter: 64
+    },
   }, {
     label: 'Gewerblich',
     value: 'commercial',
-    airstatType: 32,
+    airstatType: {
+      aircraft: 32,
+      helicopter: 61
+    },
   }, {
     label: 'Schulung',
     value: 'instruction',
-    airstatType: 43,
+    airstatType: {
+      aircraft: 43,
+      helicopter: 62
+    },
   }, {
     label: 'Flugzeugschlepp',
     value: 'aerotow',
-    airstatType: 52,
+    airstatType: {
+      aicraft: 52
+    },
   }, {
     label: 'Paradrop',
     value: 'paradrop',
-    airstatType: 35,
+    airstatType: {
+      aircraft: 35,
+      helicopter: 65
+    },
   },
 ];
 
@@ -36,6 +50,11 @@ const findByValue = type => {
 
 export const getEnabledFlightTypes = () => flightTypes.filter(type => enabledTypes.includes(type.value));
 
-export const getAirstatType = type => findByValue(type).airstatType;
+export const getAirstatType = (type, isHelicopter) =>
+  findByValue(type).airstatType[isHelicopter ? 'helicopter' : 'aircraft'];
 
 export const getLabel = type => findByValue(type).label;
+
+export const isHelicopterAirstatType = airstatType => !!flightTypes.find(
+  flightType => flightType.airstatType.helicopter && flightType.airstatType.helicopter === airstatType
+)

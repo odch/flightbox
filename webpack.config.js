@@ -20,6 +20,8 @@ const globals = {
   __DISABLE_IP_AUTHENTICATION__: env.disableIpAuthentication === true,
   __FLIGHTNET_COMPANY__: JSON.stringify(projectConf.flightnetCompany),
   __LANDING_FEES__: JSON.stringify(projectConf.aerodrome.landingFees),
+  __GO_AROUND_FEES__: JSON.stringify(projectConf.aerodrome.goAroundFees),
+  __CARD_PAYMENTS_ENABLED__: projectConf.cardPaymentsEnabled === true
 };
 
 module.exports = {

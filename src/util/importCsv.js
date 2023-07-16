@@ -38,8 +38,8 @@ function applyModifications(value, modifications) {
   return modifiedValue;
 }
 
-function getMap(array, options) {
-  const itemMap = {};
+async function getMap(array, options) {
+  let itemMap = {};
 
   const firstRow = array.shift();
 
@@ -66,6 +66,16 @@ function getMap(array, options) {
 
     itemMap[itemKey] = data;
   });
+
+  if (options.additionalEntriesPath) {
+    const snapshot = await firebase(options.additionalEntriesPath).once('value');
+    if (snapshot.exists()) {
+      itemMap = {
+        ...itemMap,
+        ...snapshot.val()
+      }
+    }
+  }
 
   return itemMap;
 }
@@ -114,7 +124,8 @@ function addNew(firebaseRef, itemMap, existing, options) {
 /**
  * @param csvString
  * @param options (marked with * is required)
- * - path* {String} (i.e. '/users')
+ * - path* {String} (i.e. '/users'),
+ * - additionalEntriesPath (i.e. '/settings/users/')
  * - columns* {Array}
  * example:
  * columns: [
@@ -124,22 +135,22 @@ function addNew(firebaseRef, itemMap, existing, options) {
  *   { csv: 'PhoneMobile', firebase: 'phone' },
  * ]
  */
-function importCsv(csvString, options) {
-  return new Promise((resolve, reject) => {
-    parseCsv(csvString).then(data => {
-      try {
-        const itemMap = getMap(data, options);
+async function importCsv(csvString, options) {
+  const data = await parseCsv(csvString);
 
-        firebase(options.path, (error, ref) => {
-          updateExisting(ref, itemMap, options, existing => {
-            addNew(ref, itemMap, existing, options);
-            resolve();
-          });
-        });
-      } catch(e) {
-        reject(e);
-      }
-    });
+  const itemMap = await getMap(data, options);
+
+  const ref = firebase(options.path);
+
+  return new Promise((resolve, reject) => {
+    try {
+      updateExisting(ref, itemMap, options, existing => {
+        addNew(ref, itemMap, existing, options);
+        resolve();
+      });
+    } catch(e) {
+      reject(e);
+    }
   });
 }
 

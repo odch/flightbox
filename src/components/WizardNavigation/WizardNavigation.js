@@ -19,12 +19,12 @@ const BackButton = styled(WizardButton)`
   float: right;
 `;
 
-const NextButton = styled(WizardButton)`
+export const NextButton = styled(WizardButton)`
   float: right;
   margin-left: 20px;
 `;
 
-const CancelButton = styled(WizardButton)`
+export const CancelButton = styled(WizardButton)`
   @media(max-width: 600px) {
     margin-top: 1.5em;
   }
