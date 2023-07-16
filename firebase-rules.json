@@ -274,7 +274,7 @@
     "card-payments": {
       "$card_payment_id": {
         ".read": "auth !== null",
-        ".write": "auth !== null && !data.exists() && newData.exists()",
+        ".write": "auth !== null && newData.exists()",
         ".validate": "newData.hasChildren(['amount', 'currency', 'arrivalReference', 'timestamp', 'status'])",
         "currency": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -289,7 +289,7 @@
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "status": {
-          ".validate": "newData.val() === 'pending' || newData.val() === 'success' || newData.val() === 'failure'"
+          ".validate": "newData.val() === 'pending' || newData.val() === 'success' || newData.val() === 'failure' || newData.val() === 'cancelled'"
         },
         "$other": {
           ".validate": false

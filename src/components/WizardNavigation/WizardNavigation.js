@@ -24,7 +24,7 @@ export const NextButton = styled(WizardButton)`
   margin-left: 20px;
 `;
 
-const CancelButton = styled(WizardButton)`
+export const CancelButton = styled(WizardButton)`
   @media(max-width: 600px) {
     margin-top: 1.5em;
   }

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import {Step} from '../../../../modules/ui/arrivalPayment'
 import SingleSelect from '../../../SingleSelect'
-import {NextButton} from '../../../WizardNavigation'
+import {NextButton, CancelButton} from '../../../WizardNavigation'
 import CashPaymentMessage from './CashPaymentMessage'
 import FinishActions from './FinishActions'
 
@@ -12,8 +12,10 @@ const Container = styled.div`
 `
 
 const SelectContainer = styled.div`
-  width: 600px;
+  width: 400px;
+  max-width: 100%;
   margin: auto;
+  font-size: 1.5em;
 `
 
 const InstructionMessage = styled.div`
@@ -30,6 +32,11 @@ const StyledNextButton = styled(NextButton)`
   margin-bottom: 1em;
 `
 
+const StyledCancelButton = styled(CancelButton)`
+  margin-top: 1em;
+  margin-bottom: 1em;
+`
+
 const PaymentMethod = ({
                          itemKey,
                          method,
@@ -40,7 +47,8 @@ const PaymentMethod = ({
                          createMovementFromMovement,
                          finish,
                          setMethod,
-                         setStep
+                         setStep,
+                         cancelCardPayment
                        }) => (
   <Container>
     {failure && (
@@ -59,7 +67,16 @@ const PaymentMethod = ({
       </>
     ) : step === Step.CONFIRMED ? (
       method === 'card' ? (
-        <InstructionMessage>Bitte folgen Sie den Anweisungen auf dem Kartenlesegerät</InstructionMessage>
+        <>
+          <InstructionMessage>Bitte folgen Sie den Anweisungen auf dem Kartenlesegerät</InstructionMessage>
+          <StyledCancelButton
+            type="button"
+            label="Abbrechen"
+            onClick={() => {
+              cancelCardPayment()
+            }}
+          />
+        </>
       ) : null
     ) : (<>
         <InstructionMessage>Bitte wählen Sie eine Zahlungsart:</InstructionMessage>
@@ -72,7 +89,7 @@ const PaymentMethod = ({
               label: 'Karte',
               value: 'card'
             }]}
-            orientation="horizontal"
+            orientation="vertical"
             onChange={e => setMethod(e.target.value)}
             value={method}
           />
@@ -112,6 +129,7 @@ PaymentMethod.propTypes = {
   finish: PropTypes.func.isRequired,
   setMethod: PropTypes.func.isRequired,
   setStep: PropTypes.func.isRequired,
+  cancelCardPayment: PropTypes.func.isRequired,
 }
 
 export default PaymentMethod

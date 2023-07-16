@@ -5,6 +5,7 @@ export {
   setMethod,
   setStep,
   createCardPayment,
+  cancelCardPayment,
   reset
 } from './actions';
 
