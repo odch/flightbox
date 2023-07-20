@@ -44,7 +44,7 @@ const Finish = props => {
           <Message>Landetaxe: {landingFeeMsg}</Message>
         </>
       )}
-      {isHomeBase === false && (
+      {isHomeBase === false ? (
         __CARD_PAYMENTS_ENABLED__ ? (
           <PaymentMethod itemKey={itemKey} createMovementFromMovement={createMovementFromMovement} finish={finish}
                          amount={amount}/>
@@ -54,6 +54,8 @@ const Finish = props => {
             <FinishActions itemKey={itemKey} createMovementFromMovement={createMovementFromMovement} finish={finish}/>
           </>
         )
+      ) : (
+        <FinishActions itemKey={itemKey} createMovementFromMovement={createMovementFromMovement} finish={finish}/>
       )}
     </Wrapper>
   );
