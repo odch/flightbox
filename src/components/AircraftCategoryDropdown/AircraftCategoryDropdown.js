@@ -39,7 +39,7 @@ const AircraftCategoryDropdown = props => (
 
 AircraftCategoryDropdown.propTypes = {
   className: PropTypes.string,
-  value: PropTypes.number,
+  value: PropTypes.string,
   onChange: PropTypes.func,
   readOnly: PropTypes.bool,
 };
