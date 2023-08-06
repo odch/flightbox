@@ -10,7 +10,7 @@ const setAssociatedMovementPending = async (movementKey, movementType) => {
 
 const loadMovement = async (movementKey, movementType) => {
   const movementSnapshot = await admin.database()
-    .ref(path(movementType)).child(movementKey).
+    .ref(utils.path(movementType)).child(movementKey).
     once('value')
   if (movementSnapshot.exists()) {
     const movement = movementSnapshot.val()
