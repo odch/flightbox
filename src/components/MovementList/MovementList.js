@@ -57,7 +57,6 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Ab morgen"
           items={this.props.items}
-          associatedMovements={this.props.associatedMovements}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={afterTodayPredicate}
@@ -72,7 +71,6 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Heute"
           items={this.props.items}
-          associatedMovements={this.props.associatedMovements}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={todayPredicate}
@@ -87,7 +85,6 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Gestern"
           items={this.props.items}
-          associatedMovements={this.props.associatedMovements}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={yesterdayPredicate}
@@ -102,7 +99,6 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Dieser Monat"
           items={this.props.items}
-          associatedMovements={this.props.associatedMovements}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={thisMonthPredicate}
@@ -116,7 +112,6 @@ class MovementList extends React.PureComponent {
         <MovementGroup
           label="Älter"
           items={this.props.items}
-          associatedMovements={this.props.associatedMovements}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
           predicate={olderPredicate}
@@ -140,7 +135,6 @@ MovementList.propTypes = {
   loadItems: PropTypes.func.isRequired,
   loadAircraftSettings: PropTypes.func.isRequired,
   items: PropTypes.object.isRequired,
-  associatedMovements: PropTypes.object.isRequired,
   selected: PropTypes.string,
   onSelect: PropTypes.func,
   loading: PropTypes.bool.isRequired,

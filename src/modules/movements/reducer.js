@@ -22,42 +22,38 @@ export function setLoadingFailure(state) {
   });
 }
 
-export const setAssociatedMovements = (state, action) => ({
-  ...state,
-  associatedMovements: {
-    ...state.associatedMovements,
-    ...action.payload.associatedMovements
-  }
-});
-
-export const setMovementsByImmatriculation = (state, action) => ({
-  ...state,
-  byImmatriculation: {
-    ...state.byImmatriculation,
-    [action.payload.immatriculation]: action.payload.movements
-  }
-});
-
 export const setFilter = (state, action) => ({
   ...state,
   filter: action.payload.filter
 })
 
+export const addMovementByKey = (state, action) => ({
+  ...state,
+  byKey: {
+    ...state.byKey,
+    [action.payload.movement.key]: action.payload.movement
+  }
+});
+
+export const clearMovementsByKey = (state, action) => ({
+  ...state,
+  byKey: {}
+});
+
 const ACTION_HANDLERS = {
   [actions.SET_MOVEMENTS]: setMovements,
-  [actions.SET_ASSOCIATED_MOVEMENTS]: setAssociatedMovements,
-  [actions.SET_MOVEMENTS_BY_IMMATRICULATION]: setMovementsByImmatriculation,
   [actions.SET_MOVEMENTS_LOADING]: setLoading,
   [actions.LOAD_MOVEMENTS_FAILURE]: setLoadingFailure,
   [actions.SET_MOVEMENTS_FILTER]: setFilter,
+  [actions.ADD_MOVEMENT_BY_KEY]: addMovementByKey,
+  [actions.CLEAR_MOVEMENTS_BY_KEY]: clearMovementsByKey,
 };
 
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
   loading: false,
   loadingFailed: false,
-  associatedMovements: {},
-  byImmatriculation: {},
+  byKey: {},
   filter: {
     date: { // "end" is the newer date bound ("start" must come before "end")
       start: null,

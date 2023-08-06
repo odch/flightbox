@@ -14,7 +14,6 @@ import ImmutableItemsArray from '../util/ImmutableItemsArray';
 
 const getMovements = state => {
   const data = state.movements.data;
-  const associatedMovements = state.movements.associatedMovements;
   const filter = state.movements.filter;
 
   const dateFilterSet = !!filter.date.start && !!filter.date.end
@@ -32,7 +31,7 @@ const getMovements = state => {
         return false;
       }
       if (onlyWithoutAssociatedMovement) {
-        if (associatedMovements[item.key]) {
+        if (!item.associatedMovement || ['departure', 'arrival'].includes(item.associatedMovement.type)) {
           return false;
         }
       }
@@ -47,7 +46,6 @@ const getMovements = state => {
 const mapStateToProps = state => {
   return {
     items: getMovements(state),
-    associatedMovements: state.movements.associatedMovements,
     loading: state.movements.loading,
     loadingFailed: state.movements.loadingFailed,
     lockDate: state.settings.lockDate,
