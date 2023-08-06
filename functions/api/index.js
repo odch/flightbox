@@ -6,11 +6,6 @@ const fetchAerodromeStatus = require('./fetchAerodromeStatus')
 
 const api = express()
 
-// Prevent firebase from initializing twice
-try {
-  admin.initializeApp()
-} catch (e) {}
-
 api.use(cors)
 
 api.get('(/api)?/aerodrome/status', async (req, res) => {

@@ -10,11 +10,6 @@ const modes = require('./modes');
 const requestHelper = require('./util/requestHelper');
 const errors = require('./util/errors');
 
-// Prevent firebase from initializing twice
-try {
-  admin.initializeApp()
-} catch (e) {}
-
 const sendToken = (res, token) => {
   res.send({
     token: token
