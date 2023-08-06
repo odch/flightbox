@@ -36,24 +36,46 @@ class AssociatedMovement extends React.PureComponent {
     this.handleCreateMovement = this.handleCreateMovement.bind(this);
   }
 
+  componentWillMount() {
+    const {associatedMovement, associatedMovementData, loadMovement} = this.props
+    if (
+      associatedMovement &&
+      ['departure', 'arrival'].includes(associatedMovement.type) &&
+      associatedMovementData === undefined
+    ) {
+      loadMovement(associatedMovement.key, associatedMovement.type);
+    }
+  }
+
+  componentDidUpdate() {
+    const {associatedMovement, associatedMovementData, loadMovement} = this.props
+    if (
+      associatedMovement &&
+      ['departure', 'arrival'].includes(associatedMovement.type) &&
+      associatedMovementData === undefined
+    ) {
+      loadMovement(associatedMovement.key, associatedMovement.type);
+    }
+  }
+
   render() {
-    const {movementType, associatedMovement} = this.props;
+    const {movementType, associatedMovementData} = this.props;
 
     let label;
     let text;
 
     if (movementType === 'departure') {
       label = 'Zugeordnete Ankunft';
-      text = associatedMovement
+      text = associatedMovementData
         ? 'Die folgende Ankunft wurde diesem Abflug automatisch zugeordnet:'
-        : associatedMovement === null
+        : associatedMovementData === null
           ? 'Es konnte keine Ankunft zugeordnet werden.'
           : null;
     } else {
       label = 'Zugeordneter Abflug';
-      text = associatedMovement
+      text = associatedMovementData
         ? 'Der folgende Abflug wurde dieser Ankunft automatisch zugeordnet:'
-        : associatedMovement === null
+        : associatedMovementData === null
           ? 'Es konnte kein Abflug zugeordnet werden.'
           : null;
     }
@@ -63,9 +85,9 @@ class AssociatedMovement extends React.PureComponent {
         <div>
           <Label>{label}</Label>
           {text && <div>{text}</div>}
-          {associatedMovement
-            ? <StyledDetails data={associatedMovement} isHomeBase={this.props.isHomeBase}/>
-            : associatedMovement === undefined
+          {associatedMovementData
+            ? <StyledDetails data={associatedMovementData} isHomeBase={this.props.isHomeBase}/>
+            : associatedMovementData === undefined
               ? <MaterialIcon icon="sync" rotate="left"/>
               : (
                 <ActionsContainer>
@@ -92,7 +114,10 @@ AssociatedMovement.propTypes = {
   movementType: PropTypes.oneOf(['departure', 'arrival']),
   movementKey: PropTypes.string.isRequired,
   isHomeBase: PropTypes.bool.isRequired,
-  associatedMovement: PropTypes.object,
+  associatedMovement: PropTypes.shape({
+    key: PropTypes.string,
+    type: PropTypes.oneOf(['departure', 'arrival', 'none']),
+  }),
   loading: PropTypes.bool.isRequired,
   createMovementFromMovement: PropTypes.func.isRequired
 };

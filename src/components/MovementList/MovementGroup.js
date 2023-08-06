@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import Movement from './Movement';
 import { isLocked } from '../../util/movements.js';
@@ -34,7 +34,6 @@ class MovementGroup extends React.PureComponent {
             <Movement
               key={item.key}
               data={item}
-              associatedMovement={props.associatedMovements[item.key]}
               selected={item.key === props.selected}
               onSelect={props.onSelect}
               onEdit={props.onEdit}
@@ -55,7 +54,6 @@ class MovementGroup extends React.PureComponent {
 MovementGroup.propTypes = {
   label: PropTypes.string,
   items: PropTypes.object.isRequired,
-  associatedMovements: PropTypes.object.isRequired,
   selected: PropTypes.string,
   onSelect: PropTypes.func,
   predicate: PropTypes.func,

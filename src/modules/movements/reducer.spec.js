@@ -6,8 +6,7 @@ const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
   loading: false,
   loadingFailed: false,
-  associatedMovements: {},
-  byImmatriculation: {},
+  byKey: {},
   filter: {
     date: { // "end" is the newer date bound ("start" must come before "end")
       start: null,

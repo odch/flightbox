@@ -42,7 +42,7 @@ export function saveMovement(path, key, movement) {
     };
 
     if (key) {
-      firebase(path).child(key).set(movement, setCommitted);
+      firebase(path).child(key).update(movement, setCommitted);
     } else {
       key = firebase(path).push(movement, setCommitted).key;
     }

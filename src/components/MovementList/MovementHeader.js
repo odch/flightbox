@@ -136,7 +136,10 @@ class MovementHeader extends React.PureComponent {
         onClick={props.onClick}
         selected={props.selected}
         locked={props.locked}
-        hasAssociatedMovement={!!props.associatedMovement}
+        hasAssociatedMovement={
+          props.data.associatedMovement
+          && ['departure', 'arrival'].includes(props.data.associatedMovement.type)
+        }
       >
         <Column className="type">
           <MaterialIcon
@@ -156,14 +159,14 @@ class MovementHeader extends React.PureComponent {
         </Column>
         <Column className="location" alignMiddle>{getLocation(props.data)}</Column>
         <ActionColumn className="action" alignMiddle highlight>
-          {props.associatedMovement === null ? (
+          {props.data.associatedMovement && props.data.associatedMovement.type === 'none' ? (
             <Action
               label={ACTION_LABELS[props.data.type].label}
               icon={ACTION_LABELS[props.data.type].icon}
               onClick={this.handleActionClick}
               responsive
             />
-          ) : props.associatedMovement === undefined
+          ) : !props.data.associatedMovement
             ? <MaterialIcon icon="sync" rotate="left"/>
             : null
           }
@@ -198,7 +201,6 @@ MovementHeader.propTypes = {
   onDelete: PropTypes.func.isRequired,
   locked: PropTypes.bool,
   onClick: PropTypes.func,
-  associatedMovement: PropTypes.object,
   isHomeBase: PropTypes.bool.isRequired
 };
 

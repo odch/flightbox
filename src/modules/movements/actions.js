@@ -5,12 +5,10 @@ export const SET_MOVEMENTS = 'SET_MOVEMENTS';
 export const MOVEMENT_ADDED = 'MOVEMENT_ADDED';
 export const MOVEMENT_CHANGED = 'MOVEMENT_CHANGED';
 export const MOVEMENT_DELETED = 'MOVEMENT_DELETED';
-export const IMMATRICULATION_MOVEMENT_ADDED = 'IMMATRICULATION_MOVEMENT_ADDED';
-export const IMMATRICULATION_MOVEMENT_CHANGED = 'IMMATRICULATION_MOVEMENT_CHANGED';
-export const IMMATRICULATION_MOVEMENT_DELETED = 'IMMATRICULATION_MOVEMENT_DELETED';
+export const LOAD_MOVEMENT = 'LOAD_MOVEMENT';
+export const ADD_MOVEMENT_BY_KEY = 'ADD_MOVEMENT_BY_KEY';
+export const CLEAR_MOVEMENTS_BY_KEY = 'CLEAR_MOVEMENTS_BY_KEY';
 export const DELETE_MOVEMENT = 'DELETE_MOVEMENT';
-export const SET_ASSOCIATED_MOVEMENTS = 'SET_ASSOCIATED_MOVEMENTS';
-export const SET_MOVEMENTS_BY_IMMATRICULATION = 'SET_MOVEMENTS_BY_IMMATRICULATION';
 export const INIT_NEW_MOVEMENT = 'INIT_NEW_MOVEMENT';
 export const INIT_NEW_MOVEMENT_FROM_MOVEMENT = 'INIT_NEW_MOVEMENT_FROM_MOVEMENT';
 export const SAVE_MOVEMENT = 'SAVE_MOVEMENT';
@@ -81,33 +79,28 @@ export function movementDeleted(snapshot, movementType) {
   };
 }
 
-export function immatriculationMovementAdded(snapshot, movementType) {
+export function loadMovement(key, type) {
   return {
-    type: IMMATRICULATION_MOVEMENT_ADDED,
+    type: LOAD_MOVEMENT,
     payload: {
-      snapshot,
-      movementType
-    },
+      key,
+      type
+    }
   };
 }
 
-export function immatriculationMovementChanged(snapshot, movementType) {
+export function addMovementByKey(movement) {
   return {
-    type: IMMATRICULATION_MOVEMENT_CHANGED,
+    type: ADD_MOVEMENT_BY_KEY,
     payload: {
-      snapshot,
-      movementType
-    },
+      movement
+    }
   };
 }
 
-export function immatriculationMovementDeleted(snapshot, movementType) {
+export function clearMovementsByKey() {
   return {
-    type: IMMATRICULATION_MOVEMENT_DELETED,
-    payload: {
-      snapshot,
-      movementType
-    },
+    type: CLEAR_MOVEMENTS_BY_KEY
   };
 }
 
@@ -120,25 +113,6 @@ export function deleteMovement(movementType, key, successAction) {
       successAction,
     },
   };
-}
-
-export function setAssociatiatedMovements(associatedMovements) {
-  return {
-    type: SET_ASSOCIATED_MOVEMENTS,
-    payload: {
-      associatedMovements
-    }
-  }
-}
-
-export function setMovementsByImmatriculation(immatriculation, movements) {
-  return {
-    type: SET_MOVEMENTS_BY_IMMATRICULATION,
-    payload: {
-      immatriculation,
-      movements
-    }
-  }
 }
 
 export function initNewMovement(movementType) {

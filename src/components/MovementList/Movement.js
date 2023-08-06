@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import MovementHeader from './MovementHeader';
 import MovementDetails from './MovementDetails';
-import AssociatedMovement from './AssociatedMovement';
+import AssociatedMovement from '../../containers/AssociatedMovementContainer';
 import Action from './Action';
 
 const Wrapper = styled.div`
@@ -47,7 +47,7 @@ class Movement extends React.PureComponent {
       || props.aircraftSettings.homeBase[props.data.immatriculation] === true;
 
     return (
-      <Wrapper selected={props.selected}>
+      <Wrapper selected={props.selected} data-id={props.data.key}>
         <MovementHeader
           onClick={this.handleClick}
           selected={props.selected}
@@ -56,7 +56,6 @@ class Movement extends React.PureComponent {
           createMovementFromMovement={props.createMovementFromMovement}
           onDelete={props.onDelete}
           locked={props.locked}
-          associatedMovement={props.associatedMovement}
           isHomeBase={isHomeBase}
         />
         {props.selected && (
@@ -79,7 +78,7 @@ class Movement extends React.PureComponent {
               movementType={props.data.type}
               movementKey={props.data.key}
               isHomeBase={isHomeBase}
-              associatedMovement={props.associatedMovement}
+              associatedMovement={props.data.associatedMovement}
               createMovementFromMovement={props.createMovementFromMovement}
               loading={props.loading}
             />
@@ -106,7 +105,6 @@ class Movement extends React.PureComponent {
 
 Movement.propTypes = {
   data: PropTypes.object.isRequired,
-  associatedMovement: PropTypes.object,
   selected: PropTypes.bool,
   onEdit: PropTypes.func.isRequired,
   onSelect: PropTypes.func.isRequired,
