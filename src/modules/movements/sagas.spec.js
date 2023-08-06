@@ -249,6 +249,10 @@ describe('modules', () => {
           expect(generator.next().value)
             .toEqual(call(sagas.addMovements, departuresResult.snapshot, arrivalsResult.snapshot, existingMovements, channel));
 
+          if (clear) {
+            expect(generator.next().value).toEqual(put(actions.clearMovementsByKey()));
+          }
+
           expect(generator.next().done).toEqual(true);
         };
 
