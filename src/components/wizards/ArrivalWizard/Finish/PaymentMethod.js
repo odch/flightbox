@@ -7,6 +7,18 @@ import {NextButton, CancelButton} from '../../../WizardNavigation'
 import CashPaymentMessage from './CashPaymentMessage'
 import FinishActions from './FinishActions'
 
+const PAYMENT_METHODS = [{
+  label: 'Karte',
+  value: 'card'
+}, {
+  label: 'Zahlung per Bezahl-Link (E-Mail)',
+  value: 'paylink'
+}
+  /*{
+    label: 'Bar',
+    value: 'cash'
+  }*/]
+
 const Container = styled.div`
   padding: 2em;
 `
@@ -39,9 +51,19 @@ const StyledCancelButton = styled(CancelButton)`
 
 const PaymentMethod = ({
                          itemKey,
+                         email,
+                         immatriculation,
                          method,
                          step,
                          amount,
+                         landings,
+                         landingFeeSingle,
+                         landingFeeCode,
+                         landingFeeTotal,
+                         goArounds,
+                         goAroundFeeSingle,
+                         goAroundFeeCode,
+                         goAroundFeeTotal,
                          failure,
                          createCardPayment,
                          createMovementFromMovement,
@@ -77,18 +99,25 @@ const PaymentMethod = ({
             }}
           />
         </>
+      ) : method === 'paylink' ? (
+        <>
+          <>
+            <InstructionMessage>Bitte warten, der Bezahl-Link wird vorbereitet...</InstructionMessage>
+            <StyledCancelButton
+              type="button"
+              label="Abbrechen"
+              onClick={() => {
+                cancelCardPayment()
+              }}
+            />
+          </>
+        </>
       ) : null
     ) : (<>
         <InstructionMessage>Bitte wählen Sie eine Zahlungsart:</InstructionMessage>
         <SelectContainer>
           <SingleSelect
-            items={[{
-              label: 'Bar',
-              value: 'cash'
-            }, {
-              label: 'Karte',
-              value: 'card'
-            }]}
+            items={PAYMENT_METHODS}
             orientation="vertical"
             onChange={e => setMethod(e.target.value)}
             value={method}
@@ -107,7 +136,40 @@ const PaymentMethod = ({
               setStep(Step.COMPLETED)
             } else if (method === 'card') {
               setStep(Step.CONFIRMED)
-              createCardPayment(itemKey, amount, 'CHF',)
+              createCardPayment(
+                itemKey,
+                amount,
+                'CHF',
+                'card',
+                email,
+                immatriculation,
+                landings,
+                landingFeeSingle,
+                landingFeeCode,
+                landingFeeTotal,
+                goArounds,
+                goAroundFeeSingle,
+                goAroundFeeCode,
+                goAroundFeeTotal
+              )
+            } else if (method === 'paylink') {
+              setStep(Step.CONFIRMED)
+              createCardPayment(
+                itemKey,
+                amount,
+                'CHF',
+                'paylink',
+                email,
+                immatriculation,
+                landings,
+                landingFeeSingle,
+                landingFeeCode,
+                landingFeeTotal,
+                goArounds,
+                goAroundFeeSingle,
+                goAroundFeeCode,
+                goAroundFeeTotal
+              )
             }
           }}
           dataCy="next-button"
@@ -124,6 +186,16 @@ PaymentMethod.propTypes = {
   step: PropTypes.string.isRequired,
   method: PropTypes.string,
   amount: PropTypes.number.isRequired,
+  email: PropTypes.string.isRequired,
+  immatriculation: PropTypes.string.isRequired,
+  landings: PropTypes.number.isRequired,
+  landingFeeSingle: PropTypes.number,
+  landingFeeCode: PropTypes.string,
+  landingFeeTotal: PropTypes.number,
+  goArounds: PropTypes.number,
+  goAroundFeeSingle: PropTypes.number,
+  goAroundFeeCoe: PropTypes.string,
+  goAroundFeeTotal: PropTypes.number,
   failure: PropTypes.bool.isRequired,
   createMovementFromMovement: PropTypes.func.isRequired,
   finish: PropTypes.func.isRequired,

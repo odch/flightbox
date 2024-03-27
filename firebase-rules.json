@@ -109,6 +109,9 @@
         "goAroundFeeSingle": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
         },
+        "goAroundFeeCode": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
         "goAroundFeeTotal": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
         },
@@ -120,6 +123,9 @@
         },
         "landingFeeSingle": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "landingFeeCode": {
+          ".validate": "newData.isString() && newData.val().length > 0"
         },
         "landingFeeTotal": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
@@ -296,6 +302,39 @@
         },
         "status": {
           ".validate": "newData.val() === 'pending' || newData.val() === 'success' || newData.val() === 'failure' || newData.val() === 'cancelled'"
+        },
+        "method": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "immatriculation": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "landings": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "landingFeeSingle": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "landingFeeCode": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "landingFeeTotal": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "goArounds": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "goAroundFeeSingle": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "goAroundFeeCode": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "goAroundFeeTotal": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
         },
         "$other": {
           ".validate": false

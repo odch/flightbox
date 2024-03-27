@@ -33,7 +33,7 @@ const getFee = (feesDefinition, mtow, flightType, aircraftOrigin) => {
     throw new Error(`No fees defined for MTOW ${mtow} and flight type '${flightType}'`);
   }
 
-  return mtowRange.fee;
+  return {fee: mtowRange.fee, billingProduct: mtowRange.billingProduct};
 }
 
 export const getLandingFee = (mtow, flightType, aircraftOrigin) =>
@@ -42,16 +42,17 @@ export const getLandingFee = (mtow, flightType, aircraftOrigin) =>
 export const getGoAroundFee = (mtow, flightType, aircraftOrigin) =>
   getFee(__GO_AROUND_FEES__, mtow, flightType, aircraftOrigin)
 
-const updateFeeFn = (feeGetter, feeSingleField, feeTotalField) =>
+const updateFeeFn = (feeGetter, feeSingleField, feeTotalField, feeCodeField) =>
   (changeAction, mtow, flightType, aircraftOrigin, count) => {
     if (mtow && flightType && aircraftOrigin) {
       const feeSingle = feeGetter(mtow, flightType, aircraftOrigin);
 
-      if (typeof feeSingle === 'number') {
-        changeAction(feeSingleField, feeSingle);
+      if (feeSingle) {
+        changeAction(feeSingleField, feeSingle.fee);
+        changeAction(feeCodeField, feeSingle.billingProduct);
 
         if (typeof count === 'number') {
-          const landingFeeTotal = feeSingle * count;
+          const landingFeeTotal = feeSingle.fee * count;
           changeAction(feeTotalField, landingFeeTotal);
         }
       }
@@ -59,13 +60,13 @@ const updateFeeFn = (feeGetter, feeSingleField, feeTotalField) =>
   }
 
 export const updateLandingFees = (changeAction, mtow, flightType, aircraftOrigin, landingCount) => {
-  updateFeeFn(getLandingFee, 'landingFeeSingle', 'landingFeeTotal')(
+  updateFeeFn(getLandingFee, 'landingFeeSingle', 'landingFeeTotal', 'landingFeeCode')(
     changeAction, mtow, flightType, aircraftOrigin, landingCount
   );
 }
 
 export const updateGoAroundFees = (changeAction, mtow, flightType, aircraftOrigin, goAroundCount) => {
-  updateFeeFn(getGoAroundFee, 'goAroundFeeSingle', 'goAroundFeeTotal')(
+  updateFeeFn(getGoAroundFee, 'goAroundFeeSingle', 'goAroundFeeTotal', 'goAroundFeeCode')(
     changeAction, mtow, flightType, aircraftOrigin, goAroundCount
   );
 }
