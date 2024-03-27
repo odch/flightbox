@@ -16,6 +16,7 @@ const Label = styled.div`
 const Value = styled.div`
   width: 50%;
   margin-left: 50%;
+  overflow-wrap: break-word;
 `;
 
 class MovementField extends React.PureComponent {
