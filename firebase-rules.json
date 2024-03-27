@@ -301,7 +301,7 @@
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "status": {
-          ".validate": "newData.val() === 'pending' || newData.val() === 'success' || newData.val() === 'failure' || newData.val() === 'cancelled'"
+          ".validate": "newData.val() === 'pending' || newData.val() === 'success' || newData.val() === 'failure' || newData.val() === 'cancelled' || newData.val() === 'inprogress'"
         },
         "method": {
           ".validate": "newData.isString() && newData.val().length > 0"
