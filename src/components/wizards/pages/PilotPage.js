@@ -26,13 +26,8 @@ const PilotPage = (props) => {
             return null;
           }}
         />
-        <Field
-          name="phone"
-          type="text"
-          label="Telefon"
-          component={renderInputField}
-          readOnly={props.readOnly}
-        />
+      </FieldSet>
+      <FieldSet>
         <Field
           name="lastname"
           type="text"
@@ -44,6 +39,22 @@ const PilotPage = (props) => {
           name="firstname"
           type="text"
           label="Vorname"
+          component={renderInputField}
+          readOnly={props.readOnly}
+        />
+      </FieldSet>
+      <FieldSet>
+        <Field
+          name="email"
+          type="email"
+          label="E-Mail"
+          component={renderInputField}
+          readOnly={props.readOnly}
+        />
+        <Field
+          name="phone"
+          type="text"
+          label="Telefon"
           component={renderInputField}
           readOnly={props.readOnly}
         />
@@ -63,5 +74,5 @@ PilotPage.propTypes = {
 export default reduxForm({
   form: 'wizard',
   destroyOnUnmount: false,
-  validate: validate(null, ['memberNr', 'phone', 'lastname', 'firstname']),
+  validate: validate(null, ['memberNr', 'lastname', 'firstname', 'email', 'phone']),
 })(PilotPage);

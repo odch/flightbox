@@ -63,6 +63,7 @@ class MovementDetails extends React.PureComponent {
             <MovementField label="Mitgliedernummer" value={props.data.memberNr}/>
             <MovementField label="Nachname" value={props.data.lastname}/>
             <MovementField label="Vorname" value={props.data.firstname}/>
+            <MovementField label="E-Mail" value={props.data.email}/>
             <MovementField label="Telefon" value={props.data.phone}/>
           </DetailsBox>
           {props.data.type === 'departure'
