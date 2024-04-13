@@ -1,19 +1,32 @@
-import { connect } from 'react-redux';
-import { loadMovements, deleteMovement } from '../modules/movements';
+import {connect} from 'react-redux';
+import {deleteMovement, loadMovements} from '../modules/movements';
 import {
-  showDeleteConfirmationDialog,
-  hideDeleteConfirmationDialog,
-  showMovementWizard,
   createMovementFromMovement,
-  selectMovement
+  hideDeleteConfirmationDialog,
+  selectMovement,
+  showDeleteConfirmationDialog,
+  showMovementWizard
 } from '../modules/ui/movements';
-import { loadAircraftSettings } from '../modules/settings/aircrafts'
+import {loadAircraftSettings} from '../modules/settings/aircrafts'
 
 import MovementList from '../components/MovementList';
 import ImmutableItemsArray from '../util/ImmutableItemsArray';
 
+/**
+ * Sometimes there's a bug which results in empty departures/arrivals with just
+ * `associatedMovement: {type: 'none' }`.
+ *
+ * Couldn't find out what the reason for this yet. But by filtering them out here
+ * we make sure that the movement list can still be used (otherwise there are null
+ * pointers, because all the required fields are missing on the movement).
+ */
+const getMovementsFromState = state => new ImmutableItemsArray(
+  state.movements.data.array
+    .filter(movement => !!movement.location)
+)
+
 const getMovements = state => {
-  const data = state.movements.data;
+  const data = getMovementsFromState(state)
   const filter = state.movements.filter;
 
   const dateFilterSet = !!filter.date.start && !!filter.date.end
