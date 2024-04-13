@@ -2,7 +2,7 @@ const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 const utils = require('./utils')
 
-// Run once a day at midnight, set missing associated movements
+// Run once a week at midnight, set missing associated movements
 // Manually run the task here https://console.cloud.google.com/cloudscheduler
 const handleImmatriculation = async (immatriculation, movements) => {
   const aircraftMovements = await utils.loadAircraftMovements(immatriculation)
@@ -28,7 +28,7 @@ const loadWithoutAssociation = path => admin.database()
   .once("value")
 
 exports.setAssociatedMovementsCronJob = functions.pubsub
-  .schedule('*/15 * * * *')
+  .schedule('0 15 * * 0') // midnight from sunday to monday in Europe (in pacific time)
   .onRun(async () => {
     functions.logger.log('Starting job')
 
