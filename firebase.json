@@ -11,5 +11,8 @@
       "source": "/api/**",
       "function": "api"
     }]
+  },
+  "functions": {
+    "source": "functions"
   }
 }

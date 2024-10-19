@@ -6,6 +6,8 @@
 
 ### Getting Started
 
+Node Version: 10
+
 ```
 $ npm install
 $ npm start [--project={PROJECT_NAME}]
@@ -52,7 +54,9 @@ $ npm run build:prod [--project={PROJECT_NAME}]
 
 #### Push to Firebase
 
-Prerequisites: Firebase Tools must be installed (`npm install -g firebase-tools`).
+Node version for this step: 20
+
+Prerequisites: Firebase Tools must be installed (`npm install -g firebase-tools@13`).
 
 **Caution:** Ensure that you have selected the right Firebase project (list all projects by typing `firebase list` and change it if necessary (with `firebase use`)).
 
@@ -142,3 +146,42 @@ Returns (example):
 ```
 
 If no status is set, `{}` is returned.
+
+#### Import users ####
+
+##### Request #####
+
+POST an array of users to this endpoint to sync the users list.
+
+New users are added, existing ones are updated, and those which are saved in the database, but not present in the given
+users array are removed from the database.
+
+Example payload:
+```
+POST /api/users/import
+
+{
+  "users": [
+    {
+      "memberNr": "48434",
+      "firstname": "John",
+      "lastname": "Doe",
+      "phone": "+41791234567",
+      "email": "john.doe@example.com"
+    },
+    {
+      "memberNr": "30443",
+      "firstname": "Jane",
+      "lastname": "Smith",
+      "phone": "+41791234568",
+      "email": "jane.smith@example.com"
+    },
+    ...
+  ]
+}
+```
+
+##### Auth #####
+
+This endpoint requires a Basic Auth header (username and password to use set in the function config:
+`api.serviceuser.username` and `api.serviceuser.password`).
