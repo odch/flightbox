@@ -12,14 +12,14 @@ const Wrapper = styled.header`
   box-sizing: border-box;
   background-color: ${props => props.theme.colors.background};
   text-align: center;
-  
+
   @media screen and (max-width: 768px) {
     display: none;
   }
 `;
 
 const StyledLogo = styled(Logo)`
-  width: 85%;
+  width: ${props => props.theme.logoSize || 85}%;
   margin-top: 10px;
 `;
 
