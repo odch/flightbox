@@ -1,0 +1,87 @@
+{
+  "aerodrome": {
+    "name": "Mollis",
+    "ICAO": "LSZM",
+    "runways": [
+      {
+        "name": "01",
+        "type": "A"
+      },
+      {
+        "name": "19",
+        "type": "A"
+      }
+    ],
+    "departureRoutes": [
+      {
+        "name": "N",
+        "label": "Nord"
+      },
+      {
+        "name": "O",
+        "label": "Ost"
+      },
+      {
+        "name": "S",
+        "label": "Süd"
+      },
+      {
+        "name": "W",
+        "label": "West"
+      }
+    ],
+    "arrivalRoutes": [
+      {
+        "name": "N",
+        "label": "Nord"
+      },
+      {
+        "name": "O",
+        "label": "Ost"
+      },
+      {
+        "name": "S",
+        "label": "Süd"
+      },
+      {
+        "name": "W",
+        "label": "West"
+      }
+    ],
+    "landingFees": {
+      "default": {
+        "default": [
+          {
+            "mtowMin": 0,
+            "mtowMax": 800,
+            "fee": 22.8
+          },
+          {
+            "mtowMin": 801,
+            "mtowMax": 1000,
+            "fee": 27.6
+          },
+          {
+            "mtowMin": 1001,
+            "mtowMax": 1300,
+            "fee": 33.6
+          },
+          {
+            "mtowMin": 1301,
+            "mtowMax": 2000,
+            "fee": 38.4
+          }
+        ]
+      }
+    }
+  },
+  "environments": {
+    "test": {
+      "firebaseProjectId": "lszm-test",
+      "firebaseApiKey": "AIzaSyBP3IcalmLfA6gi9bq4Ln6aDyelL4gOLGg"
+    }
+  },
+  "theme": "lszm",
+  "title": "Flightbox - Flugplatz Mollis",
+  "cardPaymentsEnabled": false
+}
