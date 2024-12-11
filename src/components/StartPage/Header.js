@@ -13,12 +13,18 @@ const StyledHeader = styled.header`
   box-sizing: border-box;
 `;
 
+const StyledLogoWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  height: 100%;
+`
+
 const StyledLoginInfo = styled(LoginInfo)`
   float: right;
 `;
 
 const StyledLogo = styled(Logo)`
-  height: 85%;
+  height: ${props => props.theme.logoSize || 85}%;
 `;
 
 class Header extends React.PureComponent {
@@ -28,7 +34,9 @@ class Header extends React.PureComponent {
     return (
       <StyledHeader>
         <StyledLoginInfo logout={props.logout} auth={props.auth} showLogin={props.showLogin}/>
-        <StyledLogo/>
+        <StyledLogoWrapper>
+          <StyledLogo/>
+        </StyledLogoWrapper>
       </StyledHeader>
     );
   }
