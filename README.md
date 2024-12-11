@@ -60,6 +60,18 @@ Prerequisites: Firebase Tools must be installed (`npm install -g firebase-tools@
 
 **Caution:** Ensure that you have selected the right Firebase project (list all projects by typing `firebase list` and change it if necessary (with `firebase use`)).
 
+##### Set up env
+
+Set the realtime database name for the cloud functions:
+
+```
+firebase functions:config:set rtdb.instance={RTDB NAME}
+```
+
+(e.g. `firebase functions:config:set rtdb.instance=lszt-test`)
+
+##### Deploy everything including cloud functions
+
 ```
 $ firebase deploy
 ```
