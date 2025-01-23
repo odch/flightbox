@@ -3,21 +3,25 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import {Step} from '../../../../modules/ui/arrivalPayment'
 import SingleSelect from '../../../SingleSelect'
-import {NextButton, CancelButton} from '../../../WizardNavigation'
+import {CancelButton, NextButton} from '../../../WizardNavigation'
 import CashPaymentMessage from './CashPaymentMessage'
 import FinishActions from './FinishActions'
 
 const PAYMENT_METHODS = [{
-  label: 'Karte',
-  value: 'card'
-}, {
-  label: 'Zahlung per Bezahl-Link (E-Mail)',
-  value: 'paylink'
-}
-  /*{
+    label: 'Karte',
+    value: 'card'
+  },
+  /*
+  disabled for now as not fully implemented (payment service connection)
+  {
+    label: 'Zahlung per Bezahl-Link (E-Mail)',
+    value: 'paylink'
+  }
+  */
+  {
     label: 'Bar',
     value: 'cash'
-  }*/]
+  }]
 
 const Container = styled.div`
   padding: 2em;
