@@ -6,7 +6,13 @@
 
 ### Getting Started
 
-Node Version: 10
+#### Required Node Versions
+
+Node Version for building the app: 10
+
+Node Version for deploying to Firebase and for the cloud functions: 20
+
+#### Start locally
 
 ```
 $ npm install
@@ -70,11 +76,27 @@ firebase functions:config:set rtdb.instance={RTDB NAME}
 
 (e.g. `firebase functions:config:set rtdb.instance=lszt-test`)
 
-##### Deploy everything including cloud functions
+##### Deploy app
+
+Before executing this command, make sure the correct project was built using the Node version
+mentioned at the beginning of this document.
 
 ```
-$ firebase deploy
+$ firebase deploy --only hosting,database
 ```
+
+##### Deploy cloud functions
+
+Use the following commands to deploy the cloud functions.
+
+Before executing these commands, make sure you selected the correct Node version for the cloud
+functions, which is mentioned at the beginning of this document.
+
+```
+$ cd functions && npm ci && cd ..
+$ firebase deploy --only functions
+```
+
 ## Cloud functions
 
 ### `auth`
