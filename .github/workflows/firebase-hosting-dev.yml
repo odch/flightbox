@@ -10,6 +10,7 @@ jobs:
       matrix:
         environment:
           - lszt_test
+          - lszm_test
     environment: ${{ matrix.environment }}
     steps:
       - run: echo 'Running deplyoment for project ${{ vars.PROJECT }}'
