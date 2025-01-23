@@ -9,8 +9,10 @@ jobs:
     strategy:
       matrix:
         environment:
-          - lszt-test
+          - lszt_test
+    environment: ${{ matrix.environment }}
     steps:
+      - run: echo 'Running deplyoment for project ${{ vars.PROJECT }}'
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
         with:
@@ -28,7 +30,13 @@ jobs:
       - run: firebase deploy --only hosting,database
   build_and_deploy_functions:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment:
+          - lszt_test
+    environment: ${{ matrix.environment }}
     steps:
+      - run: echo 'Running functions deplyoment for project ${{ vars.PROJECT }}'
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
