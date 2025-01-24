@@ -86,7 +86,7 @@ class AssociatedMovement extends React.PureComponent {
           <Label>{label}</Label>
           {text && <div>{text}</div>}
           {associatedMovementData
-            ? <StyledDetails data={associatedMovementData} isHomeBase={this.props.isHomeBase}/>
+            ? <StyledDetails data={associatedMovementData} isHomeBase={this.props.isHomeBase} isAdmin={this.props.isAdmin}/>
             : associatedMovementData === undefined
               ? <MaterialIcon icon="sync" rotate="left"/>
               : (
