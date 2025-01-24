@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import CommitFailureDialog from '../CommitFailureDialog';
 import Centered from '../Centered';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import MaterialIcon from '../MaterialIcon';
-import { getFromItemKey } from '../../util/reference-number';
+import {getFromItemKey} from '../../util/reference-number';
 import Breadcrumbs from './Breadcrumbs';
 
 class MovementWizard extends Component {
@@ -52,6 +52,7 @@ class MovementWizard extends Component {
         onSubmit={this.submitPage.bind(this)}
         cancel={this.props.cancel}
         readOnly={this.props.locked}
+        isAdmin={this.props.auth.data.admin}
       />
     );
 

@@ -11,6 +11,7 @@ import AerodromeDropdown from '../../containers/AerodromeDropdownContainer';
 import AircraftDropdown from '../../containers/AircraftDropdownContainer';
 import AircraftCategoryDropdown from '../../components/AircraftCategoryDropdown';
 import UserDropdown from '../../containers/UserDropdownContainer';
+import MaskedInput from '../MaskedInput'
 
 const StyledLabeledComponent = styled(LabeledComponent)`
   width: 45%;
@@ -42,7 +43,9 @@ const renderLabeledComponent = (props, component) => {
 };
 
 export const renderInputField = (props) => {
-  const cmp = (
+  const cmp = props.masked ? (
+    <MaskedInput {...props}/>
+  ) : (
     <Input
       {...props.input}
       name={props.name}
