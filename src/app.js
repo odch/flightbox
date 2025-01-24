@@ -1,17 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware, compose } from 'redux';
+import {Route} from 'react-router-dom';
+import {Provider} from 'react-redux';
+import {applyMiddleware, compose, createStore} from 'redux';
 import createHistory from 'history/createHashHistory';
-import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
+import {ConnectedRouter, routerMiddleware} from 'react-router-redux';
 import createSagaMiddleware from 'redux-saga';
-import { ThemeProvider } from 'styled-components';
+import {ThemeProvider} from 'styled-components';
 import moment from 'moment';
 
 import 'moment/locale/de';
 
-import reducer, { sagas } from './modules';
+import reducer, {sagas} from './modules';
 import autoRestart from './util/autoRestartSaga';
 
 import App from './containers/AppContainer';
@@ -27,8 +27,8 @@ const reduxRouterMiddleware = routerMiddleware(history);
 
 let middleware = applyMiddleware(sagaMiddleware, reduxRouterMiddleware);
 
-if (window.devToolsExtension) {
-  middleware = compose(middleware, window.devToolsExtension());
+if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+  middleware = compose(middleware, window.__REDUX_DEVTOOLS_EXTENSION__({ trace: true }));
 }
 
 const store = createStore(reducer, {}, middleware);
