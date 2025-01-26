@@ -4,6 +4,7 @@ const del = require('del');
 const env = require('gulp-env');
 const merge = require('merge-stream');
 const replace = require('gulp-replace');
+const rename = require('gulp-rename');
 const projects = require('./projects');
 const processFirebaseRules = require('./tasks/processFirebaseRules');
 
@@ -32,8 +33,9 @@ gulp.task('build', ['clean'], function () {
   const favicons = gulp.src(['./theme/' + projectConf.theme + '/favicons/*'], { base: './theme/' + projectConf.theme })
     .pipe(gulp.dest(config.output.path));
 
-  const rules = gulp.src(['./firebase-rules.json'], { base: './' })
+  const rules = gulp.src(['./firebase-rules-template.json'], { base: './' })
     .pipe(processFirebaseRules(projectConf))
+    .pipe(rename('firebase-rules.json'))
     .pipe(gulp.dest(config.output.path));
 
   return merge(bundle, copy, favicons, rules);

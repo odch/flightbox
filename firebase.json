@@ -4,9 +4,6 @@
   },
   "hosting": {
     "public": "build",
-    "ignore": [
-      "firebase-rules.json"
-    ],
     "rewrites": [{
       "source": "/api/**",
       "function": "api"
