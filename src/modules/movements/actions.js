@@ -18,6 +18,8 @@ export const EDIT_MOVEMENT = 'EDIT_MOVEMENT';
 export const START_INITIALIZE_WIZARD = 'START_INITIALIZE_WIZARD';
 export const WIZARD_INITIALIZED = 'WIZARD_INITIALIZED';
 export const SET_MOVEMENTS_FILTER = 'SET_MOVEMENTS_FILTER';
+export const SET_ASSOCIATED_MOVEMENT = 'SET_ASSOCIATED_MOVEMENT';
+export const CLEAR_ASSOCIATED_MOVEMENTS = 'CLEAR_ASSOCIATED_MOVEMENTS';
 
 export function loadMovements(clear) {
   return {
@@ -188,5 +190,22 @@ export function setMovementsFilter(filter) {
     payload: {
       filter
     }
+  };
+}
+
+export function setAssociatedMovement(movementType, movementKey, associatedMovement) {
+  return {
+    type: SET_ASSOCIATED_MOVEMENT,
+    payload: {
+      movementType,
+      movementKey,
+      associatedMovement
+    }
+  };
+}
+
+export function clearAssociatedMovements() {
+  return {
+    type: CLEAR_ASSOCIATED_MOVEMENTS
   };
 }

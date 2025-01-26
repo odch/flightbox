@@ -107,21 +107,19 @@ const getAssociatedMovement = (movement, isHomeBase, aircraftMovements) => {
   throw new Error('Code should not be reached')
 }
 
-const path = (movementType) => movementType === 'departure' ? '/departures' : '/arrivals'
+const path = (movementType) => '/movementAssociations' + (movementType === 'departure' ? '/departures' : '/arrivals')
 
 const setAssociatedMovement = async (movementKey, movementType, associatedMovement) => {
   const newData = associatedMovement ? {
-    associatedMovement: {
-      key: associatedMovement.key,
-      type: associatedMovement.type
-    }
+    key: associatedMovement.key,
+    type: associatedMovement.type
   } : {
-    associatedMovement: {
-      type: 'none'
-    }
+    type: 'none'
   }
 
-  await admin.database().ref(path(movementType)).child(movementKey).update(newData)
+  const basePath = path(movementType)
+
+  await admin.database().ref(basePath).child(movementKey).update(newData)
 }
 
 const isHomeBase = async immatriculation => {

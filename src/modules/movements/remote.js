@@ -48,3 +48,17 @@ export function saveMovement(path, key, movement) {
     }
   });
 }
+
+export function addMovementAssociationListener(movementType, movementKey, callback) {
+  const ref = firebase('/movementAssociations')
+    .child(movementType === 'departure' ? 'departures' : 'arrivals')
+    .child(movementKey)
+  ref.on('value', callback);
+}
+
+export function removeMovementAssociationListener(movementType, movementKey) {
+  const ref = firebase('/movementAssociations')
+    .child(movementType === 'departure' ? 'departures' : 'arrivals')
+    .child(movementKey)
+  ref.off('value');
+}

@@ -165,6 +165,10 @@
         }
       }
     },
+    "movementAssociations": {
+      ".read": "auth !== null",
+      ".write": false
+    },
     "aircrafts": {
       ".read": "auth !== null",
       ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",

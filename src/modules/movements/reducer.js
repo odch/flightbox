@@ -35,9 +35,25 @@ export const addMovementByKey = (state, action) => ({
   }
 });
 
-export const clearMovementsByKey = (state, action) => ({
+export const clearMovementsByKey = (state) => ({
   ...state,
   byKey: {}
+});
+
+export const clearAssociatedMovements = (state) => ({
+  ...state,
+  associatedMovements: INITIAL_STATE.associatedMovements
+});
+
+export const setAssociatedMovement = (state, action) => ({
+  ...state,
+  associatedMovements: {
+    ...state.associatedMovements,
+    [action.payload.movementType === 'departure' ? 'departures' : 'arrivals']: {
+      ...state.associatedMovements[action.payload.movementType === 'departure' ? 'departures' : 'arrivals'],
+      [action.payload.movementKey]: action.payload.associatedMovement
+    }
+  }
 });
 
 const ACTION_HANDLERS = {
@@ -47,10 +63,16 @@ const ACTION_HANDLERS = {
   [actions.SET_MOVEMENTS_FILTER]: setFilter,
   [actions.ADD_MOVEMENT_BY_KEY]: addMovementByKey,
   [actions.CLEAR_MOVEMENTS_BY_KEY]: clearMovementsByKey,
+  [actions.SET_ASSOCIATED_MOVEMENT]: setAssociatedMovement,
+  [actions.CLEAR_ASSOCIATED_MOVEMENTS]: clearAssociatedMovements,
 };
 
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
+  associatedMovements: {
+    departures: {},
+    arrivals: {}
+  },
   loading: false,
   loadingFailed: false,
   byKey: {},

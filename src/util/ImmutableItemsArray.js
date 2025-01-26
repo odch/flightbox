@@ -26,6 +26,10 @@ class ImmutableItemsArray {
     }
   }
 
+  containsKey(key) {
+    return !!this.getByKey(key)
+  }
+
   getByKey(key) {
     const index = this.keys[key];
     if (typeof index === 'number') {
