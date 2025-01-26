@@ -12,17 +12,16 @@ import {loadAircraftSettings} from '../modules/settings/aircrafts'
 import MovementList from '../components/MovementList';
 import ImmutableItemsArray from '../util/ImmutableItemsArray';
 
-/**
- * Sometimes there's a bug which results in empty departures/arrivals with just
- * `associatedMovement: {type: 'none' }`.
- *
- * Couldn't find out what the reason for this yet. But by filtering them out here
- * we make sure that the movement list can still be used (otherwise there are null
- * pointers, because all the required fields are missing on the movement).
- */
 const getMovementsFromState = state => new ImmutableItemsArray(
   state.movements.data.array
-    .filter(movement => !!movement.location)
+    .map(movement => ({
+      ...movement,
+      associatedMovement: state
+        .movements
+        .associatedMovements
+        [movement.type === 'departure' ? 'departures' : 'arrivals']
+        [movement.key]
+    }))
 )
 
 const getMovements = state => {
