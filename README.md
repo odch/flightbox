@@ -82,8 +82,11 @@ Before executing this command, make sure the correct project was built using the
 mentioned at the beginning of this document.
 
 ```
-$ firebase deploy --only hosting,database
+$ firebase target:apply database main {RTDB NAME}
+$ firebase deploy --only hosting,database:main
 ```
+
+(e.g. `lszt-test` for `{RTDB NAME}`)
 
 ##### Deploy cloud functions
 
