@@ -1,7 +1,8 @@
 {
-  "database": {
+  "database": [{
+    "target": "main",
     "rules": "build/firebase-rules.json"
-  },
+  }],
   "hosting": {
     "public": "build",
     "rewrites": [{
