@@ -8,11 +8,14 @@ import Message, {ReferenceNumberMessage} from './Message';
 import CashPaymentMessage from './CashPaymentMessage'
 import FinishActions from './FinishActions'
 import PaymentMethod from '../../../../containers/PaymentMethodContainer'
+import objectToArray from '../../../../util/objectToArray'
 
 const getHeading = isUpdate =>
   isUpdate === true
     ? 'Die Ankunft wurde erfolgreich aktualisiert!'
     : 'Ihre Ankunft wurde erfolgreich erfasst!';
+
+const enabledPaymentMethods = objectToArray(__CONF__.paymentMethods);
 
 const Finish = props => {
   const {
@@ -49,7 +52,7 @@ const Finish = props => {
         </>
       )}
       {isHomeBase === false ? (
-        __CARD_PAYMENTS_ENABLED__ ? (
+        enabledPaymentMethods.length > 1 ? (
           <PaymentMethod
             itemKey={itemKey}
             email={email}
@@ -65,6 +68,7 @@ const Finish = props => {
             goAroundFeeSingle={goAroundFeeSingle}
             goAroundFeeCode={goAroundFeeCode}
             goAroundFeeTotal={goAroundFeeTotal}
+            enabledPaymentMethods={enabledPaymentMethods}
           />
         ) : (
           <>

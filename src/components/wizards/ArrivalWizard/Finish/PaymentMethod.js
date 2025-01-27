@@ -6,6 +6,7 @@ import SingleSelect from '../../../SingleSelect'
 import {CancelButton, NextButton} from '../../../WizardNavigation'
 import CashPaymentMessage from './CashPaymentMessage'
 import FinishActions from './FinishActions'
+import TwintPaymentMessage from './TwintPaymentMessage'
 
 const PAYMENT_METHODS = [{
     label: 'Karte',
@@ -21,6 +22,10 @@ const PAYMENT_METHODS = [{
   {
     label: 'Bar',
     value: 'cash'
+  },
+  {
+    label: 'Twint',
+    value: 'twint_external'
   }]
 
 const Container = styled.div`
@@ -74,7 +79,8 @@ const PaymentMethod = ({
                          finish,
                          setMethod,
                          setStep,
-                         cancelCardPayment
+                         cancelCardPayment,
+                         enabledPaymentMethods
                        }) => (
   <Container>
     {failure && (
@@ -84,6 +90,8 @@ const PaymentMethod = ({
       <>
         {method === 'cash' ? (
           <CashPaymentMessage itemKey={itemKey}/>
+        ) : method === 'twint_external' ? (
+          <TwintPaymentMessage itemKey={itemKey}/>
         ) : (
           <InstructionMessage>Die Zahlung war erfolgreich</InstructionMessage>
         )}
@@ -121,7 +129,7 @@ const PaymentMethod = ({
         <InstructionMessage>Bitte wählen Sie eine Zahlungsart:</InstructionMessage>
         <SelectContainer>
           <SingleSelect
-            items={PAYMENT_METHODS}
+            items={PAYMENT_METHODS.filter(method => enabledPaymentMethods.includes(method.value))}
             orientation="vertical"
             onChange={e => setMethod(e.target.value)}
             value={method}
@@ -136,7 +144,7 @@ const PaymentMethod = ({
               return
             }
 
-            if (method === 'cash') {
+            if (method === 'cash' || method === 'twint_external') {
               setStep(Step.COMPLETED)
             } else if (method === 'card') {
               setStep(Step.CONFIRMED)
@@ -206,6 +214,7 @@ PaymentMethod.propTypes = {
   setMethod: PropTypes.func.isRequired,
   setStep: PropTypes.func.isRequired,
   cancelCardPayment: PropTypes.func.isRequired,
+  enabledPaymentMethods: PropTypes.arrayOf(PropTypes.string).isRequired
 }
 
 export default PaymentMethod
