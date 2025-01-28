@@ -14,12 +14,15 @@ class ArrivalFinishContainer extends Component {
   render() {
     const {
       aircraftSettings,
+      email,
       immatriculation,
       landings,
       landingFeeSingle,
+      landingFeeCode,
       landingFeeTotal,
       goArounds,
       goAroundFeeSingle,
+      goAroundFeeCode,
       goAroundFeeTotal,
       createMovementFromMovement,
       finish,
@@ -41,13 +44,17 @@ class ArrivalFinishContainer extends Component {
         createMovementFromMovement={createMovementFromMovement}
         finish={finish}
         isUpdate={isUpdate}
+        email={email}
+        immatriculation={immatriculation}
         isHomeBase={isHomeBase}
         itemKey={itemKey}
         landings={landings}
         landingFeeSingle={landingFeeSingle}
+        landingFeeCode={landingFeeCode}
         landingFeeTotal={landingFeeTotal}
         goArounds={goArounds}
         goAroundFeeSingle={goAroundFeeSingle}
+        goAroundFeeCode={goAroundFeeCode}
         goAroundFeeTotal={goAroundFeeTotal}
       />
     );
@@ -65,12 +72,15 @@ ArrivalFinishContainer.propTypes = {
   finish: PropTypes.func.isRequired,
   isUpdate: PropTypes.bool.isRequired,
   itemKey: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
   immatriculation: PropTypes.string.isRequired,
   landings: PropTypes.number.isRequired,
   landingFeeSingle: PropTypes.number,
+  landingFeeCode: PropTypes.string,
   landingFeeTotal: PropTypes.number,
   goArounds: PropTypes.number,
   goAroundFeeSingle: PropTypes.number,
+  goAroundFeeCoe: PropTypes.string,
   goAroundFeeTotal: PropTypes.number
 };
 
@@ -80,12 +90,15 @@ const mapStateToProps = (state, ownProps) => {
     finish: ownProps.finish,
     isUpdate: ownProps.isUpdate,
     itemKey: state.ui.wizard.itemKey,
+    email: state.ui.wizard.values.email,
     immatriculation: state.ui.wizard.values.immatriculation,
     landings: state.ui.wizard.values.landingCount,
     landingFeeSingle: state.ui.wizard.values.landingFeeSingle,
+    landingFeeCode: state.ui.wizard.values.landingFeeCode,
     landingFeeTotal: state.ui.wizard.values.landingFeeTotal,
     goArounds: state.ui.wizard.values.goAroundCount,
     goAroundFeeSingle: state.ui.wizard.values.goAroundFeeSingle,
+    goAroundFeeCode: state.ui.wizard.values.goAroundFeeCode,
     goAroundFeeTotal: state.ui.wizard.values.goAroundFeeTotal
   });
 };

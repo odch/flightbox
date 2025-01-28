@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Movement from './Movement';
-import { isLocked } from '../../util/movements.js';
+import {isLocked} from '../../util/movements.js';
 
 const GroupWrapper = styled.div`
   margin: 0 0 2em 0;
@@ -43,6 +43,7 @@ class MovementGroup extends React.PureComponent {
               locked={isLocked(item, props.lockDate)}
               aircraftSettings={props.aircraftSettings}
               loading={props.loading}
+              isAdmin={props.isAdmin}
             />
           )}
         </ItemsContainer>
@@ -66,7 +67,8 @@ MovementGroup.propTypes = {
     club: PropTypes.objectOf(PropTypes.bool),
     homeBase: PropTypes.objectOf(PropTypes.bool)
   }).isRequired,
-  loading: PropTypes.bool.isRequired
+  loading: PropTypes.bool.isRequired,
+  isAdmin: PropTypes.bool.isRequired
 };
 
 export default MovementGroup;

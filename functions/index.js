@@ -1,8 +1,13 @@
 'use strict';
 
+const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
-admin.initializeApp();
+const dbInstance = functions.config().rtdb.instance;
+
+admin.initializeApp({
+  databaseURL: `https://${dbInstance}.firebaseio.com`
+});
 
 const auth = require('./auth');
 const api = require('./api');

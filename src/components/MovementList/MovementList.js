@@ -6,7 +6,7 @@ import LoadingInfo from './LoadingInfo';
 import LoadingFailureInfo from './LoadingFailureInfo';
 import NoMovementsInfo from './NoMovmementsInfo';
 import MovementDeleteConfirmationDialog from '../MovementDeleteConfirmationDialog';
-import { AutoLoad } from '../../util/AutoLoad';
+import {AutoLoad} from '../../util/AutoLoad';
 import MovementFilter from '../../containers/MovementFilterContainer';
 
 const afterTodayPredicate = Predicates.newerThanSameDay();
@@ -67,6 +67,7 @@ class MovementList extends React.PureComponent {
           lockDate={this.props.lockDate.date}
           aircraftSettings={this.props.aircraftSettings}
           loading={this.props.loading}
+          isAdmin={this.props.isAdmin}
         />
         <MovementGroup
           label="Heute"
@@ -81,6 +82,7 @@ class MovementList extends React.PureComponent {
           lockDate={this.props.lockDate.date}
           aircraftSettings={this.props.aircraftSettings}
           loading={this.props.loading}
+          isAdmin={this.props.isAdmin}
         />
         <MovementGroup
           label="Gestern"
@@ -95,6 +97,7 @@ class MovementList extends React.PureComponent {
           lockDate={this.props.lockDate.date}
           aircraftSettings={this.props.aircraftSettings}
           loading={this.props.loading}
+          isAdmin={this.props.isAdmin}
         />
         <MovementGroup
           label="Dieser Monat"
@@ -108,6 +111,7 @@ class MovementList extends React.PureComponent {
           lockDate={this.props.lockDate.date}
           aircraftSettings={this.props.aircraftSettings}
           loading={this.props.loading}
+          isAdmin={this.props.isAdmin}
         />
         <MovementGroup
           label="Älter"
@@ -121,6 +125,7 @@ class MovementList extends React.PureComponent {
           lockDate={this.props.lockDate.date}
           aircraftSettings={this.props.aircraftSettings}
           loading={this.props.loading}
+          isAdmin={this.props.isAdmin}
         />
         {this.props.loading && <LoadingInfo/>}
         {this.props.loadingFailed && <LoadingFailureInfo/>}

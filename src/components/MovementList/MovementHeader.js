@@ -5,7 +5,7 @@ import dates from '../../util/dates';
 import Action from './Action';
 import MaterialIcon from '../MaterialIcon';
 import HomeBaseIcon from './HomeBaseIcon';
-import {TYPE_LABELS, ACTION_LABELS} from './labels';
+import {ACTION_LABELS, TYPE_LABELS} from './labels';
 
 const ICON_HEIGHT = 30;
 
@@ -166,9 +166,9 @@ class MovementHeader extends React.PureComponent {
               onClick={this.handleActionClick}
               responsive
             />
-          ) : !props.data.associatedMovement
-            ? <MaterialIcon icon="sync" rotate="left"/>
-            : null
+          ) : props.data.associatedMovement === null
+            ? <MaterialIcon icon="sync" rotate="left"/> // show rotating icon if `associatedMovement` is null (= state where the associated movement is being monitored, but not set yet)
+            : null // if `associatedMovement` is undefined, we don't want to show anything (= state before the associated movement is even being monitored)
           }
         </ActionColumn>
         <ActionColumn className="delete" alignMiddle>

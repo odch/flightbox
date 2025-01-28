@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import dates from '../../util/dates';
 import {getLabel as getFlightTypeLabel} from '../../util/flightTypes';
-import {getDepartureRouteLabel, getArrivalRouteLabel} from '../../util/routes';
+import {getArrivalRouteLabel, getDepartureRouteLabel} from '../../util/routes';
 import {getItemLabel as getCarriageVoucherItemLabel} from '../../util/carriageVoucher';
 import newLineToBr from '../../util/newLineToBr';
 import DetailsBox from './DetailsBox';
@@ -11,6 +11,7 @@ import MovementField from './MovementField';
 import HomeBaseIcon from './HomeBaseIcon';
 import {getFromItemKey} from '../../util/reference-number';
 import {getLandingFeeText} from '../../util/landingFees';
+import {maskEmail, maskPhone} from '../../util/masking'
 
 const Content = styled.div`
   padding: 1.5em 1em 0 1em;
@@ -63,7 +64,8 @@ class MovementDetails extends React.PureComponent {
             <MovementField label="Mitgliedernummer" value={props.data.memberNr}/>
             <MovementField label="Nachname" value={props.data.lastname}/>
             <MovementField label="Vorname" value={props.data.firstname}/>
-            <MovementField label="Telefon" value={props.data.phone}/>
+            <MovementField label="E-Mail" value={props.isAdmin ? props.data.email : maskEmail(props.data.email)}/>
+            <MovementField label="Telefon" value={props.isAdmin ? props.data.phone : maskPhone(props.data.phone)}/>
           </DetailsBox>
           {props.data.type === 'departure'
             ? (
@@ -128,7 +130,8 @@ MovementDetails.propTypes = {
   className: PropTypes.string,
   data: PropTypes.object.isRequired,
   locked: PropTypes.bool,
-  isHomeBase: PropTypes.bool.isRequired
+  isHomeBase: PropTypes.bool.isRequired,
+  isAdmin: PropTypes.bool.isRequired
 };
 
 export default MovementDetails;

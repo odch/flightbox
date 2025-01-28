@@ -47,16 +47,19 @@
         ],
         "default": [
           {
+            "billingProduct": "prod_Pn8NbuL38Z8D4n",
             "mtowMin": 0,
             "mtowMax": 750,
             "fee": 16
           },
           {
+            "billingProduct": "prod_Pn8NbuL38Z8D4n",
             "mtowMin": 751,
             "mtowMax": 1499,
             "fee": 20
           },
           {
+            "billingProduct": "prod_Pn8NbuL38Z8D4n",
             "mtowMin": 1500,
             "fee": 50
           }
@@ -65,16 +68,19 @@
       "default": {
         "default": [
           {
+            "billingProduct": "prod_Pn8NbuL38Z8D4n",
             "mtowMin": 0,
             "mtowMax": 750,
             "fee": 16
           },
           {
+            "billingProduct": "prod_Pn8NbuL38Z8D4n",
             "mtowMin": 751,
             "mtowMax": 1499,
             "fee": 20
           },
           {
+            "billingProduct": "prod_Pn8NbuL38Z8D4n",
             "mtowMin": 1500,
             "fee": 50
           }
@@ -96,5 +102,5 @@
   "flightnetCompany": "mfgt",
   "theme": "lszt",
   "title": "MFGT Bewegungen",
-  "cardPaymentsEnabled": true
+  "paymentMethods": ["cash", "card"]
 }

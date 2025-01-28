@@ -8,13 +8,42 @@ import {Step} from './reducer'
 export const cardPaymentIdSelector = state => state.ui.arrivalPayment.cardPaymentId
 
 export function* createCardPayment(channel, action) {
-  const {amount, currency, movementKey} = action.payload
+  const {
+    amount,
+    currency,
+    movementKey,
+    method,
+    email,
+    immatriculation,
+    landings,
+    landingFeeSingle,
+    landingFeeCode,
+    landingFeeTotal,
+    goArounds,
+    goAroundFeeSingle,
+    goAroundFeeCode,
+    goAroundFeeTotal
+  } = action.payload
+
   const values = {
     amount,
     currency,
+    method,
+    email,
+    immatriculation,
+    landings,
+    landingFeeSingle,
+    landingFeeCode,
+    landingFeeTotal,
     arrivalReference: movementKey,
     status: 'pending',
     timestamp: new Date().getTime()
+  }
+  if (goArounds && goAroundFeeTotal) {
+    values.goArounds = goArounds
+    values.goAroundFeeSingle = goAroundFeeSingle
+    values.goAroundFeeCode = goAroundFeeCode
+    values.goAroundFeeTotal = goAroundFeeTotal
   }
   const newPaymentRef = yield call(remote.create, values)
   yield put(actions.setCardPaymentId(newPaymentRef.key))

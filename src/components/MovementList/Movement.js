@@ -64,6 +64,7 @@ class Movement extends React.PureComponent {
               data={props.data}
               locked={props.locked}
               isHomeBase={isHomeBase}
+              isAdmin={props.isAdmin}
             />
             {!props.locked && (
               <Footer>
@@ -81,6 +82,7 @@ class Movement extends React.PureComponent {
               associatedMovement={props.data.associatedMovement}
               createMovementFromMovement={props.createMovementFromMovement}
               loading={props.loading}
+              isAdmin={props.isAdmin}
             />
           </div>
         )}

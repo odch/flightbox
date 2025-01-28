@@ -1,12 +1,13 @@
-import { getPagination } from './pagination';
-import { takeEvery, takeLatest } from 'redux-saga'
-import { put, call, select, fork } from 'redux-saga/effects'
-import { initialize, destroy, getFormValues } from 'redux-form'
-import createChannel, { monitor } from '../../util/createChannel';
+import {getPagination} from './pagination';
+import {takeEvery, takeLatest} from 'redux-saga'
+import {call, fork, put, select} from 'redux-saga/effects'
+import {destroy, getFormValues, initialize} from 'redux-form'
+import createChannel, {monitor} from '../../util/createChannel';
 import * as actions from './actions';
 import * as remote from './remote';
-import {localToFirebase, firebaseToLocal, transferValues, compareDescending} from '../../util/movements';
-import { error } from '../../util/log';
+import {addMovementAssociationListener, removeMovementAssociationListener} from './remote';
+import {compareDescending, firebaseToLocal, localToFirebase, transferValues} from '../../util/movements';
+import {error} from '../../util/log';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 
@@ -48,6 +49,7 @@ export function* getDefaultValuesFromArrival(arrivalKey) {
       'memberNr',
       'lastname',
       'firstname',
+      'email',
       'phone',
       { name: 'passengerCount', defaultValue: 0 },
       'location',
@@ -74,6 +76,7 @@ export function* getDefaultValuesFromDeparture(departureKey) {
       'memberNr',
       'lastname',
       'firstname',
+      'email',
       'phone',
       { name: 'passengerCount', defaultValue: 0 },
       'location',
@@ -128,6 +131,7 @@ export function* loadMovements(channel, action) {
 
       if (clear) {
         yield put(actions.clearMovementsByKey())
+        yield put(actions.clearAssociatedMovements())
       }
     }
   } catch(e) {
@@ -209,7 +213,25 @@ export function* addMovements(departuresSnapshot, arrivalsSnapshot, existingMove
 
   const newData = existingMovements.insertAll(movements, compareDescending);
 
+  yield call(monitorAssociations, newData, existingMovements, channel)
+
   channel.put(actions.setMovements(newData));
+}
+
+export function* monitorAssociations(newMovements, oldMovements, channel) {
+  newMovements.array
+    .filter(movement => !oldMovements.containsKey(movement.key))
+    .forEach(movement => monitorAssociation(movement, channel))
+
+  oldMovements.array
+    .filter(movement => !newMovements.containsKey(movement.key))
+    .forEach(movement => removeMovementAssociationListener(movement.type, movement.key))
+}
+
+export function monitorAssociation(movement, channel) {
+  addMovementAssociationListener(movement.type, movement.key, (snapshot) => {
+    channel.put(actions.setAssociatedMovement(movement.type, movement.key, snapshot.val()));
+  })
 }
 
 export function* monitorRef(ref, channel, movementType, eventActions) {
@@ -263,6 +285,8 @@ export function* addMovementToState(snapshot, movementType, currentState, channe
       return;
     }
 
+    yield call(monitorAssociation, movement, channel)
+
     channel.put(actions.setMovements(newData));
   }
 }
@@ -270,9 +294,13 @@ export function* addMovementToState(snapshot, movementType, currentState, channe
 export function* removeMovementFromState(snapshot, channel) {
   const {data} = yield select(stateSelector);
 
+  const movement = data.getByKey(snapshot.key)
+
   const newState = {
     data: data.remove(snapshot.key)
   };
+
+  yield call(removeMovementAssociationListener, movement.type, movement.key)
 
   channel.put(actions.setMovements(newState.data));
 

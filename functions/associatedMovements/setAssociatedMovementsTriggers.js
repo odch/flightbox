@@ -153,26 +153,28 @@ const updateOnDelete = async (snap, type) => {
   }
 }
 
+const instance = functions.config().rtdb.instance;
+
 module.exports.setAssociatedMovementOnCreatedDeparture =
-  functions.database.ref('/departures/{departureId}')
+  functions.database.instance(instance).ref('/departures/{departureId}')
     .onCreate(snap => updateOnCreate(snap, 'departure'))
 
 module.exports.setAssociatedMovementOnCreatedArrival =
-  functions.database.ref('/arrivals/{arrivalId}')
+  functions.database.instance(instance).ref('/arrivals/{arrivalId}')
     .onCreate(snap => updateOnCreate(snap, 'arrival'))
 
 module.exports.setAssociatedMovementOnUpdatedDeparture =
-  functions.database.ref('/departures/{departureId}')
+  functions.database.instance(instance).ref('/departures/{departureId}')
     .onWrite(change => updateOnWrite(change, 'departure'))
 
 module.exports.setAssociatedMovementOnUpdatedArrival =
-  functions.database.ref('/arrivals/{arrivalId}')
+  functions.database.instance(instance).ref('/arrivals/{arrivalId}')
     .onWrite(change => updateOnWrite(change, 'arrival'))
 
 module.exports.setAssociatedMovementOnDeletedDeparture =
-  functions.database.ref('/departures/{departureId}')
+  functions.database.instance(instance).ref('/departures/{departureId}')
     .onDelete(snap => updateOnDelete(snap, 'departure'))
 
 module.exports.setAssociatedMovementOnDeletedArrival =
-  functions.database.ref('/arrivals/{arrivalId}')
+  functions.database.instance(instance).ref('/arrivals/{arrivalId}')
     .onDelete(snap => updateOnDelete(snap, 'arrival'))

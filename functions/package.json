@@ -2,12 +2,12 @@
   "name": "functions",
   "description": "Cloud Functions for Firebase",
   "engines": {
-    "node": "10"
+    "node": "20"
   },
   "dependencies": {
     "cors": "^2.8.4",
-    "firebase-admin": "8.4.0",
-    "firebase-functions": "^3.13.2",
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^4.7.0",
     "moment": "^2.22.2",
     "request-promise": "^4.2.6",
     "soap": "^0.24.0"

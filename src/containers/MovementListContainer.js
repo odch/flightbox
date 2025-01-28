@@ -1,19 +1,31 @@
-import { connect } from 'react-redux';
-import { loadMovements, deleteMovement } from '../modules/movements';
+import {connect} from 'react-redux';
+import {deleteMovement, loadMovements} from '../modules/movements';
 import {
-  showDeleteConfirmationDialog,
-  hideDeleteConfirmationDialog,
-  showMovementWizard,
   createMovementFromMovement,
-  selectMovement
+  hideDeleteConfirmationDialog,
+  selectMovement,
+  showDeleteConfirmationDialog,
+  showMovementWizard
 } from '../modules/ui/movements';
-import { loadAircraftSettings } from '../modules/settings/aircrafts'
+import {loadAircraftSettings} from '../modules/settings/aircrafts'
 
 import MovementList from '../components/MovementList';
 import ImmutableItemsArray from '../util/ImmutableItemsArray';
 
+const getMovementsFromState = state => new ImmutableItemsArray(
+  state.movements.data.array
+    .map(movement => ({
+      ...movement,
+      associatedMovement: state
+        .movements
+        .associatedMovements
+        [movement.type === 'departure' ? 'departures' : 'arrivals']
+        [movement.key]
+    }))
+)
+
 const getMovements = state => {
-  const data = state.movements.data;
+  const data = getMovementsFromState(state)
   const filter = state.movements.filter;
 
   const dateFilterSet = !!filter.date.start && !!filter.date.end

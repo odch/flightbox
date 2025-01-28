@@ -9,7 +9,7 @@
       ],
       "$departure_id": {
         ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24))",
-        ".validate": "newData.hasChildren(['aircraftType', 'dateTime', 'departureRoute', 'duration', 'firstname', 'flightType', 'immatriculation', 'lastname', 'location', 'mtow', 'aircraftCategory', 'negativeTimestamp'])",
+        ".validate": "newData.hasChildren(['aircraftType', 'dateTime', 'departureRoute', 'duration', 'email', 'firstname', 'flightType', 'immatriculation', 'lastname', 'location', 'mtow', 'aircraftCategory', 'negativeTimestamp'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
@@ -24,6 +24,9 @@
         },
         "duration": {
           ".validate": "newData.isString() && newData.val().matches(/^\\d{2}:\\d{2}$/)"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().matches(/^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$/)"
         },
         "firstname": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -81,7 +84,7 @@
       ],
       "$arrival_id": {
         ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24))",
-        ".validate": "newData.hasChildren(['aircraftType', 'arrivalRoute', 'dateTime', 'firstname', 'flightType', 'immatriculation', 'landingCount', 'lastname', 'location', 'mtow', 'aircraftCategory', 'negativeTimestamp'])",
+        ".validate": "newData.hasChildren(['aircraftType', 'arrivalRoute', 'dateTime', 'email', 'firstname', 'flightType', 'immatriculation', 'landingCount', 'lastname', 'location', 'mtow', 'aircraftCategory', 'negativeTimestamp'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
@@ -90,6 +93,9 @@
         },
         "dateTime": {
           ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().matches(/^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$/)"
         },
         "firstname": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -103,6 +109,9 @@
         "goAroundFeeSingle": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
         },
+        "goAroundFeeCode": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
         "goAroundFeeTotal": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
         },
@@ -114,6 +123,9 @@
         },
         "landingFeeSingle": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "landingFeeCode": {
+          ".validate": "newData.isString() && newData.val().length > 0"
         },
         "landingFeeTotal": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
@@ -152,6 +164,10 @@
           ".validate": false
         }
       }
+    },
+    "movementAssociations": {
+      ".read": "auth !== null",
+      ".write": false
     },
     "aircrafts": {
       ".read": "auth !== null",
@@ -289,7 +305,40 @@
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "status": {
-          ".validate": "newData.val() === 'pending' || newData.val() === 'success' || newData.val() === 'failure' || newData.val() === 'cancelled'"
+          ".validate": "newData.val() === 'pending' || newData.val() === 'success' || newData.val() === 'failure' || newData.val() === 'cancelled' || newData.val() === 'inprogress'"
+        },
+        "method": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "immatriculation": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "landings": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "landingFeeSingle": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "landingFeeCode": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "landingFeeTotal": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "goArounds": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "goAroundFeeSingle": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "goAroundFeeCode": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "goAroundFeeTotal": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
         },
         "$other": {
           ".validate": false

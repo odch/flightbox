@@ -8,22 +8,29 @@ import Message, {ReferenceNumberMessage} from './Message';
 import CashPaymentMessage from './CashPaymentMessage'
 import FinishActions from './FinishActions'
 import PaymentMethod from '../../../../containers/PaymentMethodContainer'
+import objectToArray from '../../../../util/objectToArray'
 
 const getHeading = isUpdate =>
   isUpdate === true
     ? 'Die Ankunft wurde erfolgreich aktualisiert!'
     : 'Ihre Ankunft wurde erfolgreich erfasst!';
 
+const enabledPaymentMethods = objectToArray(__CONF__.paymentMethods);
+
 const Finish = props => {
   const {
     isUpdate,
     isHomeBase,
     itemKey,
+    email,
+    immatriculation,
     landings,
     landingFeeSingle,
+    landingFeeCode,
     landingFeeTotal,
     goArounds,
     goAroundFeeSingle,
+    goAroundFeeCode,
     goAroundFeeTotal,
     createMovementFromMovement,
     finish
@@ -45,9 +52,24 @@ const Finish = props => {
         </>
       )}
       {isHomeBase === false ? (
-        __CARD_PAYMENTS_ENABLED__ ? (
-          <PaymentMethod itemKey={itemKey} createMovementFromMovement={createMovementFromMovement} finish={finish}
-                         amount={amount}/>
+        enabledPaymentMethods.length > 1 ? (
+          <PaymentMethod
+            itemKey={itemKey}
+            email={email}
+            immatriculation={immatriculation}
+            createMovementFromMovement={createMovementFromMovement}
+            finish={finish}
+            amount={amount}
+            landings={landings}
+            landingFeeSingle={landingFeeSingle}
+            landingFeeCode={landingFeeCode}
+            landingFeeTotal={landingFeeTotal}
+            goArounds={goArounds}
+            goAroundFeeSingle={goAroundFeeSingle}
+            goAroundFeeCode={goAroundFeeCode}
+            goAroundFeeTotal={goAroundFeeTotal}
+            enabledPaymentMethods={enabledPaymentMethods}
+          />
         ) : (
           <>
             <CashPaymentMessage itemKey={itemKey}/>
@@ -67,11 +89,15 @@ Finish.propTypes = {
   isUpdate: PropTypes.bool.isRequired,
   isHomeBase: PropTypes.bool.isRequired,
   itemKey: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
+  immatriculation: PropTypes.string.isRequired,
   landings: PropTypes.number.isRequired,
   landingFeeSingle: PropTypes.number,
+  landingFeeCode: PropTypes.string,
   landingFeeTotal: PropTypes.number,
   goArounds: PropTypes.number,
   goAroundFeeSingle: PropTypes.number,
+  goAroundFeeCode: PropTypes.string,
   goAroundFeeTotal: PropTypes.number,
   cardPaymentsEnabled: PropTypes.bool
 };

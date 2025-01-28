@@ -3,9 +3,30 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import {Step} from '../../../../modules/ui/arrivalPayment'
 import SingleSelect from '../../../SingleSelect'
-import {NextButton, CancelButton} from '../../../WizardNavigation'
+import {CancelButton, NextButton} from '../../../WizardNavigation'
 import CashPaymentMessage from './CashPaymentMessage'
 import FinishActions from './FinishActions'
+import TwintPaymentMessage from './TwintPaymentMessage'
+
+const PAYMENT_METHODS = [{
+    label: 'Karte',
+    value: 'card'
+  },
+  /*
+  disabled for now as not fully implemented (payment service connection)
+  {
+    label: 'Zahlung per Bezahl-Link (E-Mail)',
+    value: 'paylink'
+  }
+  */
+  {
+    label: 'Bar',
+    value: 'cash'
+  },
+  {
+    label: 'Twint',
+    value: 'twint_external'
+  }]
 
 const Container = styled.div`
   padding: 2em;
@@ -39,16 +60,27 @@ const StyledCancelButton = styled(CancelButton)`
 
 const PaymentMethod = ({
                          itemKey,
+                         email,
+                         immatriculation,
                          method,
                          step,
                          amount,
+                         landings,
+                         landingFeeSingle,
+                         landingFeeCode,
+                         landingFeeTotal,
+                         goArounds,
+                         goAroundFeeSingle,
+                         goAroundFeeCode,
+                         goAroundFeeTotal,
                          failure,
                          createCardPayment,
                          createMovementFromMovement,
                          finish,
                          setMethod,
                          setStep,
-                         cancelCardPayment
+                         cancelCardPayment,
+                         enabledPaymentMethods
                        }) => (
   <Container>
     {failure && (
@@ -58,6 +90,8 @@ const PaymentMethod = ({
       <>
         {method === 'cash' ? (
           <CashPaymentMessage itemKey={itemKey}/>
+        ) : method === 'twint_external' ? (
+          <TwintPaymentMessage itemKey={itemKey}/>
         ) : (
           <InstructionMessage>Die Zahlung war erfolgreich</InstructionMessage>
         )}
@@ -77,18 +111,25 @@ const PaymentMethod = ({
             }}
           />
         </>
+      ) : method === 'paylink' ? (
+        <>
+          <>
+            <InstructionMessage>Bitte warten, der Bezahl-Link wird vorbereitet...</InstructionMessage>
+            <StyledCancelButton
+              type="button"
+              label="Abbrechen"
+              onClick={() => {
+                cancelCardPayment()
+              }}
+            />
+          </>
+        </>
       ) : null
     ) : (<>
         <InstructionMessage>Bitte wählen Sie eine Zahlungsart:</InstructionMessage>
         <SelectContainer>
           <SingleSelect
-            items={[{
-              label: 'Bar',
-              value: 'cash'
-            }, {
-              label: 'Karte',
-              value: 'card'
-            }]}
+            items={PAYMENT_METHODS.filter(method => enabledPaymentMethods.includes(method.value))}
             orientation="vertical"
             onChange={e => setMethod(e.target.value)}
             value={method}
@@ -103,11 +144,44 @@ const PaymentMethod = ({
               return
             }
 
-            if (method === 'cash') {
+            if (method === 'cash' || method === 'twint_external') {
               setStep(Step.COMPLETED)
             } else if (method === 'card') {
               setStep(Step.CONFIRMED)
-              createCardPayment(itemKey, amount, 'CHF',)
+              createCardPayment(
+                itemKey,
+                amount,
+                'CHF',
+                'card',
+                email,
+                immatriculation,
+                landings,
+                landingFeeSingle,
+                landingFeeCode,
+                landingFeeTotal,
+                goArounds,
+                goAroundFeeSingle,
+                goAroundFeeCode,
+                goAroundFeeTotal
+              )
+            } else if (method === 'paylink') {
+              setStep(Step.CONFIRMED)
+              createCardPayment(
+                itemKey,
+                amount,
+                'CHF',
+                'paylink',
+                email,
+                immatriculation,
+                landings,
+                landingFeeSingle,
+                landingFeeCode,
+                landingFeeTotal,
+                goArounds,
+                goAroundFeeSingle,
+                goAroundFeeCode,
+                goAroundFeeTotal
+              )
             }
           }}
           dataCy="next-button"
@@ -124,12 +198,23 @@ PaymentMethod.propTypes = {
   step: PropTypes.string.isRequired,
   method: PropTypes.string,
   amount: PropTypes.number.isRequired,
+  email: PropTypes.string.isRequired,
+  immatriculation: PropTypes.string.isRequired,
+  landings: PropTypes.number.isRequired,
+  landingFeeSingle: PropTypes.number,
+  landingFeeCode: PropTypes.string,
+  landingFeeTotal: PropTypes.number,
+  goArounds: PropTypes.number,
+  goAroundFeeSingle: PropTypes.number,
+  goAroundFeeCoe: PropTypes.string,
+  goAroundFeeTotal: PropTypes.number,
   failure: PropTypes.bool.isRequired,
   createMovementFromMovement: PropTypes.func.isRequired,
   finish: PropTypes.func.isRequired,
   setMethod: PropTypes.func.isRequired,
   setStep: PropTypes.func.isRequired,
   cancelCardPayment: PropTypes.func.isRequired,
+  enabledPaymentMethods: PropTypes.arrayOf(PropTypes.string).isRequired
 }
 
 export default PaymentMethod

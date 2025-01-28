@@ -68,7 +68,7 @@ describe('util', () => {
         'getLandingFee(%i, %s, %s)',
         (mtow, flightType, aircraftOrigin, expected) => {
           test(`returns ${expected}`, () => {
-            expect(getLandingFee(mtow, flightType, aircraftOrigin)).toBe(expected);
+            expect(getLandingFee(mtow, flightType, aircraftOrigin).fee).toBe(expected);
           });
         }
       );
@@ -109,9 +109,10 @@ describe('util', () => {
 
         updateLandingFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, undefined);
 
-        expect(changeAction.mock.calls.length).toBe(1);
+        expect(changeAction.mock.calls.length).toBe(2);
 
         expect(changeAction.mock.calls[0]).toEqual(['landingFeeSingle', 20])
+        expect(changeAction.mock.calls[1]).toEqual(['landingFeeCode', 'prod_Pn8NbuL38Z8D4n'])
       })
 
       test('also updates total landing fee if landing count set', () => {
@@ -119,10 +120,11 @@ describe('util', () => {
 
         updateLandingFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 2);
 
-        expect(changeAction.mock.calls.length).toBe(2);
+        expect(changeAction.mock.calls.length).toBe(3);
 
         expect(changeAction.mock.calls[0]).toEqual(['landingFeeSingle', 20])
-        expect(changeAction.mock.calls[1]).toEqual(['landingFeeTotal', 40])
+        expect(changeAction.mock.calls[1]).toEqual(['landingFeeCode', 'prod_Pn8NbuL38Z8D4n'])
+        expect(changeAction.mock.calls[2]).toEqual(['landingFeeTotal', 40])
       })
     })
 
@@ -156,9 +158,10 @@ describe('util', () => {
 
         updateGoAroundFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, undefined);
 
-        expect(changeAction.mock.calls.length).toBe(1);
+        expect(changeAction.mock.calls.length).toBe(2);
 
         expect(changeAction.mock.calls[0]).toEqual(['goAroundFeeSingle', 20])
+        expect(changeAction.mock.calls[1]).toEqual(['goAroundFeeCode', 'prod_Pn8NbuL38Z8D4n'])
       })
 
       test('also updates total go around fee if go around count set', () => {
@@ -166,10 +169,11 @@ describe('util', () => {
 
         updateGoAroundFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 2);
 
-        expect(changeAction.mock.calls.length).toBe(2);
+        expect(changeAction.mock.calls.length).toBe(3);
 
         expect(changeAction.mock.calls[0]).toEqual(['goAroundFeeSingle', 20])
-        expect(changeAction.mock.calls[1]).toEqual(['goAroundFeeTotal', 40])
+        expect(changeAction.mock.calls[1]).toEqual(['goAroundFeeCode', 'prod_Pn8NbuL38Z8D4n'])
+        expect(changeAction.mock.calls[2]).toEqual(['goAroundFeeTotal', 40])
       })
     })
 

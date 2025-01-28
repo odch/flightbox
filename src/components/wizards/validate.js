@@ -43,6 +43,13 @@ const config = {
     },
     message: 'Geben Sie hier den Vornamen des Piloten ein.',
   },
+  email: {
+    types: {
+      required: true,
+      match: /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
+    },
+    message: 'Geben Sie hier die E-Mail-Adresse des Piloten ein.',
+  },
   date: {
     types: {
       required: true,
