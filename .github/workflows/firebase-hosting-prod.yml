@@ -27,7 +27,7 @@ jobs:
           project_id: ${{ vars.FIREBASE_PROJECT }}
           tools-version: 13
           firebase_token: ${{ secrets.FIREBASE_TOKEN }}
-      - run: firebase target:apply database main ${{ vars.FIREBASE_PROJECT }}
+      - run: firebase target:apply database main ${{ vars.FIREBASE_RTDB_NAME }}
       - run: firebase deploy --only hosting,database:main
   build_and_deploy_functions:
     runs-on: ubuntu-latest
