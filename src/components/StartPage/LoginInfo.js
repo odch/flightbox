@@ -26,7 +26,7 @@ class LoginInfo extends React.PureComponent {
       return (
         <div className={props.className} data-cy="login-info">
           <MaterialIcon icon="account_box"/>
-          <UserName>{props.auth.data.uid}</UserName>
+          <UserName>{props.auth.data.email || props.auth.data.uid}</UserName>
           {props.auth.data.links !== false && <Button onClick={props.logout} data-cy="logout">Abmelden</Button>}
         </div>
       );

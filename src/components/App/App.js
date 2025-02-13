@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import {Switch, Route, Redirect} from 'react-router-dom';
-import LoginPage from '../../containers/LoginPageContainer';
+import {Redirect, Route, Switch} from 'react-router-dom';
+import LoginPage from '../../components/LoginPage';
 import Centered from '../Centered';
 import MaterialIcon from '../MaterialIcon';
 import MessagePage from "../../containers/MessagePageContainer";
