@@ -1,5 +1,6 @@
 export const UPDATE_USERNAME = 'UPDATE_USERNAME';
 export const UPDATE_PASSWORD = 'UPDATE_PASSWORD';
+export const UPDATE_EMAIL = 'UPDATE_EMAIL';
 
 export function updateUsername(username) {
   return {
@@ -15,6 +16,15 @@ export function updatePassword(password) {
     type: UPDATE_PASSWORD,
     payload: {
       password,
+    },
+  };
+}
+
+export function updateEmail(email) {
+  return {
+    type: UPDATE_EMAIL,
+    payload: {
+      email,
     },
   };
 }

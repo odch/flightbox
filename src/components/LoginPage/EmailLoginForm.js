@@ -6,15 +6,15 @@ import Centered from '../Centered';
 import Failure from './Failure';
 import Button from '../Button';
 
-const handleSubmit = (authenticate, username, password, e) => {
+const handleSubmit = (authenticate, email, e) => {
   e.preventDefault();
-  authenticate(username, password);
+  authenticate(email);
 };
 
 const Wrapper = styled(Centered)`
   width: 500px;
   box-sizing: border-box;
-  
+
   @media screen and (max-width: 520px) {
     & {
       width: 100%;
@@ -38,7 +38,7 @@ const StyledInput = styled.input`
 `;
 
 const LoginDialogButton = styled(Button)`
-  @media(max-width: 600px) {
+  @media (max-width: 600px) {
     width: 100%;
   }
 `;
@@ -48,65 +48,73 @@ const SubmitButton = styled(LoginDialogButton)`
   margin-bottom: 1em;
 `;
 
-const Main = props => {
-  const { authenticate, username, password, submitting, failure, updateUsername, updatePassword } = props;
+const EmailLoginForm = props => {
+  const {
+    authenticate,
+    email,
+    submitting,
+    failure,
+    emailSent,
+    updateEmail
+  } = props;
 
-  const usernameInput = (
+  if (emailSent) {
+    return <Wrapper>
+      <div style={{textAlign: 'center'}}>Es wurde eine E-Mail an <span
+        style={{fontWeight: 'bold'}}>{email}</span> gesendet. Folgen Sie bitte den Anweisungen in der E-Mail, um die
+        Anmeldung abzuschliessen.
+      </div>
+    </Wrapper>
+  }
+
+  const emailInput = (
     <StyledInput
-      type="text"
-      value={username}
+      type="email"
+      value={email}
       autoFocus={true}
       readOnly={submitting}
-      onChange={e => { updateUsername(e.target.value); }}
-      data-cy="username"
-    />
-  );
-  const passwordInput = (
-    <StyledInput
-      type="password"
-      value={password}
-      readOnly={submitting}
-      onChange={e => { updatePassword(e.target.value); }}
-      data-cy="password"
+      onChange={e => {
+        updateEmail(e.target.value);
+      }}
+      data-cy="email"
     />
   );
 
   return (
     <Wrapper>
       <form
-        onSubmit={handleSubmit.bind(null, authenticate, username, password)}
+        onSubmit={handleSubmit.bind(null, authenticate, email)}
         disabled={props.submitting}
         data-cy="login-form"
       >
-        <StyledLabeledComponent label="Benutzername" component={usernameInput}/>
-        <StyledLabeledComponent label="Passwort" component={passwordInput}/>
+        <StyledLabeledComponent label="E-Mail" component={emailInput}/>
         <Failure failure={failure}/>
         <SubmitButton
           type="submit"
           label="Anmelden"
           icon="send"
-          disabled={submitting || username.length === 0 || password.length === 0}
+          disabled={submitting || email.length === 0}
           primary
           dataCy="submit"
+          loading={props.submitting}
         />
         {props.showCancel === true && (
           <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel} dataCy="cancel"/>
         )}
       </form>
     </Wrapper>
-  );
+  )
 };
 
-Main.propTypes = {
+EmailLoginForm.propTypes = {
   authenticate: PropTypes.func.isRequired,
-  updateUsername: PropTypes.func.isRequired,
-  updatePassword: PropTypes.func.isRequired,
+  updateEmail: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   showCancel: PropTypes.bool.isRequired,
-  username: PropTypes.string.isRequired,
-  password: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
   submitting: PropTypes.bool.isRequired,
   failure: PropTypes.bool.isRequired,
+  emailSent: PropTypes.bool.isRequired,
 };
 
-export default Main;
+export default EmailLoginForm;

@@ -70,6 +70,12 @@
         "runway": {
           ".validate": "{runway}"
         },
+        "createdBy": {
+          ".validate": "newData.isString()"
+        },
+        "createdBy_orderKey": {
+          ".validate": "newData.isString()"
+        },
         "$other": {
           ".validate": false
         }
@@ -159,6 +165,12 @@
         },
         "runway": {
           ".validate": "{runway}"
+        },
+        "createdBy": {
+          ".validate": "newData.isString()"
+        },
+        "createdBy_orderKey": {
+          ".validate": "newData.isString()"
         },
         "$other": {
           ".validate": false

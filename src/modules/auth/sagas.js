@@ -1,10 +1,17 @@
-import { takeEvery } from 'redux-saga';
-import { call, put, fork } from 'redux-saga/effects'
+import {takeEvery} from 'redux-saga';
+import {call, fork, put} from 'redux-saga/effects'
 import * as actions from './actions';
-import { loadIpToken, loadCredentialsToken } from '../../util/auth';
+import {loadCredentialsToken, loadIpToken} from '../../util/auth';
 import createChannel from '../../util/createChannel';
-import firebase, { authenticate as fbAuth, unauth as fbUnauth, watchAuthState } from '../../util/firebase';
-import { error as logError } from '../../util/log';
+import firebase, {
+  authenticate as fbAuth,
+  authenticateEmail as fbAuthEmail,
+  isSignInWithEmail,
+  signInWithEmail,
+  unauth as fbUnauth,
+  watchAuthState
+} from '../../util/firebase';
+import {error as logError} from '../../util/log';
 
 export function getLoginData(uid) {
   return new Promise((resolve, reject) => {
@@ -84,6 +91,28 @@ export function* doUsernamePasswordAuthentication(action) {
   }
 }
 
+export function* sendAuthenticationEmail(action) {
+  try {
+    yield put(actions.setSubmitting());
+    const { email } = action.payload;
+    if (isNotEmptyString(email)) {
+      yield call(fbAuthEmail, email);
+      yield put(actions.sendAuthenticationEmailSuccess());
+    }
+  } catch(e) {
+    logError('Failed to send authentication email', e);
+    yield put(actions.sendAuthenticationEmailFailure());
+  }
+}
+
+export function* doEmailAuthentication() {
+  try {
+      yield call(signInWithEmail);
+  } catch(e) {
+    logError('Failed to execute email authentication', e);
+  }
+}
+
 export function* doFirebaseAuthentication(action) {
   try {
     yield call(fbAuth, action.payload.token);
@@ -103,7 +132,7 @@ export function* doListenFirebaseAuthentication(action) {
   let authData = null;
 
   if (authenticated) {
-    const { uid, expires, token } = action.payload.authData;
+    const { uid, expires, token, email } = action.payload.authData;
 
     if (uid === 'ipauth') {
       authData = {
@@ -118,7 +147,8 @@ export function* doListenFirebaseAuthentication(action) {
         token,
         admin: loginData && loginData.admin === true,
         links: !loginData || loginData.links !== false,
-        name: yield call(getName, uid)
+        name: yield call(getName, uid),
+        email
       }
     }
   }
@@ -126,7 +156,11 @@ export function* doListenFirebaseAuthentication(action) {
   yield put(actions.firebaseAuthenticationEvent(authData));
 
   if (!authenticated) {
-    yield put(actions.requestIpAuthentication());
+    if (isSignInWithEmail()) {
+      yield put(actions.requestEmailAuthentication())
+    } else {
+      yield put(actions.requestIpAuthentication());
+    }
   }
 }
 
@@ -155,6 +189,8 @@ export default function* sagas() {
   yield [
     fork(takeEvery, actions.REQUEST_IP_AUTHENTICATION, doIpAuthentication),
     fork(takeEvery, actions.REQUEST_USERNAME_PASSWORD_AUTHENTICATION, doUsernamePasswordAuthentication),
+    fork(takeEvery, actions.SEND_AUTHENTICATION_EMAIL, sendAuthenticationEmail),
+    fork(takeEvery, actions.REQUEST_EMAIL_AUTHENTICATION, doEmailAuthentication),
     fork(takeEvery, actions.REQUEST_FIREBASE_AUTHENTICATION, doFirebaseAuthentication),
     fork(takeEvery, actions.LOGOUT, doLogout),
     fork(takeEvery, actions.FIREBASE_AUTHENTICATION, doListenFirebaseAuthentication),

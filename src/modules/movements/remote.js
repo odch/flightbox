@@ -1,13 +1,17 @@
 import firebase from '../../util/firebase';
+import {toOrderKey} from './pagination'
 
-export function loadLimited(path, start, limit, endAt) {
+export function loadLimited(path, start, limit, endAt, createdBy) {
   return new Promise(resolve => {
+    const startAtParam = createdBy ? `${createdBy}_${typeof start === 'number' ? start : ''}`: start
+    const endAtParam = createdBy && endAt ? toOrderKey(createdBy, endAt) : createdBy ? createdBy : endAt
+
     const ref = firebase(path)
-      .orderByChild('negativeTimestamp')
-      .startAt(start);
+      .orderByChild(createdBy ? 'createdBy_orderKey' : 'negativeTimestamp')
+      .startAt(startAtParam);
     const limitedRef = limit
       ? ref.limitToFirst(limit)
-      : ref.endAt(endAt);
+      : ref.endAt(endAtParam);
     limitedRef.once('value', snapshot => {
       resolve({
         snapshot,

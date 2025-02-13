@@ -1,9 +1,9 @@
-import { connect } from 'react-redux';
-import { updateUsername, updatePassword } from '../modules/ui/loginPage';
-import { authenticate } from '../modules/auth';
-import { hideLogin } from '../modules/ui/showLogin';
+import {connect} from 'react-redux';
+import {updatePassword, updateUsername} from '../modules/ui/loginPage';
+import {authenticate} from '../modules/auth';
+import {hideLogin} from '../modules/ui/showLogin';
 
-import LoginPage from '../components/LoginPage';
+import UsernamePasswordLoginForm from '../components/LoginPage/UsernamePasswordLoginForm'
 
 const mapStateToProps = state => {
   const { username, password } = state.ui.loginPage;
@@ -33,4 +33,4 @@ const mapActionCreators = {
   onCancel: hideLogin,
 };
 
-export default connect(mapStateToProps, mapActionCreators)(LoginPage);
+export default connect(mapStateToProps, mapActionCreators)(UsernamePasswordLoginForm);

@@ -1,4 +1,4 @@
-import {getPagination} from './pagination';
+import {getPagination, toOrderKey} from './pagination';
 import {takeEvery, takeLatest} from 'redux-saga'
 import {call, fork, put, select} from 'redux-saga/effects'
 import {destroy, getFormValues, initialize} from 'redux-form'
@@ -16,6 +16,8 @@ export const stateSelector = state => state.movements;
 export const movementSelector = (state, key) => state.movements.data.getByKey(key);
 
 export const wizardFormValuesSelector = getFormValues('wizard');
+
+export const authSelector = state => state.auth.data
 
 export function* getDepartureDefaultValues() {
   return {
@@ -173,36 +175,88 @@ export function* loadDeparturesAndArrivalsFiltered(movements) {
   return {departures, arrivals};
 }
 
+export function getReloadParams(movements) {
+  const oldestDeparture = getOldest(movements.departures.snapshot);
+  const oldestArrival = getOldest(movements.arrivals.snapshot);
+
+  if (oldestDeparture && oldestArrival) {
+    if (oldestDeparture.negativeTimestamp > oldestArrival.negativeTimestamp) {
+      // departure is older -> reload arrivals with new pagination
+      return {
+        reloadType: 'arrivals',
+        reloadEnd: oldestDeparture.negativeTimestamp
+      }
+    } else {
+      // arrival is older -> reload departures with new pagination
+      return {
+        reloadType: 'departures',
+        reloadEnd: oldestArrival.negativeTimestamp
+      }
+    }
+  }
+
+  if (oldestDeparture) {
+    // no arrivals -> reload arrivals with new pagination
+    return {
+      reloadType: 'arrivals',
+      reloadEnd: oldestDeparture.negativeTimestamp
+    }
+  }
+
+  if (oldestArrival) {
+    // no departures -> reload departures with new pagination
+    return {
+      reloadType: 'departures',
+      reloadEnd: oldestArrival.negativeTimestamp
+    }
+  }
+
+  return null
+}
+
 export function* loadLatestDeparturesAndArrivalsPaged(movements, clear) {
+  const auth = yield select(authSelector);
+
   const pagination = getPagination(clear ? [] : movements.data.array);
 
   const departures = yield call(
     remote.loadLimited,
     '/departures',
     pagination.start,
-    pagination.limit
+    pagination.limit,
+    undefined,
+    !auth.admin ? auth.email : undefined
   );
-
-  const oldestDeparture = getOldest(departures.snapshot);
-
-  let arrivalsLimit = null;
-  let arrivalsEnd = null;
-
-  if (oldestDeparture) {
-    arrivalsEnd = oldestDeparture.negativeTimestamp;
-  } else {
-    arrivalsLimit = pagination.limit;
-  }
 
   const arrivals = yield call(
     remote.loadLimited,
     '/arrivals',
     pagination.start,
-    arrivalsLimit,
-    arrivalsEnd
+    pagination.limit,
+    undefined,
+    !auth.admin ? auth.email : undefined
   );
 
-  return {departures, arrivals};
+  const loadedMovements = {
+    departures,
+    arrivals
+  }
+
+  // make sure we load both collections until oldest in pagination
+  const reloadParams = getReloadParams(loadedMovements)
+
+  if (reloadParams) {
+    loadedMovements[reloadParams.reloadType] = yield call(
+      remote.loadLimited,
+      `/${reloadParams.reloadType}`,
+      pagination.start,
+      undefined,
+      reloadParams.reloadEnd,
+      !auth.admin ? auth.email : undefined
+    )
+  }
+
+  return loadedMovements
 }
 
 export function* addMovements(departuresSnapshot, arrivalsSnapshot, existingMovements, channel) {
@@ -368,6 +422,7 @@ export function* editMovement(action) {
 
 export function* saveMovement() {
   const values = yield select(wizardFormValuesSelector);
+  const auth = yield select(authSelector);
 
   const movement = localToFirebase(values);
 
@@ -378,6 +433,11 @@ export function* saveMovement() {
 
   delete movement.type;
   delete movement.associatedMovement;
+
+  if (auth.email) {
+    movement.createdBy = auth.email
+    movement.createdBy_orderKey = toOrderKey(auth.email, movement.negativeTimestamp)
+  }
 
   try {
     key = yield call(remote.saveMovement, path, key, movement);

@@ -56,6 +56,39 @@ export function authenticate(token) {
   });
 }
 
+export function authenticateEmail(email) {
+  return new Promise((resolve, reject) => {
+    initialize();
+    Firebase.auth().sendSignInLinkToEmail(email, {
+      url: window.location.href,
+      handleCodeInApp: true
+    })
+      .then(() => {
+        window.localStorage.setItem('emailForSignIn', email);
+        resolve();
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
+}
+
+export function isSignInWithEmail() {
+  return Firebase.auth().isSignInWithEmailLink(window.location.href)
+}
+
+export function signInWithEmail() {
+  const email = window.localStorage.getItem('emailForSignIn');
+  Firebase.auth().signInWithEmailLink(email, window.location.href)
+    .then((result) => {
+      window.localStorage.removeItem('emailForSignIn');
+      resolve(result)
+    })
+    .catch((error) => {
+      reject(error)
+    });
+}
+
 export function unauth() {
   Firebase.auth().signOut();
 }
