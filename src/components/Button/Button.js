@@ -27,7 +27,7 @@ class Button extends React.Component {
   }
 
   render() {
-    const { type, className, disabled, onClick, icon, label, primary, flat, danger, neutral, dataCy } = this.props;
+    const { type, className, disabled, onClick, icon, label, primary, flat, danger, neutral, loading, dataCy } = this.props;
     return (
       <StyledButton
         type={type}
@@ -48,7 +48,7 @@ class Button extends React.Component {
           danger={danger}
           flat={flat}
         >
-          {icon && <MaterialIcon icon={icon}/>}<Label>{label}</Label>
+          {loading ? <MaterialIcon icon="sync" rotate="left"/> : icon ? <MaterialIcon icon={icon}/> : undefined}<Label>{label}</Label>
         </Overlay>
       </StyledButton>
     );
@@ -66,6 +66,7 @@ Button.propTypes = {
   flat: PropTypes.bool,
   danger: PropTypes.bool,
   neutral: PropTypes.bool,
+  loading: PropTypes.bool,
   dataCy: PropTypes.string
 };
 
