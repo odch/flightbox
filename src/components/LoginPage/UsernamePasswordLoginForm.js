@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import LabeledComponent from '../LabeledComponent';
-import Centered from '../Centered';
 import Failure from './Failure';
 import Button from '../Button';
 
@@ -10,22 +9,6 @@ const handleSubmit = (authenticate, username, password, e) => {
   e.preventDefault();
   authenticate(username, password);
 };
-
-const Wrapper = styled(Centered)`
-  width: 500px;
-  box-sizing: border-box;
-
-  @media screen and (max-width: 520px) {
-    & {
-      width: 100%;
-      padding: 1em;
-      top: 25%;
-      left: 0;
-      margin-right: 0;
-      transform: none;
-    }
-  }
-`;
 
 const StyledLabeledComponent = styled(LabeledComponent)`
   margin-bottom: 2em;
@@ -72,7 +55,7 @@ const UsernamePasswordLoginForm = props => {
   );
 
   return (
-    <Wrapper>
+    <div>
       <form
         onSubmit={handleSubmit.bind(null, authenticate, username, password)}
         disabled={props.submitting}
@@ -94,7 +77,7 @@ const UsernamePasswordLoginForm = props => {
           <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel} dataCy="cancel"/>
         )}
       </form>
-    </Wrapper>
+    </div>
   );
 };
 

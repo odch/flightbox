@@ -16,8 +16,8 @@ class Main extends React.PureComponent {
   render() {
     return (
       <Wrapper>
-        <Hints/>
-        <EntryPoints admin={this.props.auth.data.admin}/>
+        <Hints guest={this.props.auth.data.guest}/>
+        <EntryPoints admin={this.props.auth.data.admin} guest={this.props.auth.data.guest}/>
         <MarketingLink linked={this.props.auth.data.links}/>
       </Wrapper>
     );
@@ -28,6 +28,7 @@ Main.propTypes = {
   auth: PropTypes.shape({
     data: PropTypes.shape({
       admin: PropTypes.bool,
+      guest: PropTypes.bool,
       links: PropTypes.bool
     })
   }).isRequired,

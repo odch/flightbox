@@ -1,7 +1,7 @@
 import {takeEvery} from 'redux-saga';
 import {call, fork, put} from 'redux-saga/effects'
 import * as actions from './actions';
-import {loadCredentialsToken, loadIpToken} from '../../util/auth';
+import {loadCredentialsToken, loadGuestToken, loadIpToken} from '../../util/auth';
 import createChannel from '../../util/createChannel';
 import firebase, {
   authenticate as fbAuth,
@@ -113,6 +113,24 @@ export function* doEmailAuthentication() {
   }
 }
 
+export function* doGuestTokenAuthentication(action) {
+  try {
+    const queryToken = action.payload.token
+    const guestToken = yield call(loadGuestToken, queryToken);
+    if (guestToken) {
+      yield put(actions.requestFirebaseAuthentication(
+        guestToken,
+        actions.guestTokenAuthenticationFailure()
+      ));
+    } else {
+      yield put(actions.guestTokenAuthenticationFailure());
+    }
+  } catch (e) {
+    error('Login with guest token failed', e)
+    yield put(actions.guestTokenAuthenticationFailure())
+  }
+}
+
 export function* doFirebaseAuthentication(action) {
   try {
     yield call(fbAuth, action.payload.token);
@@ -146,6 +164,7 @@ export function* doListenFirebaseAuthentication(action) {
         expiration: expires * 1000,
         token,
         admin: loginData && loginData.admin === true,
+        guest: uid === 'guest',
         links: !loginData || loginData.links !== false,
         name: yield call(getName, uid),
         email
@@ -189,6 +208,7 @@ export default function* sagas() {
   yield [
     fork(takeEvery, actions.REQUEST_IP_AUTHENTICATION, doIpAuthentication),
     fork(takeEvery, actions.REQUEST_USERNAME_PASSWORD_AUTHENTICATION, doUsernamePasswordAuthentication),
+    fork(takeEvery, actions.REQUEST_GUEST_TOKEN_AUTHENTICATION, doGuestTokenAuthentication),
     fork(takeEvery, actions.SEND_AUTHENTICATION_EMAIL, sendAuthenticationEmail),
     fork(takeEvery, actions.REQUEST_EMAIL_AUTHENTICATION, doEmailAuthentication),
     fork(takeEvery, actions.REQUEST_FIREBASE_AUTHENTICATION, doFirebaseAuthentication),

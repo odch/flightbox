@@ -2,30 +2,14 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import LabeledComponent from '../LabeledComponent';
-import Centered from '../Centered';
 import Failure from './Failure';
 import Button from '../Button';
+import GuestTokenLogin from '../../containers/GuestTokenLoginContainer'
 
 const handleSubmit = (authenticate, email, e) => {
   e.preventDefault();
   authenticate(email);
 };
-
-const Wrapper = styled(Centered)`
-  width: 500px;
-  box-sizing: border-box;
-
-  @media screen and (max-width: 520px) {
-    & {
-      width: 100%;
-      padding: 1em;
-      top: 25%;
-      left: 0;
-      margin-right: 0;
-      transform: none;
-    }
-  }
-`;
 
 const StyledLabeledComponent = styled(LabeledComponent)`
   margin-bottom: 2em;
@@ -48,8 +32,31 @@ const SubmitButton = styled(LoginDialogButton)`
   margin-bottom: 1em;
 `;
 
+const StyledForm = styled.form`
+  overflow: hidden;
+`
+
+const StyledHint = styled.div`
+  font-size: 0.8em;
+  color: #aaa;
+`
+
+const StyledOrContainer = styled.div`
+  text-align: center;
+  border-top: 1px solid #ddd;
+  margin-top: 3em;
+`
+
+const StyledOrText = styled.span`
+  position: relative;
+  top: -8px;
+  background-color: white;
+  padding: 20px;
+`
+
 const EmailLoginForm = props => {
   const {
+    queryToken,
     authenticate,
     email,
     submitting,
@@ -59,12 +66,10 @@ const EmailLoginForm = props => {
   } = props;
 
   if (emailSent) {
-    return <Wrapper>
-      <div style={{textAlign: 'center'}}>Es wurde eine E-Mail an <span
-        style={{fontWeight: 'bold'}}>{email}</span> gesendet. Folgen Sie bitte den Anweisungen in der E-Mail, um die
-        Anmeldung abzuschliessen.
-      </div>
-    </Wrapper>
+    return <div style={{textAlign: 'center'}}>Es wurde eine E-Mail an <span
+      style={{fontWeight: 'bold'}}>{email}</span> gesendet. Folgen Sie bitte den Anweisungen in der E-Mail, um die
+      Anmeldung abzuschliessen.
+    </div>
   }
 
   const emailInput = (
@@ -81,28 +86,42 @@ const EmailLoginForm = props => {
   );
 
   return (
-    <Wrapper>
-      <form
-        onSubmit={handleSubmit.bind(null, authenticate, email)}
-        disabled={props.submitting}
-        data-cy="login-form"
-      >
-        <StyledLabeledComponent label="E-Mail" component={emailInput}/>
-        <Failure failure={failure}/>
-        <SubmitButton
-          type="submit"
-          label="Anmelden"
-          icon="send"
-          disabled={submitting || email.length === 0}
-          primary
-          dataCy="submit"
-          loading={props.submitting}
-        />
-        {props.showCancel === true && (
-          <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel} dataCy="cancel"/>
+    <div>
+        <StyledForm
+          onSubmit={handleSubmit.bind(null, authenticate, email)}
+          disabled={props.submitting}
+          data-cy="login-form"
+        >
+          <StyledLabeledComponent label="E-Mail" component={emailInput}/>
+          {failure && <Failure failure={failure}/>}
+          <SubmitButton
+            type="submit"
+            label="Anmelden"
+            icon="send"
+            disabled={submitting || email.length === 0}
+            primary
+            dataCy="submit"
+            loading={props.submitting}
+          />
+          {props.showCancel === true && (
+            <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel} dataCy="cancel"/>
+          )}
+        </StyledForm>
+        {queryToken && (
+          <>
+            <StyledHint>Wenn Sie sich mit Ihrer E-Mail-Adresse anmelden, können Sie Ihre eigenen erfassten
+              Bewegungen
+              anschliessend noch einsehen und
+              ggf. korrigieren.
+            </StyledHint>
+            <StyledOrContainer><StyledOrText>oder</StyledOrText></StyledOrContainer>
+            <GuestTokenLogin queryToken={queryToken}/>
+            <StyledHint>Wenn Sie sich als Gast anmelden, können Sie nur Ihre Ankunft und Ihren Abflug erfassen. Die
+              erfassten Bewegungen können Sie anschliessend nicht mehr einsehen.
+            </StyledHint>
+          </>
         )}
-      </form>
-    </Wrapper>
+      </div>
   )
 };
 

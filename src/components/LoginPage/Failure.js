@@ -8,7 +8,7 @@ const Wrapper = styled.div`
 `;
 
 const Failure = props => (
-  <Wrapper>{props.failure ? 'Login fehlgeschlagen' : '\u00a0'}</Wrapper>
+  <Wrapper>{props.failure ? 'Anmeldung fehlgeschlagen' : '\u00a0'}</Wrapper>
 );
 
 Failure.propTypes = {
