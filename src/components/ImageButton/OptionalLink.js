@@ -6,6 +6,13 @@ import {Link} from 'react-router-dom';
 const StyledLink = styled(Link)`
   display: block;
   cursor: pointer;
+  margin: 0 1em;
+  padding: 1em;
+  border-radius: 10px;
+
+  &:hover {
+    background-color: ${props => props.theme.colors.background};
+  }
 `;
 
 const ClickableChild = styled.div`
