@@ -8,14 +8,25 @@ const Wrapper = styled.div`
   font-size: 2em;
 `;
 
+const LinkContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`
+
 class ImageButton extends React.PureComponent {
 
   render() {
     const props = this.props;
     return (
       <Wrapper className={props.className}>
-        <OptionalLink href={props.href} onClick={props.onClick} dataCy={props.dataCy}><img src={props.img}/></OptionalLink>
-        <OptionalLink href={props.href} onClick={props.onClick}>{props.label}</OptionalLink>
+        <OptionalLink href={props.href} onClick={props.onClick} dataCy={props.dataCy}>
+          <LinkContent>
+            <img src={props.img}/>
+            {props.label}
+          </LinkContent>
+        </OptionalLink>
       </Wrapper>
     )
   }
