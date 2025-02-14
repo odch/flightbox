@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { withRouter } from "react-router-dom";
+import React, {Component} from 'react';
+import {withRouter} from "react-router-dom";
 import LabeledBox from '../LabeledBox';
 import JumpNavigation from '../JumpNavigation';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
@@ -16,6 +16,7 @@ import AircraftImportForm from '../../containers/AircraftImportFormContainer';
 import AircraftsItemList from '../../containers/AircraftsItemListContainer';
 import Content from './Content';
 import DescriptionText from './DescriptionText';
+import GuestAccessBox from '../../containers/GuestAccessBoxContainer'
 
 class AdminPage extends Component {
 
@@ -71,6 +72,7 @@ class AdminPage extends Component {
               </DescriptionText>
               <AircraftsItemList type="homeBase"/>
             </LabeledBox>
+            <GuestAccessBox/>
           </Content>}
       </VerticalHeaderLayout>
     );

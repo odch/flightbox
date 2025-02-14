@@ -207,6 +207,10 @@
         ".read": "auth !== null",
         ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
       },
+      "guestAccessToken": {
+        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".write":  false
+      },
       "aircrafts": {
         "homeBase": {
           ".read": "auth !== null",
