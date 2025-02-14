@@ -7,30 +7,32 @@ import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
 
 const PilotPage = (props) => {
-  const { previousPage, handleSubmit } = props;
+  const { previousPage, handleSubmit, isGuest } = props;
   return (
     <form onSubmit={handleSubmit} className="PilotPage">
       <FieldSet>
-        <Field
-          name="memberNr"
-          label="Mitgliedernummer"
-          component={renderUserDropdown}
-          readOnly={props.readOnly}
-          normalize={user => {
-            if (user) {
-              return user.memberNr;
-            }
-            return null;
-          }}
-          onChange={user => {
-            if (user) {
-              props.change('firstname', user.firstname);
-              props.change('lastname', user.lastname);
-              props.change('email', user.email);
-              props.change('phone', user.phone);
-            }
-          }}
-        />
+        {!isGuest && (
+          <Field
+            name="memberNr"
+            label="Mitgliedernummer"
+            component={renderUserDropdown}
+            readOnly={props.readOnly}
+            normalize={user => {
+              if (user) {
+                return user.memberNr;
+              }
+              return null;
+            }}
+            onChange={user => {
+              if (user) {
+                props.change('firstname', user.firstname);
+                props.change('lastname', user.lastname);
+                props.change('email', user.email);
+                props.change('phone', user.phone);
+              }
+            }}
+          />
+        )}
       </FieldSet>
       <FieldSet>
         <Field
@@ -77,6 +79,7 @@ PilotPage.propTypes = {
   cancel: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
   isAdmin: PropTypes.bool.isRequired,
+  isGuest: PropTypes.bool.isRequired,
 };
 
 export default reduxForm({

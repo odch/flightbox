@@ -6,6 +6,10 @@ const INITIAL_STATE = {
   authenticated: false,
   submitting: false,
   failure: false,
+  guestAuthentication: {
+    submitting: false,
+    failure: false
+  }
 };
 
 const ACTION_HANDLERS = {
@@ -14,6 +18,24 @@ const ACTION_HANDLERS = {
       submitting: true,
       failure: false,
     });
+  },
+  [actions.REQUEST_GUEST_TOKEN_AUTHENTICATION]: state => {
+    return {
+      ...state,
+      guestAuthentication: {
+        submitting: true,
+        failure: false
+      }
+    }
+  },
+  [actions.GUEST_TOKEN_AUTHENTICATION_FAILURE]: state => {
+    return {
+      ...state,
+      guestAuthentication: {
+        submitting: false,
+        failure: true
+      }
+    }
   },
   [actions.USERNAME_PASSWORD_AUTHENTICATION_FAILURE]: state => {
     return Object.assign({}, state, {
@@ -34,6 +56,7 @@ const ACTION_HANDLERS = {
         failure: false,
         submitting: false,
         data: action.payload.authData,
+        guestAuthentication: INITIAL_STATE.guestAuthentication
       };
     }
     return INITIAL_STATE;

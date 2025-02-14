@@ -1,5 +1,6 @@
 import {
   authenticate,
+  authenticateAsGuest,
   FIREBASE_AUTHENTICATION_EVENT,
   logout,
   sendAuthenticationEmail,
@@ -12,6 +13,7 @@ export {
   FIREBASE_AUTHENTICATION_EVENT,
   USERNAME_PASSWORD_AUTHENTICATION_FAILURE,
   authenticate,
+  authenticateAsGuest,
   sendAuthenticationEmail,
   logout
 };

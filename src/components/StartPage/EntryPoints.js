@@ -18,7 +18,7 @@ const Wrapper = styled.div`
 const EntryPoint = styled(ImageButton)`
   width: 33%;
   margin: 1em 0;
-  
+
   @media screen and (max-width: 768px) {
     width: 100%;
     display: inline-block;
@@ -29,6 +29,16 @@ const EntryPoint = styled(ImageButton)`
 class EntryPoints extends React.PureComponent {
 
   render() {
+    if (this.props.guest === true) {
+      return (
+        <Wrapper>
+          <EntryPoint img={departureImagePath} label="Abflug" href="/departure/new" dataCy="new-departure"/>
+          <EntryPoint img={arrivalImagePath} label="Ankunft" href="/arrival/new" dataCy="new-arrival"/>
+          <EntryPoint img={helpImagePath} label="Hilfe" href="/help" dataCy="help"/>
+        </Wrapper>
+      );
+    }
+
     return (
       <Wrapper>
         <EntryPoint img={departureImagePath} label="Abflug" href="/departure/new" dataCy="new-departure"/>
@@ -44,6 +54,7 @@ class EntryPoints extends React.PureComponent {
 
 EntryPoints.propTypes = {
   admin: PropTypes.bool,
+  guest: PropTypes.bool,
 };
 
 export default EntryPoints;

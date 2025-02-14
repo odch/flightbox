@@ -53,6 +53,7 @@ class MovementWizard extends Component {
         cancel={this.props.cancel}
         readOnly={this.props.locked}
         isAdmin={this.props.auth.data.admin}
+        isGuest={this.props.auth.data.guest}
       />
     );
 

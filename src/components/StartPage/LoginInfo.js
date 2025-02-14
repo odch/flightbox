@@ -17,6 +17,16 @@ const Button = styled.button`
   cursor: pointer;
 `;
 
+const getUsername = authData => {
+  if (authData.email) {
+    return authData.email
+  }
+  if (authData.guest === true) {
+    return 'Gast'
+  }
+  return authData.uid
+}
+
 class LoginInfo extends React.PureComponent {
 
   render() {
@@ -26,7 +36,7 @@ class LoginInfo extends React.PureComponent {
       return (
         <div className={props.className} data-cy="login-info">
           <MaterialIcon icon="account_box"/>
-          <UserName>{props.auth.data.email || props.auth.data.uid}</UserName>
+          <UserName>{getUsername(props.auth.data)}</UserName>
           {props.auth.data.links !== false && <Button onClick={props.logout} data-cy="logout">Abmelden</Button>}
         </div>
       );
