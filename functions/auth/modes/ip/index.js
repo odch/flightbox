@@ -19,8 +19,10 @@ module.exports = req =>
   new Promise(resolve => {
     const requestIp = requestHelper.getIp(req);
     if (requestIp && ips.includes(requestIp)) {
+      console.info(`Request IP ${requestIp} present in allowed IPs ${ips}. Returning 'ipauth' uid.`)
       resolve('ipauth');
     } else {
+      console.info(`Request IP ${requestIp} not present in allowed IPs ${ips}`)
       resolve(null);
     }
   });
