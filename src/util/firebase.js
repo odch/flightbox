@@ -56,7 +56,7 @@ export function authenticate(token) {
   });
 }
 
-export function authenticateEmail(email) {
+export function authenticateEmail(email, local) {
   return new Promise((resolve, reject) => {
     initialize();
     Firebase.auth().sendSignInLinkToEmail(email, {
@@ -65,6 +65,7 @@ export function authenticateEmail(email) {
     })
       .then(() => {
         window.localStorage.setItem('emailForSignIn', email);
+        window.localStorage.setItem('isLocalSignIn', local);
         resolve();
       })
       .catch(error => {

@@ -6,9 +6,9 @@ import Failure from './Failure';
 import Button from '../Button';
 import GuestTokenLogin from '../../containers/GuestTokenLoginContainer'
 
-const handleSubmit = (authenticate, email, e) => {
+const handleSubmit = (authenticate, email, local, e) => {
   e.preventDefault();
-  authenticate(email);
+  authenticate(email, local);
 };
 
 const StyledLabeledComponent = styled(LabeledComponent)`
@@ -88,7 +88,7 @@ const EmailLoginForm = props => {
   return (
     <div>
         <StyledForm
-          onSubmit={handleSubmit.bind(null, authenticate, email)}
+          onSubmit={handleSubmit.bind(null, authenticate, email, !!queryToken)}
           disabled={props.submitting}
           data-cy="login-form"
         >

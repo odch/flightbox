@@ -65,11 +65,12 @@ export function guestTokenAuthenticationFailure() {
   };
 }
 
-export function sendAuthenticationEmail(email) {
+export function sendAuthenticationEmail(email, local) {
   return {
     type: SEND_AUTHENTICATION_EMAIL,
     payload: {
-      email
+      email,
+      local
     },
   };
 }
@@ -98,12 +99,13 @@ export function usernamePasswordAuthenticationFailure() {
   };
 }
 
-export function requestFirebaseAuthentication(token, failureAction) {
+export function requestFirebaseAuthentication(token, failureAction, local) {
   return {
     type: REQUEST_FIREBASE_AUTHENTICATION,
     payload: {
       token,
-      failureAction
+      failureAction,
+      local
     },
   };
 }
