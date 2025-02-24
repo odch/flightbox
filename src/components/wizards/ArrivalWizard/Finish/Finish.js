@@ -15,8 +15,6 @@ const getHeading = isUpdate =>
     ? 'Die Ankunft wurde erfolgreich aktualisiert!'
     : 'Ihre Ankunft wurde erfolgreich erfasst!';
 
-const enabledPaymentMethods = objectToArray(__CONF__.paymentMethods);
-
 const Finish = props => {
   const {
     isUpdate,
@@ -32,9 +30,12 @@ const Finish = props => {
     goAroundFeeSingle,
     goAroundFeeCode,
     goAroundFeeTotal,
+    localUser,
     createMovementFromMovement,
     finish
   } = props
+
+  const enabledPaymentMethods = objectToArray(__CONF__.paymentMethods).filter(method => method === 'card' ? localUser : true);
 
   const heading = getHeading(isUpdate);
   const landingFeeMsg = isHomeBase === false
@@ -99,7 +100,7 @@ Finish.propTypes = {
   goAroundFeeSingle: PropTypes.number,
   goAroundFeeCode: PropTypes.string,
   goAroundFeeTotal: PropTypes.number,
-  cardPaymentsEnabled: PropTypes.bool
+  localUser: PropTypes.bool,
 };
 
 export default Finish;

@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { loadAircraftSettings } from '../modules/settings/aircrafts';
-import { createMovementFromMovement } from '../modules/ui/movements';
-import Finish, { FinishLoading } from '../components/wizards/ArrivalWizard/Finish';
+import React, {Component} from 'react';
+import {connect} from 'react-redux';
+import {loadAircraftSettings} from '../modules/settings/aircrafts';
+import {createMovementFromMovement} from '../modules/ui/movements';
+import Finish, {FinishLoading} from '../components/wizards/ArrivalWizard/Finish';
 
 class ArrivalFinishContainer extends Component {
 
@@ -27,7 +27,8 @@ class ArrivalFinishContainer extends Component {
       createMovementFromMovement,
       finish,
       isUpdate,
-      itemKey
+      itemKey,
+      localUser
     } = this.props
 
     if (!aircraftSettings.club || !aircraftSettings.homeBase) {
@@ -56,6 +57,7 @@ class ArrivalFinishContainer extends Component {
         goAroundFeeSingle={goAroundFeeSingle}
         goAroundFeeCode={goAroundFeeCode}
         goAroundFeeTotal={goAroundFeeTotal}
+        localUser={localUser}
       />
     );
   }
@@ -99,7 +101,8 @@ const mapStateToProps = (state, ownProps) => {
     goArounds: state.ui.wizard.values.goAroundCount,
     goAroundFeeSingle: state.ui.wizard.values.goAroundFeeSingle,
     goAroundFeeCode: state.ui.wizard.values.goAroundFeeCode,
-    goAroundFeeTotal: state.ui.wizard.values.goAroundFeeTotal
+    goAroundFeeTotal: state.ui.wizard.values.goAroundFeeTotal,
+    localUser: state.auth.data.local
   });
 };
 
