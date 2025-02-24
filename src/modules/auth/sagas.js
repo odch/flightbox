@@ -94,9 +94,9 @@ export function* doUsernamePasswordAuthentication(action) {
 export function* sendAuthenticationEmail(action) {
   try {
     yield put(actions.setSubmitting());
-    const { email } = action.payload;
+    const { email, local } = action.payload;
     if (isNotEmptyString(email)) {
-      yield call(fbAuthEmail, email);
+      yield call(fbAuthEmail, email, local);
       yield put(actions.sendAuthenticationEmailSuccess());
     }
   } catch(e) {
@@ -159,12 +159,15 @@ export function* doListenFirebaseAuthentication(action) {
       }
     } else {
       const loginData = yield call(getLoginData, uid)
+      const guest = uid === 'guest'
+      const local = guest || window.localStorage.getItem('isLocalSignIn') === 'true'
       authData = {
         uid,
         expiration: expires * 1000,
         token,
         admin: loginData && loginData.admin === true,
-        guest: uid === 'guest',
+        guest,
+        local,
         links: !loginData || loginData.links !== false,
         name: yield call(getName, uid),
         email
