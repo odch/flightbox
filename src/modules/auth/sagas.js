@@ -156,6 +156,7 @@ export function* doListenFirebaseAuthentication(action) {
       authData = {
         expiration: expires * 1000,
         token,
+        local: true
       }
     } else {
       const loginData = yield call(getLoginData, uid)
