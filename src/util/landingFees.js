@@ -100,13 +100,13 @@ export const getLandingFeeText = (
     const total = formatMoney(landingFeeTotal + goAroundFeeTotal);
     const landingFee = formatMoney(landingFeeSingle);
     const goAroundFee = formatMoney(goAroundFeeSingle);
-    return `CHF ${total} (${landings} Landung(en) à CHF ${landingFee} und ${goArounds} Durchstart(s) à CHF ${goAroundFee})`;
+    return `CHF ${total} (${landings} ${landings > 1 ? 'Landungen' : 'Landung'} à CHF ${landingFee} und ${goArounds} ${goArounds > 1 ? 'Durchstarts' : 'Durchstart'} à CHF ${goAroundFee})`;
   }
 
   const total = formatMoney(landingFeeTotal);
   if (landings > 1) {
     const landingFee = formatMoney(landingFeeSingle);
-    return `CHF ${total} (${landings} Landung(en) à CHF ${landingFee})`;
+    return `CHF ${total} (${landings} Landungen à CHF ${landingFee})`;
   }
   return `CHF ${total}`;
 }
