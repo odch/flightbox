@@ -13,6 +13,9 @@ if (!config.auth || !config.auth.ips) {
   )
 } else {
   ips = config.auth.ips.split(',').map(ip => ip.trim());
+  console.info(
+    "The following IP addresses are enabled (config property auth.ips): " + ips
+  )
 }
 
 module.exports = req =>
