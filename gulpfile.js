@@ -5,11 +5,25 @@ const env = require('gulp-env');
 const merge = require('merge-stream');
 const replace = require('gulp-replace');
 const rename = require('gulp-rename');
+const through2 = require('through2');
 const projects = require('./projects');
 const processFirebaseRules = require('./tasks/processFirebaseRules');
 
 require('ignore-styles');
 require('@babel/polyfill');
+
+const prettyPrintJson = () => through2.obj((file, _, cb) => {
+  if (file.isBuffer()) {
+    try {
+      const jsonContent = JSON.parse(file.contents.toString());
+      const prettyJson = JSON.stringify(jsonContent, null, 2); // Pretty-print with 2 spaces
+      file.contents = Buffer.from(prettyJson);
+    } catch (error) {
+      return cb(new Error('Invalid JSON format'));
+    }
+  }
+  cb(null, file);
+});
 
 gulp.task('clean', function () {
   const config = require('./webpack.config.js');
@@ -35,6 +49,7 @@ gulp.task('build', ['clean'], function () {
 
   const rules = gulp.src(['./firebase-rules-template.json'], { base: './' })
     .pipe(processFirebaseRules(projectConf))
+    .pipe(prettyPrintJson())
     .pipe(rename('firebase-rules.json'))
     .pipe(gulp.dest(config.output.path));
 
