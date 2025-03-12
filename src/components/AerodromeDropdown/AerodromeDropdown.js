@@ -7,20 +7,25 @@ const optionRenderer = (option, focussed) => (
   <Option code={option.key} name={option.name} focussed={focussed}/>
 );
 
-const aerodromesComparator = filter =>
-  (aerodrome1, aerodrome2) => {
-    // place key matches first
-    if (filter) {
-      if (aerodrome1.key.indexOf(filter) > -1 && aerodrome2.key.indexOf(filter) === -1) {
-        return -1;
-      }
-      if (aerodrome1.key.indexOf(filter) === -1 && aerodrome2.key.indexOf(filter) > -1) {
-        return 1;
-      }
-    }
+const aerodromesComparator = (filter) => (aerodrome1, aerodrome2) => {
+  // Place "LS" aerodromes first
+  const isLS1 = aerodrome1.key.toUpperCase().startsWith("LS");
+  const isLS2 = aerodrome2.key.toUpperCase().startsWith("LS");
 
-    return aerodrome1.key.localeCompare(aerodrome2.key);
-  };
+  if (isLS1 && !isLS2) return -1;
+  if (!isLS1 && isLS2) return 1;
+
+  // Place key matches first
+  if (filter) {
+    const match1 = aerodrome1.key.indexOf(filter) > -1;
+    const match2 = aerodrome2.key.indexOf(filter) > -1;
+
+    if (match1 && !match2) return -1;
+    if (!match1 && match2) return 1;
+  }
+
+  return aerodrome1.key.localeCompare(aerodrome2.key);
+};
 
 const optionFilter = (options, filter) =>
   options
