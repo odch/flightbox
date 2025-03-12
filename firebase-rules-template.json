@@ -376,6 +376,42 @@
           ".validate": false
         }
       }
+    },
+    "profiles": {
+      "$profile_id": {
+        ".read": "auth !== null && $profile_id === auth.uid",
+        ".write": "auth !== null && $profile_id === auth.uid",
+        "memberNr": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d+$/)"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().matches(/^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$/)"
+        },
+        "firstname": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "lastname": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "phone": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "immatriculation": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "aircraftType": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "aircraftCategory": {
+          ".validate": "{aircraftCategory}"
+        },
+        "mtow": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     }
   }
 }

@@ -104,12 +104,12 @@ export const renderAerodromeDropdown = (props) => {
 };
 
 export const renderAircraftDropdown = (props) => {
-  const cmp = <AircraftDropdown {...props.input} readOnly={props.readOnly} dataCy={props.input.name}/>;
+  const cmp = <AircraftDropdown {...props.input} readOnly={props.readOnly} dataCy={props.input.name} clearable={props.clearable}/>;
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderAircraftCategoryDropdown = (props) => {
-  const cmp = <AircraftCategoryDropdown {...props.input} readOnly={props.readOnly} dataCy={props.input.name}/>;
+  const cmp = <AircraftCategoryDropdown {...props.input} readOnly={props.readOnly} dataCy={props.input.name} clearable={props.clearable}/>;
   return renderLabeledComponent(props, cmp);
 };
 

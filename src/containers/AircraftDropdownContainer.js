@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { loadAircrafts } from '../modules/aircrafts';
+import React, {Component} from 'react';
+import {connect} from 'react-redux';
+import {loadAircrafts} from '../modules/aircrafts';
 import AircraftDropdown from '../components/AircraftDropdown';
 
 class AircraftDropdownContainer extends Component {
@@ -20,6 +20,7 @@ class AircraftDropdownContainer extends Component {
         onBlur={this.props.onBlur}
         readOnly={this.props.readOnly}
         dataCy={this.props.dataCy}
+        clearable={this.props.clearable}
       />
     );
   }
@@ -33,6 +34,7 @@ AircraftDropdownContainer.propTypes = {
   onFocus: PropTypes.func.isRequired,
   onBlur: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
+  clearable: PropTypes.bool,
   dataCy: PropTypes.string
 };
 
