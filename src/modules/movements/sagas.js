@@ -10,6 +10,7 @@ import {compareDescending, firebaseToLocal, localToFirebase, transferValues} fro
 import {error} from '../../util/log';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
+import {loadRemote} from '../profile'
 
 export const stateSelector = state => state.movements;
 
@@ -19,8 +20,24 @@ export const wizardFormValuesSelector = getFormValues('wizard');
 
 export const authSelector = state => state.auth.data
 
-export function* getDepartureDefaultValues() {
+export function* getProfileDefaultValues() {
+  const auth = yield select(authSelector)
+
+  if (!auth || auth.guest === true || auth.uid === 'ipauth') {
+    return {}
+  }
+
+  const snapshot = yield call(loadRemote, auth.uid);
+
   return {
+    ...snapshot.val()
+  }
+}
+
+export function* getDepartureDefaultValues() {
+  const profileDefaultValues = yield call(getProfileDefaultValues)
+  return {
+    ...profileDefaultValues,
     type: 'departure',
     date: dates.localDate(),
     time: dates.localTimeRounded(15, 'up'),
@@ -28,7 +45,9 @@ export function* getDepartureDefaultValues() {
 }
 
 export function* getArrivalDefaultValues() {
+  const profileDefaultValues = yield call(getProfileDefaultValues)
   return {
+    ...profileDefaultValues,
     type: 'arrival',
     date: dates.localDate(),
     time: dates.localTimeRounded(15, 'down'),

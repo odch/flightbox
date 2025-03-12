@@ -6,6 +6,10 @@ export {
   saveProfile
 } from './actions';
 
+export {
+  load as loadRemote
+} from './remote'
+
 export {sagas};
 
 export default reducer;
