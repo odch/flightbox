@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
+import {Link} from 'react-router-dom'
 
 const UserName = styled.span`
   margin-right: 0.3em;
@@ -22,13 +23,27 @@ const StyledUserNameWrapper = styled.div`
 `
 
 const StyledMenuButton = styled.button`
-  padding: 2px;
+  padding: 3px;
   border: none;
   border-radius: 5px;
   font-size: 1em;
   background-color: transparent;
   cursor: pointer;
   font-weight: bold;
+  display: block;
+  margin: 3px 0;
+`;
+
+const StyledMenuLink = styled(Link)`
+  padding: 3px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  background-color: transparent;
+  cursor: pointer;
+  font-weight: bold;
+  display: block;
+  margin: 3px 0;
 `;
 
 const StyledMenu = styled.div`
@@ -113,8 +128,12 @@ class LoginInfo extends React.Component {
   }
 
   renderMenu() {
+    const auth = this.props.auth.data
     return (
       <StyledMenu innerRef={this.setMenuRef}>
+        {auth && auth.guest !== true && auth.uid !== 'ipauth' && (
+          <StyledMenuLink to="/profile" data-cy="profile">Profil</StyledMenuLink>
+        )}
         <StyledMenuButton onClick={this.props.logout} data-cy="logout">Abmelden</StyledMenuButton>
       </StyledMenu>
     )
