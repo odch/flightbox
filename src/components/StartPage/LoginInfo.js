@@ -17,6 +17,30 @@ const Button = styled.button`
   cursor: pointer;
 `;
 
+const StyledUserNameWrapper = styled.div`
+  cursor: pointer;
+`
+
+const StyledMenuButton = styled.button`
+  padding: 2px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  background-color: transparent;
+  cursor: pointer;
+  font-weight: bold;
+`;
+
+const StyledMenu = styled.div`
+  position: relative;
+  margin-top: 5px;
+  background-color: rgb(255, 255, 255);
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+`
+
 const getUsername = authData => {
   if (authData.email) {
     return authData.email
@@ -27,7 +51,44 @@ const getUsername = authData => {
   return authData.uid
 }
 
-class LoginInfo extends React.PureComponent {
+class LoginInfo extends React.Component {
+
+  constructor(props) {
+    super(props)
+
+    this.handleUserNameClick = this.handleUserNameClick.bind(this)
+    this.handleClickOutside = this.handleClickOutside.bind(this)
+    this.setMenuRef = this.setMenuRef.bind(this);
+
+    this.state = {
+      menuOpen: false
+    }
+  }
+
+  handleUserNameClick() {
+    this.setState(prevState => ({ menuOpen: !prevState.menuOpen }), () => {
+      if (this.state.menuOpen) {
+        document.addEventListener('click', this.handleClickOutside);
+      } else {
+        document.removeEventListener('click', this.handleClickOutside);
+      }
+    });
+  }
+
+  handleClickOutside(event) {
+    if (this.menuRef && !this.menuRef.contains(event.target)) {
+      this.setState({ menuOpen: false });
+      document.removeEventListener('click', this.handleClickOutside);
+    }
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
+  }
+
+  setMenuRef(node) {
+    this.menuRef = node;
+  }
 
   render() {
     const props = this.props;
@@ -35,9 +96,11 @@ class LoginInfo extends React.PureComponent {
     if (props.auth.authenticated === true && typeof props.auth.data.uid === 'string') {
       return (
         <div className={props.className} data-cy="login-info">
-          <MaterialIcon icon="account_box"/>
-          <UserName>{getUsername(props.auth.data)}</UserName>
-          {props.auth.data.links !== false && <Button onClick={props.logout} data-cy="logout">Abmelden</Button>}
+          <StyledUserNameWrapper onClick={this.handleUserNameClick}>
+            <MaterialIcon icon="account_box"/>
+            <UserName>{getUsername(props.auth.data)}</UserName>
+          </StyledUserNameWrapper>
+          {this.state.menuOpen && props.auth.data.links !== false && this.renderMenu()}
         </div>
       );
     }
@@ -47,6 +110,14 @@ class LoginInfo extends React.PureComponent {
         <Button onClick={props.showLogin}>Anmelden</Button>
       </div>
     );
+  }
+
+  renderMenu() {
+    return (
+      <StyledMenu innerRef={this.setMenuRef}>
+        <StyledMenuButton onClick={this.props.logout} data-cy="logout">Abmelden</StyledMenuButton>
+      </StyledMenu>
+    )
   }
 }
 
