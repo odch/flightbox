@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import {loadAircraftSettings} from '../modules/settings/aircrafts';
 import {loadInvoiceRecipientSettings} from '../modules/settings/invoiceRecipients';
 import {createMovementFromMovement} from '../modules/ui/movements';
+import {saveMovement} from '../modules/movements';
 import Finish, {FinishLoading} from '../components/wizards/ArrivalWizard/Finish';
 import {HeadingType} from '../components/wizards/MovementWizard'
 import objectToArray from '../util/objectToArray'
@@ -158,6 +159,7 @@ const mapActionCreators = {
   createMovementFromMovement,
   loadAircraftSettings,
   loadInvoiceRecipientSettings,
+  saveMovement
 };
 
 export default connect(mapStateToProps, mapActionCreators)(ArrivalFinishContainer);

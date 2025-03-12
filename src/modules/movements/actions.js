@@ -14,6 +14,7 @@ export const INIT_NEW_MOVEMENT_FROM_MOVEMENT = 'INIT_NEW_MOVEMENT_FROM_MOVEMENT'
 export const SAVE_MOVEMENT = 'SAVE_MOVEMENT';
 export const SAVE_MOVEMENT_SUCCESS = 'SAVE_MOVEMENT_SUCCESS';
 export const SAVE_MOVEMENT_FAILED = 'SAVE_MOVEMENT_FAILED';
+export const SAVE_MOVEMENT_PAYMENT_METHOD = 'SAVE_MOVEMENT_PAYMENT_METHOD';
 export const EDIT_MOVEMENT = 'EDIT_MOVEMENT';
 export const START_INITIALIZE_WIZARD = 'START_INITIALIZE_WIZARD';
 export const WIZARD_INITIALIZED = 'WIZARD_INITIALIZED';
@@ -158,6 +159,17 @@ export function saveMovementFailed(error) {
     type: SAVE_MOVEMENT_FAILED,
     payload: {
       error,
+    },
+  };
+}
+
+export function saveMovementPaymentMethod(movementType, key, paymentMethod) {
+  return {
+    type: SAVE_MOVEMENT_PAYMENT_METHOD,
+    payload: {
+      movementType,
+      key,
+      paymentMethod,
     },
   };
 }
