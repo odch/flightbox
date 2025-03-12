@@ -101,6 +101,7 @@ class PaymentMethod extends Component {
 
     const {
       itemKey,
+      invoiceRecipientName,
       email,
       immatriculation,
       amount,
@@ -114,9 +115,17 @@ class PaymentMethod extends Component {
       goAroundFeeTotal,
       createCardPayment,
       setStep,
+      saveMovementPaymentMethod
     } = this.props
 
-    if (['cash', 'twint_external', 'invoice'].includes(method)) {
+    const paymentMethodData = {
+      method
+    }
+
+    if (['cash', 'twint_external'].includes(method)) {
+      setStep(Step.COMPLETED)
+    } else if (method === 'invoice') {
+      paymentMethodData.invoiceRecipientName = invoiceRecipientName
       setStep(Step.COMPLETED)
     } else if (method === 'card') {
       setStep(Step.CONFIRMED)
@@ -157,6 +166,8 @@ class PaymentMethod extends Component {
         goAroundFeeTotal
       )
     }
+
+    saveMovementPaymentMethod('arrival', itemKey, paymentMethodData)
   }
 
   render() {
@@ -257,12 +268,13 @@ PaymentMethod.propTypes = {
   goAroundFeeCoe: PropTypes.string,
   goAroundFeeTotal: PropTypes.number,
   failure: PropTypes.bool.isRequired,
+  enabledPaymentMethods: PropTypes.arrayOf(PropTypes.string).isRequired,
   createMovementFromMovement: PropTypes.func.isRequired,
   finish: PropTypes.func.isRequired,
   setMethod: PropTypes.func.isRequired,
   setStep: PropTypes.func.isRequired,
   cancelCardPayment: PropTypes.func.isRequired,
-  enabledPaymentMethods: PropTypes.arrayOf(PropTypes.string).isRequired
+  saveMovementPaymentMethod: PropTypes.func.isRequired
 }
 
 export default withRouter(PaymentMethod)

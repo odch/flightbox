@@ -172,6 +172,15 @@
         "createdBy_orderKey": {
           ".validate": "newData.isString()"
         },
+        "paymentMethod": {
+          ".validate": "newData.hasChildren(['method'])",
+          "method": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "invoiceRecipientName": {
+            ".validate": "newData.isString()"
+          }
+        },
         "$other": {
           ".validate": false
         }

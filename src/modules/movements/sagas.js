@@ -451,6 +451,21 @@ export function* saveMovement() {
   }
 }
 
+export function* saveMovementPaymentMethod(action) {
+  const {movementType, key, paymentMethod} = action.payload;
+  const path = getPathByMovementType(movementType);
+  try {
+    yield call(remote.saveMovement, path, key, {
+      paymentMethod
+    });
+  } catch(e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to save movement payment method', e);
+      console.error('movement key', key);
+    }
+  }
+}
+
 function getPathByMovementType(type) {
   switch(type) {
     case 'departure':
@@ -490,6 +505,7 @@ export default function* sagas() {
     fork(takeEvery, actions.INIT_NEW_MOVEMENT, initNewMovement),
     fork(takeEvery, actions.INIT_NEW_MOVEMENT_FROM_MOVEMENT, initNewMovementFromMovement),
     fork(takeEvery, actions.SAVE_MOVEMENT, saveMovement),
+    fork(takeEvery, actions.SAVE_MOVEMENT_PAYMENT_METHOD, saveMovementPaymentMethod),
     fork(takeLatest, actions.EDIT_MOVEMENT, editMovement),
   ]
 }

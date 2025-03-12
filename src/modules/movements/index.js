@@ -12,6 +12,7 @@ export {
   initNewMovementFromMovement,
   editMovement,
   saveMovement,
+  saveMovementPaymentMethod,
   setMovementsFilter,
   loadMovement
 } from './actions';
