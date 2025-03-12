@@ -44,6 +44,7 @@ const UserDropdown = props => (
     optionRenderer={optionRenderer(props.users.data.array)}
     onChange={callWithValue.bind(null, props.onChange, props.users.data.array)}
     value={props.value}
+    showOptionsOnFocus={false}
     noOptionsText="Kein Mitglied gefunden"
     moreOptionsText="Mehr Mitglieder vorhanden! Tippen Sie einen Teil der Mitgliedernummer, um die Liste einzuschränken."
     onFocus={props.onFocus}
