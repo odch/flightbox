@@ -54,6 +54,7 @@ const AircraftDropdown = props => (
     onBlur={callWithValue.bind(null, props.onBlur, props.aircrafts.data.array)}
     readOnly={props.readOnly}
     dataCy={props.dataCy}
+    clearable={props.clearable}
   />
 );
 
@@ -64,6 +65,7 @@ AircraftDropdown.propTypes = {
   onFocus: PropTypes.func.isRequired,
   onBlur: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
+  clearable: PropTypes.bool,
   dataCy: PropTypes.string
 };
 

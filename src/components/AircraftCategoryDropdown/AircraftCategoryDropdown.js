@@ -34,6 +34,7 @@ const AircraftCategoryDropdown = props => (
     optionsRenderLimit={categories.length}
     noOptionsText="Kategorie nicht gefunden"
     mustSelect
+    clearable={props.clearable}
   />
 );
 

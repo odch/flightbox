@@ -13,6 +13,7 @@ import AdminPage from "../../containers/AdminPageContainer";
 import ArrivalPage from "../../containers/ArrivalPageContainer";
 import ArrivalPaymentPage from "../../containers/ArrivalPaymentPageContainer";
 import AerodromeStatusPage from '../../containers/AerodromeStatusPageContainer';
+import ProfilePage from '../../containers/ProfilePageContainer';
 
 const UNPROTECTED_ROUTES = [
   '/aerodrome-status'
@@ -52,6 +53,7 @@ class App extends React.PureComponent {
         <Route exact path="/message" component={MessagePage}/>
         <Route exact path="/help" component={HelpPage}/>
         <Route exact path="/aerodrome-status" component={AerodromeStatusPage}/>
+        <Route exact path="/profile" component={ProfilePage}/>
         <Redirect to="/"/>
       </Switch>
     );
