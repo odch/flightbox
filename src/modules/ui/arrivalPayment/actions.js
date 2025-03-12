@@ -22,6 +22,7 @@ export const setStep = step => ({
 
 export const createCardPayment = (
   movementKey,
+  refNr,
   amount,
   currency,
   method,
@@ -39,6 +40,7 @@ export const createCardPayment = (
   type: ARRIVAL_PAYMENT_CREATE_CARD_PAYMENT,
   payload: {
     movementKey,
+    refNr,
     amount,
     currency,
     method,
