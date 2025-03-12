@@ -12,5 +12,6 @@
     "Der Preflight-Check wurde ausgeführt."
   ],
   "paymentMethods": ["cash"],
+  "homebasePayment": false,
   "loginForm": "usernamePassword"
 }

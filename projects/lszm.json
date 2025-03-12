@@ -83,6 +83,7 @@
   },
   "theme": "lszm",
   "title": "Flightbox - Flugplatz Mollis",
-  "paymentMethods": ["cash", "twint_external"],
+  "paymentMethods": ["checkout", "invoice"],
+  "homebasePayment": true,
   "loginForm": "email"
 }

@@ -1,5 +1,5 @@
-import { takeEvery } from 'redux-saga';
-import { fork, call, select, put } from 'redux-saga/effects'
+import {takeEvery} from 'redux-saga';
+import {call, fork, put, select} from 'redux-saga/effects'
 import * as actions from './actions';
 import * as remote from './remote'
 import createChannel, {monitor} from '../../../util/createChannel'
@@ -12,6 +12,7 @@ export function* createCardPayment(channel, action) {
     amount,
     currency,
     movementKey,
+    refNr,
     method,
     email,
     immatriculation,
@@ -26,18 +27,21 @@ export function* createCardPayment(channel, action) {
   } = action.payload
 
   const values = {
-    amount,
+    amount: Math.round(amount * 100),
     currency,
     method,
     email,
     immatriculation,
     landings,
     landingFeeSingle,
-    landingFeeCode,
     landingFeeTotal,
+    refNr,
     arrivalReference: movementKey,
     status: 'pending',
     timestamp: new Date().getTime()
+  }
+  if (landingFeeCode) {
+    values.landingFeeCode = landingFeeCode
   }
   if (goArounds && goAroundFeeTotal) {
     values.goArounds = goArounds
@@ -52,8 +56,14 @@ export function* createCardPayment(channel, action) {
 
 function* monitorPaymentStatus(paymentRef, channel) {
   paymentRef.onValueEvent(snapshot => {
-    const status = snapshot.val().status
-    if (status === 'success') {
+    const val = snapshot.val()
+    const data = val.data
+    const status = val.status
+
+    if (data) {
+      paymentRef.off('value')
+      window.location.href = data
+    } else if (status === 'success') {
       channel.put(actions.setStep(Step.COMPLETED))
       paymentRef.off('value')
     } else if (status === 'failure') {

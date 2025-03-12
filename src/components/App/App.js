@@ -11,6 +11,7 @@ import HelpPage from "../../containers/HelpPageContainer";
 import MovementsPage from "../../containers/MovementsPageContainer";
 import AdminPage from "../../containers/AdminPageContainer";
 import ArrivalPage from "../../containers/ArrivalPageContainer";
+import ArrivalPaymentPage from "../../containers/ArrivalPaymentPageContainer";
 import AerodromeStatusPage from '../../containers/AerodromeStatusPageContainer';
 
 const UNPROTECTED_ROUTES = [
@@ -45,6 +46,7 @@ class App extends React.PureComponent {
         <Route exact path="/arrival/new" component={ArrivalPage}/>
         <Route exact path="/arrival/new/:departureKey" component={ArrivalPage}/>
         <Route exact path="/arrival/:key" component={ArrivalPage}/>
+        <Route exact path="/arrival/:key/payment" component={ArrivalPaymentPage}/>
         <Route exact path="/movements" component={MovementsPage}/>
         <Route exact path="/admin" component={AdminPage}/>
         <Route exact path="/message" component={MessagePage}/>

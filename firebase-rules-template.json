@@ -228,6 +228,10 @@
           ".validate": false
         }
       },
+      "invoiceRecipients": {
+        ".read": "auth !== null",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).exists()"
+      },
       "$other": {
         ".validate": false
       }
@@ -307,7 +311,7 @@
       "$card_payment_id": {
         ".read": "auth !== null",
         ".write": "auth !== null && newData.exists()",
-        ".validate": "newData.hasChildren(['amount', 'currency', 'arrivalReference', 'timestamp', 'status'])",
+        ".validate": "newData.hasChildren(['amount', 'currency', 'arrivalReference', 'refNr', 'timestamp', 'status'])",
         "currency": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
@@ -318,6 +322,9 @@
           ".validate": "newData.isNumber() && newData.val() > 0"
         },
         "arrivalReference": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "refNr": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "status": {
@@ -339,7 +346,7 @@
           ".validate": "newData.isNumber() && newData.val() > 0"
         },
         "landingFeeCode": {
-          ".validate": "newData.isString() && newData.val().length > 0"
+          ".validate": "newData.isString()"
         },
         "landingFeeTotal": {
           ".validate": "newData.isNumber() && newData.val() > 0"
