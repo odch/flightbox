@@ -26,7 +26,6 @@ class Dropdown extends Component {
       filter: '',
       focusedOption: null,
       inputFocused: false,
-      optionsVisible: false,
     };
     this.options = [];
     this.handleContainerKeyDown = this.handleContainerKeyDown.bind(this);
@@ -97,21 +96,20 @@ class Dropdown extends Component {
   }
 
   renderOptions() {
-    if (this.state.optionsVisible !== true) {
+    if (this.state.filter.length === 0 && (!this.state.inputFocused || !this.props.showOptionsOnFocus)) {
       return null;
     }
 
     const filteredOptions = this.getFilteredOptions(this.state.filter);
 
-    let options;
+    if (filteredOptions.length === 0) {
+      return null
+    }
 
-    if (filteredOptions.length > 0) {
-      options = filteredOptions.slice(0, this.props.optionsRenderLimit).map(option => this.renderOption(option));
-      if (filteredOptions.length > this.props.optionsRenderLimit) {
-        options.push(this.renderMoreOptionsLabel());
-      }
-    } else {
-      options = this.renderNoOptionsLabel();
+    const options = filteredOptions.slice(0, this.props.optionsRenderLimit).map(option => this.renderOption(option));
+
+    if (filteredOptions.length > this.props.optionsRenderLimit) {
+      options.push(this.renderMoreOptionsLabel());
     }
 
     return (
@@ -190,7 +188,6 @@ class Dropdown extends Component {
     }
     this.setState({
       inputFocused: true,
-      optionsVisible: true,
       filter: '',
     });
     this.setFocusedOption(this.getInitiallyFocusedOption());
@@ -202,7 +199,6 @@ class Dropdown extends Component {
   handleInputBlur() {
     this.setState({
       inputFocused: false,
-      optionsVisible: false,
     });
     if (this.state.filter && this.props.mustSelect !== true) {
       this.setValue(this.state.filter);
@@ -234,7 +230,7 @@ class Dropdown extends Component {
       return;
     }
 
-    if (e.which === KEY_CODE_ARROW_DOWN && this.state.optionsVisible === false) {
+    if (e.which === KEY_CODE_ARROW_DOWN) {
       this.input.focus();
       return;
     }
@@ -351,6 +347,7 @@ Dropdown.propTypes = {
   optionRenderer: PropTypes.func.isRequired,
   valueRenderer: PropTypes.func,
   optionFilter: PropTypes.func,
+  showOptionsOnFocus: PropTypes.bool,
   noOptionsText: PropTypes.string,
   moreOptionsText: PropTypes.string,
   mustSelect: PropTypes.bool,
@@ -365,6 +362,7 @@ Dropdown.propTypes = {
 };
 
 Dropdown.defaultProps = {
+  showOptionsOnFocus: true,
   noOptionsText: 'No options found',
   moreOptionsText: 'Too many options available. Type to filter...',
   mustSelect: false,

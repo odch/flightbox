@@ -54,6 +54,7 @@ const AerodromeDropdown = props => (
     onChange={callWithValue.bind(null, props.onChange, props.aerodromes.data.array)}
     onBeforeInputChange={normalize}
     value={props.value}
+    showOptionsOnFocus={false}
     noOptionsText="Kein Flugplatz gefunden"
     moreOptionsText="Mehr Flugplätze vorhanden! Tippen Sie einen Teil des ICAO-Codes oder des Namens, um die Liste einzuschränken."
     onFocus={props.onFocus}

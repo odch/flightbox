@@ -47,6 +47,7 @@ const AircraftDropdown = props => (
     onChange={callWithValue.bind(null, props.onChange, props.aircrafts.data.array)}
     onBeforeInputChange={normalizeImmatriculation}
     value={props.value}
+    showOptionsOnFocus={false}
     noOptionsText="Kein Flugzeug gefunden"
     moreOptionsText="Mehr Flugzeuge vorhanden! Tippen Sie einen Teil der Immatrikulation, um die Liste einzuschränken."
     onFocus={props.onFocus}
