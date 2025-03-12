@@ -10,12 +10,12 @@ const Dt = styled.dt`
   margin-bottom: 0.5em;
   font-weight: 200;
   float: left;
-  wiDth: 150px;
+  wiDth: 200px;
 `;
 
 const Dd = styled.dd`
   margin-bottom: 1em;
-  margin-left: 150px;
+  margin-left: 200px;
 `;
 
 const InternalDescription = () => (
@@ -28,6 +28,8 @@ const InternalDescription = () => (
       <Dd>Die Mitgliedernummer des Piloten</Dd>
       <Dt>LASTNAME</Dt>
       <Dd>Der Nachname des Piloten</Dd>
+      <Dt>EMAIL</Dt>
+      <Dd>Die E-Mail-Adresse des Piloten</Dd>
       <Dt>MTOW</Dt>
       <Dd>Das maximale Abfluggewicht</Dd>
       <Dt>CLUB</Dt>
@@ -45,6 +47,10 @@ const InternalDescription = () => (
       <Dd>Anzahl Landungen</Dd>
       <Dt>GA_COUNT</Dt>
       <Dd>Anzahl Durchstarts</Dd>
+      <Dt>PAYMENT_METHOD</Dt>
+      <Dd>Die gewählte Zahlungsart</Dd>
+      <Dt>INVOICE_RECIPIENT</Dt>
+      <Dd>Name des Rechnungsempfängers bei Zahlungsart "Rechnung"</Dd>
     </Dl>
   </div>
 );

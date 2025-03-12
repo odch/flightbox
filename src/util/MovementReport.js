@@ -1,9 +1,9 @@
 import firebase from './firebase.js';
 import Download from './Download.js';
-import { firebaseToLocal, compareAscending } from './movements.js';
-import { fetch as fetchAircrafts } from './aircrafts';
-import { fetch as fetchAerodromes } from './aerodromes';
-import { getFromItemKey } from './reference-number';
+import {compareAscending, firebaseToLocal} from './movements.js';
+import {fetch as fetchAircrafts} from './aircrafts';
+import {fetch as fetchAerodromes} from './aerodromes';
+import {getFromItemKey} from './reference-number';
 import dates from './dates';
 import ItemsArray from './ItemsArray';
 import {getAirstatType} from './flightTypes';
@@ -237,6 +237,7 @@ class MovementReport {
     airstatRecord.KEY = this.getMovementKey(movement)
     airstatRecord.MEMBERNR = movement.memberNr;
     airstatRecord.LASTNAME = movement.lastname;
+    airstatRecord.EMAIL = movement.email;
     airstatRecord.MTOW = movement.mtow;
     airstatRecord.CLUB = aircrafts.club[movement.immatriculation] === true ? 1 : undefined;
     airstatRecord.HOME_BASE = aircrafts.homeBase[movement.immatriculation] === true ? 1 : undefined;
@@ -247,6 +248,8 @@ class MovementReport {
     airstatRecord.FEES = (movement.landingFeeTotal || 0) + (movement.goAroundFeeTotal || 0);
     airstatRecord.LDG_COUNT = movement.landingCount || 0;
     airstatRecord.GA_COUNT = movement.goAroundCount || 0;
+    airstatRecord.PAYMENT_METHOD = movement.paymentMethod ? movement.paymentMethod.method : undefined;
+    airstatRecord.INVOICE_RECIPIENT =  movement.paymentMethod ? movement.paymentMethod.invoiceRecipientName : undefined
 
     return airstatRecord;
   }
@@ -274,6 +277,7 @@ MovementReport.internalHeader = [
   'KEY',
   'MEMBERNR',
   'LASTNAME',
+  'EMAIL',
   'MTOW',
   'CLUB',
   'HOME_BASE',
@@ -281,7 +285,9 @@ MovementReport.internalHeader = [
   'REMARKS',
   'FEES',
   'LDG_COUNT',
-  'GA_COUNT'
+  'GA_COUNT',
+  'PAYMENT_METHOD',
+  'INVOICE_RECIPIENT'
 ];
 
 MovementReport.LOCATION_DEFAULT = 'LSZZ';
