@@ -4,6 +4,10 @@ import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
 import {Link} from 'react-router-dom'
 
+const StyledWrapper = styled.div`
+  position: relative
+`
+
 const UserName = styled.span`
   margin-right: 0.3em;
 `;
@@ -47,7 +51,10 @@ const StyledMenuLink = styled(Link)`
 `;
 
 const StyledMenu = styled.div`
-  position: relative;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 150px;
   margin-top: 5px;
   background-color: rgb(255, 255, 255);
   border: 1px solid #ddd;
@@ -110,13 +117,13 @@ class LoginInfo extends React.Component {
 
     if (props.auth.authenticated === true && typeof props.auth.data.uid === 'string') {
       return (
-        <div className={props.className} data-cy="login-info">
+        <StyledWrapper className={props.className} data-cy="login-info">
           <StyledUserNameWrapper onClick={this.handleUserNameClick}>
             <MaterialIcon icon="account_box"/>
             <UserName>{getUsername(props.auth.data)}</UserName>
           </StyledUserNameWrapper>
           {this.state.menuOpen && props.auth.data.links !== false && this.renderMenu()}
-        </div>
+        </StyledWrapper>
       );
     }
 
