@@ -38,10 +38,10 @@ const Finish = props => {
     finish
   } = props
   const heading = getHeading(headingType);
-  const landingFeeMsg = isHomeBase === false
+  const landingFeeMsg = (isHomeBase === false || __CONF__.homebasePayment)
     ? getLandingFeeText(landings, landingFeeSingle, landingFeeTotal, goArounds, goAroundFeeSingle, goAroundFeeTotal)
     : null;
-  const amount =( landingFeeTotal || 0) + (goAroundFeeTotal || 0)
+  const amount = (landingFeeTotal || 0) + (goAroundFeeTotal || 0)
 
   const showPayment = (isHomeBase === false || __CONF__.homebasePayment) && !isUpdate && !!landingFeeMsg
 
