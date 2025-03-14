@@ -369,6 +369,12 @@ export function* removeMovementFromState(snapshot, channel) {
 
   const movement = data.getByKey(snapshot.key)
 
+  if (!movement) {
+    return {
+      data
+    }
+  }
+
   const newState = {
     data: data.remove(snapshot.key)
   };
