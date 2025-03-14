@@ -25,8 +25,14 @@ const StyledSectionTitle = styled.h1`
 `
 
 function ProfileForm(props) {
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    props.saveProfile()
+  }
+
   return (
-    <StyledForm onSubmit={props.saveProfile}>
+    <StyledForm onSubmit={handleSubmit}>
       <StyledSectionTitle>Standard-Eingabewerte</StyledSectionTitle>
       <div>Die Werte aus den folgenden Feldern werden automatisch vorausgefüllt, wenn Sie einen neuen Abflug oder eine
         neue Ankunft erfassen.</div>
