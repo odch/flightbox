@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { connect } from 'react-redux';
-import { Field, reduxForm, getFormValues } from 'redux-form';
+import {connect} from 'react-redux';
+import {Field, getFormValues, reduxForm} from 'redux-form';
 import validate from '../validate';
-import { renderInputField, renderAircraftDropdown, renderAircraftCategoryDropdown } from '../renderField';
+import {renderAircraftCategoryDropdown, renderAircraftDropdown, renderInputField} from '../renderField';
 import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
-import {getAircraftOrigin, updateLandingFees, updateGoAroundFees} from '../../../util/landingFees'
+import {getAircraftOrigin, updateGoAroundFees, updateLandingFees} from '../../../util/landingFees'
 
 const AircraftPage = (props) => {
   const { handleSubmit, formValues, aircraftSettings } = props;
@@ -29,8 +29,8 @@ const AircraftPage = (props) => {
               const goAroundCount = formValues['goAroundCount'];
               const aircraftOrigin = getAircraftOrigin(aircraft.key, aircraftSettings);
 
-              updateLandingFees(props.change, aircraft.mtow, flightType, aircraftOrigin, landingCount);
-              updateGoAroundFees(props.change, aircraft.mtow, flightType, aircraftOrigin, goAroundCount);
+              updateLandingFees(props.change, aircraft.mtow, flightType, aircraftOrigin, aircraft.category, landingCount);
+              updateGoAroundFees(props.change, aircraft.mtow, flightType, aircraftOrigin, aircraft.category, goAroundCount);
 
               return aircraft.key;
             }
@@ -60,13 +60,14 @@ const AircraftPage = (props) => {
             return null;
           }}
           normalize={mtow => {
+            const aircraftCategory = formValues['aircraftCategory']
             const flightType = formValues['flightType']
             const landingCount = formValues['landingCount']
             const goAroundCount = formValues['goAroundCount']
             const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], props.aircraftSettings);
 
-            updateLandingFees(props.change, mtow, flightType, aircraftOrigin, landingCount)
-            updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, goAroundCount)
+            updateLandingFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount)
+            updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount)
 
             return mtow
           }}
@@ -76,6 +77,18 @@ const AircraftPage = (props) => {
           component={renderAircraftCategoryDropdown}
           label="Kategorie"
           readOnly={props.readOnly}
+          normalize={aircraftCategory => {
+            const mtow = formValues['mtow']
+            const flightType = formValues['flightType']
+            const landingCount = formValues['landingCount']
+            const goAroundCount = formValues['goAroundCount']
+            const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], props.aircraftSettings);
+
+            updateLandingFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount)
+            updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount)
+
+            return mtow
+          }}
         />
       </FieldSet>
       <WizardNavigation previousVisible={false} cancel={props.cancel}/>
