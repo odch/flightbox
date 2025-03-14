@@ -1,10 +1,10 @@
 import {
-  getLandingFee,
-  updateLandingFees,
   AircraftOrigin,
   getAircraftOrigin,
+  getLandingFee,
+  getLandingFeeText,
   updateGoAroundFees,
-  getLandingFeeText
+  updateLandingFees
 } from './landingFees'
 
 /**
@@ -23,52 +23,52 @@ describe('util', () => {
   describe('landingFees', () => {
     describe('getLandingFee ', () => {
       describe.each([
-        [0, 'instruction', AircraftOrigin.CLUB, 11],
-        [750, 'instruction', AircraftOrigin.CLUB,  11],
-        [751, 'instruction', AircraftOrigin.CLUB,  15],
-        [1499, 'instruction', AircraftOrigin.CLUB,  15],
-        [1500, 'instruction', AircraftOrigin.CLUB,  15],
-        [10000, 'instruction', AircraftOrigin.CLUB, 15],
+        [0, 'instruction', AircraftOrigin.CLUB, 'Flugzeug', 11],
+        [750, 'instruction', AircraftOrigin.CLUB, 'Flugzeug', 11],
+        [751, 'instruction', AircraftOrigin.CLUB, 'Flugzeug', 15],
+        [1499, 'instruction', AircraftOrigin.CLUB, 'Flugzeug', 15],
+        [1500, 'instruction', AircraftOrigin.CLUB, 'Flugzeug', 15],
+        [10000, 'instruction', AircraftOrigin.CLUB, 'Flugzeug', 15],
 
-        [0, 'instruction', AircraftOrigin.HOME_BASE, 16],
-        [750, 'instruction', AircraftOrigin.HOME_BASE,  16],
-        [751, 'instruction', AircraftOrigin.HOME_BASE,  20],
-        [1499, 'instruction', AircraftOrigin.HOME_BASE,  20],
-        [1500, 'instruction', AircraftOrigin.HOME_BASE,  50],
-        [10000, 'instruction', AircraftOrigin.HOME_BASE, 50],
+        [0, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 16],
+        [750, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 16],
+        [751, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 20],
+        [1499, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 20],
+        [1500, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 50],
+        [10000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 50],
 
-        [0, 'instruction', AircraftOrigin.OTHER, 16],
-        [750, 'instruction', AircraftOrigin.OTHER,  16],
-        [751, 'instruction', AircraftOrigin.OTHER,  20],
-        [1499, 'instruction', AircraftOrigin.OTHER,  20],
-        [1500, 'instruction', AircraftOrigin.OTHER,  50],
-        [10000, 'instruction', AircraftOrigin.OTHER, 50],
+        [0, 'instruction', AircraftOrigin.OTHER, 'Flugzeug', 16],
+        [750, 'instruction', AircraftOrigin.OTHER, 'Flugzeug', 16],
+        [751, 'instruction', AircraftOrigin.OTHER, 'Flugzeug', 20],
+        [1499, 'instruction', AircraftOrigin.OTHER, 'Flugzeug', 20],
+        [1500, 'instruction', AircraftOrigin.OTHER, 'Flugzeug', 50],
+        [10000, 'instruction', AircraftOrigin.OTHER, 'Flugzeug', 50],
 
-        [0, 'private', AircraftOrigin.CLUB, 16],
-        [750, 'private', AircraftOrigin.CLUB, 16],
-        [751, 'private', AircraftOrigin.CLUB, 20],
-        [1499, 'private', AircraftOrigin.CLUB, 20],
-        [1500, 'private', AircraftOrigin.CLUB, 50],
-        [10000, 'private', AircraftOrigin.CLUB, 50],
+        [0, 'private', AircraftOrigin.CLUB, 'Flugzeug', 16],
+        [750, 'private', AircraftOrigin.CLUB, 'Flugzeug', 16],
+        [751, 'private', AircraftOrigin.CLUB, 'Flugzeug', 20],
+        [1499, 'private', AircraftOrigin.CLUB, 'Flugzeug', 20],
+        [1500, 'private', AircraftOrigin.CLUB, 'Flugzeug', 50],
+        [10000, 'private', AircraftOrigin.CLUB, 'Flugzeug', 50],
 
-        [0, 'private', AircraftOrigin.HOME_BASE, 16],
-        [750, 'private', AircraftOrigin.HOME_BASE, 16],
-        [751, 'private', AircraftOrigin.HOME_BASE, 20],
-        [1499, 'private', AircraftOrigin.HOME_BASE, 20],
-        [1500, 'private', AircraftOrigin.HOME_BASE, 50],
-        [10000, 'private', AircraftOrigin.HOME_BASE, 50],
+        [0, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 16],
+        [750, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 16],
+        [751, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 20],
+        [1499, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 20],
+        [1500, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 50],
+        [10000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 50],
 
-        [0, 'private', AircraftOrigin.OTHER, 16],
-        [750, 'private', AircraftOrigin.OTHER, 16],
-        [751, 'private', AircraftOrigin.OTHER, 20],
-        [1499, 'private', AircraftOrigin.OTHER, 20],
-        [1500, 'private', AircraftOrigin.OTHER, 50],
-        [10000, 'private', AircraftOrigin.OTHER, 50]
+        [0, 'private', AircraftOrigin.OTHER, 'Flugzeug', 16],
+        [750, 'private', AircraftOrigin.OTHER, 'Flugzeug', 16],
+        [751, 'private', AircraftOrigin.OTHER, 'Flugzeug', 20],
+        [1499, 'private', AircraftOrigin.OTHER, 'Flugzeug', 20],
+        [1500, 'private', AircraftOrigin.OTHER, 'Flugzeug', 50],
+        [10000, 'private', AircraftOrigin.OTHER, 'Flugzeug', 50]
       ])(
         'getLandingFee(%i, %s, %s)',
-        (mtow, flightType, aircraftOrigin, expected) => {
+        (mtow, flightType, aircraftOrigin, aircraftCategory, expected) => {
           test(`returns ${expected}`, () => {
-            expect(getLandingFee(mtow, flightType, aircraftOrigin).fee).toBe(expected);
+            expect(getLandingFee(mtow, flightType, aircraftOrigin, aircraftCategory).fee).toBe(expected);
           });
         }
       );
@@ -83,7 +83,7 @@ describe('util', () => {
       test('does nothing if mtow not defined', () => {
         const changeAction = jest.fn();
 
-        updateLandingFees(changeAction, undefined, 'private', AircraftOrigin.HOME_BASE, 2);
+        updateLandingFees(changeAction, undefined, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 2);
 
         expect(changeAction.mock.calls.length).toBe(0);
       })
@@ -91,7 +91,7 @@ describe('util', () => {
       test('does nothing if flight type not defined', () => {
         const changeAction = jest.fn();
 
-        updateLandingFees(changeAction, 1000, undefined, AircraftOrigin.HOME_BASE, 2);
+        updateLandingFees(changeAction, 1000, undefined, AircraftOrigin.HOME_BASE, 'Flugzeug', 2);
 
         expect(changeAction.mock.calls.length).toBe(0);
       })
@@ -99,7 +99,7 @@ describe('util', () => {
       test('does nothing if aircraft origin not defined', () => {
         const changeAction = jest.fn();
 
-        updateLandingFees(changeAction, 1000, 'private', undefined, 2);
+        updateLandingFees(changeAction, 1000, 'private', undefined, 'Flugzeug', 2);
 
         expect(changeAction.mock.calls.length).toBe(0);
       })
@@ -107,7 +107,7 @@ describe('util', () => {
       test('updates single landing fee if single landing fee could be calculated', () => {
         const changeAction = jest.fn();
 
-        updateLandingFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, undefined);
+        updateLandingFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', undefined);
 
         expect(changeAction.mock.calls.length).toBe(2);
 
@@ -118,7 +118,7 @@ describe('util', () => {
       test('also updates total landing fee if landing count set', () => {
         const changeAction = jest.fn();
 
-        updateLandingFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 2);
+        updateLandingFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 2);
 
         expect(changeAction.mock.calls.length).toBe(3);
 
@@ -132,7 +132,7 @@ describe('util', () => {
       test('does nothing if mtow not defined', () => {
         const changeAction = jest.fn();
 
-        updateGoAroundFees(changeAction, undefined, 'private', AircraftOrigin.HOME_BASE, 2);
+        updateGoAroundFees(changeAction, undefined, 'private', AircraftOrigin.HOME_BASE,'Flugzeug',  2);
 
         expect(changeAction.mock.calls.length).toBe(0);
       })
@@ -140,7 +140,7 @@ describe('util', () => {
       test('does nothing if flight type not defined', () => {
         const changeAction = jest.fn();
 
-        updateGoAroundFees(changeAction, 1000, undefined, AircraftOrigin.HOME_BASE, 2);
+        updateGoAroundFees(changeAction, 1000, undefined, AircraftOrigin.HOME_BASE, 'Flugzeug', 2);
 
         expect(changeAction.mock.calls.length).toBe(0);
       })
@@ -148,7 +148,7 @@ describe('util', () => {
       test('does nothing if aircraft origin not defined', () => {
         const changeAction = jest.fn();
 
-        updateGoAroundFees(changeAction, 1000, 'private', undefined, 2);
+        updateGoAroundFees(changeAction, 1000, 'private', undefined, 'Flugzeug', 2);
 
         expect(changeAction.mock.calls.length).toBe(0);
       })
@@ -156,7 +156,7 @@ describe('util', () => {
       test('updates single go around fee if single go around fee could be calculated', () => {
         const changeAction = jest.fn();
 
-        updateGoAroundFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, undefined);
+        updateGoAroundFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', undefined);
 
         expect(changeAction.mock.calls.length).toBe(2);
 
@@ -167,7 +167,7 @@ describe('util', () => {
       test('also updates total go around fee if go around count set', () => {
         const changeAction = jest.fn();
 
-        updateGoAroundFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 2);
+        updateGoAroundFees(changeAction, 1000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 2);
 
         expect(changeAction.mock.calls.length).toBe(3);
 
@@ -205,11 +205,11 @@ describe('util', () => {
         [undefined, undefined, undefined, undefined, undefined, undefined, null],
         [1, 20, 20, undefined, undefined, undefined, 'CHF 20.00'],
         [1, 20, 20, 0, 15, 0, 'CHF 20.00'],
-        [2, 20, 40, undefined, undefined, undefined, 'CHF 40.00 (2 Landung(en) à CHF 20.00)'],
-        [2, 20, 40, 0, 15, 0, 'CHF 40.00 (2 Landung(en) à CHF 20.00)'],
-        [1, 20, 20, 1, 15, 15, 'CHF 35.00 (1 Landung(en) à CHF 20.00 und 1 Durchstart(s) à CHF 15.00)'],
-        [1, 20, 20, 2, 15, 30, 'CHF 50.00 (1 Landung(en) à CHF 20.00 und 2 Durchstart(s) à CHF 15.00)'],
-        [2, 20, 40, 2, 15, 30, 'CHF 70.00 (2 Landung(en) à CHF 20.00 und 2 Durchstart(s) à CHF 15.00)']
+        [2, 20, 40, undefined, undefined, undefined, 'CHF 40.00 (2 Landungen à CHF 20.00)'],
+        [2, 20, 40, 0, 15, 0, 'CHF 40.00 (2 Landungen à CHF 20.00)'],
+        [1, 20, 20, 1, 15, 15, 'CHF 35.00 (1 Landung à CHF 20.00 und 1 Durchstart à CHF 15.00)'],
+        [1, 20, 20, 2, 15, 30, 'CHF 50.00 (1 Landung à CHF 20.00 und 2 Durchstarts à CHF 15.00)'],
+        [2, 20, 40, 2, 15, 30, 'CHF 70.00 (2 Landungen à CHF 20.00 und 2 Durchstarts à CHF 15.00)']
       ])(
         'getLandingFeeText(%i, %i, %i, %i, %i, %i)',
         (landings, landingFeeSingle, landingFeeTotal, goArounds, goAroundFeeSingle, goAroundFeeTotal, expected) => {

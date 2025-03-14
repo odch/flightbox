@@ -48,32 +48,7 @@
         "label": "West"
       }
     ],
-    "landingFees": {
-      "default": {
-        "default": [
-          {
-            "mtowMin": 0,
-            "mtowMax": 800,
-            "fee": 22.8
-          },
-          {
-            "mtowMin": 801,
-            "mtowMax": 1000,
-            "fee": 27.6
-          },
-          {
-            "mtowMin": 1001,
-            "mtowMax": 1300,
-            "fee": 33.6
-          },
-          {
-            "mtowMin": 1301,
-            "mtowMax": 2000,
-            "fee": 38.4
-          }
-        ]
-      }
-    }
+    "landingFeesStrategy": "lszm"
   },
   "environments": {
     "test": {

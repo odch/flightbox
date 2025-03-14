@@ -1,4 +1,6 @@
 import formatMoney from './formatMoney';
+import defaultGetFee from './landingFeeStrategies/default'
+import lszmGetFee from './landingFeeStrategies/lszm'
 
 export const AircraftOrigin = Object.freeze({
   CLUB: 'club',
@@ -6,46 +8,21 @@ export const AircraftOrigin = Object.freeze({
   OTHER: 'other'
 });
 
-const getFee = (feesDefinition, mtow, flightType, aircraftOrigin) => {
-  if (typeof feesDefinition === 'undefined') {
-    return undefined;
-  }
-
-  const feesForType = feesDefinition[flightType] || feesDefinition['default'];
-
-  if (!feesForType) {
-    throw new Error(`No fees defined for flight type '${flightType}'`);
-  }
-
-  const feesForAircraftOrigin = feesForType[aircraftOrigin] || feesForType['default'];
-
-  const mtowRange = feesForAircraftOrigin.find(mtowRange => {
-    if (typeof mtowRange.mtowMin !== 'undefined' && mtowRange.mtowMin > mtow) {
-      return false;
-    }
-    if (typeof mtowRange.mtowMax !== 'undefined' && mtowRange.mtowMax < mtow) {
-      return false;
-    }
-    return true;
-  })
-
-  if (!mtowRange) {
-    throw new Error(`No fees defined for MTOW ${mtow} and flight type '${flightType}'`);
-  }
-
-  return {fee: mtowRange.fee, billingProduct: mtowRange.billingProduct};
+const strategies = {
+  default: defaultGetFee,
+  lszm: lszmGetFee
 }
 
-export const getLandingFee = (mtow, flightType, aircraftOrigin) =>
-  getFee(__LANDING_FEES__, mtow, flightType, aircraftOrigin)
+export const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
+  strategies[__LANDING_FEES_STRATEGY__ || 'default'].getLandingFee(mtow, flightType, aircraftOrigin, aircraftCategory)
 
-export const getGoAroundFee = (mtow, flightType, aircraftOrigin) =>
-  getFee(__GO_AROUND_FEES__, mtow, flightType, aircraftOrigin)
+export const getGoAroundFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
+  strategies[__LANDING_FEES_STRATEGY__ || 'default'].getGoAroundFee(mtow, flightType, aircraftOrigin, aircraftCategory)
 
 const updateFeeFn = (feeGetter, feeSingleField, feeTotalField, feeCodeField) =>
-  (changeAction, mtow, flightType, aircraftOrigin, count) => {
-    if (mtow && flightType && aircraftOrigin) {
-      const feeSingle = feeGetter(mtow, flightType, aircraftOrigin);
+  (changeAction, mtow, flightType, aircraftOrigin, aircraftCategory, count) => {
+    if (mtow && flightType && aircraftOrigin && aircraftCategory) {
+      const feeSingle = feeGetter(mtow, flightType, aircraftOrigin, aircraftCategory);
 
       if (feeSingle) {
         changeAction(feeSingleField, feeSingle.fee);
@@ -59,15 +36,15 @@ const updateFeeFn = (feeGetter, feeSingleField, feeTotalField, feeCodeField) =>
     }
   }
 
-export const updateLandingFees = (changeAction, mtow, flightType, aircraftOrigin, landingCount) => {
+export const updateLandingFees = (changeAction, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount) => {
   updateFeeFn(getLandingFee, 'landingFeeSingle', 'landingFeeTotal', 'landingFeeCode')(
-    changeAction, mtow, flightType, aircraftOrigin, landingCount
+    changeAction, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount
   );
 }
 
-export const updateGoAroundFees = (changeAction, mtow, flightType, aircraftOrigin, goAroundCount) => {
+export const updateGoAroundFees = (changeAction, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount) => {
   updateFeeFn(getGoAroundFee, 'goAroundFeeSingle', 'goAroundFeeTotal', 'goAroundFeeCode')(
-    changeAction, mtow, flightType, aircraftOrigin, goAroundCount
+    changeAction, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount
   );
 }
 
