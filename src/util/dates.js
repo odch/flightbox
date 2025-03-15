@@ -131,6 +131,10 @@ const dates = {
     const time = parseWithLocale(timestamp, locale).format('LT');
     return date + ' ' + time
   },
+
+  monthNames: [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+  ]
 };
 
 export default dates;

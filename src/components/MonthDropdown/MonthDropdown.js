@@ -2,44 +2,12 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Dropdown from '../Dropdown';
+import dates from '../../util/dates'
 
-const months = [{
-  key: '1',
-  label: 'Januar'
-}, {
-  key: '2',
-  label: 'Februar'
-}, {
-  key: '3',
-  label: 'März'
-}, {
-  key: '4',
-  label: 'April'
-}, {
-  key: '5',
-  label: 'Mai'
-}, {
-  key: '6',
-  label: 'Juni'
-}, {
-  key: '7',
-  label: 'Juli'
-}, {
-  key: '8',
-  label: 'August'
-}, {
-  key: '9',
-  label: 'September'
-}, {
-  key: '10',
-  label: 'Oktober'
-}, {
-  key: '11',
-  label: 'November'
-}, {
-  key: '12',
-  label: 'Dezember'
-}];
+const months = dates.monthNames.map((monthName, index) => ({
+  key: (index + 1).toString(),
+  label: monthName
+}))
 
 const Option = styled.div`
   padding: 0.2em;
