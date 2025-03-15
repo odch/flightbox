@@ -1,20 +1,44 @@
-import { takeEvery } from 'redux-saga';
-import { fork, call, put, select } from 'redux-saga/effects';
+import {takeEvery} from 'redux-saga';
+import {call, fork, put, select} from 'redux-saga/effects';
 import * as actions from './actions';
-import { airstat, landings, yearlySummary } from '../../util/report';
+import {airstat, invoices, landings, yearlySummary} from '../../util/report';
 
 export const selectReport = report => state => state.reports[report];
 
-function generate(report, year, month, options) {
+function* generate(report, year, month, options) {
   switch (report) {
     case 'airstat':
-      return airstat(year, month, options);
+      const airstatResult = yield call(airstat, year, month, options)
+      return csv(airstatResult);
     case 'landings':
-      return landings(year, month, options);
+      const landingsResult = yield call(landings, year, month, options)
+      return csv(landingsResult);
     case 'yearlySummary':
-      return yearlySummary(year, options);
+      const yearlySummaryResult = yield call(yearlySummary, year, options)
+      return csv(yearlySummaryResult);
+    case 'invoices':
+      const invoicesResult = yield call(invoices, year, month, options)
+      return pdf(
+        `invoice_recipients_${year}_${month}.pdf`,
+        invoicesResult
+      )
     default:
       throw new Error('Unknown report ' + report);
+  }
+}
+
+function csv(result) {
+    return {
+      type: 'csv',
+      result
+    }
+}
+
+function pdf(filename, result) {
+  return {
+    type: 'pdf',
+    filename,
+    result
   }
 }
 
@@ -36,7 +60,13 @@ export function* generateReport(action) {
 
   yield put(actions.setReportGenerationInProgress(report, false));
 
-  yield call(startDownload, download);
+  if (download.type === 'csv') {
+    yield call(startDownload, download.result);
+  } else if (download.type === 'pdf') {
+    download.result.download(download.filename)
+  } else {
+    throw new Error('Unsupported type ' + download.type)
+  }
 }
 
 export default function* sagas() {
