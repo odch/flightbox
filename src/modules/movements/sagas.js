@@ -284,7 +284,13 @@ export function* addMovements(departuresSnapshot, arrivalsSnapshot, existingMove
   departuresSnapshot.forEach(transformToLocal(movements, 'departure'));
   arrivalsSnapshot.forEach(transformToLocal(movements, 'arrival'));
 
-  const newData = existingMovements.insertAll(movements, compareDescending);
+  const auth = yield select(authSelector);
+
+  const filteredMovements = auth.admin || !auth.email
+    ? movements
+    : movements.filter(movement => movement.createdBy === auth.email)
+
+  const newData = existingMovements.insertAll(filteredMovements, compareDescending);
 
   yield call(monitorAssociations, newData, existingMovements, channel)
 
@@ -347,6 +353,11 @@ export function* addMovementToState(snapshot, movementType, currentState, channe
 
   if (!data.getByKey(snapshot.key)) {
     const movement = transformSnapshotToLocal(snapshot, movementType);
+
+    const auth = yield select(authSelector);
+    if (!auth.admin && auth.email && movement.createdBy !== auth.email) {
+      return;
+    }
 
     const newData = data.insert(movement, compareDescending);
 
