@@ -70,6 +70,12 @@
         "runway": {
           ".validate": "{runway}"
         },
+        "createdBy": {
+          ".validate": "newData.isString()"
+        },
+        "createdBy_orderKey": {
+          ".validate": "newData.isString()"
+        },
         "$other": {
           ".validate": false
         }
@@ -160,6 +166,21 @@
         "runway": {
           ".validate": "{runway}"
         },
+        "createdBy": {
+          ".validate": "newData.isString()"
+        },
+        "createdBy_orderKey": {
+          ".validate": "newData.isString()"
+        },
+        "paymentMethod": {
+          ".validate": "newData.hasChildren(['method'])",
+          "method": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "invoiceRecipientName": {
+            ".validate": "newData.isString()"
+          }
+        },
         "$other": {
           ".validate": false
         }
@@ -195,6 +216,10 @@
         ".read": "auth !== null",
         ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
       },
+      "guestAccessToken": {
+        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".write":  false
+      },
       "aircrafts": {
         "homeBase": {
           ".read": "auth !== null",
@@ -211,6 +236,10 @@
         "$other": {
           ".validate": false
         }
+      },
+      "invoiceRecipients": {
+        ".read": "auth !== null",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).exists()"
       },
       "$other": {
         ".validate": false
@@ -291,7 +320,7 @@
       "$card_payment_id": {
         ".read": "auth !== null",
         ".write": "auth !== null && newData.exists()",
-        ".validate": "newData.hasChildren(['amount', 'currency', 'arrivalReference', 'timestamp', 'status'])",
+        ".validate": "newData.hasChildren(['amount', 'currency', 'arrivalReference', 'refNr', 'timestamp', 'status'])",
         "currency": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
@@ -302,6 +331,9 @@
           ".validate": "newData.isNumber() && newData.val() > 0"
         },
         "arrivalReference": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "refNr": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "status": {
@@ -323,7 +355,7 @@
           ".validate": "newData.isNumber() && newData.val() > 0"
         },
         "landingFeeCode": {
-          ".validate": "newData.isString() && newData.val().length > 0"
+          ".validate": "newData.isString()"
         },
         "landingFeeTotal": {
           ".validate": "newData.isNumber() && newData.val() > 0"
@@ -338,6 +370,42 @@
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "goAroundFeeTotal": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "profiles": {
+      "$profile_id": {
+        ".read": "auth !== null && $profile_id === auth.uid",
+        ".write": "auth !== null && $profile_id === auth.uid",
+        "memberNr": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d+$/)"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().matches(/^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$/)"
+        },
+        "firstname": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "lastname": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "phone": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "immatriculation": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "aircraftType": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "aircraftCategory": {
+          ".validate": "{aircraftCategory}"
+        },
+        "mtow": {
           ".validate": "newData.isNumber() && newData.val() > 0"
         },
         "$other": {

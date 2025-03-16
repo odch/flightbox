@@ -13,14 +13,19 @@ if (!config.auth || !config.auth.ips) {
   )
 } else {
   ips = config.auth.ips.split(',').map(ip => ip.trim());
+  console.info(
+    "The following IP addresses are enabled (config property auth.ips): " + ips
+  )
 }
 
 module.exports = req =>
   new Promise(resolve => {
     const requestIp = requestHelper.getIp(req);
     if (requestIp && ips.includes(requestIp)) {
+      console.info(`Request IP ${requestIp} present in allowed IPs ${ips}. Returning 'ipauth' uid.`)
       resolve('ipauth');
     } else {
+      console.info(`Request IP ${requestIp} not present in allowed IPs ${ips}`)
       resolve(null);
     }
   });

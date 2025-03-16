@@ -1,6 +1,7 @@
 import {connect} from 'react-redux';
 import PaymentMethod from '../components/wizards/ArrivalWizard/Finish/PaymentMethod'
-import {createCardPayment, setMethod, setStep, cancelCardPayment} from '../modules/ui/arrivalPayment'
+import {cancelCardPayment, createCardPayment, setMethod, setStep} from '../modules/ui/arrivalPayment'
+import {saveMovementPaymentMethod} from '../modules/movements'
 
 const mapStateToProps = state => ({
   method: state.ui.arrivalPayment.method,
@@ -12,7 +13,8 @@ const mapActionCreators = {
   setMethod,
   setStep,
   createCardPayment,
-  cancelCardPayment
+  cancelCardPayment,
+  saveMovementPaymentMethod
 };
 
 export default connect(mapStateToProps, mapActionCreators)(PaymentMethod)

@@ -1,20 +1,40 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { loadAircraftSettings } from '../modules/settings/aircrafts';
-import { createMovementFromMovement } from '../modules/ui/movements';
-import Finish, { FinishLoading } from '../components/wizards/ArrivalWizard/Finish';
+import React, {Component} from 'react';
+import {connect} from 'react-redux';
+import {loadAircraftSettings} from '../modules/settings/aircrafts';
+import {loadInvoiceRecipientSettings} from '../modules/settings/invoiceRecipients';
+import {createMovementFromMovement} from '../modules/ui/movements';
+import {saveMovement} from '../modules/movements';
+import Finish, {FinishLoading} from '../components/wizards/ArrivalWizard/Finish';
+import {HeadingType} from '../components/wizards/MovementWizard'
+import objectToArray from '../util/objectToArray'
+
+const findInvoiceRecipient = (invoiceRecipients, authEmail) => {
+  if (!invoiceRecipients || !invoiceRecipients.loaded || invoiceRecipients.recipients.length === 0) {
+    return null
+  }
+
+  for (const invoiceRecipient of invoiceRecipients.recipients) {
+    if (invoiceRecipient.emails.includes(authEmail)) {
+      return invoiceRecipient
+    }
+  }
+
+  return null
+}
 
 class ArrivalFinishContainer extends Component {
 
   componentWillMount() {
     this.props.loadAircraftSettings();
+    this.props.loadInvoiceRecipientSettings();
   }
 
   render() {
     const {
       aircraftSettings,
-      email,
+      invoiceRecipientSettings,
+      email, // pilot email (also see `authEmail`)
       immatriculation,
       landings,
       landingFeeSingle,
@@ -27,7 +47,10 @@ class ArrivalFinishContainer extends Component {
       createMovementFromMovement,
       finish,
       isUpdate,
-      itemKey
+      headingType,
+      itemKey,
+      localUser,
+      authEmail
     } = this.props
 
     if (!aircraftSettings.club || !aircraftSettings.homeBase) {
@@ -35,6 +58,18 @@ class ArrivalFinishContainer extends Component {
         <FinishLoading/>
       );
     }
+
+    if (!invoiceRecipientSettings.loaded) {
+      return (
+        <FinishLoading/>
+      );
+    }
+
+    const invoiceRecipient = findInvoiceRecipient(invoiceRecipientSettings, authEmail)
+
+    const enabledPaymentMethods = objectToArray(__CONF__.paymentMethods)
+      .filter(method => method === 'card' ? localUser : true)
+      .filter(method => method === 'invoice' ? !!invoiceRecipient : true);
 
     const isHomeBase = aircraftSettings.club[immatriculation] === true
         || aircraftSettings.homeBase[immatriculation] === true;
@@ -44,6 +79,7 @@ class ArrivalFinishContainer extends Component {
         createMovementFromMovement={createMovementFromMovement}
         finish={finish}
         isUpdate={isUpdate}
+        headingType={headingType}
         email={email}
         immatriculation={immatriculation}
         isHomeBase={isHomeBase}
@@ -56,6 +92,9 @@ class ArrivalFinishContainer extends Component {
         goAroundFeeSingle={goAroundFeeSingle}
         goAroundFeeCode={goAroundFeeCode}
         goAroundFeeTotal={goAroundFeeTotal}
+        localUser={localUser}
+        enabledPaymentMethods={enabledPaymentMethods}
+        invoiceRecipientName={invoiceRecipient ? invoiceRecipient.name : undefined}
       />
     );
   }
@@ -66,11 +105,20 @@ ArrivalFinishContainer.propTypes = {
     club: PropTypes.object,
     homeBase: PropTypes.object,
   }).isRequired,
+  invoiceRecipientSettings: PropTypes.shape({
+    loaded: PropTypes.bool.isRequired,
+    recipients: PropTypes.arrayOf(PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      emails: PropTypes.arrayOf(PropTypes.string)
+    })).isRequired
+  }),
   createMovementFromMovement: PropTypes.func.isRequired,
   loadAircraftSettings: PropTypes.func.isRequired,
+  loadInvoiceRecipientSettings: PropTypes.func.isRequired,
 
   finish: PropTypes.func.isRequired,
-  isUpdate: PropTypes.bool.isRequired,
+  isUpdate: PropTypes.bool,
+  headingType: PropTypes.oneOf(Object.values(HeadingType)).isRequired,
   itemKey: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
   immatriculation: PropTypes.string.isRequired,
@@ -87,25 +135,31 @@ ArrivalFinishContainer.propTypes = {
 const mapStateToProps = (state, ownProps) => {
   return Object.assign({}, ownProps, {
     aircraftSettings: state.settings.aircrafts,
+    invoiceRecipientSettings: state.settings.invoiceRecipients,
     finish: ownProps.finish,
     isUpdate: ownProps.isUpdate,
-    itemKey: state.ui.wizard.itemKey,
-    email: state.ui.wizard.values.email,
-    immatriculation: state.ui.wizard.values.immatriculation,
-    landings: state.ui.wizard.values.landingCount,
-    landingFeeSingle: state.ui.wizard.values.landingFeeSingle,
-    landingFeeCode: state.ui.wizard.values.landingFeeCode,
-    landingFeeTotal: state.ui.wizard.values.landingFeeTotal,
-    goArounds: state.ui.wizard.values.goAroundCount,
-    goAroundFeeSingle: state.ui.wizard.values.goAroundFeeSingle,
-    goAroundFeeCode: state.ui.wizard.values.goAroundFeeCode,
-    goAroundFeeTotal: state.ui.wizard.values.goAroundFeeTotal
+    headingType: ownProps.headingType || HeadingType.NONE,
+    itemKey: state.form.wizard.values.key || state.ui.wizard.itemKey,
+    email: state.form.wizard.values.email,
+    immatriculation: state.form.wizard.values.immatriculation,
+    landings: state.form.wizard.values.landingCount,
+    landingFeeSingle: state.form.wizard.values.landingFeeSingle,
+    landingFeeCode: state.form.wizard.values.landingFeeCode,
+    landingFeeTotal: state.form.wizard.values.landingFeeTotal,
+    goArounds: state.form.wizard.values.goAroundCount,
+    goAroundFeeSingle: state.form.wizard.values.goAroundFeeSingle,
+    goAroundFeeCode: state.form.wizard.values.goAroundFeeCode,
+    goAroundFeeTotal: state.form.wizard.values.goAroundFeeTotal,
+    localUser: state.auth.data.local,
+    authEmail: state.auth.data.email,
   });
 };
 
 const mapActionCreators = {
   createMovementFromMovement,
   loadAircraftSettings,
+  loadInvoiceRecipientSettings,
+  saveMovement
 };
 
 export default connect(mapStateToProps, mapActionCreators)(ArrivalFinishContainer);

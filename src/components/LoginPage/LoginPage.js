@@ -1,35 +1,60 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import Header from './Header';
-import Main from './Main';
+import EmailLoginForm from '../../containers/EmailLoginFormContainer'
+import UsernamePasswordLoginForm from '../../containers/UsernamePasswordLoginFormContainer'
+import styled from 'styled-components'
+import {withRouter} from 'react-router-dom'
+import getAuthQueryToken from '../../util/getAuthQueryToken'
 
-const LoginPage = props => (
-  <div className="LoginPage">
-    <Header/>
-    <Main
-      authenticate={props.authenticate}
-      updateUsername={props.updateUsername}
-      updatePassword={props.updatePassword}
-      onCancel={props.onCancel}
-      showCancel={props.showCancel}
-      username={props.username}
-      password={props.password}
-      submitting={props.submitting}
-      failure={props.failure}
-    />
-  </div>
-);
+const StyledWrapper = styled.div`
+  display: flex;
+  min-height: 100vh;
 
-LoginPage.propTypes = {
-  authenticate: PropTypes.func.isRequired,
-  updateUsername: PropTypes.func.isRequired,
-  updatePassword: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  showCancel: PropTypes.bool.isRequired,
-  username: PropTypes.string.isRequired,
-  password: PropTypes.string.isRequired,
-  submitting: PropTypes.bool.isRequired,
-  failure: PropTypes.bool.isRequired
-};
+  @media screen and (max-width: 520px) {
+    & {
+      flex-direction: column;
+    }
+  }
+`
 
-export default LoginPage;
+const LoginWrapper = styled.div`
+  width: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @media screen and (max-width: 520px) {
+    & {
+      width: 100%;
+      flex: 1;
+    }
+  }
+`;
+
+const LoginInnerWrapper = styled.div`
+  width: 60%;
+  max-width: 800px;
+  padding: 1em;
+
+  @media screen and (max-width: 520px) {
+    & {
+      width: 100%;
+    }
+  }
+`
+
+const LoginPage = ({location}) => {
+  const queryToken = getAuthQueryToken(location)
+  return (
+    <StyledWrapper>
+      <Header/>
+      <LoginWrapper>
+        <LoginInnerWrapper>
+      {__CONF__.loginForm === 'email' ? <EmailLoginForm queryToken={queryToken}/> : <UsernamePasswordLoginForm/>}
+        </LoginInnerWrapper>
+      </LoginWrapper>
+    </StyledWrapper>
+  );
+}
+
+export default withRouter(LoginPage);

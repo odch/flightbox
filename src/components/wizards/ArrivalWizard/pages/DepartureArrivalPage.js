@@ -3,10 +3,10 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {Field, getFormValues, reduxForm} from 'redux-form';
 import validate from '../../validate';
-import { renderAerodromeDropdown, renderDateField, renderTimeField, renderIncrementationField } from '../../renderField';
+import {renderAerodromeDropdown, renderDateField, renderIncrementationField, renderTimeField} from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
-import {getAircraftOrigin, updateLandingFees, updateGoAroundFees} from '../../../../util/landingFees'
+import {getAircraftOrigin, updateGoAroundFees, updateLandingFees} from '../../../../util/landingFees'
 
 const toNumber = value => {
   if (typeof value === 'number') {
@@ -20,10 +20,11 @@ const toNumber = value => {
 
 const updateFees = (updateFn, count, changeAction, formValues, aircraftSettings) => {
   const mtow = formValues['mtow'];
+  const aircraftCategory = formValues['aircraftCategory'];
   const flightType = formValues['flightType'];
   const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], aircraftSettings);
 
-  updateFn(changeAction, mtow, flightType, aircraftOrigin, count);
+  updateFn(changeAction, mtow, flightType, aircraftOrigin, aircraftCategory, count);
 
   return count;
 }

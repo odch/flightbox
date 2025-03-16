@@ -5,21 +5,21 @@ import {getLandingFeeText} from '../../../../util/landingFees';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
 import Message, {ReferenceNumberMessage} from './Message';
-import CashPaymentMessage from './CashPaymentMessage'
 import FinishActions from './FinishActions'
 import PaymentMethod from '../../../../containers/PaymentMethodContainer'
-import objectToArray from '../../../../util/objectToArray'
+import {HeadingType} from '../../MovementWizard'
 
-const getHeading = isUpdate =>
-  isUpdate === true
+const getHeading = (headingType) =>
+  headingType === HeadingType.UPDATED
     ? 'Die Ankunft wurde erfolgreich aktualisiert!'
-    : 'Ihre Ankunft wurde erfolgreich erfasst!';
-
-const enabledPaymentMethods = objectToArray(__CONF__.paymentMethods);
+    : headingType === HeadingType.CREATED
+      ? 'Ihre Ankunft wurde erfolgreich erfasst!'
+      : undefined;
 
 const Finish = props => {
   const {
     isUpdate,
+    headingType,
     isHomeBase,
     itemKey,
     email,
@@ -32,27 +32,26 @@ const Finish = props => {
     goAroundFeeSingle,
     goAroundFeeCode,
     goAroundFeeTotal,
+    enabledPaymentMethods,
+    invoiceRecipientName,
     createMovementFromMovement,
     finish
   } = props
-
-  const heading = getHeading(isUpdate);
-  const landingFeeMsg = isHomeBase === false
+  const heading = getHeading(headingType);
+  const landingFeeMsg = (isHomeBase === false || __CONF__.homebasePayment)
     ? getLandingFeeText(landings, landingFeeSingle, landingFeeTotal, goArounds, goAroundFeeSingle, goAroundFeeTotal)
     : null;
-  const amount =( landingFeeTotal || 0) + (goAroundFeeTotal || 0)
+  const amount = (landingFeeTotal || 0) + (goAroundFeeTotal || 0)
+
+  const showPayment = (isHomeBase === false || __CONF__.homebasePayment) && !isUpdate && !!landingFeeMsg
 
   return (
     <Wrapper>
-      <Heading>{heading}</Heading>
-      {landingFeeMsg && (
+      {heading && <Heading>{heading}</Heading>}
+      {showPayment ? (
         <>
           <ReferenceNumberMessage>Referenznummer: {getFromItemKey(itemKey)}</ReferenceNumberMessage>
           <Message>Landetaxe: {landingFeeMsg}</Message>
-        </>
-      )}
-      {isHomeBase === false ? (
-        enabledPaymentMethods.length > 1 ? (
           <PaymentMethod
             itemKey={itemKey}
             email={email}
@@ -69,13 +68,9 @@ const Finish = props => {
             goAroundFeeCode={goAroundFeeCode}
             goAroundFeeTotal={goAroundFeeTotal}
             enabledPaymentMethods={enabledPaymentMethods}
+            invoiceRecipientName={invoiceRecipientName}
           />
-        ) : (
-          <>
-            <CashPaymentMessage itemKey={itemKey}/>
-            <FinishActions itemKey={itemKey} createMovementFromMovement={createMovementFromMovement} finish={finish}/>
-          </>
-        )
+        </>
       ) : (
         <FinishActions itemKey={itemKey} createMovementFromMovement={createMovementFromMovement} finish={finish}/>
       )}
@@ -86,7 +81,8 @@ const Finish = props => {
 Finish.propTypes = {
   finish: PropTypes.func.isRequired,
   createMovementFromMovement: PropTypes.func.isRequired,
-  isUpdate: PropTypes.bool.isRequired,
+  isUpdate: PropTypes.bool,
+  headingType: PropTypes.oneOf(Object.values(HeadingType)).isRequired,
   isHomeBase: PropTypes.bool.isRequired,
   itemKey: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
@@ -99,7 +95,8 @@ Finish.propTypes = {
   goAroundFeeSingle: PropTypes.number,
   goAroundFeeCode: PropTypes.string,
   goAroundFeeTotal: PropTypes.number,
-  cardPaymentsEnabled: PropTypes.bool
+  localUser: PropTypes.bool,
+  enabledPaymentMethods: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default Finish;

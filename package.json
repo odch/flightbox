@@ -35,8 +35,8 @@
     "firebase": "^5.0.3",
     "gulp": "~3.9.0",
     "gulp-env": "~0.4.0",
-    "gulp-replace": "^1.0.0",
     "gulp-rename": "^1.0.0",
+    "gulp-replace": "^1.0.0",
     "gulp-through": "^0.4.0",
     "history": "^4.7.2",
     "ignore-styles": "^5.0.1",
@@ -48,7 +48,9 @@
     "moment-timezone": "^0.5.17",
     "natives": "^1.1.6",
     "node-sass": "^4.8.3",
+    "pdfmake": "^0.2.18",
     "prop-types": "^15.6.1",
+    "qrcode-svg": "^1.1.0",
     "ramda": "^0.25.0",
     "react": "^16.4.0",
     "react-day-picker": "^7.1.9",
@@ -90,6 +92,7 @@
     ],
     "globals": {
       "__DISABLE_IP_AUTHENTICATION__": false,
+      "__LANDING_FEES_STRATEGY__": "default",
       "__LANDING_FEES__": {
         "instruction": {
           "club": [

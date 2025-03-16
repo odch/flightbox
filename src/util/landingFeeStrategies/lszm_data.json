@@ -1,0 +1,30 @@
+{
+  "factors": {
+    "non_homebase_plane_helicopter": 1.2,
+    "homebase_plane": 1.0,
+    "homebase_plane_instruction": 0.8,
+    "homebase_helicopter": 0.6
+  },
+  "fees": {
+    "base": [
+      { "max_weight": 800, "fee": 19.0 },
+      { "max_weight": 1000, "fee": 23.0 },
+      { "max_weight": 1300, "fee": 28.0 },
+      { "max_weight": 2000, "fee": 32.0 },
+      { "max_weight": 3000, "fee": 48.0 },
+      { "max_weight": 4000, "fee": 67.0 },
+      { "max_weight": 5000, "fee": 88.0 },
+      { "max_weight": 6000, "fee": 111.0 },
+      { "max_weight": 7000, "fee": 136.0 },
+      { "max_weight": 8000, "fee": 162.0 },
+      { "max_weight": 9000, "fee": 190.0 },
+      { "max_weight": 10000, "fee": 220.0 },
+      { "max_weight": 12500, "fee": 300.0 },
+      { "max_weight": 15000, "fee": 450.0 },
+      { "max_weight": 20000, "fee": 600.0 },
+      { "max_weight": 30000, "fee": 900.0 },
+      { "max_weight": 40000, "fee": 1200.0 },
+      { "max_weight": 50000, "fee": 1800.0 }
+    ]
+  }
+}

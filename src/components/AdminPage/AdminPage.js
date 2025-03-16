@@ -1,11 +1,12 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { withRouter } from "react-router-dom";
+import React, {Component} from 'react';
+import {withRouter} from "react-router-dom";
 import LabeledBox from '../LabeledBox';
 import JumpNavigation from '../JumpNavigation';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import AirstatReportForm from '../../containers/AirstatReportFormContainer';
 import LandingsReportForm from '../../containers/LandingsReportFormContainer';
+import InvoicesReportForm from '../../containers/InvoicesReportFormContainer';
 import LockMovementsForm from '../../containers/LockMovementsFormContainer';
 import AerodromeStatusForm from '../../containers/AerodromeStatusFormContainer';
 import YearlySummaryReportForm from '../../containers/YearlySummaryReportFormContainer';
@@ -16,6 +17,8 @@ import AircraftImportForm from '../../containers/AircraftImportFormContainer';
 import AircraftsItemList from '../../containers/AircraftsItemListContainer';
 import Content from './Content';
 import DescriptionText from './DescriptionText';
+import GuestAccessBox from '../../containers/GuestAccessBoxContainer'
+import objectToArray from '../../util/objectToArray'
 
 class AdminPage extends Component {
 
@@ -37,6 +40,10 @@ class AdminPage extends Component {
             <LabeledBox label="Landeliste herunterladen (CSV)">
               <LandingsReportForm/>
             </LabeledBox>
+            {objectToArray(__CONF__.paymentMethods).includes('invoice') && (
+              <LabeledBox label="Rechnungsberichte herunterladen (PDF)">
+                <InvoicesReportForm/>
+              </LabeledBox>)}
             <LabeledBox label="Jahreszusammenfassung herunterladen (CSV)">
               <YearlySummaryReportForm/>
             </LabeledBox>
@@ -71,6 +78,7 @@ class AdminPage extends Component {
               </DescriptionText>
               <AircraftsItemList type="homeBase"/>
             </LabeledBox>
+            <GuestAccessBox/>
           </Content>}
       </VerticalHeaderLayout>
     );

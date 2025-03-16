@@ -47,12 +47,14 @@ const AircraftDropdown = props => (
     onChange={callWithValue.bind(null, props.onChange, props.aircrafts.data.array)}
     onBeforeInputChange={normalizeImmatriculation}
     value={props.value}
+    showOptionsOnFocus={false}
     noOptionsText="Kein Flugzeug gefunden"
     moreOptionsText="Mehr Flugzeuge vorhanden! Tippen Sie einen Teil der Immatrikulation, um die Liste einzuschränken."
     onFocus={props.onFocus}
     onBlur={callWithValue.bind(null, props.onBlur, props.aircrafts.data.array)}
     readOnly={props.readOnly}
     dataCy={props.dataCy}
+    clearable={props.clearable}
   />
 );
 
@@ -63,6 +65,7 @@ AircraftDropdown.propTypes = {
   onFocus: PropTypes.func.isRequired,
   onBlur: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
+  clearable: PropTypes.bool,
   dataCy: PropTypes.string
 };
 

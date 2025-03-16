@@ -1,4 +1,4 @@
-import {getPagination} from './pagination';
+import {getPagination, toOrderKey} from './pagination';
 import {takeEvery, takeLatest} from 'redux-saga'
 import {call, fork, put, select} from 'redux-saga/effects'
 import {destroy, getFormValues, initialize} from 'redux-form'
@@ -10,6 +10,7 @@ import {compareDescending, firebaseToLocal, localToFirebase, transferValues} fro
 import {error} from '../../util/log';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
+import {loadRemote} from '../profile'
 
 export const stateSelector = state => state.movements;
 
@@ -17,8 +18,26 @@ export const movementSelector = (state, key) => state.movements.data.getByKey(ke
 
 export const wizardFormValuesSelector = getFormValues('wizard');
 
-export function* getDepartureDefaultValues() {
+export const authSelector = state => state.auth.data
+
+export function* getProfileDefaultValues() {
+  const auth = yield select(authSelector)
+
+  if (!auth || auth.guest === true || auth.uid === 'ipauth') {
+    return {}
+  }
+
+  const snapshot = yield call(loadRemote, auth.uid);
+
   return {
+    ...snapshot.val()
+  }
+}
+
+export function* getDepartureDefaultValues() {
+  const profileDefaultValues = yield call(getProfileDefaultValues)
+  return {
+    ...profileDefaultValues,
     type: 'departure',
     date: dates.localDate(),
     time: dates.localTimeRounded(15, 'up'),
@@ -26,7 +45,9 @@ export function* getDepartureDefaultValues() {
 }
 
 export function* getArrivalDefaultValues() {
+  const profileDefaultValues = yield call(getProfileDefaultValues)
   return {
+    ...profileDefaultValues,
     type: 'arrival',
     date: dates.localDate(),
     time: dates.localTimeRounded(15, 'down'),
@@ -173,36 +194,88 @@ export function* loadDeparturesAndArrivalsFiltered(movements) {
   return {departures, arrivals};
 }
 
+export function getReloadParams(movements) {
+  const oldestDeparture = getOldest(movements.departures.snapshot);
+  const oldestArrival = getOldest(movements.arrivals.snapshot);
+
+  if (oldestDeparture && oldestArrival) {
+    if (oldestDeparture.negativeTimestamp > oldestArrival.negativeTimestamp) {
+      // departure is older -> reload arrivals with new pagination
+      return {
+        reloadType: 'arrivals',
+        reloadEnd: oldestDeparture.negativeTimestamp
+      }
+    } else {
+      // arrival is older -> reload departures with new pagination
+      return {
+        reloadType: 'departures',
+        reloadEnd: oldestArrival.negativeTimestamp
+      }
+    }
+  }
+
+  if (oldestDeparture) {
+    // no arrivals -> reload arrivals with new pagination
+    return {
+      reloadType: 'arrivals',
+      reloadEnd: oldestDeparture.negativeTimestamp
+    }
+  }
+
+  if (oldestArrival) {
+    // no departures -> reload departures with new pagination
+    return {
+      reloadType: 'departures',
+      reloadEnd: oldestArrival.negativeTimestamp
+    }
+  }
+
+  return null
+}
+
 export function* loadLatestDeparturesAndArrivalsPaged(movements, clear) {
+  const auth = yield select(authSelector);
+
   const pagination = getPagination(clear ? [] : movements.data.array);
 
   const departures = yield call(
     remote.loadLimited,
     '/departures',
     pagination.start,
-    pagination.limit
+    pagination.limit,
+    undefined,
+    !auth.admin ? auth.email : undefined
   );
-
-  const oldestDeparture = getOldest(departures.snapshot);
-
-  let arrivalsLimit = null;
-  let arrivalsEnd = null;
-
-  if (oldestDeparture) {
-    arrivalsEnd = oldestDeparture.negativeTimestamp;
-  } else {
-    arrivalsLimit = pagination.limit;
-  }
 
   const arrivals = yield call(
     remote.loadLimited,
     '/arrivals',
     pagination.start,
-    arrivalsLimit,
-    arrivalsEnd
+    pagination.limit,
+    undefined,
+    !auth.admin ? auth.email : undefined
   );
 
-  return {departures, arrivals};
+  const loadedMovements = {
+    departures,
+    arrivals
+  }
+
+  // make sure we load both collections until oldest in pagination
+  const reloadParams = getReloadParams(loadedMovements)
+
+  if (reloadParams) {
+    loadedMovements[reloadParams.reloadType] = yield call(
+      remote.loadLimited,
+      `/${reloadParams.reloadType}`,
+      pagination.start,
+      undefined,
+      reloadParams.reloadEnd,
+      !auth.admin ? auth.email : undefined
+    )
+  }
+
+  return loadedMovements
 }
 
 export function* addMovements(departuresSnapshot, arrivalsSnapshot, existingMovements, channel) {
@@ -211,7 +284,13 @@ export function* addMovements(departuresSnapshot, arrivalsSnapshot, existingMove
   departuresSnapshot.forEach(transformToLocal(movements, 'departure'));
   arrivalsSnapshot.forEach(transformToLocal(movements, 'arrival'));
 
-  const newData = existingMovements.insertAll(movements, compareDescending);
+  const auth = yield select(authSelector);
+
+  const filteredMovements = auth.admin || !auth.email
+    ? movements
+    : movements.filter(movement => movement.createdBy === auth.email)
+
+  const newData = existingMovements.insertAll(filteredMovements, compareDescending);
 
   yield call(monitorAssociations, newData, existingMovements, channel)
 
@@ -275,6 +354,11 @@ export function* addMovementToState(snapshot, movementType, currentState, channe
   if (!data.getByKey(snapshot.key)) {
     const movement = transformSnapshotToLocal(snapshot, movementType);
 
+    const auth = yield select(authSelector);
+    if (!auth.admin && auth.email && movement.createdBy !== auth.email) {
+      return;
+    }
+
     const newData = data.insert(movement, compareDescending);
 
     // if is last element, it was added to the range only because a movement
@@ -295,6 +379,12 @@ export function* removeMovementFromState(snapshot, channel) {
   const {data} = yield select(stateSelector);
 
   const movement = data.getByKey(snapshot.key)
+
+  if (!movement) {
+    return {
+      data
+    }
+  }
 
   const newState = {
     data: data.remove(snapshot.key)
@@ -368,6 +458,7 @@ export function* editMovement(action) {
 
 export function* saveMovement() {
   const values = yield select(wizardFormValuesSelector);
+  const auth = yield select(authSelector);
 
   const movement = localToFirebase(values);
 
@@ -379,6 +470,11 @@ export function* saveMovement() {
   delete movement.type;
   delete movement.associatedMovement;
 
+  if (auth.email) {
+    movement.createdBy = auth.email
+    movement.createdBy_orderKey = toOrderKey(auth.email, movement.negativeTimestamp)
+  }
+
   try {
     key = yield call(remote.saveMovement, path, key, movement);
     yield put(actions.saveMovementSuccess(key, values))
@@ -388,6 +484,21 @@ export function* saveMovement() {
       console.error('movement', movement);
     }
     yield put(actions.saveMovementFailed(e))
+  }
+}
+
+export function* saveMovementPaymentMethod(action) {
+  const {movementType, key, paymentMethod} = action.payload;
+  const path = getPathByMovementType(movementType);
+  try {
+    yield call(remote.saveMovement, path, key, {
+      paymentMethod
+    });
+  } catch(e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to save movement payment method', e);
+      console.error('movement key', key);
+    }
   }
 }
 
@@ -430,6 +541,7 @@ export default function* sagas() {
     fork(takeEvery, actions.INIT_NEW_MOVEMENT, initNewMovement),
     fork(takeEvery, actions.INIT_NEW_MOVEMENT_FROM_MOVEMENT, initNewMovementFromMovement),
     fork(takeEvery, actions.SAVE_MOVEMENT, saveMovement),
+    fork(takeEvery, actions.SAVE_MOVEMENT_PAYMENT_METHOD, saveMovementPaymentMethod),
     fork(takeLatest, actions.EDIT_MOVEMENT, editMovement),
   ]
 }

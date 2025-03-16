@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import {Switch, Route, Redirect} from 'react-router-dom';
-import LoginPage from '../../containers/LoginPageContainer';
+import {Redirect, Route, Switch} from 'react-router-dom';
+import LoginPage from '../../components/LoginPage';
 import Centered from '../Centered';
 import MaterialIcon from '../MaterialIcon';
 import MessagePage from "../../containers/MessagePageContainer";
@@ -11,7 +11,9 @@ import HelpPage from "../../containers/HelpPageContainer";
 import MovementsPage from "../../containers/MovementsPageContainer";
 import AdminPage from "../../containers/AdminPageContainer";
 import ArrivalPage from "../../containers/ArrivalPageContainer";
+import ArrivalPaymentPage from "../../containers/ArrivalPaymentPageContainer";
 import AerodromeStatusPage from '../../containers/AerodromeStatusPageContainer';
+import ProfilePage from '../../containers/ProfilePageContainer';
 
 const UNPROTECTED_ROUTES = [
   '/aerodrome-status'
@@ -45,11 +47,13 @@ class App extends React.PureComponent {
         <Route exact path="/arrival/new" component={ArrivalPage}/>
         <Route exact path="/arrival/new/:departureKey" component={ArrivalPage}/>
         <Route exact path="/arrival/:key" component={ArrivalPage}/>
+        <Route exact path="/arrival/:key/payment" component={ArrivalPaymentPage}/>
         <Route exact path="/movements" component={MovementsPage}/>
         <Route exact path="/admin" component={AdminPage}/>
         <Route exact path="/message" component={MessagePage}/>
         <Route exact path="/help" component={HelpPage}/>
         <Route exact path="/aerodrome-status" component={AerodromeStatusPage}/>
+        <Route exact path="/profile" component={ProfilePage}/>
         <Redirect to="/"/>
       </Switch>
     );

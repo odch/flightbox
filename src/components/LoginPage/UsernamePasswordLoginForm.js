@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import LabeledComponent from '../LabeledComponent';
-import Centered from '../Centered';
 import Failure from './Failure';
 import Button from '../Button';
 
@@ -10,22 +9,6 @@ const handleSubmit = (authenticate, username, password, e) => {
   e.preventDefault();
   authenticate(username, password);
 };
-
-const Wrapper = styled(Centered)`
-  width: 500px;
-  box-sizing: border-box;
-  
-  @media screen and (max-width: 520px) {
-    & {
-      width: 100%;
-      padding: 1em;
-      top: 25%;
-      left: 0;
-      margin-right: 0;
-      transform: none;
-    }
-  }
-`;
 
 const StyledLabeledComponent = styled(LabeledComponent)`
   margin-bottom: 2em;
@@ -48,7 +31,7 @@ const SubmitButton = styled(LoginDialogButton)`
   margin-bottom: 1em;
 `;
 
-const Main = props => {
+const UsernamePasswordLoginForm = props => {
   const { authenticate, username, password, submitting, failure, updateUsername, updatePassword } = props;
 
   const usernameInput = (
@@ -72,7 +55,7 @@ const Main = props => {
   );
 
   return (
-    <Wrapper>
+    <div>
       <form
         onSubmit={handleSubmit.bind(null, authenticate, username, password)}
         disabled={props.submitting}
@@ -88,16 +71,17 @@ const Main = props => {
           disabled={submitting || username.length === 0 || password.length === 0}
           primary
           dataCy="submit"
+          loading={props.submitting}
         />
         {props.showCancel === true && (
           <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel} dataCy="cancel"/>
         )}
       </form>
-    </Wrapper>
+    </div>
   );
 };
 
-Main.propTypes = {
+UsernamePasswordLoginForm.propTypes = {
   authenticate: PropTypes.func.isRequired,
   updateUsername: PropTypes.func.isRequired,
   updatePassword: PropTypes.func.isRequired,
@@ -109,4 +93,4 @@ Main.propTypes = {
   failure: PropTypes.bool.isRequired,
 };
 
-export default Main;
+export default UsernamePasswordLoginForm;

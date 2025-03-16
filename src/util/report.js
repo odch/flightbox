@@ -1,6 +1,7 @@
 import MovementReport from './MovementReport';
 import LandingsReport from './LandingsReport';
 import YearlySummaryReport from './YearlySummaryReport';
+import InvoicesReport from './InvoicesReport'
 
 export function airstat(year, month, options) {
   return new Promise(resolve => {
@@ -23,6 +24,15 @@ export function landings(year, month, options) {
 export function yearlySummary(year, options) {
   return new Promise(resolve => {
     new YearlySummaryReport(year, options)
+      .generate(download => {
+        resolve(download);
+      });
+  });
+}
+
+export function invoices(year, month, options) {
+  return new Promise(resolve => {
+    new InvoicesReport(year, month, options)
       .generate(download => {
         resolve(download);
       });

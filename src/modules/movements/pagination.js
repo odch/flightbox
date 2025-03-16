@@ -1,4 +1,4 @@
-import { localToFirebase } from '../../util/movements';
+import {localToFirebase} from '../../util/movements';
 
 export const LIMIT = 10;
 
@@ -30,4 +30,8 @@ export function getPagination(items) {
     start,
     limit,
   };
+}
+
+export function toOrderKey(createdBy, negativeTimestamp) {
+  return `${createdBy}_${9999999999999 - negativeTimestamp * -1}`
 }

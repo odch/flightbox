@@ -80,7 +80,7 @@ const ReportForm = props => {
       <fieldset disabled={props.disabled}>
         <StyledLabeledComponent label="Jahr" component={yearInput}/>
         {props.withMonth && <StyledLabeledComponent label="Monat" component={monthInput}/>}
-        <StyledLabeledComponent label="Trennzeichen" component={delimiterInput}/>
+        {props.withDelimiter && <StyledLabeledComponent label="Trennzeichen" component={delimiterInput}/>}
         {props.children}
         <Button
           type="submit"
@@ -102,13 +102,15 @@ ReportForm.propTypes = {
   }),
   delimiter: PropTypes.string,
   withMonth: PropTypes.bool,
+  withDelimiter: PropTypes.bool,
   setDate: PropTypes.func.isRequired,
-  setDelimiter: PropTypes.func.isRequired,
+  setDelimiter: PropTypes.func,
   generate: PropTypes.func.isRequired,
 };
 
 ReportForm.defaultProps = {
   withMonth: true,
+  withDelimiter: true
 };
 
 export default ReportForm;

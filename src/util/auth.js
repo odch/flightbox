@@ -24,3 +24,9 @@ export const loadCredentialsToken = credentials =>
     mode: 'flightnet',
     company: __FLIGHTNET_COMPANY__
   }));
+
+export const loadGuestToken = queryToken =>
+  post({
+    mode: 'guest_token',
+    token: queryToken
+  });

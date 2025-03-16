@@ -7,6 +7,12 @@ import MaterialIcon from '../MaterialIcon';
 import {getFromItemKey} from '../../util/reference-number';
 import Breadcrumbs from './Breadcrumbs';
 
+export const HeadingType = {
+  CREATED: 'CREATED',
+  UPDATED: 'UPDATED',
+  NONE: 'NONE'
+};
+
 class MovementWizard extends Component {
 
   componentWillMount() {
@@ -42,7 +48,11 @@ class MovementWizard extends Component {
     }
 
     if (this.props.wizard.committed === true) {
-      return <this.props.finishComponentClass finish={this.props.finish} isUpdate={this.isUpdate()}/>;
+      return <this.props.finishComponentClass
+        finish={this.props.finish}
+        isUpdate={this.isUpdate()}
+        headingType={this.isUpdate() ? HeadingType.UPDATED : HeadingType.CREATED}
+      />;
     }
 
     const pageObj = this.props.pages[this.props.wizard.page - 1];
@@ -53,6 +63,7 @@ class MovementWizard extends Component {
         cancel={this.props.cancel}
         readOnly={this.props.locked}
         isAdmin={this.props.auth.data.admin}
+        isGuest={this.props.auth.data.guest}
       />
     );
 
