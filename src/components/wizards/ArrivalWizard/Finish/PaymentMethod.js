@@ -15,7 +15,7 @@ const PAYMENT_METHODS = [{
   value: 'card'
 },
   {
-    label: 'Online',
+    label: 'Direkt zahlen',
     value: 'checkout'
   },
   {
