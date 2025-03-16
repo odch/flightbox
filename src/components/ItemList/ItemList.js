@@ -14,15 +14,16 @@ const Input = styled.input`
   padding: 0.2em;
   font-size: 1.5em;
   margin-right: 1em;
+  width: 50%;
 `;
 
 const AddButton = styled.button`
   border: none;
   background: none;
   font-size: 1.3em;
-  
+
   ${props => props.disabled !== true && `cursor: pointer;`}
-  
+
   &:hover {
     ${props => props.disabled !== true && `color: ${props.theme.colors.main};`}
   }
@@ -42,13 +43,14 @@ const ItemList = props => (
   <div>
     <Form onSubmit={handleSubmit.bind(null, props.addItem, props.newItem)}>
       <Input
-        type="text"
+        type={props.newItemInputType}
         value={props.newItem}
+        placeholder={props.placeholder}
         onChange={e => props.changeNewItem(e.target.value)}
       />
       <AddButton
         type="submit"
-        disabled={props.newItem.length === 0}
+        disabled={!props.newItem || props.newItem.length === 0}
       >
         <MaterialIcon icon="done"/>&nbsp;Hinzufügen
       </AddButton>
@@ -67,9 +69,15 @@ const ItemList = props => (
   </div>
 );
 
+ItemList.defaultTypes = {
+  newItemInputType: 'text'
+}
+
 ItemList.propTypes = {
   items: PropTypes.arrayOf(PropTypes.string).isRequired,
   newItem: PropTypes.string.isRequired,
+  newItemInputType: PropTypes.string,
+  placeholder: PropTypes.string,
   changeNewItem: PropTypes.func.isRequired,
   addItem: PropTypes.func.isRequired,
   removeItem: PropTypes.func.isRequired,

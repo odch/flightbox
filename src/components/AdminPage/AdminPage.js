@@ -15,6 +15,7 @@ import UserImportForm from '../../containers/UserImportFormContainer';
 import AerodromeImportForm from '../../containers/AerodromeImportFormContainer';
 import AircraftImportForm from '../../containers/AircraftImportFormContainer';
 import AircraftsItemList from '../../containers/AircraftsItemListContainer';
+import InvoiceRecipientsList from '../../containers/InvoiceRecipientsListContainer'
 import Content from './Content';
 import DescriptionText from './DescriptionText';
 import GuestAccessBox from '../../containers/GuestAccessBoxContainer'
@@ -29,6 +30,7 @@ class AdminPage extends Component {
   }
 
   render() {
+    const invoicePaymentEnabled = objectToArray(__CONF__.paymentMethods).includes('invoice')
     return (
       <VerticalHeaderLayout>
         {this.props.auth.data.admin === true &&
@@ -40,7 +42,7 @@ class AdminPage extends Component {
             <LabeledBox label="Landeliste herunterladen (CSV)">
               <LandingsReportForm/>
             </LabeledBox>
-            {objectToArray(__CONF__.paymentMethods).includes('invoice') && (
+            {invoicePaymentEnabled && (
               <LabeledBox label="Rechnungsberichte herunterladen (PDF)">
                 <InvoicesReportForm/>
               </LabeledBox>)}
@@ -78,6 +80,11 @@ class AdminPage extends Component {
               </DescriptionText>
               <AircraftsItemList type="homeBase"/>
             </LabeledBox>
+            {invoicePaymentEnabled && (
+              <LabeledBox label="Rechnungsempfänger">
+                <InvoiceRecipientsList/>
+              </LabeledBox>
+            )}
             <GuestAccessBox/>
           </Content>}
       </VerticalHeaderLayout>
