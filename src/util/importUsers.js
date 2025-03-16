@@ -8,6 +8,7 @@ function importUsers(csvString) {
       { csv: 'LastName', firebase: 'lastname' },
       { csv: 'FirstName', firebase: 'firstname' },
       { csv: 'PhoneMobile', firebase: 'phone' },
+      { csv: 'Email', firebase: 'email' },
     ],
   };
   return importCsv(csvString, options);
