@@ -133,6 +133,7 @@ function addNew(firebaseRef, itemMap, existing, options) {
  *   { csv: 'LastName', firebase: 'lastname' },
  *   { csv: 'FirstName', firebase: 'firstname' },
  *   { csv: 'PhoneMobile', firebase: 'phone' },
+ *   { csv: 'Email', firebase: 'email' },
  * ]
  */
 async function importCsv(csvString, options) {

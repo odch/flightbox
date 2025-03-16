@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import CsvImportForm, { Example } from '../CsvImportForm';
+import CsvImportForm, {Example} from '../CsvImportForm';
 import P from '../P';
 import Em from '../Em';
 import Strong from '../Strong';
@@ -11,15 +11,15 @@ const UserImportForm = props => {
       <P>Für den Import wird eine CSV-Datei benötigt, die alle Benutzer enthält. Beim Import werden
         alle Benutzer aus der Datenbank entfernt, die nicht in der CSV-Datei enthalten sind.</P>
       <P>
-        Die Datei muss aus den Spalten <Em>UserName</Em>, <Em>LastName</Em>, <Em>FirstName</Em> und <Em>PhoneMobile</Em> bestehen.
+        Die Datei muss aus den Spalten <Em>UserName</Em>, <Em>LastName</Em>, <Em>FirstName</Em>, <Em>PhoneMobile</Em> und <Em>Email</Em> bestehen.
         Die Sortierung ist nicht relevant.
         Die CSV-Datei muss als <Strong>UTF-8</Strong>-Datei gespeichert sein.
       </P>
       <P>Muster mit zwei Personen:</P>
           <Example>
-            UserName,LastName,FirstName,PhoneMobile<br/>
-            11069,Mustermann,Max,+41791234567<br/>
-            11293,Musterfrau,Maria,+41768765432<br/>
+            UserName,LastName,FirstName,PhoneMobile,Email<br/>
+            11069,Mustermann,Max,+41791234567,max@example.com<br/>
+            11293,Musterfrau,Maria,+41768765432,maria@example.com<br/>
           </Example>
     </div>
   );
