@@ -87,7 +87,7 @@ const AircraftPage = (props) => {
             updateLandingFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount)
             updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount)
 
-            return mtow
+            return aircraftCategory
           }}
         />
       </FieldSet>
