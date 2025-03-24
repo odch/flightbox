@@ -24,6 +24,7 @@ export function setLoadingFailure(state) {
 
 export const setFilter = (state, action) => ({
   ...state,
+  previousFilter: state.filter,
   filter: action.payload.filter
 })
 
@@ -83,7 +84,8 @@ const INITIAL_STATE = {
     },
     immatriculation: '',
     onlyWithoutAssociatedMovement: false
-  }
+  },
+  previousFilter: null
 };
 
 const reducer = (initialState, actionHandlers) => {

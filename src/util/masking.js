@@ -29,5 +29,9 @@ export function maskText(text) {
     return text
   }
 
+  if (text.length < 3) {
+    return '*'.repeat(text.length)
+  }
+
   return text[0] + '*'.repeat(text.length - 2) + text.slice(-1)
 }
