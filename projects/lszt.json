@@ -102,6 +102,5 @@
   "flightnetCompany": "mfgt",
   "theme": "lszt",
   "title": "MFGT Bewegungen",
-  "paymentMethods": ["cash", "card"],
-  "loginForm": "email"
+  "paymentMethods": ["cash", "card"]
 }
