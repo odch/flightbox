@@ -123,8 +123,21 @@ export function getOldest(snapshot) {
   return oldest;
 }
 
+function hasFilterDateChanged(newFilter, previousFilter) {
+  const newStart = newFilter.date.start
+  const newEnd = newFilter.date.end
+
+  const previousStart = previousFilter.date.start
+  const previousEnd = previousFilter.date.end
+
+  return newStart !== previousStart || newEnd !== previousEnd;
+}
+
 export function* filterMovements() {
-  yield put(actions.loadMovements(true));
+  const {filter, previousFilter} = yield select(stateSelector);
+  if (hasFilterDateChanged(filter, previousFilter)) {
+    yield put(actions.loadMovements(true));
+  }
 }
 
 export function* loadMovements(channel, action) {
