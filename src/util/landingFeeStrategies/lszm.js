@@ -1,6 +1,6 @@
 import data from './lszm_data.json'
 import {AircraftOrigin} from '../landingFees'
-import {isHelicopter} from '../aircraftCategories'
+import {flightTypeAircraftType, isHelicopter} from '../aircraftCategories'
 
 const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
   getFee(mtow, flightType, aircraftOrigin, aircraftCategory)
@@ -10,6 +10,11 @@ const getGoAroundFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
 
 const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
   const isHomebase = aircraftOrigin === AircraftOrigin.HOME_BASE || aircraftOrigin === AircraftOrigin.CLUB
+
+  if (flightTypeAircraftType(aircraftCategory) === 'glider') {
+    return getGliderFee(flightType, isHomebase)
+  }
+
   const isHeli = isHelicopter(aircraftCategory)
   const isInstruction = flightType === 'instruction'
 
@@ -45,6 +50,31 @@ const getBaseFee = mtow => {
       return entry.fee
     }
   }
+}
+
+const getGliderFee = (flightType, isHomebase) => {
+  const match = flightType.match(/^glider_(instruction|private)_(self|winch|aerotow)$/)
+  if (!match) {
+    throw new Error('Unsupported flight type ' + flightType)
+  }
+  const instructionPrivateType = match[1]
+  const gliderBaseName = match[2]
+
+  const baseFee = data.fees.glider_base[gliderBaseName]
+
+  if (typeof baseFee !== 'number') {
+    return undefined
+  }
+
+  const isInstruction = instructionPrivateType === 'instruction'
+
+  const factor = gliderBaseName === 'winch' && !isHomebase
+  ? getFactor(true, false, false) // same factor as homebase (non-instruction) for non-homebase if winch
+  : getFactor(isHomebase, false, isInstruction)
+
+  const fee = round1Decimal(baseFee * factor)
+
+  return {fee}
 }
 
 const round1Decimal = val => Math.round(val * 10) / 10;
