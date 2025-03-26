@@ -1,5 +1,5 @@
-import { connect } from 'react-redux';
-import { getFormValues } from 'redux-form';
+import {connect} from 'react-redux';
+import {getFormValues} from 'redux-form';
 import FlightPage from '../components/wizards/DepartureWizard/pages/FlightPage';
 import objectToArray from '../util/objectToArray';
 import {getEnabledFlightTypes} from '../util/flightTypes';
@@ -27,7 +27,7 @@ const getHiddenFields = values => {
 const mapStateToProps = (state, ownProps) => {
   const values = getFormValues('wizard')(state);
   return Object.assign({}, ownProps, {
-    flightTypes: filter(getEnabledFlightTypes(), values),
+    flightTypes: filter(getEnabledFlightTypes(values.aircraftCategory), values),
     runways: filter(runways, values),
     departureRoutes: filter(departureRoutes, values),
     hiddenFields: getHiddenFields(values),
