@@ -60,5 +60,16 @@
   "title": "Flightbox - Flugplatz Mollis",
   "paymentMethods": ["checkout", "invoice"],
   "homebasePayment": true,
-  "loginForm": "email"
+  "loginForm": "email",
+  "enabledFlightTypes": [
+    "private",
+    "instruction",
+    "aerotow",
+    "glider_private_aerotow",
+    "glider_private_winch",
+    "glider_private_self",
+    "glider_instruction_aerotow",
+    "glider_instruction_winch",
+    "glider_instruction_self"
+  ]
 }
