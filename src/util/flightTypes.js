@@ -31,7 +31,7 @@ const flightTypes = [
     label: 'Flugzeugschlepp',
     value: 'aerotow',
     airstatType: {
-      aicraft: 52,
+      aircraft: 52,
       motor_glider: 52
     },
   }, {
