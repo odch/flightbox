@@ -54,6 +54,10 @@
     "test": {
       "firebaseProjectId": "lszm-test",
       "firebaseApiKey": "AIzaSyBP3IcalmLfA6gi9bq4Ln6aDyelL4gOLGg"
+    },
+    "production": {
+      "firebaseProjectId": "lszm-prod",
+      "firebaseApiKey": "AIzaSyBeSPI8y2oli06U-29zBC6Ehce_sWWnkSE"
     }
   },
   "theme": "lszm",
