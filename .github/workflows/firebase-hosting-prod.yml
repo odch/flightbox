@@ -10,6 +10,7 @@ jobs:
       matrix:
         environment:
           - lszt_prod
+          - lszm_prod
           - lspv_prod
     environment: ${{ matrix.environment }}
     steps:
@@ -36,6 +37,7 @@ jobs:
       matrix:
         environment:
           - lszt_prod
+          - lszm_prod
           - lspv_prod
     environment: ${{ matrix.environment }}
     steps:
