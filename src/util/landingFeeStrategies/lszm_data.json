@@ -6,6 +6,10 @@
     "homebase_helicopter": 0.6
   },
   "fees": {
+    "glider_base": {
+      "winch": 14,
+      "self": 19
+    },
     "base": [
       { "max_weight": 800, "fee": 19.0 },
       { "max_weight": 1000, "fee": 23.0 },

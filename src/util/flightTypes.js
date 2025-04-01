@@ -1,4 +1,5 @@
 import objectToArray from './objectToArray';
+import {flightTypeAircraftType} from './aircraftCategories'
 
 const enabledTypes = objectToArray(__CONF__.enabledFlightTypes);
 
@@ -8,7 +9,8 @@ const flightTypes = [
     value: 'private',
     airstatType: {
       aircraft: 42,
-      helicopter: 64
+      helicopter: 64,
+      motor_glider: 53
     },
   }, {
     label: 'Gewerblich',
@@ -22,13 +24,15 @@ const flightTypes = [
     value: 'instruction',
     airstatType: {
       aircraft: 43,
-      helicopter: 62
+      helicopter: 62,
+      motor_glider: 53
     },
   }, {
     label: 'Flugzeugschlepp',
     value: 'aerotow',
     airstatType: {
-      aicraft: 52
+      aircraft: 52,
+      motor_glider: 52
     },
   }, {
     label: 'Paradrop',
@@ -37,7 +41,43 @@ const flightTypes = [
       aircraft: 35,
       helicopter: 65
     },
-  },
+  }, {
+    label: 'Privat (Schlepp)',
+    value: 'glider_private_aerotow',
+    airstatType: {
+      glider: 72,
+    },
+  }, {
+    label: 'Privat (Winde)',
+    value: 'glider_private_winch',
+    airstatType: {
+      glider: 74,
+    },
+  }, {
+    label: 'Privat (Selbststart)',
+    value: 'glider_private_self',
+    airstatType: {
+      glider: 75,
+    },
+  }, {
+    label: 'Schulung (Schlepp)',
+    value: 'glider_instruction_aerotow',
+    airstatType: {
+      glider: 71,
+    },
+  }, {
+    label: 'Schulung (Winde)',
+    value: 'glider_instruction_winch',
+    airstatType: {
+      glider: 73,
+    },
+  }, {
+    label: 'Schulung (Selbststart)',
+    value: 'glider_instruction_self',
+    airstatType: {
+      glider: 75,
+    },
+  }
 ];
 
 const findByValue = type => {
@@ -48,10 +88,12 @@ const findByValue = type => {
   return obj;
 };
 
-export const getEnabledFlightTypes = () => flightTypes.filter(type => enabledTypes.includes(type.value));
+export const getEnabledFlightTypes = (aircraftCategory) => flightTypes
+  .filter(type => enabledTypes.includes(type.value))
+  .filter(type => !!type.airstatType[flightTypeAircraftType(aircraftCategory)]);
 
-export const getAirstatType = (type, isHelicopter) =>
-  findByValue(type).airstatType[isHelicopter ? 'helicopter' : 'aircraft'];
+export const getAirstatType = (type, aircraftCategory) =>
+  findByValue(type).airstatType[flightTypeAircraftType(aircraftCategory)];
 
 export const getLabel = type => findByValue(type).label;
 
