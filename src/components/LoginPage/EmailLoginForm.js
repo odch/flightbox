@@ -57,6 +57,7 @@ const StyledOrText = styled.span`
 const EmailLoginForm = props => {
   const {
     queryToken,
+    guestOnly,
     authenticate,
     email,
     submitting,
@@ -87,6 +88,7 @@ const EmailLoginForm = props => {
 
   return (
     <div>
+      {!guestOnly && (
         <StyledForm
           onSubmit={handleSubmit.bind(null, authenticate, email, !!queryToken)}
           disabled={props.submitting}
@@ -107,25 +109,32 @@ const EmailLoginForm = props => {
             <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel} dataCy="cancel"/>
           )}
         </StyledForm>
-        {queryToken && (
-          <>
-            <StyledHint>Wenn Sie sich mit Ihrer E-Mail-Adresse anmelden, können Sie Ihre eigenen erfassten
-              Bewegungen
-              anschliessend noch einsehen und
-              ggf. korrigieren.
-            </StyledHint>
-            <StyledOrContainer><StyledOrText>oder</StyledOrText></StyledOrContainer>
-            <GuestTokenLogin queryToken={queryToken}/>
-            <StyledHint>Wenn Sie sich als Gast anmelden, können Sie nur Ihre Ankunft und Ihren Abflug erfassen. Die
-              erfassten Bewegungen können Sie anschliessend nicht mehr einsehen.
-            </StyledHint>
-          </>
-        )}
-      </div>
+      )}
+      {queryToken && (
+        guestOnly
+          ? <GuestTokenLogin queryToken={queryToken}/>
+          : (
+            <>
+              <StyledHint>Wenn Sie sich mit Ihrer E-Mail-Adresse anmelden, können Sie Ihre eigenen erfassten
+                Bewegungen
+                anschliessend noch einsehen und
+                ggf. korrigieren.
+              </StyledHint>
+              <StyledOrContainer><StyledOrText>oder</StyledOrText></StyledOrContainer>
+              <GuestTokenLogin queryToken={queryToken}/>
+              <StyledHint>Wenn Sie sich als Gast anmelden, können Sie nur Ihre Ankunft und Ihren Abflug erfassen. Die
+                erfassten Bewegungen können Sie anschliessend nicht mehr einsehen.
+              </StyledHint>
+            </>
+          )
+      )}
+    </div>
   )
 };
 
 EmailLoginForm.propTypes = {
+  queryToken: PropTypes.string,
+  guestOnly: PropTypes.bool,
   authenticate: PropTypes.func.isRequired,
   updateEmail: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,

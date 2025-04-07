@@ -15,4 +15,15 @@ const getAuthQueryToken = location => {
   return null
 }
 
+export const getGuestOnly = location => {
+  if (location.state && location.state.guestOnly) {
+    return location.state.guestOnly
+  }
+
+  const query = new URLSearchParams(location.search)
+  const guestOnly = query.get('guestOnly')
+
+  return guestOnly === 'true'
+}
+
 export default getAuthQueryToken

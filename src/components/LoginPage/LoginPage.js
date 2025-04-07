@@ -4,7 +4,7 @@ import EmailLoginForm from '../../containers/EmailLoginFormContainer'
 import UsernamePasswordLoginForm from '../../containers/UsernamePasswordLoginFormContainer'
 import styled from 'styled-components'
 import {withRouter} from 'react-router-dom'
-import getAuthQueryToken from '../../util/getAuthQueryToken'
+import getAuthQueryToken, {getGuestOnly} from '../../util/getAuthQueryToken'
 
 const StyledWrapper = styled.div`
   display: flex;
@@ -45,12 +45,16 @@ const LoginInnerWrapper = styled.div`
 
 const LoginPage = ({location}) => {
   const queryToken = getAuthQueryToken(location)
+  const guestOnly = getGuestOnly(location)
   return (
     <StyledWrapper>
       <Header/>
       <LoginWrapper>
         <LoginInnerWrapper>
-      {__CONF__.loginForm === 'email' ? <EmailLoginForm queryToken={queryToken}/> : <UsernamePasswordLoginForm/>}
+          {__CONF__.loginForm === 'email'
+            ? <EmailLoginForm queryToken={queryToken} guestOnly={guestOnly}/>
+            : <UsernamePasswordLoginForm/>
+          }
         </LoginInnerWrapper>
       </LoginWrapper>
     </StyledWrapper>

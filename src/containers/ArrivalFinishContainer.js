@@ -15,7 +15,7 @@ const findInvoiceRecipient = (invoiceRecipients, authEmail) => {
   }
 
   for (const invoiceRecipient of invoiceRecipients.recipients) {
-    if (invoiceRecipient.emails.includes(authEmail)) {
+    if (invoiceRecipient.emails && invoiceRecipient.emails.includes(authEmail)) {
       return invoiceRecipient
     }
   }
