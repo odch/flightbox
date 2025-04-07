@@ -21379,6 +21379,216 @@
     "name": "SCHANIS AIRPORT",
     "type": "small_airport"
   },
+  "LSYG": {
+    "country": "CH",
+    "name": "GSTELLIHORN",
+    "type": "mountain_landing_site"
+  },
+  "LSVM": {
+    "country": "CH",
+    "name": "GUMM",
+    "type": "mountain_landing_site"
+  },
+  "LSYH": {
+    "country": "CH",
+    "name": "SUSTEN STEINGLETSCHER",
+    "type": "mountain_landing_site"
+  },
+  "LSYK": {
+    "country": "CH",
+    "name": "KANDERFIRN",
+    "type": "mountain_landing_site"
+  },
+  "LSVP": {
+    "country": "CH",
+    "name": "PETERSGRAT",
+    "type": "mountain_landing_site"
+  },
+  "LSYO": {
+    "country": "CH",
+    "name": "ROSENEGG-WEST",
+    "type": "mountain_landing_site"
+  },
+  "LSVN": {
+    "country": "CH",
+    "name": "STALDENHORN",
+    "type": "mountain_landing_site"
+  },
+  "LSVS": {
+    "country": "CH",
+    "name": "SUSTENLIMMI",
+    "type": "mountain_landing_site"
+  },
+  "LSVW": {
+    "country": "CH",
+    "name": "VORDERE WALIG",
+    "type": "mountain_landing_site"
+  },
+  "LSVK": {
+    "country": "CH",
+    "name": "GLÄRNISCHFIRN",
+    "type": "mountain_landing_site"
+  },
+  "LSYI": {
+    "country": "CH",
+    "name": "LIMMERENFIRN",
+    "type": "mountain_landing_site"
+  },
+  "LSVV": {
+    "country": "CH",
+    "name": "VORABGLETSCHER",
+    "type": "mountain_landing_site"
+  },
+  "LSVD": {
+    "country": "CH",
+    "name": "CLARIDEN-HÜFIFIRN",
+    "type": "mountain_landing_site"
+  },
+  "LSVJ": {
+    "country": "CH",
+    "name": "ALPE FOPPA",
+    "type": "mountain_landing_site"
+  },
+  "LSVE": {
+    "country": "CH",
+    "name": "AESCHHORN",
+    "type": "mountain_landing_site"
+  },
+  "LSVF": {
+    "country": "CH",
+    "name": "ALPHUBEL",
+    "type": "mountain_landing_site"
+  },
+  "LSVI": {
+    "country": "CH",
+    "name": "AROLLA",
+    "type": "mountain_landing_site"
+  },
+  "LSYD": {
+    "country": "CH",
+    "name": "BEC DE NENDAZ",
+    "type": "mountain_landing_site"
+  },
+  "LSYQ": {
+    "country": "CH",
+    "name": "CROIX DE COEUR",
+    "type": "mountain_landing_site"
+  },
+  "LSYE": {
+    "country": "CH",
+    "name": "EBNEFLUH",
+    "type": "mountain_landing_site"
+  },
+  "LSYY": {
+    "country": "CH",
+    "name": "GLACIER DU BRENAY",
+    "type": "mountain_landing_site"
+  },
+  "LSYX": {
+    "country": "CH",
+    "name": "GLACIER DU TRIENT",
+    "type": "mountain_landing_site"
+  },
+  "LSYZ": {
+    "country": "CH",
+    "name": "GLACIER DE TSANFLEURON",
+    "type": "mountain_landing_site"
+  },
+  "LSVG": {
+    "country": "CH",
+    "name": "GRIMENTZ",
+    "type": "mountain_landing_site"
+  },
+  "LSYJ": {
+    "country": "CH",
+    "name": "JUNGFRAUJOCH",
+    "type": "mountain_landing_site"
+  },
+  "LSYN": {
+    "country": "CH",
+    "name": "LANGGLETSCHER",
+    "type": "mountain_landing_site"
+  },
+  "LSVQ": {
+    "country": "CH",
+    "name": "MONTE ROSA",
+    "type": "mountain_landing_site"
+  },
+  "LSYP": {
+    "country": "CH",
+    "name": "PETIT COMBIN",
+    "type": "mountain_landing_site"
+  },
+  "LSYR": {
+    "country": "CH",
+    "name": "ROSA BLANCHE",
+    "type": "mountain_landing_site"
+  },
+  "LSYT": {
+    "country": "CH",
+    "name": "THEODULGLETSCHER",
+    "type": "mountain_landing_site"
+  },
+  "LSYU": {
+    "country": "CH",
+    "name": "UNTERROTHORN",
+    "type": "mountain_landing_site"
+  },
+  "LSYW": {
+    "country": "CH",
+    "name": "WILDHORN",
+    "type": "mountain_landing_site"
+  },
+  "LSVC": {
+    "country": "CH",
+    "name": "COL DES MOSSES",
+    "type": "mountain_landing_site"
+  },
+  "LSYA": {
+    "country": "CH",
+    "name": "ALP TRIDA",
+    "type": "mountain_landing_site"
+  },
+  "LSYC": {
+    "country": "CH",
+    "name": "CRAP SOGN GION",
+    "type": "mountain_landing_site"
+  },
+  "LSYF": {
+    "country": "CH",
+    "name": "FUORCLA CHAMUOTSCH",
+    "type": "mountain_landing_site"
+  },
+  "LSVH": {
+    "country": "CH",
+    "name": "FUORCLA GRISCHA",
+    "type": "mountain_landing_site"
+  },
+  "LSVO": {
+    "country": "CH",
+    "name": "MADRISAHORN",
+    "type": "mountain_landing_site"
+  },
+  "LSYV": {
+    "country": "CH",
+    "name": "VADRET DAL CORVATSCH",
+    "type": "mountain_landing_site"
+  },
+  "LSVR": {
+    "country": "CH",
+    "name": "VADRET PERS",
+    "type": "mountain_landing_site"
+  },
+  "LSYB": {
+    "country": "CH",
+    "name": "BLÜEMLISALP",
+    "type": "mountain_landing_site"
+  },
+  "LSVA": {
+    "country": "CH",
+    "name": "AROSA",
+    "type": "mountain_landing_site"
+  },
   "LT-0003": {
     "country": "LT",
     "name": "AIRPORT",
