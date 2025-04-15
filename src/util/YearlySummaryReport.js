@@ -1,6 +1,11 @@
 import Download from './Download.js';
 import MovementReport from "./MovementReport";
-import {getAirstatType, isHelicopterAirstatType} from './flightTypes';
+import {
+  isCommercialFlightAirstatType,
+  isHelicopterAirstatType,
+  isInstructionFlightAirstatType,
+  isPrivateFlightAirstatType
+} from './flightTypes';
 
 class YearlySummaryReport {
 
@@ -67,6 +72,8 @@ class YearlySummaryReport {
 
     const lines = movements.split('\n');
 
+    debugger
+
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
 
@@ -81,7 +88,7 @@ class YearlySummaryReport {
       let movCount = parseInt(columns[4]);
       let circuitsCount = 0;
 
-      if (movFlightType === getAirstatType('private')) {
+      if (isPrivateFlightAirstatType(movFlightType)) {
         summary.PrivatePax += movPax;
 
         if (movTrafficType === 'V') {
@@ -108,7 +115,7 @@ class YearlySummaryReport {
             summary.PrivateAway += movCount;
           }
         }
-      } else if (movFlightType === getAirstatType('instruction')) {
+      } else if (isInstructionFlightAirstatType(movFlightType)) {
         summary.InstructionPax += movPax;
 
         if (movTrafficType === 'V') {
@@ -133,7 +140,7 @@ class YearlySummaryReport {
             summary.InstructionAway += movCount;
           }
         }
-      } else if (movFlightType === getAirstatType('commercial')) {
+      } else if (movFlightType === isCommercialFlightAirstatType(movFlightType)) {
         summary.CommercialPax += movPax;
 
         if (movLocation === __CONF__.aerodrome.ICAO) {
