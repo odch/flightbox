@@ -100,3 +100,29 @@ export const getLabel = type => findByValue(type).label;
 export const isHelicopterAirstatType = airstatType => !!flightTypes.find(
   flightType => flightType.airstatType.helicopter && flightType.airstatType.helicopter === airstatType
 )
+
+const flightTypeContainsAirstatType = (flightTypeIds, airstatType) => {
+  for (const flightTypeId of flightTypeIds) {
+    const flightType= flightTypes.find(type => type.value === flightTypeId)
+    const containsAirstatType = Object.values(flightType.airstatType).includes(airstatType)
+    if (containsAirstatType) {
+      return true
+    }
+  }
+  return false
+}
+
+export const isPrivateFlightAirstatType = airstatType => flightTypeContainsAirstatType(
+  ['private', 'glider_private_aerotow', 'glider_private_winch', 'glider_private_self'],
+  airstatType
+)
+
+export const isInstructionFlightAirstatType = airstatType => flightTypeContainsAirstatType(
+  ['instruction', 'glider_instruction_aerotow', 'glider_instruction_winch', 'glider_instruction_self'],
+  airstatType
+)
+
+export const isCommercialFlightAirstatType = airstatType => flightTypeContainsAirstatType(
+  ['commercial'],
+  airstatType
+)
