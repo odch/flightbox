@@ -115,7 +115,7 @@ class MovementDetails extends React.PureComponent {
               </DetailsBox>
             )
           }
-          {props.data.type === 'arrival' && props.isHomeBase === false && props.data.landingFeeTotal !== undefined && (
+          {props.data.type === 'arrival' && props.data.landingFeeTotal !== undefined && (
             <DetailsBox label="Gebühren">
               <MovementField label="Referenznummer" value={getFromItemKey(props.data.key)}/>
               <MovementField label="Landetaxe" value={getLandingFee(props.data)}/>
