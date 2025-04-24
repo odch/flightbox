@@ -72,8 +72,6 @@ class YearlySummaryReport {
 
     const lines = movements.split('\n');
 
-    debugger
-
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
 
