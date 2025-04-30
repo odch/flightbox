@@ -14,6 +14,7 @@ const api = require('./api');
 const webhook = require('./webhook');
 const setAssociatedMovementsCronJob = require('./associatedMovements/setAssociatedMovementsCronJob');
 const associatedMovementsTriggers = require('./associatedMovements/setAssociatedMovementsTriggers');
+const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsTrigger');
 
 exports.auth = auth;
 exports.api = api;
@@ -25,3 +26,4 @@ exports.setAssociatedMovementOnUpdatedDeparture = associatedMovementsTriggers.se
 exports.setAssociatedMovementOnUpdatedArrival = associatedMovementsTriggers.setAssociatedMovementOnUpdatedArrival;
 exports.setAssociatedMovementOnDeletedDeparture = associatedMovementsTriggers.setAssociatedMovementOnDeletedDeparture;
 exports.setAssociatedMovementOnDeletedArrival = associatedMovementsTriggers.setAssociatedMovementOnDeletedArrival;
+exports.updateCustomsInvoiceRecipientsOnUpdate = invoiceRecipientsTrigger.updateCustomsInvoiceRecipientsOnUpdate;

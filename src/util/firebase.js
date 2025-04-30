@@ -107,6 +107,10 @@ export function loadValue(path) {
   });
 }
 
+export function getIdToken() {
+  return Firebase.auth().currentUser.getIdToken()
+}
+
 export default firebase;
 
 if (window.Cypress) {
