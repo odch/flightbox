@@ -44,7 +44,7 @@
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "memberNr": {
-          ".validate": "newData.isString() && newData.val().matches(/^\\d+$/)"
+          ".validate": "newData.isString()"
         },
         "mtow": {
           ".validate": "newData.isNumber() && newData.val() > 0"
@@ -143,7 +143,7 @@
           ".validate": "newData.isString() && newData.val().length > 0"
         },
         "memberNr": {
-          ".validate": "newData.isString() && newData.val().matches(/^\\d+$/)"
+          ".validate": "newData.isString()"
         },
         "mtow": {
           ".validate": "newData.isNumber() && newData.val() > 0"
@@ -382,7 +382,7 @@
         ".read": "auth !== null && $profile_id === auth.uid",
         ".write": "auth !== null && $profile_id === auth.uid",
         "memberNr": {
-          ".validate": "newData.isString() && newData.val().matches(/^\\d+$/)"
+          ".validate": "newData.isString()"
         },
         "email": {
           ".validate": "newData.isString() && newData.val().matches(/^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$/)"
