@@ -12,6 +12,7 @@
         "type": "A"
       }
     ],
+    "noRunwayIfHelicopter": true,
     "departureRoutes": [
       {
         "name": "N",
