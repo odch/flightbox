@@ -18,6 +18,13 @@ import App from './containers/AppContainer';
 
 import './style/global-style';
 
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+  dsn: "https://8a606d82aa68850021fbfac2ffda30b5@o4509293310967808.ingest.de.sentry.io/4509293314113617",
+  sendDefaultPii: true
+});
+
 const theme = require('../theme/' + __THEME__);
 
 const sagaMiddleware = createSagaMiddleware();
