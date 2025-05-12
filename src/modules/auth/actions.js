@@ -11,6 +11,9 @@ export const SEND_AUTHENTICATION_EMAIL = 'SEND_AUTHENTICATION_EMAIL';
 export const SEND_AUTHENTICATION_EMAIL_SUCCESS = 'SEND_AUTHENTICATION_EMAIL_SUCCESS';
 export const SEND_AUTHENTICATION_EMAIL_FAILURE = 'SEND_AUTHENTICATION_EMAIL_FAILURE';
 
+export const COMPLETE_EMAIL_AUTHENTICATION = 'COMPLETE_EMAIL_AUTHENTICATION';
+export const EMAIL_AUTHENTICATION_COMPLETION_FAILURE = 'EMAIL_AUTHENTICATION_COMPLETION_FAILURE';
+
 export const REQUEST_EMAIL_AUTHENTICATION = 'REQUEST_EMAIL_AUTHENTICATION';
 
 export const REQUEST_FIREBASE_AUTHENTICATION = 'REQUEST_FIREBASE_AUTHENTICATION';
@@ -72,6 +75,21 @@ export function sendAuthenticationEmail(email, local) {
       email,
       local
     },
+  };
+}
+
+export function completeEmailAuthentication(email) {
+  return {
+    type: COMPLETE_EMAIL_AUTHENTICATION,
+    payload: {
+      email,
+    },
+  };
+}
+
+export function emailAuthenticationCompletionFailure() {
+  return {
+    type: EMAIL_AUTHENTICATION_COMPLETION_FAILURE,
   };
 }
 
