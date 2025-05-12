@@ -58,11 +58,14 @@ const EmailLoginForm = props => {
   const {
     queryToken,
     guestOnly,
-    authenticate,
+    sendAuthenticationEmail,
+    completeEmailAuthentication,
     email,
     submitting,
     failure,
     emailSent,
+    emailLoginParamsPresent,
+    emailLoginCompletionFailure,
     updateEmail
   } = props;
 
@@ -86,11 +89,38 @@ const EmailLoginForm = props => {
     />
   );
 
+  if (emailLoginParamsPresent) {
+    return (
+      <div>
+        <div style={{marginBottom: '2rem'}}>Sie wollen sich über einen Login-Link anmelden. Geben Sie Ihre E-Mail-Adresse noch einmal ein, um die
+          Anmeldung abzuschliessen.
+        </div>
+        <StyledForm
+          onSubmit={handleSubmit.bind(null, completeEmailAuthentication, email, !!queryToken)}
+          disabled={props.submitting}
+          data-cy="login-form"
+        >
+          <StyledLabeledComponent label="E-Mail" component={emailInput}/>
+          {emailLoginCompletionFailure && <Failure failure/>}
+          <SubmitButton
+            type="submit"
+            label="Anmelden"
+            icon="send"
+            disabled={submitting || email.length === 0}
+            primary
+            dataCy="submit"
+            loading={props.submitting}
+          />
+        </StyledForm>
+      </div>
+    )
+  }
+
   return (
     <div>
       {!guestOnly && (
         <StyledForm
-          onSubmit={handleSubmit.bind(null, authenticate, email, !!queryToken)}
+          onSubmit={handleSubmit.bind(null, sendAuthenticationEmail, email, !!queryToken)}
           disabled={props.submitting}
           data-cy="login-form"
         >
@@ -135,7 +165,8 @@ const EmailLoginForm = props => {
 EmailLoginForm.propTypes = {
   queryToken: PropTypes.string,
   guestOnly: PropTypes.bool,
-  authenticate: PropTypes.func.isRequired,
+  sendAuthenticationEmail: PropTypes.func.isRequired,
+  completeEmailAuthentication: PropTypes.func.isRequired,
   updateEmail: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   showCancel: PropTypes.bool.isRequired,
@@ -143,6 +174,8 @@ EmailLoginForm.propTypes = {
   submitting: PropTypes.bool.isRequired,
   failure: PropTypes.bool.isRequired,
   emailSent: PropTypes.bool.isRequired,
+  emailLoginParamsPresent: PropTypes.bool.isRequired,
+  emailLoginCompletionFailure: PropTypes.bool.isRequired,
 };
 
 export default EmailLoginForm;

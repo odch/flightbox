@@ -6,6 +6,7 @@ const INITIAL_STATE = {
   authenticated: false,
   submitting: false,
   failure: false,
+  emailAuthenticationCompletionFailure: false,
   guestAuthentication: {
     submitting: false,
     failure: false
@@ -60,6 +61,13 @@ const ACTION_HANDLERS = {
       };
     }
     return INITIAL_STATE;
+  },
+  [actions.EMAIL_AUTHENTICATION_COMPLETION_FAILURE]: state => {
+    return {
+      ...state,
+      submitting: false,
+      emailAuthenticationCompletionFailure: true
+    }
   },
 };
 

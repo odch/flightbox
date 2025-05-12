@@ -105,12 +105,34 @@ export function* sendAuthenticationEmail(action) {
   }
 }
 
+export function* completeEmailAuthentication(action) {
+  try {
+    yield put(actions.setSubmitting());
+    const { email } = action.payload;
+    window.localStorage.setItem('emailForSignIn', email);
+    yield call(signInWithEmail);
+    yield call(cleanUpLoginBrowserState);
+  } catch(e) {
+    logError('Failed to complete email authentication', e);
+    yield put(actions.emailAuthenticationCompletionFailure());
+  }
+}
+
 export function* doEmailAuthentication() {
   try {
-      yield call(signInWithEmail);
+    yield call(signInWithEmail);
   } catch(e) {
     logError('Failed to execute email authentication', e);
+  } finally {
+    yield call(cleanUpLoginBrowserState);
+    window.location.reload();
   }
+}
+
+export function* cleanUpLoginBrowserState() {
+  window.localStorage.removeItem('emailForSignIn');
+  const cleanUrl = location.origin + location.pathname + location.hash;
+  yield call([window.history, 'replaceState'], {}, document.title, cleanUrl);
 }
 
 export function* doGuestTokenAuthentication(action) {
@@ -179,12 +201,17 @@ export function* doListenFirebaseAuthentication(action) {
   yield put(actions.firebaseAuthenticationEvent(authData));
 
   if (!authenticated) {
-    if (isSignInWithEmail()) {
+    if (isSignInWithEmail() && isSignInEmailInStorage()) {
       yield put(actions.requestEmailAuthentication())
     } else {
       yield put(actions.requestIpAuthentication());
     }
   }
+}
+
+function isSignInEmailInStorage() {
+  const email = window.localStorage.getItem('emailForSignIn');
+  return !!email
 }
 
 function isNotEmptyString(str) {
@@ -214,6 +241,7 @@ export default function* sagas() {
     fork(takeEvery, actions.REQUEST_USERNAME_PASSWORD_AUTHENTICATION, doUsernamePasswordAuthentication),
     fork(takeEvery, actions.REQUEST_GUEST_TOKEN_AUTHENTICATION, doGuestTokenAuthentication),
     fork(takeEvery, actions.SEND_AUTHENTICATION_EMAIL, sendAuthenticationEmail),
+    fork(takeEvery, actions.COMPLETE_EMAIL_AUTHENTICATION, completeEmailAuthentication),
     fork(takeEvery, actions.REQUEST_EMAIL_AUTHENTICATION, doEmailAuthentication),
     fork(takeEvery, actions.REQUEST_FIREBASE_AUTHENTICATION, doFirebaseAuthentication),
     fork(takeEvery, actions.LOGOUT, doLogout),
