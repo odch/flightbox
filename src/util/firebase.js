@@ -75,16 +75,12 @@ export function authenticateEmail(email, local) {
 }
 
 export function isSignInWithEmail() {
-  const email = window.localStorage.getItem('emailForSignIn');
-  if (!email) {
-    return false
-  }
   return Firebase.auth().isSignInWithEmailLink(window.location.href)
 }
 
 export function signInWithEmail() {
   const email = window.localStorage.getItem('emailForSignIn');
-  Firebase.auth().signInWithEmailLink(email, window.location.href)
+  return Firebase.auth().signInWithEmailLink(email, window.location.href)
     .then(() => {
       window.localStorage.removeItem('emailForSignIn');
     })

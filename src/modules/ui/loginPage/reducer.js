@@ -45,10 +45,9 @@ function usernamePasswordAuthenticationFailure(state) {
 }
 
 function firebaseAuthenticationEvent(state) {
-  return Object.assign({}, state, {
-    username: '',
-    password: '',
-  });
+  return {
+    ...INITIAL_STATE
+  }
 }
 
 const ACTION_HANDLERS = {
