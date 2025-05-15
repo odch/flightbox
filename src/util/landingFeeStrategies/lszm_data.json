@@ -5,6 +5,12 @@
     "homebase_plane_instruction": 0.8,
     "homebase_helicopter": 0.6
   },
+  "vat": {
+    "non_homebase_plane_helicopter": 8.1,
+    "homebase_plane": 8.1,
+    "homebase_plane_instruction": 0,
+    "homebase_helicopter": 8.1
+  },
   "fees": {
     "glider_base": {
       "winch": 14,

@@ -19,16 +19,25 @@ const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
   const isInstruction = flightType === 'instruction'
 
   const factor = getFactor(isHomebase, isHeli, isInstruction)
+  const vatPercentage = getVat(isHomebase, isHeli, isInstruction)
   const baseFee = getBaseFee(mtow)
 
-  const fee = round1Decimal(baseFee * factor)
+  const fee = baseFee * factor
+  const feeWithVat = fee * (1 + vatPercentage/100)
 
-  return {fee};
+  const roundedFee = roundToFiveCents(feeWithVat)
+
+  return {fee: roundedFee};
 }
 
 const getFactor = (isHomebase, isHeli, isInstruction) => {
   const factorName = getFactorName(isHomebase, isHeli, isInstruction)
   return data.factors[factorName]
+}
+
+const getVat = (isHomebase, isHeli, isInstruction) => {
+  const factorName = getFactorName(isHomebase, isHeli, isInstruction)
+  return data.vat[factorName]
 }
 
 const getFactorName = (isHomebase, isHeli, isInstruction) => {
@@ -69,15 +78,22 @@ const getGliderFee = (flightType, isHomebase) => {
   const isInstruction = instructionPrivateType === 'instruction'
 
   const factor = gliderBaseName === 'winch' && !isHomebase
-  ? getFactor(true, false, false) // same factor as homebase (non-instruction) for non-homebase if winch
-  : getFactor(isHomebase, false, isInstruction)
+    ? getFactor(true, false, false) // same factor as homebase (non-instruction) for non-homebase if winch
+    : getFactor(isHomebase, false, isInstruction)
+  const vatPercentage = gliderBaseName === 'winch' && !isHomebase
+    ? getVat(true, false, false) // same factor as homebase (non-instruction) for non-homebase if winch
+    : getVat(isHomebase, false, isInstruction)
 
-  const fee = round1Decimal(baseFee * factor)
+  const fee = baseFee * factor
 
-  return {fee}
+  const feeWithVat = fee * (1 + vatPercentage/100)
+
+  const roundedFee = roundToFiveCents(feeWithVat)
+
+  return {fee: roundedFee}
 }
 
-const round1Decimal = val => Math.round(val * 10) / 10;
+const roundToFiveCents = val => Math.round(val * 20) / 20;
 
 export default {
   getLandingFee,
