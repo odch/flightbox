@@ -31,7 +31,11 @@ departureRoutes.push(circuitRoute);
 const findByValue = (array, value) => {
   const obj = array.find(item => item.value === value);
   if (!obj) {
-    throw new Error('Route "' + value + '" not found');
+    console.log('Route "' + value + '" not found');
+    return {
+      value,
+      label: value.charAt(0).toUpperCase() + value.slice(1)
+    }
   }
   return obj;
 };
