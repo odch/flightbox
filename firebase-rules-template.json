@@ -136,6 +136,18 @@
         "landingFeeTotal": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
         },
+        "feeTotalNet": {
+          ".validate": "newData.isNumber()"
+        },
+        "feeVat": {
+          ".validate": "newData.isNumber()"
+        },
+        "feeRoundingDifference": {
+          ".validate": "newData.isNumber()"
+        },
+        "feeTotalGross": {
+          ".validate": "newData.isNumber()"
+        },
         "lastname": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },

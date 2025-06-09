@@ -10,8 +10,8 @@ import DetailsBox from './DetailsBox';
 import MovementField from './MovementField';
 import HomeBaseIcon from './HomeBaseIcon';
 import {getFromItemKey} from '../../util/reference-number';
-import {getLandingFeeText} from '../../util/landingFees';
 import {maskEmail, maskPhone} from '../../util/masking'
+import formatMoney from '../../util/formatMoney'
 
 const Content = styled.div`
   padding: 1.5em 1em 0 1em;
@@ -30,14 +30,18 @@ const getCarriageVoucher = props => {
   return null;
 };
 
-const getLandingFee = data => getLandingFeeText(
-  data.landingCount,
-  data.landingFeeSingle,
-  data.landingFeeTotal,
-  data.goAroundCount,
-  data.goAroundFeeSingle,
-  data.goAroundFeeTotal
-)
+const getLandingFee = data => {
+  if (typeof data.feeTotalGross === 'number') {
+    return `CHF ${formatMoney(data.feeTotalGross)}`
+  }
+
+  if (typeof data.landingFeeTotal === 'number') {
+    const total = data.landingFeeTotal + (data.goAroundFeeTotal || 0)
+    return `CHF ${formatMoney(total)}`
+  }
+
+  return null
+}
 
 class MovementDetails extends React.PureComponent {
 
