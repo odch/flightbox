@@ -19,13 +19,10 @@ const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
   const isInstruction = flightType === 'instruction'
 
   const factor = getFactor(isHomebase, isHeli, isInstruction)
-  const vatPercentage = getVat(isHomebase, isHeli, isInstruction)
   const baseFee = getBaseFee(mtow)
 
   const fee = baseFee * factor
-  const feeWithVat = fee * (1 + vatPercentage/100)
-
-  const roundedFee = roundToFiveCents(feeWithVat)
+  const roundedFee = roundToOneCent(fee)
 
   return {fee: roundedFee};
 }
@@ -38,6 +35,34 @@ const getFactor = (isHomebase, isHeli, isInstruction) => {
 const getVat = (isHomebase, isHeli, isInstruction) => {
   const factorName = getFactorName(isHomebase, isHeli, isInstruction)
   return data.vat[factorName]
+}
+
+const getVatRate = (flightType, aircraftOrigin, aircraftCategory) => {
+  const isHomebase = aircraftOrigin === AircraftOrigin.HOME_BASE || aircraftOrigin === AircraftOrigin.CLUB
+
+  if (flightTypeAircraftType(aircraftCategory) === 'glider') {
+    return getGliderVatRate(flightType, isHomebase)
+  }
+
+  const isHeli = isHelicopter(aircraftCategory)
+  const isInstruction = flightType === 'instruction'
+
+  return getVat(isHomebase, isHeli, isInstruction)
+}
+
+const getGliderVatRate = (flightType, isHomebase) => {
+  const match = flightType.match(/^glider_(instruction|private)_(self|winch|aerotow)$/)
+  if (!match) {
+    throw new Error('Unsupported flight type ' + flightType)
+  }
+  const instructionPrivateType = match[1]
+  const gliderBaseName = match[2]
+
+  const isInstruction = instructionPrivateType === 'instruction'
+
+  return gliderBaseName === 'winch' && !isHomebase
+    ? getVat(true, false, false) // same factor as homebase (non-instruction) for non-homebase if winch
+    : getVat(isHomebase, false, isInstruction)
 }
 
 const getFactorName = (isHomebase, isHeli, isInstruction) => {
@@ -80,22 +105,18 @@ const getGliderFee = (flightType, isHomebase) => {
   const factor = gliderBaseName === 'winch' && !isHomebase
     ? getFactor(true, false, false) // same factor as homebase (non-instruction) for non-homebase if winch
     : getFactor(isHomebase, false, isInstruction)
-  const vatPercentage = gliderBaseName === 'winch' && !isHomebase
-    ? getVat(true, false, false) // same factor as homebase (non-instruction) for non-homebase if winch
-    : getVat(isHomebase, false, isInstruction)
 
   const fee = baseFee * factor
 
-  const feeWithVat = fee * (1 + vatPercentage/100)
-
-  const roundedFee = roundToFiveCents(feeWithVat)
+  const roundedFee = roundToOneCent(fee)
 
   return {fee: roundedFee}
 }
 
-const roundToFiveCents = val => Math.round(val * 20) / 20;
+const roundToOneCent = val => Math.round(val * 100) / 100;
 
 export default {
   getLandingFee,
-  getGoAroundFee
+  getGoAroundFee,
+  getVatRate
 }

@@ -6,7 +6,7 @@ import validate from '../../validate';
 import {renderAerodromeDropdown, renderDateField, renderIncrementationField, renderTimeField} from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
-import {getAircraftOrigin, updateGoAroundFees, updateLandingFees} from '../../../../util/landingFees'
+import {getAircraftOrigin, updateFeesTotal, updateGoAroundFees, updateLandingFees} from '../../../../util/landingFees'
 
 const toNumber = value => {
   if (typeof value === 'number') {
@@ -18,13 +18,15 @@ const toNumber = value => {
   return undefined;
 };
 
-const updateFees = (updateFn, count, changeAction, formValues, aircraftSettings) => {
+const updateFees = (updateFn, count, changeAction, formValues, aircraftSettings, callback) => {
   const mtow = formValues['mtow'];
   const aircraftCategory = formValues['aircraftCategory'];
   const flightType = formValues['flightType'];
   const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], aircraftSettings);
 
-  updateFn(changeAction, mtow, flightType, aircraftOrigin, aircraftCategory, count);
+  const newTotal = updateFn(changeAction, mtow, flightType, aircraftOrigin, aircraftCategory, count);
+
+  callback(newTotal, flightType, aircraftOrigin, aircraftCategory)
 
   return count;
 }
@@ -66,7 +68,13 @@ const DepartureArrivalPage = (props) => {
           parse={e => e.target.value}
           label="Anzahl Landungen"
           readOnly={props.readOnly}
-          normalize={landingCount => updateFees(updateLandingFees, landingCount, change, formValues, aircraftSettings)}
+          normalize={landingCount => updateFees(
+            updateLandingFees, landingCount, change, formValues, aircraftSettings,
+            (landingFeeTotal, flightType, aircraftOrigin, aircraftCategory) => {
+              const goAroundFeeTotal = formValues['goAroundFeeTotal']
+              updateFeesTotal(change, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory)
+            }
+          )}
         />
         <Field
           name="goAroundCount"
@@ -75,7 +83,13 @@ const DepartureArrivalPage = (props) => {
           parse={e => e.target.value}
           label="Anzahl Durchstarts (ohne Aufsetzen)"
           readOnly={props.readOnly}
-          normalize={goAroundCount => updateFees(updateGoAroundFees, goAroundCount, change, formValues, aircraftSettings)}
+          normalize={goAroundCount => updateFees(
+            updateGoAroundFees, goAroundCount, change, formValues, aircraftSettings,
+            (goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory) => {
+              const landingFeeTotal = formValues['landingFeeTotal']
+              updateFeesTotal(change, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory)
+            }
+          )}
         />
       </FieldSet>
       <WizardNavigation previousStep={previousPage} cancel={props.cancel}/>

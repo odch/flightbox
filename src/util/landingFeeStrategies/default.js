@@ -35,7 +35,13 @@ const getFee = (feesDefinition, mtow, flightType, aircraftOrigin) => {
   return {fee: mtowRange.fee, billingProduct: mtowRange.billingProduct};
 }
 
+/**
+ * Not implemented for the default strategy. VAT is included in fee where VAT is applicable.
+ */
+const getVatRate = (flightType, aircraftOrigin, aircraftCategory) => 0
+
 export default {
   getLandingFee,
-  getGoAroundFee
+  getGoAroundFee,
+  getVatRate
 }
