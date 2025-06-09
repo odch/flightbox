@@ -178,7 +178,11 @@ class InvoicesReport {
       style: 'subHeader'
     })
 
-    let landingFeeSum = 0
+    let netFeeSum = 0
+    let vatSum = 0
+    let roundingDiffSum = 0
+    let grossFeeSum = 0
+
     const rows = []
 
     arrivals.forEach(arrival => {
@@ -191,9 +195,10 @@ class InvoicesReport {
         lastname,
         email,
         flightType,
-        landingCount,
-        landingFeeSingle,
-        landingFeeTotal,
+        feeTotalNet,
+        feeVat,
+        feeRoundingDifference,
+        feeTotalGross,
       } = arrival;
 
       rows.push([
@@ -205,18 +210,34 @@ class InvoicesReport {
         lastname,
         email,
         getFlightTypeLabel(flightType),
-        {text: landingCount, alignment: 'right'},
-        {text: formatMoney(landingFeeSingle), alignment: 'right'},
-        {text: formatMoney(landingFeeTotal), alignment: 'right'}
+        {text: formatMoney(feeTotalNet), alignment: 'right'},
+        {text: formatMoney(feeVat), alignment: 'right'},
+        {text: formatMoney(feeRoundingDifference), alignment: 'right'},
+        {text: formatMoney(feeTotalGross), alignment: 'right'}
       ])
 
-      landingFeeSum += landingFeeTotal
+      netFeeSum += feeTotalNet
+      vatSum += feeVat
+      roundingDiffSum += feeRoundingDifference
+      grossFeeSum += feeTotalGross
     })
 
-    rows.push([{colSpan: 10, text: ''}, '', '', '', '', '', '', '', '', '', {
+    rows.push([{colSpan: 8, text: ''}, '', '', '', '', '', '', '', {
       alignment: 'right',
       bold: true,
-      text: formatMoney(landingFeeSum)
+      text: formatMoney(netFeeSum)
+    }, {
+      alignment: 'right',
+      bold: true,
+      text: formatMoney(vatSum)
+    }, {
+      alignment: 'right',
+      bold: true,
+      text: formatMoney(roundingDiffSum)
+    }, {
+      alignment: 'right',
+      bold: true,
+      text: formatMoney(grossFeeSum)
     }])
 
     const table = {
@@ -231,9 +252,10 @@ class InvoicesReport {
             {text: 'Nachname', bold: true},
             {text: 'E-Mail', bold: true},
             {text: 'Flugtyp', bold: true},
-            {text: 'Anzahl Landungen', bold: true, alignment: 'right'},
-            {text: 'Landegebühr einzel', bold: true, alignment: 'right'},
-            {text: 'Landegebühr gesamt', bold: true, alignment: 'right'}
+            {text: 'Subtotal', bold: true, alignment: 'right'},
+            {text: 'MwSt.', bold: true, alignment: 'right'},
+            {text: 'Rundung', bold: true, alignment: 'right'},
+            {text: 'Total', bold: true, alignment: 'right'}
           ],
           ...rows
         ]
