@@ -6,7 +6,7 @@ import validate from '../../validate';
 import {renderSingleSelect, renderTextArea} from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
-import {getAircraftOrigin, updateGoAroundFees, updateLandingFees} from '../../../../util/landingFees';
+import {getAircraftOrigin, updateFeesTotal, updateGoAroundFees, updateLandingFees} from '../../../../util/landingFees';
 import CircuitsFieldHint from '../../CircuitsFieldHint';
 
 const FlightPage = (props) => {
@@ -29,8 +29,10 @@ const FlightPage = (props) => {
             const goAroundCount = formValues['goAroundCount'];
             const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], aircraftSettings);
 
-            updateLandingFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount);
-            updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount);
+            const landingFeeTotal = updateLandingFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount);
+            const goAroundFeeTotal = updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount);
+
+            updateFeesTotal(props.change, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory);
 
             return flightType
           }}

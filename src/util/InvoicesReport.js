@@ -11,6 +11,8 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 window.pdfFonts = pdfFonts; // actually not necessary, but otherwise `pdfFonts` is unused and would be removed
 
+const CHECKOUT_RECIPIENT_NAME = 'Online-Zahlungen'
+
 class InvoicesReport {
 
   constructor(year, month, options = {}) {
@@ -89,11 +91,15 @@ class InvoicesReport {
     const arrivalRecipients = this.groupArrivalsByRecipient(filteredArrivals)
     const customsRecipients = this.groupCustomsDeclarationsByRecipient(customsInvoices)
 
-    const recipientNames = Array.from(new Set([
+    let recipientNames = Array.from(new Set([
       ...Object.keys(arrivalRecipients),
       ...Object.keys(customsRecipients)
     ]))
+
+    // sort names, but CHECKOUT_RECIPIENT_NAME should always be the first
+    recipientNames = recipientNames.filter(name => name !== CHECKOUT_RECIPIENT_NAME)
     recipientNames.sort()
+    recipientNames.unshift(CHECKOUT_RECIPIENT_NAME)
 
     const monthLabel = this.getMonthLabel()
 
@@ -123,7 +129,7 @@ class InvoicesReport {
 
     arrivals.forEach(record => {
       const arrival = firebaseToLocal(record.val());
-      if (arrival.paymentMethod && arrival.paymentMethod.method === 'invoice') {
+      if (arrival.paymentMethod) {
         filtered.push(arrival)
       }
     });
@@ -135,13 +141,19 @@ class InvoicesReport {
     const recipients = {}
 
     arrivals.forEach(arrival => {
-      const invoiceRecipientName = arrival.paymentMethod.invoiceRecipientName
+      const invoiceRecipientName = arrival.paymentMethod.method === 'invoice'
+        ? arrival.paymentMethod.invoiceRecipientName
+        : arrival.paymentMethod.method === 'checkout'
+          ? CHECKOUT_RECIPIENT_NAME
+          : undefined
 
-      if (!recipients[invoiceRecipientName]) {
-        recipients[invoiceRecipientName] = []
+      if (invoiceRecipientName) {
+        if (!recipients[invoiceRecipientName]) {
+          recipients[invoiceRecipientName] = []
+        }
+
+        recipients[invoiceRecipientName].push(arrival)
       }
-
-      recipients[invoiceRecipientName].push(arrival)
     });
 
     return recipients
@@ -178,7 +190,11 @@ class InvoicesReport {
       style: 'subHeader'
     })
 
-    let landingFeeSum = 0
+    let netFeeSum = 0
+    let vatSum = 0
+    let roundingDiffSum = 0
+    let grossFeeSum = 0
+
     const rows = []
 
     arrivals.forEach(arrival => {
@@ -191,10 +207,33 @@ class InvoicesReport {
         lastname,
         email,
         flightType,
-        landingCount,
-        landingFeeSingle,
-        landingFeeTotal,
+        feeTotalNet,
+        feeVat,
+        feeRoundingDifference,
+        feeTotalGross,
+        landingFeeTotal // fallback only for the "transition" month
       } = arrival;
+
+      let totalNetFormatted
+      let vatFormatted
+      let roundingDiffFormatted
+      let totalGrossFormatted
+
+      if (typeof feeTotalGross === 'number') {
+        totalNetFormatted=formatMoney(feeTotalNet)
+        vatFormatted = formatMoney(feeVat)
+        roundingDiffFormatted = formatMoney(feeRoundingDifference)
+        totalGrossFormatted = formatMoney(feeTotalGross)
+
+        netFeeSum += feeTotalNet
+        vatSum += feeVat
+        roundingDiffSum += feeRoundingDifference
+        grossFeeSum += feeTotalGross
+      } else { // fallback only for the "transition" month
+        totalGrossFormatted = formatMoney(landingFeeTotal)
+
+        grossFeeSum += landingFeeTotal
+      }
 
       rows.push([
         {text: dates.formatDate(date), alignment: 'right'},
@@ -205,18 +244,29 @@ class InvoicesReport {
         lastname,
         email,
         getFlightTypeLabel(flightType),
-        {text: landingCount, alignment: 'right'},
-        {text: formatMoney(landingFeeSingle), alignment: 'right'},
-        {text: formatMoney(landingFeeTotal), alignment: 'right'}
+        {text: totalNetFormatted, alignment: 'right'},
+        {text: vatFormatted, alignment: 'right'},
+        {text: roundingDiffFormatted, alignment: 'right'},
+        {text: totalGrossFormatted, alignment: 'right'}
       ])
-
-      landingFeeSum += landingFeeTotal
     })
 
-    rows.push([{colSpan: 10, text: ''}, '', '', '', '', '', '', '', '', '', {
+    rows.push([{colSpan: 8, text: ''}, '', '', '', '', '', '', '', {
       alignment: 'right',
       bold: true,
-      text: formatMoney(landingFeeSum)
+      text: formatMoney(netFeeSum)
+    }, {
+      alignment: 'right',
+      bold: true,
+      text: formatMoney(vatSum)
+    }, {
+      alignment: 'right',
+      bold: true,
+      text: formatMoney(roundingDiffSum)
+    }, {
+      alignment: 'right',
+      bold: true,
+      text: formatMoney(grossFeeSum)
     }])
 
     const table = {
@@ -231,9 +281,10 @@ class InvoicesReport {
             {text: 'Nachname', bold: true},
             {text: 'E-Mail', bold: true},
             {text: 'Flugtyp', bold: true},
-            {text: 'Anzahl Landungen', bold: true, alignment: 'right'},
-            {text: 'Landegebühr einzel', bold: true, alignment: 'right'},
-            {text: 'Landegebühr gesamt', bold: true, alignment: 'right'}
+            {text: 'Subtotal', bold: true, alignment: 'right'},
+            {text: 'MwSt.', bold: true, alignment: 'right'},
+            {text: 'Rundung', bold: true, alignment: 'right'},
+            {text: 'Total', bold: true, alignment: 'right'}
           ],
           ...rows
         ]

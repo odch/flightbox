@@ -36,14 +36,7 @@ class ArrivalFinishContainer extends Component {
       invoiceRecipientSettings,
       email, // pilot email (also see `authEmail`)
       immatriculation,
-      landings,
-      landingFeeSingle,
-      landingFeeCode,
-      landingFeeTotal,
-      goArounds,
-      goAroundFeeSingle,
-      goAroundFeeCode,
-      goAroundFeeTotal,
+      fees,
       createMovementFromMovement,
       finish,
       isUpdate,
@@ -84,14 +77,7 @@ class ArrivalFinishContainer extends Component {
         immatriculation={immatriculation}
         isHomeBase={isHomeBase}
         itemKey={itemKey}
-        landings={landings}
-        landingFeeSingle={landingFeeSingle}
-        landingFeeCode={landingFeeCode}
-        landingFeeTotal={landingFeeTotal}
-        goArounds={goArounds}
-        goAroundFeeSingle={goAroundFeeSingle}
-        goAroundFeeCode={goAroundFeeCode}
-        goAroundFeeTotal={goAroundFeeTotal}
+        fees={fees}
         localUser={localUser}
         enabledPaymentMethods={enabledPaymentMethods}
         invoiceRecipientName={invoiceRecipient ? invoiceRecipient.name : undefined}
@@ -99,6 +85,21 @@ class ArrivalFinishContainer extends Component {
     );
   }
 }
+
+const feesShape = PropTypes.shape({
+  landings: PropTypes.number.isRequired,
+  landingFeeSingle: PropTypes.number,
+  landingFeeCode: PropTypes.string,
+  landingFeeTotal: PropTypes.number,
+  goArounds: PropTypes.number,
+  goAroundFeeSingle: PropTypes.number,
+  goAroundFeeCode: PropTypes.string,
+  goAroundFeeTotal: PropTypes.number,
+  totalNet: PropTypes.number,
+  vat: PropTypes.number,
+  roundingDifference: PropTypes.number,
+  totalGross: PropTypes.number
+})
 
 ArrivalFinishContainer.propTypes = {
   aircraftSettings: PropTypes.shape({
@@ -122,14 +123,7 @@ ArrivalFinishContainer.propTypes = {
   itemKey: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
   immatriculation: PropTypes.string.isRequired,
-  landings: PropTypes.number.isRequired,
-  landingFeeSingle: PropTypes.number,
-  landingFeeCode: PropTypes.string,
-  landingFeeTotal: PropTypes.number,
-  goArounds: PropTypes.number,
-  goAroundFeeSingle: PropTypes.number,
-  goAroundFeeCoe: PropTypes.string,
-  goAroundFeeTotal: PropTypes.number
+  fees: feesShape.isRequired,
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -142,14 +136,20 @@ const mapStateToProps = (state, ownProps) => {
     itemKey: state.form.wizard.values.key || state.ui.wizard.itemKey,
     email: state.form.wizard.values.email,
     immatriculation: state.form.wizard.values.immatriculation,
-    landings: state.form.wizard.values.landingCount,
-    landingFeeSingle: state.form.wizard.values.landingFeeSingle,
-    landingFeeCode: state.form.wizard.values.landingFeeCode,
-    landingFeeTotal: state.form.wizard.values.landingFeeTotal,
-    goArounds: state.form.wizard.values.goAroundCount,
-    goAroundFeeSingle: state.form.wizard.values.goAroundFeeSingle,
-    goAroundFeeCode: state.form.wizard.values.goAroundFeeCode,
-    goAroundFeeTotal: state.form.wizard.values.goAroundFeeTotal,
+    fees: {
+      landings: state.form.wizard.values.landingCount,
+      landingFeeSingle: state.form.wizard.values.landingFeeSingle,
+      landingFeeCode: state.form.wizard.values.landingFeeCode,
+      landingFeeTotal: state.form.wizard.values.landingFeeTotal,
+      goArounds: state.form.wizard.values.goAroundCount,
+      goAroundFeeSingle: state.form.wizard.values.goAroundFeeSingle,
+      goAroundFeeCode: state.form.wizard.values.goAroundFeeCode,
+      goAroundFeeTotal: state.form.wizard.values.goAroundFeeTotal,
+      totalNet: state.form.wizard.values.feeTotalNet,
+      vat: state.form.wizard.values.feeVat,
+      roundingDifference: state.form.wizard.values.feeRoundingDifference,
+      totalGross: state.form.wizard.values.feeTotalGross
+    },
     localUser: state.auth.data.local,
     authEmail: state.auth.data.email,
   });

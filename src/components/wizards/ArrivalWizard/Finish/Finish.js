@@ -1,13 +1,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {getFromItemKey} from '../../../../util/reference-number';
-import {getLandingFeeText} from '../../../../util/landingFees';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
-import Message, {ReferenceNumberMessage} from './Message';
+import {ReferenceNumberMessage} from './Message';
 import FinishActions from './FinishActions'
 import PaymentMethod from '../../../../containers/PaymentMethodContainer'
 import {HeadingType} from '../../MovementWizard'
+import Fees from './Fees'
 
 const getHeading = (headingType) =>
   headingType === HeadingType.UPDATED
@@ -24,6 +24,18 @@ const Finish = props => {
     itemKey,
     email,
     immatriculation,
+    fees,
+    enabledPaymentMethods,
+    invoiceRecipientName,
+    createMovementFromMovement,
+    finish
+  } = props
+  const heading = getHeading(headingType);
+
+
+  const showPayment = (isHomeBase === false || __CONF__.homebasePayment) && !isUpdate && !!fees
+
+  const {
     landings,
     landingFeeSingle,
     landingFeeCode,
@@ -32,18 +44,8 @@ const Finish = props => {
     goAroundFeeSingle,
     goAroundFeeCode,
     goAroundFeeTotal,
-    enabledPaymentMethods,
-    invoiceRecipientName,
-    createMovementFromMovement,
-    finish
-  } = props
-  const heading = getHeading(headingType);
-  const landingFeeMsg = (isHomeBase === false || __CONF__.homebasePayment)
-    ? getLandingFeeText(landings, landingFeeSingle, landingFeeTotal, goArounds, goAroundFeeSingle, goAroundFeeTotal)
-    : null;
-  const amount = (landingFeeTotal || 0) + (goAroundFeeTotal || 0)
-
-  const showPayment = (isHomeBase === false || __CONF__.homebasePayment) && !isUpdate && !!landingFeeMsg
+    totalGross
+  } = fees
 
   return (
     <Wrapper>
@@ -51,14 +53,14 @@ const Finish = props => {
       {showPayment ? (
         <>
           <ReferenceNumberMessage>Referenznummer: {getFromItemKey(itemKey)}</ReferenceNumberMessage>
-          <Message>Landetaxe: {landingFeeMsg}</Message>
+          <Fees fees={fees}/>
           <PaymentMethod
             itemKey={itemKey}
             email={email}
             immatriculation={immatriculation}
             createMovementFromMovement={createMovementFromMovement}
             finish={finish}
-            amount={amount}
+            amount={totalGross}
             landings={landings}
             landingFeeSingle={landingFeeSingle}
             landingFeeCode={landingFeeCode}
@@ -78,6 +80,21 @@ const Finish = props => {
   );
 };
 
+const feesShape = PropTypes.shape({
+  landings: PropTypes.number.isRequired,
+  landingFeeSingle: PropTypes.number,
+  landingFeeCode: PropTypes.string,
+  landingFeeTotal: PropTypes.number,
+  goArounds: PropTypes.number,
+  goAroundFeeSingle: PropTypes.number,
+  goAroundFeeCode: PropTypes.string,
+  goAroundFeeTotal: PropTypes.number,
+  totalNet: PropTypes.number,
+  vat: PropTypes.number,
+  roundingDifference: PropTypes.number,
+  totalGross: PropTypes.number
+})
+
 Finish.propTypes = {
   finish: PropTypes.func.isRequired,
   createMovementFromMovement: PropTypes.func.isRequired,
@@ -87,14 +104,7 @@ Finish.propTypes = {
   itemKey: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
   immatriculation: PropTypes.string.isRequired,
-  landings: PropTypes.number.isRequired,
-  landingFeeSingle: PropTypes.number,
-  landingFeeCode: PropTypes.string,
-  landingFeeTotal: PropTypes.number,
-  goArounds: PropTypes.number,
-  goAroundFeeSingle: PropTypes.number,
-  goAroundFeeCode: PropTypes.string,
-  goAroundFeeTotal: PropTypes.number,
+  fees: feesShape.isRequired,
   localUser: PropTypes.bool,
   enabledPaymentMethods: PropTypes.arrayOf(PropTypes.string).isRequired,
 };

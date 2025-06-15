@@ -1,11 +1,4 @@
-import {
-  AircraftOrigin,
-  getAircraftOrigin,
-  getLandingFee,
-  getLandingFeeText,
-  updateGoAroundFees,
-  updateLandingFees
-} from './landingFees'
+import {AircraftOrigin, getAircraftOrigin, getLandingFee, updateGoAroundFees, updateLandingFees} from './landingFees'
 
 /**
  * Test landing fees defined as Jest global:
@@ -198,26 +191,6 @@ describe('util', () => {
       test('returns AircraftOrigin.OTHER if is foreign aircraft', () => {
         expect(getAircraftOrigin('HBCIY', aircraftSettings)).toBe(AircraftOrigin.OTHER);
       })
-    })
-
-    describe('getLandingFeeText', () => {
-      describe.each([
-        [undefined, undefined, undefined, undefined, undefined, undefined, null],
-        [1, 20, 20, undefined, undefined, undefined, 'CHF 20.00'],
-        [1, 20, 20, 0, 15, 0, 'CHF 20.00'],
-        [2, 20, 40, undefined, undefined, undefined, 'CHF 40.00 (2 Landungen à CHF 20.00)'],
-        [2, 20, 40, 0, 15, 0, 'CHF 40.00 (2 Landungen à CHF 20.00)'],
-        [1, 20, 20, 1, 15, 15, 'CHF 35.00 (1 Landung à CHF 20.00 und 1 Durchstart à CHF 15.00)'],
-        [1, 20, 20, 2, 15, 30, 'CHF 50.00 (1 Landung à CHF 20.00 und 2 Durchstarts à CHF 15.00)'],
-        [2, 20, 40, 2, 15, 30, 'CHF 70.00 (2 Landungen à CHF 20.00 und 2 Durchstarts à CHF 15.00)']
-      ])(
-        'getLandingFeeText(%i, %i, %i, %i, %i, %i)',
-        (landings, landingFeeSingle, landingFeeTotal, goArounds, goAroundFeeSingle, goAroundFeeTotal, expected) => {
-          test(`returns ${expected}`, () => {
-            expect(getLandingFeeText(landings, landingFeeSingle, landingFeeTotal, goArounds, goAroundFeeSingle, goAroundFeeTotal)).toBe(expected);
-          });
-        }
-      );
     })
   })
 })
