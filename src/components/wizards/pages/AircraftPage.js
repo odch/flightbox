@@ -20,19 +20,21 @@ const AircraftPage = (props) => {
           readOnly={props.readOnly}
           normalize={aircraft => {
             if (aircraft) {
-              props.change('aircraftType', aircraft.type);
-              props.change('mtow', aircraft.mtow);
-              props.change('aircraftCategory', aircraft.category)
+              if (formValues['type'] === 'arrival') {
+                props.change('aircraftType', aircraft.type);
+                props.change('mtow', aircraft.mtow);
+                props.change('aircraftCategory', aircraft.category)
 
-              const flightType = formValues['flightType'];
-              const landingCount = formValues['landingCount'];
-              const goAroundCount = formValues['goAroundCount'];
-              const aircraftOrigin = getAircraftOrigin(aircraft.key, aircraftSettings);
+                const flightType = formValues['flightType'];
+                const landingCount = formValues['landingCount'];
+                const goAroundCount = formValues['goAroundCount'];
+                const aircraftOrigin = getAircraftOrigin(aircraft.key, aircraftSettings);
 
-              const landingFeeTotal = updateLandingFees(props.change, aircraft.mtow, flightType, aircraftOrigin, aircraft.category, landingCount);
-              const goAroundFeeTotal = updateGoAroundFees(props.change, aircraft.mtow, flightType, aircraftOrigin, aircraft.category, goAroundCount);
+                const landingFeeTotal = updateLandingFees(props.change, aircraft.mtow, flightType, aircraftOrigin, aircraft.category, landingCount);
+                const goAroundFeeTotal = updateGoAroundFees(props.change, aircraft.mtow, flightType, aircraftOrigin, aircraft.category, goAroundCount);
 
-              updateFeesTotal(props.change, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraft.category);
+                updateFeesTotal(props.change, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraft.category);
+              }
 
               return aircraft.key;
             }
@@ -62,16 +64,18 @@ const AircraftPage = (props) => {
             return null;
           }}
           normalize={mtow => {
-            const aircraftCategory = formValues['aircraftCategory']
-            const flightType = formValues['flightType']
-            const landingCount = formValues['landingCount']
-            const goAroundCount = formValues['goAroundCount']
-            const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], props.aircraftSettings);
+            if (formValues['type'] === 'arrival') {
+              const aircraftCategory = formValues['aircraftCategory']
+              const flightType = formValues['flightType']
+              const landingCount = formValues['landingCount']
+              const goAroundCount = formValues['goAroundCount']
+              const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], props.aircraftSettings);
 
-            const landingFeeTotal = updateLandingFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount)
-            const goAroundFeeTotal = updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount)
+              const landingFeeTotal = updateLandingFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount)
+              const goAroundFeeTotal = updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount)
 
-            updateFeesTotal(props.change, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory);
+              updateFeesTotal(props.change, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory);
+            }
 
             return mtow
           }}
@@ -82,16 +86,18 @@ const AircraftPage = (props) => {
           label="Kategorie"
           readOnly={props.readOnly}
           normalize={aircraftCategory => {
-            const mtow = formValues['mtow']
-            const flightType = formValues['flightType']
-            const landingCount = formValues['landingCount']
-            const goAroundCount = formValues['goAroundCount']
-            const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], props.aircraftSettings);
+            if (formValues['type'] === 'arrival') {
+              const mtow = formValues['mtow']
+              const flightType = formValues['flightType']
+              const landingCount = formValues['landingCount']
+              const goAroundCount = formValues['goAroundCount']
+              const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], props.aircraftSettings);
 
-            const landingFeeTotal = updateLandingFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount)
-            const goAroundFeeTotal = updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount)
+              const landingFeeTotal = updateLandingFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount)
+              const goAroundFeeTotal = updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount)
 
-            updateFeesTotal(props.change, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory);
+              updateFeesTotal(props.change, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory);
+            }
 
             return aircraftCategory
           }}
