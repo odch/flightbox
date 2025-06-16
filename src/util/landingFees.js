@@ -58,7 +58,7 @@ export const updateGoAroundFees = (changeAction, mtow, flightType, aircraftOrigi
   );
 }
 
-const getFeesTotals = (landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory) => {
+const getFeesTotals = (landingFeeTotal = 0, goAroundFeeTotal = 0, flightType, aircraftOrigin, aircraftCategory) => {
   const totalNet = landingFeeTotal + goAroundFeeTotal
 
   const taxRate = getTaxRate(flightType, aircraftOrigin, aircraftCategory);
