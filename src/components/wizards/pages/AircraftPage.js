@@ -20,11 +20,11 @@ const AircraftPage = (props) => {
           readOnly={props.readOnly}
           normalize={aircraft => {
             if (aircraft) {
-              if (formValues['type'] === 'arrival') {
-                props.change('aircraftType', aircraft.type);
-                props.change('mtow', aircraft.mtow);
-                props.change('aircraftCategory', aircraft.category)
+              props.change('aircraftType', aircraft.type);
+              props.change('mtow', aircraft.mtow);
+              props.change('aircraftCategory', aircraft.category)
 
+              if (formValues['type'] === 'arrival') {
                 const flightType = formValues['flightType'];
                 const landingCount = formValues['landingCount'];
                 const goAroundCount = formValues['goAroundCount'];
