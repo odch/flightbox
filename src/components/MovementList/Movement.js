@@ -57,6 +57,7 @@ class Movement extends React.PureComponent {
           onDelete={props.onDelete}
           locked={props.locked}
           isHomeBase={isHomeBase}
+          isAdmin={props.isAdmin}
         />
         {props.selected && (
           <div>

@@ -6,13 +6,22 @@ import Action from './Action';
 import MaterialIcon from '../MaterialIcon';
 import HomeBaseIcon from './HomeBaseIcon';
 import {ACTION_LABELS, TYPE_LABELS} from './labels';
+import NoPaymentTag from './NoPaymentTag'
 
 const ICON_HEIGHT = 30;
 
+const TagsWrapper = styled.div`
+  padding: 0 1em 0.5em 1em;
+  display: flex;
+`
+
 const Wrapper = styled.div`
+  cursor: pointer;
+`
+
+const ColumnsWrapper = styled.div`
   padding: 1em;
   overflow: hidden;
-  cursor: pointer;
   display: flex;
   ${props => props.selected && `
     font-weight: bold;
@@ -131,56 +140,72 @@ class MovementHeader extends React.PureComponent {
       : null;
     const time = dates.formatTime(props.data.date, props.data.time);
 
+    const showPayment = (props.isHomeBase === false || __CONF__.homebasePayment)
+    const paymentMissing = showPayment
+      && props.data.type === 'arrival'
+      && props.data.landingFeeTotal !== undefined
+      && !props.data.paymentMethod
+    const hasTags = paymentMissing
+
     return (
       <Wrapper
         onClick={props.onClick}
         selected={props.selected}
-        locked={props.locked}
-        hasAssociatedMovement={
-          props.data.associatedMovement
-          && ['departure', 'arrival'].includes(props.data.associatedMovement.type)
-        }
-      >
-        <Column className="type">
-          <MaterialIcon
-            icon={TYPE_LABELS[props.data.type].icon}
-            size={ICON_HEIGHT}
-            title={TYPE_LABELS[props.data.type].label}
-          />
-        </Column>
-        <Column className="immatriculation" alignMiddle>{props.data.immatriculation}</Column>
-        <Column className="homebase" alignMiddle>
-          <HomeBaseIcon isHomeBase={props.isHomeBase}/>
-        </Column>
-        <Column className="pilot" alignMiddle>{props.data.lastname}</Column>
-        <Column className="datetime" alignMiddle={!date}>
-          {date && <Date className="date">{date}</Date>}
-          <div className="time">{time}</div>
-        </Column>
-        <Column className="location" alignMiddle>{getLocation(props.data)}</Column>
-        <ActionColumn className="action" alignMiddle highlight>
-          {props.data.associatedMovement && props.data.associatedMovement.type === 'none' ? (
-            <Action
-              label={ACTION_LABELS[props.data.type].label}
-              icon={ACTION_LABELS[props.data.type].icon}
-              onClick={this.handleActionClick}
-              responsive
-            />
-          ) : props.data.associatedMovement === null
-            ? <MaterialIcon icon="sync" rotate="left"/> // show rotating icon if `associatedMovement` is null (= state where the associated movement is being monitored, but not set yet)
-            : null // if `associatedMovement` is undefined, we don't want to show anything (= state before the associated movement is even being monitored)
+        locked={props.locked}>
+        <ColumnsWrapper
+          hasAssociatedMovement={
+            props.data.associatedMovement
+            && ['departure', 'arrival'].includes(props.data.associatedMovement.type)
           }
-        </ActionColumn>
-        <ActionColumn className="delete" alignMiddle>
-          {!props.locked && (
-            <Action
-              label="Löschen"
-              icon="delete"
-              onClick={this.handleDeleteClick}
-              responsive
+        >
+          <Column className="type">
+            <MaterialIcon
+              icon={TYPE_LABELS[props.data.type].icon}
+              size={ICON_HEIGHT}
+              title={TYPE_LABELS[props.data.type].label}
             />
-          )}
-        </ActionColumn>
+          </Column>
+          <Column className="immatriculation" alignMiddle>{props.data.immatriculation}</Column>
+          <Column className="homebase" alignMiddle>
+            <HomeBaseIcon isHomeBase={props.isHomeBase}/>
+          </Column>
+          <Column className="pilot" alignMiddle>{props.data.lastname}</Column>
+          <Column className="datetime" alignMiddle={!date}>
+            {date && <Date className="date">{date}</Date>}
+            <div className="time">{time}</div>
+          </Column>
+          <Column className="location" alignMiddle>{getLocation(props.data)}</Column>
+          <ActionColumn className="action" alignMiddle highlight>
+            {props.data.associatedMovement && props.data.associatedMovement.type === 'none' ? (
+              <Action
+                label={ACTION_LABELS[props.data.type].label}
+                icon={ACTION_LABELS[props.data.type].icon}
+                onClick={this.handleActionClick}
+                responsive
+              />
+            ) : props.data.associatedMovement === null
+              ? <MaterialIcon icon="sync" rotate="left"/> // show rotating icon if `associatedMovement` is null (= state where the associated movement is being monitored, but not set yet)
+              : null // if `associatedMovement` is undefined, we don't want to show anything (= state before the associated movement is even being monitored)
+            }
+          </ActionColumn>
+          <ActionColumn className="delete" alignMiddle>
+            {!props.locked && (
+              <Action
+                label="Löschen"
+                icon="delete"
+                onClick={this.handleDeleteClick}
+                responsive
+              />
+            )}
+          </ActionColumn>
+        </ColumnsWrapper>
+        {hasTags && (
+          <TagsWrapper>
+            {props.isAdmin && paymentMissing && (
+              <NoPaymentTag/>
+            )}
+          </TagsWrapper>
+        )}
       </Wrapper>
     );
   }
@@ -201,7 +226,8 @@ MovementHeader.propTypes = {
   onDelete: PropTypes.func.isRequired,
   locked: PropTypes.bool,
   onClick: PropTypes.func,
-  isHomeBase: PropTypes.bool.isRequired
+  isHomeBase: PropTypes.bool.isRequired,
+  isAdmin: PropTypes.bool.isRequired
 };
 
 export default MovementHeader;
