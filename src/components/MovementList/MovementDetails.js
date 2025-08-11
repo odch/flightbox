@@ -3,6 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import dates from '../../util/dates';
 import {getLabel as getFlightTypeLabel} from '../../util/flightTypes';
+import {getLabel as getPaymentMethodLabel} from '../../util/paymentMethods';
 import {getArrivalRouteLabel, getDepartureRouteLabel} from '../../util/routes';
 import {getItemLabel as getCarriageVoucherItemLabel} from '../../util/carriageVoucher';
 import newLineToBr from '../../util/newLineToBr';
@@ -12,6 +13,7 @@ import HomeBaseIcon from './HomeBaseIcon';
 import {getFromItemKey} from '../../util/reference-number';
 import {maskEmail, maskPhone} from '../../util/masking'
 import formatMoney from '../../util/formatMoney'
+import NoPaymentFieldValue from './NoPaymentFieldValue'
 
 const Content = styled.div`
   padding: 1.5em 1em 0 1em;
@@ -54,6 +56,8 @@ class MovementDetails extends React.PureComponent {
 
     const date = dates.formatDate(props.data.date);
     const time = dates.formatTime(props.data.date, props.data.time);
+
+    const showPaymentMethod = (props.isAdmin || !props.data.paymentMethod) && (props.isHomeBase === false || __CONF__.homebasePayment)
 
     return (
         <Content className={props.className}>
@@ -123,6 +127,14 @@ class MovementDetails extends React.PureComponent {
             <DetailsBox label="Gebühren">
               <MovementField label="Referenznummer" value={getFromItemKey(props.data.key)}/>
               <MovementField label="Landetaxe" value={getLandingFee(props.data)}/>
+              {showPaymentMethod && (
+                <MovementField
+                  label="Zahlungsart"
+                  value={props.data.paymentMethod
+                    ? getPaymentMethodLabel(props.data.paymentMethod)
+                    : <NoPaymentFieldValue arrivalId={props.data.key}/>}
+                />
+              )}
             </DetailsBox>
           )}
         </Content>
