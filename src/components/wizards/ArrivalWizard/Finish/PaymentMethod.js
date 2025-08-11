@@ -9,27 +9,7 @@ import FinishActions from './FinishActions'
 import TwintPaymentMessage from './TwintPaymentMessage'
 import {withRouter} from 'react-router-dom'
 import {getFromItemKey} from '../../../../util/reference-number'
-
-const PAYMENT_METHODS = [{
-  label: 'Karte',
-  value: 'card'
-},
-  {
-    label: 'Direkt zahlen',
-    value: 'checkout'
-  },
-  {
-    label: 'Bar',
-    value: 'cash'
-  },
-  {
-    label: 'Twint',
-    value: 'twint_external'
-  },
-  {
-    label: 'Rechnung',
-    value: 'invoice'
-  }]
+import {PAYMENT_METHODS} from '../../../../util/paymentMethods'
 
 const Container = styled.div`
 `
@@ -229,8 +209,11 @@ class PaymentMethod extends Component {
                   .filter(method => enabledPaymentMethods.includes(method.value))
                   .map(method => method.value === 'invoice' ? ({
                     ...method,
-                    label: `${method.label} (${invoiceRecipientName})`
-                  }) : method)}
+                    label: `${method.ctaLabel ||method.label} (${invoiceRecipientName})`
+                  }) : {
+                    ...method,
+                    label: method.ctaLabel || method.label
+                  })}
                 orientation="vertical"
                 onChange={e => setMethod(e.target.value)}
                 value={method}
