@@ -305,7 +305,11 @@ class InvoicesReport {
       style: 'subHeader'
     })
 
-    let feeSum = 0
+    let netFeeSum = 0
+    let vatSum = 0
+    let roundingDiffSum = 0
+    let grossFeeSum = 0
+
     const rows = []
 
     customsDeclarations.forEach(declaration => {
@@ -318,22 +322,57 @@ class InvoicesReport {
         fee,
       } = declaration;
 
+      let totalNetFormatted
+      let vatFormatted
+      let roundingDiffFormatted
+      let totalGrossFormatted
+
+      if (typeof fee === 'number') {
+        // fallback only for the "transition" month
+        totalGrossFormatted = formatMoney(fee)
+
+        grossFeeSum += fee
+      } else {
+        totalNetFormatted=formatMoney(fee.totalNet)
+        vatFormatted = formatMoney(fee.vat)
+        roundingDiffFormatted = formatMoney(fee.roundingDifference)
+        totalGrossFormatted = formatMoney(fee.totalGrossRounded)
+
+        netFeeSum += fee.totalNet
+        vatSum += fee.vat
+        roundingDiffSum += fee.roundingDifference
+        grossFeeSum += fee.totalGrossRounded
+      }
+
       rows.push([
         {text: dates.formatDateTime(created), alignment: 'right'},
         {text: date, alignment: 'right'},
         registration,
         email,
         direction === 'arrival' ? 'Einflug' : 'Ausflug',
-        {text: formatMoney(fee), alignment: 'right'}
+        {text: totalNetFormatted, alignment: 'right'},
+        {text: vatFormatted, alignment: 'right'},
+        {text: roundingDiffFormatted, alignment: 'right'},
+        {text: totalGrossFormatted, alignment: 'right'}
       ])
-
-      feeSum += fee
     })
 
     rows.push([{colSpan: 4, text: ''}, '', '', '', '', {
       alignment: 'right',
       bold: true,
-      text: formatMoney(feeSum)
+      text: formatMoney(netFeeSum)
+    }, {
+      alignment: 'right',
+      bold: true,
+      text: formatMoney(vatSum)
+    }, {
+      alignment: 'right',
+      bold: true,
+      text: formatMoney(roundingDiffSum)
+    }, {
+      alignment: 'right',
+      bold: true,
+      text: formatMoney(grossFeeSum)
     }])
 
     const table = {
@@ -345,7 +384,10 @@ class InvoicesReport {
             {text: 'Immatrikulation', bold: true},
             {text: 'E-Mail', bold: true},
             {text: 'Einflug / Ausflug', bold: true},
-            {text: 'Gebühr', bold: true, alignment: 'right'}
+            {text: 'Subtotal', bold: true, alignment: 'right'},
+            {text: 'MwSt.', bold: true, alignment: 'right'},
+            {text: 'Rundung', bold: true, alignment: 'right'},
+            {text: 'Total', bold: true, alignment: 'right'}
           ],
           ...rows
         ]
