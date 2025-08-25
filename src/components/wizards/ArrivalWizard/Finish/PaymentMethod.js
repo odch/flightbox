@@ -81,7 +81,7 @@ class PaymentMethod extends Component {
 
     const {
       itemKey,
-      invoiceRecipientName,
+      invoiceRecipientNames,
       email,
       immatriculation,
       amount,
@@ -104,8 +104,9 @@ class PaymentMethod extends Component {
 
     if (['cash', 'twint_external'].includes(method)) {
       setStep(Step.COMPLETED)
-    } else if (method === 'invoice') {
-      paymentMethodData.invoiceRecipientName = invoiceRecipientName
+    } else if (method.startsWith('invoice')) {
+      paymentMethodData.method = 'invoice'
+      paymentMethodData.invoiceRecipientName = method.substring(method.indexOf('[') + 1, method.indexOf(']'))
       setStep(Step.COMPLETED)
     } else if (method === 'card') {
       setStep(Step.CONFIRMED)
@@ -161,8 +162,24 @@ class PaymentMethod extends Component {
       setMethod,
       cancelCardPayment,
       enabledPaymentMethods,
-      invoiceRecipientName
+      invoiceRecipientNames
     } = this.props
+
+    const availableMethods = PAYMENT_METHODS
+      .filter(method => enabledPaymentMethods.includes(method.value) && method.value !== 'invoice')
+      .map(method => ({
+        ...method,
+        label: method.ctaLabel || method.label
+      }))
+
+    if (enabledPaymentMethods.includes('invoice')) {
+      for (const invoiceRecipientName of invoiceRecipientNames) {
+        availableMethods.push({
+          value: `invoice[${invoiceRecipientName}]`,
+          label: `Rechnung (${invoiceRecipientName})`
+        })
+      }
+    }
 
     return (
       <Container>
@@ -205,15 +222,7 @@ class PaymentMethod extends Component {
             <InstructionMessage>Bitte wählen Sie eine Zahlungsart:</InstructionMessage>
             <SelectContainer>
               <SingleSelect
-                items={PAYMENT_METHODS
-                  .filter(method => enabledPaymentMethods.includes(method.value))
-                  .map(method => method.value === 'invoice' ? ({
-                    ...method,
-                    label: `${method.ctaLabel ||method.label} (${invoiceRecipientName})`
-                  }) : {
-                    ...method,
-                    label: method.ctaLabel || method.label
-                  })}
+                items={availableMethods}
                 orientation="vertical"
                 onChange={e => setMethod(e.target.value)}
                 value={method}

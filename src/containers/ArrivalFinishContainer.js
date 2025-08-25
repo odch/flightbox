@@ -9,18 +9,20 @@ import Finish, {FinishLoading} from '../components/wizards/ArrivalWizard/Finish'
 import {HeadingType} from '../components/wizards/MovementWizard'
 import objectToArray from '../util/objectToArray'
 
-const findInvoiceRecipient = (invoiceRecipients, authEmail) => {
+const findInvoiceRecipients = (invoiceRecipients, authEmail) => {
   if (!invoiceRecipients || !invoiceRecipients.loaded || invoiceRecipients.recipients.length === 0) {
     return null
   }
 
+  const matchingRecipients = []
+
   for (const invoiceRecipient of invoiceRecipients.recipients) {
     if (invoiceRecipient.emails && invoiceRecipient.emails.includes(authEmail)) {
-      return invoiceRecipient
+      matchingRecipients.push(invoiceRecipient)
     }
   }
 
-  return null
+  return matchingRecipients
 }
 
 class ArrivalFinishContainer extends Component {
@@ -58,11 +60,11 @@ class ArrivalFinishContainer extends Component {
       );
     }
 
-    const invoiceRecipient = findInvoiceRecipient(invoiceRecipientSettings, authEmail)
+    const invoiceRecipients = findInvoiceRecipients(invoiceRecipientSettings, authEmail)
 
     const enabledPaymentMethods = objectToArray(__CONF__.paymentMethods)
       .filter(method => method === 'card' ? localUser : true)
-      .filter(method => method === 'invoice' ? !!invoiceRecipient : true);
+      .filter(method => method === 'invoice' ? invoiceRecipients.length > 0 : true);
 
     const isHomeBase = aircraftSettings.club[immatriculation] === true
         || aircraftSettings.homeBase[immatriculation] === true;
@@ -80,7 +82,7 @@ class ArrivalFinishContainer extends Component {
         fees={fees}
         localUser={localUser}
         enabledPaymentMethods={enabledPaymentMethods}
-        invoiceRecipientName={invoiceRecipient ? invoiceRecipient.name : undefined}
+        invoiceRecipientNames={invoiceRecipients.map(recipient => recipient.name)}
       />
     );
   }
