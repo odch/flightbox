@@ -26,7 +26,7 @@ const Finish = props => {
     immatriculation,
     fees,
     enabledPaymentMethods,
-    invoiceRecipientName,
+    invoiceRecipientNames,
     createMovementFromMovement,
     finish
   } = props
@@ -70,7 +70,7 @@ const Finish = props => {
             goAroundFeeCode={goAroundFeeCode}
             goAroundFeeTotal={goAroundFeeTotal}
             enabledPaymentMethods={enabledPaymentMethods}
-            invoiceRecipientName={invoiceRecipientName}
+            invoiceRecipientNames={invoiceRecipientNames}
           />
         </>
       ) : (
