@@ -82,7 +82,7 @@ class ArrivalFinishContainer extends Component {
         fees={fees}
         localUser={localUser}
         enabledPaymentMethods={enabledPaymentMethods}
-        invoiceRecipientNames={invoiceRecipients.map(recipient => recipient.name)}
+        invoiceRecipientNames={invoiceRecipients ? invoiceRecipients.map(recipient => recipient.name) : []}
       />
     );
   }
