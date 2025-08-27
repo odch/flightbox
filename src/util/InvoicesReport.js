@@ -33,9 +33,10 @@ class InvoicesReport {
   generate(callback) {
     Promise.all([
         this.readArrivals(),
-        this.readCustomsDeclarationsInvoices()
-    ]).then(([arrivalsResult, customsInvoices]) => {
-      this.build(arrivalsResult, customsInvoices, callback);
+        this.readCustomsDeclarationsInvoices(),
+        this.readCustomsDeclarationsCheckouts()
+    ]).then(([arrivalsResult, customsInvoices, customsCheckouts]) => {
+      this.build(arrivalsResult, customsInvoices, customsCheckouts, callback);
     });
   }
 
@@ -50,9 +51,9 @@ class InvoicesReport {
     });
   }
 
-  async readCustomsDeclarationsInvoices() {
+  async fetchCustomsData(endpoint) {
     const idToken = await getIdToken()
-    const url = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/invoices?year=${this.year}&month=${this.month}`
+    const url = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/${endpoint}?year=${this.year}&month=${this.month}`
     const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${idToken}`
@@ -60,15 +61,23 @@ class InvoicesReport {
     })
 
     if (!response.ok) {
-      console.log('Failed to fetch customs invoices', response)
-      throw new Error('Failed to fetch customs invoices')
+      console.log(`Failed to fetch customs ${endpoint}`, response)
+      throw new Error(`Failed to fetch customs ${endpoint}`)
     }
 
     return await response.json()
   }
 
-  build(arrivals, customsInvoices, callback) {
-    const content = this.buildContent(arrivals, customsInvoices)
+  async readCustomsDeclarationsInvoices() {
+    return this.fetchCustomsData('invoices')
+  }
+
+  async readCustomsDeclarationsCheckouts() {
+    return this.fetchCustomsData('checkouts')
+  }
+
+  build(arrivals, customsInvoices, customsCheckouts, callback) {
+    const content = this.buildContent(arrivals, customsInvoices, customsCheckouts)
     const docDefinition = {
       pageOrientation: 'landscape',
       content,
@@ -86,10 +95,12 @@ class InvoicesReport {
     callback(pdf)
   }
 
-  buildContent(arrivals, customsInvoices) {
+  buildContent(arrivals, customsInvoices, customsCheckouts) {
     const filteredArrivals = this.filterArrivals(arrivals)
     const arrivalRecipients = this.groupArrivalsByRecipient(filteredArrivals)
     const customsRecipients = this.groupCustomsDeclarationsByRecipient(customsInvoices)
+
+    customsRecipients[CHECKOUT_RECIPIENT_NAME] = customsCheckouts
 
     let recipientNames = Array.from(new Set([
       ...Object.keys(arrivalRecipients),
