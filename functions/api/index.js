@@ -5,7 +5,7 @@ const cors = require('cors')({origin: true, credentials: true})
 const fetchAerodromeStatus = require('./fetchAerodromeStatus')
 const basicAuth = require('./basicAuth')
 const syncUsers = require('./syncUsers')
-const fetchInvoices = require('./customs/fetchInvoices')
+const {fetchInvoices, fetchCheckouts} = require('./customs/fetchFromCustoms')
 const {fbAdminAuth} = require('./fbAuth')
 
 const api = express()
@@ -50,6 +50,18 @@ api.get('(/api)?/customs/invoices', fbAdminAuth, async (req, res) => {
   } catch (e) {
     console.error('Failed to fetch invoices from customs', e)
     res.status(500).send({ error: 'Failed to fetch invoices from customs' })
+  }
+})
+
+api.get('(/api)?/customs/checkouts', fbAdminAuth, async (req, res) => {
+  try {
+    const db = admin.database()
+    const {year, month} = req.query
+    const invoices = await fetchCheckouts(db, year, month)
+    res.status(200).send(invoices)
+  } catch (e) {
+    console.error('Failed to fetch checkouts from customs', e)
+    res.status(500).send({ error: 'Failed to fetch checkouts from customs' })
   }
 })
 
