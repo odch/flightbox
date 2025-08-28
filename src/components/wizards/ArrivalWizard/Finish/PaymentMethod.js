@@ -63,6 +63,10 @@ class PaymentMethod extends Component {
     if (successParam === 'true') {
       this.props.setMethod('checkout')
       this.props.setStep(Step.COMPLETED)
+      this.props.saveMovementPaymentMethod('arrival', this.props.itemKey, {
+        method: 'checkout',
+        status: 'completed'
+      })
       return
     }
 
@@ -128,6 +132,7 @@ class PaymentMethod extends Component {
         goAroundFeeTotal
       )
     } else if (method === 'checkout') {
+      paymentMethodData.status = 'pending'
       setStep(Step.CONFIRMED)
       createCardPayment(
         itemKey,
