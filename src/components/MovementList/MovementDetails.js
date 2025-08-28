@@ -130,7 +130,7 @@ class MovementDetails extends React.PureComponent {
               {showPaymentMethod && (
                 <MovementField
                   label="Zahlungsart"
-                  value={props.data.paymentMethod
+                  value={props.data.paymentMethod && props.data.paymentMethod.status !== 'pending'
                     ? getPaymentMethodLabel(props.data.paymentMethod)
                     : <NoPaymentFieldValue arrivalId={props.data.key}/>}
                 />
