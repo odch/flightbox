@@ -140,7 +140,7 @@ class InvoicesReport {
 
     arrivals.forEach(record => {
       const arrival = firebaseToLocal(record.val());
-      if (arrival.paymentMethod) {
+      if (arrival.paymentMethod && arrival.paymentMethod.status !== 'pending') {
         filtered.push(arrival)
       }
     });

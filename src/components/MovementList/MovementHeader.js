@@ -144,7 +144,7 @@ class MovementHeader extends React.PureComponent {
     const paymentMissing = showPayment
       && props.data.type === 'arrival'
       && props.data.landingFeeTotal !== undefined
-      && !props.data.paymentMethod
+      && (!props.data.paymentMethod || props.data.paymentMethod.status === 'pending')
     const hasTags = paymentMissing
 
     return (
