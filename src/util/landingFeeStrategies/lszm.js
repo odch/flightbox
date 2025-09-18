@@ -18,18 +18,12 @@ const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
   const isHeli = isHelicopter(aircraftCategory)
   const isInstruction = flightType === 'instruction'
 
-  const factor = getFactor(isHomebase, isHeli, isInstruction)
-  const baseFee = getBaseFee(mtow)
+  const factorName = getFactorName(isHomebase, isHeli, isInstruction)
+  const fee = getMtowFee(data.fees[factorName], mtow)
 
-  const fee = baseFee * factor
   const roundedFee = roundToOneCent(fee)
 
   return {fee: roundedFee};
-}
-
-const getFactor = (isHomebase, isHeli, isInstruction) => {
-  const factorName = getFactorName(isHomebase, isHeli, isInstruction)
-  return data.factors[factorName]
 }
 
 const getVat = (isHomebase, isHeli, isInstruction) => {
@@ -78,8 +72,20 @@ const getFactorName = (isHomebase, isHeli, isInstruction) => {
   return 'homebase_plane'
 }
 
-const getBaseFee = mtow => {
-  for (const entry of data.fees.base) {
+const getGliderFactorName = (isHomebase, method, isInstruction) => {
+  let factorName = isHomebase ? 'homebase' : 'non_homebase'
+
+  factorName += `_${method}`
+
+  if (isInstruction) {
+    factorName += '_instruction'
+  }
+
+  return factorName
+}
+
+const getMtowFee = (feeList, mtow) => {
+  for (const entry of feeList) {
     if (mtow <= entry.max_weight) {
       return entry.fee
     }
@@ -92,21 +98,19 @@ const getGliderFee = (flightType, isHomebase) => {
     throw new Error('Unsupported flight type ' + flightType)
   }
   const instructionPrivateType = match[1]
-  const gliderBaseName = match[2]
+  const method = match[2]
 
-  const baseFee = data.fees.glider_base[gliderBaseName]
+  const factorName = getGliderFactorName(isHomebase, method, instructionPrivateType === 'instruction')
 
-  if (typeof baseFee !== 'number') {
+  if (!factorName) {
     return undefined
   }
 
-  const isInstruction = instructionPrivateType === 'instruction'
+  const fee = data.fees.glider[factorName]
 
-  const factor = gliderBaseName === 'winch' && !isHomebase
-    ? getFactor(true, false, false) // same factor as homebase (non-instruction) for non-homebase if winch
-    : getFactor(isHomebase, false, isInstruction)
-
-  const fee = baseFee * factor
+  if (typeof fee !== 'number') {
+    return undefined
+  }
 
   const roundedFee = roundToOneCent(fee)
 
