@@ -129,28 +129,30 @@ ArrivalFinishContainer.propTypes = {
 };
 
 const mapStateToProps = (state, ownProps) => {
+  const wizard = state.form.wizard || {}
+  const wizardValues = wizard.values || {}
   return Object.assign({}, ownProps, {
     aircraftSettings: state.settings.aircrafts,
     invoiceRecipientSettings: state.settings.invoiceRecipients,
     finish: ownProps.finish,
     isUpdate: ownProps.isUpdate,
     headingType: ownProps.headingType || HeadingType.NONE,
-    itemKey: state.form.wizard.values.key || state.ui.wizard.itemKey,
-    email: state.form.wizard.values.email,
-    immatriculation: state.form.wizard.values.immatriculation,
+    itemKey: wizardValues.key || state.ui.wizard.itemKey,
+    email: wizardValues.email,
+    immatriculation: wizardValues.immatriculation,
     fees: {
-      landings: state.form.wizard.values.landingCount,
-      landingFeeSingle: state.form.wizard.values.landingFeeSingle,
-      landingFeeCode: state.form.wizard.values.landingFeeCode,
-      landingFeeTotal: state.form.wizard.values.landingFeeTotal,
-      goArounds: state.form.wizard.values.goAroundCount,
-      goAroundFeeSingle: state.form.wizard.values.goAroundFeeSingle,
-      goAroundFeeCode: state.form.wizard.values.goAroundFeeCode,
-      goAroundFeeTotal: state.form.wizard.values.goAroundFeeTotal,
-      totalNet: state.form.wizard.values.feeTotalNet,
-      vat: state.form.wizard.values.feeVat,
-      roundingDifference: state.form.wizard.values.feeRoundingDifference,
-      totalGross: state.form.wizard.values.feeTotalGross
+      landings: wizardValues.landingCount,
+      landingFeeSingle: wizardValues.landingFeeSingle,
+      landingFeeCode: wizardValues.landingFeeCode,
+      landingFeeTotal: wizardValues.landingFeeTotal,
+      goArounds: wizardValues.goAroundCount,
+      goAroundFeeSingle: wizardValues.goAroundFeeSingle,
+      goAroundFeeCode: wizardValues.goAroundFeeCode,
+      goAroundFeeTotal: wizardValues.goAroundFeeTotal,
+      totalNet: wizardValues.feeTotalNet,
+      vat: wizardValues.feeVat,
+      roundingDifference: wizardValues.feeRoundingDifference,
+      totalGross: wizardValues.feeTotalGross
     },
     localUser: state.auth.data.local,
     authEmail: state.auth.data.email,
