@@ -32,8 +32,7 @@ const Finish = props => {
   } = props
   const heading = getHeading(headingType);
 
-
-  const showPayment = (isHomeBase === false || __CONF__.homebasePayment) && !isUpdate && !!fees
+  const showPayment = (isHomeBase === false || __CONF__.homebasePayment) && !isUpdate && !!fees && fees.totalGross > 0
 
   const {
     landings,
