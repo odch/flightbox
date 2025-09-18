@@ -80,6 +80,10 @@ const getFeesTotals = (landingFeeTotal = 0, goAroundFeeTotal = 0, flightType, ai
 }
 
 export const updateFeesTotal = (changeAction, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory) => {
+  if (!flightType || !aircraftOrigin || !aircraftCategory) {
+    return
+  }
+
   const {totalNet, vat, roundingDifference, totalGrossRounded} =
     getFeesTotals(landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory)
 
