@@ -6,6 +6,7 @@ import {reducer as formReducer} from 'redux-form';
 import aerodromes, {sagas as aerodromesSagas} from './aerodromes';
 import aircrafts, {sagas as aircraftsSagas} from './aircrafts';
 import auth, {sagas as authSagas} from './auth';
+import customs, {sagas as customsSagas} from './customs';
 import imports, {sagas as importsSagas} from './imports';
 import movements, {sagas as movementSagas} from './movements';
 import settings, {sagas as settingsSagas} from './settings';
@@ -20,6 +21,7 @@ const reducer = combineReducers({
   aircrafts,
   form: formReducer,
   auth,
+  customs,
   imports,
   movements,
   settings,
@@ -45,6 +47,7 @@ export const sagas = function* rootSaga () {
     uiSagas,
     usersSagas,
     profileSagas,
+    customsSagas
   ])
 };
 

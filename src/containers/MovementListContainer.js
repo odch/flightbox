@@ -8,6 +8,7 @@ import {
   showMovementWizard
 } from '../modules/ui/movements';
 import {loadAircraftSettings} from '../modules/settings/aircrafts'
+import {loadAerodromes} from '../modules/aerodromes'
 
 import MovementList from '../components/MovementList';
 import ImmutableItemsArray from '../util/ImmutableItemsArray';
@@ -74,6 +75,7 @@ const mapActionCreators = {
   hideDeleteConfirmationDialog,
   createMovementFromMovement,
   loadAircraftSettings,
+  loadAerodromes,
   loadItems: loadMovements,
   deleteItem: deleteMovement,
   onEdit: showMovementWizard,

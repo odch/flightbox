@@ -76,6 +76,12 @@
         "createdBy_orderKey": {
           ".validate": "newData.isString()"
         },
+        "customsFormId": {
+          ".validate": "newData.isString()"
+        },
+        "customsFormUrl": {
+          ".validate": "newData.isString()"
+        },
         "$other": {
           ".validate": false
         }
@@ -192,6 +198,12 @@
           "invoiceRecipientName": {
             ".validate": "newData.isString()"
           }
+        },
+        "customsFormId": {
+          ".validate": "newData.isString()"
+        },
+        "customsFormUrl": {
+          ".validate": "newData.isString()"
         },
         "$other": {
           ".validate": false
