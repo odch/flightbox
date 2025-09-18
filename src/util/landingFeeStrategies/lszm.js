@@ -77,7 +77,7 @@ const getGliderFactorName = (isHomebase, method, isInstruction) => {
 
   factorName += `_${method}`
 
-  if (isInstruction) {
+  if (isHomebase && isInstruction) {
     factorName += '_instruction'
   }
 
