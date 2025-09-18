@@ -48,6 +48,9 @@ describe('util', () => {
           [0, 'glider_private_winch', AircraftOrigin.OTHER, 'Segelflugzeug', 20],
           [0, 'glider_private_self', AircraftOrigin.OTHER, 'Segelflugzeug', 22.8],
           [0, 'glider_private_aerotow', AircraftOrigin.OTHER, 'Segelflugzeug', undefined], // fee due for towing plane only
+          [0, 'glider_instruction_winch', AircraftOrigin.OTHER, 'Segelflugzeug', 20],
+          [0, 'glider_instruction_self', AircraftOrigin.OTHER, 'Segelflugzeug', 22.8],
+          [0, 'glider_instruction_aerotow', AircraftOrigin.OTHER, 'Segelflugzeug', undefined], // fee due for towing plane only
 
           // homebase plane (non instruction)
           [0, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 20],
