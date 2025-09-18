@@ -5,8 +5,8 @@ const cors = require('cors')({origin: true, credentials: true})
 const fetchAerodromeStatus = require('./fetchAerodromeStatus')
 const basicAuth = require('./basicAuth')
 const syncUsers = require('./syncUsers')
-const {fetchInvoices, fetchCheckouts} = require('./customs/fetchFromCustoms')
-const {fbAdminAuth} = require('./fbAuth')
+const {fetchInvoices, fetchCheckouts, postPrepopulatedForm} = require('./customs/fetchFromCustoms')
+const {fbAuth, fbAdminAuth} = require('./fbAuth')
 
 const api = express()
 
@@ -62,6 +62,18 @@ api.get('(/api)?/customs/checkouts', fbAdminAuth, async (req, res) => {
   } catch (e) {
     console.error('Failed to fetch checkouts from customs', e)
     res.status(500).send({ error: 'Failed to fetch checkouts from customs' })
+  }
+})
+
+api.post('(/api)?/customs/prepopulated-forms', fbAuth, async (req, res) => {
+  try {
+    const db = admin.database()
+    const formData = req.body
+    const result = await postPrepopulatedForm(db, formData)
+    res.status(200).send(result)
+  } catch (e) {
+    console.error('Failed to post prepopulated form to customs', e)
+    res.status(500).send({ error: 'Failed to post prepopulated form to customs' })
   }
 })
 
