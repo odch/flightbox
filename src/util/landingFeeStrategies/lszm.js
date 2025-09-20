@@ -1,7 +1,7 @@
 import data from './lszm_data.json'
 import {AircraftOrigin} from '../landingFees'
 import {flightTypeAircraftType, isHelicopter} from '../aircraftCategories'
-import {getMtowFee, roundToOneCent} from './utils'
+import {getMtowFee} from './utils'
 
 const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
   getFee(mtow, flightType, aircraftOrigin, aircraftCategory)
@@ -22,9 +22,7 @@ const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
   const factorName = getFactorName(isHomebase, isHeli, isInstruction)
   const fee = getMtowFee(data.fees[factorName], mtow)
 
-  const roundedFee = roundToOneCent(fee)
-
-  return {fee: roundedFee};
+  return {fee};
 }
 
 const getVat = (isHomebase, isHeli, isInstruction) => {
@@ -105,9 +103,7 @@ const getGliderFee = (flightType, isHomebase) => {
     return undefined
   }
 
-  const roundedFee = roundToOneCent(fee)
-
-  return {fee: roundedFee}
+  return {fee}
 }
 
 export default {
