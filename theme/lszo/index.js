@@ -1,4 +1,4 @@
-const logo = require('./logo.png');
+const logo = require('./logo.svg');
 
 const theme = {
   colors: {
