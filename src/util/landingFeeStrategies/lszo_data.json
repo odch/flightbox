@@ -1,0 +1,14 @@
+{
+  "fees": {
+    "plane": [
+      { "max_weight": 999, "fee": 15.73 },
+      { "max_weight": 1999, "fee": 17.58 },
+      { "max_weight": 50000, "fee": 27.75 }
+    ],
+    "instruction_homebase": 9,
+    "instruction_external": 11.10,
+    "helicopter": [
+      { "max_weight": 1000, "fee": 46.25 }
+    ]
+  }
+}

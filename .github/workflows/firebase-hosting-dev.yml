@@ -12,6 +12,7 @@ jobs:
           - lszt_test
           - lszm_test
           - lspv_test
+          - lszo_test
     environment: ${{ matrix.environment }}
     steps:
       - run: echo 'Running deplyoment for project ${{ vars.PROJECT }}'
@@ -39,6 +40,7 @@ jobs:
           - lszt_test
           - lszm_test
           - lspv_test
+          - lszo_test
     environment: ${{ matrix.environment }}
     steps:
       - run: echo 'Running functions deplyoment for project ${{ vars.PROJECT }}'
