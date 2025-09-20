@@ -1,9 +1,15 @@
 import {AircraftOrigin} from '../landingFees'
 import data from './lszo_data.json'
 import {isHelicopter} from '../aircraftCategories'
+import {getMtowFee} from './utils'
 
-const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
-  getFee(mtow, flightType, aircraftOrigin, aircraftCategory)
+const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
+  const fee = getFee(mtow, flightType, aircraftOrigin, aircraftCategory)
+  if (fee) {
+    return {fee}
+  }
+  return undefined
+}
 
 const getGoAroundFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
   undefined
