@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 
 export default [
   { question: 'Wann muss ich einen Abflug und wann eine Ankunft erfassen?',
@@ -49,30 +49,6 @@ export default [
         <p>
           Wenn Sie den Platzbereich verlassen und bei der Ankunft Platzrunden durchführen,
           wählen Sie "Anzahl Landungen" entsprechend.
-        </p>
-      </div>
-    ),
-  },
-  { question: 'Wie bezahle ich die Landetaxen?',
-    answer: (
-      <div>
-        <p>
-          Wenn Ihr Flugzeug nicht in {__CONF__.aerodrome.name} stationiert ist, legen Sie den fälligen Betrag
-          bitte in bar in ein dafür vorgesehenes Couvert, beschriften Sie es mit der Referenznummer,
-          die bei der Erfassung anzeigt wird, und deponieren Sie es im Briefkasten
-          vor dem C-Büro.
-        </p>
-      </div>
-    ),
-  },
-  { question: 'Warum sind meine Personendaten nicht aktuell?',
-    answer: (
-      <div>
-        <p>
-          Die Personendaten werden regelmässig aus dem Flightnet importiert. Prüfen Sie die Daten
-          im Flightnet auf Richtigkeit. Sind die Daten im Flightnet korrekt, aber in diesem
-          System über längere Zeit nicht aktuell, kontaktieren Sie uns über
-          das <Link to="/message">Rückmeldungsformular</Link>.
         </p>
       </div>
     ),
