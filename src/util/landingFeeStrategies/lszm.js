@@ -1,6 +1,7 @@
 import data from './lszm_data.json'
 import {AircraftOrigin} from '../landingFees'
 import {flightTypeAircraftType, isHelicopter} from '../aircraftCategories'
+import {getMtowFee} from './utils'
 
 const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
   getFee(mtow, flightType, aircraftOrigin, aircraftCategory)
@@ -18,18 +19,10 @@ const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
   const isHeli = isHelicopter(aircraftCategory)
   const isInstruction = flightType === 'instruction'
 
-  const factor = getFactor(isHomebase, isHeli, isInstruction)
-  const baseFee = getBaseFee(mtow)
-
-  const fee = baseFee * factor
-  const roundedFee = roundToOneCent(fee)
-
-  return {fee: roundedFee};
-}
-
-const getFactor = (isHomebase, isHeli, isInstruction) => {
   const factorName = getFactorName(isHomebase, isHeli, isInstruction)
-  return data.factors[factorName]
+  const fee = getMtowFee(data.fees[factorName], mtow)
+
+  return {fee};
 }
 
 const getVat = (isHomebase, isHeli, isInstruction) => {
@@ -78,12 +71,16 @@ const getFactorName = (isHomebase, isHeli, isInstruction) => {
   return 'homebase_plane'
 }
 
-const getBaseFee = mtow => {
-  for (const entry of data.fees.base) {
-    if (mtow <= entry.max_weight) {
-      return entry.fee
-    }
+const getGliderFactorName = (isHomebase, method, isInstruction) => {
+  let factorName = isHomebase ? 'homebase' : 'non_homebase'
+
+  factorName += `_${method}`
+
+  if (isHomebase && isInstruction) {
+    factorName += '_instruction'
   }
+
+  return factorName
 }
 
 const getGliderFee = (flightType, isHomebase) => {
@@ -92,28 +89,22 @@ const getGliderFee = (flightType, isHomebase) => {
     throw new Error('Unsupported flight type ' + flightType)
   }
   const instructionPrivateType = match[1]
-  const gliderBaseName = match[2]
+  const method = match[2]
 
-  const baseFee = data.fees.glider_base[gliderBaseName]
+  const factorName = getGliderFactorName(isHomebase, method, instructionPrivateType === 'instruction')
 
-  if (typeof baseFee !== 'number') {
+  if (!factorName) {
     return undefined
   }
 
-  const isInstruction = instructionPrivateType === 'instruction'
+  const fee = data.fees.glider[factorName]
 
-  const factor = gliderBaseName === 'winch' && !isHomebase
-    ? getFactor(true, false, false) // same factor as homebase (non-instruction) for non-homebase if winch
-    : getFactor(isHomebase, false, isInstruction)
+  if (typeof fee !== 'number') {
+    return undefined
+  }
 
-  const fee = baseFee * factor
-
-  const roundedFee = roundToOneCent(fee)
-
-  return {fee: roundedFee}
+  return {fee}
 }
-
-const roundToOneCent = val => Math.round(val * 100) / 100;
 
 export default {
   getLandingFee,

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bei Flightbox anmelden</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4;">
+  <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;">
+
+    <!-- Header -->
+    <div style="background: {{themeColor}}; color: white; padding: 20px 30px; text-align: center;">
+      <h1 style="margin: 0; font-size: 28px; font-weight: 300;">Flightbox</h1>
+      <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">{{airportName}}</p>
+    </div>
+
+    <!-- Content -->
+    <div style="padding: 20px 30px;">
+      <p style="font-size: 16px; margin-bottom: 20px;">Hallo!</p>
+
+      <p style="font-size: 16px; margin-bottom: 30px;">Klicken Sie auf die Schaltfläche unten, um sich sicher bei Ihrem Flightbox-Konto anzumelden:</p>
+
+      <!-- Sign In Button -->
+      <div style="text-align: center; margin: 40px 0;">
+        <a href="{{signInLink}}"
+           style="display: inline-block; background: {{themeColor}}; color: white; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); transition: all 0.3s ease;">
+          Bei Flightbox anmelden
+        </a>
+      </div>
+
+      <p style="font-size: 14px; color: #666; margin-top: 30px;">Falls die Schaltfläche nicht funktioniert, kopieren Sie diesen Link und fügen Sie ihn in Ihren Browser ein:</p>
+      <p style="word-break: break-all; font-size: 14px; color: #667eea; background-color: #f8f9fa; padding: 15px; border-radius: 4px; font-family: monospace;">{{signInLink}}</p>
+
+      <!-- Security Notice -->
+      <div style="margin-top: 40px; padding: 20px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;">
+        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #856404;">🔒 Sicherheitshinweis</h3>
+        <p style="margin: 0; font-size: 14px; color: #856404;">
+          • Dieser Link läuft in <strong>1 Stunde</strong> aus Sicherheitsgründen ab<br>
+          • Falls Sie diesen Anmelde-Link nicht angefordert haben, können Sie diese E-Mail ignorieren<br>
+          • Teilen Sie diesen Link niemals mit anderen
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+      <p style="margin: 0; font-size: 14px; color: #6c757d;">
+        Diese E-Mail wurde von der open digital Flightbox gesendet<br>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

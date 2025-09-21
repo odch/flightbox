@@ -1,0 +1,61 @@
+{
+  "aerodrome": {
+    "name": "Luzern-Beromünster",
+    "ICAO": "LSZO",
+    "runways": [
+      {
+        "name": "15",
+        "type": "G"
+      },
+      {
+        "name": "33",
+        "type": "G"
+      }
+    ],
+    "noRunwayIfHelicopter": true,
+    "departureRoutes": [
+      {
+        "name": "O",
+        "label": "Ost"
+      },
+      {
+        "name": "W",
+        "label": "West"
+      }
+    ],
+    "arrivalRoutes": [
+      {
+        "name": "O",
+        "label": "Ost"
+      },
+      {
+        "name": "W",
+        "label": "West"
+      }
+    ],
+    "landingFeesStrategy": "lszo"
+  },
+  "environments": {
+    "test": {
+      "firebaseProjectId": "lszo-test",
+      "firebaseApiKey": "AIzaSyB6YhIf-vJBbSFgNZxcUH5NTk1MRWJGIAU"
+    }
+  },
+  "theme": "lszo",
+  "title": "Flightbox - Flugplatz Luzern-Beromünster",
+  "paymentMethods": ["checkout", "cash"],
+  "homebasePayment": true,
+  "loginForm": "email",
+  "enabledFlightTypes": [
+    "private",
+    "instruction",
+    "aerotow",
+    "paradrop",
+    "glider_private_aerotow",
+    "glider_private_winch",
+    "glider_private_self",
+    "glider_instruction_aerotow",
+    "glider_instruction_winch",
+    "glider_instruction_self"
+  ]
+}

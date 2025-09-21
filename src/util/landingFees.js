@@ -1,5 +1,6 @@
 import defaultGetFee from './landingFeeStrategies/default'
 import lszmGetFee from './landingFeeStrategies/lszm'
+import lszoGetFee from './landingFeeStrategies/lszo'
 
 export const AircraftOrigin = Object.freeze({
   CLUB: 'club',
@@ -9,7 +10,8 @@ export const AircraftOrigin = Object.freeze({
 
 const strategies = {
   default: defaultGetFee,
-  lszm: lszmGetFee
+  lszm: lszmGetFee,
+  lszo: lszoGetFee
 }
 
 export const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
@@ -80,6 +82,10 @@ const getFeesTotals = (landingFeeTotal = 0, goAroundFeeTotal = 0, flightType, ai
 }
 
 export const updateFeesTotal = (changeAction, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory) => {
+  if (!flightType || !aircraftOrigin || !aircraftCategory) {
+    return
+  }
+
   const {totalNet, vat, roundingDifference, totalGrossRounded} =
     getFeesTotals(landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory)
 

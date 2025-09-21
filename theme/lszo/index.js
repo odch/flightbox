@@ -1,14 +1,15 @@
-const logo = require('./logo.png');
+const logo = require('./logo.svg');
 
 const theme = {
   colors: {
-    main: '#003863',
+    main: '#19295d',
     background: '#fafafa',
-    danger: '#e00f00'
+    danger: '#fa4214'
   },
   images: {
     logo
-  }
+  },
+  logoSize: 60
 };
 
 module.exports = theme;

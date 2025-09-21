@@ -7,10 +7,8 @@ describe('util', () => {
       describe('getLandingFee ', () => {
         describe.each([
           // non-homebase
-          [0, 'private', AircraftOrigin.OTHER, 'Flugzeug', 22.8],
-          [0, 'private', AircraftOrigin.OTHER, 'Hubschrauber', 22.8],
-          [800, 'private', AircraftOrigin.OTHER, 'Flugzeug', 22.8],
-          [800, 'private', AircraftOrigin.OTHER, 'Hubschrauber', 22.8],
+          [0, 'private', AircraftOrigin.OTHER, 'Flugzeug', 27.6],
+          [0, 'private', AircraftOrigin.OTHER, 'Hubschrauber', 27.6],
           [1000, 'private', AircraftOrigin.OTHER, 'Flugzeug', 27.6],
           [1000, 'private', AircraftOrigin.OTHER, 'Hubschrauber', 27.6],
           [1300, 'private', AircraftOrigin.OTHER, 'Flugzeug', 33.6],
@@ -47,17 +45,16 @@ describe('util', () => {
           [50000, 'private', AircraftOrigin.OTHER, 'Hubschrauber', 2160],
 
           // non-homebase glider
+          [0, 'glider_private_winch', AircraftOrigin.OTHER, 'Segelflugzeug', 20],
           [0, 'glider_private_self', AircraftOrigin.OTHER, 'Segelflugzeug', 22.8],
-          [10000, 'glider_private_self', AircraftOrigin.OTHER, 'Segelflugzeug', 22.8], // mtow doesn't matter
-          [0, 'glider_private_winch', AircraftOrigin.OTHER, 'Segelflugzeug', 14], // special case: same as homebase
-          [10000, 'glider_private_winch', AircraftOrigin.OTHER, 'Segelflugzeug', 14], // mtow doesn't matter
           [0, 'glider_private_aerotow', AircraftOrigin.OTHER, 'Segelflugzeug', undefined], // fee due for towing plane only
-          [10000, 'glider_private_aerotow', AircraftOrigin.OTHER, 'Segelflugzeug', undefined], // fee due for towing plane only
+          [0, 'glider_instruction_winch', AircraftOrigin.OTHER, 'Segelflugzeug', 20],
+          [0, 'glider_instruction_self', AircraftOrigin.OTHER, 'Segelflugzeug', 22.8],
+          [0, 'glider_instruction_aerotow', AircraftOrigin.OTHER, 'Segelflugzeug', undefined], // fee due for towing plane only
 
           // homebase plane (non instruction)
-          [0, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 19],
-          [800, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 19],
-          [1000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 23],
+          [0, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 20],
+          [1000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 20],
           [1300, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 28],
           [2000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 32],
           [3000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 48],
@@ -72,21 +69,17 @@ describe('util', () => {
           [15000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 450],
           [20000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 600],
           [30000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 900],
-          [40000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 1200],
-          [50000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 1800],
+          [40000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 1000],
+          [50000, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug', 1200],
 
           // homebase glider (non instruction)
-          [0, 'glider_private_self', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 19],
-          [10000, 'glider_private_self', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 19], // mtow doesn't matter
-          [0, 'glider_private_winch', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 14],
-          [10000, 'glider_private_winch', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 14], // mtow doesn't matter
+          [0, 'glider_private_winch', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 20],
+          [0, 'glider_private_self', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 20],
           [0, 'glider_private_aerotow', AircraftOrigin.HOME_BASE, 'Segelflugzeug', undefined], // fee due for towing plane only
-          [10000, 'glider_private_aerotow', AircraftOrigin.HOME_BASE, 'Segelflugzeug', undefined], // fee due for towing plane only
 
           // homebase plane (instruction)
-          [0, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 15.2],
-          [800, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 15.2],
-          [1000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 18.4],
+          [0, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 19],
+          [1000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 19],
           [1300, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 22.4],
           [2000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 25.6],
           [3000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 38.4],
@@ -101,22 +94,18 @@ describe('util', () => {
           [15000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 360],
           [20000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 480],
           [30000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 720],
-          [40000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 960],
-          [50000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 1440],
+          [40000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 950],
+          [50000, 'instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 1100],
 
           // homebase glider (instruction)
-          [0, 'glider_instruction_self', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 15.2],
-          [10000, 'glider_instruction_self', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 15.2], // mtow doesn't matter
-          [0, 'glider_instruction_winch', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 11.2],
-          [10000, 'glider_instruction_winch', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 11.2], // mtow doesn't matter
+          [0, 'glider_instruction_winch', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 19],
+          [0, 'glider_instruction_self', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 19],
           [0, 'glider_instruction_aerotow', AircraftOrigin.HOME_BASE, 'Segelflugzeug', undefined], // fee due for towing plane only
-          [10000, 'glider_instruction_aerotow', AircraftOrigin.HOME_BASE, 'Segelflugzeug', undefined], // fee due for towing plane only
 
           // homebase helicopter
-          [0, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 11.4],
-          [800, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 11.4],
-          [1000, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 13.8],
-          [1300, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 16.8],
+          [0, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 19],
+          [1000, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 19],
+          [1300, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 19],
           [2000, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 19.2],
           [3000, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 28.8],
           [4000, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 40.2],
@@ -133,7 +122,7 @@ describe('util', () => {
           [40000, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 720],
           [50000, 'private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 1080],
         ])(
-          'getLandingFee(%i, %s, %s)',
+          'getLandingFee(%i, %s, %s, %s, %i)',
           (mtow, flightType, aircraftOrigin, aircraftCategory, expected) => {
             test(`returns ${expected}`, () => {
               const landingFee = lszm.getLandingFee(mtow, flightType, aircraftOrigin, aircraftCategory)
