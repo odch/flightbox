@@ -57,7 +57,8 @@ class MovementDetails extends React.PureComponent {
     const date = dates.formatDate(props.data.date);
     const time = dates.formatTime(props.data.date, props.data.time);
 
-    const showPaymentMethod = (props.isAdmin || !props.data.paymentMethod) && (props.isHomeBase === false || __CONF__.homebasePayment)
+    const showPaymentMethod = (props.isAdmin || !props.data.paymentMethod || props.data.paymentMethod.status === 'pending')
+      && (props.isHomeBase === false || __CONF__.homebasePayment)
 
     return (
         <Content className={props.className}>
