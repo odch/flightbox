@@ -60,8 +60,7 @@ export function authenticateEmail(email, local) {
   return new Promise((resolve, reject) => {
     initialize();
 
-    const projectId = __FIREBASE_PROJECT_ID__ || 'your-project-id';
-    const functionUrl = `https://us-central1-${projectId}.cloudfunctions.net/generateSignInLink`;
+    const functionUrl = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/generateSignInLink`;
 
     const requestOptions = {
       method: 'POST',
