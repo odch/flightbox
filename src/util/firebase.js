@@ -59,18 +59,38 @@ export function authenticate(token) {
 export function authenticateEmail(email, local) {
   return new Promise((resolve, reject) => {
     initialize();
-    Firebase.auth().sendSignInLinkToEmail(email, {
-      url: window.location.href,
-      handleCodeInApp: true
-    })
-      .then(() => {
+
+    const projectId = __FIREBASE_PROJECT_ID__ || 'your-project-id';
+    const functionUrl = `https://us-central1-${projectId}.cloudfunctions.net/generateSignInLink`;
+
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        continueUrl: window.location.href
+      })
+    };
+
+    fetch(functionUrl, requestOptions)
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(errorData => {
+            throw new Error(errorData.error || 'Failed to generate sign-in link');
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
         window.localStorage.setItem('emailForSignIn', email);
         window.localStorage.setItem('isLocalSignIn', local);
-        resolve();
+
+        resolve({
+          signInLink: data.signInLink,
+          email: data.email
+        });
       })
-      .catch(error => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }
 

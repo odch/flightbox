@@ -95,8 +95,32 @@ export function* sendAuthenticationEmail(action) {
   try {
     yield put(actions.setSubmitting());
     const { email, local } = action.payload;
+
     if (isNotEmptyString(email)) {
-      yield call(fbAuthEmail, email, local);
+      const result = yield call(fbAuthEmail, email, local);
+
+      const airportName = __CONF__.aerodrome.name;
+      const theme = require(`../../../theme/${__CONF__.theme}`);
+      const emailFunctionUrl = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/sendSignInEmail`;
+
+      const emailRequest = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: result.email,
+          signInLink: result.signInLink,
+          airportName: airportName,
+          themeColor: theme.colors.main
+        })
+      };
+
+      const emailResponse = yield call(fetch, emailFunctionUrl, emailRequest);
+
+      if (!emailResponse.ok) {
+        const errorData = yield call([emailResponse, 'json']);
+        throw new Error(errorData.error || 'Failed to send authentication email');
+      }
+
       yield put(actions.sendAuthenticationEmailSuccess());
     }
   } catch(e) {

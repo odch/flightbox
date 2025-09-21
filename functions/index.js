@@ -10,6 +10,8 @@ admin.initializeApp({
 });
 
 const auth = require('./auth');
+const { generateSignInLink } = require('./auth/generateSignInLink');
+const { sendSignInEmail } = require('./auth/sendSignInEmail');
 const api = require('./api');
 const webhook = require('./webhook');
 const setAssociatedMovementsCronJob = require('./associatedMovements/setAssociatedMovementsCronJob');
@@ -17,6 +19,8 @@ const associatedMovementsTriggers = require('./associatedMovements/setAssociated
 const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsTrigger');
 
 exports.auth = auth;
+exports.generateSignInLink = generateSignInLink;
+exports.sendSignInEmail = sendSignInEmail;
 exports.api = api;
 exports.webhook = webhook;
 exports.setAssociatedMovementsCronJob = setAssociatedMovementsCronJob;
