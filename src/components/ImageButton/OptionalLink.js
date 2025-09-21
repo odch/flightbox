@@ -8,10 +8,10 @@ const StyledLink = styled(Link)`
   cursor: pointer;
   margin: 0 1em;
   padding: 1em;
-  border-radius: 10px;
 
   &:hover {
     background-color: ${props => props.theme.colors.background};
+    box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;
   }
 `;
 

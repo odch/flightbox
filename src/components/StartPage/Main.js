@@ -6,9 +6,7 @@ import Hints from './Hints';
 import EntryPoints from './EntryPoints';
 
 const Wrapper = styled.div`
-  position: absolute;
-  top: 25%;
-  width: 100%;
+  padding-top: 100px;
 `;
 
 class Main extends React.PureComponent {
