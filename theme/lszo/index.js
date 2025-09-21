@@ -3,7 +3,7 @@ const logo = require('./logo.svg');
 const theme = {
   colors: {
     main: '#19295d',
-    background: '#f6f6f6',
+    background: '#fafafa',
     danger: '#fa4214'
   },
   images: {

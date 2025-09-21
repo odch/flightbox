@@ -5,12 +5,14 @@ import LoginInfo from './LoginInfo';
 import Logo from '../Logo';
 
 const StyledHeader = styled.header`
-  position: absolute;
-  height: 25%;
+  position: fixed;
   width: 100%;
+  top: 0;
+  left: 0;
   background-color: ${props => props.theme.colors.background};
   padding: 10px;
   box-sizing: border-box;
+  box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;
 `;
 
 const StyledLogoWrapper = styled.div`
@@ -24,8 +26,22 @@ const StyledLoginInfo = styled(LoginInfo)`
 `;
 
 const StyledLogo = styled(Logo)`
-  height: ${props => props.theme.logoSize || 85}%;
+  height: 50px;
 `;
+
+const StyledTitle = styled.div`
+  margin-left: 1.5rem;
+`
+
+const StyledFlightboxLabel = styled.div`
+  font-size: 1.2rem;
+  margin-bottom: 0.3rem;
+  color: ${props => props.theme.colors.main};
+`
+
+const StyledAerodromeName = styled.div`
+  color: #666;
+`
 
 class Header extends React.PureComponent {
 
@@ -36,6 +52,10 @@ class Header extends React.PureComponent {
         <StyledLoginInfo logout={props.logout} auth={props.auth} showLogin={props.showLogin}/>
         <StyledLogoWrapper>
           <StyledLogo/>
+          <StyledTitle>
+            <StyledFlightboxLabel>Flightbox</StyledFlightboxLabel>
+            <StyledAerodromeName>{__CONF__.aerodrome.name}</StyledAerodromeName>
+          </StyledTitle>
         </StyledLogoWrapper>
       </StyledHeader>
     );

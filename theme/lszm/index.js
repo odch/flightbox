@@ -3,7 +3,7 @@ const logo = require('./logo.png');
 const theme = {
   colors: {
     main: '#324158',
-    background: '#f6f6f6',
+    background: '#fafafa',
     danger: '#fa4214'
   },
   images: {
