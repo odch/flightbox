@@ -10,6 +10,7 @@ import TwintPaymentMessage from './TwintPaymentMessage'
 import {withRouter} from 'react-router-dom'
 import {getFromItemKey} from '../../../../util/reference-number'
 import {PAYMENT_METHODS} from '../../../../util/paymentMethods'
+import CardExternalPaymentMessage from './CardExternalPaymentMessage'
 
 const Container = styled.div`
 `
@@ -106,7 +107,7 @@ class PaymentMethod extends Component {
       method
     }
 
-    if (['cash', 'twint_external'].includes(method)) {
+    if (['cash', 'twint_external', 'card_external'].includes(method)) {
       setStep(Step.COMPLETED)
     } else if (method.startsWith('invoice')) {
       paymentMethodData.method = 'invoice'
@@ -197,6 +198,8 @@ class PaymentMethod extends Component {
               <CashPaymentMessage itemKey={itemKey}/>
             ) : method === 'twint_external' ? (
               <TwintPaymentMessage itemKey={itemKey}/>
+            ) : method === 'card_external' ? (
+              <CardExternalPaymentMessage itemKey={itemKey}/>
             ) : method === 'checkout' ? (
               <SuccessMessage>Die Zahlung war erfolgreich</SuccessMessage>
             ) : null}
