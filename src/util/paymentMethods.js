@@ -13,6 +13,10 @@ export const PAYMENT_METHODS = [
     value: 'cash'
   },
   {
+    label: 'Karte',
+    value: 'card_external'
+  },
+  {
     label: 'Twint',
     value: 'twint_external'
   },
