@@ -102,5 +102,6 @@
     "Die verfügbare Pistenlänge ist ausreichend.",
     "Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.",
     "Der Preflight-Check wurde ausgeführt."
-  ]
+  ],
+  "paymentMethods": ["cash", "card_external", "twint_external"]
 }
