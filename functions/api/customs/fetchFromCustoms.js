@@ -49,3 +49,11 @@ module.exports.postPrepopulatedForm = async (firebase, formData) => {
     { method: 'POST', body: formData }
   )
 }
+
+module.exports.isCustomsDeclarationAppAvailable = async (firebase) => {
+  const snapshot = await firebase.ref('/settings/customsDeclarationApp').once('value')
+  const customsSettings = snapshot.val()
+  
+  // Check if customs declaration app is properly configured
+  return !!(customsSettings && customsSettings.accessToken && customsSettings.baseUrl && customsSettings.aerodrome)
+}

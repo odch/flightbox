@@ -158,8 +158,32 @@ function* startCustoms(action) {
   }
 }
 
+function* checkAvailability() {
+  try {
+    const idToken = yield call(getIdToken)
+    const url = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/availability`
+    const response = yield call(fetch, url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${idToken}`
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to get customs availability: ${response.status} ${response.statusText}`)
+    }
+
+    const body = yield call([response, response.json])
+    yield put(actions.setCustomsAvailability(!!(body && body.available)))
+  } catch (e) {
+    console.error('Failed to check customs availability', e)
+    yield put(actions.setCustomsAvailability(false))
+  }
+}
+
 export default function* sagas() {
   yield [
-    fork(takeEvery, actions.START_CUSTOMS, startCustoms)
+    fork(takeEvery, actions.START_CUSTOMS, startCustoms),
+    fork(takeEvery, actions.CHECK_CUSTOMS_AVAILABILITY, checkAvailability)
   ]
 }

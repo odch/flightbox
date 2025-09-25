@@ -1,9 +1,10 @@
-import {startCustoms} from './actions';
 import sagas from './sagas';
 import reducer from './reducer'
+import {checkCustomsAvailability, startCustoms} from './actions'
 
 export {
-  startCustoms
+  startCustoms,
+  checkCustomsAvailability,
 };
 
 export {sagas}
