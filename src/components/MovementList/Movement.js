@@ -147,13 +147,18 @@ class Movement extends React.PureComponent {
   }
 
   shouldShowCustomsAction() {
-    const { data } = this.props;
-    
+    const { data, customs } = this.props;
+
+    // Only show customs actions if the customs declaration app is available (checked via Cloud Functions)
+    if (customs && customs.available !== true) {
+      return false;
+    }
+
     // Show "Zollanmeldung öffnen" if customsFormId exists (regardless of timing)
     if (data.customsFormId) {
       return true;
     }
-    
+
     // Show "Zollanmeldung erfassen" for foreign flights that are in the future
     return this.isForeignFlight() && this.isFutureFlightTime();
   }
@@ -167,7 +172,7 @@ Movement.propTypes = {
     success: PropTypes.bool
   }).isRequired,
   aerodromes: PropTypes.shape({
-    data: PropTypes.array
+    data: PropTypes.object
   }),
   onEdit: PropTypes.func.isRequired,
   onStartCustoms: PropTypes.func.isRequired,

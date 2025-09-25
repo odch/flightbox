@@ -34,6 +34,7 @@ class MovementList extends React.PureComponent {
   componentWillMount() {
     this.props.loadAircraftSettings();
     this.props.loadAerodromes();
+    this.props.checkCustomsAvailability();
     this.props.onSelect(null);
     this.props.loadItems(true);
   }
@@ -140,6 +141,7 @@ class MovementList extends React.PureComponent {
 MovementList.propTypes = {
   loadItems: PropTypes.func.isRequired,
   loadAircraftSettings: PropTypes.func.isRequired,
+  checkCustomsAvailability: PropTypes.func.isRequired,
   loadAerodromes: PropTypes.func.isRequired,
   items: PropTypes.object.isRequired,
   selected: PropTypes.string,
