@@ -38,10 +38,6 @@ const calculateArrivalTime = (departureTime, duration) => {
   return calculateTimeWithDuration(departureTime, duration, 'add');
 }
 
-const calculateDepartureTime = (arrivalTime, duration) => {
-  return calculateTimeWithDuration(arrivalTime, duration, 'subtract');
-}
-
 const getDirectionDependingData = async movementData => {
   const aerodrome = await getAerodrome(movementData.location)
 
@@ -58,7 +54,6 @@ const getDirectionDependingData = async movementData => {
     arrivalTime: movementData.time,
     departureCountry: aerodrome.country,
     departureLocation: aerodrome.name,
-    departureTime: calculateDepartureTime(movementData.time, movementData.duration),
   }
 }
 
