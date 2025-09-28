@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
+import dates from '../../util/dates';
 import MovementHeader from './MovementHeader';
 import MovementDetails from './MovementDetails';
 import AssociatedMovement from '../../containers/AssociatedMovementContainer';
@@ -29,6 +30,9 @@ const Footer = styled.div`
   padding-right: 0.7em;
   padding-bottom: 0.7em;
   font-size: 1.3em;
+  display: flex;
+  gap: 25px;
+  justify-content: end;
 `;
 
 class Movement extends React.PureComponent {
@@ -38,6 +42,7 @@ class Movement extends React.PureComponent {
     this.handleClick = this.handleClick.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleEditClick = this.handleEditClick.bind(this);
+    this.handleCustomsClick = this.handleCustomsClick.bind(this);
   }
 
   render() {
@@ -69,6 +74,15 @@ class Movement extends React.PureComponent {
             />
             {!props.locked && (
               <Footer>
+                {this.shouldShowCustomsAction() && (
+                  <Action
+                    label={props.data.customsFormId ? "Zollanmeldung öffnen" : "Zollanmeldung erfassen"}
+                    icon={props.customs.loading ? "sync" :"description"}
+                    rotateIcon={props.customs.loading ? 'left' : undefined}
+                    disabled={props.customs.loading}
+                    onClick={this.handleCustomsClick}
+                  />
+                )}
                 <Action
                   label="Bearbeiten"
                   icon="edit"
@@ -104,12 +118,64 @@ class Movement extends React.PureComponent {
   handleEditClick() {
     this.props.onEdit(this.props.data.type, this.props.data.key);
   }
+
+  handleCustomsClick() {
+    this.props.onStartCustoms(this.props.data);
+  }
+
+  isForeignFlight() {
+    const { data, aerodromes } = this.props;
+
+    if (!aerodromes || !aerodromes.data) {
+      return false;
+    }
+
+    const aerodrome = aerodromes.data.getByKey(data.location);
+
+    if (!aerodrome) {
+      return false;
+    }
+
+    return aerodrome.country !== 'CH';
+  }
+
+  isFutureFlightTime() {
+    const { data } = this.props;
+    const flightTimestamp = dates.localToIsoUtc(data.date, data.time);
+    const now = new Date().toISOString();
+    return flightTimestamp > now;
+  }
+
+  shouldShowCustomsAction() {
+    const { data, customs } = this.props;
+
+    // Only show customs actions if the customs declaration app is available (checked via Cloud Functions)
+    if (customs && customs.available !== true) {
+      return false;
+    }
+
+    // Show "Zollanmeldung öffnen" if customsFormId exists (regardless of timing)
+    if (data.customsFormId) {
+      return true;
+    }
+
+    // Show "Zollanmeldung erfassen" for foreign flights that are in the future
+    return this.isForeignFlight() && this.isFutureFlightTime();
+  }
 }
 
 Movement.propTypes = {
   data: PropTypes.object.isRequired,
   selected: PropTypes.bool,
+  customs: PropTypes.shape({
+    loading: PropTypes.bool,
+    success: PropTypes.bool
+  }).isRequired,
+  aerodromes: PropTypes.shape({
+    data: PropTypes.object
+  }),
   onEdit: PropTypes.func.isRequired,
+  onStartCustoms: PropTypes.func.isRequired,
   onSelect: PropTypes.func.isRequired,
   timeWithDate: PropTypes.bool,
   createMovementFromMovement: PropTypes.func.isRequired,

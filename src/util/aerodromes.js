@@ -14,6 +14,20 @@ export function fetch() {
   });
 }
 
+export function get(key) {
+  return new Promise(resolve => {
+    firebase('/aerodromes/' + key, (error, ref) => {
+      ref.once('value', snapshot => {
+        if (snapshot.exists()) {
+          resolve(snapshot.val());
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  });
+}
+
 export function exists(key) {
   return new Promise(resolve => {
     firebase('/aerodromes/' + key, (error, ref) => {

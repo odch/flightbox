@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
-import Movement from './Movement';
+import Movement from '../../containers/MovementListMovementContainer';
 import {isLocked} from '../../util/movements.js';
 
 const GroupWrapper = styled.div`
