@@ -40,8 +40,7 @@ gulp.task('build', ['clean'], function () {
     .pipe(webpack(config))
     .pipe(gulp.dest(config.output.path));
 
-  const copy = gulp.src(['./index.html', './reset.css'], { base: './' })
-    .pipe(replace('%TITLE%', projectConf.title))
+  const copy = gulp.src(['./reset.css'], { base: './' })
     .pipe(gulp.dest(config.output.path));
 
   const favicons = gulp.src(['./theme/' + projectConf.theme + '/favicons/*'], { base: './theme/' + projectConf.theme })
