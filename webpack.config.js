@@ -1,6 +1,7 @@
 const projects = require('./projects');
 const path = require('path');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const projectName = process.env.npm_config_project || 'lszt';
 
@@ -33,7 +34,7 @@ module.exports = {
   ],
   output: {
     path: path.resolve(__dirname, './build'),
-    filename: 'bundle.js',
+    filename: 'bundle.[chunkhash].js',
   },
   module: {
     rules: [
@@ -67,5 +68,11 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin(globals),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, './index.html'),
+      filename: 'index.html',
+      inject: 'body',
+      title: projectConf.title,
+    }),
   ],
 };
