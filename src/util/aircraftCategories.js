@@ -2,10 +2,10 @@ const categories = [
   {name: 'Flugzeug', flightTypeAircraftType: 'aircraft'},
   {name: 'Eigenbauflugzeug', flightTypeAircraftType: 'aircraft'},
   {name: 'Motorsegler', flightTypeAircraftType: 'motor_glider'},
-  {name: 'Hubschrauber', flightTypeAircraftType: 'helicopter'},
-  {name: 'Eigenbauhubschrauber', flightTypeAircraftType: 'helicopter'},
-  {name: 'Segelflugzeug', flightTypeAircraftType: 'glider'},
-  {name: 'Eigenbausegelflugzeug', flightTypeAircraftType: 'glider'},
+  {name: 'Hubschrauber', flightTypeAircraftType: 'helicopter', icon: 'helicopter'},
+  {name: 'Eigenbauhubschrauber', flightTypeAircraftType: 'helicopter', icon: 'helicopter'},
+  {name: 'Segelflugzeug', flightTypeAircraftType: 'glider', icon: 'glider'},
+  {name: 'Eigenbausegelflugzeug', flightTypeAircraftType: 'glider', icon: 'glider'},
   {name: 'Ballon (Heissluft)', flightTypeAircraftType: 'aircraft'},
   {name: 'Ballon (Gas)', flightTypeAircraftType: 'aircraft'},
   {name: 'Luftschiff (Heissluft)', flightTypeAircraftType: 'aircraft'},
@@ -25,11 +25,23 @@ const flightTypeAircraftType = aircraftCategory => {
     return null
   }
 
-  const category =categories.find(category => category.name === aircraftCategory)
+  const category = categories.find(category => category.name === aircraftCategory)
 
   if (category) {
     return category.flightTypeAircraftType
   }
 }
 
-module.exports = {categories: categoryNames, isHelicopter, flightTypeAircraftType} // no ES6 export as this file is also required in build process without ES6 support
+const icon = aircraftCategory => {
+  if (!aircraftCategory) {
+    return null
+  }
+
+  const category = categories.find(category => category.name === aircraftCategory)
+
+  if (category) {
+    return category.icon
+  }
+}
+
+module.exports = {categories: categoryNames, isHelicopter, flightTypeAircraftType, icon} // no ES6 export as this file is also required in build process without ES6 support
