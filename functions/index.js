@@ -9,6 +9,8 @@ admin.initializeApp({
   databaseURL: `https://${dbInstance}.firebaseio.com`
 });
 
+const { scheduledAerodromesUpdate } = require('./updateAerodromes');
+
 const auth = require('./auth');
 const { generateSignInLink } = require('./auth/generateSignInLink');
 const { sendSignInEmail } = require('./auth/sendSignInEmail');
@@ -28,6 +30,8 @@ exports.setAssociatedMovementOnCreatedDeparture = associatedMovementsTriggers.se
 exports.setAssociatedMovementOnCreatedArrival = associatedMovementsTriggers.setAssociatedMovementOnCreatedArrival;
 exports.setAssociatedMovementOnUpdatedDeparture = associatedMovementsTriggers.setAssociatedMovementOnUpdatedDeparture;
 exports.setAssociatedMovementOnUpdatedArrival = associatedMovementsTriggers.setAssociatedMovementOnUpdatedArrival;
+
+exports.scheduledAerodromesUpdate = scheduledAerodromesUpdate;
 exports.setAssociatedMovementOnDeletedDeparture = associatedMovementsTriggers.setAssociatedMovementOnDeletedDeparture;
 exports.setAssociatedMovementOnDeletedArrival = associatedMovementsTriggers.setAssociatedMovementOnDeletedArrival;
 exports.updateCustomsInvoiceRecipientsOnUpdate = invoiceRecipientsTrigger.updateCustomsInvoiceRecipientsOnUpdate;
