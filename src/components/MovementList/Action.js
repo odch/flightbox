@@ -10,7 +10,7 @@ const StyledAction = styled.span`
     `
     : `
       cursor: pointer;
-  
+
       &:hover {
         color: ${props.theme.colors.main};
       }
@@ -20,7 +20,7 @@ const StyledAction = styled.span`
 
 const ActionLabel = styled.span`
   ${props => props.responsive && `
-    @media (max-width: 980px) {
+    @media (max-width: 1200px) {
       display: none;
     }`
   }
