@@ -7,6 +7,7 @@ import MaterialIcon from '../MaterialIcon';
 import HomeBaseIcon from './HomeBaseIcon';
 import {ACTION_LABELS, TYPE_LABELS} from './labels';
 import NoPaymentTag from './NoPaymentTag'
+import AircraftTypeIcon from '../AircraftTypeIcon'
 
 const ICON_HEIGHT = 30;
 
@@ -41,7 +42,12 @@ const ColumnsWrapper = styled.div`
   }
 
   .homebase {
+    width: 50px;
+  }
+
+  .aircraftType {
     flex: 0.5;
+    padding-right: 10px;
   }
 
   .pilot, .datetime, .location {
@@ -63,10 +69,16 @@ const ColumnsWrapper = styled.div`
     white-space: nowrap;
   }
 
-  @media (max-width: 980px) {
+  @media (max-width: 1200px) {
     .action, .delete {
       width: 40px;
       text-align: center;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .aircraftType {
+      display: none;
     }
   }
 
@@ -168,6 +180,9 @@ class MovementHeader extends React.PureComponent {
           <Column className="immatriculation" alignMiddle>{props.data.immatriculation}</Column>
           <Column className="homebase" alignMiddle>
             <HomeBaseIcon isHomeBase={props.isHomeBase}/>
+          </Column>
+          <Column className="aircraftType" alignMiddle>
+            <AircraftTypeIcon aircraftCategory={props.data.aircraftCategory} mtow={props.data.mtow}/>
           </Column>
           <Column className="pilot" alignMiddle>{props.data.lastname}</Column>
           <Column className="datetime" alignMiddle={!date}>
