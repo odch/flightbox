@@ -43,6 +43,15 @@
         "location": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
+        "locationName": {
+          ".validate": "newData.isString()"
+        },
+        "locationCountry": {
+          ".validate": "newData.isString()"
+        },
+        "locationTimezone": {
+          ".validate": "newData.isString()"
+        },
         "memberNr": {
           ".validate": "newData.isString()"
         },
@@ -159,6 +168,15 @@
         },
         "location": {
           ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "locationName": {
+          ".validate": "newData.isString()"
+        },
+        "locationCountry": {
+          ".validate": "newData.isString()"
+        },
+        "locationTimezone": {
+          ".validate": "newData.isString()"
         },
         "memberNr": {
           ".validate": "newData.isString()"
