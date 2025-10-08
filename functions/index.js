@@ -10,6 +10,7 @@ admin.initializeApp({
 });
 
 const { scheduledAerodromesUpdate } = require('./updateAerodromes');
+const enrichMovements = require('./enrichMovements');
 
 const auth = require('./auth');
 const { generateSignInLink } = require('./auth/generateSignInLink');
@@ -35,3 +36,8 @@ exports.scheduledAerodromesUpdate = scheduledAerodromesUpdate;
 exports.setAssociatedMovementOnDeletedDeparture = associatedMovementsTriggers.setAssociatedMovementOnDeletedDeparture;
 exports.setAssociatedMovementOnDeletedArrival = associatedMovementsTriggers.setAssociatedMovementOnDeletedArrival;
 exports.updateCustomsInvoiceRecipientsOnUpdate = invoiceRecipientsTrigger.updateCustomsInvoiceRecipientsOnUpdate;
+
+exports.enrichDepartureOnCreate = enrichMovements.enrichDepartureOnCreate;
+exports.enrichDepartureOnUpdate = enrichMovements.enrichDepartureOnUpdate;
+exports.enrichArrivalOnCreate = enrichMovements.enrichArrivalOnCreate;
+exports.enrichArrivalOnUpdate = enrichMovements.enrichArrivalOnUpdate;
