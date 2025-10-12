@@ -12,7 +12,6 @@ import AerodromeStatusForm from '../../containers/AerodromeStatusFormContainer';
 import YearlySummaryReportForm from '../../containers/YearlySummaryReportFormContainer';
 import MessageList from '../../containers/MessageListContainer';
 import UserImportForm from '../../containers/UserImportFormContainer';
-import AerodromeImportForm from '../../containers/AerodromeImportFormContainer';
 import AircraftImportForm from '../../containers/AircraftImportFormContainer';
 import AircraftsItemList from '../../containers/AircraftsItemListContainer';
 import InvoiceRecipientsList from '../../containers/InvoiceRecipientsListContainer'
@@ -58,9 +57,6 @@ class AdminPage extends Component {
             </LabeledBox>
             <LabeledBox label="Benutzerliste importieren" className="user-import">
               <UserImportForm/>
-            </LabeledBox>
-            <LabeledBox label="Flugplatzliste importieren" className="aerodrome-import">
-              <AerodromeImportForm/>
             </LabeledBox>
             <LabeledBox label="Flugzeugliste importieren" className="aircraft-import">
               <AircraftImportForm/>
