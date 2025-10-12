@@ -121,10 +121,6 @@ const ActionColumn = styled(Column)`
   font-size: 1.2em;
 `;
 
-const Date = styled.div`
-  margin-bottom: 0.2em;
-`;
-
 const getLocation = data => {
   if (data.location.toUpperCase() === __CONF__.aerodrome.ICAO) {
     if (data.departureRoute === 'circuits' || data.arrivalRoute === 'circuits') {
@@ -185,9 +181,15 @@ class MovementHeader extends React.PureComponent {
             <AircraftTypeIcon aircraftCategory={props.data.aircraftCategory} mtow={props.data.mtow}/>
           </Column>
           <Column className="pilot" alignMiddle>{props.data.lastname}</Column>
-          <Column className="datetime" alignMiddle={!date}>
-            {date && <Date className="date">{date}</Date>}
-            <div className="time">{time}</div>
+          <Column className="datetime" alignMiddle>
+            {date ? (<div style={{lineHeight: '1.1'}}>
+              <div style={{fontSize: '0.90em', color: '#666'}}>{date}</div>
+              <div>{time}</div>
+            </div>) : (
+              <div>
+                <div>{time}</div>
+              </div>
+            )}
           </Column>
           <Column className="location" alignMiddle>{getLocation(props.data)}</Column>
           <ActionColumn className="action" alignMiddle highlight>
