@@ -14,6 +14,8 @@ import {getFromItemKey} from '../../util/reference-number';
 import {maskEmail, maskPhone} from '../../util/masking'
 import formatMoney from '../../util/formatMoney'
 import NoPaymentFieldValue from './NoPaymentFieldValue'
+import {formatLocationDisplay} from '../../util/locationDisplay'
+
 
 const Content = styled.div`
   padding: 1.5em 1em 0 1em;
@@ -93,14 +95,14 @@ class MovementDetails extends React.PureComponent {
               <DetailsBox label="Start und Ziel">
                 <MovementField label="Datum" value={date}/>
                 <MovementField label="Startzeit (Lokalzeit)" value={time}/>
-                <MovementField label="Zielflugplatz" value={props.data.location}/>
+                <MovementField label="Zielflugplatz" value={formatLocationDisplay(props.data, { lineHeight: 1.2, nameMarginTop: '2px' })}/>
                 <MovementField label="Dauer" value={props.data.duration}/>
               </DetailsBox>
             ) : (
               <DetailsBox label="Start und Ziel">
-                <MovementField label="Startflugplatz" value={props.data.location}/>
                 <MovementField label="Datum" value={date}/>
                 <MovementField label="Landezeit (Lokalzeit)" value={time}/>
+                <MovementField label="Startflugplatz" value={formatLocationDisplay(props.data, { lineHeight: 1.2, nameMarginTop: '2px' })}/>
                 <MovementField label="Anzahl Landungen" value={props.data.landingCount}/>
                 <MovementField label="Anzahl Durchstarts" value={props.data.goAroundCount} defaultValue={0}/>
               </DetailsBox>

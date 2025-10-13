@@ -8,6 +8,7 @@ import HomeBaseIcon from './HomeBaseIcon';
 import {ACTION_LABELS, TYPE_LABELS} from './labels';
 import NoPaymentTag from './NoPaymentTag'
 import AircraftTypeIcon from '../AircraftTypeIcon'
+import {formatLocationDisplay} from '../../util/locationDisplay'
 
 const ICON_HEIGHT = 30;
 
@@ -121,20 +122,6 @@ const ActionColumn = styled(Column)`
   font-size: 1.2em;
 `;
 
-const Date = styled.div`
-  margin-bottom: 0.2em;
-`;
-
-const getLocation = data => {
-  if (data.location.toUpperCase() === __CONF__.aerodrome.ICAO) {
-    if (data.departureRoute === 'circuits' || data.arrivalRoute === 'circuits') {
-      return 'Platzrunden';
-    }
-    return 'Lokalflug';
-  }
-  return data.location;
-};
-
 
 class MovementHeader extends React.PureComponent {
 
@@ -185,11 +172,17 @@ class MovementHeader extends React.PureComponent {
             <AircraftTypeIcon aircraftCategory={props.data.aircraftCategory} mtow={props.data.mtow}/>
           </Column>
           <Column className="pilot" alignMiddle>{props.data.lastname}</Column>
-          <Column className="datetime" alignMiddle={!date}>
-            {date && <Date className="date">{date}</Date>}
-            <div className="time">{time}</div>
+          <Column className="datetime" alignMiddle>
+            {date ? (<div style={{lineHeight: '1.1'}}>
+              <div style={{fontSize: '0.90em', color: '#666'}}>{date}</div>
+              <div>{time}</div>
+            </div>) : (
+              <div>
+                <div>{time}</div>
+              </div>
+            )}
           </Column>
-          <Column className="location" alignMiddle>{getLocation(props.data)}</Column>
+          <Column className="location" alignMiddle>{formatLocationDisplay(props.data)}</Column>
           <ActionColumn className="action" alignMiddle highlight>
             {props.data.associatedMovement && props.data.associatedMovement.type === 'none' ? (
               <Action

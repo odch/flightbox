@@ -1,17 +1,14 @@
-import { takeEvery } from 'redux-saga';
-import { fork, call, put, select } from 'redux-saga/effects';
+import {takeEvery} from 'redux-saga';
+import {call, fork, put, select} from 'redux-saga/effects';
 import * as actions from './actions';
-import importAerodromes from '../../util/importAerodromes';
 import importAircrafts from '../../util/importAircrafts';
 import importUsers from '../../util/importUsers';
-import { error } from '../../util/log';
+import {error} from '../../util/log';
 
 export const selectImport = importName => state => state.imports[importName];
 
 export function doImport(importName, csvString) {
   switch (importName) {
-    case 'aerodromes':
-      return importAerodromes(csvString);
     case 'aircrafts':
       return importAircrafts(csvString);
     case 'users':

@@ -248,7 +248,7 @@
     },
     "aerodromes": {
       ".read": "auth !== null",
-      ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
+      ".write": false,
       ".indexOn": [
         "name"
       ]
