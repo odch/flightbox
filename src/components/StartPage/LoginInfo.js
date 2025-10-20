@@ -10,6 +10,10 @@ const StyledWrapper = styled.div`
 
 const UserName = styled.span`
   margin-right: 0.3em;
+
+  @media (max-width: 500px) {
+    display: none;
+  }
 `;
 
 const Button = styled.button`
@@ -38,6 +42,20 @@ const StyledMenuButton = styled.button`
   margin: 3px 0;
 `;
 
+const StyledMenuUsername = styled.div`
+  padding: 7px 3px;
+  font-size: 1em;
+  font-weight: bold;
+  margin-bottom: 7px;
+  border-bottom: 1px solid #ddd;
+  color: #666;
+  display: none;
+
+  @media (max-width: 500px) {
+    display: block;
+  }
+`;
+
 const StyledMenuLink = styled(Link)`
   padding: 3px;
   border: none;
@@ -54,7 +72,7 @@ const StyledMenu = styled.div`
   position: absolute;
   top: 100%;
   right: 0;
-  width: 150px;
+  min-width: 150px;
   margin-top: 5px;
   background-color: rgb(255, 255, 255);
   border: 1px solid #ddd;
@@ -138,6 +156,7 @@ class LoginInfo extends React.Component {
     const auth = this.props.auth.data
     return (
       <StyledMenu innerRef={this.setMenuRef}>
+        <StyledMenuUsername>{getUsername(auth)}</StyledMenuUsername>
         {auth && auth.guest !== true && auth.uid !== 'ipauth' && (
           <StyledMenuLink to="/profile" data-cy="profile">Profil</StyledMenuLink>
         )}
