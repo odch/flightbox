@@ -75,8 +75,14 @@ class MovementDetails extends React.PureComponent {
             <MovementField label="Mitgliedernummer" value={props.data.memberNr}/>
             <MovementField label="Nachname" value={props.data.lastname}/>
             <MovementField label="Vorname" value={props.data.firstname}/>
-            <MovementField label="E-Mail" value={props.isAdmin ? props.data.email : maskEmail(props.data.email)}/>
-            <MovementField label="Telefon" value={props.isAdmin ? props.data.phone : maskPhone(props.data.phone)}/>
+            <MovementField label="E-Mail"
+                           value={__CONF__.maskContactInformation === true && !props.isAdmin
+                             ? maskEmail(props.data.email)
+                             : props.data.email}/>
+            <MovementField label="Telefon"
+                           value={__CONF__.maskContactInformation === true && !props.isAdmin
+                             ? maskPhone(props.data.phone)
+                             : props.data.phone}/>
           </DetailsBox>
           {props.data.type === 'departure'
             ? (
