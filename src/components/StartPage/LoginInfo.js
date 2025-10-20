@@ -40,6 +40,7 @@ const StyledMenuButton = styled.button`
   font-weight: bold;
   display: block;
   margin: 3px 0;
+  color: black;
 `;
 
 const StyledMenuUsername = styled.div`
@@ -50,6 +51,7 @@ const StyledMenuUsername = styled.div`
   border-bottom: 1px solid #ddd;
   color: #666;
   display: none;
+  text-decoration: none;
 
   @media (max-width: 500px) {
     display: block;
