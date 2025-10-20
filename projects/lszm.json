@@ -76,5 +76,6 @@
     "glider_instruction_aerotow",
     "glider_instruction_winch",
     "glider_instruction_self"
-  ]
+  ],
+  "maskContactInformation": false
 }

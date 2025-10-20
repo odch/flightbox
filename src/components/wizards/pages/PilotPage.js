@@ -57,7 +57,7 @@ const PilotPage = (props) => {
           label="E-Mail"
           component={renderInputField}
           readOnly={props.readOnly}
-          masked={!props.isAdmin}
+          masked={__CONF__.maskContactInformation === true && !props.isAdmin}
         />
         <Field
           name="phone"
@@ -65,7 +65,7 @@ const PilotPage = (props) => {
           label="Telefon"
           component={renderInputField}
           readOnly={props.readOnly}
-          masked={!props.isAdmin}
+          masked={__CONF__.maskContactInformation === true && !props.isAdmin}
         />
       </FieldSet>
       <WizardNavigation previousStep={previousPage} cancel={props.cancel}/>
