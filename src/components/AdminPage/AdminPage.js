@@ -1,26 +1,50 @@
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
 import {withRouter} from "react-router-dom";
-import LabeledBox from '../LabeledBox';
-import JumpNavigation from '../JumpNavigation';
+import styled from 'styled-components';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
-import AirstatReportForm from '../../containers/AirstatReportFormContainer';
-import LandingsReportForm from '../../containers/LandingsReportFormContainer';
-import InvoicesReportForm from '../../containers/InvoicesReportFormContainer';
-import LockMovementsForm from '../../containers/LockMovementsFormContainer';
-import AerodromeStatusForm from '../../containers/AerodromeStatusFormContainer';
-import YearlySummaryReportForm from '../../containers/YearlySummaryReportFormContainer';
-import MessageList from '../../containers/MessageListContainer';
-import UserImportForm from '../../containers/UserImportFormContainer';
-import AircraftImportForm from '../../containers/AircraftImportFormContainer';
-import AircraftsItemList from '../../containers/AircraftsItemListContainer';
-import InvoiceRecipientsList from '../../containers/InvoiceRecipientsListContainer'
+import JumpNavigation from '../JumpNavigation';
+import AdminNavigation from './AdminNavigation';
+import AdminExportPage from './subpages/AdminExportPage';
+import AdminLockMovementsPage from './subpages/AdminLockMovementsPage';
+import AdminAerodromeStatusPage from './subpages/AdminAerodromeStatusPage';
+import AdminMessagesPage from './subpages/AdminMessagesPage';
+import AdminImportPage from './subpages/AdminImportPage';
+import AdminAircraftPage from './subpages/AdminAircraftPage';
+import AdminInvoiceRecipientsPage from './subpages/AdminInvoiceRecipientsPage';
+import AdminGuestAccessPage from './subpages/AdminGuestAccessPage';
 import Content from './Content';
-import DescriptionText from './DescriptionText';
-import GuestAccessBox from '../../containers/GuestAccessBoxContainer'
-import objectToArray from '../../util/objectToArray'
+import objectToArray from '../../util/objectToArray';
+
+const AdminLayout = styled.div`
+  display: flex;
+  height: 100%;
+  min-height: calc(100vh - 60px);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const AdminContent = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  background-color: #fff;
+  padding-left: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem 0 0 0;
+  }
+`;
 
 class AdminPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeTab: 'export'
+    };
+    this.handleTabChange = this.handleTabChange.bind(this)
+  }
 
   componentWillMount() {
     if (this.props.auth.data.admin !== true) {
@@ -28,61 +52,63 @@ class AdminPage extends Component {
     }
   }
 
+  handleTabChange(tab) {
+    this.setState({activeTab: tab});
+  }
+
+  renderSubPage() {
+    switch (this.state.activeTab) {
+      case 'export':
+        return <AdminExportPage/>;
+      case 'lock-movements':
+        return <AdminLockMovementsPage/>;
+      case 'aerodrome-status':
+        return <AdminAerodromeStatusPage/>;
+      case 'messages':
+        return <AdminMessagesPage/>;
+      case 'import':
+        return <AdminImportPage/>;
+      case 'aircraft':
+        return <AdminAircraftPage/>;
+      case 'invoice-recipients':
+        return <AdminInvoiceRecipientsPage/>;
+      case 'guest-access':
+        return <AdminGuestAccessPage/>;
+      default:
+        return <AdminExportPage/>;
+    }
+  };
+
   render() {
+    const hiddenTabs = []
+
     const invoicePaymentEnabled = objectToArray(__CONF__.paymentMethods).includes('invoice')
+    const guestAccessEnabled = this.props.guestAccessToken && this.props.guestAccessToken.token
+
+    if (!invoicePaymentEnabled) {
+      hiddenTabs.push('invoice-recipients')
+    }
+    if (!guestAccessEnabled) {
+      hiddenTabs.push('guest-access')
+    }
+
     return (
       <VerticalHeaderLayout>
         {this.props.auth.data.admin === true &&
           <Content>
             <JumpNavigation/>
-            <LabeledBox label="BAZL-Report herunterladen (CSV)" className="AirstatReportForm">
-              <AirstatReportForm/>
-            </LabeledBox>
-            <LabeledBox label="Landeliste herunterladen (CSV)">
-              <LandingsReportForm/>
-            </LabeledBox>
-            {invoicePaymentEnabled && (
-              <LabeledBox label="Rechnungsberichte herunterladen (PDF)">
-                <InvoicesReportForm/>
-              </LabeledBox>)}
-            <LabeledBox label="Jahreszusammenfassung herunterladen (CSV)">
-              <YearlySummaryReportForm/>
-            </LabeledBox>
-            <LockMovementsForm/>
-            <LabeledBox label="Flugplatz-Status" contentPadding={0}>
-              <AerodromeStatusForm/>
-            </LabeledBox>
-            <LabeledBox label="Nachrichten" className="messages" contentPadding={0}>
-              <MessageList/>
-            </LabeledBox>
-            <LabeledBox label="Benutzerliste importieren" className="user-import">
-              <UserImportForm/>
-            </LabeledBox>
-            <LabeledBox label="Flugzeugliste importieren" className="aircraft-import">
-              <AircraftImportForm/>
-            </LabeledBox>
-            <LabeledBox label="Club-Flugzeuge">
-              <DescriptionText>
-                Geben Sie hier die Immatrikulationen der Club-Flugzeuge ein.
-                Die Immatrikulationen dürfen nur Grossbuchstaben und Zahlen enthalten.
-              </DescriptionText>
-              <AircraftsItemList type="club"/>
-            </LabeledBox>
-            <LabeledBox label="Auf diesem Flugplatz stationierte Flugzeuge (ohne Club-Flugzeuge)">
-              <DescriptionText>
-                Geben Sie hier die Immatrikulationen aller auf diesem Flugplatz stationierten Flugzeuge ein
-                (ohne die Club-Flugzeuge).
-                Die Immatrikulationen dürfen nur Grossbuchstaben und Zahlen enthalten.
-              </DescriptionText>
-              <AircraftsItemList type="homeBase"/>
-            </LabeledBox>
-            {invoicePaymentEnabled && (
-              <LabeledBox label="Rechnungsempfänger">
-                <InvoiceRecipientsList/>
-              </LabeledBox>
-            )}
-            <GuestAccessBox/>
-          </Content>}
+            <AdminLayout>
+              <AdminNavigation
+                activeTab={this.state.activeTab}
+                hiddenTabs={hiddenTabs}
+                onTabChange={this.handleTabChange}
+              />
+              <AdminContent>
+                {this.renderSubPage()}
+              </AdminContent>
+            </AdminLayout>
+          </Content>
+        }
       </VerticalHeaderLayout>
     );
   }
@@ -90,6 +116,9 @@ class AdminPage extends Component {
 
 AdminPage.propTypes = {
   auth: PropTypes.object.isRequired,
+  guestAccessToken: PropTypes.shape({
+    token: PropTypes.string
+  })
 };
 
 export default withRouter(AdminPage);

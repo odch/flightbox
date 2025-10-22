@@ -9,13 +9,17 @@ const Form = styled.form`
     display: flex;
 `;
 
+const InputContainer = styled.div`
+    flex-grow: 1;
+    padding-right: 1em;
+`
+
 const Input = styled.input`
     border: solid #000;
     border-width: 0 0 1px 0;
     padding: 0.2em;
     font-size: 1.5em;
-    margin-right: 1em;
-    flex-grow: 1;
+    width:100%;
 `;
 
 const AddButton = styled.button`
@@ -27,11 +31,6 @@ const AddButton = styled.button`
     &:hover {
         ${props => props.disabled !== true && `color: ${props.theme.colors.main};`}
     }
-`;
-
-const ItemsContainer = styled.div`
-    max-height: 300px;
-    overflow: auto;
 `;
 
 class InvoiceRecipientsList extends React.Component {
@@ -72,14 +71,16 @@ class InvoiceRecipientsList extends React.Component {
     return (
       <div>
         <Form onSubmit={handleSubmit}>
-          <Input
-            type="text"
-            value={this.state.newRecipientName}
-            placeholder="Name des Rechnungsempfängers (z.B. 'Flugschule XYZ')"
-            onChange={e => this.setState({
-              newRecipientName: e.target.value
-            })}
-          />
+          <InputContainer>
+            <Input
+              type="text"
+              value={this.state.newRecipientName}
+              placeholder="Name des Rechnungsempfängers (z.B. 'Flugschule XYZ')"
+              onChange={e => this.setState({
+                newRecipientName: e.target.value
+              })}
+            />
+          </InputContainer>
           <AddButton
             type="submit"
             disabled={this.state.newRecipientName.length === 0}
@@ -87,7 +88,7 @@ class InvoiceRecipientsList extends React.Component {
             <MaterialIcon icon="done"/>&nbsp;Hinzufügen
           </AddButton>
         </Form>
-        <ItemsContainer>
+        <div>
           {sortedRecipients.map((recipient) => {
             return (
               <InvoiceRecipient
@@ -103,7 +104,7 @@ class InvoiceRecipientsList extends React.Component {
               />
             );
           })}
-        </ItemsContainer>
+        </div>
       </div>
     )
   }
