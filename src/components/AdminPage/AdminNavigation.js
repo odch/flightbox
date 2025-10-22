@@ -10,7 +10,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   border: 1px solid #ddd;
-  box-shadow: 0 -1px 0 rgba(0,0,0,.03), 0 0 2px rgba(0,0,0,.03), 0 2px 4px rgba(0,0,0,.06);
+  box-shadow: 0 0 2px rgba(0,0,0,.03), 0 2px 4px rgba(0,0,0,.06);
 
   @media (max-width: 768px) {
     width: 100%;
@@ -38,14 +38,12 @@ const Title = styled.h2`
 
 const Menu = styled.nav`
   flex: 1;
-  padding: 1rem 0;
   overflow-y: auto;
 
   @media (max-width: 768px) {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    padding: 0;
   }
 `;
 
