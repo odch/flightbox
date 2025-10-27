@@ -56,12 +56,9 @@ const ColumnsWrapper = styled.div`
     padding-right: 10px;
   }
 
-  .delete {
-    width: 110px;
-  }
-
   .action {
     width: 200px;
+    text-align: right;
   }
 
   .pilot, .location {
@@ -71,9 +68,8 @@ const ColumnsWrapper = styled.div`
   }
 
   @media (max-width: 1200px) {
-    .action, .delete {
+    .action {
       width: 40px;
-      text-align: center;
     }
   }
 
@@ -104,7 +100,7 @@ const ColumnsWrapper = styled.div`
       display: none;
     }
 
-    .action, .delete {
+    .action {
       width: 30px;
     }
   }
@@ -128,7 +124,6 @@ class MovementHeader extends React.PureComponent {
   constructor(props) {
     super(props);
     this.handleActionClick = this.handleActionClick.bind(this);
-    this.handleDeleteClick = this.handleDeleteClick.bind(this);
   }
 
   render() {
@@ -196,16 +191,6 @@ class MovementHeader extends React.PureComponent {
               : null // if `associatedMovement` is undefined, we don't want to show anything (= state before the associated movement is even being monitored)
             }
           </ActionColumn>
-          <ActionColumn className="delete" alignMiddle>
-            {!props.locked && (
-              <Action
-                label="Löschen"
-                icon="delete"
-                onClick={this.handleDeleteClick}
-                responsive
-              />
-            )}
-          </ActionColumn>
         </ColumnsWrapper>
         {hasTags && (
           <TagsWrapper>
@@ -221,17 +206,12 @@ class MovementHeader extends React.PureComponent {
   handleActionClick() {
     this.props.createMovementFromMovement(this.props.data.type, this.props.data.key);
   }
-
-  handleDeleteClick() {
-    this.props.onDelete(this.props.data);
-  }
 }
 
 MovementHeader.propTypes = {
   data: PropTypes.object.isRequired,
   selected: PropTypes.bool,
   createMovementFromMovement: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
   locked: PropTypes.bool,
   onClick: PropTypes.func,
   isHomeBase: PropTypes.bool.isRequired,

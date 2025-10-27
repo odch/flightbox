@@ -33,6 +33,12 @@ const Footer = styled.div`
   display: flex;
   gap: 25px;
   justify-content: end;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
 `;
 
 class Movement extends React.PureComponent {
@@ -59,7 +65,6 @@ class Movement extends React.PureComponent {
           data={props.data}
           timeWithDate={props.timeWithDate}
           createMovementFromMovement={props.createMovementFromMovement}
-          onDelete={props.onDelete}
           locked={props.locked}
           isHomeBase={isHomeBase}
           isAdmin={props.isAdmin}
@@ -88,6 +93,11 @@ class Movement extends React.PureComponent {
                   icon="edit"
                   onClick={this.handleEditClick}
                 />
+                <Action
+                  label="Löschen"
+                  icon="delete"
+                  onClick={this.handleDeleteClick}
+                />
               </Footer>
             )}
             <AssociatedMovement
@@ -110,8 +120,7 @@ class Movement extends React.PureComponent {
     this.props.onSelect(selected);
   }
 
-  handleDeleteClick(e) {
-    e.stopPropagation(); // prevent call of onClick handler
+  handleDeleteClick() {
     this.props.onDelete(this.props.data);
   }
 
