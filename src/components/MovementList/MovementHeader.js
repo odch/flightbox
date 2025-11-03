@@ -118,6 +118,21 @@ const ActionColumn = styled(Column)`
   font-size: 1.2em;
 `;
 
+const StyledMovementTypeIcon = styled(MaterialIcon)`
+  ${props => props.locked && `
+    opacity: 0.5;
+  `}
+`
+
+const StyledLockIcon = styled(MaterialIcon)`
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  padding: 1px;
+  color: #666;
+`
 
 class MovementHeader extends React.PureComponent {
 
@@ -153,11 +168,21 @@ class MovementHeader extends React.PureComponent {
           }
         >
           <Column className="type">
-            <MaterialIcon
-              icon={TYPE_LABELS[props.data.type].icon}
-              size={ICON_HEIGHT}
-              title={TYPE_LABELS[props.data.type].label}
-            />
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <StyledMovementTypeIcon
+                icon={TYPE_LABELS[props.data.type].icon}
+                size={ICON_HEIGHT}
+                title={TYPE_LABELS[props.data.type].label}
+                locked={props.locked}
+              />
+              {props.locked && (
+                <StyledLockIcon
+                  icon="lock"
+                  size={14}
+                  title="Diese Bewegung kann nicht mehr bearbeitet oder gelöscht werden"
+                />
+              )}
+            </div>
           </Column>
           <Column className="immatriculation" alignMiddle>{props.data.immatriculation}</Column>
           <Column className="homebase" alignMiddle>
