@@ -325,7 +325,6 @@ class InvoicesReport {
 
     customsDeclarations.forEach(declaration => {
       const {
-        created,
         date,
         direction,
         registration,
@@ -356,7 +355,6 @@ class InvoicesReport {
       }
 
       rows.push([
-        {text: dates.formatDateTime(created), alignment: 'right'},
         {text: date, alignment: 'right'},
         registration,
         email,
@@ -368,7 +366,7 @@ class InvoicesReport {
       ])
     })
 
-    rows.push([{colSpan: 4, text: ''}, '', '', '', '', {
+    rows.push([{colSpan: 3, text: ''}, '', '', '', {
       alignment: 'right',
       bold: true,
       text: formatMoney(netFeeSum)
@@ -390,7 +388,6 @@ class InvoicesReport {
       table: {
         body: [
           [
-            {text: 'Erfasst am', bold: true, alignment: 'right'},
             {text: 'Datum', bold: true, alignment: 'right'},
             {text: 'Immatrikulation', bold: true},
             {text: 'E-Mail', bold: true},
