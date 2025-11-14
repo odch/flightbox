@@ -10,6 +10,7 @@ admin.initializeApp({
 });
 
 const { scheduledAerodromesUpdate } = require('./updateAerodromes');
+const { scheduledAircraftListUpdate } = require('./updateAircraftList');
 const enrichMovements = require('./enrichMovements');
 
 const auth = require('./auth');
@@ -33,6 +34,7 @@ exports.setAssociatedMovementOnUpdatedDeparture = associatedMovementsTriggers.se
 exports.setAssociatedMovementOnUpdatedArrival = associatedMovementsTriggers.setAssociatedMovementOnUpdatedArrival;
 
 exports.scheduledAerodromesUpdate = scheduledAerodromesUpdate;
+exports.scheduledAircraftListUpdate = scheduledAircraftListUpdate;
 exports.setAssociatedMovementOnDeletedDeparture = associatedMovementsTriggers.setAssociatedMovementOnDeletedDeparture;
 exports.setAssociatedMovementOnDeletedArrival = associatedMovementsTriggers.setAssociatedMovementOnDeletedArrival;
 exports.updateCustomsInvoiceRecipientsOnUpdate = invoiceRecipientsTrigger.updateCustomsInvoiceRecipientsOnUpdate;
