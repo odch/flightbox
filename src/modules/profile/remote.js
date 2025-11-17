@@ -10,15 +10,13 @@ export function load(username) {
 }
 
 export function save(username, profile) {
-  return new Promise((resolve, reject) => {
-    firebase(`/profiles/${username}`, (error, ref) => {
-      ref.update(profile, commitError => {
-        if (commitError) {
-          reject(commitError);
-        } else {
-          resolve();
-        }
-      });
-    });
+  return new Promise(async (resolve, reject) => {
+    try {
+      const ref = firebase(`/profiles/${username}`);
+      await ref.update(profile);
+      resolve();
+    } catch (error) {
+      reject(error);
+    }
   });
 }

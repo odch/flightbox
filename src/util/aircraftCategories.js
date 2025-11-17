@@ -1,3 +1,4 @@
+// Note: this list must be kept in sync with the map in `updateAircraftList.js`
 const categories = [
   {name: 'Flugzeug', flightTypeAircraftType: 'aircraft'},
   {name: 'Eigenbauflugzeug', flightTypeAircraftType: 'aircraft'},
