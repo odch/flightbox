@@ -64,14 +64,13 @@ function* removeInvoiceRecipientEmail(action) {
 }
 
 function* saveInvoiceRecipients(invoiceRecipients) {
-  return new Promise((resolve, reject) => {
-    firebase('/settings/invoiceRecipients').set(invoiceRecipients, error => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve();
-      }
-    });
+  return new Promise(async (resolve, reject) => {
+    try {
+      await firebase('/settings/invoiceRecipients').set(invoiceRecipients);
+      resolve();
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 
