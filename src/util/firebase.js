@@ -1,6 +1,6 @@
-import Firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/database';
+import Firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/database';
 
 function initialize() {
   if (Firebase.apps.length > 0) {
