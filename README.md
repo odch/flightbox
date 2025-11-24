@@ -68,6 +68,19 @@ Prerequisites: Firebase Tools must be installed (`npm install -g firebase-tools@
 
 ##### Set up env
 
+##### Database
+
+###### Flightbox
+
+**Code**:
+
+In project conf JSON file, set the following properties:
+
+- `environments.(test|production).firebaseDatabaseName`
+- `environments.(test|production).firebaseDatabaseUrl`
+
+**Functions**:
+
 Set the realtime database name for the cloud functions:
 
 ```
@@ -85,6 +98,13 @@ firebase functions:config:set rtdb.url={RTDB URL}
 ```
 
 (e.g. `firebase functions:config:set rtdb.url=https://lszt-test-eu.europe-west1.firebasedatabase.app`)
+
+###### Flightbox-Stripe repository
+
+In the https://github.com/odch/flightbox-stripe repository, set the following Github-Workflow environment variables:
+
+- `FIREBASE_RTDB_NAME`
+- `FIREBASE_RTDB_URL`
 
 ##### Deploy app
 
