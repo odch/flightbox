@@ -76,6 +76,16 @@ firebase functions:config:set rtdb.instance={RTDB NAME}
 
 (e.g. `firebase functions:config:set rtdb.instance=lszt-test`)
 
+
+If the database is not in the default location and the database URL is not `{instance}.firebaseio.com`, you also have
+to set the database URL additionally:
+
+```
+firebase functions:config:set rtdb.url={RTDB URL}
+```
+
+(e.g. `firebase functions:config:set rtdb.url=https://lszt-test-eu.europe-west1.firebasedatabase.app`)
+
 ##### Deploy app
 
 Before executing this command, make sure the correct project was built using the Node version
