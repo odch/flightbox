@@ -55,7 +55,7 @@ export function* createCardPayment(channel, action) {
 }
 
 function* monitorPaymentStatus(paymentRef, channel) {
-  paymentRef.onValueEvent(snapshot => {
+  paymentRef.on('value', snapshot => {
     const val = snapshot.val()
     const data = val.data
     const status = val.status

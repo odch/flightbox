@@ -1,6 +1,6 @@
-import Firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/database';
+import Firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/database';
 
 function initialize() {
   if (Firebase.apps.length > 0) {
@@ -9,7 +9,7 @@ function initialize() {
 
   const config = {
     apiKey: __FIREBASE_API_KEY__,
-    databaseURL: `https://${__FIREBASE_DATABASE_NAME__ || __FIREBASE_PROJECT_ID__}.firebaseio.com`
+    databaseURL: __FIREBASE_DATABASE_URL__ || `https://${__FIREBASE_DATABASE_NAME__ || __FIREBASE_PROJECT_ID__}.firebaseio.com`
   };
 
   Firebase.initializeApp(config);

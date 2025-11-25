@@ -17,6 +17,7 @@ const globals = {
   __THEME__: JSON.stringify(projectConf.theme),
   __FIREBASE_PROJECT_ID__: JSON.stringify(env.firebaseProjectId),
   __FIREBASE_DATABASE_NAME__: JSON.stringify(env.firebaseDatabaseName),
+  __FIREBASE_DATABASE_URL__: JSON.stringify(env.firebaseDatabaseUrl),
   __FIREBASE_API_KEY__: JSON.stringify(env.firebaseApiKey),
   __DISABLE_IP_AUTHENTICATION__: env.disableIpAuthentication === true,
   __FLIGHTNET_COMPANY__: JSON.stringify(projectConf.flightnetCompany),
@@ -40,7 +41,7 @@ module.exports = {
     rules: [
       {
         test: /\.jsx?$/,
-        exclude: /node_modules/,
+        exclude: /node_modules\/(?!(idb|@firebase)\/).*/,
         use: {
           loader: 'babel-loader',
           options: {

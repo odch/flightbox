@@ -54,6 +54,7 @@
   "environments": {
     "test": {
       "firebaseProjectId": "lszm-test",
+      "firebaseDatabaseUrl": "https://lszm-test-eu.europe-west1.firebasedatabase.app",
       "firebaseApiKey": "AIzaSyBP3IcalmLfA6gi9bq4Ln6aDyelL4gOLGg"
     },
     "production": {

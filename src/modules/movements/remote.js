@@ -30,25 +30,28 @@ export function loadByKey(path, key) {
 }
 
 export function removeMovement(path, key) {
-  return new Promise(resolve => {
-    firebase(path).child(key).remove(resolve);
+  return new Promise(async (resolve, reject) => {
+    try {
+      await firebase(path).child(key).remove();
+      resolve();
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 
 export function saveMovement(path, key, movement) {
-  return new Promise((resolve, reject) => {
-    const setCommitted = error => {
-      if (error) {
-        reject(error);
-      } else {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (key) {
+        await firebase(path).child(key).update(movement);
         resolve(key);
+      } else {
+        const newRef = await firebase(path).push(movement);
+        resolve(newRef.key);
       }
-    };
-
-    if (key) {
-      firebase(path).child(key).update(movement, setCommitted);
-    } else {
-      key = firebase(path).push(movement, setCommitted).key;
+    } catch (error) {
+      reject(error);
     }
   });
 }
