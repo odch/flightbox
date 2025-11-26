@@ -12,7 +12,7 @@
     "node-fetch": "^2.6.7",
     "nodemailer": "^6.9.0",
     "request-promise": "^4.2.6",
-    "soap": "^0.24.0"
+    "soap": "^1.6.0"
   },
   "private": true,
   "scripts": {
