@@ -11,7 +11,7 @@ import objectToArray from '../util/objectToArray'
 
 const findInvoiceRecipients = (invoiceRecipients, authEmail) => {
   if (!invoiceRecipients || !invoiceRecipients.loaded || invoiceRecipients.recipients.length === 0) {
-    return null
+    return []
   }
 
   const matchingRecipients = []
