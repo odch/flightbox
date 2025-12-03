@@ -1,0 +1,70 @@
+{
+  "aerodrome": {
+    "name": "Bad Ragaz",
+    "ICAO": "LSZE",
+    "runways": [
+      {
+        "name": "12",
+        "type": "A"
+      },
+      {
+        "name": "30",
+        "type": "A"
+      }
+    ],
+    "noRunwayIfHelicopter": true,
+    "departureRoutes": [
+      {
+        "name": "N",
+        "label": "Nord"
+      },
+      {
+        "name": "O",
+        "label": "Ost"
+      },
+      {
+        "name": "W",
+        "label": "West"
+      }
+    ],
+    "arrivalRoutes": [
+      {
+        "name": "N",
+        "label": "Nord"
+      },
+      {
+        "name": "O",
+        "label": "Ost"
+      },
+      {
+        "name": "W",
+        "label": "West"
+      }
+    ],
+    "landingFeesStrategy": "lsze"
+  },
+  "environments": {
+    "test": {
+      "firebaseProjectId": "lsze-test",
+      "firebaseDatabaseUrl": "https://lsze-test-default-rtdb.europe-west1.firebasedatabase.app",
+      "firebaseApiKey": "AIzaSyCKIaIc2zz5Stb9gbBriFaGOsdKz8M-bvo"
+    }
+  },
+  "theme": "lsze",
+  "title": "Flightbox - Flugplatz Bad Ragaz",
+  "paymentMethods": ["checkout", "invoice"],
+  "homebasePayment": true,
+  "loginForm": "email",
+  "enabledFlightTypes": [
+    "private",
+    "instruction",
+    "aerotow",
+    "glider_private_aerotow",
+    "glider_private_winch",
+    "glider_private_self",
+    "glider_instruction_aerotow",
+    "glider_instruction_winch",
+    "glider_instruction_self"
+  ],
+  "maskContactInformation": false
+}

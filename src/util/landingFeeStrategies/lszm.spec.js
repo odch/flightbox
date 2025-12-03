@@ -152,10 +152,10 @@ describe('util', () => {
           ['glider_private_self', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 8.1],
 
           // homebase plane (instruction)
-          ['instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 0],
+          ['instruction', AircraftOrigin.HOME_BASE, 'Flugzeug', 8.1],
 
           // homebase glider (instruction)
-          ['glider_instruction_self', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 0],
+          ['glider_instruction_self', AircraftOrigin.HOME_BASE, 'Segelflugzeug', 8.1],
 
           // homebase helicopter
           ['private', AircraftOrigin.HOME_BASE, 'Hubschrauber', 8.1],
