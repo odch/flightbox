@@ -11,4 +11,5 @@ cypress/videos
 
 node_modules/
 npm-debug.log
+firebase-debug.log
 .runtimeconfig.json
