@@ -2,7 +2,7 @@
   "vat": {
     "non_homebase_plane_helicopter": 8.1,
     "homebase_plane": 8.1,
-    "homebase_plane_instruction": 0,
+    "homebase_plane_instruction": 8.1,
     "homebase_helicopter": 8.1
   },
   "fees": {
