@@ -3,6 +3,10 @@ const callCustomsApi = async (firebase, urlBuilder, options = {}) => {
   const snapshot = await firebase.ref('/settings/customsDeclarationApp').once('value')
   const customsSettings = snapshot.val()
 
+  if (!customsSettings) {
+    return null
+  }
+
   const url = urlBuilder(customsSettings)
 
   const headers = {
@@ -34,12 +38,12 @@ const callCustomsApi = async (firebase, urlBuilder, options = {}) => {
 
 module.exports.fetchInvoices = async (firebase, year, month) => {
   const body = await callCustomsApi(firebase, customsSettings => `${customsSettings.baseUrl}/api/invoices?ad=${customsSettings.aerodrome}&year=${year}&month=${month}`)
-  return body.invoices
+  return body?.invoices || []
 }
 
 module.exports.fetchCheckouts = async (firebase, year, month) => {
   const body = await callCustomsApi(firebase, customsSettings => `${customsSettings.baseUrl}/api/checkouts?ad=${customsSettings.aerodrome}&year=${year}&month=${month}`)
-  return body.checkouts
+  return body?.checkouts || []
 }
 
 module.exports.postPrepopulatedForm = async (firebase, formData) => {
@@ -53,7 +57,7 @@ module.exports.postPrepopulatedForm = async (firebase, formData) => {
 module.exports.isCustomsDeclarationAppAvailable = async (firebase) => {
   const snapshot = await firebase.ref('/settings/customsDeclarationApp').once('value')
   const customsSettings = snapshot.val()
-  
+
   // Check if customs declaration app is properly configured
   return !!(customsSettings && customsSettings.accessToken && customsSettings.baseUrl && customsSettings.aerodrome)
 }
