@@ -13,6 +13,7 @@ import AdminImportPage from './subpages/AdminImportPage';
 import AdminAircraftPage from './subpages/AdminAircraftPage';
 import AdminInvoiceRecipientsPage from './subpages/AdminInvoiceRecipientsPage';
 import AdminGuestAccessPage from './subpages/AdminGuestAccessPage';
+import AdminKioskAccessPage from './subpages/AdminKioskAccessPage';
 import Content from './Content';
 import objectToArray from '../../util/objectToArray';
 
@@ -74,6 +75,8 @@ class AdminPage extends Component {
         return <AdminInvoiceRecipientsPage/>;
       case 'guest-access':
         return <AdminGuestAccessPage/>;
+      case 'kiosk-access':
+        return <AdminKioskAccessPage/>;
       default:
         return <AdminExportPage/>;
     }
@@ -84,6 +87,7 @@ class AdminPage extends Component {
 
     const invoicePaymentEnabled = objectToArray(__CONF__.paymentMethods).includes('invoice')
     const guestAccessEnabled = this.props.guestAccessToken && this.props.guestAccessToken.token
+    const kioskAccessEnabled = this.props.kioskAccessToken && this.props.kioskAccessToken.token
 
     if (!invoicePaymentEnabled) {
       hiddenTabs.push('invoice-recipients')
@@ -91,6 +95,11 @@ class AdminPage extends Component {
     if (!guestAccessEnabled) {
       hiddenTabs.push('guest-access')
     }
+    if (!kioskAccessEnabled) {
+      hiddenTabs.push('kiosk-access')
+    }
+
+    debugger
 
     return (
       <VerticalHeaderLayout>
@@ -117,6 +126,9 @@ class AdminPage extends Component {
 AdminPage.propTypes = {
   auth: PropTypes.object.isRequired,
   guestAccessToken: PropTypes.shape({
+    token: PropTypes.string
+  }),
+  kioskAccessToken: PropTypes.shape({
     token: PropTypes.string
   })
 };
