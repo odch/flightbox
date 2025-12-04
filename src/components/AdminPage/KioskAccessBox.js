@@ -46,7 +46,7 @@ export default function KioskAccessBox({kioskAccessToken}) {
   const url = `${window.location.protocol}//${window.location.host}?kt=${kioskAccessToken.token}`
 
   return (
-    <LabeledBox label="Gast-Login">
+    <LabeledBox label="Kiosk-Login">
       <DescriptionText>
         Das Kiosk-Login ist aktiv. Dieser Link kann für öffentlich zugängliche Flightbox-Terminals verwendet werden.
       </DescriptionText>
