@@ -29,7 +29,7 @@ export function* saveProfile(action) {
 
     const auth = yield select(authSelector);
 
-    if (!auth || auth.guest || auth.uid === 'ipauth') {
+    if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
       throw new Error('Current user not allowed to save profile');
     }
 

@@ -23,7 +23,7 @@ export const authSelector = state => state.auth.data
 export function* getProfileDefaultValues() {
   const auth = yield select(authSelector)
 
-  if (!auth || !auth.uid || auth.guest === true) {
+  if (!auth || !auth.uid || auth.guest === true || auth.kiosk === true) {
     return {}
   }
 

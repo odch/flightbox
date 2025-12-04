@@ -90,6 +90,9 @@ const getUsername = authData => {
   if (authData.guest === true) {
     return 'Gast'
   }
+  if (authData.kiosk === true) {
+    return 'Kiosk'
+  }
   return authData.uid
 }
 
@@ -159,7 +162,7 @@ class LoginInfo extends React.Component {
     return (
       <StyledMenu innerRef={this.setMenuRef}>
         <StyledMenuUsername>{getUsername(auth)}</StyledMenuUsername>
-        {auth && auth.guest !== true && auth.uid !== 'ipauth' && (
+        {auth && auth.guest !== true && auth.kiosk !== true && auth.uid !== 'ipauth' && (
           <StyledMenuLink to="/profile" data-cy="profile">Profil</StyledMenuLink>
         )}
         <StyledMenuButton onClick={this.props.logout} data-cy="logout">Abmelden</StyledMenuButton>

@@ -99,8 +99,6 @@ class AdminPage extends Component {
       hiddenTabs.push('kiosk-access')
     }
 
-    debugger
-
     return (
       <VerticalHeaderLayout>
         {this.props.auth.data.admin === true &&
