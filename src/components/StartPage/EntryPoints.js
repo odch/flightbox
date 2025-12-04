@@ -29,7 +29,7 @@ const EntryPoint = styled(ImageButton)`
 class EntryPoints extends React.PureComponent {
 
   render() {
-    if (this.props.guest === true) {
+    if (this.props.guest === true || this.props.kiosk === true) {
       return (
         <Wrapper>
           <EntryPoint img={departureImagePath} label="Abflug" href="/departure/new" dataCy="new-departure"/>
@@ -55,6 +55,7 @@ class EntryPoints extends React.PureComponent {
 EntryPoints.propTypes = {
   admin: PropTypes.bool,
   guest: PropTypes.bool,
+  kiosk: PropTypes.bool,
 };
 
 export default EntryPoints;

@@ -30,3 +30,9 @@ export const loadGuestToken = queryToken =>
     mode: 'guest_token',
     token: queryToken
   });
+
+export const loadKioskToken = queryToken =>
+  post({
+    mode: 'kiosk_token',
+    token: queryToken
+  });
