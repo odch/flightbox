@@ -5,6 +5,7 @@ import aerodromeStatus, {sagas as aerodromeStatusSagas} from './aerodromeStatus'
 import aircrafts, {sagas as aircraftsSagas} from './aircrafts';
 import lockDate, {sagas as lockDateSagas} from './lockDate';
 import guestAccessToken, {sagas as guestAccessTokenSagas} from './guestAccessToken';
+import kioskAccessToken, {sagas as kioskAccessTokenSagas} from './kioskAccessToken';
 import invoiceRecipients, {sagas as invoiceRecipientsSagas} from './invoiceRecipients';
 
 const reducer = combineReducers({
@@ -12,6 +13,7 @@ const reducer = combineReducers({
   aircrafts,
   lockDate,
   guestAccessToken,
+  kioskAccessToken,
   invoiceRecipients,
 });
 
@@ -21,6 +23,7 @@ export function* sagas() {
     fork(aircraftsSagas),
     fork(lockDateSagas),
     fork(guestAccessTokenSagas),
+    fork(kioskAccessTokenSagas),
     fork(invoiceRecipientsSagas),
   ]
 }

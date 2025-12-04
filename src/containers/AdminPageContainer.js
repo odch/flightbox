@@ -5,7 +5,8 @@ import AdminPage from '../components/AdminPage';
 const mapStateToProps = state => {
   return {
     auth: state.auth,
-    guestAccessToken: state.settings.guestAccessToken
+    guestAccessToken: state.settings.guestAccessToken,
+    kioskAccessToken: state.settings.kioskAccessToken
   };
 };
 

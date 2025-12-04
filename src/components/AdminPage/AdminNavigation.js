@@ -112,6 +112,7 @@ const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange }) => {
     { key: 'messages', label: 'Nachrichten', icon: 'message' },
     { key: 'aircraft', label: 'Flugzeuge', icon: 'flight' },
     { key: 'invoice-recipients', label: 'Rechnungsempfänger', icon: 'receipt' },
+    { key: 'kiosk-access', label: 'Kiosk-Login', icon: 'person_add' },
     { key: 'guest-access', label: 'Gast-Login', icon: 'person_add' },
     { key: 'import', label: 'Import', icon: 'file_upload' },
   ].filter(item => !hiddenTabs.includes(item.key));
