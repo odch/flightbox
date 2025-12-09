@@ -24,6 +24,7 @@ const webhook = require('./webhook');
 const setAssociatedMovementsCronJob = require('./associatedMovements/setAssociatedMovementsCronJob');
 const associatedMovementsTriggers = require('./associatedMovements/setAssociatedMovementsTriggers');
 const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsTrigger');
+const updateArrivalPaymentStatus = require('./updateArrivalPaymentStatus');
 
 exports.auth = auth;
 exports.generateSignInLink = generateSignInLink;
@@ -46,3 +47,5 @@ exports.enrichDepartureOnCreate = enrichMovements.enrichDepartureOnCreate;
 exports.enrichDepartureOnUpdate = enrichMovements.enrichDepartureOnUpdate;
 exports.enrichArrivalOnCreate = enrichMovements.enrichArrivalOnCreate;
 exports.enrichArrivalOnUpdate = enrichMovements.enrichArrivalOnUpdate;
+
+exports.updateArrivalPaymentStatusOnCardPaymentUpdate = updateArrivalPaymentStatus.updateArrivalPaymentStatusOnCardPaymentUpdate;
