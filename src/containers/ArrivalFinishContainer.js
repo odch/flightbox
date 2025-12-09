@@ -8,6 +8,7 @@ import {saveMovement} from '../modules/movements';
 import Finish, {FinishLoading} from '../components/wizards/ArrivalWizard/Finish';
 import {HeadingType} from '../components/wizards/MovementWizard'
 import objectToArray from '../util/objectToArray'
+import {getEnabledPaymentMethods} from '../util/paymentMethods'
 
 const findInvoiceRecipients = (invoiceRecipients, authEmail) => {
   if (!invoiceRecipients || !invoiceRecipients.loaded || invoiceRecipients.recipients.length === 0) {
@@ -44,6 +45,7 @@ class ArrivalFinishContainer extends Component {
       isUpdate,
       headingType,
       itemKey,
+      auth,
       localUser,
       authEmail
     } = this.props
@@ -62,7 +64,7 @@ class ArrivalFinishContainer extends Component {
 
     const invoiceRecipients = findInvoiceRecipients(invoiceRecipientSettings, authEmail)
 
-    const enabledPaymentMethods = objectToArray(__CONF__.paymentMethods)
+    const enabledPaymentMethods = getEnabledPaymentMethods(objectToArray(__CONF__.paymentMethods), auth.data)
       .filter(method => method === 'card' ? localUser : true)
       .filter(method => method === 'invoice' ? invoiceRecipients.length > 0 : true);
 
@@ -154,6 +156,7 @@ const mapStateToProps = (state, ownProps) => {
       roundingDifference: wizardValues.feeRoundingDifference,
       totalGross: wizardValues.feeTotalGross
     },
+    auth: state.auth,
     localUser: state.auth.data.local,
     authEmail: state.auth.data.email,
   });
