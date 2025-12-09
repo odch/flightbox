@@ -26,6 +26,15 @@ export const PAYMENT_METHODS = [
   }
 ]
 
+const AUTH_CONDITIONS = {
+  kiosk: auth => auth.kiosk === true,
+  notKiosk: auth => auth.kiosk !== true
+}
+
+export const getEnabledPaymentMethods = (paymentMethods, auth) => paymentMethods
+  .filter(method => method.authCondition ? AUTH_CONDITIONS[method.authCondition](auth) : true)
+  .map(method => typeof method === 'string' ? method : method.name)
+
 export const getLabel = (value) => {
   const method = PAYMENT_METHODS.find(method => method.value === value.method)
 
