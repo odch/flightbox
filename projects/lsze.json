@@ -52,7 +52,17 @@
   },
   "theme": "lsze",
   "title": "Flightbox - Flugplatz Bad Ragaz",
-  "paymentMethods": ["checkout", "invoice"],
+  "paymentMethods": [
+    {
+      "name": "checkout",
+      "authCondition": "notKiosk"
+    },
+    {
+      "name": "card_external",
+      "authCondition": "kiosk"
+    },
+    "invoice"
+  ],
   "homebasePayment": true,
   "loginForm": "email",
   "enabledFlightTypes": [
