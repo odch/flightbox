@@ -12,6 +12,7 @@ jobs:
           - lszt_prod
           - lszm_prod
           - lspv_prod
+          - lsze_prod
     environment: ${{ matrix.environment }}
     steps:
       - run: echo 'Running deplyoment for project ${{ vars.PROJECT }}'
@@ -39,6 +40,7 @@ jobs:
           - lszt_prod
           - lszm_prod
           - lspv_prod
+          - lsze_prod
     environment: ${{ matrix.environment }}
     steps:
       - run: echo 'Running functions deplyoment for project ${{ vars.PROJECT }}'
