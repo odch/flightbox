@@ -1,7 +1,7 @@
 import {takeEvery} from 'redux-saga';
 import {call, fork, put} from 'redux-saga/effects'
 import * as actions from './actions';
-import {loadCredentialsToken, loadGuestToken, loadIpToken} from '../../util/auth';
+import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
 import createChannel from '../../util/createChannel';
 import firebase, {
   authenticate as fbAuth,
@@ -12,6 +12,7 @@ import firebase, {
   watchAuthState
 } from '../../util/firebase';
 import {error as logError} from '../../util/log';
+import {getKioskAuthQueryToken} from '../../util/getAuthQueryToken'
 
 export function getLoginData(uid) {
   return new Promise((resolve, reject) => {
@@ -177,6 +178,24 @@ export function* doGuestTokenAuthentication(action) {
   }
 }
 
+export function* doKioskTokenAuthentication(action) {
+  try {
+    const queryToken = action.payload.token
+    const kioskToken = yield call(loadKioskToken, queryToken);
+    if (kioskToken) {
+      yield put(actions.requestFirebaseAuthentication(
+        kioskToken,
+        actions.kioskTokenAuthenticationFailure()
+      ));
+    } else {
+      yield put(actions.kioskTokenAuthenticationFailure());
+    }
+  } catch (e) {
+    error('Login with kiosk token failed', e)
+    yield put(actions.kioskTokenAuthenticationFailure())
+  }
+}
+
 export function* doFirebaseAuthentication(action) {
   try {
     yield call(fbAuth, action.payload.token);
@@ -188,6 +207,7 @@ export function* doFirebaseAuthentication(action) {
 
 export function* doLogout() {
   yield call(fbUnauth);
+  window.location.href = '/'
 }
 
 export function* doListenFirebaseAuthentication(action) {
@@ -207,13 +227,15 @@ export function* doListenFirebaseAuthentication(action) {
     } else {
       const loginData = yield call(getLoginData, uid)
       const guest = uid === 'guest'
-      const local = guest || window.localStorage.getItem('isLocalSignIn') === 'true'
+      const kiosk = uid === 'kiosk'
+      const local = guest || kiosk || window.localStorage.getItem('isLocalSignIn') === 'true'
       authData = {
         uid,
         expiration: expires * 1000,
         token,
         admin: loginData && loginData.admin === true,
         guest,
+        kiosk,
         local,
         links: !loginData || loginData.links !== false,
         name: yield call(getName, uid),
@@ -227,10 +249,16 @@ export function* doListenFirebaseAuthentication(action) {
   if (!authenticated) {
     if (isSignInWithEmail() && isSignInEmailInStorage()) {
       yield put(actions.requestEmailAuthentication())
+    } else if (isSignInWithKioskAccessToken()) {
+      yield put(actions.authenticateAsKiosk(getKioskAuthQueryToken(window.location)))
     } else {
       yield put(actions.requestIpAuthentication());
     }
   }
+}
+
+function isSignInWithKioskAccessToken() {
+  return !!getKioskAuthQueryToken(window.location)
 }
 
 function isSignInEmailInStorage() {
@@ -264,6 +292,7 @@ export default function* sagas() {
     fork(takeEvery, actions.REQUEST_IP_AUTHENTICATION, doIpAuthentication),
     fork(takeEvery, actions.REQUEST_USERNAME_PASSWORD_AUTHENTICATION, doUsernamePasswordAuthentication),
     fork(takeEvery, actions.REQUEST_GUEST_TOKEN_AUTHENTICATION, doGuestTokenAuthentication),
+    fork(takeEvery, actions.REQUEST_KIOSK_TOKEN_AUTHENTICATION, doKioskTokenAuthentication),
     fork(takeEvery, actions.SEND_AUTHENTICATION_EMAIL, sendAuthenticationEmail),
     fork(takeEvery, actions.COMPLETE_EMAIL_AUTHENTICATION, completeEmailAuthentication),
     fork(takeEvery, actions.REQUEST_EMAIL_AUTHENTICATION, doEmailAuthentication),

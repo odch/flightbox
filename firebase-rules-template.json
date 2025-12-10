@@ -262,6 +262,10 @@
         ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
         ".write":  false
       },
+      "kioskAccessToken": {
+        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".write":  false
+      },
       "aircrafts": {
         "homeBase": {
           ".read": "auth !== null",
