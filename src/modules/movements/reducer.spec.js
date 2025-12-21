@@ -4,6 +4,10 @@ import reducer from './reducer';
 
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
+  associatedMovements: {
+    departures: {},
+    arrivals: {}
+  },
   loading: false,
   loadingFailed: false,
   byKey: {},
@@ -14,7 +18,8 @@ const INITIAL_STATE = {
     },
     immatriculation: '',
     onlyWithoutAssociatedMovement: false
-  }
+  },
+  previousFilter: null
 };
 
 describe('modules', () => {

@@ -1,9 +1,11 @@
-import { put, call } from 'redux-saga/effects';
+import {call, put} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
-import { loadIpToken, loadCredentialsToken } from '../../util/auth';
-import { expectDoneWithoutReturn, expectDoneWithReturn } from '../../../test/sagaUtils';
-import firebase, { authenticate as fbAuth, unauth as fbUnauth } from '../../util/firebase';
+import {loadCredentialsToken, loadIpToken} from '../../util/auth';
+import {expectDoneWithoutReturn, expectDoneWithReturn} from '../../../test/sagaUtils';
+import firebase, {authenticate as fbAuth, isSignInWithEmail, unauth as fbUnauth} from '../../util/firebase';
+
+jest.mock('../../util/firebase');
 
 describe('modules', () => {
   describe('auth', () => {
@@ -105,6 +107,8 @@ describe('modules', () => {
 
       describe('doListenFirebaseAuthentication', () => {
         it('should request IP authentication if currently logged out', () => {
+          isSignInWithEmail.mockReturnValue(false);
+
           const generator = sagas.doListenFirebaseAuthentication(actions.firebaseAuthentication(null));
 
           expect(generator.next().value).toEqual(put(actions.firebaseAuthenticationEvent(null)));
@@ -117,7 +121,8 @@ describe('modules', () => {
           const generator = sagas.doListenFirebaseAuthentication(actions.firebaseAuthentication({
             uid: 'myadminuser',
             expires: 1,
-            token: 'validtoken'
+            token: 'validtoken',
+            email: 'admin@example.com'
           }));
 
           expect(generator.next().value).toEqual(call(sagas.getLoginData, 'myadminuser'));
@@ -131,7 +136,11 @@ describe('modules', () => {
             expiration: 1000,
             token: 'validtoken',
             uid: 'myadminuser',
-            name: 'Hans Muster'
+            name: 'Hans Muster',
+            email: 'admin@example.com',
+            guest: false,
+            kiosk: false,
+            local: false
           })));
 
           expectDoneWithoutReturn(generator);
@@ -141,7 +150,8 @@ describe('modules', () => {
           const generator = sagas.doListenFirebaseAuthentication(actions.firebaseAuthentication({
             uid: 'testuser',
             expires: 1,
-            token: 'validtoken'
+            token: 'validtoken',
+            email: 'testuser@example.com'
           }));
 
           expect(generator.next().value).toEqual(call(sagas.getLoginData, 'testuser'));
@@ -154,7 +164,11 @@ describe('modules', () => {
             expiration: 1000,
             token: 'validtoken',
             uid: 'testuser',
-            name: 'Hans Muster'
+            name: 'Hans Muster',
+            email: 'testuser@example.com',
+            guest: false,
+            kiosk: false,
+            local: false
           })));
 
           expectDoneWithoutReturn(generator);
@@ -170,6 +184,7 @@ describe('modules', () => {
           expect(generator.next(false).value).toEqual(put(actions.firebaseAuthenticationEvent({
             expiration: 1000,
             token: 'validtoken',
+            local: true
           })));
 
           expectDoneWithoutReturn(generator);

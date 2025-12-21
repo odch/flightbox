@@ -7,6 +7,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:functions": "cd functions && npm test",
+    "test:app": "jest --testPathIgnorePatterns=functions",
     "codecov": "codecov",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
