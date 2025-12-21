@@ -102,5 +102,6 @@
   "flightnetCompany": "mfgt",
   "theme": "lszt",
   "title": "Flightbox - Flugplatz Lommis",
-  "paymentMethods": ["cash", "card"]
+  "paymentMethods": ["cash", "card"],
+  "memberManagement": true
 }

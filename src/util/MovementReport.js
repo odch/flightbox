@@ -235,7 +235,9 @@ class MovementReport {
 
   addInternalFields(airstatRecord, movement, aircrafts) {
     airstatRecord.KEY = this.getMovementKey(movement)
-    airstatRecord.MEMBERNR = movement.memberNr;
+    if (__CONF__.memberManagement === true) {
+      airstatRecord.MEMBERNR = movement.memberNr;
+    }
     airstatRecord.LASTNAME = movement.lastname;
     airstatRecord.EMAIL = movement.email;
     airstatRecord.MTOW = movement.mtow;
@@ -275,7 +277,7 @@ MovementReport.header = [
 
 MovementReport.internalHeader = [
   'KEY',
-  'MEMBERNR',
+  ...(__CONF__.memberManagement === true ? ['MEMBERNR'] : []),
   'LASTNAME',
   'EMAIL',
   'MTOW',

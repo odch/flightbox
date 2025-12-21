@@ -24,8 +24,12 @@ const InternalDescription = () => (
     <Dl>
       <Dt>KEY</Dt>
       <Dd>Die Referenznummer der Bewegung</Dd>
-      <Dt>MEMBERNR</Dt>
-      <Dd>Die Mitgliedernummer des Piloten</Dd>
+      {__CONF__.memberManagement === true && (
+        <>
+          <Dt>MEMBERNR</Dt>
+          <Dd>Die Mitgliedernummer des Piloten</Dd>
+        </>
+      )}
       <Dt>LASTNAME</Dt>
       <Dd>Der Nachname des Piloten</Dd>
       <Dt>EMAIL</Dt>
