@@ -1,5 +1,5 @@
-import {select, put, call} from 'redux-saga/effects';
-import {initialize, destroy} from 'redux-form';
+import {call, put, select} from 'redux-saga/effects';
+import {destroy, initialize} from 'redux-form';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
@@ -7,7 +7,6 @@ import * as sagas from './sagas';
 import * as remote from './remote';
 import {LIMIT} from './pagination';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
-import {addMovements} from "./sagas";
 
 describe('modules', () => {
   describe('movements', () => {
@@ -16,13 +15,22 @@ describe('modules', () => {
         it('should return departure default values', () => {
           const generator = sagas.getDepartureDefaultValues();
 
+          expect(generator.next().value).toEqual(call(sagas.getProfileDefaultValues));
+
+          const profileDefaults = {
+            firstname: 'John',
+            lastname: 'Doe',
+          }
+
+          const next = generator.next(profileDefaults);
+
           const initialValues = {
+            firstname: 'John',
+            lastname: 'Doe',
             type: 'departure',
             date: dates.localDate(),
             time: dates.localTimeRounded(15, 'up')
           };
-
-          const next = generator.next();
 
           expect(next.value).toEqual(initialValues);
           expect(next.done).toEqual(true);
@@ -33,13 +41,22 @@ describe('modules', () => {
         it('should return arrival default values', () => {
           const generator = sagas.getArrivalDefaultValues();
 
+          expect(generator.next().value).toEqual(call(sagas.getProfileDefaultValues));
+
+          const profileDefaults = {
+            firstname: 'John',
+            lastname: 'Doe',
+          }
+
+          const next = generator.next(profileDefaults);
+
           const initialValues = {
+            firstname: 'John',
+            lastname: 'Doe',
             type: 'arrival',
             date: dates.localDate(),
             time: dates.localTimeRounded(15, 'down')
           };
-
-          const next = generator.next();
 
           expect(next.value).toEqual(initialValues);
           expect(next.done).toEqual(true);
@@ -251,6 +268,7 @@ describe('modules', () => {
 
           if (clear) {
             expect(generator.next().value).toEqual(put(actions.clearMovementsByKey()));
+            expect(generator.next().value).toEqual(put(actions.clearAssociatedMovements()));
           }
 
           expect(generator.next().done).toEqual(true);
@@ -275,7 +293,14 @@ describe('modules', () => {
           const generator = sagas.loadLatestDeparturesAndArrivalsPaged(state, false);
 
           expect(generator.next().value)
-            .toEqual(call(remote.loadLimited, '/departures', undefined, LIMIT));
+            .toEqual(select(sagas.authSelector));
+
+          const auth = {
+            email: 'pilot@example.com'
+          }
+
+          expect(generator.next(auth).value)
+            .toEqual(call(remote.loadLimited, '/departures', undefined, LIMIT, undefined, 'pilot@example.com'));
 
           const departuresResult = {
             snapshot: new FakeFirebaseSnapshot(null, [
@@ -292,7 +317,7 @@ describe('modules', () => {
           };
 
           expect(generator.next(departuresResult).value)
-            .toEqual(call(remote.loadLimited, '/arrivals', undefined, null, -1493791200000));
+            .toEqual(call(remote.loadLimited, '/arrivals', undefined, 10, undefined, 'pilot@example.com'));
 
           const arrivalsResult = {
             snapshot: new FakeFirebaseSnapshot(null, [
@@ -307,6 +332,9 @@ describe('modules', () => {
               name: 'arrRef'
             }
           };
+
+          expect(generator.next(arrivalsResult).value)
+            .toEqual(call(remote.loadLimited, '/arrivals', undefined, undefined, -1493791200000, 'pilot@example.com'));
 
           const next = generator.next(arrivalsResult);
 
@@ -513,7 +541,12 @@ describe('modules', () => {
             negativeTimestamp: -1476021600000,
           };
 
-          expect(generator.next(formValues).value).toEqual(call(remote.saveMovement, '/departures', undefined, formValuesForFirebase));
+          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
+
+          const auth = {
+          }
+
+          expect(generator.next(auth).value).toEqual(call(remote.saveMovement, '/departures', undefined, formValuesForFirebase));
 
           const key = 'new-departure-key';
 

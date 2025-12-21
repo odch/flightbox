@@ -1,5 +1,9 @@
 'use strict';
 
+jest.mock('firebase-functions', () => ({
+  config: jest.fn(() => ({}))
+}));
+
 const flightnet = require('.');
 
 jest.mock('./flightnet', () => ({

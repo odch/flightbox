@@ -10,8 +10,8 @@ jobs:
         with:
           node-version: 10
       - run: npm ci
-      #- run: npm test TODO reenable tests when fixed
       - run: npm run build
+      - run: npm run test:app
   build_functions:
     if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
     runs-on: ubuntu-latest
@@ -20,4 +20,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: cd functions && npm ci && cd ..
+      - run: cd functions && npm ci
+      - run: cd functions && npm test

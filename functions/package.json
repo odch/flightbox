@@ -14,8 +14,12 @@
     "request-promise": "^4.2.6",
     "soap": "^1.6.0"
   },
+  "devDependencies": {
+    "jest": "^24.1.0"
+  },
   "private": true,
   "scripts": {
+    "test": "jest",
     "serve": "firebase serve --only functions",
     "shell": "firebase functions:config:get > .runtimeconfig.json && firebase experimental:functions:shell",
     "start": "npm run shell",
