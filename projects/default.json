@@ -14,5 +14,6 @@
   "paymentMethods": ["cash"],
   "homebasePayment": false,
   "loginForm": "usernamePassword",
-  "maskContactInformation": true
+  "maskContactInformation": true,
+  "memberManagement": false
 }
