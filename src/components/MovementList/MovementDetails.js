@@ -72,7 +72,7 @@ class MovementDetails extends React.PureComponent {
             <StyledHomeBaseIcon isHomeBase={props.isHomeBase} showText/>
           </DetailsBox>
           <DetailsBox label="Pilot">
-            <MovementField label="Mitgliedernummer" value={props.data.memberNr}/>
+            {__CONF__.memberManagement === true && <MovementField label="Mitgliedernummer" value={props.data.memberNr}/>}
             <MovementField label="Nachname" value={props.data.lastname}/>
             <MovementField label="Vorname" value={props.data.firstname}/>
             <MovementField label="E-Mail"

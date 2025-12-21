@@ -88,6 +88,7 @@ class AdminPage extends Component {
     const invoicePaymentEnabled = objectToArray(__CONF__.paymentMethods).includes('invoice')
     const guestAccessEnabled = this.props.guestAccessToken && this.props.guestAccessToken.token
     const kioskAccessEnabled = this.props.kioskAccessToken && this.props.kioskAccessToken.token
+    const memberManagementEnabled = __CONF__.memberManagement === true
 
     if (!invoicePaymentEnabled) {
       hiddenTabs.push('invoice-recipients')
@@ -97,6 +98,9 @@ class AdminPage extends Component {
     }
     if (!kioskAccessEnabled) {
       hiddenTabs.push('kiosk-access')
+    }
+    if (!memberManagementEnabled) {
+      hiddenTabs.push('import')
     }
 
     return (

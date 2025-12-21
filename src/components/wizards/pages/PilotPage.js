@@ -11,7 +11,7 @@ const PilotPage = (props) => {
   return (
     <form onSubmit={handleSubmit} className="PilotPage">
       <FieldSet>
-        {!isGuest && (
+        {__CONF__.memberManagement === true &&!isGuest && (
           <Field
             name="memberNr"
             label="Mitgliedernummer"

@@ -35,10 +35,12 @@ function ProfileForm(props) {
     <StyledForm onSubmit={handleSubmit}>
       <StyledSectionTitle>Standard-Eingabewerte</StyledSectionTitle>
       <div>Die Werte aus den folgenden Feldern werden automatisch vorausgefüllt, wenn Sie einen neuen Abflug oder eine
-        neue Ankunft erfassen.</div>
+        neue Ankunft erfassen.
+      </div>
       <StyledSection>
         <StyledSectionTitle>Pilot</StyledSectionTitle>
-          <FieldSet gutter={false}>
+        <FieldSet gutter={false}>
+          {__CONF__.memberManagement === true && (
             <Field
               name="memberNr"
               type="text"
@@ -46,39 +48,40 @@ function ProfileForm(props) {
               component={renderInputField}
               readOnly={props.readOnly}
             />
-          </FieldSet>
+          )}
+        </FieldSet>
         <FieldSet gutter={false}>
-            <Field
-              name="lastname"
-              type="text"
-              label="Nachname"
-              component={renderInputField}
-              readOnly={props.readOnly}
-            />
-            <Field
-              name="firstname"
-              type="text"
-              label="Vorname"
-              component={renderInputField}
-              readOnly={props.readOnly}
-            />
-          </FieldSet>
+          <Field
+            name="lastname"
+            type="text"
+            label="Nachname"
+            component={renderInputField}
+            readOnly={props.readOnly}
+          />
+          <Field
+            name="firstname"
+            type="text"
+            label="Vorname"
+            component={renderInputField}
+            readOnly={props.readOnly}
+          />
+        </FieldSet>
         <FieldSet gutter={false}>
-            <Field
-              name="email"
-              type="email"
-              label="E-Mail"
-              component={renderInputField}
-              readOnly={props.readOnly}
-            />
-            <Field
-              name="phone"
-              type="tel"
-              label="Telefon"
-              component={renderInputField}
-              readOnly={props.readOnly}
-            />
-          </FieldSet>
+          <Field
+            name="email"
+            type="email"
+            label="E-Mail"
+            component={renderInputField}
+            readOnly={props.readOnly}
+          />
+          <Field
+            name="phone"
+            type="tel"
+            label="Telefon"
+            component={renderInputField}
+            readOnly={props.readOnly}
+          />
+        </FieldSet>
       </StyledSection>
 
       <StyledSection>
