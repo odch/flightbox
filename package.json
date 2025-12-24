@@ -31,7 +31,7 @@
     "binary-search": "^1.3.6",
     "css-loader": "^7.1.2",
     "csv-parse": "^2.5.0",
-    "csv-stringify": "^3.1.1",
+    "csv-stringify": "^6.6.0",
     "cypress": "^3.0.1",
     "del": "^8.0.1",
     "enzyme": "^3.3.0",
@@ -96,6 +96,9 @@
       "!<rootDir>/node_modules/",
       "!<rootDir>/test/"
     ],
+    "moduleNameMapper": {
+      "^csv-stringify/browser/esm$": "csv-stringify"
+    },
     "globals": {
       "__DISABLE_IP_AUTHENTICATION__": false,
       "__LANDING_FEES_STRATEGY__": "default",
