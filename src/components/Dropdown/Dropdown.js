@@ -230,11 +230,6 @@ class Dropdown extends Component {
       return;
     }
 
-    if (e.which === KEY_CODE_ARROW_DOWN) {
-      this.input.focus();
-      return;
-    }
-
     if (e.which !== KEY_CODE_ARROW_DOWN && e.which !== KEY_CODE_ARROW_UP) {
       return;
     }
