@@ -52,7 +52,7 @@
     "pdfmake": "^0.2.18",
     "prop-types": "^15.6.1",
     "qrcode-svg": "^1.1.0",
-    "ramda": "^0.25.0",
+    "ramda": "^0.32.0",
     "react": "^16.4.0",
     "react-day-picker": "^7.1.9",
     "react-dom": "^16.4.0",
