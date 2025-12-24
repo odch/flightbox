@@ -30,7 +30,6 @@ module.exports = {
   mode: process.env.ENV === 'production' ? 'production' : 'development',
   entry: [
     '@babel/polyfill',
-    'whatwg-fetch',
     path.resolve(__dirname, './src/app.js'),
     path.resolve(__dirname, './theme/' + projectConf.theme)
   ],
