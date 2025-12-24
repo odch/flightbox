@@ -1,6 +1,5 @@
 const gulp = require('gulp');
 const webpack = require('webpack-stream');
-const del = require('del');
 const env = require('gulp-env');
 const merge = require('merge-stream');
 const rename = require('gulp-rename');
@@ -24,9 +23,10 @@ const prettyPrintJson = () => through2.obj((file, _, cb) => {
   cb(null, file);
 });
 
-function clean() {
+async function clean() {
   const config = require('./webpack.config.js');
-  return del([config.output.path]);
+  const { deleteAsync } = await import('del');
+  return await deleteAsync([config.output.path]);
 }
 
 function buildTask() {

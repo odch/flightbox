@@ -33,7 +33,7 @@
     "csv-parse": "^2.5.0",
     "csv-stringify": "^3.1.1",
     "cypress": "^3.0.1",
-    "del": "^3.0.0",
+    "del": "^8.0.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "firebase": "^9.23.0",
