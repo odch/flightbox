@@ -30,7 +30,7 @@
     "babel-loader": "^10.0.0",
     "binary-search": "^1.3.6",
     "css-loader": "^7.1.2",
-    "csv-parse": "^2.5.0",
+    "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
     "cypress": "^3.0.1",
     "del": "^8.0.1",
@@ -96,7 +96,8 @@
       "!<rootDir>/test/"
     ],
     "moduleNameMapper": {
-      "^csv-stringify/browser/esm$": "csv-stringify"
+      "^csv-stringify/browser/esm$": "csv-stringify",
+      "^csv-parse/browser/esm/sync$": "csv-parse/sync"
     },
     "globals": {
       "__DISABLE_IP_AUTHENTICATION__": false,

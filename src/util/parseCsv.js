@@ -1,4 +1,4 @@
-import parse from 'csv-parse/lib/sync';
+import {parse} from 'csv-parse/browser/esm/sync';
 
 function parseCsv(csvString) {
   try {
