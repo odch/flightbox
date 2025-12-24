@@ -1,18 +1,14 @@
-import parse from 'csv-parse';
+import parse from 'csv-parse/lib/sync';
 
 function parseCsv(csvString) {
-  return new Promise((resolve, reject) => {
-    const parseOptions = {
+  try {
+    const output = parse(csvString, {
       skip_empty_lines: true,
-    };
-    parse(csvString, parseOptions, (err, output) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(output);
-      }
     });
-  });
+    return Promise.resolve(output);
+  } catch (err) {
+    return Promise.reject(err);
+  }
 }
 
 export default parseCsv;
