@@ -1,4 +1,4 @@
-import stringify from 'csv-stringify';
+import {stringify} from 'csv-stringify/browser/esm'
 
 function writeCsv(records, options={}) {
   return new Promise((resolve, reject) => {
