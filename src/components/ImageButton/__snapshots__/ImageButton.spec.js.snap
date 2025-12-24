@@ -1,10 +1,10 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`components ImageButton propagates href to OptionalLink 1`] = `
 "<styled.div className={[undefined]}>
-  <OptionalLink href=\\"/some/path\\" onClick={[undefined]} dataCy={[undefined]}>
+  <OptionalLink href="/some/path" onClick={[undefined]} dataCy={[undefined]}>
     <styled.div>
-      <img src=\\"\\" />
+      <img src="" />
     </styled.div>
   </OptionalLink>
 </styled.div>"
@@ -14,7 +14,7 @@ exports[`components ImageButton propagates onClick to OptionalLink 1`] = `
 "<styled.div className={[undefined]}>
   <OptionalLink href={[undefined]} onClick={[Function: onClick]} dataCy={[undefined]}>
     <styled.div>
-      <img src=\\"\\" />
+      <img src="" />
     </styled.div>
   </OptionalLink>
 </styled.div>"
@@ -24,7 +24,7 @@ exports[`components ImageButton renders label and image 1`] = `
 "<styled.div className={[undefined]}>
   <OptionalLink href={[undefined]} onClick={[undefined]} dataCy={[undefined]}>
     <styled.div>
-      <img src=\\"imgsource.jpg\\" />
+      <img src="imgsource.jpg" />
       my label
     </styled.div>
   </OptionalLink>
