@@ -1,7 +1,7 @@
 const gulp = require('gulp');
-const webpack = require('webpack-stream');
+const webpackStream = require('webpack-stream');
+const webpackCore = require('webpack');
 const env = require('gulp-env');
-const merge = require('merge-stream');
 const rename = require('gulp-rename');
 const through2 = require('through2');
 const projects = require('./projects');
@@ -10,14 +10,18 @@ const processFirebaseRules = require('./tasks/processFirebaseRules');
 require('ignore-styles');
 require('@babel/polyfill');
 
-const prettyPrintJson = () => through2.obj((file, _, cb) => {
+const prettyPrintJson = () => through2.obj((file, enc, cb) => {
+  if (file.isNull()) {
+    return cb(null, file);
+  }
   if (file.isBuffer()) {
     try {
       const jsonContent = JSON.parse(file.contents.toString());
-      const prettyJson = JSON.stringify(jsonContent, null, 2); // Pretty-print with 2 spaces
+      const prettyJson = JSON.stringify(jsonContent, null, 2);
       file.contents = Buffer.from(prettyJson);
+      return cb(null, file);
     } catch (error) {
-      return cb(new Error('Invalid JSON format'));
+      return cb(new Error(`Invalid JSON format in ${file.path}`));
     }
   }
   cb(null, file);
@@ -29,44 +33,52 @@ async function clean() {
   return await deleteAsync([config.output.path]);
 }
 
-function buildTask() {
-  const config = require('./webpack.config.js');
-
-  const projectName = process.env.npm_config_project || 'lszt';
-  const projectConf = projects.load(projectName);
-
-  const bundle = gulp.src('./src/app.js')
-    .pipe(webpack(config))
-    .pipe(gulp.dest(config.output.path));
-
-  const copy = gulp.src(['./reset.css'], { base: './' })
-    .pipe(gulp.dest(config.output.path));
-
-  const favicons = gulp.src(['./theme/' + projectConf.theme + '/favicons/*'], { base: './theme/' + projectConf.theme })
-    .pipe(gulp.dest(config.output.path));
-
-  const rules = gulp.src(['./firebase-rules-template.json'], { base: './' })
-    .pipe(processFirebaseRules(projectConf))
-    .pipe(prettyPrintJson())
-    .pipe(rename('firebase-rules.json'))
-    .pipe(gulp.dest(config.output.path));
-
-  return merge(bundle, copy, favicons, rules);
-}
-
-function prodEnv(done) {
+async function prodEnv() {
   env({
     vars: {
       ENV: 'production',
     },
   });
-  done();
 }
 
-// Export tasks
-exports.clean = clean;
-exports.build = gulp.series(clean, buildTask);
-exports['build:prod'] = gulp.series(prodEnv, clean, buildTask);
+function bundleJS() {
+  const config = require('./webpack.config.js');
+  return webpackStream(config, webpackCore)
+    .pipe(gulp.dest(config.output.path));
+}
 
-// Default task
+function copyResetCss() {
+  const config = require('./webpack.config.js');
+  return gulp.src('./reset.css', { base: './', allowEmpty: true })
+    .pipe(gulp.dest(config.output.path));
+}
+
+function copyFavicons() {
+  const config = require('./webpack.config.js');
+  const projectName = process.env.npm_config_project || 'lszt';
+  const projectConf = projects.load(projectName);
+  const faviconPath = `./theme/${projectConf.theme}/favicons/*`;
+
+  return gulp.src(faviconPath, { base: `./theme/${projectConf.theme}`, allowEmpty: true })
+    .pipe(gulp.dest(config.output.path));
+}
+
+function buildFirebaseRules() {
+  const config = require('./webpack.config.js');
+  const projectName = process.env.npm_config_project || 'lszt';
+  const projectConf = projects.load(projectName);
+
+  return gulp.src('./firebase-rules-template.json', { allowEmpty: true })
+    .pipe(processFirebaseRules(projectConf))
+    .pipe(prettyPrintJson())
+    .pipe(rename('firebase-rules.json'))
+    .pipe(gulp.dest(config.output.path));
+}
+
+const assets = gulp.parallel(copyResetCss, copyFavicons, buildFirebaseRules);
+
+exports.clean = clean;
+exports.build = gulp.series(clean, bundleJS, assets);
+exports['build:prod'] = gulp.series(prodEnv, clean, bundleJS, assets);
+
 exports.default = exports.build;
