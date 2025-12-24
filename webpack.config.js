@@ -27,6 +27,7 @@ const globals = {
 };
 
 module.exports = {
+  mode: process.env.ENV === 'production' ? 'production' : 'development',
   entry: [
     '@babel/polyfill',
     'whatwg-fetch',
@@ -35,7 +36,17 @@ module.exports = {
   ],
   output: {
     path: path.resolve(__dirname, './build'),
-    filename: 'bundle.[chunkhash].js',
+    filename: 'bundle.[contenthash].js',
+    clean: true,
+  },
+  resolve: {
+    fallback: {
+      "stream": require.resolve("stream-browserify"),
+      "util": require.resolve("util/"),
+      "path": false,
+      "fs": false
+    },
+    extensions: ['.js', '.jsx', '.json']
   },
   module: {
     rules: [
@@ -44,9 +55,6 @@ module.exports = {
         exclude: /node_modules\/(?!(idb|@firebase)\/).*/,
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env']
-          }
         }
       },
       {
@@ -55,19 +63,23 @@ module.exports = {
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg|woff|woff2)$/,
-        loader: 'url-loader?limit=10000',
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 10000 // Inline images < 10kb
+          }
+        }
       },
       {
         test: /\.(eot|ttf|wav|mp3)$/,
-        loader: 'file-loader',
-      },
-      {
-        test: /\.json$/,
-        loader: 'json-loader',
-      },
+        type: 'asset/resource',
+      }
     ],
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      process: 'process/browser', // Injects the process polyfill
+    }),
     new webpack.DefinePlugin(globals),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, './index.html'),
