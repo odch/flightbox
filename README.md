@@ -6,7 +6,7 @@
 
 #### Required Node Versions
 
-Node Version for building the app: 16
+Node Version for building the app: 20
 
 Node Version for deploying to Firebase and for the cloud functions: 20
 
