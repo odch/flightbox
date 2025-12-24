@@ -39,7 +39,6 @@
     "gulp": "~3.9.0",
     "gulp-env": "~0.4.0",
     "gulp-rename": "^1.0.0",
-    "gulp-replace": "^1.0.0",
     "gulp-through": "^0.4.0",
     "history": "^4.7.2",
     "html-webpack-plugin": "^2.30.1",

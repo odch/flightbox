@@ -3,7 +3,6 @@ const webpack = require('webpack-stream');
 const del = require('del');
 const env = require('gulp-env');
 const merge = require('merge-stream');
-const replace = require('gulp-replace');
 const rename = require('gulp-rename');
 const through2 = require('through2');
 const projects = require('./projects');
