@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const gulp = require('gulp');
 const webpackStream = require('webpack-stream');
 const webpackCore = require('webpack');
@@ -53,13 +55,22 @@ function copyResetCss() {
     .pipe(gulp.dest(config.output.path));
 }
 
-function copyFavicons() {
+function copyFavicons(done) {
   const config = require('./webpack.config.js');
   const projectName = process.env.npm_config_project || 'lszt';
   const projectConf = projects.load(projectName);
-  const faviconPath = `./theme/${projectConf.theme}/favicons/*`;
 
-  return gulp.src(faviconPath, { base: `./theme/${projectConf.theme}`, allowEmpty: true })
+  const faviconDir = path.join(__dirname, 'theme', projectConf.theme, 'favicons');
+
+  if (!fs.existsSync(faviconDir)) {
+    console.log(`⚠️  Skipping favicons: Directory not found at ${faviconDir}`);
+    return done();
+  }
+
+  return gulp.src(path.join(faviconDir, '*'), {
+    base: path.join(__dirname, 'theme', projectConf.theme),
+    allowEmpty: true
+  })
     .pipe(gulp.dest(config.output.path));
 }
 
