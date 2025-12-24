@@ -1,7 +1,7 @@
 {
   "license": "MIT",
   "scripts": {
-    "start": "DEV=1 webpack-dev-server --progress --colors --host 0.0.0.0",
+    "start": "DEV=1 webpack serve --host 0.0.0.0",
     "build": "gulp build",
     "build:prod": "gulp build:prod",
     "test": "jest",
@@ -24,30 +24,30 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/runtime": "^7.3.1",
     "@sentry/react": "^6.2.4",
+    "ajv": "^8.17.1",
+    "ajv-keywords": "^5.1.0",
     "babel-jest": "^27.5.1",
-    "babel-loader": "^8.0.5",
+    "babel-loader": "^9.2.1",
     "binary-search": "^1.3.6",
     "cheerio": "1.0.0-rc.3",
-    "css-loader": "^0.28.11",
+    "css-loader": "^7.1.2",
     "csv-parse": "^2.5.0",
     "csv-stringify": "^3.1.1",
     "cypress": "^3.0.1",
     "del": "^3.0.0",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
-    "file-loader": "^1.1.11",
     "firebase": "^9.23.0",
     "gulp": "^4.0.2",
     "gulp-env": "~0.4.0",
     "gulp-rename": "^2.1.0",
     "gulp-through": "^0.4.0",
     "history": "^4.7.2",
-    "html-webpack-plugin": "^2.30.1",
+    "html-webpack-plugin": "^5.6.5",
     "ignore-styles": "^5.0.1",
     "immutability-helper": "^2.6.6",
     "jest": "^27.5.1",
     "jest-environment-jsdom": "^27.5.1",
-    "json-loader": "~0.5.4",
     "merge-stream": "^2.0.0",
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.17",
@@ -68,12 +68,14 @@
     "redux-saga": "^0.16.0",
     "scroll-into-view": "^1.16.2",
     "start-server-and-test": "^1.4.1",
-    "style-loader": "^0.21.0",
+    "stream-browserify": "^3.0.0",
+    "style-loader": "^4.0.0",
     "styled-components": "^3.3.0",
-    "url-loader": "^1.0.1",
-    "webpack": "^3.1.0",
-    "webpack-dev-server": "^2.11.2",
-    "webpack-stream": "^4.0.3",
+    "util": "^0.12.5",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2",
+    "webpack-stream": "^7.0.0",
     "whatwg-fetch": "^2.0.4"
   },
   "repository": {
@@ -208,5 +210,8 @@
         }
       }
     }
+  },
+  "dependencies": {
+    "process": "^0.11.10"
   }
 }
