@@ -24,11 +24,13 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/runtime": "^7.3.1",
     "@sentry/react": "^6.2.4",
+    "babel-jest": "^27.5.1",
     "babel-loader": "^8.0.5",
     "binary-search": "^1.3.6",
+    "cheerio": "1.0.0-rc.3",
     "css-loader": "^0.28.11",
-    "csv-parse": "^2.1.0",
-    "csv-stringify": "^3.0.0",
+    "csv-parse": "^2.5.0",
+    "csv-stringify": "^3.1.1",
     "cypress": "^3.0.1",
     "del": "^3.0.0",
     "enzyme": "^3.3.0",
@@ -43,7 +45,8 @@
     "html-webpack-plugin": "^2.30.1",
     "ignore-styles": "^5.0.1",
     "immutability-helper": "^2.6.6",
-    "jest": "^24.1.0",
+    "jest": "^27.5.1",
+    "jest-environment-jsdom": "^27.5.1",
     "json-loader": "~0.5.4",
     "merge-stream": "^2.0.0",
     "moment": "^2.22.2",
@@ -78,6 +81,7 @@
     "url": "https://github.com/odch/flightbox.git"
   },
   "jest": {
+    "testEnvironment": "jsdom",
     "setupTestFrameworkScriptFile": "<rootDir>/test/testSetup.js",
     "moduleDirectories": [
       "node_modules",
