@@ -24,18 +24,18 @@ const prettyPrintJson = () => through2.obj((file, _, cb) => {
   cb(null, file);
 });
 
-gulp.task('clean', function () {
+function clean() {
   const config = require('./webpack.config.js');
   return del([config.output.path]);
-});
+}
 
-gulp.task('build', ['clean'], function () {
+function buildTask() {
   const config = require('./webpack.config.js');
 
   const projectName = process.env.npm_config_project || 'lszt';
   const projectConf = projects.load(projectName);
 
-  const bundle = gulp.src(config.entry)
+  const bundle = gulp.src('./src/app.js')
     .pipe(webpack(config))
     .pipe(gulp.dest(config.output.path));
 
@@ -52,14 +52,21 @@ gulp.task('build', ['clean'], function () {
     .pipe(gulp.dest(config.output.path));
 
   return merge(bundle, copy, favicons, rules);
-});
+}
 
-gulp.task('prod-env', function () {
+function prodEnv(done) {
   env({
     vars: {
       ENV: 'production',
     },
   });
-});
+  done();
+}
 
-gulp.task('build:prod', ['prod-env', 'build']);
+// Export tasks
+exports.clean = clean;
+exports.build = gulp.series(clean, buildTask);
+exports['build:prod'] = gulp.series(prodEnv, clean, buildTask);
+
+// Default task
+exports.default = exports.build;
