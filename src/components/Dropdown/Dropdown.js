@@ -131,6 +131,7 @@ class Dropdown extends Component {
         onMouseDown={this.handleOptionClick.bind(this, option)}
         onMouseEnter={this.handleOptionMouseEnter.bind(this, option)}
         innerRef={comp => this.options[option.key] = comp}
+        data-cy={this.props.dataCy && `${this.props.dataCy}-option-${option.key}` }
       >
         {this.props.optionRenderer(option, focussed)}
       </Option>
