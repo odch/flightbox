@@ -3,8 +3,14 @@
     "name": "Cypress",
     "ICAO": "LSXX",
     "runways": [
-      "36",
-      "18"
+      {
+        "name": "36",
+        "type": "A"
+      },
+      {
+        "name": "18",
+        "type": "A"
+      }
     ],
     "departureRoutes": [
       {
@@ -30,6 +36,7 @@
   "environments": {
     "test": {
       "firebaseProjectId": "cypress-testing",
+      "firebaseDatabaseUrl": "https://cypress-testing-eu.europe-west1.firebasedatabase.app",
       "firebaseApiKey": "AIzaSyCqFmRzGWHTsUarhSoqzHvJLMjzq6uZNCw",
       "disableIpAuthentication": true
     }

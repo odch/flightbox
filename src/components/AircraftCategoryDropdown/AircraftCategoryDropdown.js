@@ -35,6 +35,7 @@ const AircraftCategoryDropdown = props => (
     noOptionsText="Kategorie nicht gefunden"
     mustSelect
     clearable={props.clearable}
+    dataCy={props.dataCy}
   />
 );
 
@@ -43,6 +44,7 @@ AircraftCategoryDropdown.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   readOnly: PropTypes.bool,
+  dataCy: PropTypes.string,
 };
 
 export default AircraftCategoryDropdown;

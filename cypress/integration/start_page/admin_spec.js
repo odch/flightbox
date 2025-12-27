@@ -17,7 +17,7 @@ describe('start_page', () => {
     it('has no admin entry point if not admin', () => {
       cy.login();
       cy.get('[data-cy=login-info]').contains('foo'); // wait for home screen to be loaded
-      cy.get('[data-cy=admin]').should('not.be.visible')
+      cy.get('[data-cy=admin]').should('not.exist');
     });
   });
 });

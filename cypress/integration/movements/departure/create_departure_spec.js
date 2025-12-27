@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { firebaseToLocal } from '../../../../src/util/movements';
+import {firebaseToLocal} from '../../../../src/util/movements';
 
 function expectLastOfMonth(date) {
   expect(date).to.equal(moment(date).endOf('month').format('YYYY-MM-DD'));
@@ -14,29 +14,35 @@ function expectMinutes(time, expectedMinutes) {
 describe('movements', () => {
   describe('departure', () => {
     describe('create_departure', () => {
+      let createdDepartureKey;
+
       before(() => {
         cy.visit('#/departure/new');
         cy.login();
       });
 
       after(() => {
-        cy.logout();
+        if (createdDepartureKey) {
+          cy.window().then(win => {
+            win.firebase.getRef(`/departures/${createdDepartureKey}`).remove();
+          });
+        }
 
-        cy.window().then(win => {
-          win.firebase.getRef('/departures').remove();
-        })
+        cy.logout();
       });
 
       it('creates a new departure', () => {
         cy.get(`[data-cy=immatriculation]`).type('HBKOF');
         cy.get(`[data-cy=aircraftType]`).type('DR40');
         cy.get(`[data-cy=mtow]`).type('1000');
+        cy.get(`[data-cy=aircraftCategory]`).click();
+        cy.get(`[data-cy=aircraftCategory-option-Flugzeug]`).click();
         cy.get(`[data-cy=next-button]`).click();
 
-        cy.get(`[data-cy=memberNr]`).type('99999');
-        cy.get(`[data-cy=phone]`).type('0791234567');
         cy.get(`[data-cy=lastname]`).type('Muster');
         cy.get(`[data-cy=firstname]`).type('Max');
+        cy.get(`[data-cy=email]`).type('max@example.com');
+        cy.get(`[data-cy=phone]`).type('0791234567');
         cy.get(`[data-cy=next-button]`).click();
 
         cy.get(`[data-cy=passengerCount-increment]`).click();
@@ -69,7 +75,9 @@ describe('movements', () => {
           const keys = Object.keys(departures);
           expect(keys.length).to.equal(1);
 
-          const movement = firebaseToLocal(departures[keys[0]]);
+          createdDepartureKey = keys[0];
+
+          const movement = firebaseToLocal(departures[createdDepartureKey]);
 
           // we selected the last day of the month
           expectLastOfMonth(movement.date);
@@ -86,11 +94,11 @@ describe('movements', () => {
           expect(movement.immatriculation).to.equal('HBKOF');
           expect(movement.lastname).to.equal('Muster');
           expect(movement.location).to.equal('LSZR');
-          expect(movement.memberNr).to.equal('99999');
           expect(movement.mtow).to.equal(1000);
           expect(movement.location).to.equal('LSZR');
           expect(movement.passengerCount).to.equal(1);
           expect(movement.phone).to.equal('0791234567');
+          expect(movement.email).to.equal('max@example.com');
           expect(movement.remarks).to.equal('Komme erst morgen zurück');
           expect(movement.route).to.equal('Säntis Churfirsten Rheintal');
           expect(movement.runway).to.equal('36');
