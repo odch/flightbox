@@ -3,12 +3,12 @@
     "plane": [
       { "max_weight": 1000, "fee": 20 },
       { "max_weight": 2000, "fee": 30 },
-      { "max_weight": 50000, "fee": 40 }
+      { "max_weight": 3000, "fee": 40 }
     ],
     "helicopter": [
       { "max_weight": 1000, "fee": 20 },
       { "max_weight": 2000, "fee": 30 },
-      { "max_weight": 50000, "fee": 60 }
+      { "max_weight": 3000, "fee": 60 }
     ]
   }
 }

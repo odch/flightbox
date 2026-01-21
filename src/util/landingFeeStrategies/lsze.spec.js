@@ -17,8 +17,20 @@ describe('util', () => {
           [2001, 'Hubschrauber', 55.5],
           [3000, 'Flugzeug', 37],
           [3000, 'Hubschrauber', 55.5],
-          [3001, 'Flugzeug', 37],
-          [3001, 'Hubschrauber', 55.5],
+
+          // > 3000 kg: CHF 20 per ton (incl. VAT)
+          [3001, 'Flugzeug', 74.01],
+          [3001, 'Hubschrauber', 74.01],
+          [4000, 'Flugzeug', 74.01],
+          [4000, 'Hubschrauber', 74.01],
+
+          [4001, 'Flugzeug', 92.51],
+          [4001, 'Hubschrauber', 92.51],
+          [5000, 'Flugzeug', 92.51],
+          [5000, 'Hubschrauber', 92.51],
+
+          [50000, 'Flugzeug', 925.07],
+          [50000, 'Hubschrauber', 925.07],
         ])(
           'getLandingFee(%i, %s, %i)',
           (mtow, aircraftCategory, expected) => {

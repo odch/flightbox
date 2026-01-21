@@ -18,7 +18,16 @@ const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
 const getGoAroundFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
   undefined
 
+const getMtowFeeHeavy = mtow => {
+  const tons = Math.ceil(mtow / 1000)
+  return tons * 20
+}
+
 const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
+  if (mtow > 3000) {
+    return getMtowFeeHeavy(mtow)
+  }
+
   const isHeli = isHelicopter(aircraftCategory)
 
   if (isHeli) {
