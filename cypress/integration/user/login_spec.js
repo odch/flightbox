@@ -11,7 +11,7 @@ describe('user', () => {
     it('requires valid username and password', () => {
       cy.get('[data-cy=submit]').should('be.disabled');
       cy.get('form').submit();
-      cy.get('form').should('contain', 'Login fehlgeschlagen');
+      cy.get('form').should('contain', 'Anmeldung fehlgeschlagen');
     });
 
     it('logs in successfully', () => {

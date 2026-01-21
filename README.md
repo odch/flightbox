@@ -1,14 +1,12 @@
 # open digital Flightbox
 
-[![wercker status](https://app.wercker.com/status/0fe66b2964c401ddbc2b7b17d2e9f3d0/s/master "wercker status")](https://app.wercker.com/project/byKey/0fe66b2964c401ddbc2b7b17d2e9f3d0)
-[![devDependencies Status](https://david-dm.org/lszt/flights-react/dev-status.svg)](https://david-dm.org/lszt/flights-react?type=dev)
 [![GitHub release](https://img.shields.io/github/release/odch/flightbox.svg)](https://www.github.com/odch/flightbox/releases/)
 
 ### Getting Started
 
 #### Required Node Versions
 
-Node Version for building the app: 10
+Node Version for building the app: 20
 
 Node Version for deploying to Firebase and for the cloud functions: 20
 

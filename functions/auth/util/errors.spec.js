@@ -15,8 +15,8 @@ describe('functions', () => {
 
             errors.sendClientError(response, 'Required body property `foo` is missing');
 
-            expect(response.status).toBeCalledWith(400);
-            expect(response.send).toBeCalledWith({
+            expect(response.status).toHaveBeenCalledWith(400);
+            expect(response.send).toHaveBeenCalledWith({
               error: 'Required body property `foo` is missing'
             });
           });
@@ -34,11 +34,11 @@ describe('functions', () => {
 
             errors.sendServerError(response, 'Failed to xyz', err);
 
-            expect(response.status).toBeCalledWith(500);
-            expect(response.send).toBeCalledWith({
+            expect(response.status).toHaveBeenCalledWith(500);
+            expect(response.send).toHaveBeenCalledWith({
               error: 'Failed to xyz'
             });
-            expect(console.error).toBeCalledWith('Failed to xyz', err);
+            expect(console.error).toHaveBeenCalledWith('Failed to xyz', err);
           });
         });
       });

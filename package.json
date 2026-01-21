@@ -1,12 +1,14 @@
 {
   "license": "MIT",
   "scripts": {
-    "start": "DEV=1 webpack-dev-server --progress --colors --host 0.0.0.0",
+    "start": "DEV=1 webpack serve --host 0.0.0.0",
     "build": "gulp build",
     "build:prod": "gulp build:prod",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:functions": "cd functions && npm test",
+    "test:app": "jest --testPathIgnorePatterns=functions",
     "codecov": "codecov",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
@@ -21,38 +23,37 @@
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-react": "^7.0.0",
     "@babel/runtime": "^7.3.1",
-    "@sentry/react": "^6.2.4",
-    "babel-loader": "^8.0.5",
-    "binary-search": "^1.3.3",
-    "codecov": "^3.0.2",
-    "css-loader": "^0.28.11",
-    "csv-parse": "^2.1.0",
-    "csv-stringify": "^3.0.0",
-    "cypress": "^3.0.1",
-    "del": "^3.0.0",
+    "@sentry/react": "^10.32.1",
+    "ajv": "^8.17.1",
+    "ajv-keywords": "^5.1.0",
+    "babel-jest": "^30.2.0",
+    "babel-loader": "^10.0.0",
+    "binary-search": "^1.3.6",
+    "css-loader": "^7.1.2",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.6.0",
+    "cypress": "^15.8.1",
+    "del": "^8.0.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
-    "file-loader": "^1.1.11",
     "firebase": "^9.23.0",
-    "gulp": "~3.9.0",
+    "gulp": "^5.0.1",
     "gulp-env": "~0.4.0",
-    "gulp-rename": "^1.0.0",
-    "gulp-replace": "^1.0.0",
+    "gulp-rename": "^2.1.0",
     "gulp-through": "^0.4.0",
     "history": "^4.7.2",
+    "html-webpack-plugin": "^5.6.5",
     "ignore-styles": "^5.0.1",
-    "immutability-helper": "^2.6.6",
-    "jest": "^24.1.0",
-    "json-loader": "~0.5.4",
-    "merge-stream": "~1.0.0",
+    "immutability-helper": "^3.1.1",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
     "moment": "^2.22.2",
-    "moment-timezone": "^0.5.17",
+    "moment-timezone": "^0.6.0",
     "natives": "^1.1.6",
-    "node-sass": "^4.8.3",
-    "pdfmake": "^0.2.18",
+    "pdfmake": "^0.2.21",
     "prop-types": "^15.6.1",
     "qrcode-svg": "^1.1.0",
-    "ramda": "^0.25.0",
+    "ramda": "^0.32.0",
     "react": "^16.4.0",
     "react-day-picker": "^7.1.9",
     "react-dom": "^16.4.0",
@@ -63,24 +64,26 @@
     "redux": "^4.0.0",
     "redux-form": "^7.3.0",
     "redux-saga": "^0.16.0",
-    "sass-loader": "^7.0.2",
-    "scroll-into-view": "^1.9.3",
-    "start-server-and-test": "^1.4.1",
-    "style-loader": "^0.21.0",
+    "scroll-into-view": "^1.16.2",
+    "start-server-and-test": "^2.1.3",
+    "stream-browserify": "^3.0.0",
+    "style-loader": "^4.0.0",
     "styled-components": "^3.3.0",
-    "url-loader": "^1.0.1",
-    "webpack": "^3.1.0",
-    "html-webpack-plugin": "^2.30.1",
-    "webpack-dev-server": "^2.11.2",
-    "webpack-stream": "^4.0.3",
-    "whatwg-fetch": "^2.0.4"
+    "util": "^0.12.5",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2",
+    "webpack-stream": "^7.0.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/odch/flightbox.git"
   },
   "jest": {
-    "setupTestFrameworkScriptFile": "<rootDir>/test/testSetup.js",
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/testSetup.js"
+    ],
     "moduleDirectories": [
       "node_modules",
       "functions/node_modules"
@@ -92,6 +95,10 @@
       "!<rootDir>/node_modules/",
       "!<rootDir>/test/"
     ],
+    "moduleNameMapper": {
+      "^csv-stringify/browser/esm$": "csv-stringify",
+      "^csv-parse/browser/esm/sync$": "csv-parse/sync"
+    },
     "globals": {
       "__DISABLE_IP_AUTHENTICATION__": false,
       "__LANDING_FEES_STRATEGY__": "default",
@@ -206,5 +213,8 @@
         }
       }
     }
+  },
+  "dependencies": {
+    "process": "^0.11.10"
   }
 }
