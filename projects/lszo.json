@@ -43,7 +43,11 @@
   },
   "theme": "lszo",
   "title": "Flightbox - Flugplatz Luzern-Beromünster",
-  "paymentMethods": ["checkout", "cash"],
+  "paymentMethods": [
+    "checkout",
+    "cash",
+    "invoice"
+  ],
   "homebasePayment": true,
   "loginForm": "email",
   "enabledFlightTypes": [
@@ -57,5 +61,6 @@
     "glider_instruction_aerotow",
     "glider_instruction_winch",
     "glider_instruction_self"
-  ]
+  ],
+  "maskContactInformation": false
 }

@@ -79,7 +79,9 @@
     "glider_private_self",
     "glider_instruction_aerotow",
     "glider_instruction_winch",
-    "glider_instruction_self"
+    "glider_instruction_self",
+    "military",
+    "sar"
   ],
   "maskContactInformation": false
 }

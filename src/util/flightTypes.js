@@ -77,6 +77,19 @@ const flightTypes = [
     airstatType: {
       glider: 75,
     },
+  }, {
+    label: 'Militär',
+    value: 'military',
+    airstatType: {
+      aircraft: 57,
+      helicopter: 67
+    }
+  }, {
+    label: 'Such- und Rettungsflüge SAR',
+    value: 'sar',
+    airstatType: {
+      helicopter: 66
+    }
   }
 ];
 
