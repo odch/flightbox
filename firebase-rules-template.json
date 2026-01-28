@@ -284,7 +284,7 @@
         }
       },
       "invoiceRecipients": {
-        ".read": "auth !== null",
+        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
         ".write": "auth !== null && root.child('admins/' + auth.uid).exists()"
       },
       "$other": {

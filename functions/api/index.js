@@ -5,6 +5,7 @@ const cors = require('cors')({origin: true, credentials: true})
 const fetchAerodromeStatus = require('./fetchAerodromeStatus')
 const basicAuth = require('./basicAuth')
 const syncUsers = require('./syncUsers')
+const fetchUserInvoiceRecipients = require('./fetchUserInvoiceRecipients')
 const {fetchInvoices, fetchCheckouts, postPrepopulatedForm, isCustomsDeclarationAppAvailable} = require('./customs/fetchFromCustoms')
 const {fbAuth, fbAdminAuth} = require('./fbAuth')
 
@@ -85,6 +86,17 @@ api.get('(/api)?/customs/availability', fbAuth, async (req, res) => {
   } catch (e) {
     console.error('Failed to check customs availability', e)
     res.status(500).send({ error: 'Failed to check customs availability' })
+  }
+})
+
+api.get('(/api)?/users/me/invoice-recipients', fbAuth, async (req, res) => {
+  try {
+    const db = admin.database()
+    const invoiceRecipients = await fetchUserInvoiceRecipients(db, req.fbUserEmail)
+    res.status(200).send(invoiceRecipients)
+  } catch (e) {
+    console.error('Failed to get user invoice recipients', e)
+    res.status(500).send({ error: 'Failed to get user invoice recipients' })
   }
 })
 
