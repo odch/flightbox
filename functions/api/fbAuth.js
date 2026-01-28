@@ -27,6 +27,7 @@ const fbAuth = async (req, res, next) => {
     console.log('Authenticated user:', uid);
 
     req.fbUserId = uid
+    req.fbUserEmail = decodedToken.email
     return next()
 
   } catch (error) {
