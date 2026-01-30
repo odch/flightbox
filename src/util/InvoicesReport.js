@@ -125,7 +125,8 @@ class InvoicesReport {
         })
 
         this.addLandingFeesTable(recipientName, arrivalRecipients[recipientName], content)
-        this.addCustomsFeesTable(recipientName, customsRecipients[recipientName], content)
+        this.addCustomsFeesTable(recipientName, customsRecipients[recipientName], content, false)
+        this.addCustomsFeesTable(recipientName, customsRecipients[recipientName], content, true)
       }))
 
     if (content.length === 0) {
@@ -306,13 +307,17 @@ class InvoicesReport {
     content.push(table)
   }
 
-  addCustomsFeesTable(recipientName, customsDeclarations, content) {
-    if (!customsDeclarations || customsDeclarations.length === 0) {
+  addCustomsFeesTable(recipientName, customsDeclarations, content, cancelled) {
+    const relevantDeclarations = customsDeclarations ? customsDeclarations
+      .filter(declaration => cancelled ? declaration.cancelled === true : declaration.cancelled !== true)
+      : []
+
+    if (relevantDeclarations.length === 0) {
       return
     }
 
     content.push({
-      text: 'Zollgebühren',
+      text: cancelled ? 'Zollgebühren ANNULLIERT' : 'Zollgebühren',
       style: 'subHeader'
     })
 
