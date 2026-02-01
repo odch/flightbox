@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {loadAircraftSettings} from '../modules/settings/aircrafts';
-import {loadInvoiceRecipientSettings} from '../modules/settings/invoiceRecipients';
+import {loadUserInvoiceRecipients} from '../modules/invoiceRecipients';
 import {createMovementFromMovement} from '../modules/ui/movements';
 import {saveMovement} from '../modules/movements';
 import Finish, {FinishLoading} from '../components/wizards/ArrivalWizard/Finish';
@@ -10,33 +10,17 @@ import {HeadingType} from '../components/wizards/MovementWizard'
 import objectToArray from '../util/objectToArray'
 import {getEnabledPaymentMethods} from '../util/paymentMethods'
 
-const findInvoiceRecipients = (invoiceRecipients, authEmail) => {
-  if (!invoiceRecipients || !invoiceRecipients.loaded || invoiceRecipients.recipients.length === 0) {
-    return []
-  }
-
-  const matchingRecipients = []
-
-  for (const invoiceRecipient of invoiceRecipients.recipients) {
-    if (invoiceRecipient.emails && invoiceRecipient.emails.includes(authEmail)) {
-      matchingRecipients.push(invoiceRecipient)
-    }
-  }
-
-  return matchingRecipients
-}
-
 class ArrivalFinishContainer extends Component {
 
   componentWillMount() {
     this.props.loadAircraftSettings();
-    this.props.loadInvoiceRecipientSettings();
+    this.props.loadUserInvoiceRecipients();
   }
 
   render() {
     const {
       aircraftSettings,
-      invoiceRecipientSettings,
+      invoiceRecipients,
       email, // pilot email (also see `authEmail`)
       immatriculation,
       fees,
@@ -47,7 +31,6 @@ class ArrivalFinishContainer extends Component {
       itemKey,
       auth,
       localUser,
-      authEmail
     } = this.props
 
     if (!aircraftSettings.club || !aircraftSettings.homeBase) {
@@ -56,13 +39,11 @@ class ArrivalFinishContainer extends Component {
       );
     }
 
-    if (!invoiceRecipientSettings.loaded) {
+    if (!invoiceRecipients) {
       return (
         <FinishLoading/>
       );
     }
-
-    const invoiceRecipients = findInvoiceRecipients(invoiceRecipientSettings, authEmail)
 
     const enabledPaymentMethods = getEnabledPaymentMethods(objectToArray(__CONF__.paymentMethods), auth.data)
       .filter(method => method === 'card' ? localUser : true)
@@ -84,7 +65,7 @@ class ArrivalFinishContainer extends Component {
         fees={fees}
         localUser={localUser}
         enabledPaymentMethods={enabledPaymentMethods}
-        invoiceRecipientNames={invoiceRecipients ? invoiceRecipients.map(recipient => recipient.name) : []}
+        invoiceRecipientNames={invoiceRecipients}
       />
     );
   }
@@ -110,16 +91,10 @@ ArrivalFinishContainer.propTypes = {
     club: PropTypes.object,
     homeBase: PropTypes.object,
   }).isRequired,
-  invoiceRecipientSettings: PropTypes.shape({
-    loaded: PropTypes.bool.isRequired,
-    recipients: PropTypes.arrayOf(PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      emails: PropTypes.arrayOf(PropTypes.string)
-    })).isRequired
-  }),
+  invoiceRecipients: PropTypes.arrayOf(PropTypes.string),
   createMovementFromMovement: PropTypes.func.isRequired,
   loadAircraftSettings: PropTypes.func.isRequired,
-  loadInvoiceRecipientSettings: PropTypes.func.isRequired,
+  loadUserInvoiceRecipients: PropTypes.func.isRequired,
 
   finish: PropTypes.func.isRequired,
   isUpdate: PropTypes.bool,
@@ -135,7 +110,7 @@ const mapStateToProps = (state, ownProps) => {
   const wizardValues = wizard.values || {}
   return Object.assign({}, ownProps, {
     aircraftSettings: state.settings.aircrafts,
-    invoiceRecipientSettings: state.settings.invoiceRecipients,
+    invoiceRecipients: state.invoiceRecipients.recipients,
     finish: ownProps.finish,
     isUpdate: ownProps.isUpdate,
     headingType: ownProps.headingType || HeadingType.NONE,
@@ -165,7 +140,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapActionCreators = {
   createMovementFromMovement,
   loadAircraftSettings,
-  loadInvoiceRecipientSettings,
+  loadUserInvoiceRecipients,
   saveMovement
 };
 
