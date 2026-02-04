@@ -328,7 +328,7 @@ class InvoicesReport {
 
     const rows = []
 
-    customsDeclarations.forEach(declaration => {
+    relevantDeclarations.forEach(declaration => {
       const {
         date,
         direction,
