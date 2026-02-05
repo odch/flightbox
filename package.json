@@ -50,7 +50,7 @@
     "moment": "^2.22.2",
     "moment-timezone": "^0.6.0",
     "natives": "^1.1.6",
-    "pdfmake": "^0.2.21",
+    "pdfmake": "^0.3.3",
     "prop-types": "^15.6.1",
     "qrcode-svg": "^1.1.0",
     "ramda": "^0.32.0",
