@@ -1,7 +1,6 @@
-import { takeEvery } from 'redux-saga';
-import { call, put, fork, select } from 'redux-saga/effects'
-import { getFormValues } from 'redux-form'
-import { push } from 'react-router-redux'
+import {all, call, put, select, takeEvery} from 'redux-saga/effects'
+import {getFormValues} from 'redux-form'
+import {push} from 'connected-react-router'
 import * as actions from './actions';
 import * as remote from './remote';
 
@@ -35,9 +34,9 @@ export function* confirmSaveMessageSuccess() {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeEvery, actions.LOAD_MESSAGES, loadMessages),
-    fork(takeEvery, actions.SAVE_MESSAGE, saveMessage),
-    fork(takeEvery, actions.CONFIRM_SAVE_MESSAGE_SUCCESS, confirmSaveMessageSuccess),
-  ]
+  yield all([
+    takeEvery(actions.LOAD_MESSAGES, loadMessages),
+    takeEvery(actions.SAVE_MESSAGE, saveMessage),
+    takeEvery(actions.CONFIRM_SAVE_MESSAGE_SUCCESS, confirmSaveMessageSuccess),
+  ])
 }

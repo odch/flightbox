@@ -1,7 +1,6 @@
-import { takeEvery } from 'redux-saga';
-import { take, fork, call, put } from 'redux-saga/effects';
+import {all, call, fork, put, take, takeEvery} from 'redux-saga/effects';
 import * as actions from './actions';
-import createChannel, { monitor } from '../../../util/createChannel';
+import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
 
 const paths = {
@@ -41,10 +40,10 @@ function* remove(type, name) {
 
 function* watchLoadAircrafts(channel) {
   yield take(actions.LOAD_AIRCRAFT_SETTINGS);
-  yield [
+  yield all([
     call(loadByType, channel, 'club'),
     call(loadByType, channel, 'homeBase')
-  ];
+  ])
 }
 
 function* addAircraft(action) {
@@ -61,10 +60,10 @@ function* removeAircraft(action) {
 
 export default function* sagas() {
   const channel = createChannel();
-  yield [
+  yield all([
     fork(monitor, channel),
     fork(watchLoadAircrafts, channel),
-    fork(takeEvery, actions.ADD_AIRCRAFT, addAircraft),
-    fork(takeEvery, actions.REMOVE_AIRCRAFT, removeAircraft),
-  ]
+    takeEvery(actions.ADD_AIRCRAFT, addAircraft),
+    takeEvery(actions.REMOVE_AIRCRAFT, removeAircraft),
+  ])
 }

@@ -1,7 +1,6 @@
-import { takeLatest } from 'redux-saga';
-import { call, put, fork, select } from 'redux-saga/effects'
+import {all, call, put, select, takeLatest} from 'redux-saga/effects'
 import * as actions from './actions';
-import { loadValue } from '../../util/firebase';
+import {loadValue} from '../../util/firebase';
 
 export const aerodromesSelector = state => state.aerodromes;
 
@@ -15,7 +14,7 @@ export function* loadAerodromes() {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeLatest, actions.LOAD_AERODROMES, loadAerodromes),
-  ]
+  yield all([
+    takeLatest(actions.LOAD_AERODROMES, loadAerodromes),
+  ])
 }

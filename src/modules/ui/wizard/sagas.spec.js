@@ -1,8 +1,8 @@
-import { put } from 'redux-saga/effects';
-import { push } from 'react-router-redux';
+import {put} from 'redux-saga/effects';
+import {push} from 'connected-react-router';
 import * as actions from './actions';
 import * as sagas from './sagas';
-import { saveMovementSuccess } from '../../movements/actions';
+import {saveMovementSuccess} from '../../movements/actions';
 
 describe('modules', () => {
   describe('ui', () => {

@@ -1,5 +1,4 @@
-import {takeEvery} from 'redux-saga';
-import {call, fork, put, select} from 'redux-saga/effects';
+import {all, call, put, select, takeEvery} from 'redux-saga/effects';
 import * as actions from './actions';
 import importUsers from '../../util/importUsers';
 import {error} from '../../util/log';
@@ -42,7 +41,7 @@ export function* importSaga(action) {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeEvery, actions.START_IMPORT, importSaga),
-  ]
+  yield all([
+    takeEvery(actions.START_IMPORT, importSaga),
+  ])
 }

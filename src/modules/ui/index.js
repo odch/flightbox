@@ -1,11 +1,11 @@
-import { combineReducers } from 'redux';
-import { fork } from 'redux-saga/effects'
+import {combineReducers} from 'redux';
+import {all, fork} from 'redux-saga/effects'
 import loginPage from './loginPage';
-import movements, { sagas as movementsSagas } from './movements';
+import movements, {sagas as movementsSagas} from './movements';
 import settings from './settings';
 import showLogin from './showLogin';
-import wizard, { sagas as wizardSagas } from './wizard';
-import arrivalPayment, { sagas as arrivalPaymentSagas } from './arrivalPayment';
+import wizard, {sagas as wizardSagas} from './wizard';
+import arrivalPayment, {sagas as arrivalPaymentSagas} from './arrivalPayment';
 
 const reducer = combineReducers({
   loginPage,
@@ -17,11 +17,11 @@ const reducer = combineReducers({
 });
 
 export function* sagas() {
-  yield [
+  yield all([
     fork(movementsSagas),
     fork(wizardSagas),
     fork(arrivalPaymentSagas),
-  ]
+  ])
 }
 
 export default reducer;

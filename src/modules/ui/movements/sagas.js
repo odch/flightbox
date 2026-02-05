@@ -1,6 +1,5 @@
-import { takeEvery } from 'redux-saga';
-import { put, fork } from 'redux-saga/effects'
-import { push, goBack } from 'react-router-redux'
+import {all, put, takeEvery} from 'redux-saga/effects'
+import {goBack, push} from 'connected-react-router'
 import * as actions from './actions';
 
 export function* showMovementWizard(action) {
@@ -19,9 +18,9 @@ export function* cancelWizard() {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeEvery, actions.SHOW_MOVEMENT_WIZARD, showMovementWizard),
-    fork(takeEvery, actions.CREATE_MOVEMENT_FROM_MOVEMENT, createMovementFromMovement),
-    fork(takeEvery, actions.CANCEL_WIZARD, cancelWizard),
-  ]
+  yield all([
+    takeEvery(actions.SHOW_MOVEMENT_WIZARD, showMovementWizard),
+    takeEvery(actions.CREATE_MOVEMENT_FROM_MOVEMENT, createMovementFromMovement),
+    takeEvery(actions.CANCEL_WIZARD, cancelWizard),
+  ])
 }

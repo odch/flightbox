@@ -1,5 +1,5 @@
 import {combineReducers} from 'redux';
-import {fork} from 'redux-saga/effects'
+import {all, fork} from 'redux-saga/effects'
 
 import aerodromeStatus, {sagas as aerodromeStatusSagas} from './aerodromeStatus';
 import aircrafts, {sagas as aircraftsSagas} from './aircrafts';
@@ -18,14 +18,14 @@ const reducer = combineReducers({
 });
 
 export function* sagas() {
-  yield [
+  yield all([
     fork(aerodromeStatusSagas),
     fork(aircraftsSagas),
     fork(lockDateSagas),
     fork(guestAccessTokenSagas),
     fork(kioskAccessTokenSagas),
     fork(invoiceRecipientsSagas),
-  ]
+  ])
 }
 
 export default reducer;

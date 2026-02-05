@@ -1,7 +1,6 @@
 import * as actions from './actions'
 import * as remote from './remote'
-import {takeEvery} from 'redux-saga'
-import {call, fork, put, select} from 'redux-saga/effects'
+import {all, call, put, select, takeEvery} from 'redux-saga/effects'
 import {getFormValues, initialize} from 'redux-form'
 
 const str = (value) => typeof value === 'string' && value.trim().length > 0 ? value : null
@@ -57,8 +56,8 @@ export function* saveProfile(action) {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeEvery, actions.LOAD_PROFILE, loadProfile),
-    fork(takeEvery, actions.SAVE_PROFILE, saveProfile),
-  ]
+  yield all([
+    takeEvery(actions.LOAD_PROFILE, loadProfile),
+    takeEvery(actions.SAVE_PROFILE, saveProfile),
+  ])
 }
