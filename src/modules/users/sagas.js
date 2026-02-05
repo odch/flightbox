@@ -1,5 +1,4 @@
-import { takeEvery } from 'redux-saga';
-import { call, put, fork, select } from 'redux-saga/effects'
+import {all, call, put, select, takeEvery} from 'redux-saga/effects'
 import * as actions from './actions';
 import firebase from '../../util/firebase';
 
@@ -24,7 +23,7 @@ export function* loadUsers() {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeEvery, actions.LOAD_USERS, loadUsers),
-  ]
+  yield all([
+    takeEvery(actions.LOAD_USERS, loadUsers),
+  ])
 }

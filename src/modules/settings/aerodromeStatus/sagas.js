@@ -1,4 +1,4 @@
-import {takeEvery, fork, call, put, select, take} from 'redux-saga/effects';
+import {all, call, fork, put, select, take, takeEvery} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as remote from './remote';
 import ImmutableItemsArray from "../../../util/ImmutableItemsArray"
@@ -85,10 +85,10 @@ export function* watchCurrentAerodromeStatus(channel) {
 
 export default function* sagas() {
   const aerodromeStatusChannel = createChannel();
-  yield [
-    fork(takeEvery, actions.LOAD_AERODROME_STATUS, loadAerodromeStatus),
-    fork(takeEvery, actions.SAVE_AERODROME_STATUS, saveAerodromeStatus),
+  yield all([
+    takeEvery(actions.LOAD_AERODROME_STATUS, loadAerodromeStatus),
+    takeEvery(actions.SAVE_AERODROME_STATUS, saveAerodromeStatus),
     fork(monitor, aerodromeStatusChannel),
     fork(watchCurrentAerodromeStatus, aerodromeStatusChannel)
-  ]
+  ])
 }

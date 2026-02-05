@@ -1,6 +1,5 @@
 import * as actions from './actions'
-import {takeEvery} from 'redux-saga'
-import {call, fork, put} from 'redux-saga/effects'
+import {all, call, put, takeEvery} from 'redux-saga/effects'
 import {getIdToken} from '../../util/firebase'
 
 export function* loadUserInvoiceRecipients() {
@@ -29,7 +28,7 @@ export function* loadUserInvoiceRecipients() {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeEvery, actions.LOAD_USER_INVOICE_RECIPIENTS, loadUserInvoiceRecipients),
-  ]
+  yield all([
+    takeEvery(actions.LOAD_USER_INVOICE_RECIPIENTS, loadUserInvoiceRecipients),
+  ])
 }

@@ -71,7 +71,7 @@ describe('modules', () => {
             }
 
             const saveEffect = generator.next(auth).value
-            const data = saveEffect.CALL.args[0]
+            const data = saveEffect.payload.args[0]
 
             expect(data.status).toEqual('restricted');
             expect(data.details).toEqual('Eine Landung pro Person pro Tag.');

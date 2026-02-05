@@ -4,8 +4,8 @@ import ReactDOM from 'react-dom';
 import {Route} from 'react-router-dom';
 import {Provider} from 'react-redux';
 import {applyMiddleware, compose, createStore} from 'redux';
-import createHistory from 'history/createHashHistory';
-import {ConnectedRouter, routerMiddleware} from 'react-router-redux';
+import {createHashHistory} from 'history';
+import {ConnectedRouter, routerMiddleware} from 'connected-react-router';
 import createSagaMiddleware from 'redux-saga';
 import {ThemeProvider} from 'styled-components';
 import moment from 'moment';
@@ -30,7 +30,8 @@ const theme = require('../theme/' + __THEME__);
 
 const sagaMiddleware = createSagaMiddleware();
 
-const history = createHistory();
+const history = createHashHistory();
+
 const reduxRouterMiddleware = routerMiddleware(history);
 
 let middleware = applyMiddleware(sagaMiddleware, reduxRouterMiddleware);
@@ -39,7 +40,7 @@ if (window.__REDUX_DEVTOOLS_EXTENSION__) {
   middleware = compose(middleware, window.__REDUX_DEVTOOLS_EXTENSION__({ trace: true }));
 }
 
-const store = createStore(reducer, {}, middleware);
+const store = createStore(reducer(history), middleware);
 
 sagaMiddleware.run(autoRestart(sagas));
 

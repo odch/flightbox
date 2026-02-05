@@ -1,4 +1,4 @@
-import {fork} from 'redux-saga/effects';
+import {all, fork} from 'redux-saga/effects';
 import * as actions from './actions';
 import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
@@ -11,8 +11,8 @@ function* loadKioskAccessToken(channel) {
 
 export default function* sagas() {
   const channel = createChannel();
-  yield [
+  yield all([
     fork(monitor, channel),
     fork(loadKioskAccessToken, channel),
-  ]
+  ])
 }

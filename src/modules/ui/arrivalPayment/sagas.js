@@ -1,5 +1,4 @@
-import {takeEvery} from 'redux-saga';
-import {call, fork, put, select} from 'redux-saga/effects'
+import {all, call, fork, put, select, takeEvery} from 'redux-saga/effects'
 import * as actions from './actions';
 import * as remote from './remote'
 import createChannel, {monitor} from '../../../util/createChannel'
@@ -93,9 +92,9 @@ export function* cancelCardPayment() {
 
 export default function* sagas() {
   const paymentStatusChannel = createChannel()
-  yield [
+  yield all([
     fork(monitor, paymentStatusChannel),
-    fork(takeEvery, actions.ARRIVAL_PAYMENT_CREATE_CARD_PAYMENT, createCardPayment, paymentStatusChannel),
-    fork(takeEvery, actions.ARRIVAL_PAYMENT_CANCEL_CARD_PAYMENT, cancelCardPayment, paymentStatusChannel)
-  ]
+    takeEvery(actions.ARRIVAL_PAYMENT_CREATE_CARD_PAYMENT, createCardPayment, paymentStatusChannel),
+    takeEvery(actions.ARRIVAL_PAYMENT_CANCEL_CARD_PAYMENT, cancelCardPayment, paymentStatusChannel)
+  ])
 }
