@@ -1,6 +1,5 @@
 import {getPagination, toOrderKey} from './pagination';
-import {takeEvery, takeLatest} from 'redux-saga'
-import {call, fork, put, select} from 'redux-saga/effects'
+import {all, call, fork, put, select, takeEvery, takeLatest} from 'redux-saga/effects'
 import {destroy, getFormValues, initialize} from 'redux-form'
 import createChannel, {monitor} from '../../util/createChannel';
 import * as actions from './actions';
@@ -542,19 +541,19 @@ const transformToLocal = (movements, movementType) => item => {
 export default function* sagas() {
   const channel = createChannel();
 
-  yield [
+  yield all([
     fork(monitor, channel),
-    fork(takeEvery, actions.LOAD_MOVEMENTS, loadMovements, channel),
-    fork(takeEvery, actions.SET_MOVEMENTS_FILTER, filterMovements, channel),
-    fork(takeEvery, actions.MOVEMENT_ADDED, movementAdded, channel),
-    fork(takeEvery, actions.MOVEMENT_CHANGED, movementChanged, channel),
-    fork(takeEvery, actions.MOVEMENT_DELETED, movementDeleted, channel),
-    fork(takeEvery, actions.LOAD_MOVEMENT, loadMovement),
-    fork(takeEvery, actions.DELETE_MOVEMENT, deleteMovement),
-    fork(takeEvery, actions.INIT_NEW_MOVEMENT, initNewMovement),
-    fork(takeEvery, actions.INIT_NEW_MOVEMENT_FROM_MOVEMENT, initNewMovementFromMovement),
-    fork(takeEvery, actions.SAVE_MOVEMENT, saveMovement),
-    fork(takeEvery, actions.SAVE_MOVEMENT_PAYMENT_METHOD, saveMovementPaymentMethod),
-    fork(takeLatest, actions.EDIT_MOVEMENT, editMovement),
-  ]
+    takeEvery(actions.LOAD_MOVEMENTS, loadMovements, channel),
+    takeEvery(actions.SET_MOVEMENTS_FILTER, filterMovements, channel),
+    takeEvery(actions.MOVEMENT_ADDED, movementAdded, channel),
+    takeEvery(actions.MOVEMENT_CHANGED, movementChanged, channel),
+    takeEvery(actions.MOVEMENT_DELETED, movementDeleted, channel),
+    takeEvery(actions.LOAD_MOVEMENT, loadMovement),
+    takeEvery(actions.DELETE_MOVEMENT, deleteMovement),
+    takeEvery(actions.INIT_NEW_MOVEMENT, initNewMovement),
+    takeEvery(actions.INIT_NEW_MOVEMENT_FROM_MOVEMENT, initNewMovementFromMovement),
+    takeEvery(actions.SAVE_MOVEMENT, saveMovement),
+    takeEvery(actions.SAVE_MOVEMENT_PAYMENT_METHOD, saveMovementPaymentMethod),
+    takeLatest(actions.EDIT_MOVEMENT, editMovement),
+  ])
 }

@@ -1,5 +1,4 @@
-import {takeEvery} from 'redux-saga';
-import {call, fork, put} from 'redux-saga/effects'
+import {all, call, fork, put, takeEvery} from 'redux-saga/effects'
 import * as actions from './actions';
 import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
 import createChannel from '../../util/createChannel';
@@ -288,17 +287,17 @@ function createFbAuthenticationChannel() {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeEvery, actions.REQUEST_IP_AUTHENTICATION, doIpAuthentication),
-    fork(takeEvery, actions.REQUEST_USERNAME_PASSWORD_AUTHENTICATION, doUsernamePasswordAuthentication),
-    fork(takeEvery, actions.REQUEST_GUEST_TOKEN_AUTHENTICATION, doGuestTokenAuthentication),
-    fork(takeEvery, actions.REQUEST_KIOSK_TOKEN_AUTHENTICATION, doKioskTokenAuthentication),
-    fork(takeEvery, actions.SEND_AUTHENTICATION_EMAIL, sendAuthenticationEmail),
-    fork(takeEvery, actions.COMPLETE_EMAIL_AUTHENTICATION, completeEmailAuthentication),
-    fork(takeEvery, actions.REQUEST_EMAIL_AUTHENTICATION, doEmailAuthentication),
-    fork(takeEvery, actions.REQUEST_FIREBASE_AUTHENTICATION, doFirebaseAuthentication),
-    fork(takeEvery, actions.LOGOUT, doLogout),
-    fork(takeEvery, actions.FIREBASE_AUTHENTICATION, doListenFirebaseAuthentication),
+  yield all([
+    takeEvery(actions.REQUEST_IP_AUTHENTICATION, doIpAuthentication),
+    takeEvery(actions.REQUEST_USERNAME_PASSWORD_AUTHENTICATION, doUsernamePasswordAuthentication),
+    takeEvery(actions.REQUEST_GUEST_TOKEN_AUTHENTICATION, doGuestTokenAuthentication),
+    takeEvery(actions.REQUEST_KIOSK_TOKEN_AUTHENTICATION, doKioskTokenAuthentication),
+    takeEvery(actions.SEND_AUTHENTICATION_EMAIL, sendAuthenticationEmail),
+    takeEvery(actions.COMPLETE_EMAIL_AUTHENTICATION, completeEmailAuthentication),
+    takeEvery(actions.REQUEST_EMAIL_AUTHENTICATION, doEmailAuthentication),
+    takeEvery(actions.REQUEST_FIREBASE_AUTHENTICATION, doFirebaseAuthentication),
+    takeEvery(actions.LOGOUT, doLogout),
+    takeEvery(actions.FIREBASE_AUTHENTICATION, doListenFirebaseAuthentication),
     fork(monitorFirebaseAuthentication, createFbAuthenticationChannel()),
-  ]
+  ])
 }

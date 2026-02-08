@@ -1,9 +1,8 @@
-import { takeEvery } from 'redux-saga';
-import { put, fork } from 'redux-saga/effects'
-import { push } from 'react-router-redux'
+import {all, put, takeEvery} from 'redux-saga/effects'
+import {push} from 'connected-react-router'
 import {
-  SAVE_MOVEMENT_SUCCESS,
   SAVE_MOVEMENT_FAILED,
+  SAVE_MOVEMENT_SUCCESS,
   START_INITIALIZE_WIZARD,
   WIZARD_INITIALIZED
 } from '../../movements';
@@ -33,11 +32,11 @@ export function* finish() {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeEvery, START_INITIALIZE_WIZARD, init),
-    fork(takeEvery, WIZARD_INITIALIZED, setInitialized),
-    fork(takeEvery, SAVE_MOVEMENT_SUCCESS, setCommitted),
-    fork(takeEvery, actions.WIZARD_FINISH, finish),
-    fork(takeEvery, SAVE_MOVEMENT_FAILED, setCommitError)
-  ]
+  yield all([
+    takeEvery(START_INITIALIZE_WIZARD, init),
+    takeEvery(WIZARD_INITIALIZED, setInitialized),
+    takeEvery(SAVE_MOVEMENT_SUCCESS, setCommitted),
+    takeEvery(actions.WIZARD_FINISH, finish),
+    takeEvery(SAVE_MOVEMENT_FAILED, setCommitError)
+  ])
 }

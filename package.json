@@ -50,7 +50,7 @@
     "moment": "^2.22.2",
     "moment-timezone": "^0.6.0",
     "natives": "^1.1.6",
-    "pdfmake": "^0.2.21",
+    "pdfmake": "^0.3.3",
     "prop-types": "^15.6.1",
     "qrcode-svg": "^1.1.0",
     "ramda": "^0.32.0",
@@ -58,12 +58,11 @@
     "react-day-picker": "^7.1.9",
     "react-dom": "^16.4.0",
     "react-hot-loader": "^4.2.0",
-    "react-redux": "^5.0.7",
+    "react-redux": "^7.2.9",
     "react-router-dom": "^4.2.2",
-    "react-router-redux": "^5.0.0-alpha.9",
-    "redux": "^4.0.0",
-    "redux-form": "^7.3.0",
-    "redux-saga": "^0.16.0",
+    "redux": "^4.2.1",
+    "redux-form": "^8.3.10",
+    "redux-saga": "^1.4.2",
     "scroll-into-view": "^1.16.2",
     "start-server-and-test": "^2.1.3",
     "stream-browserify": "^3.0.0",
@@ -215,6 +214,7 @@
     }
   },
   "dependencies": {
+    "connected-react-router": "^6.9.3",
     "process": "^0.11.10"
   }
 }

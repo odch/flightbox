@@ -1,5 +1,4 @@
-import {takeEvery} from 'redux-saga';
-import {call, fork, put, select} from 'redux-saga/effects';
+import {all, call, put, select, takeEvery} from 'redux-saga/effects';
 import * as actions from './actions';
 import {airstat, invoices, landings, yearlySummary} from '../../util/report';
 
@@ -70,7 +69,7 @@ export function* generateReport(action) {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeEvery, actions.GENERATE_REPORT, generateReport),
-  ]
+  yield all([
+    takeEvery(actions.GENERATE_REPORT, generateReport),
+  ])
 }

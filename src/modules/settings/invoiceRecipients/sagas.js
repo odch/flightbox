@@ -1,8 +1,7 @@
-import {call, fork, select, take} from 'redux-saga/effects';
+import {all, call, fork, select, take, takeEvery} from 'redux-saga/effects';
 import * as actions from './actions';
 import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
-import {takeEvery} from 'redux-saga'
 
 export const invoiceRecipientsSelector = state => state.settings.invoiceRecipients.recipients;
 
@@ -76,12 +75,12 @@ function* saveInvoiceRecipients(invoiceRecipients) {
 
 export default function* sagas() {
   const channel = createChannel();
-  yield [
+  yield all([
     fork(monitor, channel),
     fork(watchLoadRecipients, channel),
-    fork(takeEvery, actions.ADD_INVOICE_RECIPIENT, addInvoiceRecipient),
-    fork(takeEvery, actions.ADD_INVOICE_RECIPIENT_EMAIL, addInvoiceRecipientEmail),
-    fork(takeEvery, actions.REMOVE_INVOICE_RECIPIENT, removeInvoiceRecipient),
-    fork(takeEvery, actions.REMOVE_INVOICE_RECIPIENT_EMAIL, removeInvoiceRecipientEmail),
-  ]
+    takeEvery(actions.ADD_INVOICE_RECIPIENT, addInvoiceRecipient),
+    takeEvery(actions.ADD_INVOICE_RECIPIENT_EMAIL, addInvoiceRecipientEmail),
+    takeEvery(actions.REMOVE_INVOICE_RECIPIENT, removeInvoiceRecipient),
+    takeEvery(actions.REMOVE_INVOICE_RECIPIENT_EMAIL, removeInvoiceRecipientEmail),
+  ])
 }

@@ -1,7 +1,6 @@
-import { takeEvery } from 'redux-saga';
-import { take, call, put, fork, select } from 'redux-saga/effects';
+import {all, call, fork, put, take, takeEvery} from 'redux-saga/effects';
 import * as actions from './actions';
-import createChannel, { monitor } from '../../../util/createChannel';
+import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
 
 function* watchLoadLockDate(channel) {
@@ -28,9 +27,9 @@ function saveLockDate(date) {
 
 export default function* sagas() {
   const channel = createChannel();
-  yield [
+  yield all([
     fork(monitor, channel),
     fork(watchLoadLockDate, channel),
-    fork(takeEvery, actions.SET_LOCK_DATE, setLockDate),
-  ]
+    takeEvery(actions.SET_LOCK_DATE, setLockDate),
+  ])
 }

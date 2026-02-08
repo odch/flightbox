@@ -1,5 +1,4 @@
-import {takeEvery} from 'redux-saga';
-import {call, fork, put} from 'redux-saga/effects';
+import {all, call, put, takeEvery} from 'redux-saga/effects';
 import moment from 'moment-timezone';
 import * as actions from './actions';
 import dates from '../../util/dates'
@@ -177,8 +176,8 @@ function* checkAvailability() {
 }
 
 export default function* sagas() {
-  yield [
-    fork(takeEvery, actions.START_CUSTOMS, startCustoms),
-    fork(takeEvery, actions.CHECK_CUSTOMS_AVAILABILITY, checkAvailability)
-  ]
+  yield all([
+    takeEvery(actions.START_CUSTOMS, startCustoms),
+    takeEvery(actions.CHECK_CUSTOMS_AVAILABILITY, checkAvailability)
+  ])
 }
