@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import React, {Component} from 'react';
 import LabeledBox from '../LabeledBox';
 import JumpNavigation from '../JumpNavigation';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
@@ -21,7 +20,7 @@ class HelpPage extends Component {
           <JumpNavigation/>
           <QuestionsList questions={questions} onClick={this.handleItemClick.bind(this)}/>
           {questions.map((question, index) => (
-            <LabeledBox key={index} innerRef={box => this.boxes[index] = box} label={(index + 1) + '. ' + question.question}>
+            <LabeledBox key={index} ref={box => this.boxes[index] = box} label={(index + 1) + '. ' + question.question}>
               <div>
                 {question.answer}
               </div>
@@ -33,9 +32,10 @@ class HelpPage extends Component {
   }
 
   handleItemClick(index) {
-    const box = this.boxes[index];
-    const domNode = ReactDOM.findDOMNode(box);
-    domNode.scrollIntoView();
+    const domNode = this.boxes[index];
+    if (domNode) {
+      domNode.scrollIntoView();
+    }
   }
 }
 

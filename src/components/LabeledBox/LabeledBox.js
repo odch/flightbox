@@ -28,22 +28,21 @@ const Content = styled.div`
   }
 `;
 
-const LabeledBox = props => (
-  <Wrapper className={props.className} innerRef={props.innerRef}>
-    <Label>{props.label}</Label>
+const LabeledBox = React.forwardRef(({ className, label, contentMaxHeight, contentPadding, children }, ref) => (
+  <Wrapper className={className} ref={ref}>
+    <Label>{label}</Label>
     <Content
-      maxHeight={props.contentMaxHeight}
-      padding={props.contentPadding}
-    >{props.children}</Content>
+      maxHeight={contentMaxHeight}
+      padding={contentPadding}
+    >{children}</Content>
   </Wrapper>
-);
+));
 
 LabeledBox.propTypes = {
   label: PropTypes.string.isRequired,
   className: PropTypes.string,
   contentMaxHeight: PropTypes.number,
   contentPadding: PropTypes.number,
-  innerRef: PropTypes.func,
 };
 
 export default LabeledBox;

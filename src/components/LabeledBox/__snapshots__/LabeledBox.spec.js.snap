@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`components LabeledBox is built correctly 1`] = `
-"<styled.div className="my-class" innerRef={[undefined]}>
+"<styled.div className="my-class">
   <styled.div>
     My label
   </styled.div>

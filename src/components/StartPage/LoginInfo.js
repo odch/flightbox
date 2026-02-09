@@ -160,7 +160,7 @@ class LoginInfo extends React.Component {
   renderMenu() {
     const auth = this.props.auth.data
     return (
-      <StyledMenu innerRef={this.setMenuRef}>
+      <StyledMenu ref={this.setMenuRef}>
         <StyledMenuUsername>{getUsername(auth)}</StyledMenuUsername>
         {auth && auth.guest !== true && auth.kiosk !== true && auth.uid !== 'ipauth' && (
           <StyledMenuLink to="/profile" data-cy="profile">Profil</StyledMenuLink>
