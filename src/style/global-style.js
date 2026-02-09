@@ -1,4 +1,4 @@
-import { injectGlobal } from 'styled-components'
+import {createGlobalStyle} from 'styled-components'
 
 import iconFontEot from './fonts/MaterialIcons/MaterialIcons-Regular.eot';
 import iconFontWoff2 from './fonts/MaterialIcons/MaterialIcons-Regular.woff2';
@@ -7,7 +7,7 @@ import iconFontTtf from './fonts/MaterialIcons/MaterialIcons-Regular.ttf';
 
 import istokFontTtf from './fonts/IstokWeb/IstokWeb-Regular.ttf';
 
-injectGlobal`
+const GlobalStyle = createGlobalStyle`
   @font-face {
     font-family: 'Material Icons';
     font-style: normal;
@@ -19,22 +19,24 @@ injectGlobal`
     url('${iconFontWoff}') format('woff'),
     url('${iconFontTtf}') format('truetype');
   }
-  
+
   @font-face {
     font-family: 'istok_webregular';
     src: url('${istokFontTtf}');
   }
-  
+
   * {
     font-family: 'istok_webregular', sans-serif;
   }
-  
+
   *:focus {
     outline: 0;
   }
-  
+
   a {
     color: #000;
     text-decoration: none;
   }
 `;
+
+export default GlobalStyle
