@@ -110,7 +110,8 @@ class LoginInfo extends React.Component {
     }
   }
 
-  handleUserNameClick() {
+  handleUserNameClick(e) {
+    e.stopPropagation();
     this.setState(prevState => ({ menuOpen: !prevState.menuOpen }), () => {
       if (this.state.menuOpen) {
         document.addEventListener('click', this.handleClickOutside);
