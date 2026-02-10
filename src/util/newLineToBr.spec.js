@@ -1,5 +1,5 @@
 import React from 'react';
-import {shallow} from 'enzyme';
+import {render} from '@testing-library/react';
 import newLineToBr from './newLineToBr';
 
 describe('util', () => {
@@ -19,9 +19,9 @@ describe('util', () => {
 
       const result = newLineToBr(value);
 
-      const component = shallow(<div>{result}</div>);
+      const { container } = render(<div>{result}</div>);
 
-      expect(component.debug()).toMatchSnapshot();
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 });

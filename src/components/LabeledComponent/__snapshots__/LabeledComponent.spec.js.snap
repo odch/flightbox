@@ -1,12 +1,23 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`components LabeledComponent is built correctly 1`] = `
-"<styled.div className={[undefined]} onFocus={[Function: bound handleFocus]} onBlur={[Function: bound handleBlur]}>
-  <styled.label>
-    My label
-  </styled.label>
-  <styled.div>
-    <input type="text" id="my-input" />
-  </styled.div>
-</styled.div>"
+<div>
+  <div
+    class="sc-gzVnrw ihHoGK"
+  >
+    <label
+      class="sc-bdVaJa jJXuXB"
+    >
+      My label
+    </label>
+    <div
+      class="sc-bwzfXH bgAHjl"
+    >
+      <input
+        id="my-input"
+        type="text"
+      />
+    </div>
+  </div>
+</div>
 `;

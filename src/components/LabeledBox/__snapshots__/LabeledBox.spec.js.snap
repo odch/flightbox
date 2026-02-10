@@ -1,17 +1,25 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`components LabeledBox is built correctly 1`] = `
-"<styled.div className="my-class">
-  <styled.div>
-    My label
-  </styled.div>
-  <styled.div maxHeight={[undefined]} padding={[undefined]}>
-    <div>
-      child1
+<div>
+  <div
+    class="sc-bdVaJa pNFtZ my-class"
+  >
+    <div
+      class="sc-bwzfXH gonQpC"
+    >
+      My label
     </div>
-    <div>
-      child2
+    <div
+      class="sc-htpNat kUgvgo"
+    >
+      <div>
+        child1
+      </div>
+      <div>
+        child2
+      </div>
     </div>
-  </styled.div>
-</styled.div>"
+  </div>
+</div>
 `;
