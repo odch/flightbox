@@ -1,7 +1,7 @@
 import React from 'react';
-import {shallow} from 'enzyme';
+import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import ModalDialog from './ModalDialog';
-import Mask from './Mask';
 
 describe('components', () => {
   describe('ModalDialog', () => {
@@ -9,23 +9,23 @@ describe('components', () => {
       const content = <div>My test content</div>;
       const modalDialog = <ModalDialog content={content}/>;
 
-      const component = shallow(modalDialog);
+      const { container } = render(modalDialog);
 
-      expect(component.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
 
-    it('calls onBlur handler on mask click', () => {
+    it('calls onBlur handler on mask click', async () => {
+      const user = userEvent.setup();
       const handler = jest.fn();
 
       const content = <div>My test content</div>;
       const modalDialog = <ModalDialog content={content} onBlur={handler}/>;
 
-      const component = shallow(modalDialog);
+      render(modalDialog);
 
-      component.find(Mask).simulate('click');
+      await user.click(screen.getByTestId('modal-mask'));
 
-      const calls = handler.mock.calls;
-      expect(calls.length).toBe(1);
+      expect(handler).toHaveBeenCalledTimes(1);
     });
   });
 });

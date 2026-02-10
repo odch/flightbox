@@ -1,87 +1,102 @@
 import React from 'react';
-import {shallow} from 'enzyme';
+import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import IncrementationField from './IncrementationField';
-import Button from './Button';
 
 describe('components', () => {
   describe('IncrementationField', () => {
     it('is initialized with value', () => {
-      const component = shallow(<IncrementationField value={42}/>);
-      expect(component.debug()).toMatchSnapshot();
+      const { container } = render(<IncrementationField value={42}/>);
+      expect(container).toMatchSnapshot();
     });
 
     it('is initialized with value if value and min value is specified', () => {
-      const component = shallow(<IncrementationField value={42} minValue={3}/>);
-      expect(component.debug()).toMatchSnapshot();
+      const { container } = render(<IncrementationField value={42} minValue={3}/>);
+      expect(container).toMatchSnapshot();
     });
 
     it('throws error if specified value is lower than min value', () => {
-      expect(() => shallow(<IncrementationField value={2} minValue={3}/>))
+      expect(() => render(<IncrementationField value={2} minValue={3}/>))
         .toThrow('Given value 2 is lower than min value 3');
     });
 
     it('is initialized with 0 if no value and min value is specified', () => {
-      const component = shallow(<IncrementationField/>);
-      expect(component.debug()).toMatchSnapshot();
+      const { container } = render(<IncrementationField/>);
+      expect(container).toMatchSnapshot();
     });
 
     it('is initialized with min value if no value is specified', () => {
-      const component = shallow(<IncrementationField minValue={3}/>);
-      expect(component.debug()).toMatchSnapshot();
+      const { container } = render(<IncrementationField minValue={3}/>);
+      expect(container).toMatchSnapshot();
     });
 
-    it('is incremented by 1 on increment button click', () => {
-      const incrementationField = shallow(<IncrementationField/>);
+    it('is incremented by 1 on increment button click', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<IncrementationField/>);
 
-      expect(incrementationField.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
 
-      incrementationField.find(Button).at(1).simulate('click');
+      await user.click(screen.getByRole('button', { name: /increment|plus|\+/i }));
 
-      expect(incrementationField.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
 
-    it('is decremented by 1 on decrement button click', () => {
-      const incrementationField = shallow(<IncrementationField value={42}/>);
+    it('is decremented by 1 on decrement button click', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<IncrementationField value={42}/>);
 
-      expect(incrementationField.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
 
-      incrementationField.find(Button).at(0).simulate('click');
+      await user.click(screen.getByRole('button', { name: /decrement|minus|-/i }));
 
-      expect(incrementationField.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
 
-    it('cannot have value lower than min value', () => {
-      const incrementationField = shallow(<IncrementationField minValue={3}/>);
+    it('cannot have value lower than min value', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<IncrementationField minValue={3}/>);
 
-      expect(incrementationField.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
 
-      incrementationField.find(Button).at(0).simulate('click');
+      await user.click(screen.getByRole('button', { name: /decrement|minus|-/i }));
 
-      expect(incrementationField.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
 
-    it('calls onChange handler on increment', () => {
+    it('calls onChange handler on increment', async () => {
+      const user = userEvent.setup();
       const handler = jest.fn();
 
-      const incrementationField = shallow(<IncrementationField value={42} onChange={handler}/>);
+      render(<IncrementationField value={42} onChange={handler}/>);
 
-      incrementationField.find(Button).at(1).simulate('click');
+      await user.click(screen.getByRole('button', { name: /increment|plus|\+/i }));
 
-      const calls = handler.mock.calls;
-      expect(calls.length).toBe(1);
-      expect(calls[0][0].target.value).toBe(43);
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: expect.objectContaining({
+            value: 43
+          })
+        })
+      );
     });
 
-    it('calls onChange handler on decrement', () => {
+    it('calls onChange handler on decrement', async () => {
+      const user = userEvent.setup();
       const handler = jest.fn();
 
-      const incrementationField = shallow(<IncrementationField value={42} onChange={handler}/>);
+      render(<IncrementationField value={42} onChange={handler}/>);
 
-      incrementationField.find(Button).at(0).simulate('click');
+      await user.click(screen.getByRole('button', { name: /decrement|minus|-/i }));
 
-      const calls = handler.mock.calls;
-      expect(calls.length).toBe(1);
-      expect(calls[0][0].target.value).toBe(41);
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: expect.objectContaining({
+            value: 41
+          })
+        })
+      );
     });
   });
 });
