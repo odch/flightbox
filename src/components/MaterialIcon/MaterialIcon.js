@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import styled, {keyframes} from 'styled-components';
+import styled, {css, keyframes} from 'styled-components';
 
 const animations = {
   left: keyframes`
@@ -38,11 +38,11 @@ const I = styled.i`
 
   /* Support for IE. */
   font-feature-settings: 'liga';
-  
+
   /* align vertically with text */
   vertical-align: middle;
-  
-  ${props => props.rotate && `animation: ${animations[props.rotate]} 2s linear infinite;`}
+
+  ${props => props.rotate && css`animation: ${animations[props.rotate]} 2s linear infinite;`}
 `;
 
 class MaterialIcon extends React.PureComponent {

@@ -51,7 +51,7 @@ class Dropdown extends Component {
         onKeyDown={this.handleContainerKeyDown}
         onBlur={this.handleContainerBlur}
         tabIndex="1"
-        innerRef={this.refContainerDom}
+        ref={this.refContainerDom}
       >
         {this.renderInput()}
         {this.renderOptions()}
@@ -70,7 +70,7 @@ class Dropdown extends Component {
           onChange={this.handleInputChange}
           onFocus={this.handleInputFocus}
           onBlur={this.handleInputBlur}
-          innerRef={this.refInputDom}
+          ref={this.refInputDom}
           readOnly={this.props.readOnly}
           data-cy={this.props.dataCy}
         />
@@ -130,7 +130,7 @@ class Dropdown extends Component {
         focussed={focussed}
         onMouseDown={this.handleOptionClick.bind(this, option)}
         onMouseEnter={this.handleOptionMouseEnter.bind(this, option)}
-        innerRef={comp => this.options[option.key] = comp}
+        ref={comp => this.options[option.key] = comp}
         data-cy={this.props.dataCy && `${this.props.dataCy}-option-${option.key}` }
       >
         {this.props.optionRenderer(option, focussed)}

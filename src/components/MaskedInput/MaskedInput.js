@@ -92,7 +92,7 @@ class MaskedInput extends Component {
         type={this.props.type}
         readOnly={this.props.readOnly}
         data-cy={this.props.input.name}
-        innerRef={this.refInputDom}
+        ref={this.refInputDom}
       />
     );
   }

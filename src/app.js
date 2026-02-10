@@ -17,7 +17,7 @@ import autoRestart from './util/autoRestartSaga';
 
 import App from './containers/AppContainer';
 
-import './style/global-style';
+import GlobalStyle from './style/global-style';
 
 import * as Sentry from "@sentry/react";
 
@@ -46,6 +46,7 @@ sagaMiddleware.run(autoRestart(sagas));
 
 ReactDOM.render((
   <Provider store={store}>
+    <GlobalStyle/>
     <ThemeProvider theme={theme}>
       <ConnectedRouter history={history}>
         <Route component={App}/>

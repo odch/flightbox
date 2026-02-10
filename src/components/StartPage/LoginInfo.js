@@ -110,7 +110,8 @@ class LoginInfo extends React.Component {
     }
   }
 
-  handleUserNameClick() {
+  handleUserNameClick(e) {
+    e.stopPropagation();
     this.setState(prevState => ({ menuOpen: !prevState.menuOpen }), () => {
       if (this.state.menuOpen) {
         document.addEventListener('click', this.handleClickOutside);
@@ -160,7 +161,7 @@ class LoginInfo extends React.Component {
   renderMenu() {
     const auth = this.props.auth.data
     return (
-      <StyledMenu innerRef={this.setMenuRef}>
+      <StyledMenu ref={this.setMenuRef}>
         <StyledMenuUsername>{getUsername(auth)}</StyledMenuUsername>
         {auth && auth.guest !== true && auth.kiosk !== true && auth.uid !== 'ipauth' && (
           <StyledMenuLink to="/profile" data-cy="profile">Profil</StyledMenuLink>
