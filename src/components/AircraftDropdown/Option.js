@@ -8,18 +8,18 @@ const Wrapper = styled.div`
 
 const Immatriculation = styled.div`
   margin-bottom: 0.2em;
-  ${props => props.focussed && `color: ${props.theme.colors.main}`};
+  ${props => props.$focussed && `color: ${props.theme.colors.main}`};
 `;
 
 const Type = styled.div`
   font-size: 0.8em;
-  color: ${props => props.focussed ? props.theme.colors.main : `#888`};
+  color: ${props => props.$focussed ? props.theme.colors.main : `#888`};
 `;
 
 const Option = props => (
   <Wrapper>
-    <Immatriculation focussed={props.focussed}>{props.immatriculation}</Immatriculation>
-    <Type focussed={props.focussed}>{props.type}</Type>
+    <Immatriculation $focussed={props.focussed}>{props.immatriculation}</Immatriculation>
+    <Type $focussed={props.focussed}>{props.type}</Type>
   </Wrapper>
 );
 

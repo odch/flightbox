@@ -17,7 +17,7 @@ const I = styled.i`
   font-family: 'Material Icons';
   font-weight: normal;
   font-style: normal;
-  font-size: ${props => props.size}px;
+  font-size: ${props => props.$size}px;
   display: inline-block;
   width: 1em;
   height: 1em;
@@ -42,7 +42,7 @@ const I = styled.i`
   /* align vertically with text */
   vertical-align: middle;
 
-  ${props => props.rotate && css`animation: ${animations[props.rotate]} 2s linear infinite;`}
+  ${props => props.$rotate && css`animation: ${animations[props.$rotate]} 2s linear infinite;`}
 `;
 
 class MaterialIcon extends React.PureComponent {
@@ -50,9 +50,9 @@ class MaterialIcon extends React.PureComponent {
     return (
       <I
         className={this.props.className}
-        size={this.props.size}
+        $size={this.props.size}
         title={this.props.title}
-        rotate={this.props.rotate}
+        $rotate={this.props.rotate}
       >
         {this.props.icon}
       </I>

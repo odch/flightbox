@@ -4,7 +4,7 @@ import MaterialIcon from '../MaterialIcon';
 import styled from 'styled-components';
 
 const StyledAction = styled.span`
-  ${props => props.disabled
+  ${props => props.$disabled
     ? `
       color: #ddd;
     `
@@ -19,7 +19,7 @@ const StyledAction = styled.span`
 `;
 
 const ActionLabel = styled.span`
-  ${props => props.responsive && `
+  ${props => props.$responsive && `
     @media (max-width: 1200px) {
       display: none;
     }`
@@ -42,9 +42,9 @@ class Action extends React.PureComponent {
 
   render() {
     return (
-      <StyledAction onClick={this.handleClick} className={this.props.className} disabled={this.props.disabled}>
+      <StyledAction onClick={this.handleClick} className={this.props.className} $disabled={this.props.disabled}>
         <MaterialIcon icon={this.props.icon} rotate={this.props.rotateIcon}/>
-        <ActionLabel responsive={this.props.responsive}>&nbsp;{this.props.label}</ActionLabel>
+        <ActionLabel $responsive={this.props.responsive}>&nbsp;{this.props.label}</ActionLabel>
       </StyledAction>
     );
   }

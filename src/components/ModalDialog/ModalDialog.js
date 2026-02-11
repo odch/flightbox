@@ -12,7 +12,7 @@ const handleMaskClick = onBlur => {
 const ModalDialog = props => (
   <div>
     <Mask onClick={handleMaskClick.bind(null, props.onBlur)}/>
-    <Content fullWidthThreshold={props.fullWidthThreshold}>{props.content}</Content>
+    <Content $fullWidthThreshold={props.fullWidthThreshold}>{props.content}</Content>
   </div>
 );
 

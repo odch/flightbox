@@ -17,7 +17,7 @@ const Value = styled.div`
   width: 50%;
   margin-left: 50%;
   overflow-wrap: break-word;
-  ${props => !props.hasValue && 'opacity: 0.5;'}
+  ${props => !props.$hasValue && 'opacity: 0.5;'}
 `;
 
 class MovementField extends React.PureComponent {
@@ -28,7 +28,7 @@ class MovementField extends React.PureComponent {
     return (
       <Wrapper>
         <Label>{props.label}</Label>
-        <Value hasValue={!!props.value}>{props.value == null ? props.defaultValue : props.value}</Value>
+        <Value $hasValue={!!props.value}>{props.value == null ? props.defaultValue : props.value}</Value>
       </Wrapper>
     )
   }

@@ -5,7 +5,7 @@ import Button from './Button';
 
 const LabelWrap = styled.div`
   line-height: 1em;
-  ${props => props.orientation === 'vertical' && `margin-left: 1.5em;`}
+  ${props => props.$orientation === 'vertical' && `margin-left: 1.5em;`}
 `;
 
 const Description = styled.div`
@@ -17,12 +17,12 @@ const Item = props => (
   <Button
     type="button"
     onClick={() => props.onClick(props.value)}
-    selected={props.selected}
-    widthPercentage={props.widthPercentage}
-    orientation={props.orientation}
+    $selected={props.selected}
+    $widthPercentage={props.widthPercentage}
+    $orientation={props.orientation}
     data-cy={props.dataCy}
   >
-    <LabelWrap orientation={props.orientation}>
+    <LabelWrap $orientation={props.orientation}>
       <div>{props.label}</div>
       {props.description && <Description>{props.description}</Description>}
     </LabelWrap>

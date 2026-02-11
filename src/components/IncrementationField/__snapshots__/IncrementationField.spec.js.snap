@@ -4,19 +4,19 @@ exports[`components IncrementationField cannot have value lower than min value 1
 <div>
   <div>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-decrement"
       type="button"
     >
       -
     </button>
     <span
-      class="sc-bwzfXH EEAiO"
+      class="sc-gueYod bqJzSO"
     >
       3
     </span>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-increment"
       type="button"
     >
@@ -30,19 +30,19 @@ exports[`components IncrementationField cannot have value lower than min value 2
 <div>
   <div>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-decrement"
       type="button"
     >
       -
     </button>
     <span
-      class="sc-bwzfXH EEAiO"
+      class="sc-gueYod bqJzSO"
     >
       3
     </span>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-increment"
       type="button"
     >
@@ -56,19 +56,19 @@ exports[`components IncrementationField is decremented by 1 on decrement button 
 <div>
   <div>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-decrement"
       type="button"
     >
       -
     </button>
     <span
-      class="sc-bwzfXH EEAiO"
+      class="sc-gueYod bqJzSO"
     >
       42
     </span>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-increment"
       type="button"
     >
@@ -82,19 +82,19 @@ exports[`components IncrementationField is decremented by 1 on decrement button 
 <div>
   <div>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-decrement"
       type="button"
     >
       -
     </button>
     <span
-      class="sc-bwzfXH EEAiO"
+      class="sc-gueYod bqJzSO"
     >
       41
     </span>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-increment"
       type="button"
     >
@@ -108,19 +108,19 @@ exports[`components IncrementationField is incremented by 1 on increment button 
 <div>
   <div>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-decrement"
       type="button"
     >
       -
     </button>
     <span
-      class="sc-bwzfXH EEAiO"
+      class="sc-gueYod bqJzSO"
     >
       0
     </span>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-increment"
       type="button"
     >
@@ -134,19 +134,19 @@ exports[`components IncrementationField is incremented by 1 on increment button 
 <div>
   <div>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-decrement"
       type="button"
     >
       -
     </button>
     <span
-      class="sc-bwzfXH EEAiO"
+      class="sc-gueYod bqJzSO"
     >
       1
     </span>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-increment"
       type="button"
     >
@@ -160,19 +160,19 @@ exports[`components IncrementationField is initialized with 0 if no value and mi
 <div>
   <div>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-decrement"
       type="button"
     >
       -
     </button>
     <span
-      class="sc-bwzfXH EEAiO"
+      class="sc-gueYod bqJzSO"
     >
       0
     </span>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-increment"
       type="button"
     >
@@ -186,19 +186,19 @@ exports[`components IncrementationField is initialized with min value if no valu
 <div>
   <div>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-decrement"
       type="button"
     >
       -
     </button>
     <span
-      class="sc-bwzfXH EEAiO"
+      class="sc-gueYod bqJzSO"
     >
       3
     </span>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-increment"
       type="button"
     >
@@ -212,19 +212,19 @@ exports[`components IncrementationField is initialized with value 1`] = `
 <div>
   <div>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-decrement"
       type="button"
     >
       -
     </button>
     <span
-      class="sc-bwzfXH EEAiO"
+      class="sc-gueYod bqJzSO"
     >
       42
     </span>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-increment"
       type="button"
     >
@@ -238,19 +238,19 @@ exports[`components IncrementationField is initialized with value if value and m
 <div>
   <div>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-decrement"
       type="button"
     >
       -
     </button>
     <span
-      class="sc-bwzfXH EEAiO"
+      class="sc-gueYod bqJzSO"
     >
       42
     </span>
     <button
-      class="sc-bdVaJa eSNaTq"
+      class="sc-beqWay euGnyq"
       data-cy="undefined-increment"
       type="button"
     >

@@ -25,11 +25,11 @@ const ColumnsWrapper = styled.div`
   padding: 1em;
   overflow: hidden;
   display: flex;
-  ${props => props.selected && `
+  ${props => props.$selected && `
     font-weight: bold;
   `}
-  ${props => props.locked && `color: #555;`}
-  ${props => !props.hasAssociatedMovement && `
+  ${props => props.$locked && `color: #555;`}
+  ${props => !props.$hasAssociatedMovement && `
     font-weight: bold;
   `}
 
@@ -109,9 +109,9 @@ const ColumnsWrapper = styled.div`
 const Column = styled.div`
   display: inline-block;
   vertical-align: top;
-  width: ${props => props.width};
-  ${props => props.alignMiddle && `line-height: ${ICON_HEIGHT}px;`}
-  ${props => props.highlight && `color: ${props.theme.colors.main};`}
+  width: ${props => props.$width};
+  ${props => props.$alignMiddle && `line-height: ${ICON_HEIGHT}px;`}
+  ${props => props.$highlight && `color: ${props.theme.colors.main};`}
 `;
 
 const ActionColumn = styled(Column)`
@@ -119,7 +119,7 @@ const ActionColumn = styled(Column)`
 `;
 
 const StyledMovementTypeIcon = styled(MaterialIcon)`
-  ${props => props.locked && `
+  ${props => props.$locked && `
     opacity: 0.5;
   `}
 `
@@ -160,9 +160,9 @@ class MovementHeader extends React.PureComponent {
       <Wrapper
         onClick={props.onClick}
         selected={props.selected}
-        locked={props.locked}>
+        $locked={props.locked}>
         <ColumnsWrapper
-          hasAssociatedMovement={
+          $hasAssociatedMovement={
             props.data.associatedMovement
             && ['departure', 'arrival'].includes(props.data.associatedMovement.type)
           }
@@ -173,7 +173,7 @@ class MovementHeader extends React.PureComponent {
                 icon={TYPE_LABELS[props.data.type].icon}
                 size={ICON_HEIGHT}
                 title={TYPE_LABELS[props.data.type].label}
-                locked={props.locked}
+                $locked={props.locked}
               />
               {props.locked && (
                 <StyledLockIcon
@@ -184,15 +184,15 @@ class MovementHeader extends React.PureComponent {
               )}
             </div>
           </Column>
-          <Column className="immatriculation" alignMiddle>{props.data.immatriculation}</Column>
-          <Column className="homebase" alignMiddle>
+          <Column className="immatriculation" $alignMiddle>{props.data.immatriculation}</Column>
+          <Column className="homebase" $alignMiddle>
             <HomeBaseIcon isHomeBase={props.isHomeBase}/>
           </Column>
-          <Column className="aircraftType" alignMiddle>
+          <Column className="aircraftType" $alignMiddle>
             <AircraftTypeIcon aircraftCategory={props.data.aircraftCategory} mtow={props.data.mtow}/>
           </Column>
-          <Column className="pilot" alignMiddle>{props.data.lastname}</Column>
-          <Column className="datetime" alignMiddle>
+          <Column className="pilot" $alignMiddle>{props.data.lastname}</Column>
+          <Column className="datetime" $alignMiddle>
             {date ? (<div style={{lineHeight: '1.1'}}>
               <div style={{fontSize: '0.90em', color: '#666'}}>{date}</div>
               <div>{time}</div>
@@ -202,8 +202,8 @@ class MovementHeader extends React.PureComponent {
               </div>
             )}
           </Column>
-          <Column className="location" alignMiddle>{formatLocationDisplay(props.data)}</Column>
-          <ActionColumn className="action" alignMiddle highlight>
+          <Column className="location" $alignMiddle>{formatLocationDisplay(props.data)}</Column>
+          <ActionColumn className="action" $alignMiddle $highlight>
             {props.data.associatedMovement && props.data.associatedMovement.type === 'none' ? (
               <Action
                 label={ACTION_LABELS[props.data.type].label}

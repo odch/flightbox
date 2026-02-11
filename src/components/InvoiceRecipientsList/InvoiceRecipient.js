@@ -63,7 +63,7 @@ class InvoiceRecipient extends React.Component {
 
     return (
       <>
-        <Wrapper expanded={expanded}>
+        <Wrapper>
           <Header onClick={() => onExpandedChange(!expanded)}>
             <Name>
               <MaterialIcon icon={expanded ? "keyboard_arrow_up" : "keyboard_arrow_down"}/>

@@ -16,8 +16,7 @@ const Label = styled.div`
 `;
 
 const Content = styled.div`
-  padding: ${props => typeof props.padding === 'number' ? `${props.padding}px` : '1rem'};
-  ${props => props.contentMaxHeight > 0 && `max-height: ${props.contentMaxHeight}px;`}
+  padding: ${props => typeof props.$padding === 'number' ? `${props.$padding}px` : '1rem'};
 
   a {
     text-decoration: underline;
@@ -28,12 +27,11 @@ const Content = styled.div`
   }
 `;
 
-const LabeledBox = React.forwardRef(({ className, label, contentMaxHeight, contentPadding, children }, ref) => (
+const LabeledBox = React.forwardRef(({ className, label, contentPadding, children }, ref) => (
   <Wrapper className={className} ref={ref}>
     <Label>{label}</Label>
     <Content
-      maxHeight={contentMaxHeight}
-      padding={contentPadding}
+      $padding={contentPadding}
     >{children}</Content>
   </Wrapper>
 ));
@@ -41,7 +39,6 @@ const LabeledBox = React.forwardRef(({ className, label, contentMaxHeight, conte
 LabeledBox.propTypes = {
   label: PropTypes.string.isRequired,
   className: PropTypes.string,
-  contentMaxHeight: PropTypes.number,
   contentPadding: PropTypes.number,
 };
 
