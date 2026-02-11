@@ -39,7 +39,6 @@ InvoiceRecipientsListContainer.propTypes = {
   addInvoiceRecipientEmail: PropTypes.func.isRequired,
   removeInvoiceRecipient: PropTypes.func.isRequired,
   removeInvoiceRecipientEmail: PropTypes.func.isRequired,
-  changeRecipientName: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state, ownProps) => {

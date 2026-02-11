@@ -34,19 +34,19 @@ class Button extends React.Component {
         className={className}
         onClick={onClick}
         disabled={disabled}
-        primary={primary}
-        flat={flat}
-        danger={danger}
-        neutral={neutral}
+        $primary={primary}
+        $flat={flat}
+        $danger={danger}
+        $neutral={neutral}
         onMouseEnter={this.handleMouseEnter.bind(this)}
         onMouseLeave={this.handleMouseLeave.bind(this)}
         data-cy={dataCy}
       >
         <Overlay
           disabled={disabled}
-          hovered={this.state.hovered}
-          danger={danger}
-          flat={flat}
+          $hovered={this.state.hovered}
+          $danger={danger}
+          $flat={flat}
         >
           {loading ? <MaterialIcon icon="sync" rotate="left"/> : icon ? <MaterialIcon icon={icon}/> : undefined}<Label>{label}</Label>
         </Overlay>

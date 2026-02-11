@@ -6,10 +6,10 @@ import StatusShape from './StatusShape';
 import {getLabel} from './StatusOptions';
 
 const Wrapper = styled.div`
-  ${props => props.selected && `font-weight: bold;`}
-  ${props => !props.active && `cursor: pointer;`}
-  ${props => props.active && `color: ${props.theme.colors.main};`}
-  
+  ${props => props.$selected && `font-weight: bold;`}
+  ${props => !props.$active && `cursor: pointer;`}
+  ${props => props.$active && `color: ${props.theme.colors.main};`}
+
   padding: 1em;
 `;
 
@@ -22,7 +22,7 @@ const DateColumn = styled(Column)`
 `;
 
 const StatusHeader = props => (
-  <Wrapper selected={props.selected} active={props.active} onClick={props.onClick}>
+  <Wrapper $selected={props.selected} $active={props.active} onClick={props.onClick}>
     <Column>{props.active && 'Aktiv: '}{getLabel(props.item.status)}</Column>
     <DateColumn>{dates.formatDateTime(props.item.timestamp)}</DateColumn>
   </Wrapper>

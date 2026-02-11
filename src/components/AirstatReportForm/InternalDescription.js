@@ -37,12 +37,12 @@ const InternalDescription = () => (
       <Dt>MTOW</Dt>
       <Dd>Das maximale Abfluggewicht</Dd>
       <Dt>CLUB</Dt>
-      <Dd><emph>1</emph>, wenn Club-Flugzeug, sonst leer</Dd>
+      <Dd><em>1</em>, wenn Club-Flugzeug, sonst leer</Dd>
       <Dt>HOME_BASE</Dt>
-      <Dd><emph>1</emph>, wenn auf diesem Flugplatz stationiertes Flugzeug (ohne Club-Flugzeuge), sonst leer</Dd>
+      <Dd><em>1</em>, wenn auf diesem Flugplatz stationiertes Flugzeug (ohne Club-Flugzeuge), sonst leer</Dd>
       <Dt>ORIGINAL_ORIDE</Dt>
       <Dd>Der ursprüngliche Start- oder Zielflugplatz, falls er nicht identifiziert werden konnte
-        und durch <emph>LSZZ</emph> ersetzt wurde</Dd>
+        und durch <em>LSZZ</em> ersetzt wurde</Dd>
       <Dt>REMARKS</Dt>
       <Dd>Bemerkungen</Dd>
       <Dt>FEES</Dt>

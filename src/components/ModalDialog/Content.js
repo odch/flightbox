@@ -9,8 +9,8 @@ const Content = styled(Centered)`
   background-color: #fff;
   box-shadow: 0 0 2em 0 #aaa;
   z-index: 10000;
-  
-  @media(max-width: ${props => props.fullWidthThreshold}px) {
+
+  @media(max-width: ${props => props.$fullWidthThreshold}px) {
     width: 85%;
   }
 `;

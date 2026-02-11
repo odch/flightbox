@@ -3,7 +3,7 @@
 exports[`components ImageButton OptionalLink renders Link component if \`href\` prop is set 1`] = `
 <div>
   <a
-    class="sc-bdVaJa kdqqWr"
+    class="sc-beqWay gPVrXJ"
     href="/some/path"
   />
 </div>
@@ -12,7 +12,7 @@ exports[`components ImageButton OptionalLink renders Link component if \`href\` 
 exports[`components ImageButton OptionalLink renders no Link component if \`href\` prop is not set 1`] = `
 <div>
   <div
-    class="sc-bwzfXH kZUMPF"
+    class="sc-gueYod fOHbWb"
   />
 </div>
 `;

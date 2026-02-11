@@ -3,14 +3,14 @@
 exports[`components ImageButton propagates href to OptionalLink 1`] = `
 <div>
   <div
-    class="sc-htpNat bXXriG"
+    class="sc-dmqHEY ItQyv"
   >
     <a
-      class="sc-bdVaJa kdqqWr"
+      class="sc-beqWay gPVrXJ"
       href="/some/path"
     >
       <div
-        class="sc-bxivhb jeriCS"
+        class="sc-hLseeT cYtryv"
       >
         <img
           src=""
@@ -25,13 +25,13 @@ exports[`components ImageButton propagates href to OptionalLink 1`] = `
 exports[`components ImageButton propagates onClick to OptionalLink 1`] = `
 <div>
   <div
-    class="sc-htpNat bXXriG"
+    class="sc-dmqHEY ItQyv"
   >
     <div
-      class="sc-bwzfXH kZUMPF"
+      class="sc-gueYod fOHbWb"
     >
       <div
-        class="sc-bxivhb jeriCS"
+        class="sc-hLseeT cYtryv"
       >
         <img
           src=""
@@ -46,13 +46,13 @@ exports[`components ImageButton propagates onClick to OptionalLink 1`] = `
 exports[`components ImageButton renders label and image 1`] = `
 <div>
   <div
-    class="sc-htpNat bXXriG"
+    class="sc-dmqHEY ItQyv"
   >
     <div
-      class="sc-bwzfXH kZUMPF"
+      class="sc-gueYod fOHbWb"
     >
       <div
-        class="sc-bxivhb jeriCS"
+        class="sc-hLseeT cYtryv"
       >
         <img
           src="imgsource.jpg"

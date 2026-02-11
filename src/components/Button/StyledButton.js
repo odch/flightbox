@@ -1,14 +1,14 @@
 import styled from 'styled-components';
 
 const colors = props => {
-  if (props.primary) {
+  if (props.$primary) {
     return `
       background-color: ${props.disabled ? `#ccc` : props.theme.colors.main};
       color: #fff;
     `;
   }
 
-  if (props.danger) {
+  if (props.$danger) {
     return props.flat ? `
       background-color: #fff;
       color: ${props.theme.colors.danger};
@@ -22,7 +22,7 @@ const colors = props => {
     background-color: #fff;
     color: ${props.disabled
       ? `#ccc`
-      : props.neutral
+      : props.$neutral
         ? `#000`
         : props.theme.colors.main};
   `;
@@ -37,7 +37,7 @@ const StyledButton = styled.button`
   border-radius: 2px;
   ${props => !props.disabled && `
     cursor: pointer;
-    ${!props.flat && `box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;`}
+    ${!props.$flat && `box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;`}
   `}
 `;
 
