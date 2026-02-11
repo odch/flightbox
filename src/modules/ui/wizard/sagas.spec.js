@@ -1,8 +1,14 @@
 import {put} from 'redux-saga/effects';
-import {push} from 'connected-react-router';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import {saveMovementSuccess} from '../../movements/actions';
+import {history} from '../../../history';
+
+jest.mock('../../../history', () => ({
+  history: {
+    push: jest.fn(),
+  },
+}));
 
 describe('modules', () => {
   describe('ui', () => {
@@ -27,9 +33,10 @@ describe('modules', () => {
           it('should redirect and reset wizard', () => {
             const generator = sagas.finish();
 
-            expect(generator.next().value).toEqual(put(push('/')));
             expect(generator.next().value).toEqual(put(actions.reset()));
             expect(generator.next().done).toEqual(true);
+
+            expect(history.push).toHaveBeenCalledWith('/');
           });
         });
       });
