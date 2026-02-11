@@ -1,20 +1,20 @@
-import {all, put, takeEvery} from 'redux-saga/effects'
-import {goBack, push} from 'connected-react-router'
+import {all, takeEvery} from 'redux-saga/effects'
+import {history} from '../../../history'
 import * as actions from './actions';
 
 export function* showMovementWizard(action) {
   const {movementType, key} = action.payload;
-  yield put(push(`/${movementType}/${key}`));
+  history.push(`/${movementType}/${key}`);
 }
 
 export function* createMovementFromMovement(action) {
   const {sourceMovementType, sourceMovementKey} = action.payload;
   const targetMovementType = sourceMovementType === 'departure' ? 'arrival' : 'departure';
-  yield put(push(`/${targetMovementType}/new/${sourceMovementKey}`));
+  history.push(`/${targetMovementType}/new/${sourceMovementKey}`);
 }
 
 export function* cancelWizard() {
-  yield put(goBack());
+  history.goBack();
 }
 
 export default function* sagas() {

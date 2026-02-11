@@ -1,17 +1,16 @@
 import '../reset.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Route} from 'react-router-dom';
+import {Route, Router} from 'react-router-dom';
 import {Provider} from 'react-redux';
 import {applyMiddleware, compose, createStore} from 'redux';
-import {createHashHistory} from 'history';
-import {ConnectedRouter, routerMiddleware} from 'connected-react-router';
 import createSagaMiddleware from 'redux-saga';
 import {ThemeProvider} from 'styled-components';
 import moment from 'moment';
 
 import 'moment/locale/de';
 
+import {history} from './history'
 import reducer, {sagas} from './modules';
 import autoRestart from './util/autoRestartSaga';
 
@@ -30,11 +29,7 @@ const theme = require('../theme/' + __THEME__);
 
 const sagaMiddleware = createSagaMiddleware();
 
-const history = createHashHistory();
-
-const reduxRouterMiddleware = routerMiddleware(history);
-
-let middleware = applyMiddleware(sagaMiddleware, reduxRouterMiddleware);
+let middleware = applyMiddleware(sagaMiddleware);
 
 if (window.__REDUX_DEVTOOLS_EXTENSION__) {
   middleware = compose(middleware, window.__REDUX_DEVTOOLS_EXTENSION__({ trace: true }));
@@ -48,9 +43,9 @@ ReactDOM.render((
   <Provider store={store}>
     <GlobalStyle/>
     <ThemeProvider theme={theme}>
-      <ConnectedRouter history={history}>
+      <Router history={history}>
         <Route component={App}/>
-      </ConnectedRouter>
+      </Router>
     </ThemeProvider>
   </Provider>
 ), document.getElementById('app'));
