@@ -127,7 +127,7 @@ class Dropdown extends Component {
     return (
       <Option
         key={option.key}
-        focussed={focussed}
+        $focussed={focussed}
         onMouseDown={this.handleOptionClick.bind(this, option)}
         onMouseEnter={this.handleOptionMouseEnter.bind(this, option)}
         ref={comp => this.options[option.key] = comp}

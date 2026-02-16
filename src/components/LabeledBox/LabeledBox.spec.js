@@ -1,5 +1,5 @@
 import React from 'react';
-import {shallow} from 'enzyme';
+import {render} from '@testing-library/react';
 import LabeledBox from './LabeledBox';
 
 describe('components', () => {
@@ -12,9 +12,9 @@ describe('components', () => {
         </LabeledBox>
       );
 
-      const component = shallow(labeledBox);
+      const { container } = render(labeledBox);
 
-      expect(component.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
   });
 });

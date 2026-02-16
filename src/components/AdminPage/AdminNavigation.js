@@ -64,7 +64,7 @@ const MenuItem = styled.button`
     background-color: rgba(0,0,0,.03);
   }
 
-  ${props => props.active && `
+  ${props => props.$active && `
     background-color: ${props.theme.colors.main};
     color: white;
 
@@ -126,7 +126,7 @@ const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange }) => {
         {navigationItems.map(item => (
           <MenuItem
             key={item.key}
-            active={activeTab === item.key}
+            $active={activeTab === item.key}
             onClick={() => onTabChange(item.key)}
           >
             <IconWrapper>

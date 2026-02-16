@@ -1,5 +1,18 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`components ImageButton OptionalLink renders Link component if \`href\` prop is set 1`] = `"<Styled(Link) to="/some/path" onClick={[undefined]} data-cy={[undefined]} />"`;
+exports[`components ImageButton OptionalLink renders Link component if \`href\` prop is set 1`] = `
+<div>
+  <a
+    class="sc-beqWay gPVrXJ"
+    href="/some/path"
+  />
+</div>
+`;
 
-exports[`components ImageButton OptionalLink renders no Link component if \`href\` prop is not set 1`] = `"<styled.div onClick={[Function: onClick]} data-cy={[undefined]} />"`;
+exports[`components ImageButton OptionalLink renders no Link component if \`href\` prop is not set 1`] = `
+<div>
+  <div
+    class="sc-gueYod fOHbWb"
+  />
+</div>
+`;

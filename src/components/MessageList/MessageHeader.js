@@ -5,7 +5,7 @@ import dates from '../../util/dates';
 import MessageShape from './MessageShape';
 
 const Wrapper = styled.div`
-  ${props => props.selected && `font-weight: bold;`}
+  ${props => props.$selected && `font-weight: bold;`}
 `;
 
 const Column = styled.div`
@@ -17,7 +17,7 @@ const DateColumn = styled(Column)`
 `;
 
 const MessageHeader = props => (
-  <Wrapper selected={props.selected}>
+  <Wrapper $selected={props.selected}>
     <Column>{props.item.name}</Column>
     <DateColumn>{dates.formatDate(props.item.timestamp)}</DateColumn>
   </Wrapper>

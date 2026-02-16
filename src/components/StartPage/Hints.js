@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 
 const Wrapper = styled.div`
   border-radius: 10px;
-  background-color: ${props => props.theme.colors.background}
+  background-color: ${props => props.theme.colors.background};
   margin: 1em auto;
   padding: 1em;
   width: 80%;

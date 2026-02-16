@@ -11,7 +11,7 @@ const Wrapper = styled.div`
   background-color: #fbfbfb;
   box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.24);
 
-  ${props => props.selected && `
+  ${props => props.$selected && `
     margin: 20px -10px 20px -10px;
 
     @media (max-width: 768px) {
@@ -58,7 +58,7 @@ class Movement extends React.PureComponent {
       || props.aircraftSettings.homeBase[props.data.immatriculation] === true;
 
     return (
-      <Wrapper selected={props.selected} data-id={props.data.key}>
+      <Wrapper $selected={props.selected} data-id={props.data.key}>
         <MovementHeader
           onClick={this.handleClick}
           selected={props.selected}

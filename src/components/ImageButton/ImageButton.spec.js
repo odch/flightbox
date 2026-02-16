@@ -1,25 +1,26 @@
 import React from 'react';
-import {shallow} from 'enzyme';
+import {render} from '@testing-library/react';
 import ImageButton from './ImageButton';
+import {renderWithTheme} from '../../../test/renderWithTheme'
 
 describe('components', () => {
   describe('ImageButton', () => {
     it('renders label and image', () => {
-      const component = shallow(<ImageButton label="my label" img="imgsource.jpg"/>);
+      const { container } = render(<ImageButton label="my label" img="imgsource.jpg"/>);
 
-      expect(component.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
 
     it('propagates href to OptionalLink', () => {
-      const component = shallow(<ImageButton label="" img="" href="/some/path"/>);
+      const { container } = renderWithTheme(<ImageButton label="" img="" href="/some/path"/>);
 
-      expect(component.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
 
     it('propagates onClick to OptionalLink', () => {
-      const component = shallow(<ImageButton label="" img="" onClick={() => {}}/>);
+      const { container } = render(<ImageButton label="" img="" onClick={() => {}}/>);
 
-      expect(component.debug()).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
   });
 });

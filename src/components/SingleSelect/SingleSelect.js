@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import Wrapper from './Wrapper';
 import Item from './Item';
 
@@ -39,7 +39,7 @@ class SingleSelect extends Component {
       : null;
 
     return (
-      <Wrapper orientation={orientation}>
+      <Wrapper $orientation={orientation}>
         {this.props.items.map((item, index) => (
           <Item
             key={index}

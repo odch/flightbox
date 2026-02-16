@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
-const Mask = styled.div`
+const Mask = styled.div.attrs({
+  'data-testid': 'modal-mask'
+})`
   position: fixed;
   top: 0;
   left: 0;

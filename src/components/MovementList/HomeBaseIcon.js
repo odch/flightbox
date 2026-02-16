@@ -8,14 +8,14 @@ const Wrapper = styled.div`
 `;
 
 const IconWrapper = styled.span`
-  ${props => props.withText && `float: left`}
+  ${props => props.$withText && `float: left`}
 `;
 
 const StyledIcon = styled(MaterialIcon)`
   color: #ccc;
   position: relative;
-  
-  ${props => !props.isHomeBase && `
+
+  ${props => !props.$isHomeBase && `
     &:before {
       position: absolute;
       content: "";
@@ -45,11 +45,11 @@ class HomeBaseIcon extends React.PureComponent {
 
     return (
       <Wrapper className={this.props.className}>
-        <IconWrapper withText={this.props.showText}>
+        <IconWrapper $withText={this.props.showText}>
           <StyledIcon
             icon="home"
             title={text}
-            isHomeBase={this.props.isHomeBase}
+            $isHomeBase={this.props.isHomeBase}
           />
         </IconWrapper>
         {this.props.showText && <Text>{text}</Text>}

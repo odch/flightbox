@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 const Wrapper = styled.fieldset`
   border: 0;
-  ${props => props.gutter && `margin: 1em;`}
+  ${props => props.$gutter && `margin: 1em;`}
 `;
 
 const Legend = styled.legend`
@@ -17,7 +17,7 @@ class FieldSet extends React.PureComponent {
   render() {
     const props = this.props;
     return (
-      <Wrapper gutter={props.gutter}>
+      <Wrapper $gutter={props.gutter}>
         {props.legend && <Legend>{props.legend}</Legend>}
         {props.children}
       </Wrapper>

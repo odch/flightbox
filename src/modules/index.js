@@ -1,5 +1,4 @@
 import {combineReducers} from 'redux';
-import {connectRouter} from 'connected-react-router';
 import {map} from 'ramda';
 import {all, fork} from 'redux-saga/effects';
 import {reducer as formReducer} from 'redux-form';
@@ -19,7 +18,6 @@ import users, {sagas as usersSagas} from './users';
 import profile, {sagas as profileSagas} from './profile';
 
 const createRootReducer = (history) => combineReducers({
-  router: connectRouter(history),
   aerodromes,
   aircrafts,
   form: formReducer,

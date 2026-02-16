@@ -21,7 +21,7 @@ class StatusList extends Component {
           return (
             <Status
               key={index}
-              selected={isSelected}
+              $selected={isSelected}
             >
               <StatusHeader
                 item={item}

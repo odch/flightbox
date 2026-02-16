@@ -1,5 +1,4 @@
 import {all, put, takeEvery} from 'redux-saga/effects'
-import {push} from 'connected-react-router'
 import {
   SAVE_MOVEMENT_FAILED,
   SAVE_MOVEMENT_SUCCESS,
@@ -8,6 +7,7 @@ import {
 } from '../../movements';
 import * as actions from './actions';
 import {reset as arrivalPaymentReset} from '../arrivalPayment'
+import {history} from '../../../history'
 
 export function* init() {
   yield put(actions.reset());
@@ -27,7 +27,7 @@ export function* setCommitError(action) {
 }
 
 export function* finish() {
-  yield put(push('/'));
+  history.push('/');
   yield put(actions.reset());
 }
 

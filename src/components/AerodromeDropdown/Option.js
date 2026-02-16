@@ -8,18 +8,18 @@ const Wrapper = styled.div`
 
 const Code = styled.div`
   margin-bottom: 0.2em;
-  ${props => props.focussed && `color: ${props.theme.colors.main}`};
+  ${props => props.$focussed && `color: ${props.theme.colors.main}`};
 `;
 
 const Name = styled.div`
   font-size: 0.8em;
-  color: ${props => props.focussed ? props.theme.colors.main : `#888`};
+  color: ${props => props.$focussed ? props.theme.colors.main : `#888`};
 `;
 
 const Option = props => (
   <Wrapper>
-    <Code focussed={props.focussed}>{props.code}</Code>
-    <Name focussed={props.focussed}>{props.name}</Name>
+    <Code $focussed={props.focussed}>{props.code}</Code>
+    <Name $focussed={props.focussed}>{props.name}</Name>
   </Wrapper>
 );
 

@@ -19,7 +19,7 @@ const Title = styled.div`
   font-weight: bold;
   font-size: 1.5em;
   margin-bottom: 1em;
-  
+
   @media (min-width: 1000px) {
     float: left;
     margin-right: 3em;
@@ -40,8 +40,8 @@ const Number = styled.div`
   width: 2em;
   line-height: 2em;
   border-radius: 50%;
-  
-  ${props => props.active
+
+  ${props => props.$active
     ? `
       background-color: ${props.theme.colors.main};
       color: #fff;
@@ -50,7 +50,7 @@ const Number = styled.div`
       background-color: ${props.theme.colors.background};
     `
   }
-  
+
   &:before {
     content: '';
     position: absolute;
@@ -58,8 +58,8 @@ const Number = styled.div`
     left: -100em;
     width: 100em;
     height: .2em;
-    
-    ${props => props.first
+
+    ${props => props.$first
       ? `
         background-color: #fff;
         z-index: -1;
@@ -76,13 +76,13 @@ const Text = styled.div`
   color: #000;
   text-decoration: none;
 
-  ${props => props.active && `
+  ${props => props.$active && `
     color: ${props.theme.colors.main};
     font-size: 1.3em;
   `}
-  
+
   @media (max-width: 540px) {
-    ${props => !props.active && `display: none;`}
+    ${props => !props.$active && `display: none;`}
   }
 `;
 
@@ -98,8 +98,8 @@ class WizardBreadcrumbs extends React.PureComponent {
             const active = index === props.activeItem;
             return (
               <Item key={index}>
-                <Number active={active} first={index === 0}>{index + 1}</Number>
-                <Text active={active}>{item.label.replace(/ /g, '\u00a0')}</Text>
+                <Number $active={active} $first={index === 0}>{index + 1}</Number>
+                <Text $active={active}>{item.label.replace(/ /g, '\u00a0')}</Text>
               </Item>
             );
           })}

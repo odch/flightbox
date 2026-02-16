@@ -1,6 +1,6 @@
 import {all, call, put, select, takeEvery} from 'redux-saga/effects'
 import {getFormValues} from 'redux-form'
-import {push} from 'connected-react-router'
+import {history} from '../../history'
 import * as actions from './actions';
 import * as remote from './remote';
 
@@ -29,7 +29,7 @@ export function* saveMessage() {
 }
 
 export function* confirmSaveMessageSuccess() {
-  yield put(push('/'));
+  history.push('/');
   yield put(actions.resetMessageForm())
 }
 

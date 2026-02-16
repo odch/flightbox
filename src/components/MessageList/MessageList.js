@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import MessageShape from './MessageShape';
 import MessagesWrapper from './MessagesWrapper';
 import Message from './Message';
@@ -25,7 +25,7 @@ class MessageList extends Component {
           return (
             <Message
               key={index}
-              selected={isSelected}
+              $selected={isSelected}
               onClick={this.handleMessageClick.bind(this, item.key)}
             >
               <MessageHeader item={item} selected={isSelected}/>
