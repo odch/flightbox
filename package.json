@@ -27,7 +27,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^12.1.5",
     "@testing-library/user-event": "^14.6.1",
-    "ajv": "^8.17.1",
+    "ajv": "^8.18.0",
     "ajv-keywords": "^5.1.0",
     "babel-jest": "^30.2.0",
     "babel-loader": "^10.0.0",
