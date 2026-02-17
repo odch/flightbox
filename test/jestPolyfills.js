@@ -1,4 +1,4 @@
-const { TextEncoder, TextDecoder, ReadableStream } = require('util');
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;
-global.ReadableStream = ReadableStream;
+global.fetch = globalThis.fetch;
+global.Headers = globalThis.Headers;
+global.Request = globalThis.Request;
+global.Response = globalThis.Response;
