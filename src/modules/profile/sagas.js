@@ -1,7 +1,6 @@
 import * as actions from './actions'
 import * as remote from './remote'
 import {all, call, put, select, takeEvery} from 'redux-saga/effects'
-import {getFormValues, initialize} from 'redux-form'
 
 const str = (value) => typeof value === 'string' && value.trim().length > 0 ? value : null
 
@@ -13,7 +12,6 @@ export function* loadProfile() {
   try {
     const auth = yield select(authSelector)
     const snapshot = yield call(remote.load, auth.uid);
-    yield put(initialize('profile', snapshot.val() || {}));
     yield put(actions.profileLoaded(snapshot.val() || {}));
   } catch(e) {
     if (console && typeof console.error === 'function') {
@@ -24,7 +22,7 @@ export function* loadProfile() {
 
 export function* saveProfile(action) {
   try {
-    const values = yield select(getFormValues('profile'));
+    const values = action.payload.values;
 
     const auth = yield select(authSelector);
 

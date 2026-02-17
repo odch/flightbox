@@ -1,5 +1,6 @@
+import PropTypes from 'prop-types'
 import FieldSet from '../wizards/FieldSet'
-import {Field, reduxForm} from 'redux-form'
+import {Field, Form} from 'react-final-form'
 import {renderAircraftCategoryDropdown, renderAircraftDropdown, renderInputField} from '../wizards/renderField'
 import React from 'react'
 import Button from '../Button'
@@ -26,130 +27,134 @@ const StyledSectionTitle = styled.h1`
 
 function ProfileForm(props) {
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    props.saveProfile()
+  const handleSubmit = (values) => {
+    props.saveProfile(values)
   }
 
   return (
-    <StyledForm onSubmit={handleSubmit}>
-      <StyledSectionTitle>Standard-Eingabewerte</StyledSectionTitle>
-      <div>Die Werte aus den folgenden Feldern werden automatisch vorausgefüllt, wenn Sie einen neuen Abflug oder eine
-        neue Ankunft erfassen.
-      </div>
-      <StyledSection>
-        <StyledSectionTitle>Pilot</StyledSectionTitle>
-        <FieldSet gutter={false}>
-          {__CONF__.memberManagement === true && (
-            <Field
-              name="memberNr"
-              type="text"
-              label="Mitgliedernummer"
-              component={renderInputField}
-              readOnly={props.readOnly}
-            />
-          )}
-        </FieldSet>
-        <FieldSet gutter={false}>
-          <Field
-            name="lastname"
-            type="text"
-            label="Nachname"
-            component={renderInputField}
-            readOnly={props.readOnly}
-          />
-          <Field
-            name="firstname"
-            type="text"
-            label="Vorname"
-            component={renderInputField}
-            readOnly={props.readOnly}
-          />
-        </FieldSet>
-        <FieldSet gutter={false}>
-          <Field
-            name="email"
-            type="email"
-            label="E-Mail"
-            component={renderInputField}
-            readOnly={props.readOnly}
-          />
-          <Field
-            name="phone"
-            type="tel"
-            label="Telefon"
-            component={renderInputField}
-            readOnly={props.readOnly}
-          />
-        </FieldSet>
-      </StyledSection>
+    <Form onSubmit={handleSubmit} initialValues={props.profile}>
+      {({handleSubmit, dirty, form}) => (
+        <StyledForm onSubmit={handleSubmit}>
+          <StyledSectionTitle>Standard-Eingabewerte</StyledSectionTitle>
+          <div>Die Werte aus den folgenden Feldern werden automatisch vorausgefüllt, wenn Sie einen neuen Abflug oder eine
+            neue Ankunft erfassen.
+          </div>
+          <StyledSection>
+            <StyledSectionTitle>Pilot</StyledSectionTitle>
+            <FieldSet gutter={false}>
+              {__CONF__.memberManagement === true && (
+                <Field
+                  name="memberNr"
+                  type="text"
+                  label="Mitgliedernummer"
+                  component={renderInputField}
+                />
+              )}
+            </FieldSet>
+            <FieldSet gutter={false}>
+              <Field
+                name="lastname"
+                type="text"
+                label="Nachname"
+                component={renderInputField}
+              />
+              <Field
+                name="firstname"
+                type="text"
+                label="Vorname"
+                component={renderInputField}
+              />
+            </FieldSet>
+            <FieldSet gutter={false}>
+              <Field
+                name="email"
+                type="email"
+                label="E-Mail"
+                component={renderInputField}
+              />
+              <Field
+                name="phone"
+                type="tel"
+                label="Telefon"
+                component={renderInputField}
+              />
+            </FieldSet>
+          </StyledSection>
 
-      <StyledSection>
-        <StyledSectionTitle>Flugzeug</StyledSectionTitle>
-        <FieldSet gutter={false}>
-          <Field
-            name="immatriculation"
-            component={renderAircraftDropdown}
-            label="Immatrikulation"
-            readOnly={props.readOnly}
-            clearable
-            normalize={aircraft => {
-              if (aircraft) {
-                props.change('aircraftType', aircraft.type);
-                props.change('mtow', aircraft.mtow);
-                props.change('aircraftCategory', aircraft.category)
+          <StyledSection>
+            <StyledSectionTitle>Flugzeug</StyledSectionTitle>
+            <FieldSet gutter={false}>
+              <Field name="immatriculation">
+                {({input, meta}) =>
+                  renderAircraftDropdown({
+                    input: {
+                      ...input,
+                      onChange: aircraft => {
+                        if (aircraft) {
+                          input.onChange(aircraft.key);
+                          form.change('aircraftType', aircraft.type);
+                          form.change('mtow', aircraft.mtow);
+                          form.change('aircraftCategory', aircraft.category);
+                        } else {
+                          input.onChange(null);
+                        }
+                      }
+                    },
+                    meta,
+                    label: "Immatrikulation",
+                    clearable: true,
+                  })
+                }
+              </Field>
+              <Field
+                name="aircraftType"
+                type="text"
+                component={renderInputField}
+                label="Typ"
+              />
+              <Field
+                name="mtow"
+                type="number"
+                component={renderInputField}
+                label="Maximales Abfluggewicht (in Kilogramm)"
+                parse={input => {
+                  if (typeof input === 'number') {
+                    return input;
+                  }
+                  if (typeof input === 'string' && /^\d+$/.test(input)) {
+                    return parseInt(input);
+                  }
+                  return null;
+                }}
+              />
+              <Field
+                name="aircraftCategory"
+                component={renderAircraftCategoryDropdown}
+                label="Kategorie"
+                clearable
+              />
+            </FieldSet>
+          </StyledSection>
 
-                return aircraft.key;
-              }
-              return null;
-            }}
-          />
-          <Field
-            name="aircraftType"
-            type="text"
-            component={renderInputField}
-            label="Typ"
-            readOnly={props.readOnly}
-          />
-          <Field
-            name="mtow"
-            type="number"
-            component={renderInputField}
-            label="Maximales Abfluggewicht (in Kilogramm)"
-            readOnly={props.readOnly}
-            parse={input => {
-              if (typeof input === 'number') {
-                return input;
-              }
-              if (typeof input === 'string' && /^\d+$/.test(input)) {
-                return parseInt(input);
-              }
-              return null;
-            }}
-          />
-          <Field
-            name="aircraftCategory"
-            component={renderAircraftCategoryDropdown}
-            label="Kategorie"
-            readOnly={props.readOnly}
-            clearable
-          />
-        </FieldSet>
-      </StyledSection>
-
-      <div>
-        <Button
-          type="submit"
-          label="Speichern"
-          icon="save"
-          disabled={props.disabled || !props.dirty || props.saving}
-          loading={props.saving}
-          primary/>
-      </div>
-    </StyledForm>
+          <div>
+            <Button
+              type="submit"
+              label="Speichern"
+              icon="save"
+              disabled={!dirty || props.saving}
+              loading={props.saving}
+              primary/>
+          </div>
+        </StyledForm>
+      )}
+    </Form>
   )
 }
 
-export default reduxForm({
-  form: 'profile',
-})(ProfileForm);
+ProfileForm.propTypes = {
+  profile: PropTypes.object,
+  saving: PropTypes.bool,
+  saveProfile: PropTypes.func.isRequired
+}
+
+export default ProfileForm;

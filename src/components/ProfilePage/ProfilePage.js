@@ -28,7 +28,7 @@ class ProfilePage extends Component {
       <VerticalHeaderLayout>
         <Content>
           <JumpNavigation/>
-          <ProfileForm saveProfile={saveProfile} saving={saving}/>
+          <ProfileForm profile={profile} saveProfile={saveProfile} saving={saving}/>
         </Content>
       </VerticalHeaderLayout>
     )
@@ -36,11 +36,7 @@ class ProfilePage extends Component {
 }
 
 ProfilePage.propTypes = {
-  profile: PropTypes.shape({
-    defaultValues: PropTypes.shape({
-      email: PropTypes.string
-    })
-  }),
+  profile: PropTypes.object,
   loadProfile: PropTypes.func.isRequired,
   saveProfile: PropTypes.func.isRequired
 };
