@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import ModalDialog from '../ModalDialog';
 import MaterialIcon from '../MaterialIcon';
 import MomentLocaleUtils from 'react-day-picker/moment';
@@ -53,7 +53,7 @@ class DatePicker extends Component {
         <Value onClick={this.showPicker} data-cy={this.props.dataCy}>
           {this.state.value ? this.renderValue() : '\u00a0'}
           {this.props.clearable === true && this.state.value
-            ? <ClearButton onClick={this.handleClear}>
+            ? <ClearButton onClick={this.handleClear} type="button">
                 <MaterialIcon icon="clear"/>
             </ClearButton>
             : null}
