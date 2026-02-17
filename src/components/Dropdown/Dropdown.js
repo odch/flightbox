@@ -75,7 +75,7 @@ class Dropdown extends Component {
           data-cy={this.props.dataCy}
         />
         {this.props.clearable && !this.props.readOnly && this.state.value && (
-          <ClearButton onClick={this.handleClear}>
+          <ClearButton onClick={this.handleClear} type="button">
             <MaterialIcon icon="clear"/>
           </ClearButton>
         )}

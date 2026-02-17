@@ -136,7 +136,7 @@ const MovementFilter = ({filter, expanded, setMovementsFilter, setExpanded}) => 
         flat
       />
       {(expanded || dateFilterSet) && (
-        <ClearButton onClick={handleClear(setMovementsFilter)}>
+        <ClearButton onClick={handleClear(setMovementsFilter)} type="button">
           <MaterialIcon icon="clear"/>
         </ClearButton>
       )}
