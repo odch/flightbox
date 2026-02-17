@@ -1,5 +1,4 @@
 import {all, call, put, select, takeEvery} from 'redux-saga/effects'
-import {getFormValues} from 'redux-form'
 import {history} from '../../history'
 import * as actions from './actions';
 import * as remote from './remote';
@@ -15,8 +14,8 @@ export function* loadMessages() {
   }
 }
 
-export function* saveMessage() {
-  const values = yield select(getFormValues('message'));
+export function* saveMessage(action) {
+  const values = action.payload.values
   try {
     yield call(remote.save, values);
     yield put(actions.saveMessageSuccess())

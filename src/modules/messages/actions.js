@@ -38,9 +38,12 @@ export function selectMessage(key) {
   };
 }
 
-export function saveMessage() {
+export function saveMessage(values) {
   return {
     type: SAVE_MESSAGE,
+    payload: {
+      values
+    }
   };
 }
 
