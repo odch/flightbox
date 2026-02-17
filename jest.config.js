@@ -1,5 +1,6 @@
 module.exports = {
   testEnvironment: 'jsdom',
+  setupFiles: ['<rootDir>/test/jestPolyfills.js'],
   setupFilesAfterEnv: ['<rootDir>/test/testSetup.js'],
   moduleDirectories: ['node_modules', 'functions/node_modules'],
   coverageDirectory: './coverage/',
