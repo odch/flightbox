@@ -80,6 +80,7 @@
     "url": "https://github.com/odch/flightbox.git"
   },
   "dependencies": {
-    "process": "^0.11.10"
+    "process": "^0.11.10",
+    "react-final-form": "^7.0.0"
   }
 }
