@@ -14,8 +14,8 @@ export function* init() {
   yield put(arrivalPaymentReset());
 }
 
-export function* setInitialized() {
-  yield put(actions.setInitialized());
+export function* setInitialized(action) {
+  yield put(actions.setInitialized(action.payload.values));
 }
 
 export function* setCommitted(action) {

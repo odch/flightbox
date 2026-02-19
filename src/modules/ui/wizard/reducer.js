@@ -5,15 +5,24 @@ const INITIAL_STATE = {
   initialized: false,
   page: 1,
   committed: false,
-  values: null,
+  values: {},
   commitError: null,
   dialogs: {}
 };
 
-function setInitialized(state) {
-  return Object.assign({}, state, {
-    initialized: true,
-  });
+function setInitialized(state, action) {
+  return {
+    ...state,
+    values: action.payload.values,
+    initialized: true
+  }
+}
+
+function updateValues(state, action) {
+  return {
+    ...state,
+    values: action.payload.values,
+  }
 }
 
 function nextPage(state) {
@@ -73,6 +82,7 @@ function unsetCommitError(state) {
 
 const ACTION_HANDLERS = {
   [actions.WIZARD_SET_INITIALIZED]: setInitialized,
+  [actions.WIZARD_UPDATE_VALUES]: updateValues,
   [actions.WIZARD_NEXT_PAGE]: nextPage,
   [actions.WIZARD_PREVIOUS_PAGE]: previousPage,
   [actions.WIZARD_RESET]: reset,

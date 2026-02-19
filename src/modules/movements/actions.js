@@ -190,9 +190,12 @@ export function startInitializeWizard() {
   };
 }
 
-export function wizardInitialized() {
+export function wizardInitialized(values) {
   return {
     type: WIZARD_INITIALIZED,
+    payload: {
+      values
+    }
   };
 }
 
