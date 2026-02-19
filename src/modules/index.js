@@ -1,7 +1,6 @@
 import {combineReducers} from 'redux';
 import {map} from 'ramda';
 import {all, fork} from 'redux-saga/effects';
-import {reducer as formReducer} from 'redux-form';
 
 import aerodromes, {sagas as aerodromesSagas} from './aerodromes';
 import aircrafts, {sagas as aircraftsSagas} from './aircrafts';
@@ -17,10 +16,9 @@ import ui, {sagas as uiSagas} from './ui';
 import users, {sagas as usersSagas} from './users';
 import profile, {sagas as profileSagas} from './profile';
 
-const createRootReducer = (history) => combineReducers({
+const createRootReducer = () => combineReducers({
   aerodromes,
   aircrafts,
-  form: formReducer,
   auth,
   customs,
   imports,
