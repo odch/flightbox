@@ -9,7 +9,7 @@ import FlightPage from '../../../containers/DepartureFlightPageContainer';
 import CommitRequirementsDialog from './CommitRequirementsDialog';
 import LocationConfirmationDialog from '../../LocationConfirmationDialog';
 import Finish from './Finish';
-import { exists as aerodromeExists } from '../../../util/aerodromes';
+import {exists as aerodromeExists} from '../../../util/aerodromes';
 
 const pages = [
   {
@@ -68,6 +68,7 @@ DepartureWizard.propTypes = {
   initNewMovement: PropTypes.func.isRequired,
   initNewMovementFromMovement: PropTypes.func.isRequired,
   editMovement: PropTypes.func.isRequired,
+  updateValues: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   cancel: PropTypes.func.isRequired,
@@ -76,7 +77,6 @@ DepartureWizard.propTypes = {
   hideDialog: PropTypes.func.isRequired,
   saveMovement: PropTypes.func.isRequired,
   unsetCommitError: PropTypes.func.isRequired,
-  destroyForm: PropTypes.func.isRequired,
 };
 
 export default DepartureWizard;

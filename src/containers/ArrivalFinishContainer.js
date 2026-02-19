@@ -106,8 +106,7 @@ ArrivalFinishContainer.propTypes = {
 };
 
 const mapStateToProps = (state, ownProps) => {
-  const wizard = state.form.wizard || {}
-  const wizardValues = wizard.values || {}
+  const wizardValues = state.ui.wizard.values || {}
   return Object.assign({}, ownProps, {
     aircraftSettings: state.settings.aircrafts,
     invoiceRecipients: state.invoiceRecipients.recipients,

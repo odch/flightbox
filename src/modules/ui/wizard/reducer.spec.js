@@ -5,7 +5,7 @@ const INITIAL_STATE = {
   initialized: false,
   page: 1,
   committed: false,
-  values: null,
+  values: {},
   commitError: null,
   dialogs: {}
 };

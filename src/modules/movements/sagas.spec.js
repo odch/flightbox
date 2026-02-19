@@ -1,5 +1,4 @@
 import {call, put, select} from 'redux-saga/effects';
-import {destroy, initialize} from 'redux-form';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
@@ -448,16 +447,13 @@ describe('modules', () => {
           const generator = sagas.initMovement(defaultValuesSaga, arrivalKey);
 
           expect(generator.next().value).toEqual(put(actions.startInitializeWizard()));
-          expect(generator.next().value).toEqual(put(destroy('wizard')));
           expect(generator.next().value).toEqual(call(defaultValuesSaga, arrivalKey));
 
           const defaultValues = {
             test: 'foo'
           };
 
-          expect(generator.next(defaultValues).value).toEqual(put(initialize('wizard', defaultValues)));
-
-          expect(generator.next().value).toEqual(put(actions.wizardInitialized()));
+          expect(generator.next(defaultValues).value).toEqual(put(actions.wizardInitialized(defaultValues)));
 
           expect(generator.next().done).toEqual(true);
         });
@@ -470,7 +466,6 @@ describe('modules', () => {
           const generator = sagas.editMovement(action);
 
           expect(generator.next().value).toEqual(put(actions.startInitializeWizard()));
-          expect(generator.next().value).toEqual(put(destroy('wizard')));
 
           expect(generator.next().value).toEqual(select(sagas.movementSelector, 'departure-key'));
 
@@ -481,8 +476,7 @@ describe('modules', () => {
             time: '16:00',
           };
 
-          expect(generator.next(movement).value).toEqual(put(initialize('wizard', movement)));
-          expect(generator.next().value).toEqual(put(actions.wizardInitialized()));
+          expect(generator.next(movement).value).toEqual(put(actions.wizardInitialized(movement)));
 
           expect(generator.next().done).toEqual(true);
         });
@@ -493,7 +487,6 @@ describe('modules', () => {
           const generator = sagas.editMovement(action);
 
           expect(generator.next().value).toEqual(put(actions.startInitializeWizard()));
-          expect(generator.next().value).toEqual(put(destroy('wizard')));
 
           expect(generator.next().value).toEqual(select(sagas.movementSelector, 'departure-key'));
 
@@ -515,8 +508,7 @@ describe('modules', () => {
             time: '16:00'
           };
 
-          expect(generator.next(snapshot).value).toEqual(put(initialize('wizard', expectedMovementData)));
-          expect(generator.next().value).toEqual(put(actions.wizardInitialized()));
+          expect(generator.next(snapshot).value).toEqual(put(actions.wizardInitialized(expectedMovementData)));
 
           expect(generator.next().done).toEqual(true);
         });
@@ -544,9 +536,17 @@ describe('modules', () => {
           expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
 
           const auth = {
+            email: 'pilot@example.com'
           }
 
-          expect(generator.next(auth).value).toEqual(call(remote.saveMovement, '/departures', undefined, formValuesForFirebase));
+          const expectedMovementForFirebase = {
+            ...formValuesForFirebase,
+            createdBy: 'pilot@example.com',
+            createdBy_orderKey: 'pilot@example.com_8523978399999'
+          };
+
+          expect(generator.next(auth).value)
+            .toEqual(call(remote.saveMovement, '/departures', undefined, expectedMovementForFirebase));
 
           const key = 'new-departure-key';
 

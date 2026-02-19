@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Field, reduxForm } from 'redux-form';
+import {Field, Form} from 'react-final-form';
 import validate from '../../validate';
-import { renderIncrementationField, renderSingleSelect } from '../../renderField';
+import {renderIncrementationField, renderSingleSelect} from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
 import {ITEMS} from '../../../../util/carriageVoucher';
@@ -18,41 +18,44 @@ const toNumber = value => {
 };
 
 const PassengerPage = (props) => {
-  const { previousPage, handleSubmit } = props;
+  const { readOnly, hiddenFields, formValues, previousPage, onSubmit, cancel } = props;
   return (
-    <form onSubmit={handleSubmit} className="PassengerPage">
-      <FieldSet>
-        <Field
-          name="passengerCount"
-          format={toNumber}
-          parse={e => e.target.value}
-          label="Anzahl Passagiere"
-          component={renderIncrementationField}
-          readOnly={props.readOnly}
-        />
-        <Field
-          name="carriageVoucher"
-          parse={e => e.target.value}
-          items={ITEMS}
-          label="Beförderungsschein"
-          component={renderSingleSelect}
-          readOnly={props.readOnly}
-        />
-      </FieldSet>
-      <WizardNavigation previousStep={previousPage} cancel={props.cancel}/>
-    </form>
+    <Form
+      initialValues={formValues}
+      onSubmit={onSubmit}
+      validate={validate('departure', ['passengerCount', 'carriageVoucher'], hiddenFields)}
+    >
+      {({handleSubmit, form}) => (
+        <form onSubmit={handleSubmit} className="PassengerPage">
+          <FieldSet>
+            <Field
+              name="passengerCount"
+              format={toNumber}
+              label="Anzahl Passagiere"
+              component={renderIncrementationField}
+              readOnly={readOnly}
+            />
+            <Field
+              name="carriageVoucher"
+              items={ITEMS}
+              label="Beförderungsschein"
+              component={renderSingleSelect}
+              readOnly={readOnly}
+            />
+          </FieldSet>
+          <WizardNavigation previousStep={() => previousPage(form.getState().values)} cancel={cancel}/>
+        </form>
+      )}
+    </Form>
   );
 };
 
 PassengerPage.propTypes = {
   previousPage: PropTypes.func.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   cancel: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
+  formValues: PropTypes.object.isRequired,
 };
 
-export default reduxForm({
-  form: 'wizard',
-  destroyOnUnmount: false,
-  validate: validate('departure', ['passengerCount', 'carriageVoucher']),
-})(PassengerPage);
+export default PassengerPage;
