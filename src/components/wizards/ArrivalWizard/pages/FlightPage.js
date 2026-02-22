@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
-import {Field, getFormValues, reduxForm} from 'redux-form';
+import {Field, Form} from 'react-final-form';
 import validate from '../../validate';
 import {renderSingleSelect, renderTextArea} from '../../renderField';
 import FieldSet from '../../FieldSet';
@@ -10,77 +10,101 @@ import {getAircraftOrigin, updateFeesTotal, updateGoAroundFees, updateLandingFee
 import CircuitsFieldHint from '../../CircuitsFieldHint';
 
 const FlightPage = (props) => {
-  const { previousPage, handleSubmit, flightTypes, arrivalRoutes, runways, formValues, aircraftSettings } = props;
+  const {
+    previousPage,
+    onSubmit,
+    cancel,
+    flightTypes,
+    arrivalRoutes,
+    runways,
+    formValues,
+    aircraftSettings,
+    readOnly,
+    hiddenFields,
+    arrivalRoute
+  } = props;
   return (
-    <form onSubmit={handleSubmit} className="FlightPage">
-      <FieldSet>
-        <Field
-          name="flightType"
-          component={renderSingleSelect}
-          items={flightTypes}
-          orientation="vertical"
-          parse={e => e.target.value}
-          label="Typ"
-          readOnly={props.readOnly}
-          normalize={flightType => {
-            const mtow = formValues['mtow'];
-            const aircraftCategory = formValues['aircraftCategory'];
-            const landingCount = formValues['landingCount'];
-            const goAroundCount = formValues['goAroundCount'];
-            const aircraftOrigin = getAircraftOrigin(formValues['immatriculation'], aircraftSettings);
+    <Form
+      initialValues={formValues}
+      onSubmit={onSubmit}
+      validate={validate('arrival', ['flightType', 'arrivalRoute', 'remarks', 'runway'], hiddenFields)}
+    >
+      {({handleSubmit, form}) => (
+        <form onSubmit={handleSubmit} className="FlightPage">
+          <FieldSet>
+            <Field name="flightType">
+              {({ input, meta }) =>
+                renderSingleSelect({
+                  input: {
+                    ...input,
+                    onChange: (eventOrValue) => {
+                      input.onChange(eventOrValue);
 
-            const landingFeeTotal = updateLandingFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, landingCount);
-            const goAroundFeeTotal = updateGoAroundFees(props.change, mtow, flightType, aircraftOrigin, aircraftCategory, goAroundCount);
+                      const nextFlightType = eventOrValue && eventOrValue.target ? eventOrValue.target.value : eventOrValue;
+                      const values = form.getState().values;
+                      const mtow = values.mtow;
+                      const aircraftCategory = values.aircraftCategory;
+                      const landingCount = values.landingCount;
+                      const goAroundCount = values.goAroundCount;
+                      const aircraftOrigin = getAircraftOrigin(values.immatriculation, aircraftSettings);
 
-            updateFeesTotal(props.change, landingFeeTotal, goAroundFeeTotal, flightType, aircraftOrigin, aircraftCategory);
+                      const landingFeeTotal = updateLandingFees(form.change, mtow, nextFlightType, aircraftOrigin, aircraftCategory, landingCount);
+                      const goAroundFeeTotal = updateGoAroundFees(form.change, mtow, nextFlightType, aircraftOrigin, aircraftCategory, goAroundCount);
 
-            return flightType
-          }}
-        />
-        <Field
-          name="arrivalRoute"
-          component={renderSingleSelect}
-          items={arrivalRoutes}
-          orientation="vertical"
-          parse={e => e.target.value}
-          label="Ankunftsroute"
-          readOnly={props.readOnly}
-          hint={props.arrivalRoute === 'circuits' && <CircuitsFieldHint/>}
-        />
-        <Field
-          name="remarks"
-          component={renderTextArea}
-          label="Bemerkungen"
-          readOnly={props.readOnly}
-        />
-        <Field
-          name="runway"
-          component={renderSingleSelect}
-          items={runways}
-          parse={e => e.target.value}
-          label="Pistenrichtung"
-          readOnly={props.readOnly}
-          hidden={props.hiddenFields && props.hiddenFields.includes('runway')}
-        />
-      </FieldSet>
-      <WizardNavigation
-        previousStep={previousPage}
-        nextLabel="Speichern"
-        nextVisible={!props.readOnly}
-        cancel={props.cancel}
-      />
-    </form>
+                      updateFeesTotal(form.change, landingFeeTotal, goAroundFeeTotal, nextFlightType, aircraftOrigin, aircraftCategory);
+                    },
+                  },
+                  meta,
+                  items: flightTypes,
+                  orientation: "vertical",
+                  label: "Typ",
+                  readOnly: props.readOnly,
+                })
+              }
+            </Field>
+            <Field
+              name="arrivalRoute"
+              component={renderSingleSelect}
+              items={arrivalRoutes}
+              orientation="vertical"
+              label="Ankunftsroute"
+              readOnly={readOnly}
+              hint={arrivalRoute === 'circuits' && <CircuitsFieldHint/>}
+            />
+            <Field
+              name="remarks"
+              component={renderTextArea}
+              label="Bemerkungen"
+              readOnly={readOnly}
+            />
+            <Field
+              name="runway"
+              component={renderSingleSelect}
+              items={runways}
+              label="Pistenrichtung"
+              readOnly={readOnly}
+              hidden={hiddenFields && hiddenFields.includes('runway')}
+            />
+          </FieldSet>
+          <WizardNavigation
+            previousStep={() => previousPage(form.getState().values)}
+            nextLabel="Speichern"
+            nextVisible={!readOnly}
+            cancel={cancel}
+          />
+        </form>
+      )}
+    </Form>
   );
 };
 
 const mapStateToProps = state => ({
-  formValues: getFormValues('wizard')(state),
   aircraftSettings: state.settings.aircrafts
 });
 
 FlightPage.propTypes = {
   previousPage: PropTypes.func.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   cancel: PropTypes.func.isRequired,
   readOnly: PropTypes.bool,
   flightTypes: PropTypes.arrayOf(PropTypes.shape({
@@ -104,8 +128,4 @@ FlightPage.propTypes = {
   hiddenFields: PropTypes.arrayOf(PropTypes.string)
 };
 
-export default reduxForm({
-  form: 'wizard',
-  destroyOnUnmount: false,
-  validate: validate('arrival', ['flightType', 'arrivalRoute', 'remarks', 'runway']),
-})(connect(mapStateToProps)(FlightPage));
+export default connect(mapStateToProps)(FlightPage);

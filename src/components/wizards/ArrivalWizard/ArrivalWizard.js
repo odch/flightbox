@@ -8,7 +8,7 @@ import DepartureArrivalPage from './pages/DepartureArrivalPage';
 import FlightPage from '../../../containers/ArrivalFlightPageContainer';
 import Finish from '../../../containers/ArrivalFinishContainer';
 import LocationConfirmationDialog from '../../LocationConfirmationDialog';
-import { exists as aerodromeExists } from '../../../util/aerodromes';
+import {exists as aerodromeExists} from '../../../util/aerodromes';
 
 const pages = [
   {
@@ -68,7 +68,6 @@ ArrivalWizard.propTypes = {
   finish: PropTypes.func.isRequired,
   saveMovement: PropTypes.func.isRequired,
   unsetCommitError: PropTypes.func.isRequired,
-  destroyForm: PropTypes.func.isRequired,
   showDialog: PropTypes.func.isRequired,
   hideDialog: PropTypes.func.isRequired,
 };

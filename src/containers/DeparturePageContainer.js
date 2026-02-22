@@ -1,24 +1,19 @@
-import { connect } from 'react-redux';
-import { destroy, getFormValues } from 'redux-form';
+import {connect} from 'react-redux';
 import {
+  finish,
+  hideDialog,
   nextPage,
   previousPage,
-  finish,
   showDialog,
-  hideDialog,
   unsetCommitError,
+  updateValues,
 } from '../modules/ui/wizard';
-import { cancelWizard } from '../modules/ui/movements';
-import {
-  initNewMovement,
-  initNewMovementFromMovement,
-  editMovement,
-  saveMovement
-} from '../modules/movements';
-import { loadLockDate } from '../modules/settings/lockDate';
-import { loadAircraftSettings } from '../modules/settings/aircrafts';
+import {cancelWizard} from '../modules/ui/movements';
+import {editMovement, initNewMovement, initNewMovementFromMovement, saveMovement} from '../modules/movements';
+import {loadLockDate} from '../modules/settings/lockDate';
+import {loadAircraftSettings} from '../modules/settings/aircrafts';
 import DepartureWizard from '../components/wizards/DepartureWizard';
-import { isLocked } from '../util/movements';
+import {isLocked} from '../util/movements';
 
 const mapStateToProps = (state, ownProps) => {
   let lockDateLoading = true;
@@ -27,7 +22,7 @@ const mapStateToProps = (state, ownProps) => {
   const lockDateState = state.settings.lockDate;
   if (lockDateState && state.ui.wizard.initialized === true) {
     lockDateLoading = lockDateState.loading;
-    locked = isLocked(getFormValues('wizard')(state), lockDateState.date);
+    locked = isLocked(state.ui.wizard.values, lockDateState.date);
   }
 
   return {
@@ -43,6 +38,7 @@ const mapActionCreators = {
   initNewMovement,
   initNewMovementFromMovement,
   editMovement,
+  updateValues,
   nextPage,
   previousPage,
   cancel: cancelWizard,
@@ -51,7 +47,6 @@ const mapActionCreators = {
   hideDialog,
   saveMovement,
   unsetCommitError,
-  destroyForm: destroy,
   loadLockDate,
   loadAircraftSettings
 };

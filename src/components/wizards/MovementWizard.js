@@ -58,12 +58,13 @@ class MovementWizard extends Component {
     const pageObj = this.props.pages[this.props.wizard.page - 1];
     const pageComponent = (
       <pageObj.component
-        previousPage={this.props.previousPage}
+        previousPage={this.goToPreviousPage.bind(this)}
         onSubmit={this.submitPage.bind(this)}
         cancel={this.props.cancel}
         readOnly={this.props.locked}
         isAdmin={this.props.auth.data.admin}
         isGuest={this.props.auth.data.guest}
+        formValues={this.props.wizard.values}
       />
     );
 
@@ -86,7 +87,7 @@ class MovementWizard extends Component {
     );
   }
 
-  getDialog() {
+  getDialog() {
     const dialogConf = this.props.pages[this.props.wizard.page - 1].dialog;
     if (dialogConf && this.props.wizard.dialogs[dialogConf.name] === true) {
       const isLast = this.props.wizard.page === this.props.pages.length;
@@ -106,7 +107,14 @@ class MovementWizard extends Component {
     return null;
   }
 
+  goToPreviousPage(data) {
+    this.props.updateValues(data)
+    this.props.previousPage()
+  }
+
   submitPage(data) {
+    this.props.updateValues(data)
+
     const isLast = this.props.wizard.page === this.props.pages.length;
 
     const nextAction = isLast
@@ -147,7 +155,7 @@ class MovementWizard extends Component {
 
 MovementWizard.propTypes = {
   pages: PropTypes.arrayOf(PropTypes.shape({
-    component: PropTypes.func.isRequired,
+    component: PropTypes.object.isRequired,
     label: PropTypes.string.isRequired,
     dialog: PropTypes.shape({
       name: PropTypes.string.isRequired,
@@ -169,6 +177,7 @@ MovementWizard.propTypes = {
   initNewMovement: PropTypes.func.isRequired,
   editMovement: PropTypes.func.isRequired,
   initMovement: PropTypes.func,
+  updateValues: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   cancel: PropTypes.func.isRequired,
@@ -177,7 +186,6 @@ MovementWizard.propTypes = {
   hideDialog: PropTypes.func,
   saveMovement: PropTypes.func.isRequired,
   unsetCommitError: PropTypes.func,
-  destroyForm: PropTypes.func.isRequired,
   loadLockDate: PropTypes.func.isRequired,
   loadAircraftSettings: PropTypes.func.isRequired,
 };

@@ -139,8 +139,8 @@ const getRelevantFields = (fields, hiddenFields = []) => {
   return fields.filter(field => !hiddenFields.includes(field))
 }
 
-const validate = (type, fields) => (values, props) => {
-  const relevantFields = getRelevantFields(fields, props.hiddenFields)
+const validate = (type, fields, hiddenFields) => (values) => {
+  const relevantFields = getRelevantFields(fields, hiddenFields)
   const errorArr = validateUtil(values, getConfig(relevantFields), type);
 
   const errors = {};

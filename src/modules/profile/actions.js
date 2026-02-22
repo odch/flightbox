@@ -19,9 +19,12 @@ export function profileLoaded(profile) {
   };
 }
 
-export function saveProfile() {
+export function saveProfile(values) {
   return {
     type: SAVE_PROFILE,
+    payload: {
+      values
+    }
   };
 }
 

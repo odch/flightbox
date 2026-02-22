@@ -1,4 +1,5 @@
 export const WIZARD_SET_INITIALIZED = 'WIZARD_SET_INITIALIZED';
+export const WIZARD_UPDATE_VALUES = 'WIZARD_UPDATE_VALUES';
 export const WIZARD_NEXT_PAGE = 'WIZARD_NEXT_PAGE';
 export const WIZARD_PREVIOUS_PAGE = 'WIZARD_PREVIOUS_PAGE';
 export const WIZARD_FINISH = 'WIZARD_FINISH';
@@ -9,9 +10,21 @@ export const WIZARD_SET_COMMITTED = 'WIZARD_SET_COMMITTED';
 export const WIZARD_SET_COMMIT_ERROR = 'WIZARD_SET_COMMIT_ERROR';
 export const WIZARD_UNSET_COMMIT_ERROR = 'WIZARD_UNSET_COMMIT_ERROR';
 
-export function setInitialized() {
+export function setInitialized(values) {
   return {
     type: WIZARD_SET_INITIALIZED,
+    payload: {
+      values
+    }
+  };
+}
+
+export function updateValues(values) {
+  return {
+    type: WIZARD_UPDATE_VALUES,
+    payload: {
+      values
+    }
   };
 }
 

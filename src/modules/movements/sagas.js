@@ -1,6 +1,5 @@
 import {getPagination, toOrderKey} from './pagination';
 import {all, call, fork, put, select, takeEvery, takeLatest} from 'redux-saga/effects'
-import {destroy, getFormValues, initialize} from 'redux-form'
 import createChannel, {monitor} from '../../util/createChannel';
 import * as actions from './actions';
 import * as remote from './remote';
@@ -15,7 +14,7 @@ export const stateSelector = state => state.movements;
 
 export const movementSelector = (state, key) => state.movements.data.getByKey(key);
 
-export const wizardFormValuesSelector = getFormValues('wizard');
+export const wizardFormValuesSelector = state => state.ui.wizard.values;
 
 export const authSelector = state => state.auth.data
 
@@ -446,16 +445,13 @@ export function* initNewMovementFromMovement(action) {
 
 export function* initMovement(loadInitialValuesSaga, ...loadInitialValuesArgs) {
   yield put(actions.startInitializeWizard());
-  yield put(destroy('wizard'));
   const initialValues = yield call(loadInitialValuesSaga, ...loadInitialValuesArgs);
-  yield put(initialize('wizard', initialValues));
-  yield put(actions.wizardInitialized());
+  yield put(actions.wizardInitialized(initialValues));
 }
 
 export function* editMovement(action) {
   const {movementType, key} = action.payload;
   yield put(actions.startInitializeWizard());
-  yield put(destroy('wizard'));
   let movement = yield(select(movementSelector, key));
   if (!movement) {
     const path = getPathByMovementType(movementType);
@@ -464,8 +460,7 @@ export function* editMovement(action) {
     movement.key = snapshot.key;
     movement.type = movementType;
   }
-  yield put(initialize('wizard', movement));
-  yield put(actions.wizardInitialized());
+  yield put(actions.wizardInitialized(movement));
 }
 
 export function* saveMovement() {
