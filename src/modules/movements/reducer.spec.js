@@ -84,6 +84,34 @@ describe('modules', () => {
           expect(newState.data).toEqual(newMovements);
         });
       });
+
+      describe('setLoading', () => {
+        it('should set loading to true and loadingFailed to false', () => {
+          const state = {
+            loading: false,
+            loadingFailed: true,
+          };
+
+          const newState = reducer(state, actions.setMovementsLoading());
+
+          expect(newState.loading).toEqual(true);
+          expect(newState.loadingFailed).toEqual(false);
+        });
+      });
+
+      describe('setLoadingFailure', () => {
+        it('should set loadingFailed to true and loading to false', () => {
+          const state = {
+            loading: true,
+            loadingFailed: false,
+          };
+
+          const newState = reducer(state, actions.loadMovementsFailure());
+
+          expect(newState.loadingFailed).toEqual(true);
+          expect(newState.loading).toEqual(false);
+        });
+      });
     });
   });
 });

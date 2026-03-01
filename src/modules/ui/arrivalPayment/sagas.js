@@ -53,7 +53,7 @@ export function* createCardPayment(channel, action) {
   yield call(monitorPaymentStatus, newPaymentRef, channel)
 }
 
-function* monitorPaymentStatus(paymentRef, channel) {
+export function* monitorPaymentStatus(paymentRef, channel) {
   paymentRef.on('value', snapshot => {
     const val = snapshot.val()
     const data = val.data

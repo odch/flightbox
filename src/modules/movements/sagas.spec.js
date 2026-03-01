@@ -6,6 +6,7 @@ import * as sagas from './sagas';
 import * as remote from './remote';
 import {LIMIT} from './pagination';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
+import {loadRemote} from '../profile'
 
 describe('modules', () => {
   describe('movements', () => {
@@ -553,6 +554,131 @@ describe('modules', () => {
           expect(generator.next(key).value).toEqual(put(actions.saveMovementSuccess(key, formValues)));
 
           expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('getProfileDefaultValues', () => {
+        it('should return empty object if no auth', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const next = generator.next(null);
+          expect(next.value).toEqual({});
+          expect(next.done).toEqual(true);
+        });
+
+        it('should return empty object if auth has no uid', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const next = generator.next({});
+          expect(next.value).toEqual({});
+          expect(next.done).toEqual(true);
+        });
+
+        it('should return empty object if auth is guest', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const next = generator.next({ uid: 'guest-uid', guest: true });
+          expect(next.value).toEqual({});
+          expect(next.done).toEqual(true);
+        });
+
+        it('should return empty object if auth is kiosk', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const next = generator.next({ uid: 'kiosk-uid', kiosk: true });
+          expect(next.value).toEqual({});
+          expect(next.done).toEqual(true);
+        });
+
+        it('should load profile and return values if auth has uid', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { uid: 'user-123' };
+          expect(generator.next(auth).value).toEqual(call(loadRemote, 'user-123'));
+
+          const profileData = { firstname: 'John', lastname: 'Doe' };
+          const snapshot = { val: () => profileData };
+
+          const next = generator.next(snapshot);
+          expect(next.value).toEqual(profileData);
+          expect(next.done).toEqual(true);
+        });
+      });
+
+      describe('filterMovements', () => {
+        it('should dispatch loadMovements if filter date changed', () => {
+          const generator = sagas.filterMovements();
+
+          expect(generator.next().value).toEqual(select(sagas.stateSelector));
+
+          const state = {
+            filter: {
+              date: { start: '2017-05-01', end: '2017-05-31' }
+            },
+            previousFilter: {
+              date: { start: '2017-04-01', end: '2017-04-30' }
+            }
+          };
+
+          expect(generator.next(state).value).toEqual(put(actions.loadMovements(true)));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not dispatch loadMovements if filter date not changed', () => {
+          const generator = sagas.filterMovements();
+
+          expect(generator.next().value).toEqual(select(sagas.stateSelector));
+
+          const state = {
+            filter: {
+              date: { start: '2017-05-01', end: '2017-05-31' }
+            },
+            previousFilter: {
+              date: { start: '2017-05-01', end: '2017-05-31' }
+            }
+          };
+
+          expect(generator.next(state).done).toEqual(true);
+        });
+      });
+
+      describe('saveMovementPaymentMethod', () => {
+        it('should save movement payment method', () => {
+          const key = 'dep-key-1';
+          const paymentMethod = 'cash';
+          const action = actions.saveMovementPaymentMethod('departure', key, paymentMethod);
+
+          const generator = sagas.saveMovementPaymentMethod(action);
+
+          expect(generator.next().value).toEqual(
+            call(remote.saveMovement, '/departures', key, { paymentMethod })
+          );
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should handle errors silently', () => {
+          const key = 'dep-key-1';
+          const paymentMethod = 'cash';
+          const action = actions.saveMovementPaymentMethod('departure', key, paymentMethod);
+
+          const generator = sagas.saveMovementPaymentMethod(action);
+
+          expect(generator.next().value).toEqual(
+            call(remote.saveMovement, '/departures', key, { paymentMethod })
+          );
+
+          const error = new Error('save failed');
+          expect(generator.throw(error).done).toEqual(true);
         });
       });
     });

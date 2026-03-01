@@ -6,14 +6,14 @@ import {get as getAerodrome} from '../../util/aerodromes'
 import {getIdToken} from '../../util/firebase.js'
 import * as remote from '../movements/remote'
 
-const getCustomsAircraftType = aircraftCategory => {
+export const getCustomsAircraftType = aircraftCategory => {
   if (['Hubschrauber', 'Eigenbauhubschrauber'].includes(aircraftCategory)) {
     return 'helicopter'
   }
   return 'airplane'
 }
 
-const parseDuration = (duration) => {
+export const parseDuration = (duration) => {
   const durationParts = duration.split(':');
   return {
     hours: parseInt(durationParts[0], 10),
@@ -21,7 +21,7 @@ const parseDuration = (duration) => {
   };
 }
 
-const calculateTimeWithDuration = (time, duration, operation = 'add') => {
+export const calculateTimeWithDuration = (time, duration, operation = 'add') => {
   const timeMoment = moment(time, 'HH:mm');
 
   const { hours, minutes } = parseDuration(duration);
@@ -33,11 +33,11 @@ const calculateTimeWithDuration = (time, duration, operation = 'add') => {
   return resultMoment.format('HH:mm');
 }
 
-const calculateArrivalTime = (departureTime, duration) => {
+export const calculateArrivalTime = (departureTime, duration) => {
   return calculateTimeWithDuration(departureTime, duration, 'add');
 }
 
-const getDirectionDependingData = async movementData => {
+export const getDirectionDependingData = async movementData => {
   const aerodrome = await getAerodrome(movementData.location)
 
   if (movementData.type === 'departure') {
@@ -56,7 +56,7 @@ const getDirectionDependingData = async movementData => {
   }
 }
 
-const getCustomsPayload = async movementData => {
+export const getCustomsPayload = async movementData => {
   return {
     aerodromeId: __CONF__.aerodrome.ICAO.toLowerCase(),
     externalId: movementData.key,
@@ -73,7 +73,7 @@ const getCustomsPayload = async movementData => {
   }
 }
 
-const postPrepopulatedFormToCustoms = async (formData) => {
+export const postPrepopulatedFormToCustoms = async (formData) => {
   const idToken = await getIdToken()
   const url = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/prepopulated-forms`
 
@@ -93,7 +93,7 @@ const postPrepopulatedFormToCustoms = async (formData) => {
   return await response.json()
 }
 
-const getPathByMovementType = (type) => {
+export const getPathByMovementType = (type) => {
   switch(type) {
     case 'departure':
       return '/departures';
@@ -104,7 +104,7 @@ const getPathByMovementType = (type) => {
   }
 }
 
-const saveCustomsFormData = async (movementData, customsFormId, completionUrl) => {
+export const saveCustomsFormData = async (movementData, customsFormId, completionUrl) => {
   const path = getPathByMovementType(movementData.type)
   return remote.saveMovement(path, movementData.key, {
     customsFormId,
@@ -112,14 +112,14 @@ const saveCustomsFormData = async (movementData, customsFormId, completionUrl) =
   })
 }
 
-const openCompletionUrl = (url) => {
+export const openCompletionUrl = (url) => {
   const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
   if (!newWindow) {
     console.warn('Popup blocked for completion URL:', url)
   }
 }
 
-function* startCustoms(action) {
+export function* startCustoms(action) {
   const { movementData } = action.payload
 
   if (movementData.customsFormId && movementData.customsFormUrl) {
@@ -152,7 +152,7 @@ function* startCustoms(action) {
   }
 }
 
-function* checkAvailability() {
+export function* checkAvailability() {
   try {
     const idToken = yield call(getIdToken)
     const url = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/availability`

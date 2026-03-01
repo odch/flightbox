@@ -60,6 +60,32 @@ describe('modules', () => {
             });
           });
         });
+
+        describe('SHOW_DELETE_CONFIRMATION_DIALOG', () => {
+          it('should set deleteConfirmation to the item', () => {
+            const item = { key: 'dep1', type: 'departure' };
+            expect(
+              reducer({
+                deleteConfirmation: null
+              }, actions.showDeleteConfirmationDialog(item))
+            ).toEqual({
+              deleteConfirmation: item
+            });
+          });
+        });
+
+        describe('HIDE_DELETE_CONFIRMATION_DIALOG', () => {
+          it('should set deleteConfirmation to null', () => {
+            const item = { key: 'dep1', type: 'departure' };
+            expect(
+              reducer({
+                deleteConfirmation: item
+              }, actions.hideDeleteConfirmationDialog())
+            ).toEqual({
+              deleteConfirmation: null
+            });
+          });
+        });
       });
     });
   });

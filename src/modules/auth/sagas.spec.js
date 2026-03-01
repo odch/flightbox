@@ -1,7 +1,7 @@
 import {call, put} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
-import {loadCredentialsToken, loadIpToken} from '../../util/auth';
+import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
 import {expectDoneWithoutReturn, expectDoneWithReturn} from '../../../test/sagaUtils';
 import firebase, {authenticate as fbAuth, isSignInWithEmail, unauth as fbUnauth} from '../../util/firebase';
 
@@ -237,6 +237,98 @@ describe('modules', () => {
             val: () => ({})
           };
           expectDoneWithReturn(generator, snapshot, null);
+        });
+      });
+
+      describe('doGuestTokenAuthentication', () => {
+        it('should trigger Firebase authentication if guest token found', () => {
+          const queryToken = 'guest-query-token';
+          const guestToken = 'firebase-guest-token';
+          const action = actions.authenticateAsGuest(queryToken);
+
+          const generator = sagas.doGuestTokenAuthentication(action);
+
+          expect(generator.next().value).toEqual(call(loadGuestToken, queryToken));
+          expect(generator.next(guestToken).value).toEqual(
+            put(actions.requestFirebaseAuthentication(
+              guestToken,
+              actions.guestTokenAuthenticationFailure()
+            ))
+          );
+
+          expectDoneWithoutReturn(generator);
+        });
+
+        it('should put failure action if no guest token found', () => {
+          const queryToken = 'guest-query-token';
+          const action = actions.authenticateAsGuest(queryToken);
+
+          const generator = sagas.doGuestTokenAuthentication(action);
+
+          expect(generator.next().value).toEqual(call(loadGuestToken, queryToken));
+          expect(generator.next(null).value).toEqual(put(actions.guestTokenAuthenticationFailure()));
+
+          expectDoneWithoutReturn(generator);
+        });
+
+        it('should put failure action if an exception is thrown', () => {
+          const queryToken = 'guest-query-token';
+          const action = actions.authenticateAsGuest(queryToken);
+
+          const generator = sagas.doGuestTokenAuthentication(action);
+
+          expect(generator.next().value).toEqual(call(loadGuestToken, queryToken));
+
+          const error = new Error('network error');
+          expect(generator.throw(error).value).toEqual(put(actions.guestTokenAuthenticationFailure()));
+
+          expectDoneWithoutReturn(generator);
+        });
+      });
+
+      describe('doKioskTokenAuthentication', () => {
+        it('should trigger Firebase authentication if kiosk token found', () => {
+          const queryToken = 'kiosk-query-token';
+          const kioskToken = 'firebase-kiosk-token';
+          const action = actions.authenticateAsKiosk(queryToken);
+
+          const generator = sagas.doKioskTokenAuthentication(action);
+
+          expect(generator.next().value).toEqual(call(loadKioskToken, queryToken));
+          expect(generator.next(kioskToken).value).toEqual(
+            put(actions.requestFirebaseAuthentication(
+              kioskToken,
+              actions.kioskTokenAuthenticationFailure()
+            ))
+          );
+
+          expectDoneWithoutReturn(generator);
+        });
+
+        it('should put failure action if no kiosk token found', () => {
+          const queryToken = 'kiosk-query-token';
+          const action = actions.authenticateAsKiosk(queryToken);
+
+          const generator = sagas.doKioskTokenAuthentication(action);
+
+          expect(generator.next().value).toEqual(call(loadKioskToken, queryToken));
+          expect(generator.next(null).value).toEqual(put(actions.kioskTokenAuthenticationFailure()));
+
+          expectDoneWithoutReturn(generator);
+        });
+
+        it('should put failure action if an exception is thrown', () => {
+          const queryToken = 'kiosk-query-token';
+          const action = actions.authenticateAsKiosk(queryToken);
+
+          const generator = sagas.doKioskTokenAuthentication(action);
+
+          expect(generator.next().value).toEqual(call(loadKioskToken, queryToken));
+
+          const error = new Error('network error');
+          expect(generator.throw(error).value).toEqual(put(actions.kioskTokenAuthenticationFailure()));
+
+          expectDoneWithoutReturn(generator);
         });
       });
     });
