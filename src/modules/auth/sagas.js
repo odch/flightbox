@@ -172,7 +172,7 @@ export function* doGuestTokenAuthentication(action) {
       yield put(actions.guestTokenAuthenticationFailure());
     }
   } catch (e) {
-    error('Login with guest token failed', e)
+    logError('Login with guest token failed', e)
     yield put(actions.guestTokenAuthenticationFailure())
   }
 }
@@ -190,7 +190,7 @@ export function* doKioskTokenAuthentication(action) {
       yield put(actions.kioskTokenAuthenticationFailure());
     }
   } catch (e) {
-    error('Login with kiosk token failed', e)
+    logError('Login with kiosk token failed', e)
     yield put(actions.kioskTokenAuthenticationFailure())
   }
 }

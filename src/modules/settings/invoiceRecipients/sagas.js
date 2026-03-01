@@ -5,18 +5,18 @@ import firebase from '../../../util/firebase';
 
 export const invoiceRecipientsSelector = state => state.settings.invoiceRecipients.recipients;
 
-function* loadRecipients(channel) {
+export function* loadRecipients(channel) {
   firebase('/settings/invoiceRecipients').on('value', (snapshot) => {
     channel.put(actions.loadInvoiceRecipientSettingsSuccess(snapshot.val() || []));
   });
 }
 
-function* watchLoadRecipients(channel) {
+export function* watchLoadRecipients(channel) {
   yield take(actions.LOAD_INVOICE_RECIPIENT_SETTINGS);
   yield call(loadRecipients, channel)
 }
 
-function* addInvoiceRecipient(action) {
+export function* addInvoiceRecipient(action) {
   const currentRecipients = yield select(invoiceRecipientsSelector)
   const newRecipients = [
     ...currentRecipients,
@@ -27,7 +27,7 @@ function* addInvoiceRecipient(action) {
   yield call(saveInvoiceRecipients, newRecipients);
 }
 
-function* addInvoiceRecipientEmail(action) {
+export function* addInvoiceRecipientEmail(action) {
   const currentRecipients = yield select(invoiceRecipientsSelector)
   const newRecipients = currentRecipients.map(recipient =>
     recipient.name === action.payload.name
@@ -43,13 +43,13 @@ function* addInvoiceRecipientEmail(action) {
   yield call(saveInvoiceRecipients, newRecipients);
 }
 
-function* removeInvoiceRecipient(action) {
+export function* removeInvoiceRecipient(action) {
   const currentRecipients = yield select(invoiceRecipientsSelector)
   const newRecipients = currentRecipients.filter(recipient => recipient.name !== action.payload.name)
   yield call(saveInvoiceRecipients, newRecipients);
 }
 
-function* removeInvoiceRecipientEmail(action) {
+export function* removeInvoiceRecipientEmail(action) {
   const currentRecipients = yield select(invoiceRecipientsSelector)
   const newRecipients = currentRecipients.map(recipient =>
     recipient.name === action.payload.name
@@ -62,7 +62,7 @@ function* removeInvoiceRecipientEmail(action) {
   yield call(saveInvoiceRecipients, newRecipients);
 }
 
-function* saveInvoiceRecipients(invoiceRecipients) {
+export function* saveInvoiceRecipients(invoiceRecipients) {
   return new Promise(async (resolve, reject) => {
     try {
       await firebase('/settings/invoiceRecipients').set(invoiceRecipients);

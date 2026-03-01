@@ -1,9 +1,12 @@
-import {call, put, select} from 'redux-saga/effects';
+import {call, put, select, take} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
 import FakeFirebaseSnapshot from '../../../../test/FakeFirebaseSnapshot';
 import ImmutableItemsArray from "../../../util/ImmutableItemsArray"
+import firebase from '../../../util/firebase';
+
+jest.mock('../../../util/firebase');
 
 describe('modules', () => {
   describe('settings', () => {
@@ -81,6 +84,71 @@ describe('modules', () => {
             expect(generator.next().value).toEqual(put(actions.saveAerodromeStatusSuccess()));
             expect(generator.next().value).toEqual(call(sagas.loadAerodromeStatus));
             expect(generator.next().done).toEqual(true);
+          });
+        });
+
+        describe('watchCurrentAerodromeStatus', () => {
+          it('should wait for WATCH_CURRENT_AERODROME_STATUS and then call firebase', () => {
+            const onMock = jest.fn();
+            const limitToLastMock = jest.fn().mockReturnValue({ on: onMock });
+            const orderByChildMock = jest.fn().mockReturnValue({ limitToLast: limitToLastMock });
+            firebase.mockReturnValue({ orderByChild: orderByChildMock });
+
+            const channel = { put: jest.fn() };
+            const generator = sagas.watchCurrentAerodromeStatus(channel);
+
+            expect(generator.next().value).toEqual(take(actions.WATCH_CURRENT_AERODROME_STATUS));
+            expect(generator.next().done).toEqual(true);
+
+            expect(firebase).toHaveBeenCalledWith('/status');
+            expect(orderByChildMock).toHaveBeenCalledWith('timestamp');
+            expect(limitToLastMock).toHaveBeenCalledWith(1);
+            expect(onMock).toHaveBeenCalledWith('value', expect.any(Function));
+          });
+
+          it('should call channel.put with status when snapshot has data', () => {
+            const onMock = jest.fn();
+            const limitToLastMock = jest.fn().mockReturnValue({ on: onMock });
+            const orderByChildMock = jest.fn().mockReturnValue({ limitToLast: limitToLastMock });
+            firebase.mockReturnValue({ orderByChild: orderByChildMock });
+
+            const channel = { put: jest.fn() };
+            const generator = sagas.watchCurrentAerodromeStatus(channel);
+
+            generator.next(); // take
+            generator.next(); // firebase call + done
+
+            const callback = onMock.mock.calls[0][1];
+
+            const statusItem = { status: 'open', details: '' };
+            const snapshot = { val: () => ({ key1: statusItem }) };
+            callback(snapshot);
+
+            expect(channel.put).toHaveBeenCalledWith(
+              actions.setCurrentAerodromeStatus(statusItem)
+            );
+          });
+
+          it('should call channel.put with null when snapshot is empty', () => {
+            const onMock = jest.fn();
+            const limitToLastMock = jest.fn().mockReturnValue({ on: onMock });
+            const orderByChildMock = jest.fn().mockReturnValue({ limitToLast: limitToLastMock });
+            firebase.mockReturnValue({ orderByChild: orderByChildMock });
+
+            const channel = { put: jest.fn() };
+            const generator = sagas.watchCurrentAerodromeStatus(channel);
+
+            generator.next(); // take
+            generator.next(); // firebase call + done
+
+            const callback = onMock.mock.calls[0][1];
+
+            const nullSnapshot = { val: () => null };
+            callback(nullSnapshot);
+
+            expect(channel.put).toHaveBeenCalledWith(
+              actions.setCurrentAerodromeStatus(null)
+            );
           });
         });
       });

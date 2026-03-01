@@ -3,7 +3,7 @@ import * as actions from './actions';
 import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
 
-function* watchLoadLockDate(channel) {
+export function* watchLoadLockDate(channel) {
   yield take(actions.LOAD_LOCK_DATE);
   yield put(actions.lockDateLoading());
   firebase('/settings/lockDate').on('value', (snapshot) => {
@@ -11,13 +11,13 @@ function* watchLoadLockDate(channel) {
   });
 }
 
-function* setLockDate(action) {
+export function* setLockDate(action) {
   yield put(actions.setLockDateSaving());
   yield call(saveLockDate, action.payload.lockDate);
   yield put(actions.setLockDateSuccess());
 }
 
-function saveLockDate(date) {
+export function saveLockDate(date) {
   return new Promise((resolve) => {
     firebase('/settings/lockDate').set(date, () => {
       resolve();

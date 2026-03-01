@@ -3,7 +3,7 @@ import * as actions from './actions';
 import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
 
-function* loadKioskAccessToken(channel) {
+export function* loadKioskAccessToken(channel) {
   firebase('/settings/kioskAccessToken').on('value', (snapshot) => {
     channel.put(actions.kioskAccessTokenLoaded(snapshot.val()));
   });
