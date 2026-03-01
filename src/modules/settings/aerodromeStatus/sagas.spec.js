@@ -53,6 +53,10 @@ describe('modules', () => {
         });
 
         describe('saveAerodromeStatus', () => {
+          afterEach(() => {
+            jest.restoreAllMocks();
+          });
+
           it('should save status', () => {
             const now = new Date('2020-03-29T11:00:00.000Z')
             jest.spyOn(global, 'Date').mockImplementationOnce(() => now);
@@ -83,6 +87,66 @@ describe('modules', () => {
 
             expect(generator.next().value).toEqual(put(actions.saveAerodromeStatusSuccess()));
             expect(generator.next().value).toEqual(call(sagas.loadAerodromeStatus));
+            expect(generator.next().done).toEqual(true);
+          });
+
+          it('should use uid as by when name is not set', () => {
+            const action = actions.saveAerodromeStatus({
+              status: 'open',
+              details: ''
+            });
+
+            const generator = sagas.saveAerodromeStatus(action);
+
+            expect(generator.next().value).toEqual(put(actions.setAerodromeStatusSaving()));
+            expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+            const auth = { admin: true, uid: 'user-123' };
+            const saveEffect = generator.next(auth).value;
+            const data = saveEffect.payload.args[0];
+
+            expect(data.by).toEqual('user-123');
+          });
+
+          it('should handle error silently when auth check fails', () => {
+            const action = actions.saveAerodromeStatus({ status: 'open', details: '' });
+            const generator = sagas.saveAerodromeStatus(action);
+
+            expect(generator.next().value).toEqual(put(actions.setAerodromeStatusSaving()));
+            expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+            // auth is null -> will throw
+            const result = generator.next(null);
+            expect(result.done).toEqual(true);
+          });
+        });
+
+        describe('loadAerodromeStatus error path', () => {
+          it('should handle error silently', () => {
+            const generator = sagas.loadAerodromeStatus();
+
+            expect(generator.next().value).toEqual(put(actions.aerodromeStatusLoading()));
+
+            const error = new Error('load failed');
+            const result = generator.throw(error);
+            expect(result.done).toEqual(true);
+          });
+
+          it('should handle empty status list', () => {
+            const generator = sagas.loadAerodromeStatus();
+
+            expect(generator.next().value).toEqual(put(actions.aerodromeStatusLoading()));
+            expect(generator.next().value).toEqual(call(remote.loadLatest));
+
+            const emptySnapshot = new FakeFirebaseSnapshot('status', []);
+
+            expect(generator.next(emptySnapshot).value).toEqual(
+              put(actions.aerodromeStatusLoaded({
+                status: null,
+                details: ''
+              }, new ImmutableItemsArray([])))
+            );
+
             expect(generator.next().done).toEqual(true);
           });
         });

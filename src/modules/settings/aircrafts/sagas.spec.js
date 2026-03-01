@@ -19,6 +19,37 @@ describe('modules', () => {
             expect(generator.next().done).toEqual(true);
             expect(mockRef.on).toHaveBeenCalledWith('value', expect.any(Function));
           });
+
+          it('should put loadAircraftSettingsSuccess with snapshot val when callback fires', () => {
+            const channel = {put: jest.fn()};
+            const mockRef = {on: jest.fn()};
+            firebase.mockReturnValue(mockRef);
+            const generator = sagas.loadByType(channel, 'homeBase');
+            generator.next();
+
+            const callback = mockRef.on.mock.calls[0][1];
+            const snapshot = {val: () => ({'HB-KOF': true})};
+            callback(snapshot);
+
+            expect(channel.put).toHaveBeenCalledWith(
+              actions.loadAircraftSettingsSuccess('homeBase', {'HB-KOF': true})
+            );
+          });
+
+          it('should put empty object when snapshot val is null', () => {
+            const channel = {put: jest.fn()};
+            const mockRef = {on: jest.fn()};
+            firebase.mockReturnValue(mockRef);
+            const generator = sagas.loadByType(channel, 'club');
+            generator.next();
+
+            const callback = mockRef.on.mock.calls[0][1];
+            callback({val: () => null});
+
+            expect(channel.put).toHaveBeenCalledWith(
+              actions.loadAircraftSettingsSuccess('club', {})
+            );
+          });
         });
 
         describe('add', () => {
@@ -30,6 +61,29 @@ describe('modules', () => {
             const result = generator.next();
             expect(result.done).toEqual(true);
           });
+
+          it('should resolve promise when set succeeds', async () => {
+            const mockChildRef = {
+              set: jest.fn((val, cb) => cb(null))
+            };
+            const mockRef = {child: jest.fn().mockReturnValue(mockChildRef)};
+            firebase.mockReturnValue(mockRef);
+            const generator = sagas.add('club', 'HB-KOF');
+            const promise = generator.next().value;
+            await expect(promise).resolves.toBeUndefined();
+          });
+
+          it('should reject promise when set fails', async () => {
+            const error = new Error('permission denied');
+            const mockChildRef = {
+              set: jest.fn((val, cb) => cb(error))
+            };
+            const mockRef = {child: jest.fn().mockReturnValue(mockChildRef)};
+            firebase.mockReturnValue(mockRef);
+            const generator = sagas.add('club', 'HB-KOF');
+            const promise = generator.next().value;
+            await expect(promise).rejects.toThrow('permission denied');
+          });
         });
 
         describe('remove', () => {
@@ -40,6 +94,29 @@ describe('modules', () => {
             const generator = sagas.remove('club', 'HB-KOF');
             const result = generator.next();
             expect(result.done).toEqual(true);
+          });
+
+          it('should resolve promise when remove succeeds', async () => {
+            const mockChildRef = {
+              remove: jest.fn(cb => cb(null))
+            };
+            const mockRef = {child: jest.fn().mockReturnValue(mockChildRef)};
+            firebase.mockReturnValue(mockRef);
+            const generator = sagas.remove('club', 'HB-KOF');
+            const promise = generator.next().value;
+            await expect(promise).resolves.toBeUndefined();
+          });
+
+          it('should reject promise when remove fails', async () => {
+            const error = new Error('remove failed');
+            const mockChildRef = {
+              remove: jest.fn(cb => cb(error))
+            };
+            const mockRef = {child: jest.fn().mockReturnValue(mockChildRef)};
+            firebase.mockReturnValue(mockRef);
+            const generator = sagas.remove('club', 'HB-KOF');
+            const promise = generator.next().value;
+            await expect(promise).rejects.toThrow('remove failed');
           });
         });
 

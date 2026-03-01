@@ -104,6 +104,76 @@ describe('modules', () => {
           expect(pdfResult.download).toHaveBeenCalledWith('invoice_recipients_2024_11.pdf');
         });
       });
+
+      describe('generateReport (csv path - landings)', () => {
+        it('should generate and download a landings csv report', () => {
+          const report = 'landings';
+          const action = actions.generateReport(report);
+          const generator = sagas.generateReport(action);
+
+          expect(generator.next().value).toEqual(
+            put(actions.setReportGenerationInProgress(report, true))
+          );
+
+          // select
+          generator.next();
+
+          const reportState = {
+            date: {year: 2024, month: 5},
+            parameters: {option: true}
+          };
+
+          const downloadResult = {start: jest.fn()};
+          const download = {type: 'csv', result: downloadResult};
+
+          // generate call
+          expect(generator.next(reportState).value).toMatchObject({type: 'CALL'});
+
+          expect(generator.next(download).value).toEqual(
+            put(actions.setReportGenerationInProgress(report, false))
+          );
+
+          // startDownload call
+          expect(generator.next().value).toMatchObject({type: 'CALL'});
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('generateReport (csv path - yearlySummary)', () => {
+        it('should generate and download a yearlySummary csv report', () => {
+          const report = 'yearlySummary';
+          const action = actions.generateReport(report);
+          const generator = sagas.generateReport(action);
+
+          expect(generator.next().value).toEqual(
+            put(actions.setReportGenerationInProgress(report, true))
+          );
+
+          // select
+          generator.next();
+
+          const reportState = {
+            date: {year: 2024, month: null},
+            parameters: {}
+          };
+
+          const downloadResult = {start: jest.fn()};
+          const download = {type: 'csv', result: downloadResult};
+
+          // generate call
+          expect(generator.next(reportState).value).toMatchObject({type: 'CALL'});
+
+          expect(generator.next(download).value).toEqual(
+            put(actions.setReportGenerationInProgress(report, false))
+          );
+
+          // startDownload call
+          expect(generator.next().value).toMatchObject({type: 'CALL'});
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
     });
   });
 });
