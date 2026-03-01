@@ -1,22 +1,18 @@
 'use strict';
 
 // Capture handlers registered by the module
-const capturedHandlers = {};
+const mockCapturedHandlers = {};
 
 jest.mock('firebase-functions', () => {
-  const makeRef = (capturedHandlers) => (path) => ({
+  const makeRef = (handlers) => (path) => ({
     onCreate: jest.fn(handler => {
       const key = `onCreate:${path}`;
-      capturedHandlers[key] = handler;
+      handlers[key] = handler;
     }),
     onWrite: jest.fn(handler => {
       const key = `onWrite:${path}`;
-      capturedHandlers[key] = handler;
+      handlers[key] = handler;
     })
-  });
-
-  const dbInstance = (capturedHandlers) => ({
-    ref: makeRef(capturedHandlers)
   });
 
   return {
@@ -29,7 +25,7 @@ jest.mock('firebase-functions', () => {
     },
     database: {
       instance: jest.fn(() => ({
-        ref: makeRef(capturedHandlers)
+        ref: makeRef(mockCapturedHandlers)
       }))
     }
   };
@@ -96,7 +92,7 @@ describe('functions/enrichMovements', () => {
         val: jest.fn(() => movementData)
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snapshot);
     };
 
@@ -136,7 +132,7 @@ describe('functions/enrichMovements', () => {
         val: () => ({ location: 'lszh' }) // lowercase
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snapshot);
 
       expect(childMock).toHaveBeenCalledWith('LSZH');
@@ -200,7 +196,7 @@ describe('functions/enrichMovements', () => {
         })
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snapshot);
 
       expect(mockUpdate).not.toHaveBeenCalled();
@@ -216,7 +212,7 @@ describe('functions/enrichMovements', () => {
         val: () => ({}) // no location field
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snapshot);
 
       expect(mockOnce).not.toHaveBeenCalled();
@@ -233,7 +229,7 @@ describe('functions/enrichMovements', () => {
         val: () => null
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snapshot);
 
       expect(mockOnce).not.toHaveBeenCalled();
@@ -256,7 +252,7 @@ describe('functions/enrichMovements', () => {
         val: () => ({ location: 'LSZH' })
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await expect(handler(snapshot)).rejects.toThrow('DB error');
     });
   });
@@ -290,7 +286,7 @@ describe('functions/enrichMovements', () => {
         val: () => ({ location: 'LSZB' })
       };
 
-      const handler = capturedHandlers['onCreate:/arrivals/{arrivalId}'];
+      const handler = mockCapturedHandlers['onCreate:/arrivals/{arrivalId}'];
       await handler(snapshot);
 
       expect(childForMovement).toHaveBeenCalledWith('arr-001');
@@ -313,7 +309,7 @@ describe('functions/enrichMovements', () => {
         }
       };
 
-      const handler = capturedHandlers['onWrite:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
       return handler(change);
     };
 
