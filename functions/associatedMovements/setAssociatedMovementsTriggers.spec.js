@@ -1,17 +1,17 @@
 'use strict';
 
-const capturedHandlers = {};
+const mockCapturedHandlers = {};
 
 jest.mock('firebase-functions', () => {
   const makeDbRef = (path) => ({
     onCreate: jest.fn(handler => {
-      capturedHandlers[`onCreate:${path}`] = handler;
+      mockCapturedHandlers[`onCreate:${path}`] = handler;
     }),
     onWrite: jest.fn(handler => {
-      capturedHandlers[`onWrite:${path}`] = handler;
+      mockCapturedHandlers[`onWrite:${path}`] = handler;
     }),
     onDelete: jest.fn(handler => {
-      capturedHandlers[`onDelete:${path}`] = handler;
+      mockCapturedHandlers[`onDelete:${path}`] = handler;
     })
   });
 
@@ -89,7 +89,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         }
       };
 
-      const handler = capturedHandlers['onWrite:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
       await handler(change);
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
@@ -111,7 +111,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         }
       };
 
-      const handler = capturedHandlers['onWrite:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
       await handler(change);
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
@@ -133,7 +133,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         }
       };
 
-      const handler = capturedHandlers['onWrite:/arrivals/{arrivalId}'];
+      const handler = mockCapturedHandlers['onWrite:/arrivals/{arrivalId}'];
       await handler(change);
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
@@ -155,7 +155,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         }
       };
 
-      const handler = capturedHandlers['onWrite:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
       await handler(change);
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
@@ -184,7 +184,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         }
       };
 
-      const handler = capturedHandlers['onWrite:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
       await handler(change);
 
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
@@ -205,7 +205,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         val: () => ({ immatriculation: 'HBKOF', dateTime: '2024-01-01T10:00:00' })
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snap);
 
       expect(utils.loadAircraftMovements).toHaveBeenCalledWith('HBKOF');
@@ -226,7 +226,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         val: () => ({ immatriculation: 'HBABC', dateTime: '2024-01-01T11:00:00' })
       };
 
-      const handler = capturedHandlers['onCreate:/arrivals/{arrivalId}'];
+      const handler = mockCapturedHandlers['onCreate:/arrivals/{arrivalId}'];
       await handler(snap);
 
       expect(utils.loadAircraftMovements).toHaveBeenCalledWith('HBABC');
@@ -247,7 +247,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         val: () => ({ immatriculation: 'HBKOF', dateTime: '2024-01-01T11:00:00' })
       };
 
-      const handler = capturedHandlers['onCreate:/arrivals/{arrivalId}'];
+      const handler = mockCapturedHandlers['onCreate:/arrivals/{arrivalId}'];
       await handler(snap);
 
       // setAssociatedMovement should be called for the movement itself AND the back-link
@@ -266,7 +266,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         })
       };
 
-      const handler = capturedHandlers['onDelete:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onDelete:/departures/{departureId}'];
       await handler(snap);
 
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
@@ -281,7 +281,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         })
       };
 
-      const handler = capturedHandlers['onDelete:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onDelete:/departures/{departureId}'];
       await handler(snap);
 
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
@@ -318,7 +318,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         })
       };
 
-      const handler = capturedHandlers['onDelete:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onDelete:/departures/{departureId}'];
       await handler(snap);
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
@@ -355,7 +355,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         })
       };
 
-      const handler = capturedHandlers['onDelete:/arrivals/{arrivalId}'];
+      const handler = mockCapturedHandlers['onDelete:/arrivals/{arrivalId}'];
       await handler(snap);
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
@@ -380,7 +380,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         val: () => ({ immatriculation: 'HBKOF', dateTime: '2024-01-01T10:00:00' })
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snap);
 
       // Should be called once (the initial update)
@@ -434,7 +434,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         })
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snap);
 
       // setAssociatedMovement called at least once for the movement itself
@@ -489,7 +489,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         })
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snap);
 
       // setAssociatedMovement should be called at least for dep-001 and arr-001 back-link
@@ -533,7 +533,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         })
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snap);
 
       // dep-001 is updated, then arr-001 back-link is set.
@@ -574,7 +574,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
         })
       };
 
-      const handler = capturedHandlers['onCreate:/departures/{departureId}'];
+      const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
       await handler(snap);
 
       // setAssociatedMovement called for dep-001 itself
