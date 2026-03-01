@@ -203,6 +203,29 @@ describe('components', () => {
         });
       });
 
+      describe('newer than same day', () => {
+        it('returns true if day after', () => {
+          const result = Predicates.newerThanSameDay('2016-04-10')({
+            date: '2016-04-11',
+          });
+          expect(result).toBe(true);
+        });
+
+        it('returns false if same day', () => {
+          const result = Predicates.newerThanSameDay('2016-04-10')({
+            date: '2016-04-10',
+          });
+          expect(result).toBe(false);
+        });
+
+        it('returns false if day before', () => {
+          const result = Predicates.newerThanSameDay('2016-04-10')({
+            date: '2016-04-09',
+          });
+          expect(result).toBe(false);
+        });
+      });
+
       describe('older than same month', () => {
         it('returns true if month before', () => {
           const result = Predicates.olderThanSameMonth('2016-04-10')({

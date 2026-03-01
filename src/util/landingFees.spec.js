@@ -170,6 +170,50 @@ describe('util', () => {
       })
     })
 
+    describe('updateFeesTotal', () => {
+      it('does nothing if flightType is missing', () => {
+        const changeAction = jest.fn();
+        const {updateFeesTotal} = require('./landingFees');
+        updateFeesTotal(changeAction, 100, 50, undefined, 'home', 'Flugzeug');
+        expect(changeAction).not.toHaveBeenCalled();
+      });
+
+      it('does nothing if aircraftOrigin is missing', () => {
+        const changeAction = jest.fn();
+        const {updateFeesTotal} = require('./landingFees');
+        updateFeesTotal(changeAction, 100, 50, 'private', undefined, 'Flugzeug');
+        expect(changeAction).not.toHaveBeenCalled();
+      });
+
+      it('does nothing if aircraftCategory is missing', () => {
+        const changeAction = jest.fn();
+        const {updateFeesTotal} = require('./landingFees');
+        updateFeesTotal(changeAction, 100, 50, 'private', 'home', undefined);
+        expect(changeAction).not.toHaveBeenCalled();
+      });
+
+      it('calls changeAction for all fee fields when all params present', () => {
+        const changeAction = jest.fn();
+        const {updateFeesTotal, AircraftOrigin} = require('./landingFees');
+        updateFeesTotal(changeAction, 100, 50, 'private', AircraftOrigin.HOME_BASE, 'Flugzeug');
+        expect(changeAction).toHaveBeenCalledWith('feeTotalNet', expect.any(Number));
+        expect(changeAction).toHaveBeenCalledWith('feeVat', expect.any(Number));
+        expect(changeAction).toHaveBeenCalledWith('feeRoundingDifference', expect.any(Number));
+        expect(changeAction).toHaveBeenCalledWith('feeTotalGross', expect.any(Number));
+        expect(changeAction).toHaveBeenCalledTimes(4);
+      });
+
+      it('computes correct totalNet (sum of landing + goAround fee totals)', () => {
+        const changeAction = jest.fn();
+        const {updateFeesTotal, AircraftOrigin} = require('./landingFees');
+        updateFeesTotal(changeAction, 100, 50, 'private', AircraftOrigin.OTHER, 'Flugzeug');
+        const callMap = Object.fromEntries(changeAction.mock.calls);
+        // Default strategy has 0% VAT so feeTotalNet = 150, feeVat = 0
+        expect(callMap['feeTotalNet']).toBe(150);
+        expect(callMap['feeVat']).toBe(0);
+      });
+    });
+
     describe('getAircraftOrigin', () => {
       const aircraftSettings = {
         club: { 'HBKOF': true },
