@@ -11,6 +11,7 @@ describe('modules', () => {
       beforeEach(() => {
         global.__FIREBASE_PROJECT_ID__ = 'test-project';
         global.__CONF__ = { aerodrome: { ICAO: 'LSZT' } };
+        global.fetch = jest.fn();
       });
 
       describe('getCustomsAircraftType', () => {

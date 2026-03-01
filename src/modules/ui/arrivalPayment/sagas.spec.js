@@ -133,9 +133,12 @@ describe('modules', () => {
             const redirectUrl = 'https://payment.example.com/redirect';
             const snapshot = {val: () => ({data: redirectUrl, status: 'pending'})};
 
-            const originalHref = window.location.href;
-            delete window.location;
-            window.location = {href: ''};
+            const mockLocation = {href: ''};
+            Object.defineProperty(window, 'location', {
+              configurable: true,
+              writable: true,
+              value: mockLocation,
+            });
 
             callback(snapshot);
 
