@@ -5,6 +5,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import ClipboardCopier from '../ClipboardCopier'
+import { useTranslation } from 'react-i18next';
 
 const LinkBox = styled.div`
   margin: 3rem 0 0 0;
@@ -40,6 +41,7 @@ const StyledLink = styled.a`
 `
 
 export default function GuestAccessBox({guestAccessToken}) {
+  const { t } = useTranslation();
   if (!guestAccessToken || !guestAccessToken.token) {
     return null
   }
@@ -48,22 +50,21 @@ export default function GuestAccessBox({guestAccessToken}) {
   const urlOnlyGuest = url + '&guestOnly=true'
 
   return (
-    <LabeledBox label="Gast-Login">
+    <LabeledBox label={t('guestAccess.title')}>
       <DescriptionText>
-        Das Gast-Login per QR-Code ist aktiv. Dieser QR-Code kann auf dem Flugplatz ausgelegt werden, um Piloten
-        den Gast-Zugang zur Verfügung zu stellen.
+        {t('guestAccess.description')}
       </DescriptionText>
       <QrCodeGenerator url={url}/>
       <LinkBox>
         <InnerLinkBox>
-          <LinkLabel>Login-Link (E-Mail oder Gast):</LinkLabel>
+          <LinkLabel>{t('guestAccess.loginLinkFull')}</LinkLabel>
           <LinkValue>
             <LinkText><StyledLink href={url} target="_blank">{url}</StyledLink></LinkText>
             <ClipboardCopier text={url} />
           </LinkValue>
         </InnerLinkBox>
         <InnerLinkBox>
-          <LinkLabel>Login-Link (nur Gast):</LinkLabel>
+          <LinkLabel>{t('guestAccess.loginLinkGuest')}</LinkLabel>
           <LinkValue>
             <LinkText><StyledLink href={urlOnlyGuest} target="_blank">{urlOnlyGuest}</StyledLink></LinkText>
             <ClipboardCopier text={urlOnlyGuest} />

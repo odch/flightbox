@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import ModalDialog from '../ModalDialog';
 import Button from '../Button';
@@ -18,11 +19,12 @@ const CloseButton = styled(Button)`
 `;
 
 const ImportDoneDialog = props => {
+  const { t } = useTranslation();
   const content = (
     <div>
       <Heading>{props.doneHeading}</Heading>
       <Message>{props.doneMessage}</Message>
-      <CloseButton label="Schliessen" icon="close" onClick={props.onClose}/>
+      <CloseButton label={t('csvImport.close')} icon="close" onClick={props.onClose}/>
     </div>
   );
   return (

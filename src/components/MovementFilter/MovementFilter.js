@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import Button from '../Button';
 import DatePicker from '../DatePicker';
@@ -61,7 +62,7 @@ const renderInput = (value, onChange, disabled) => (
   <Input value={value} onChange={onChange} disabled={disabled}/>
 )
 
-const renderCheckbox = (value, onChange, disabled) => (
+const renderCheckbox = (value, onChange, disabled, t) => (
   <CheckboxWrapper>
     <label>
       <Input
@@ -70,7 +71,7 @@ const renderCheckbox = (value, onChange, disabled) => (
         onChange={onChange}
         disabled={disabled}
       />
-      Nur Bewegungen ohne zugeordnete Gegenbewegung anzeigen
+      {t('movement.filter.onlyWithoutAssociatedMovement')}
     </label>
   </CheckboxWrapper>
 )
@@ -125,12 +126,13 @@ const handleClear = setMovementsFilter => () => {
 }
 
 const MovementFilter = ({filter, expanded, setMovementsFilter, setExpanded}) => {
+  const { t } = useTranslation();
   const dateFilterSet = !!filter.date.start && !!filter.date.end
   return (
     <StyledContainer>
       <StyledButton
         icon="filter_list"
-        label={dateFilterSet ? "Filter (aktiv)" : "Filter"}
+        label={dateFilterSet ? t('movement.filter.active') : t('movement.filter.label')}
         onClick={handleFilterClick(expanded, setExpanded)}
         danger={dateFilterSet}
         flat
@@ -144,30 +146,31 @@ const MovementFilter = ({filter, expanded, setMovementsFilter, setExpanded}) => 
         <div>
           <div>
             <StyledDateComponent
-              label="Startdatum"
+              label={t('movement.filter.startDate')}
               component={renderDatePicker(filter.date.start, handleStartDateChange(filter, setMovementsFilter))}
-              validationError={!filter.date.start && filter.date.end ? 'Bitte Startdatum setzen' : null}
+              validationError={!filter.date.start && filter.date.end ? t('movement.filter.startDateRequired') : null}
             />
             <StyledDateComponent
-              label="Enddatum"
+              label={t('movement.filter.endDate')}
               component={renderDatePicker(filter.date.end, handleEndDateChange(filter, setMovementsFilter))}
-              validationError={!filter.date.end && filter.date.start ? 'Bitte Enddatum setzen' : null}
+              validationError={!filter.date.end && filter.date.start ? t('movement.filter.endDateRequired') : null}
             />
           </div>
-          <StyledInput label="Immatrikulation"
+          <StyledInput label={t('movement.details.immatriculation')}
                        component={renderInput(
                          filter.immatriculation,
                          handleImmatriculationChange(filter, setMovementsFilter),
                          !dateFilterSet
                        )}
                        validationError={filter.immatriculation.length > 0 && filter.immatriculation.length < 3
-                         ? 'Bitte mindestens 3 Zeichen eingeben'
+                         ? t('movement.filter.immatriculationMin')
                          : null}
           />
           {renderCheckbox(
             filter.onlyWithoutAssociatedMovement,
             handleOnlyWithoutAssociatedMovementChange(filter, setMovementsFilter),
-            !dateFilterSet
+            !dateFilterSet,
+            t
           )}
         </div>
       )}

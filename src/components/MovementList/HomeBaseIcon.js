@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
+import { withTranslation } from 'react-i18next';
 import MaterialIcon from '../MaterialIcon';
 
 const Wrapper = styled.div`
@@ -39,9 +40,11 @@ const Text = styled.div`
 class HomeBaseIcon extends React.PureComponent {
 
   render() {
-    const text = this.props.isHomeBase
-      ? `Dieses Flugzeug ist in ${__CONF__.aerodrome.name} stationiert`
-      : `Dieses Flugzeug ist nicht in ${__CONF__.aerodrome.name} stationiert`;
+    const { t } = this.props;
+    const text = t(
+      this.props.isHomeBase ? 'movement.homeBase.yes' : 'movement.homeBase.no',
+      { name: __CONF__.aerodrome.name }
+    );
 
     return (
       <Wrapper className={this.props.className}>
@@ -64,4 +67,4 @@ HomeBaseIcon.propTypes = {
   showText: PropTypes.bool
 };
 
-export default HomeBaseIcon;
+export default withTranslation()(HomeBaseIcon);

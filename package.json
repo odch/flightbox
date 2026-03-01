@@ -79,7 +79,9 @@
     "url": "https://github.com/odch/flightbox.git"
   },
   "dependencies": {
+    "i18next": "^24.2.3",
     "process": "^0.11.10",
-    "react-final-form": "^7.0.0"
+    "react-final-form": "^7.0.0",
+    "react-i18next": "^15.4.1"
   }
 }

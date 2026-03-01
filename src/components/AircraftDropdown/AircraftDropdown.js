@@ -3,6 +3,7 @@ import React from 'react';
 import Dropdown from '../Dropdown';
 import Option from './Option';
 import {REGISTRATION_REGEX} from '../../util/aircrafts';
+import { useTranslation } from 'react-i18next';
 
 const optionRenderer = aircrafts => {
   const map = aircrafts.reduce((map, obj) => {
@@ -40,23 +41,26 @@ const callWithValue = (delegate, aircrafts, value) => {
   }
 };
 
-const AircraftDropdown = props => (
-  <Dropdown
-    options={props.aircrafts.data.array.sort(aircraftsComparator).map(aircraftToOption)}
-    optionRenderer={optionRenderer(props.aircrafts.data.array)}
-    onChange={callWithValue.bind(null, props.onChange, props.aircrafts.data.array)}
-    onBeforeInputChange={normalizeImmatriculation}
-    value={props.value}
-    showOptionsOnFocus={false}
-    noOptionsText="Kein Flugzeug gefunden"
-    moreOptionsText="Mehr Flugzeuge vorhanden! Tippen Sie einen Teil der Immatrikulation, um die Liste einzuschränken."
-    onFocus={props.onFocus}
-    onBlur={callWithValue.bind(null, props.onBlur, props.aircrafts.data.array)}
-    readOnly={props.readOnly}
-    dataCy={props.dataCy}
-    clearable={props.clearable}
-  />
-);
+const AircraftDropdown = props => {
+  const { t } = useTranslation();
+  return (
+    <Dropdown
+      options={props.aircrafts.data.array.sort(aircraftsComparator).map(aircraftToOption)}
+      optionRenderer={optionRenderer(props.aircrafts.data.array)}
+      onChange={callWithValue.bind(null, props.onChange, props.aircrafts.data.array)}
+      onBeforeInputChange={normalizeImmatriculation}
+      value={props.value}
+      showOptionsOnFocus={false}
+      noOptionsText={t('dropdown.aircraftNotFound')}
+      moreOptionsText={t('dropdown.moreAircrafts')}
+      onFocus={props.onFocus}
+      onBlur={callWithValue.bind(null, props.onBlur, props.aircrafts.data.array)}
+      readOnly={props.readOnly}
+      dataCy={props.dataCy}
+      clearable={props.clearable}
+    />
+  );
+};
 
 AircraftDropdown.propTypes = {
   value: PropTypes.string.isRequired,

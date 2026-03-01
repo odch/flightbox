@@ -1,12 +1,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {Field, Form} from 'react-final-form';
+import { useTranslation } from 'react-i18next';
 import validate from '../../validate';
 import {renderAerodromeDropdown, renderDateField, renderDurationField, renderTimeField,} from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
 
 const DepartureArrivalPage = (props) => {
+  const { t } = useTranslation();
   const { readOnly, hiddenFields, formValues, previousPage, onSubmit } = props;
   return (
     <Form
@@ -21,14 +23,14 @@ const DepartureArrivalPage = (props) => {
               name="date"
               component={renderDateField}
               parse={e => e.value}
-              label="Datum"
+              label={t('movement.details.date')}
               readOnly={readOnly}
             />
             <Field
               name="time"
               component={renderTimeField}
               parse={e => e.value}
-              label="Startzeit (Lokalzeit)"
+              label={t('movement.details.departureTime')}
               readOnly={readOnly}
             />
             <Field
@@ -44,7 +46,7 @@ const DepartureArrivalPage = (props) => {
                     }
                   },
                   meta,
-                  label: "Zielflugplatz",
+                  label: t('movement.details.destination'),
                 })
               }
             </Field>
@@ -52,7 +54,7 @@ const DepartureArrivalPage = (props) => {
               name="duration"
               component={renderDurationField}
               parse={e => e.value}
-              label="Flugdauer"
+              label={t('wizard.duration')}
               readOnly={readOnly}
             />
           </FieldSet>

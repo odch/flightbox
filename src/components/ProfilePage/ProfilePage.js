@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types'
+import { withTranslation } from 'react-i18next';
 import styled from 'styled-components'
 import Centered from '../Centered'
 import MaterialIcon from '../MaterialIcon'
@@ -19,9 +20,10 @@ class ProfilePage extends Component {
 
   render() {
     const {profile, saving, saveProfile} = this.props;
+    const { t } = this.props;
 
     if (!profile) {
-      return <Centered><MaterialIcon icon="sync" rotate="left"/> Bitte warten ...</Centered>;
+      return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('profile.loading')}</Centered>;
     }
 
     return (
@@ -41,4 +43,4 @@ ProfilePage.propTypes = {
   saveProfile: PropTypes.func.isRequired
 };
 
-export default ProfilePage;
+export default withTranslation()(ProfilePage);

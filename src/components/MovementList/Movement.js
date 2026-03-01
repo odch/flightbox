@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
+import { withTranslation } from 'react-i18next';
 import dates from '../../util/dates';
 import MovementHeader from './MovementHeader';
 import MovementDetails from './MovementDetails';
@@ -53,6 +54,7 @@ class Movement extends React.PureComponent {
 
   render() {
     const props = this.props;
+    const { t } = this.props;
 
     const isHomeBase = props.aircraftSettings.club[props.data.immatriculation] === true
       || props.aircraftSettings.homeBase[props.data.immatriculation] === true;
@@ -81,7 +83,7 @@ class Movement extends React.PureComponent {
               <Footer>
                 {this.shouldShowCustomsAction() && (
                   <Action
-                    label={props.data.customsFormId ? "Zollanmeldung öffnen" : "Zollanmeldung erfassen"}
+                    label={props.data.customsFormId ? t('movement.openCustoms') : t('movement.recordCustoms')}
                     icon={props.customs.loading ? "sync" :"description"}
                     rotateIcon={props.customs.loading ? 'left' : undefined}
                     disabled={props.customs.loading}
@@ -89,12 +91,12 @@ class Movement extends React.PureComponent {
                   />
                 )}
                 <Action
-                  label="Bearbeiten"
+                  label={t('movement.edit')}
                   icon="edit"
                   onClick={this.handleEditClick}
                 />
                 <Action
-                  label="Löschen"
+                  label={t('movement.delete')}
                   icon="delete"
                   onClick={this.handleDeleteClick}
                 />
@@ -201,4 +203,4 @@ Movement.defaultProps = {
   timeWithDate: true,
 };
 
-export default Movement;
+export default withTranslation()(Movement);

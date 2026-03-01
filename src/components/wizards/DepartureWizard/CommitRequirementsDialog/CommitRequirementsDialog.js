@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import objectToArray from "../../../../util/objectToArray"
 import ModalDialog from '../../../ModalDialog';
 import Heading from './Heading';
@@ -9,9 +10,10 @@ import CancelButton from './CancelButton';
 import ConfirmButton from './ConfirmButton';
 
 const CommitRequirementsDialog = props => {
+  const { t } = useTranslation();
   const content = (
     <div>
-      <Heading>Bitte bestätigen</Heading>
+      <Heading>{t('departure.confirm.heading')}</Heading>
       <Items>
         {objectToArray(__CONF__.departureCommitRequirements).map((req, index) => (
           typeof req === 'string'
@@ -21,13 +23,13 @@ const CommitRequirementsDialog = props => {
       </Items>
       <div>
         <ConfirmButton
-          label="Bestätigen"
+          label={t('departure.confirm.confirmButton')}
           icon="done_all"
           onClick={props.onConfirm}
           dataCy="commit-requirement-dialog-confirm"
           primary
         />
-        <CancelButton label="Abbrechen" onClick={props.onCancel}/>
+        <CancelButton label={t('departure.confirm.cancelButton')} onClick={props.onCancel}/>
       </div>
     </div>
   );

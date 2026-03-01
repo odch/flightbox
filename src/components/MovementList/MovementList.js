@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import Predicates from './Predicates';
 import MovementGroup from './MovementGroup';
 import LoadingInfo from './LoadingInfo';
@@ -40,6 +41,7 @@ class MovementList extends React.PureComponent {
   }
 
   render() {
+    const { t } = this.props;
     if (this.props.lockDate.loading === true
       || !this.props.aircraftSettings.club
       || !this.props.aircraftSettings.homeBase) {
@@ -57,7 +59,7 @@ class MovementList extends React.PureComponent {
       <div>
         {this.props.isAdmin === true && <MovementFilter/>}
         <MovementGroup
-          label="Ab morgen"
+          label={t('movement.groups.tomorrow')}
           items={this.props.items}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
@@ -72,7 +74,7 @@ class MovementList extends React.PureComponent {
           isAdmin={this.props.isAdmin}
         />
         <MovementGroup
-          label="Heute"
+          label={t('movement.groups.today')}
           items={this.props.items}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
@@ -87,7 +89,7 @@ class MovementList extends React.PureComponent {
           isAdmin={this.props.isAdmin}
         />
         <MovementGroup
-          label="Gestern"
+          label={t('movement.groups.yesterday')}
           items={this.props.items}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
@@ -102,7 +104,7 @@ class MovementList extends React.PureComponent {
           isAdmin={this.props.isAdmin}
         />
         <MovementGroup
-          label="Dieser Monat"
+          label={t('movement.groups.thisMonth')}
           items={this.props.items}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
@@ -116,7 +118,7 @@ class MovementList extends React.PureComponent {
           isAdmin={this.props.isAdmin}
         />
         <MovementGroup
-          label="Älter"
+          label={t('movement.groups.older')}
           items={this.props.items}
           selected={this.props.selected}
           onSelect={this.props.onSelect}
@@ -162,4 +164,4 @@ MovementList.propTypes = {
   isAdmin: PropTypes.bool
 };
 
-export default AutoLoad(MovementList);
+export default withTranslation()(AutoLoad(MovementList));

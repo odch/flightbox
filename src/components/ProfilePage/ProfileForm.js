@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import FieldSet from '../wizards/FieldSet'
+import { useTranslation } from 'react-i18next';
 import {Field, Form} from 'react-final-form'
 import {renderAircraftCategoryDropdown, renderAircraftDropdown, renderInputField} from '../wizards/renderField'
 import React from 'react'
@@ -26,6 +27,7 @@ const StyledSectionTitle = styled.h1`
 `
 
 function ProfileForm(props) {
+  const { t } = useTranslation();
 
   const handleSubmit = (values) => {
     props.saveProfile(values)
@@ -35,18 +37,16 @@ function ProfileForm(props) {
     <Form onSubmit={handleSubmit} initialValues={props.profile}>
       {({handleSubmit, dirty, form}) => (
         <StyledForm onSubmit={handleSubmit}>
-          <StyledSectionTitle>Standard-Eingabewerte</StyledSectionTitle>
-          <div>Die Werte aus den folgenden Feldern werden automatisch vorausgefüllt, wenn Sie einen neuen Abflug oder eine
-            neue Ankunft erfassen.
-          </div>
+          <StyledSectionTitle>{t('profile.defaultValues')}</StyledSectionTitle>
+          <div>{t('profile.defaultValuesDesc')}</div>
           <StyledSection>
-            <StyledSectionTitle>Pilot</StyledSectionTitle>
+            <StyledSectionTitle>{t('profile.pilot')}</StyledSectionTitle>
             <FieldSet gutter={false}>
               {__CONF__.memberManagement === true && (
                 <Field
                   name="memberNr"
                   type="text"
-                  label="Mitgliedernummer"
+                  label={t('profile.memberNr')}
                   component={renderInputField}
                 />
               )}
@@ -55,13 +55,13 @@ function ProfileForm(props) {
               <Field
                 name="lastname"
                 type="text"
-                label="Nachname"
+                label={t('profile.lastname')}
                 component={renderInputField}
               />
               <Field
                 name="firstname"
                 type="text"
-                label="Vorname"
+                label={t('profile.firstname')}
                 component={renderInputField}
               />
             </FieldSet>
@@ -69,20 +69,20 @@ function ProfileForm(props) {
               <Field
                 name="email"
                 type="email"
-                label="E-Mail"
+                label={t('profile.email')}
                 component={renderInputField}
               />
               <Field
                 name="phone"
                 type="tel"
-                label="Telefon"
+                label={t('profile.phone')}
                 component={renderInputField}
               />
             </FieldSet>
           </StyledSection>
 
           <StyledSection>
-            <StyledSectionTitle>Flugzeug</StyledSectionTitle>
+            <StyledSectionTitle>{t('profile.aircraft')}</StyledSectionTitle>
             <FieldSet gutter={false}>
               <Field name="immatriculation">
                 {({input, meta}) =>
@@ -101,7 +101,7 @@ function ProfileForm(props) {
                       }
                     },
                     meta,
-                    label: "Immatrikulation",
+                    label: t('profile.immatriculation'),
                     clearable: true,
                   })
                 }
@@ -110,13 +110,13 @@ function ProfileForm(props) {
                 name="aircraftType"
                 type="text"
                 component={renderInputField}
-                label="Typ"
+                label={t('profile.type')}
               />
               <Field
                 name="mtow"
                 type="number"
                 component={renderInputField}
-                label="Maximales Abfluggewicht (in Kilogramm)"
+                label={t('profile.mtow')}
                 parse={input => {
                   if (typeof input === 'number') {
                     return input;
@@ -130,7 +130,7 @@ function ProfileForm(props) {
               <Field
                 name="aircraftCategory"
                 component={renderAircraftCategoryDropdown}
-                label="Kategorie"
+                label={t('profile.category')}
                 clearable
               />
             </FieldSet>
@@ -139,7 +139,7 @@ function ProfileForm(props) {
           <div>
             <Button
               type="submit"
-              label="Speichern"
+              label={t('profile.save')}
               icon="save"
               disabled={!dirty || props.saving}
               loading={props.saving}

@@ -9,6 +9,7 @@ import {ThemeProvider} from 'styled-components';
 import moment from 'moment';
 
 import 'moment/locale/de';
+import './i18n';
 
 import {history} from './history'
 import reducer, {sagas} from './modules';

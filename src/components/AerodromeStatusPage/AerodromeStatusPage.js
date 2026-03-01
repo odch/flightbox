@@ -7,6 +7,7 @@ import MaterialIcon from '../MaterialIcon'
 import {getLabel} from '../AerodromeStatusForm/StatusOptions'
 import dates from '../../util/dates'
 import newLineToBr from '../../util/newLineToBr'
+import { withTranslation } from 'react-i18next'
 
 const StyledLogo = styled(Logo)`
   width: 200px;
@@ -51,13 +52,13 @@ class AerodromeStatusPage extends Component {
   }
 
   render() {
-    const {status} = this.props;
+    const {status, t} = this.props;
 
     if (status === undefined) {
-      return <Centered><MaterialIcon icon="sync" rotate="left"/> Bitte warten ...</Centered>;
+      return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}</Centered>;
     }
     if (status === null) {
-      return <Centered>Flugplatzstatus nicht verfügbar</Centered>
+      return <Centered>{t('aerodromeStatus.unavailable')}</Centered>
     }
 
     return (
@@ -82,4 +83,4 @@ AerodromeStatusPage.propTypes = {
   watchCurrentAerodromeStatus: PropTypes.func.isRequired
 };
 
-export default AerodromeStatusPage;
+export default withTranslation()(AerodromeStatusPage);

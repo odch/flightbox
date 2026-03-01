@@ -2,9 +2,10 @@ import React, {Component} from 'react';
 import LabeledBox from '../LabeledBox';
 import JumpNavigation from '../JumpNavigation';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
-import questions from './questions';
+import getQuestions from './questions';
 import QuestionsList from './QuestionsList';
 import Content from './Content';
+import { withTranslation } from 'react-i18next';
 
 class HelpPage extends Component {
 
@@ -14,6 +15,8 @@ class HelpPage extends Component {
   }
 
   render() {
+    const { t } = this.props;
+    const questions = getQuestions(t);
     return (
       <VerticalHeaderLayout>
         <Content>
@@ -39,4 +42,4 @@ class HelpPage extends Component {
   }
 }
 
-export default HelpPage;
+export default withTranslation()(HelpPage);

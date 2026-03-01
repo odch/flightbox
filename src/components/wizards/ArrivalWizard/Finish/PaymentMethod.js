@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
+import { withTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import {Step} from '../../../../modules/ui/arrivalPayment'
 import SingleSelect from '../../../SingleSelect'
@@ -154,6 +155,7 @@ class PaymentMethod extends Component {
   }
 
   render() {
+    const { t } = this.props;
     const {
       itemKey,
       method,
@@ -178,7 +180,7 @@ class PaymentMethod extends Component {
       for (const invoiceRecipientName of invoiceRecipientNames) {
         availableMethods.push({
           value: `invoice[${invoiceRecipientName}]`,
-          label: `Rechnung (${invoiceRecipientName})`
+          label: t('arrival.payment.invoice', {recipient: invoiceRecipientName})
         })
       }
     }
@@ -186,7 +188,7 @@ class PaymentMethod extends Component {
     return (
       <Container>
         {failure && (
-          <FailureMessage>Die Zahlung ist fehlgeschlagen. Bitte versuchen Sie es erneut.</FailureMessage>
+          <FailureMessage>{t('arrival.payment.failure')}</FailureMessage>
         )}
         {step === Step.COMPLETED ? (
           <>
@@ -197,7 +199,7 @@ class PaymentMethod extends Component {
             ) : method === 'card_external' ? (
               <CardExternalPaymentMessage itemKey={itemKey}/>
             ) : method === 'checkout' ? (
-              <SuccessMessage>Die Zahlung war erfolgreich</SuccessMessage>
+              <SuccessMessage>{t('arrival.payment.success')}</SuccessMessage>
             ) : null}
             <FinishActions itemKey={itemKey}
                            createMovementFromMovement={createMovementFromMovement}
@@ -206,10 +208,10 @@ class PaymentMethod extends Component {
         ) : step === Step.CONFIRMED ? (
           method === 'card' ? (
             <>
-              <InstructionMessage>Bitte folgen Sie den Anweisungen auf dem Kartenlesegerät</InstructionMessage>
+              <InstructionMessage>{t('arrival.payment.cardInstruction')}</InstructionMessage>
               <StyledCancelButton
                 type="button"
-                label="Abbrechen"
+                label={t('arrival.payment.cancel')}
                 onClick={() => {
                   cancelCardPayment()
                 }}
@@ -218,12 +220,12 @@ class PaymentMethod extends Component {
           ) : method === 'checkout' ? (
             <>
               <>
-                <InstructionMessage>Bitte warten, Sie werden in wenigen Sekunden weitergeleitet...</InstructionMessage>
+                <InstructionMessage>{t('arrival.payment.redirect')}</InstructionMessage>
               </>
             </>
           ) : null
         ) : (<>
-            <InstructionMessage>Bitte wählen Sie eine Zahlungsart:</InstructionMessage>
+            <InstructionMessage>{t('arrival.payment.selectMethod')}</InstructionMessage>
             <SelectContainer>
               <SingleSelect
                 items={availableMethods}
@@ -234,7 +236,7 @@ class PaymentMethod extends Component {
             </SelectContainer>
             <StyledNextButton
               type="submit"
-              label="Weiter"
+              label={t('arrival.payment.next')}
               icon="navigate_next"
               onClick={() => this.confirmMethod(method)}
               dataCy="next-button"
@@ -273,4 +275,4 @@ PaymentMethod.propTypes = {
   saveMovementPaymentMethod: PropTypes.func.isRequired
 }
 
-export default withRouter(PaymentMethod)
+export default withRouter(withTranslation()(PaymentMethod))

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
+import { useTranslation } from 'react-i18next';
 
 const Wrapper = styled.div`
   width: 250px;
@@ -105,22 +106,23 @@ const Label = styled.span`
 `;
 
 const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange }) => {
+  const { t } = useTranslation();
   const navigationItems = [
-    { key: 'export', label: 'Export', icon: 'file_download' },
-    { key: 'lock-movements', label: 'Bewegungen sperren', icon: 'lock' },
-    { key: 'aerodrome-status', label: 'Flugplatz-Status', icon: 'traffic' },
-    { key: 'messages', label: 'Nachrichten', icon: 'message' },
-    { key: 'aircraft', label: 'Flugzeuge', icon: 'flight' },
-    { key: 'invoice-recipients', label: 'Rechnungsempfänger', icon: 'receipt' },
-    { key: 'kiosk-access', label: 'Kiosk-Login', icon: 'person_add' },
-    { key: 'guest-access', label: 'Gast-Login', icon: 'person_add' },
-    { key: 'import', label: 'Import', icon: 'file_upload' },
+    { key: 'export', label: t('admin.export'), icon: 'file_download' },
+    { key: 'lock-movements', label: t('admin.lockMovements'), icon: 'lock' },
+    { key: 'aerodrome-status', label: t('admin.aerodromeStatus'), icon: 'traffic' },
+    { key: 'messages', label: t('admin.messages'), icon: 'message' },
+    { key: 'aircraft', label: t('admin.aircraft'), icon: 'flight' },
+    { key: 'invoice-recipients', label: t('admin.invoiceRecipients'), icon: 'receipt' },
+    { key: 'kiosk-access', label: t('admin.kioskAccess'), icon: 'person_add' },
+    { key: 'guest-access', label: t('admin.guestAccess'), icon: 'person_add' },
+    { key: 'import', label: t('admin.import'), icon: 'file_upload' },
   ].filter(item => !hiddenTabs.includes(item.key));
 
   return (
     <Wrapper>
       <Header>
-        <Title>Administration</Title>
+        <Title>{t('admin.title')}</Title>
       </Header>
       <Menu>
         {navigationItems.map(item => (
