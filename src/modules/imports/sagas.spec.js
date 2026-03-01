@@ -33,6 +33,16 @@ describe('modules', () => {
         });
       });
 
+      describe('getString', () => {
+        it('should resolve with file contents as string', async () => {
+          const fileContent = 'name,email\nJohn,john@example.com';
+          const file = new Blob([fileContent], {type: 'text/csv'});
+
+          const result = await sagas.getString(file);
+          expect(result).toBe(fileContent);
+        });
+      });
+
       describe('importSaga', () => {
         it('should run the success path', () => {
           const action = actions.startImport('users');

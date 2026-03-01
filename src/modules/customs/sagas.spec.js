@@ -2,8 +2,10 @@ import {call, put} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import {getIdToken} from '../../util/firebase.js';
+import {get as getAerodrome} from '../../util/aerodromes';
 
 jest.mock('../../util/firebase.js');
+jest.mock('../../util/aerodromes');
 
 describe('modules', () => {
   describe('customs', () => {
@@ -132,6 +134,118 @@ describe('modules', () => {
           expect(generator.throw(error).value).toEqual(
             put(actions.setStartCustomsFailure('Network error'))
           );
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('getDirectionDependingData', () => {
+        it('should return departure data for departure type', async () => {
+          getAerodrome.mockResolvedValue({ country: 'CH', name: 'Birrfeld' });
+
+          const movementData = {
+            type: 'departure',
+            location: 'LSZF',
+            time: '10:00',
+            duration: '01:30'
+          };
+
+          const result = await sagas.getDirectionDependingData(movementData);
+
+          expect(result).toMatchObject({
+            departureTime: '10:00',
+            arrivalCountry: 'CH',
+            arrivalLocation: 'Birrfeld',
+            arrivalTime: '11:30'
+          });
+        });
+
+        it('should return arrival data for arrival type', async () => {
+          getAerodrome.mockResolvedValue({ country: 'DE', name: 'Friedrichshafen' });
+
+          const movementData = {
+            type: 'arrival',
+            location: 'EDNY',
+            time: '14:00'
+          };
+
+          const result = await sagas.getDirectionDependingData(movementData);
+
+          expect(result).toMatchObject({
+            arrivalTime: '14:00',
+            departureCountry: 'DE',
+            departureLocation: 'Friedrichshafen'
+          });
+        });
+      });
+
+      describe('openCompletionUrl', () => {
+        it('should open a new window with the url', () => {
+          const openMock = jest.fn().mockReturnValue({});
+          window.open = openMock;
+
+          sagas.openCompletionUrl('https://example.com/complete');
+
+          expect(openMock).toHaveBeenCalledWith(
+            'https://example.com/complete',
+            '_blank',
+            'noopener,noreferrer'
+          );
+        });
+
+        it('should warn when popup is blocked', () => {
+          const openMock = jest.fn().mockReturnValue(null);
+          window.open = openMock;
+          const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+          sagas.openCompletionUrl('https://example.com/complete');
+
+          expect(warnSpy).toHaveBeenCalled();
+          warnSpy.mockRestore();
+        });
+      });
+
+      describe('startCustoms with result without completionUrl', () => {
+        it('should not open url if result has no completionUrl', () => {
+          const movementData = { type: 'departure', key: 'movement-key' };
+          const action = actions.startCustoms(movementData);
+          const generator = sagas.startCustoms(action);
+
+          expect(generator.next().value).toEqual(put(actions.setStartCustomsLoading()));
+          expect(generator.next().value).toEqual(call(sagas.getCustomsPayload, movementData));
+
+          const payload = { aerodromeId: 'lszt' };
+          expect(generator.next(payload).value).toEqual(call(sagas.postPrepopulatedFormToCustoms, payload));
+
+          // result with no id and no completionUrl
+          const result = { someOtherField: true };
+          expect(generator.next(result).value).toEqual(put(actions.setStartCustomsSuccess()));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should handle failed saveCustomsFormData gracefully and still succeed', () => {
+          const openMock = jest.fn().mockReturnValue({});
+          window.open = openMock;
+
+          const movementData = { type: 'departure', key: 'movement-key' };
+          const action = actions.startCustoms(movementData);
+          const generator = sagas.startCustoms(action);
+
+          expect(generator.next().value).toEqual(put(actions.setStartCustomsLoading()));
+          expect(generator.next().value).toEqual(call(sagas.getCustomsPayload, movementData));
+
+          const payload = { aerodromeId: 'lszt' };
+          expect(generator.next(payload).value).toEqual(call(sagas.postPrepopulatedFormToCustoms, payload));
+
+          const result = { id: 'form-id', completionUrl: 'https://example.com/complete' };
+          expect(generator.next(result).value).toEqual(
+            call(sagas.saveCustomsFormData, movementData, result.id, result.completionUrl)
+          );
+
+          // The inner try/catch catches the error, logs it, then continues.
+          // After the inner catch, the generator calls openCompletionUrl (sync)
+          // and then yields put(setStartCustomsSuccess())
+          const saveError = new Error('save failed');
+          expect(generator.throw(saveError).value).toEqual(put(actions.setStartCustomsSuccess()));
           expect(generator.next().done).toEqual(true);
         });
       });
