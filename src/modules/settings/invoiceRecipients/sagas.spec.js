@@ -1,6 +1,7 @@
 import {call, select, take} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
+import firebase from '../../../util/firebase';
 
 jest.mock('../../../util/firebase');
 
@@ -145,6 +146,8 @@ describe('modules', () => {
 
         describe('saveInvoiceRecipients', () => {
           it('should return a Promise and complete', () => {
+            const mockRef = {set: jest.fn()};
+            firebase.mockReturnValue(mockRef);
             const generator = sagas.saveInvoiceRecipients([{name: 'Recipient A'}]);
             const result = generator.next();
             expect(result.done).toEqual(true);

@@ -2,7 +2,12 @@ import {call, put, select} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 
-jest.mock('../../util/report');
+jest.mock('../../util/report', () => ({
+  airstat: jest.fn(),
+  invoices: jest.fn(),
+  landings: jest.fn(),
+  yearlySummary: jest.fn(),
+}));
 
 describe('modules', () => {
   describe('reports', () => {

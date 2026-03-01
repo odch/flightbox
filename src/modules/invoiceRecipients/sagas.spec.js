@@ -10,6 +10,7 @@ describe('modules', () => {
     describe('sagas', () => {
       beforeEach(() => {
         global.__FIREBASE_PROJECT_ID__ = 'test-project';
+        global.fetch = jest.fn();
       });
 
       describe('loadUserInvoiceRecipients', () => {

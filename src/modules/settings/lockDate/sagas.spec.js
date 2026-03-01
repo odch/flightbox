@@ -1,6 +1,7 @@
 import {call, put, take} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
+import firebase from '../../../util/firebase';
 
 jest.mock('../../../util/firebase');
 
@@ -11,11 +12,14 @@ describe('modules', () => {
         describe('watchLoadLockDate', () => {
           it('should wait for load action, dispatch loading, and register firebase listener', () => {
             const channel = {put: jest.fn()};
+            const mockRef = {on: jest.fn()};
+            firebase.mockReturnValue(mockRef);
             const generator = sagas.watchLoadLockDate(channel);
 
             expect(generator.next().value).toEqual(take(actions.LOAD_LOCK_DATE));
             expect(generator.next().value).toEqual(put(actions.lockDateLoading()));
             expect(generator.next().done).toEqual(true);
+            expect(mockRef.on).toHaveBeenCalledWith('value', expect.any(Function));
           });
         });
 
