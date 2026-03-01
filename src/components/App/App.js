@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import {Redirect, Route, Switch} from 'react-router-dom';
 import LoginPage from '../../components/LoginPage';
 import Centered from '../Centered';
@@ -29,8 +30,9 @@ class App extends React.PureComponent {
 
   render() {
     const props = this.props;
+    const { t } = this.props;
     if (props.auth.initialized !== true) {
-      return <Centered><MaterialIcon icon="sync" rotate="left"/> Bitte warten ...</Centered>;
+      return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}</Centered>;
     }
 
     if ((props.auth.authenticated !== true || props.showLogin === true)
@@ -68,4 +70,4 @@ App.propTypes = {
   }).isRequired
 };
 
-export default App;
+export default withTranslation()(App);

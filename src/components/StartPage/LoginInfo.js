@@ -3,6 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
 import {Link} from 'react-router-dom'
+import { withTranslation } from 'react-i18next'
 
 const StyledWrapper = styled.div`
   position: relative
@@ -83,15 +84,15 @@ const StyledMenu = styled.div`
   box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
 `
 
-const getUsername = authData => {
+const getUsername = (authData, t) => {
   if (authData.email) {
     return authData.email
   }
   if (authData.guest === true) {
-    return 'Gast'
+    return t('login.guest')
   }
   if (authData.kiosk === true) {
-    return 'Kiosk'
+    return t('login.kiosk')
   }
   return authData.uid
 }
@@ -138,13 +139,14 @@ class LoginInfo extends React.Component {
 
   render() {
     const props = this.props;
+    const { t } = props;
 
     if (props.auth.authenticated === true && typeof props.auth.data.uid === 'string') {
       return (
         <StyledWrapper className={props.className} data-cy="login-info">
           <StyledUserNameWrapper onClick={this.handleUserNameClick}>
             <MaterialIcon icon="account_box"/>
-            <UserName>{getUsername(props.auth.data)}</UserName>
+            <UserName>{getUsername(props.auth.data, t)}</UserName>
           </StyledUserNameWrapper>
           {this.state.menuOpen && props.auth.data.links !== false && this.renderMenu()}
         </StyledWrapper>
@@ -153,20 +155,21 @@ class LoginInfo extends React.Component {
 
     return (
       <div className={props.className}>
-        <Button onClick={props.showLogin}>Anmelden</Button>
+        <Button onClick={props.showLogin}>{t('common.login')}</Button>
       </div>
     );
   }
 
   renderMenu() {
-    const auth = this.props.auth.data
+    const auth = this.props.auth.data;
+    const { t } = this.props;
     return (
       <StyledMenu ref={this.setMenuRef}>
-        <StyledMenuUsername>{getUsername(auth)}</StyledMenuUsername>
+        <StyledMenuUsername>{getUsername(auth, t)}</StyledMenuUsername>
         {auth && auth.guest !== true && auth.kiosk !== true && auth.uid !== 'ipauth' && (
-          <StyledMenuLink to="/profile" data-cy="profile">Profil</StyledMenuLink>
+          <StyledMenuLink to="/profile" data-cy="profile">{t('login.profile')}</StyledMenuLink>
         )}
-        <StyledMenuButton onClick={this.props.logout} data-cy="logout">Abmelden</StyledMenuButton>
+        <StyledMenuButton onClick={this.props.logout} data-cy="logout">{t('login.logout')}</StyledMenuButton>
       </StyledMenu>
     )
   }
@@ -185,4 +188,4 @@ LoginInfo.propTypes = {
   showLogin: PropTypes.func.isRequired,
 };
 
-export default LoginInfo;
+export default withTranslation()(LoginInfo);

@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
+import { withTranslation } from 'react-i18next';
 import MessageShape from './MessageShape';
 import MessagesWrapper from './MessagesWrapper';
 import Message from './Message';
@@ -14,8 +15,9 @@ class MessageList extends Component {
   }
 
   render() {
+    const { t } = this.props;
     if (this.props.messages.data.array.length === 0) {
-      return <Empty>Keine Nachrichten</Empty>;
+      return <Empty>{t('message.noMessages')}</Empty>;
     }
 
     return (
@@ -53,4 +55,4 @@ MessageList.propTypes = {
   selectMessage: PropTypes.func.isRequired,
 };
 
-export default MessageList;
+export default withTranslation()(MessageList);

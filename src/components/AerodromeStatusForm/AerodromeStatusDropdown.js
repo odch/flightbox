@@ -3,6 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import Dropdown from '../Dropdown';
 import {options} from './StatusOptions'
+import { useTranslation } from 'react-i18next'
 
 const Option = styled.div`
   padding: 0.2em;
@@ -21,21 +22,24 @@ const handleChange = (onChange, value) => {
   }
 };
 
-const AerodromeStatusDropdown = props => (
-  <Dropdown
-    className={props.className}
-    options={options}
-    value={props.value}
-    onChange={handleChange.bind(null, props.onChange)}
-    readOnly={props.readOnly}
-    optionFilter={filterOptions}
-    optionRenderer={renderOption}
-    valueRenderer={renderValue}
-    optionsRenderLimit={options.length}
-    noOptionsText="Status nicht gefunden"
-    mustSelect
-  />
-);
+const AerodromeStatusDropdown = props => {
+  const { t } = useTranslation();
+  return (
+    <Dropdown
+      className={props.className}
+      options={options}
+      value={props.value}
+      onChange={handleChange.bind(null, props.onChange)}
+      readOnly={props.readOnly}
+      optionFilter={filterOptions}
+      optionRenderer={renderOption}
+      valueRenderer={renderValue}
+      optionsRenderLimit={options.length}
+      noOptionsText={t('dropdown.statusNotFound')}
+      mustSelect
+    />
+  );
+};
 
 AerodromeStatusDropdown.propTypes = {
   className: PropTypes.string,

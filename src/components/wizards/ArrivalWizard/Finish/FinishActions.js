@@ -2,20 +2,22 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ActionButton from './ActionButton'
 import ActionsWrapper from './ActionsWrapper'
+import { useTranslation } from 'react-i18next'
 
 const FinishActions = ({itemKey, createMovementFromMovement, finish}) => {
+  const { t } = useTranslation();
   const exitImagePath = require('./ic_exit_to_app_black_48dp_2x.png');
   const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
 
   return (
     <ActionsWrapper>
       <ActionButton
-        label="Abflug erfassen"
+        label={t('hints.recordDeparture')}
         img={departureImagePath}
         onClick={createMovementFromMovement.bind(null, 'arrival', itemKey)}
       />
       <ActionButton
-        label="Beenden"
+        label={t('common.finish')}
         img={exitImagePath}
         onClick={finish}
       />

@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 const Dl = styled.dl`
   margin: 1em 0 2em 0;
@@ -18,45 +19,47 @@ const Dd = styled.dd`
   margin-left: 200px;
 `;
 
-const InternalDescription = () => (
-  <div>
-    Der interne Report enthält zusätzlich die folgenden Informationen:
-    <Dl>
-      <Dt>KEY</Dt>
-      <Dd>Die Referenznummer der Bewegung</Dd>
-      {__CONF__.memberManagement === true && (
-        <>
-          <Dt>MEMBERNR</Dt>
-          <Dd>Die Mitgliedernummer des Piloten</Dd>
-        </>
-      )}
-      <Dt>LASTNAME</Dt>
-      <Dd>Der Nachname des Piloten</Dd>
-      <Dt>EMAIL</Dt>
-      <Dd>Die E-Mail-Adresse des Piloten</Dd>
-      <Dt>MTOW</Dt>
-      <Dd>Das maximale Abfluggewicht</Dd>
-      <Dt>CLUB</Dt>
-      <Dd><em>1</em>, wenn Club-Flugzeug, sonst leer</Dd>
-      <Dt>HOME_BASE</Dt>
-      <Dd><em>1</em>, wenn auf diesem Flugplatz stationiertes Flugzeug (ohne Club-Flugzeuge), sonst leer</Dd>
-      <Dt>ORIGINAL_ORIDE</Dt>
-      <Dd>Der ursprüngliche Start- oder Zielflugplatz, falls er nicht identifiziert werden konnte
-        und durch <em>LSZZ</em> ersetzt wurde</Dd>
-      <Dt>REMARKS</Dt>
-      <Dd>Bemerkungen</Dd>
-      <Dt>FEES</Dt>
-      <Dd>Total der Landegebühren</Dd>
-      <Dt>LDG_COUNT</Dt>
-      <Dd>Anzahl Landungen</Dd>
-      <Dt>GA_COUNT</Dt>
-      <Dd>Anzahl Durchstarts</Dd>
-      <Dt>PAYMENT_METHOD</Dt>
-      <Dd>Die gewählte Zahlungsart</Dd>
-      <Dt>INVOICE_RECIPIENT</Dt>
-      <Dd>Name des Rechnungsempfängers bei Zahlungsart "Rechnung"</Dd>
-    </Dl>
-  </div>
-);
+const InternalDescription = () => {
+  const { t } = useTranslation();
+  return (
+    <div>
+      {t('airstatReport.internalDesc')}
+      <Dl>
+        <Dt>KEY</Dt>
+        <Dd>{t('airstatReport.referenceNumber')}</Dd>
+        {__CONF__.memberManagement === true && (
+          <>
+            <Dt>MEMBERNR</Dt>
+            <Dd>{t('airstatReport.memberNr')}</Dd>
+          </>
+        )}
+        <Dt>LASTNAME</Dt>
+        <Dd>{t('airstatReport.lastname')}</Dd>
+        <Dt>EMAIL</Dt>
+        <Dd>{t('airstatReport.email')}</Dd>
+        <Dt>MTOW</Dt>
+        <Dd>{t('airstatReport.mtow')}</Dd>
+        <Dt>CLUB</Dt>
+        <Dd><em>1</em>, {t('airstatReport.clubAircraft')}</Dd>
+        <Dt>HOME_BASE</Dt>
+        <Dd><em>1</em>, {t('airstatReport.homeBaseAircraft')}</Dd>
+        <Dt>ORIGINAL_ORIDE</Dt>
+        <Dd>{t('airstatReport.originalLocation')} <em>LSZZ</em> {t('airstatReport.originalLocationEnd')}</Dd>
+        <Dt>REMARKS</Dt>
+        <Dd>{t('airstatReport.remarks')}</Dd>
+        <Dt>FEES</Dt>
+        <Dd>{t('airstatReport.landingFeeTotal')}</Dd>
+        <Dt>LDG_COUNT</Dt>
+        <Dd>{t('airstatReport.landingCount')}</Dd>
+        <Dt>GA_COUNT</Dt>
+        <Dd>{t('airstatReport.goAroundCount')}</Dd>
+        <Dt>PAYMENT_METHOD</Dt>
+        <Dd>{t('airstatReport.paymentMethod')}</Dd>
+        <Dt>INVOICE_RECIPIENT</Dt>
+        <Dd>{t('airstatReport.invoiceRecipient')}</Dd>
+      </Dl>
+    </div>
+  );
+};
 
 export default InternalDescription;

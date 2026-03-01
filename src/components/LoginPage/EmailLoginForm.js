@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import LabeledComponent from '../LabeledComponent';
 import Failure from './Failure';
 import Button from '../Button';
@@ -55,6 +56,7 @@ const StyledOrText = styled.span`
 `
 
 const EmailLoginForm = props => {
+  const { t } = useTranslation();
   const {
     queryToken,
     guestOnly,
@@ -70,9 +72,8 @@ const EmailLoginForm = props => {
   } = props;
 
   if (emailSent) {
-    return <div style={{textAlign: 'center'}}>Es wurde eine E-Mail an <span
-      style={{fontWeight: 'bold'}}>{email}</span> gesendet. Folgen Sie bitte den Anweisungen in der E-Mail, um die
-      Anmeldung abzuschliessen.
+    return <div style={{textAlign: 'center'}}>{t('login.emailSentPre')} <span
+      style={{fontWeight: 'bold'}}>{email}</span> {t('login.emailSentPost')}
     </div>
   }
 
@@ -92,19 +93,17 @@ const EmailLoginForm = props => {
   if (emailLoginParamsPresent) {
     return (
       <div>
-        <div style={{marginBottom: '2rem'}}>Sie wollen sich über einen Login-Link anmelden. Geben Sie Ihre E-Mail-Adresse noch einmal ein, um die
-          Anmeldung abzuschliessen.
-        </div>
+        <div style={{marginBottom: '2rem'}}>{t('login.completeLogin')}</div>
         <StyledForm
           onSubmit={handleSubmit.bind(null, completeEmailAuthentication, email, !!queryToken)}
           disabled={props.submitting}
           data-cy="login-form"
         >
-          <StyledLabeledComponent label="E-Mail" component={emailInput}/>
+          <StyledLabeledComponent label={t('login.emailLabel')} component={emailInput}/>
           {emailLoginCompletionFailure && <Failure failure/>}
           <SubmitButton
             type="submit"
-            label="Anmelden"
+            label={t('login.loginButton')}
             icon="send"
             disabled={submitting || email.length === 0}
             primary
@@ -124,11 +123,11 @@ const EmailLoginForm = props => {
           disabled={props.submitting}
           data-cy="login-form"
         >
-          <StyledLabeledComponent label="E-Mail" component={emailInput}/>
+          <StyledLabeledComponent label={t('login.emailLabel')} component={emailInput}/>
           {failure && <Failure failure={failure}/>}
           <SubmitButton
             type="submit"
-            label="Anmelden"
+            label={t('login.loginButton')}
             icon="send"
             disabled={submitting || email.length === 0}
             primary
@@ -136,7 +135,7 @@ const EmailLoginForm = props => {
             loading={props.submitting}
           />
           {props.showCancel === true && (
-            <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel} dataCy="cancel"/>
+            <LoginDialogButton type="button" label={t('login.cancelButton')} onClick={props.onCancel} dataCy="cancel"/>
           )}
         </StyledForm>
       )}
@@ -145,16 +144,10 @@ const EmailLoginForm = props => {
           ? <GuestTokenLogin queryToken={queryToken}/>
           : (
             <>
-              <StyledHint>Wenn Sie sich mit Ihrer E-Mail-Adresse anmelden, können Sie Ihre eigenen erfassten
-                Bewegungen
-                anschliessend noch einsehen und
-                ggf. korrigieren.
-              </StyledHint>
-              <StyledOrContainer><StyledOrText>oder</StyledOrText></StyledOrContainer>
+              <StyledHint>{t('login.hintEmailLogin')}</StyledHint>
+              <StyledOrContainer><StyledOrText>{t('login.or')}</StyledOrText></StyledOrContainer>
               <GuestTokenLogin queryToken={queryToken}/>
-              <StyledHint>Wenn Sie sich als Gast anmelden, können Sie nur Ihre Ankunft und Ihren Abflug erfassen. Die
-                erfassten Bewegungen können Sie anschliessend nicht mehr einsehen.
-              </StyledHint>
+              <StyledHint>{t('login.hintGuestLogin')}</StyledHint>
             </>
           )
       )}

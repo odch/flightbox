@@ -3,6 +3,7 @@ import React from 'react'
 import styled from 'styled-components'
 import Button from '../Button'
 import PropTypes from 'prop-types'
+import { useTranslation } from 'react-i18next'
 
 const Question = styled.div`
   font-size: 1.5em;
@@ -15,12 +16,13 @@ const ButtonContainer = styled.div`
 `
 
 const DeleteDialog = ({question, onConfirm, onCancel}) => {
+  const { t } = useTranslation();
   const content = (
     <div>
       <Question>{question}</Question>
       <ButtonContainer>
-        <Button label="Abbrechen" onClick={onCancel} neutral/>
-        <Button label="Löschen" icon="delete" danger onClick={onConfirm}/>
+        <Button label={t('common.cancel')} onClick={onCancel} neutral/>
+        <Button label={t('common.delete')} icon="delete" danger onClick={onConfirm}/>
       </ButtonContainer>
     </div>
   )

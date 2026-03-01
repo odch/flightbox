@@ -3,6 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import Dropdown from '../Dropdown';
 import {categories} from '../../util/aircraftCategories';
+import { useTranslation } from 'react-i18next';
 
 const Option = styled.div`
   padding: 0.2em;
@@ -21,23 +22,26 @@ const handleChange = (onChange, value) => {
   }
 };
 
-const AircraftCategoryDropdown = props => (
-  <Dropdown
-    className={props.className}
-    options={categories.map(category => ({ key: category, label: category }))}
-    value={props.value}
-    onChange={handleChange.bind(null, props.onChange)}
-    readOnly={props.readOnly}
-    optionFilter={filterOptions}
-    optionRenderer={renderOption}
-    valueRenderer={renderValue}
-    optionsRenderLimit={categories.length}
-    noOptionsText="Kategorie nicht gefunden"
-    mustSelect
-    clearable={props.clearable}
-    dataCy={props.dataCy}
-  />
-);
+const AircraftCategoryDropdown = props => {
+  const { t } = useTranslation();
+  return (
+    <Dropdown
+      className={props.className}
+      options={categories.map(category => ({ key: category, label: category }))}
+      value={props.value}
+      onChange={handleChange.bind(null, props.onChange)}
+      readOnly={props.readOnly}
+      optionFilter={filterOptions}
+      optionRenderer={renderOption}
+      valueRenderer={renderValue}
+      optionsRenderLimit={categories.length}
+      noOptionsText={t('dropdown.categoryNotFound')}
+      mustSelect
+      clearable={props.clearable}
+      dataCy={props.dataCy}
+    />
+  );
+};
 
 AircraftCategoryDropdown.propTypes = {
   className: PropTypes.string,

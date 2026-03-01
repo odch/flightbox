@@ -3,6 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import ModalDialog from '../ModalDialog';
 import Button from '../Button';
+import { useTranslation } from 'react-i18next';
 
 const Heading = styled.div`
   font-size: 1.5em;
@@ -18,11 +19,12 @@ const CloseButton = styled(Button)`
 `;
 
 const Dialog = props => {
+  const { t } = useTranslation();
   const content = (
     <div>
       <Heading>{props.heading}</Heading>
       <Message>{props.message}</Message>
-      <CloseButton type="button" icon="close" label="Schliessen" onClick={props.onClose} flat/>
+      <CloseButton type="button" icon="close" label={t('common.close')} onClick={props.onClose} flat/>
     </div>
   );
   return <ModalDialog content={content}/>;

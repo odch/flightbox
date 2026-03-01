@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import {Field, Form} from 'react-final-form';
 import validate from '../../validate';
 import {renderSingleSelect, renderTextArea} from '../../renderField';
@@ -10,6 +11,7 @@ import {getAircraftOrigin, updateFeesTotal, updateGoAroundFees, updateLandingFee
 import CircuitsFieldHint from '../../CircuitsFieldHint';
 
 const FlightPage = (props) => {
+  const { t } = useTranslation();
   const {
     previousPage,
     onSubmit,
@@ -57,7 +59,7 @@ const FlightPage = (props) => {
                   meta,
                   items: flightTypes,
                   orientation: "vertical",
-                  label: "Typ",
+                  label: t('wizard.flightType'),
                   readOnly: props.readOnly,
                 })
               }
@@ -67,28 +69,28 @@ const FlightPage = (props) => {
               component={renderSingleSelect}
               items={arrivalRoutes}
               orientation="vertical"
-              label="Ankunftsroute"
+              label={t('wizard.arrivalRoute')}
               readOnly={readOnly}
               hint={arrivalRoute === 'circuits' && <CircuitsFieldHint/>}
             />
             <Field
               name="remarks"
               component={renderTextArea}
-              label="Bemerkungen"
+              label={t('wizard.remarks')}
               readOnly={readOnly}
             />
             <Field
               name="runway"
               component={renderSingleSelect}
               items={runways}
-              label="Pistenrichtung"
+              label={t('wizard.runway')}
               readOnly={readOnly}
               hidden={hiddenFields && hiddenFields.includes('runway')}
             />
           </FieldSet>
           <WizardNavigation
             previousStep={() => previousPage(form.getState().values)}
-            nextLabel="Speichern"
+            nextLabel={t('wizard.save')}
             nextVisible={!readOnly}
             cancel={cancel}
           />

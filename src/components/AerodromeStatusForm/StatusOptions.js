@@ -1,12 +1,16 @@
-export const options = [{
+import i18n from '../../i18n';
+
+export const getOptions = () => [{
   key: 'open',
-  label: 'Offen'
+  label: i18n.t('aerodromeStatus.open')
 }, {
   key: 'restricted',
-  label: 'Eingeschränkt'
+  label: i18n.t('aerodromeStatus.restricted')
 }, {
   key: 'closed',
-  label: 'Geschlossen'
+  label: i18n.t('aerodromeStatus.closed')
 }];
 
-export const getLabel = key => options.find(option => option.key === key).label;
+export const options = getOptions();
+
+export const getLabel = key => getOptions().find(option => option.key === key).label;

@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Dropdown from '../Dropdown';
+import { useTranslation } from 'react-i18next';
 
 const options = [{
   key: ',',
@@ -28,21 +29,24 @@ const handleChange = (onChange, value) => {
   }
 };
 
-const DelimiterDropdown = props => (
-  <Dropdown
-    className={props.className}
-    options={options}
-    value={props.value}
-    onChange={handleChange.bind(null, props.onChange)}
-    readOnly={props.readOnly}
-    optionFilter={filterOptions}
-    optionRenderer={renderOption}
-    valueRenderer={renderValue}
-    optionsRenderLimit={options.length}
-    noOptionsText="Nicht gefunden"
-    mustSelect
-  />
-);
+const DelimiterDropdown = props => {
+  const { t } = useTranslation();
+  return (
+    <Dropdown
+      className={props.className}
+      options={options}
+      value={props.value}
+      onChange={handleChange.bind(null, props.onChange)}
+      readOnly={props.readOnly}
+      optionFilter={filterOptions}
+      optionRenderer={renderOption}
+      valueRenderer={renderValue}
+      optionsRenderLimit={options.length}
+      noOptionsText={t('dropdown.notFound')}
+      mustSelect
+    />
+  );
+};
 
 DelimiterDropdown.propTypes = {
   className: PropTypes.string,

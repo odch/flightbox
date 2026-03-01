@@ -3,6 +3,7 @@ import MaterialIcon from '../MaterialIcon'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import InvoiceRecipient from './InvoiceRecipient'
+import { withTranslation } from 'react-i18next';
 
 const Form = styled.form`
     margin-bottom: 2em;
@@ -51,6 +52,7 @@ class InvoiceRecipientsList extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
     const {
       invoiceRecipients,
       addInvoiceRecipient,
@@ -75,7 +77,7 @@ class InvoiceRecipientsList extends React.Component {
             <Input
               type="text"
               value={this.state.newRecipientName}
-              placeholder="Name des Rechnungsempfängers (z.B. 'Flugschule XYZ')"
+              placeholder={t('invoiceRecipients.nameLabel')}
               onChange={e => this.setState({
                 newRecipientName: e.target.value
               })}
@@ -85,7 +87,7 @@ class InvoiceRecipientsList extends React.Component {
             type="submit"
             disabled={this.state.newRecipientName.length === 0}
           >
-            <MaterialIcon icon="done"/>&nbsp;Hinzufügen
+            <MaterialIcon icon="done"/>&nbsp;{t('invoiceRecipients.add')}
           </AddButton>
         </Form>
         <div>
@@ -121,4 +123,4 @@ InvoiceRecipientsList.propTypes = {
   removeInvoiceRecipientEmail: PropTypes.func.isRequired,
 }
 
-export default InvoiceRecipientsList
+export default withTranslation()(InvoiceRecipientsList)

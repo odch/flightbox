@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import Input from '../Input';
 import Button from '../Button';
 import LabeledComponent from '../LabeledComponent';
@@ -47,6 +48,7 @@ const handleMonthChange = (props, value) => props.setDate({
 });
 
 const ReportForm = props => {
+  const { t } = useTranslation();
   const year = props.date && props.date.year ? props.date.year : '';
   const month = props.date && props.date.month ? props.date.month : null;
   const delimiter = props.delimiter || ',';
@@ -78,13 +80,13 @@ const ReportForm = props => {
       onSubmit={handleSubmit.bind(null, props.generate, props.date, props.parameters)}
     >
       <fieldset disabled={props.disabled}>
-        <StyledLabeledComponent label="Jahr" component={yearInput}/>
-        {props.withMonth && <StyledLabeledComponent label="Monat" component={monthInput}/>}
-        {props.withDelimiter && <StyledLabeledComponent label="Trennzeichen" component={delimiterInput}/>}
+        <StyledLabeledComponent label={t('report.year')} component={yearInput}/>
+        {props.withMonth && <StyledLabeledComponent label={t('report.month')} component={monthInput}/>}
+        {props.withDelimiter && <StyledLabeledComponent label={t('report.delimiter')} component={delimiterInput}/>}
         {props.children}
         <Button
           type="submit"
-          label="Herunterladen"
+          label={t('common.download')}
           icon="file_download"
           disabled={props.disabled || !year || !month}
           primary/>

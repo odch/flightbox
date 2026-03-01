@@ -1,10 +1,14 @@
 import React from 'react'
 import Message from './Message'
+import { useTranslation } from 'react-i18next';
 
-const TwintPaymentMessage = () => (
-  <Message>
-    Bitte überweisen Sie die fällige Landetaxe über den ausliegenden TWINT QR-Code.
-  </Message>
-)
+const TwintPaymentMessage = () => {
+  const { t } = useTranslation();
+  return (
+    <Message>
+      {t('arrival.payment.twintMessage')}
+    </Message>
+  );
+}
 
 export default TwintPaymentMessage

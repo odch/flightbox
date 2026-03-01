@@ -1,22 +1,23 @@
+import i18n from '../../i18n';
 
 export const TYPE_LABELS = {
   departure: {
-    label: 'Abflug',
+    get label() { return i18n.t('movement.type.departure'); },
     icon: 'flight_takeoff'
   },
   arrival: {
-    label: 'Ankunft',
+    get label() { return i18n.t('movement.type.arrival'); },
     icon: 'flight_land'
   }
 };
 
 export const ACTION_LABELS = {
   departure: {
-    label: 'Ankunft erfassen',
+    get label() { return i18n.t('movement.action.createArrival'); },
     icon: 'flight_land'
   },
   arrival: {
-    label: 'Abflug erfassen',
+    get label() { return i18n.t('movement.action.createDeparture'); },
     icon: 'flight_takeoff'
   }
 };

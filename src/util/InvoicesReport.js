@@ -3,6 +3,7 @@ import {firebaseToLocal} from './movements.js';
 import dates from '../util/dates';
 import {getLabel as getFlightTypeLabel} from '../util/flightTypes';
 import formatMoney from './formatMoney'
+import i18n from '../i18n';
 
 import moment from 'moment';
 
@@ -11,7 +12,7 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 window.pdfFonts = pdfFonts; // actually not necessary, but otherwise `pdfFonts` is unused and would be removed
 
-const CHECKOUT_RECIPIENT_NAME = 'Online-Zahlungen'
+const CHECKOUT_RECIPIENT_NAME = i18n.t('invoicesReport.onlinePayments')
 
 class InvoicesReport {
 
@@ -130,7 +131,7 @@ class InvoicesReport {
       }))
 
     if (content.length === 0) {
-      content.push(`Keine Rechnungsempfänger im ausgewählten Zeitraum (${this.getMonthLabel()})`)
+      content.push(i18n.t('invoicesReport.noRecipients', { month: this.getMonthLabel() }))
     }
 
     return content
@@ -188,7 +189,7 @@ class InvoicesReport {
   }
 
   getMonthLabel() {
-    const monthName = dates.monthNames[this.month - 1]
+    const monthName = i18n.t(`months.${this.month - 1}`)
     return `${monthName} ${this.year}`
   }
 
@@ -198,7 +199,7 @@ class InvoicesReport {
     }
 
     content.push({
-      text: 'Landetaxen',
+      text: i18n.t('invoicesReport.landingFees'),
       style: 'subHeader'
     })
 
@@ -285,18 +286,18 @@ class InvoicesReport {
       table: {
         body: [
           [
-            {text: 'Datum', bold: true, alignment: 'right'},
-            {text: 'Uhrzeit', bold: true, alignment: 'right'},
-            {text: 'Immatrikulation', bold: true},
+            {text: i18n.t('invoicesReport.colDate'), bold: true, alignment: 'right'},
+            {text: i18n.t('invoicesReport.colTime'), bold: true, alignment: 'right'},
+            {text: i18n.t('invoicesReport.colImmatriculation'), bold: true},
             {text: 'MTOW', bold: true, alignment: 'right'},
-            {text: 'Vorname', bold: true},
-            {text: 'Nachname', bold: true},
-            {text: 'E-Mail', bold: true},
-            {text: 'Flugtyp', bold: true},
-            {text: 'Subtotal', bold: true, alignment: 'right'},
-            {text: 'MwSt.', bold: true, alignment: 'right'},
-            {text: 'Rundung', bold: true, alignment: 'right'},
-            {text: 'Total', bold: true, alignment: 'right'}
+            {text: i18n.t('invoicesReport.colFirstname'), bold: true},
+            {text: i18n.t('invoicesReport.colLastname'), bold: true},
+            {text: i18n.t('invoicesReport.colEmail'), bold: true},
+            {text: i18n.t('invoicesReport.colFlightType'), bold: true},
+            {text: i18n.t('invoicesReport.colSubtotal'), bold: true, alignment: 'right'},
+            {text: i18n.t('invoicesReport.colVat'), bold: true, alignment: 'right'},
+            {text: i18n.t('invoicesReport.colRounding'), bold: true, alignment: 'right'},
+            {text: i18n.t('invoicesReport.colTotal'), bold: true, alignment: 'right'}
           ],
           ...rows
         ]
@@ -317,7 +318,7 @@ class InvoicesReport {
     }
 
     content.push({
-      text: cancelled ? 'Zollgebühren ANNULLIERT' : 'Zollgebühren',
+      text: cancelled ? i18n.t('invoicesReport.customsFeesCancelled') : i18n.t('invoicesReport.customsFees'),
       style: 'subHeader'
     })
 
@@ -363,7 +364,7 @@ class InvoicesReport {
         {text: date, alignment: 'right'},
         registration,
         email,
-        direction === 'arrival' ? 'Einflug' : 'Ausflug',
+        direction === 'arrival' ? i18n.t('invoicesReport.directionArrival') : i18n.t('invoicesReport.directionDeparture'),
         {text: totalNetFormatted, alignment: 'right'},
         {text: vatFormatted, alignment: 'right'},
         {text: roundingDiffFormatted, alignment: 'right'},
@@ -393,14 +394,14 @@ class InvoicesReport {
       table: {
         body: [
           [
-            {text: 'Datum', bold: true, alignment: 'right'},
-            {text: 'Immatrikulation', bold: true},
-            {text: 'E-Mail', bold: true},
-            {text: 'Einflug / Ausflug', bold: true},
-            {text: 'Subtotal', bold: true, alignment: 'right'},
-            {text: 'MwSt.', bold: true, alignment: 'right'},
-            {text: 'Rundung', bold: true, alignment: 'right'},
-            {text: 'Total', bold: true, alignment: 'right'}
+            {text: i18n.t('invoicesReport.colDate'), bold: true, alignment: 'right'},
+            {text: i18n.t('invoicesReport.colImmatriculation'), bold: true},
+            {text: i18n.t('invoicesReport.colEmail'), bold: true},
+            {text: i18n.t('invoicesReport.colDirection'), bold: true},
+            {text: i18n.t('invoicesReport.colSubtotal'), bold: true, alignment: 'right'},
+            {text: i18n.t('invoicesReport.colVat'), bold: true, alignment: 'right'},
+            {text: i18n.t('invoicesReport.colRounding'), bold: true, alignment: 'right'},
+            {text: i18n.t('invoicesReport.colTotal'), bold: true, alignment: 'right'}
           ],
           ...rows
         ]

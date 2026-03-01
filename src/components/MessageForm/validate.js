@@ -1,35 +1,36 @@
 import validateUtil from '../../util/validate';
+import i18n from '../../i18n';
 
-const config = {
+const getConfig = () => ({
   name: {
     types: {
       required: true,
     },
-    message: 'Geben Sie hier Ihren Namen ein.',
+    message: i18n.t('message.validate.name'),
   },
   phone: {
     types: {
       required: true,
     },
-    message: 'Geben Sie hier Ihre Telefonnummer ein.',
+    message: i18n.t('message.validate.phone'),
   },
   email: {
     types: {
       required: true,
       match: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     },
-    message: 'Geben Sie hier Ihre E-Mail-Adresse ein.',
+    message: i18n.t('message.validate.email'),
   },
   message: {
     types: {
       required: true,
     },
-    message: 'Geben Sie hier Ihre Nachricht ein.',
+    message: i18n.t('message.validate.message'),
   },
-};
+});
 
 const validate = values => {
-  const errorArr = validateUtil(values, config);
+  const errorArr = validateUtil(values, getConfig());
 
   const errors = {};
 

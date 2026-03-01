@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import dates from '../../util/dates';
 import Action from './Action';
@@ -143,6 +144,7 @@ class MovementHeader extends React.PureComponent {
 
   render() {
     const props = this.props;
+    const { t } = this.props;
 
     const date = props.timeWithDate === true
       ? dates.formatDate(props.data.date)
@@ -179,7 +181,7 @@ class MovementHeader extends React.PureComponent {
                 <StyledLockIcon
                   icon="lock"
                   size={14}
-                  title="Diese Bewegung kann nicht mehr bearbeitet oder gelöscht werden"
+                  title={t('movement.locked')}
                 />
               )}
             </div>
@@ -243,4 +245,4 @@ MovementHeader.propTypes = {
   isAdmin: PropTypes.bool.isRequired
 };
 
-export default MovementHeader;
+export default withTranslation()(MovementHeader);

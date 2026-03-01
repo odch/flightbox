@@ -1,18 +1,20 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import ModalDialog from '../ModalDialog';
 import Heading from './Heading';
 import ErrorMessage from './ErrorMessage';
 import CloseButton from './CloseButton';
 
 const CommitFailureDialog = props => {
+  const { t } = useTranslation();
   const content = (
     <div>
-      <Heading>Speichern fehlgeschlagen</Heading>
-      <div>Die Daten konnten nicht gespeichert werden.</div>
+      <Heading>{t('commitFailure.heading')}</Heading>
+      <div>{t('commitFailure.message')}</div>
       {props.errorMsg && <ErrorMessage>{props.errorMsg}</ErrorMessage>}
       <div>
-        <CloseButton label="Schliessen" onClick={props.onClose} flat/>
+        <CloseButton label={t('commitFailure.closeButton')} onClick={props.onClose} flat/>
       </div>
     </div>
   );

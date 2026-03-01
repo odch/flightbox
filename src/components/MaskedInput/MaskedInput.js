@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import { withTranslation } from 'react-i18next'
 import {maskEmail, maskPhone, maskText} from '../../util/masking'
 import MaterialIcon from '../MaterialIcon'
 import Input from '../Input'
@@ -80,7 +81,7 @@ class MaskedInput extends Component {
           <ClearButton onClick={this.handleClear} type="button">
             <MaterialIcon icon="clear"/>
           </ClearButton>
-          {this.state.tooltipVisible && <Tooltip>Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert.</Tooltip>}
+          {this.state.tooltipVisible && <Tooltip>{this.props.t('maskedInput.tooltip')}</Tooltip>}
         </StyledMaskedComponent>
       )
     }
@@ -98,4 +99,4 @@ class MaskedInput extends Component {
   }
 }
 
-export default MaskedInput;
+export default withTranslation()(MaskedInput);

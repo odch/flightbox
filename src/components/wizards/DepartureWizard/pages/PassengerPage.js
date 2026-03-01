@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {Field, Form} from 'react-final-form';
 import validate from '../../validate';
 import {renderIncrementationField, renderSingleSelect} from '../../renderField';
@@ -18,6 +19,7 @@ const toNumber = value => {
 };
 
 const PassengerPage = (props) => {
+  const { t } = useTranslation();
   const { readOnly, hiddenFields, formValues, previousPage, onSubmit, cancel } = props;
   return (
     <Form
@@ -31,14 +33,14 @@ const PassengerPage = (props) => {
             <Field
               name="passengerCount"
               format={toNumber}
-              label="Anzahl Passagiere"
+              label={t('movement.details.passengerCount')}
               component={renderIncrementationField}
               readOnly={readOnly}
             />
             <Field
               name="carriageVoucher"
               items={ITEMS}
-              label="Beförderungsschein"
+              label={t('movement.details.carriageVoucher')}
               component={renderSingleSelect}
               readOnly={readOnly}
             />

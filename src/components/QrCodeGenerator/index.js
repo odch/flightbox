@@ -2,6 +2,7 @@ import React, {Component} from "react";
 import QRCode from "qrcode-svg";
 import Button from '../Button'
 import styled from 'styled-components'
+import { withTranslation } from 'react-i18next'
 
 const Wrapper = styled.div`
   display: flex;
@@ -29,12 +30,13 @@ class QRCodeGenerator extends Component {
   }
 
   render() {
+    const { t } = this.props;
     return (
       <Wrapper>
         <div dangerouslySetInnerHTML={{ __html: this.state.qrSvg }} />
         <Button
           onClick={this.downloadQRCode}
-          label="Herunterladen"
+          label={t('common.download')}
           icon="file_download"
           />
       </Wrapper>
@@ -42,4 +44,4 @@ class QRCodeGenerator extends Component {
   }
 }
 
-export default QRCodeGenerator;
+export default withTranslation()(QRCodeGenerator);

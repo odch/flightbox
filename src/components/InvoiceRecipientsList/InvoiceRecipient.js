@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
 import ItemList from '../ItemList'
@@ -55,6 +56,7 @@ class InvoiceRecipient extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
     const {recipient, expanded, onRemove, onAddEmail, onRemoveEmail, onExpandedChange} = this.props
 
     const sortedEmails = [...(recipient.emails || [])].sort((a, b) =>
@@ -73,7 +75,7 @@ class InvoiceRecipient extends React.Component {
           {expanded && (
             <Details>
               <ItemList items={sortedEmails}
-                        placeholder="Berechtigtes Login (E-Mail)"
+                        placeholder={t('invoiceRecipients.authorizedLogin')}
                         newItem={this.state.newEmail}
                         newItemInputType="email"
                         changeNewItem={value => {
@@ -84,7 +86,7 @@ class InvoiceRecipient extends React.Component {
                         addItem={onAddEmail}
                         removeItem={onRemoveEmail}/>
               <ButtonContainer>
-                <Button label="Löschen" icon="delete" danger onClick={() => {
+                <Button label={t('invoiceRecipients.delete')} icon="delete" danger onClick={() => {
                   this.setState({
                     recipientDeleteDialogOpen: true
                   })
@@ -95,7 +97,7 @@ class InvoiceRecipient extends React.Component {
         </Wrapper>
         {this.state.recipientDeleteDialogOpen && (
           <DeleteDialog
-            question={`Möchten Sie den Rechnungsempfänger "${recipient.name}" wirklich löschen?`}
+            question={t('invoiceRecipients.deleteConfirm', {name: recipient.name})}
             onConfirm={() => onRemove()}
             onCancel={() => {
               this.setState({
@@ -119,4 +121,4 @@ InvoiceRecipient.propTypes = {
   onExpandedChange: PropTypes.func,
 };
 
-export default InvoiceRecipient;
+export default withTranslation()(InvoiceRecipient);
