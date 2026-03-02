@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {getFromItemKey} from '../../../../util/reference-number';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
@@ -9,14 +10,8 @@ import PaymentMethod from '../../../../containers/PaymentMethodContainer'
 import {HeadingType} from '../../MovementWizard'
 import Fees from './Fees'
 
-const getHeading = (headingType) =>
-  headingType === HeadingType.UPDATED
-    ? 'Die Ankunft wurde erfolgreich aktualisiert!'
-    : headingType === HeadingType.CREATED
-      ? 'Ihre Ankunft wurde erfolgreich erfasst!'
-      : undefined;
-
 const Finish = props => {
+  const { t } = useTranslation();
   const {
     isUpdate,
     headingType,
@@ -30,7 +25,11 @@ const Finish = props => {
     createMovementFromMovement,
     finish
   } = props
-  const heading = getHeading(headingType);
+  const heading = headingType === HeadingType.UPDATED
+    ? t('arrival.updated')
+    : headingType === HeadingType.CREATED
+      ? t('arrival.created')
+      : undefined;
 
   const showPayment = (isHomeBase === false || __CONF__.homebasePayment) && !isUpdate && !!fees && fees.totalGross > 0
 
@@ -51,7 +50,7 @@ const Finish = props => {
       {heading && <Heading>{heading}</Heading>}
       {showPayment ? (
         <>
-          <ReferenceNumberMessage>Referenznummer: {getFromItemKey(itemKey)}</ReferenceNumberMessage>
+          <ReferenceNumberMessage>{t('arrival.referenceNumber', {number: getFromItemKey(itemKey)})}</ReferenceNumberMessage>
           <Fees fees={fees}/>
           <PaymentMethod
             itemKey={itemKey}

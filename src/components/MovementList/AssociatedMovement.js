@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
+import { withTranslation } from 'react-i18next';
 import MaterialIcon from '../MaterialIcon';
 import MovementDetails from './MovementDetails';
 import Action from './Action';
@@ -59,24 +60,24 @@ class AssociatedMovement extends React.PureComponent {
   }
 
   render() {
-    const {movementType, associatedMovementData} = this.props;
+    const {movementType, associatedMovementData, t} = this.props;
 
     let label;
     let text;
 
     if (movementType === 'departure') {
-      label = 'Zugeordnete Ankunft';
+      label = t('movement.associated.arrivalLabel');
       text = associatedMovementData
-        ? 'Die folgende Ankunft wurde diesem Abflug automatisch zugeordnet:'
+        ? t('movement.associated.arrivalFound')
         : associatedMovementData === null
-          ? 'Es konnte keine Ankunft zugeordnet werden.'
+          ? t('movement.associated.arrivalNotFound')
           : null;
     } else {
-      label = 'Zugeordneter Abflug';
+      label = t('movement.associated.departureLabel');
       text = associatedMovementData
-        ? 'Der folgende Abflug wurde dieser Ankunft automatisch zugeordnet:'
+        ? t('movement.associated.departureFound')
         : associatedMovementData === null
-          ? 'Es konnte kein Abflug zugeordnet werden.'
+          ? t('movement.associated.departureNotFound')
           : null;
     }
 
@@ -122,4 +123,4 @@ AssociatedMovement.propTypes = {
   createMovementFromMovement: PropTypes.func.isRequired
 };
 
-export default AssociatedMovement;
+export default withTranslation()(AssociatedMovement);

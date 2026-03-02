@@ -224,6 +224,23 @@ describe('util', () => {
       });
     });
 
+    describe('compareDescending - same time and same immatriculation', () => {
+      it('returns 0 if same time and same immatriculation', () => {
+        const a = {
+          date: '2016-03-08',
+          time: '08:30',
+          immatriculation: 'HB-KFW',
+        };
+        const b = {
+          date: '2016-03-08',
+          time: '08:30',
+          immatriculation: 'HB-KFW',
+        };
+
+        expect(compareDescending(a, b)).toBe(0);
+      });
+    });
+
     describe('transferValues', () => {
       it('transfers values which are not undefined and not null', () => {
         const source = {

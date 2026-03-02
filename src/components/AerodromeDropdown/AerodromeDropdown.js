@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Dropdown from '../Dropdown';
 import Option from './Option';
+import { useTranslation } from 'react-i18next';
 
 const optionRenderer = (option, focussed) => (
   <Option code={option.key} name={option.name} focussed={focussed}/>
@@ -45,24 +46,27 @@ const callWithValue = (delegate, aerodromes, value) => {
   }
 };
 
-const AerodromeDropdown = props => (
-  <Dropdown
-    className="AerodromeDropdown"
-    options={props.aerodromes.data.array.sort(aerodromesComparator())}
-    optionRenderer={optionRenderer}
-    optionFilter={optionFilter}
-    onChange={callWithValue.bind(null, props.onChange, props.aerodromes.data.array)}
-    onBeforeInputChange={normalize}
-    value={props.value}
-    showOptionsOnFocus={false}
-    noOptionsText="Kein Flugplatz gefunden"
-    moreOptionsText="Mehr Flugplätze vorhanden! Tippen Sie einen Teil des ICAO-Codes oder des Namens, um die Liste einzuschränken."
-    onFocus={props.onFocus}
-    onBlur={callWithValue.bind(null, props.onBlur, props.aerodromes.data.array)}
-    readOnly={props.readOnly}
-    dataCy={props.dataCy}
-  />
-);
+const AerodromeDropdown = props => {
+  const { t } = useTranslation();
+  return (
+    <Dropdown
+      className="AerodromeDropdown"
+      options={props.aerodromes.data.array.sort(aerodromesComparator())}
+      optionRenderer={optionRenderer}
+      optionFilter={optionFilter}
+      onChange={callWithValue.bind(null, props.onChange, props.aerodromes.data.array)}
+      onBeforeInputChange={normalize}
+      value={props.value}
+      showOptionsOnFocus={false}
+      noOptionsText={t('dropdown.aerodromeNotFound')}
+      moreOptionsText={t('dropdown.moreAerodromes')}
+      onFocus={props.onFocus}
+      onBlur={callWithValue.bind(null, props.onBlur, props.aerodromes.data.array)}
+      readOnly={props.readOnly}
+      dataCy={props.dataCy}
+    />
+  );
+};
 
 AerodromeDropdown.propTypes = {
   value: PropTypes.string.isRequired,

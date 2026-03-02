@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 const Wrapper = styled.div`
   color: ${props => props.theme.colors.danger};
@@ -13,8 +14,9 @@ const Wrapper = styled.div`
   justify-content: center;
 `;
 
-const NoPaymentTag = () => (
-  <Wrapper>Zahlung offen</Wrapper>
-);
+const NoPaymentTag = () => {
+  const { t } = useTranslation();
+  return <Wrapper>{t('movement.paymentPending')}</Wrapper>;
+};
 
 export default NoPaymentTag;

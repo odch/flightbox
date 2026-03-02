@@ -5,6 +5,7 @@ import Button from '../Button'
 import LabeledComponent from '../LabeledComponent';
 import TextArea from '../TextArea';
 import AerodromeStatusDropdown from './AerodromeStatusDropdown'
+import { withTranslation } from 'react-i18next'
 
 const StyledForm = styled.form`
   padding: 1em
@@ -35,7 +36,7 @@ class StatusForm extends React.Component {
   }
 
   render() {
-    const {data, disabled, dirty} = this.props;
+    const {data, disabled, dirty, t} = this.props;
 
     const statusDropdown = <AerodromeStatusDropdown value={data.status} onChange={this.handleStatusChange.bind(this)}/>;
     const detailsTextArea = <TextArea value={data.details} rows={6} onChange={this.handleDetailsChange.bind(this)}/>;
@@ -46,11 +47,11 @@ class StatusForm extends React.Component {
         onSubmit={this.handleSubmit.bind(this)}
       >
         <fieldset disabled={disabled}>
-          <StyledLabeledComponent label="Status" component={statusDropdown}/>
-          <StyledLabeledComponent label="Details" component={detailsTextArea}/>
+          <StyledLabeledComponent label={t('common.status')} component={statusDropdown}/>
+          <StyledLabeledComponent label={t('common.details')} component={detailsTextArea}/>
           <Button
             type="submit"
-            label="Speichern"
+            label={t('common.save')}
             icon="save"
             disabled={disabled || !dirty}
             primary/>
@@ -71,4 +72,4 @@ StatusForm.propTypes = {
   saveAerodromeStatus: PropTypes.func.isRequired
 };
 
-export default StatusForm;
+export default withTranslation()(StatusForm);

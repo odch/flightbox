@@ -2,11 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import ImageButton from '../../../ImageButton';
-
-const getMessage = isUpdate =>
-  isUpdate === true
-    ? 'Der Abflug wurde erfolgreich aktualisiert!'
-    : 'Ihr Abflug wurde erfolgreich erfasst!';
+import { useTranslation } from 'react-i18next';
 
 const Wrapper = styled.div`
   text-align: center;
@@ -18,11 +14,12 @@ const Message = styled.div`
 `;
 
 const Finish = props => {
+  const { t } = useTranslation();
   const exitImagePath = require('./ic_exit_to_app_black_48dp_2x.png');
   return (
     <Wrapper>
-      <Message>{getMessage(props.isUpdate)}</Message>
-      <ImageButton label="Beenden" img={exitImagePath} onClick={props.finish} dataCy="finish-button"/>
+      <Message>{props.isUpdate === true ? t('departure.updated') : t('departure.created')}</Message>
+      <ImageButton label={t('departure.finish')} img={exitImagePath} onClick={props.finish} dataCy="finish-button"/>
     </Wrapper>
   );
 };

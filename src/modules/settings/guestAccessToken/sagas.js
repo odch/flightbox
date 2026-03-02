@@ -3,7 +3,7 @@ import * as actions from './actions';
 import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
 
-function* loadGuestAccessToken(channel) {
+export function* loadGuestAccessToken(channel) {
   firebase('/settings/guestAccessToken').on('value', (snapshot) => {
     channel.put(actions.guestAccessTokenLoaded(snapshot.val()));
   });

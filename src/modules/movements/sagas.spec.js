@@ -4,8 +4,12 @@ import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
+import {addMovementAssociationListener, removeMovementAssociationListener} from './remote';
 import {LIMIT} from './pagination';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
+import {loadRemote} from '../profile'
+
+jest.mock('./remote');
 
 describe('modules', () => {
   describe('movements', () => {
@@ -553,6 +557,670 @@ describe('modules', () => {
           expect(generator.next(key).value).toEqual(put(actions.saveMovementSuccess(key, formValues)));
 
           expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('getProfileDefaultValues', () => {
+        it('should return empty object if no auth', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const next = generator.next(null);
+          expect(next.value).toEqual({});
+          expect(next.done).toEqual(true);
+        });
+
+        it('should return empty object if auth has no uid', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const next = generator.next({});
+          expect(next.value).toEqual({});
+          expect(next.done).toEqual(true);
+        });
+
+        it('should return empty object if auth is guest', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const next = generator.next({ uid: 'guest-uid', guest: true });
+          expect(next.value).toEqual({});
+          expect(next.done).toEqual(true);
+        });
+
+        it('should return empty object if auth is kiosk', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const next = generator.next({ uid: 'kiosk-uid', kiosk: true });
+          expect(next.value).toEqual({});
+          expect(next.done).toEqual(true);
+        });
+
+        it('should load profile and return values if auth has uid', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { uid: 'user-123' };
+          expect(generator.next(auth).value).toEqual(call(loadRemote, 'user-123'));
+
+          const profileData = { firstname: 'John', lastname: 'Doe' };
+          const snapshot = { val: () => profileData };
+
+          const next = generator.next(snapshot);
+          expect(next.value).toEqual(profileData);
+          expect(next.done).toEqual(true);
+        });
+      });
+
+      describe('filterMovements', () => {
+        it('should dispatch loadMovements if filter date changed', () => {
+          const generator = sagas.filterMovements();
+
+          expect(generator.next().value).toEqual(select(sagas.stateSelector));
+
+          const state = {
+            filter: {
+              date: { start: '2017-05-01', end: '2017-05-31' }
+            },
+            previousFilter: {
+              date: { start: '2017-04-01', end: '2017-04-30' }
+            }
+          };
+
+          expect(generator.next(state).value).toEqual(put(actions.loadMovements(true)));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not dispatch loadMovements if filter date not changed', () => {
+          const generator = sagas.filterMovements();
+
+          expect(generator.next().value).toEqual(select(sagas.stateSelector));
+
+          const state = {
+            filter: {
+              date: { start: '2017-05-01', end: '2017-05-31' }
+            },
+            previousFilter: {
+              date: { start: '2017-05-01', end: '2017-05-31' }
+            }
+          };
+
+          expect(generator.next(state).done).toEqual(true);
+        });
+      });
+
+      describe('saveMovementPaymentMethod', () => {
+        it('should save movement payment method', () => {
+          const key = 'dep-key-1';
+          const paymentMethod = 'cash';
+          const action = actions.saveMovementPaymentMethod('departure', key, paymentMethod);
+
+          const generator = sagas.saveMovementPaymentMethod(action);
+
+          expect(generator.next().value).toEqual(
+            call(remote.saveMovement, '/departures', key, { paymentMethod })
+          );
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should handle errors silently', () => {
+          const key = 'dep-key-1';
+          const paymentMethod = 'cash';
+          const action = actions.saveMovementPaymentMethod('departure', key, paymentMethod);
+
+          const generator = sagas.saveMovementPaymentMethod(action);
+
+          expect(generator.next().value).toEqual(
+            call(remote.saveMovement, '/departures', key, { paymentMethod })
+          );
+
+          const error = new Error('save failed');
+          expect(generator.throw(error).done).toEqual(true);
+        });
+      });
+
+      describe('saveMovement error path', () => {
+        it('should put saveMovementFailed on error', () => {
+          const generator = sagas.saveMovement();
+
+          expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
+
+          const formValues = {
+            type: 'departure',
+            immatriculation: 'HBABC',
+            date: '2016-10-09',
+            time: '16:00',
+          };
+
+          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
+
+          const auth = { email: 'pilot@example.com' };
+
+          expect(generator.next(auth).value).toMatchObject({ type: 'CALL' });
+
+          const error = new Error('save failed');
+          expect(generator.throw(error).value).toEqual(put(actions.saveMovementFailed(error)));
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('loadMovement', () => {
+        it('should load a departure by key and dispatch addMovementByKey', () => {
+          const action = actions.loadMovement('departure-key', 'departure');
+          const generator = sagas.loadMovement(action);
+
+          expect(generator.next().value).toEqual(
+            call(remote.loadByKey, '/departures', 'departure-key')
+          );
+
+          const snapshot = new FakeFirebaseSnapshot('departure-key', {
+            immatriculation: 'HBABC',
+            dateTime: '2016-10-09T14:00:00.000Z',
+            negativeTimestamp: -1476021600000
+          });
+
+          const expectedMovement = {
+            immatriculation: 'HBABC',
+            date: '2016-10-09',
+            time: '16:00',
+            key: 'departure-key',
+            type: 'departure'
+          };
+
+          expect(generator.next(snapshot).value).toEqual(
+            put(actions.addMovementByKey(expectedMovement))
+          );
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should load an arrival by key and dispatch addMovementByKey', () => {
+          const action = actions.loadMovement('arrival-key', 'arrival');
+          const generator = sagas.loadMovement(action);
+
+          expect(generator.next().value).toEqual(
+            call(remote.loadByKey, '/arrivals', 'arrival-key')
+          );
+
+          const snapshot = new FakeFirebaseSnapshot('arrival-key', {
+            immatriculation: 'HBKOF',
+            dateTime: '2017-05-03T09:00:00.000Z',
+            negativeTimestamp: -1493802000000
+          });
+
+          expect(generator.next(snapshot).value).toMatchObject({
+            type: 'PUT'
+          });
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('loadDeparturesAndArrivals', () => {
+        it('should call loadDeparturesAndArrivalsFiltered when date filter is set', () => {
+          const movements = {
+            filter: { date: { start: '2017-05-01', end: '2017-05-31' } },
+            data: new ImmutableItemsArray()
+          };
+
+          const generator = sagas.loadDeparturesAndArrivals(movements, false);
+
+          expect(generator.next().value).toEqual(
+            call(sagas.loadDeparturesAndArrivalsFiltered, movements)
+          );
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should call loadLatestDeparturesAndArrivalsPaged when no date filter', () => {
+          const movements = {
+            filter: { date: { start: null, end: null } },
+            data: new ImmutableItemsArray()
+          };
+
+          const generator = sagas.loadDeparturesAndArrivals(movements, false);
+
+          expect(generator.next().value).toEqual(
+            call(sagas.loadLatestDeparturesAndArrivalsPaged, movements, false)
+          );
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('loadDeparturesAndArrivalsFiltered', () => {
+        it('should call remote.loadLimited for departures and arrivals with date range', () => {
+          const movements = {
+            filter: { date: { start: '2017-05-01', end: '2017-05-31' } }
+          };
+
+          const generator = sagas.loadDeparturesAndArrivalsFiltered(movements);
+
+          const start = dates.negativeTimestampEndOfDay('2017-05-31');
+          const end = dates.negativeTimestampStartOfDay('2017-05-01');
+
+          expect(generator.next().value).toEqual(
+            call(remote.loadLimited, '/departures', start, null, end)
+          );
+
+          const departuresResult = { snapshot: {}, ref: {} };
+          expect(generator.next(departuresResult).value).toEqual(
+            call(remote.loadLimited, '/arrivals', start, null, end)
+          );
+
+          const arrivalsResult = { snapshot: {}, ref: {} };
+          const result = generator.next(arrivalsResult);
+
+          expect(result.value).toEqual({ departures: departuresResult, arrivals: arrivalsResult });
+          expect(result.done).toEqual(true);
+        });
+      });
+
+      describe('getReloadParams', () => {
+        it('should return reload arrivals when departure is older', () => {
+          const movements = {
+            departures: {
+              snapshot: new FakeFirebaseSnapshot(null, [
+                new FakeFirebaseSnapshot('dep1', { negativeTimestamp: -1493791200000 }) // older (larger value)
+              ])
+            },
+            arrivals: {
+              snapshot: new FakeFirebaseSnapshot(null, [
+                new FakeFirebaseSnapshot('arr1', { negativeTimestamp: -1493802000000 }) // newer (smaller value)
+              ])
+            }
+          };
+
+          const result = sagas.getReloadParams(movements);
+          expect(result).toEqual({
+            reloadType: 'arrivals',
+            reloadEnd: -1493791200000
+          });
+        });
+
+        it('should return reload departures when arrival is older', () => {
+          const movements = {
+            departures: {
+              snapshot: new FakeFirebaseSnapshot(null, [
+                new FakeFirebaseSnapshot('dep1', { negativeTimestamp: -1493802000000 }) // newer
+              ])
+            },
+            arrivals: {
+              snapshot: new FakeFirebaseSnapshot(null, [
+                new FakeFirebaseSnapshot('arr1', { negativeTimestamp: -1493791200000 }) // older
+              ])
+            }
+          };
+
+          const result = sagas.getReloadParams(movements);
+          expect(result).toEqual({
+            reloadType: 'departures',
+            reloadEnd: -1493791200000
+          });
+        });
+
+        it('should return reload arrivals when only departures exist', () => {
+          const movements = {
+            departures: {
+              snapshot: new FakeFirebaseSnapshot(null, [
+                new FakeFirebaseSnapshot('dep1', { negativeTimestamp: -1493802000000 })
+              ])
+            },
+            arrivals: {
+              snapshot: new FakeFirebaseSnapshot(null, [])
+            }
+          };
+
+          const result = sagas.getReloadParams(movements);
+          expect(result).toEqual({
+            reloadType: 'arrivals',
+            reloadEnd: -1493802000000
+          });
+        });
+
+        it('should return reload departures when only arrivals exist', () => {
+          const movements = {
+            departures: {
+              snapshot: new FakeFirebaseSnapshot(null, [])
+            },
+            arrivals: {
+              snapshot: new FakeFirebaseSnapshot(null, [
+                new FakeFirebaseSnapshot('arr1', { negativeTimestamp: -1493802000000 })
+              ])
+            }
+          };
+
+          const result = sagas.getReloadParams(movements);
+          expect(result).toEqual({
+            reloadType: 'departures',
+            reloadEnd: -1493802000000
+          });
+        });
+
+        it('should return null when both collections are empty', () => {
+          const movements = {
+            departures: { snapshot: new FakeFirebaseSnapshot(null, []) },
+            arrivals: { snapshot: new FakeFirebaseSnapshot(null, []) }
+          };
+
+          const result = sagas.getReloadParams(movements);
+          expect(result).toBeNull();
+        });
+      });
+
+      describe('addMovements', () => {
+        it('should filter movements by auth.email for non-admin users', () => {
+          const channel = { put: jest.fn() };
+
+          const departuresSnapshot = new FakeFirebaseSnapshot(null, [
+            new FakeFirebaseSnapshot('dep1', {
+              immatriculation: 'HBABC',
+              dateTime: '2017-05-03T09:00:00.000Z',
+              negativeTimestamp: -1493802000000,
+              createdBy: 'pilot@example.com'
+            })
+          ]);
+
+          const arrivalsSnapshot = new FakeFirebaseSnapshot(null, [
+            new FakeFirebaseSnapshot('arr1', {
+              immatriculation: 'HBKOF',
+              dateTime: '2017-05-03T10:00:00.000Z',
+              negativeTimestamp: -1493798400000,
+              createdBy: 'other@example.com'
+            })
+          ]);
+
+          const existingMovements = new ImmutableItemsArray();
+          const generator = sagas.addMovements(
+            departuresSnapshot, arrivalsSnapshot, existingMovements, channel
+          );
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { admin: false, email: 'pilot@example.com' };
+          expect(generator.next(auth).value).toEqual(
+            call(sagas.monitorAssociations, expect.anything(), existingMovements, channel)
+          );
+
+          expect(generator.next().done).toEqual(true);
+          expect(channel.put).toHaveBeenCalledWith(
+            expect.objectContaining({ type: 'SET_MOVEMENTS' })
+          );
+        });
+
+        it('should include all movements for admin users', () => {
+          const channel = { put: jest.fn() };
+
+          const departuresSnapshot = new FakeFirebaseSnapshot(null, [
+            new FakeFirebaseSnapshot('dep1', {
+              immatriculation: 'HBABC',
+              dateTime: '2017-05-03T09:00:00.000Z',
+              negativeTimestamp: -1493802000000,
+              createdBy: 'pilot@example.com'
+            })
+          ]);
+
+          const arrivalsSnapshot = new FakeFirebaseSnapshot(null, []);
+
+          const existingMovements = new ImmutableItemsArray();
+          const generator = sagas.addMovements(
+            departuresSnapshot, arrivalsSnapshot, existingMovements, channel
+          );
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { admin: true, email: 'admin@example.com' };
+          expect(generator.next(auth).value).toEqual(
+            call(sagas.monitorAssociations, expect.anything(), existingMovements, channel)
+          );
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('monitorAssociations', () => {
+        beforeEach(() => {
+          addMovementAssociationListener.mockClear();
+          removeMovementAssociationListener.mockClear();
+        });
+
+        it('should add listeners for new movements and remove for deleted', () => {
+          const channel = { put: jest.fn() };
+
+          const existingMovement = { key: 'dep1', type: 'departure' };
+          const newMovement = { key: 'dep2', type: 'departure' };
+
+          const oldMovements = new ImmutableItemsArray([existingMovement]);
+          const newMovements = new ImmutableItemsArray([newMovement]);
+
+          const generator = sagas.monitorAssociations(newMovements, oldMovements, channel);
+
+          expect(generator.next().done).toEqual(true);
+
+          expect(addMovementAssociationListener).toHaveBeenCalledWith(
+            'departure', 'dep2', expect.any(Function)
+          );
+          expect(removeMovementAssociationListener).toHaveBeenCalledWith('departure', 'dep1');
+        });
+      });
+
+      describe('movementAdded', () => {
+        it('should call addMovementToState', () => {
+          const channel = { put: jest.fn() };
+          const snapshot = new FakeFirebaseSnapshot('dep1', {
+            immatriculation: 'HBABC',
+            dateTime: '2017-05-03T09:00:00.000Z',
+            negativeTimestamp: -1493802000000
+          });
+          const action = actions.movementAdded(snapshot, 'departure');
+
+          const generator = sagas.movementAdded(channel, action);
+
+          expect(generator.next().value).toEqual(select(sagas.stateSelector));
+
+          const state = { data: new ImmutableItemsArray() };
+
+          expect(generator.next(state).value).toEqual(
+            call(sagas.addMovementToState, snapshot, 'departure', state, channel)
+          );
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('movementChanged', () => {
+        it('should remove then add the movement', () => {
+          const channel = { put: jest.fn() };
+          const snapshot = new FakeFirebaseSnapshot('dep1', {
+            immatriculation: 'HBABC',
+            dateTime: '2017-05-03T09:00:00.000Z',
+            negativeTimestamp: -1493802000000
+          });
+          const action = actions.movementChanged(snapshot, 'departure');
+
+          const generator = sagas.movementChanged(channel, action);
+
+          expect(generator.next().value).toEqual(
+            call(sagas.removeMovementFromState, snapshot, channel)
+          );
+
+          const currentState = { data: new ImmutableItemsArray() };
+
+          expect(generator.next(currentState).value).toEqual(
+            call(sagas.addMovementToState, snapshot, 'departure', currentState, channel)
+          );
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('movementDeleted', () => {
+        it('should call removeMovementFromState', () => {
+          const channel = { put: jest.fn() };
+          const snapshot = new FakeFirebaseSnapshot('dep1', {});
+          const action = actions.movementDeleted(snapshot, 'departure');
+
+          const generator = sagas.movementDeleted(channel, action);
+
+          expect(generator.next().value).toEqual(
+            call(sagas.removeMovementFromState, snapshot, channel)
+          );
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('removeMovementFromState', () => {
+        it('should return early with current data if movement not found', () => {
+          const channel = { put: jest.fn() };
+          const snapshot = new FakeFirebaseSnapshot('dep-not-found', {});
+
+          const existingData = new ImmutableItemsArray([]);
+          const generator = sagas.removeMovementFromState(snapshot, channel);
+
+          expect(generator.next().value).toEqual(select(sagas.stateSelector));
+
+          const state = { data: existingData };
+          const result = generator.next(state);
+
+          expect(result.value).toEqual({ data: existingData });
+          expect(result.done).toEqual(true);
+          expect(channel.put).not.toHaveBeenCalled();
+        });
+
+        it('should remove movement and put setMovements', () => {
+          const channel = { put: jest.fn() };
+          const movement = {
+            key: 'dep1',
+            type: 'departure',
+            immatriculation: 'HBABC',
+            date: '2017-05-03',
+            time: '09:00'
+          };
+
+          const existingData = new ImmutableItemsArray([movement]);
+          const snapshot = new FakeFirebaseSnapshot('dep1', {});
+
+          const generator = sagas.removeMovementFromState(snapshot, channel);
+
+          expect(generator.next().value).toEqual(select(sagas.stateSelector));
+
+          const state = { data: existingData };
+          expect(generator.next(state).value).toEqual(
+            call(removeMovementAssociationListener, 'departure', 'dep1')
+          );
+
+          expect(generator.next().done).toEqual(true);
+          expect(channel.put).toHaveBeenCalledWith(
+            expect.objectContaining({ type: 'SET_MOVEMENTS' })
+          );
+        });
+      });
+
+      describe('addMovementToState', () => {
+        beforeEach(() => {
+          addMovementAssociationListener.mockClear();
+        });
+
+        it('should not add movement if it already exists in state', () => {
+          const channel = { put: jest.fn() };
+          const existingMovement = {
+            key: 'dep1',
+            type: 'departure',
+            immatriculation: 'HBABC',
+            date: '2017-05-03',
+            time: '09:00'
+          };
+          const existingData = new ImmutableItemsArray([existingMovement]);
+          const snapshot = new FakeFirebaseSnapshot('dep1', {
+            immatriculation: 'HBABC',
+            dateTime: '2017-05-03T09:00:00.000Z',
+            negativeTimestamp: -1493802000000
+          });
+
+          const generator = sagas.addMovementToState(
+            snapshot, 'departure', { data: existingData }, channel
+          );
+
+          expect(generator.next().done).toEqual(true);
+          expect(channel.put).not.toHaveBeenCalled();
+        });
+
+        it('should not add movement if user email does not match createdBy', () => {
+          const channel = { put: jest.fn() };
+          const existingData = new ImmutableItemsArray([]);
+          const snapshot = new FakeFirebaseSnapshot('dep1', {
+            immatriculation: 'HBABC',
+            dateTime: '2017-05-03T09:00:00.000Z',
+            negativeTimestamp: -1493802000000,
+            createdBy: 'other@example.com'
+          });
+
+          const generator = sagas.addMovementToState(
+            snapshot, 'departure', { data: existingData }, channel
+          );
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { admin: false, email: 'pilot@example.com' };
+          expect(generator.next(auth).done).toEqual(true);
+          expect(channel.put).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('loadMovements error path', () => {
+        it('should call channel.put with loadMovementsFailure on error', () => {
+          const channel = { put: jest.fn() };
+          const action = actions.loadMovements(false);
+          const generator = sagas.loadMovements(channel, action);
+
+          expect(generator.next().value).toEqual(select(sagas.stateSelector));
+
+          const error = new Error('load failed');
+          generator.throw(error);
+
+          expect(channel.put).toHaveBeenCalledWith(actions.loadMovementsFailure());
+        });
+      });
+
+      describe('getDefaultValuesFromDeparture with circuits route', () => {
+        it('should set arrivalRoute to circuits when departure has circuits route', () => {
+          const generator = sagas.getDefaultValuesFromDeparture('departure-key');
+
+          expect(generator.next().value).toEqual(
+            call(remote.loadByKey, '/departures', 'departure-key')
+          );
+
+          const snapshot = new FakeFirebaseSnapshot('departure-key', {
+            immatriculation: 'HBKOF',
+            dateTime: '2016-10-09T14:00:00.000Z',
+            negativeTimestamp: -1476021600000,
+            aircraftType: 'DR40',
+            mtow: 1000,
+            departureRoute: 'circuits'
+          });
+
+          expect(generator.next(snapshot).value).toEqual(
+            call(sagas.getArrivalDefaultValues)
+          );
+
+          const initialValues = {
+            type: 'arrival',
+            date: dates.localDate(),
+            time: dates.localTimeRounded(15, 'down'),
+          };
+
+          const result = generator.next(initialValues);
+
+          expect(result.value.arrivalRoute).toEqual('circuits');
+          expect(result.done).toEqual(true);
         });
       });
     });

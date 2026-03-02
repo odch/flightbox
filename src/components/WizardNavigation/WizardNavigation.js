@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Button from '../Button';
+import { withTranslation } from 'react-i18next';
 
 const Wrapper = styled.div`
   padding: 10px 20px 10px 20px;
@@ -34,12 +35,13 @@ class WizardNavigation extends React.PureComponent {
 
   render() {
     const props = this.props;
+    const { t } = this.props;
     return (
       <Wrapper>
         {props.nextVisible && (
           <NextButton
             type="submit"
-            label={props.nextLabel || 'Weiter'}
+            label={props.nextLabel || t('wizard.next')}
             icon="navigate_next"
             onClick={props.nextStep}
             dataCy="next-button"
@@ -49,14 +51,14 @@ class WizardNavigation extends React.PureComponent {
         {props.previousVisible && (
           <BackButton
             type="button"
-            label="Zurück"
+            label={t('wizard.back')}
             onClick={props.previousStep}
           />
         )}
         {props.cancel && (
           <CancelButton
             type="button"
-            label="Abbrechen"
+            label={t('wizard.cancel')}
             onClick={props.cancel}
           />
         )}
@@ -78,4 +80,4 @@ WizardNavigation.defaultProps = {
   previousVisible: true
 };
 
-export default WizardNavigation;
+export default withTranslation()(WizardNavigation);

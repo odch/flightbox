@@ -144,6 +144,36 @@ describe('modules', () => {
             });
           });
         });
+
+        describe('WIZARD_SET_INITIALIZED', () => {
+          it('should set values and initialized flag', () => {
+            const values = { immatriculation: 'HBABC', type: 'departure' };
+
+            expect(
+              wizard({
+                initialized: false,
+                values: {},
+              }, actions.setInitialized(values))
+            ).toEqual({
+              initialized: true,
+              values,
+            });
+          });
+        });
+
+        describe('WIZARD_UPDATE_VALUES', () => {
+          it('should update values', () => {
+            const values = { immatriculation: 'HBABC', type: 'arrival' };
+
+            expect(
+              wizard({
+                values: { immatriculation: 'HBKOF' },
+              }, actions.updateValues(values))
+            ).toEqual({
+              values,
+            });
+          });
+        });
       });
     });
   });

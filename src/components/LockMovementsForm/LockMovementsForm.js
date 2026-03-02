@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { withTranslation } from 'react-i18next';
 import LabeledComponent from './StyledLabeledComponent';
 import LabeledBox from '../LabeledBox';
 import DatePicker from '../DatePicker';
@@ -13,6 +14,7 @@ class LockMovementsForm extends Component {
 
   render() {
     const { lockDate } = this.props;
+    const { t } = this.props;
 
     const datePicker = (
       <DatePicker
@@ -26,11 +28,10 @@ class LockMovementsForm extends Component {
     );
 
     return (
-      <LabeledBox label="Erfasste Bewegungen sperren" className="LockMovementsForm">
+      <LabeledBox label={t('lockMovements.heading')} className="LockMovementsForm">
         <div>
-          <p>Alle Bewegungen, die bis und mit dem gewählten Sperrdatum stattgefunden haben, können nicht
-          bearbeitet oder gelöscht werden.</p>
-          <LabeledComponent label="Sperrdatum" component={datePicker}/>
+          <p>{t('lockMovements.description')}</p>
+          <LabeledComponent label={t('lockMovements.lockDate')} component={datePicker}/>
         </div>
       </LabeledBox>
     );
@@ -43,4 +44,4 @@ LockMovementsForm.propTypes = {
   setLockDate: PropTypes.func.isRequired,
 };
 
-export default LockMovementsForm;
+export default withTranslation()(LockMovementsForm);

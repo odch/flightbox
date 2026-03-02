@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import {Field, Form} from 'react-final-form'
 import H1 from '../H1';
 import Button from '../Button';
@@ -15,53 +16,52 @@ class MessageForm extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
     return (
       <Form validate={validate} onSubmit={this.props.onSubmit}>
         {({handleSubmit}) => (
           <form className="MessageForm" onSubmit={handleSubmit}>
-            <H1>Benachrichtigen Sie uns</H1>
+            <H1>{t('message.heading')}</H1>
             <Intro>
-              Haben Sie Fragen, Anregungen oder ein anderes Anliegen bezüglich
-              der Erfassung der Abflüge und Ankünfte, benachrichtigen Sie uns
-              bitte über das untenstehende Formular.
+              {t('message.intro')}
             </Intro>
             <div>
               <Field
                 name="name"
                 type="text"
                 component={renderInputField}
-                label="Name"
+                label={t('message.name')}
               />
               <Field
                 name="email"
                 type="email"
                 component={renderInputField}
-                label="E-Mail"
+                label={t('message.email')}
               />
               <Field
                 name="phone"
                 type="tel"
                 component={renderInputField}
-                label="Telefon"
+                label={t('message.phone')}
               />
               <Field
                 name="message"
                 component={renderTextArea}
-                label="Nachricht"
+                label={t('message.message')}
               />
             </div>
-            <Button type="submit" icon="send" label="Senden" primary/>
+            <Button type="submit" icon="send" label={t('message.send')} primary/>
             {this.props.sent && (
               <Dialog
-                heading="Nachricht gesendet"
-                message="Vielen Dank! Ihre Nachricht wurde gesendet."
+                heading={t('message.successHeading')}
+                message={t('message.successMessage')}
                 onClose={this.props.confirmSaveMessageSuccess}
               />
             )}
             {this.props.commitFailed && (
               <Dialog
-                heading="Fehler"
-                message="Ihre Nachricht konnte nicht gesendet werden."
+                heading={t('message.errorHeading')}
+                message={t('message.errorMessage')}
                 onClose={this.props.resetMessageForm}
               />
             )}
@@ -80,4 +80,4 @@ MessageForm.propTypes = {
   confirmSaveMessageSuccess: PropTypes.func.isRequired,
 };
 
-export default MessageForm;
+export default withTranslation()(MessageForm);

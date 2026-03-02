@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import { withTranslation } from 'react-i18next'
 import Finish from '../../../../containers/ArrivalFinishContainer'
 import Centered from '../../../Centered'
 import MaterialIcon from '../../../MaterialIcon'
@@ -19,8 +20,9 @@ class ArrivalPaymentPage extends Component {
   }
 
   render() {
+    const { t } = this.props;
     if (this.props.wizard.initialized !== true || this.props.lockDateLoading === true) {
-      return <Centered><MaterialIcon icon="sync" rotate="left"/> Bitte warten ...</Centered>;
+      return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}</Centered>;
     }
 
     return (
@@ -31,4 +33,4 @@ class ArrivalPaymentPage extends Component {
   }
 }
 
-export default ArrivalPaymentPage
+export default withTranslation()(ArrivalPaymentPage)

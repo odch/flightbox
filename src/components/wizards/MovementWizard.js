@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
+import { withTranslation } from 'react-i18next';
 import CommitFailureDialog from '../CommitFailureDialog';
 import Centered from '../Centered';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
@@ -44,7 +45,8 @@ class MovementWizard extends Component {
 
   getMiddleItem() {
     if (this.props.wizard.initialized !== true || this.props.lockDateLoading === true) {
-      return <Centered><MaterialIcon icon="sync" rotate="left"/> Bitte warten ...</Centered>;
+      const { t } = this.props;
+      return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('wizard.loading')}</Centered>;
     }
 
     if (this.props.wizard.committed === true) {
@@ -190,4 +192,4 @@ MovementWizard.propTypes = {
   loadAircraftSettings: PropTypes.func.isRequired,
 };
 
-export default MovementWizard;
+export default withTranslation()(MovementWizard);

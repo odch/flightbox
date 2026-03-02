@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import MaterialIcon from '../MaterialIcon';
 import Item from './Item';
 
@@ -39,35 +40,38 @@ const handleSubmit = (addItem, newItem, e) => {
   addItem(newItem);
 };
 
-const ItemList = props => (
-  <div>
-    <Form onSubmit={handleSubmit.bind(null, props.addItem, props.newItem)}>
-      <Input
-        type={props.newItemInputType}
-        value={props.newItem}
-        placeholder={props.placeholder}
-        onChange={e => props.changeNewItem(e.target.value)}
-      />
-      <AddButton
-        type="submit"
-        disabled={!props.newItem || props.newItem.length === 0}
-      >
-        <MaterialIcon icon="done"/>&nbsp;Hinzufügen
-      </AddButton>
-    </Form>
-    <ItemsContainer>
-      {props.items.map((item, index) => {
-        return (
-          <Item
-            key={index}
-            name={item}
-            onRemoveClick={props.removeItem.bind(null, item)}
-          />
-        );
-      })}
-    </ItemsContainer>
-  </div>
-);
+const ItemList = props => {
+  const { t } = useTranslation();
+  return (
+    <div>
+      <Form onSubmit={handleSubmit.bind(null, props.addItem, props.newItem)}>
+        <Input
+          type={props.newItemInputType}
+          value={props.newItem}
+          placeholder={props.placeholder}
+          onChange={e => props.changeNewItem(e.target.value)}
+        />
+        <AddButton
+          type="submit"
+          disabled={!props.newItem || props.newItem.length === 0}
+        >
+          <MaterialIcon icon="done"/>&nbsp;{t('common.add')}
+        </AddButton>
+      </Form>
+      <ItemsContainer>
+        {props.items.map((item, index) => {
+          return (
+            <Item
+              key={index}
+              name={item}
+              onRemoveClick={props.removeItem.bind(null, item)}
+            />
+          );
+        })}
+      </ItemsContainer>
+    </div>
+  );
+};
 
 ItemList.defaultTypes = {
   newItemInputType: 'text'

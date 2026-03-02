@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import ModalDialog from '../ModalDialog';
 import Button from '../Button';
@@ -34,23 +35,24 @@ const ConfirmButton = styled(DialogButton)`
 `;
 
 const LocationConfirmationDialog = props => {
+  const { t } = useTranslation();
   const content = (
     <div>
-      <Heading>Flugplatz-ICAO-Kürzel nicht gefunden</Heading>
-      <Message>Das von Ihnen eingegebene Flugplatz-ICAO-Kürzel wurde in der Datenbank nicht gefunden.<br/>
-        Geben Sie wenn möglich das ICAO-Kürzel und nicht den ausgeschriebenen Namen des Flugplatzes ein.<br/><br/>
-        <Strong>Lokalflüge:</Strong> Für Lokalflüge ohne Zwischenlandung geben Sie bitte <Strong>{__CONF__.aerodrome.ICAO}</Strong> ein.<br/><br/>
-        Möchten Sie Ihre Eingabe ändern oder möchten Sie wirklich den eingegebenen Flugplatz verwenden?
+      <Heading>{t('locationDialog.heading')}</Heading>
+      <Message>{t('locationDialog.notFound')}<br/>
+        {t('locationDialog.hint')}<br/><br/>
+        <Strong>{t('locationDialog.localFlights')}</Strong> {t('locationDialog.localFlightsHint')} <Strong>{__CONF__.aerodrome.ICAO}</Strong> {t('locationDialog.localFlightsHintEnd')}<br/><br/>
+        {t('locationDialog.question')}
       </Message>
       <div>
         <ConfirmButton
-          label="Eingegebenen Flugplatz verwenden"
+          label={t('locationDialog.useAnyway')}
           icon="done"
           onClick={props.onConfirm}
           dataCy="location-confirmation-dialog-confirm"
           danger
         />
-        <CancelButton label="Eingabe ändern" onClick={props.onCancel} neutral/>
+        <CancelButton label={t('locationDialog.change')} onClick={props.onCancel} neutral/>
       </div>
     </div>
   );

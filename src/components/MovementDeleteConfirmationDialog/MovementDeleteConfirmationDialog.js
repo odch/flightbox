@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import Button from '../Button';
 import ModalDialog from '../ModalDialog';
@@ -34,6 +35,7 @@ const DeleteButton = styled(DialogButton)`
 `;
 
 const MovementDeleteConfirmationDialog = props => {
+  const { t } = useTranslation();
   const {item, hide, confirm} = props;
 
   const date = dates.formatDate(item.date);
@@ -41,18 +43,18 @@ const MovementDeleteConfirmationDialog = props => {
 
   const content = (
     <div>
-      <Question>Möchten Sie diese Bewegung wirklich löschen?</Question>
+      <Question>{t('movement.deleteConfirm.question')}</Question>
       <Data>
-        <DataItem>Immatrikulation: {item.immatriculation}</DataItem>
-        <DataItem>Pilot: {item.lastname}</DataItem>
-        <DataItem>Datum: {date}</DataItem>
-        <DataItem>Uhrzeit: {time}</DataItem>
+        <DataItem>{t('movement.deleteConfirm.immatriculation')} {item.immatriculation}</DataItem>
+        <DataItem>{t('movement.deleteConfirm.pilot')} {item.lastname}</DataItem>
+        <DataItem>{t('movement.deleteConfirm.date')} {date}</DataItem>
+        <DataItem>{t('movement.deleteConfirm.time')} {time}</DataItem>
       </Data>
       <div>
-        <DeleteButton label="Bewegung löschen" icon="delete" onClick={() => {
+        <DeleteButton label={t('movement.deleteConfirm.deleteButton')} icon="delete" onClick={() => {
           confirm(item.type, item.key, hide);
         }} danger/>
-        <DialogButton label="Abbrechen" onClick={hide} neutral/>
+        <DialogButton label={t('movement.deleteConfirm.cancelButton')} onClick={hide} neutral/>
       </div>
     </div>
   );

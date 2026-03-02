@@ -4,6 +4,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import ClipboardCopier from '../ClipboardCopier'
+import { useTranslation } from 'react-i18next';
 
 const LinkBox = styled.div`
   margin: 3rem 0 0 0;
@@ -39,6 +40,7 @@ const StyledLink = styled.a`
 `
 
 export default function KioskAccessBox({kioskAccessToken}) {
+  const { t } = useTranslation();
   if (!kioskAccessToken || !kioskAccessToken.token) {
     return null
   }
@@ -46,13 +48,13 @@ export default function KioskAccessBox({kioskAccessToken}) {
   const url = `${window.location.protocol}//${window.location.host}?kt=${kioskAccessToken.token}`
 
   return (
-    <LabeledBox label="Kiosk-Login">
+    <LabeledBox label={t('kioskAccess.title')}>
       <DescriptionText>
-        Das Kiosk-Login ist aktiv. Dieser Link kann für öffentlich zugängliche Flightbox-Terminals verwendet werden.
+        {t('kioskAccess.description')}
       </DescriptionText>
       <LinkBox>
         <InnerLinkBox>
-          <LinkLabel>Kiosk-Link:</LinkLabel>
+          <LinkLabel>{t('kioskAccess.kioskLink')}</LinkLabel>
           <LinkValue>
             <LinkText><StyledLink href={url} target="_blank">{url}</StyledLink></LinkText>
             <ClipboardCopier text={url} />

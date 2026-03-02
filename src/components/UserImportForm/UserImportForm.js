@@ -4,18 +4,17 @@ import CsvImportForm, {Example} from '../CsvImportForm';
 import P from '../P';
 import Em from '../Em';
 import Strong from '../Strong';
+import { useTranslation } from 'react-i18next';
 
 const UserImportForm = props => {
+  const { t } = useTranslation();
   const description = (
     <div>
-      <P>Für den Import wird eine CSV-Datei benötigt, die alle Benutzer enthält. Beim Import werden
-        alle Benutzer aus der Datenbank entfernt, die nicht in der CSV-Datei enthalten sind.</P>
+      <P>{t('adminImport.userListDesc1')}</P>
       <P>
-        Die Datei muss aus den Spalten <Em>UserName</Em>, <Em>LastName</Em>, <Em>FirstName</Em>, <Em>PhoneMobile</Em> und <Em>Email</Em> bestehen.
-        Die Sortierung ist nicht relevant.
-        Die CSV-Datei muss als <Strong>UTF-8</Strong>-Datei gespeichert sein.
+        {t('adminImport.userListDesc2_pre')} <Em>UserName</Em>, <Em>LastName</Em>, <Em>FirstName</Em>, <Em>PhoneMobile</Em> {t('adminImport.userListDesc2_mid')} <Em>Email</Em> {t('adminImport.userListDesc2_mid2')} <Strong>UTF-8</Strong>{t('adminImport.userListDesc2_post')}
       </P>
-      <P>Muster mit zwei Personen:</P>
+      <P>{t('adminImport.userListSample')}</P>
           <Example>
             UserName,LastName,FirstName,PhoneMobile,Email<br/>
             11069,Mustermann,Max,+41791234567,max@example.com<br/>
@@ -28,8 +27,8 @@ const UserImportForm = props => {
     <div className="UserImportForm">
       <CsvImportForm
         description={description}
-        doneHeading="Benutzer importiert"
-        doneMessage="Die Benutzer wurden importiert."
+        doneHeading={t('adminImport.doneHeading')}
+        doneMessage={t('adminImport.doneMessage')}
         selectedFile={props.selectedFile}
         disabled={props.disabled}
         importInProgress={props.importInProgress}

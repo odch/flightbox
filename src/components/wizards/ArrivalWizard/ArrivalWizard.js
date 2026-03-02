@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import MovementWizard from '../MovementWizard';
+import { useTranslation } from 'react-i18next';
 import AircraftPage from '../pages/AircraftPage';
 import PilotPage from '../pages/PilotPage';
 import PassengerPage from './pages/PassengerPage';
@@ -10,49 +11,51 @@ import Finish from '../../../containers/ArrivalFinishContainer';
 import LocationConfirmationDialog from '../../LocationConfirmationDialog';
 import {exists as aerodromeExists} from '../../../util/aerodromes';
 
-const pages = [
-  {
-    component: AircraftPage,
-    label: 'Flugzeugdaten',
-  },
-  {
-    component: PilotPage,
-    label: 'Pilot',
-  },
-  {
-    component: PassengerPage,
-    label: 'Passagiere',
-  },
-  {
-    component: DepartureArrivalPage,
-    label: 'Start und Ziel',
-    dialog: {
-      predicate: data => data.location ? aerodromeExists(data.location) : Promise.resolve(false),
-      name: 'LOCATION_CONFIRMATION',
-      component: LocationConfirmationDialog,
-    }
-  },
-  {
-    component: FlightPage,
-    label: 'Flug',
-  },
-];
-
-const ArrivalWizard = props => (
-  <MovementWizard
-    {...props}
-    initNewMovement={props.initNewMovement.bind(null, 'arrival')}
-    initMovement={props.match.params.departureKey
-      ? props.initNewMovementFromMovement.bind(null, 'arrival', 'departure', props.match.params.departureKey)
-      : null}
-    editMovement={props.editMovement.bind(null, 'arrival')}
-    pages={pages}
-    className="ArrivalWizard"
-    finishComponentClass={Finish}
-    newMovementLabel="Neue Ankunft"
-    updateMovementLabel="Ankunft bearbeiten"
-  />
-);
+const ArrivalWizard = props => {
+  const { t } = useTranslation();
+  const pages = [
+    {
+      component: AircraftPage,
+      label: t('movement.details.aircraftData'),
+    },
+    {
+      component: PilotPage,
+      label: t('movement.details.pilot'),
+    },
+    {
+      component: PassengerPage,
+      label: t('movement.details.passengers'),
+    },
+    {
+      component: DepartureArrivalPage,
+      label: t('movement.details.flightInfo'),
+      dialog: {
+        predicate: data => data.location ? aerodromeExists(data.location) : Promise.resolve(false),
+        name: 'LOCATION_CONFIRMATION',
+        component: LocationConfirmationDialog,
+      }
+    },
+    {
+      component: FlightPage,
+      label: t('movement.details.flight'),
+    },
+  ];
+  return (
+    <MovementWizard
+      {...props}
+      initNewMovement={props.initNewMovement.bind(null, 'arrival')}
+      initMovement={props.match.params.departureKey
+        ? props.initNewMovementFromMovement.bind(null, 'arrival', 'departure', props.match.params.departureKey)
+        : null}
+      editMovement={props.editMovement.bind(null, 'arrival')}
+      pages={pages}
+      className="ArrivalWizard"
+      finishComponentClass={Finish}
+      newMovementLabel={t('arrival.newLabel')}
+      updateMovementLabel={t('arrival.editLabel')}
+    />
+  );
+};
 
 ArrivalWizard.propTypes = {
   wizard: PropTypes.object.isRequired,

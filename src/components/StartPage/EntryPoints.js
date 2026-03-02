@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import ImageButton from '../ImageButton';
+import { withTranslation } from 'react-i18next';
 
 const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
 const arrivalImagePath = require('./ic_flight_land_black_48dp_2x.png');
@@ -29,24 +30,25 @@ const EntryPoint = styled(ImageButton)`
 class EntryPoints extends React.PureComponent {
 
   render() {
+    const { t } = this.props;
     if (this.props.guest === true || this.props.kiosk === true) {
       return (
         <Wrapper>
-          <EntryPoint img={departureImagePath} label="Abflug" href="/departure/new" dataCy="new-departure"/>
-          <EntryPoint img={arrivalImagePath} label="Ankunft" href="/arrival/new" dataCy="new-arrival"/>
-          <EntryPoint img={helpImagePath} label="Hilfe" href="/help" dataCy="help"/>
+          <EntryPoint img={departureImagePath} label={t('nav.departure')} href="/departure/new" dataCy="new-departure"/>
+          <EntryPoint img={arrivalImagePath} label={t('nav.arrival')} href="/arrival/new" dataCy="new-arrival"/>
+          <EntryPoint img={helpImagePath} label={t('nav.help')} href="/help" dataCy="help"/>
         </Wrapper>
       );
     }
 
     return (
       <Wrapper>
-        <EntryPoint img={departureImagePath} label="Abflug" href="/departure/new" dataCy="new-departure"/>
-        <EntryPoint img={arrivalImagePath} label="Ankunft" href="/arrival/new" dataCy="new-arrival"/>
-        <EntryPoint img={movementsImagePath} label="Erfasste Bewegungen" href="/movements" dataCy="movements"/>
-        <EntryPoint img={messageImagePath} label="Rückmeldung" href="/message" dataCy="message"/>
-        <EntryPoint img={helpImagePath} label="Hilfe" href="/help" dataCy="help"/>
-        {this.props.admin === true && <EntryPoint img={adminImagePath} label="Administration" href="/admin" dataCy="admin"/>}
+        <EntryPoint img={departureImagePath} label={t('nav.departure')} href="/departure/new" dataCy="new-departure"/>
+        <EntryPoint img={arrivalImagePath} label={t('nav.arrival')} href="/arrival/new" dataCy="new-arrival"/>
+        <EntryPoint img={movementsImagePath} label={t('nav.movements')} href="/movements" dataCy="movements"/>
+        <EntryPoint img={messageImagePath} label={t('nav.message')} href="/message" dataCy="message"/>
+        <EntryPoint img={helpImagePath} label={t('nav.help')} href="/help" dataCy="help"/>
+        {this.props.admin === true && <EntryPoint img={adminImagePath} label={t('nav.admin')} href="/admin" dataCy="admin"/>}
       </Wrapper>
     );
   }
@@ -58,4 +60,4 @@ EntryPoints.propTypes = {
   kiosk: PropTypes.bool,
 };
 
-export default EntryPoints;
+export default withTranslation()(EntryPoints);

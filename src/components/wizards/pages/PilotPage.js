@@ -1,12 +1,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {Field, Form} from 'react-final-form';
+import { useTranslation } from 'react-i18next';
 import validate from '../validate';
 import {renderInputField, renderUserDropdown} from '../renderField';
 import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
 
 const PilotPage = (props) => {
+  const { t } = useTranslation();
   const { previousPage, onSubmit, isGuest, hiddenFields, formValues } = props;
   return (
     <Form
@@ -35,7 +37,7 @@ const PilotPage = (props) => {
                       },
                     },
                     meta,
-                    label: "Mitgliedernummer",
+                    label: t('movement.details.memberNr'),
                     readOnly: props.readOnly,
                   })
                 }
@@ -46,14 +48,14 @@ const PilotPage = (props) => {
             <Field
               name="lastname"
               type="text"
-              label="Nachname"
+              label={t('movement.details.lastname')}
               component={renderInputField}
               readOnly={props.readOnly}
             />
             <Field
               name="firstname"
               type="text"
-              label="Vorname"
+              label={t('movement.details.firstname')}
               component={renderInputField}
               readOnly={props.readOnly}
             />
@@ -62,7 +64,7 @@ const PilotPage = (props) => {
             <Field
               name="email"
               type="email"
-              label="E-Mail"
+              label={t('movement.details.email')}
               component={renderInputField}
               readOnly={props.readOnly}
               masked={__CONF__.maskContactInformation === true && !props.isAdmin}
@@ -70,7 +72,7 @@ const PilotPage = (props) => {
             <Field
               name="phone"
               type="tel"
-              label="Telefon"
+              label={t('movement.details.phone')}
               component={renderInputField}
               readOnly={props.readOnly}
               masked={__CONF__.maskContactInformation === true && !props.isAdmin}

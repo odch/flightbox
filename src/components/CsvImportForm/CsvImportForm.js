@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import FileInput from '../FileInput';
 import Button from '../Button';
 import ImportDoneDialog from './ImportDoneDialog';
@@ -13,6 +14,7 @@ const handleFormSubmit = (startImport, e) => {
 };
 
 const CsvImportForm = props => {
+  const { t } = useTranslation();
   const importDoneDialog = props.importDone === true
     ? (
       <ImportDoneDialog
@@ -35,16 +37,16 @@ const CsvImportForm = props => {
       <div>
         {props.description}
         <form onSubmit={handleFormSubmit.bind(null, props.startImport)}>
-          <StyledLabeledComponent label="CSV-Datei auswählen" component={fileInput}/>
+          <StyledLabeledComponent label={t('csvImport.selectFile')} component={fileInput}/>
           <Button
             type="submit"
-            label="Importieren"
+            label={t('csvImport.import')}
             icon="file_upload"
             disabled={props.disabled || props.importInProgress || !props.selectedFile}
             primary
           />
-          {props.importInProgress && <ProgressMessage>Import wird ausgeführt. Bitte warten ...</ProgressMessage>}
-          {props.importFailed && <FailureMessage>Der Import ist fehlgeschlagen.</FailureMessage>}
+          {props.importInProgress && <ProgressMessage>{t('csvImport.importing')}</ProgressMessage>}
+          {props.importFailed && <FailureMessage>{t('csvImport.failed')}</FailureMessage>}
         </form>
       </div>
       {importDoneDialog}

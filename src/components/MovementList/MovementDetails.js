@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import dates from '../../util/dates';
 import {getLabel as getFlightTypeLabel} from '../../util/flightTypes';
@@ -55,6 +56,7 @@ class MovementDetails extends React.PureComponent {
 
   render() {
     const props = this.props;
+    const { t } = this.props;
 
     const date = dates.formatDate(props.data.date);
     const time = dates.formatTime(props.data.date, props.data.time);
@@ -64,81 +66,81 @@ class MovementDetails extends React.PureComponent {
 
     return (
         <Content className={props.className}>
-          <DetailsBox label="Flugzeugdaten">
-            <MovementField label="Immatrikulation" value={props.data.immatriculation}/>
-            <MovementField label="Flugzeugtyp" value={props.data.aircraftType}/>
-            <MovementField label="MTOW" value={props.data.mtow}/>
-            {props.data.aircraftCategory && <MovementField label="Kategorie" value={props.data.aircraftCategory}/>}
+          <DetailsBox label={t('movement.details.aircraftData')}>
+            <MovementField label={t('movement.details.immatriculation')} value={props.data.immatriculation}/>
+            <MovementField label={t('movement.details.aircraftType')} value={props.data.aircraftType}/>
+            <MovementField label={t('movement.details.mtow')} value={props.data.mtow}/>
+            {props.data.aircraftCategory && <MovementField label={t('movement.details.category')} value={props.data.aircraftCategory}/>}
             <StyledHomeBaseIcon isHomeBase={props.isHomeBase} showText/>
           </DetailsBox>
-          <DetailsBox label="Pilot">
-            {__CONF__.memberManagement === true && <MovementField label="Mitgliedernummer" value={props.data.memberNr}/>}
-            <MovementField label="Nachname" value={props.data.lastname}/>
-            <MovementField label="Vorname" value={props.data.firstname}/>
-            <MovementField label="E-Mail"
+          <DetailsBox label={t('movement.details.pilot')}>
+            {__CONF__.memberManagement === true && <MovementField label={t('movement.details.memberNr')} value={props.data.memberNr}/>}
+            <MovementField label={t('movement.details.lastname')} value={props.data.lastname}/>
+            <MovementField label={t('movement.details.firstname')} value={props.data.firstname}/>
+            <MovementField label={t('movement.details.email')}
                            value={__CONF__.maskContactInformation === true && !props.isAdmin
                              ? maskEmail(props.data.email)
                              : props.data.email}/>
-            <MovementField label="Telefon"
+            <MovementField label={t('movement.details.phone')}
                            value={__CONF__.maskContactInformation === true && !props.isAdmin
                              ? maskPhone(props.data.phone)
                              : props.data.phone}/>
           </DetailsBox>
           {props.data.type === 'departure'
             ? (
-              <DetailsBox label="Passagiere">
-                <MovementField label="Anzahl Passagiere" value={props.data.passengerCount} defaultValue={0}/>
-                <MovementField label="Beförderungsschein" value={getCarriageVoucher(props)}/>
+              <DetailsBox label={t('movement.details.passengers')}>
+                <MovementField label={t('movement.details.passengerCount')} value={props.data.passengerCount} defaultValue={0}/>
+                <MovementField label={t('movement.details.carriageVoucher')} value={getCarriageVoucher(props)}/>
               </DetailsBox>
             ) : (
-              <DetailsBox label="Passagiere">
-                <MovementField label="Anzahl Passagiere" value={props.data.passengerCount} defaultValue={0}/>
+              <DetailsBox label={t('movement.details.passengers')}>
+                <MovementField label={t('movement.details.passengerCount')} value={props.data.passengerCount} defaultValue={0}/>
               </DetailsBox>
             )
           }
           {props.data.type === 'departure'
             ? (
-              <DetailsBox label="Start und Ziel">
-                <MovementField label="Datum" value={date}/>
-                <MovementField label="Startzeit (Lokalzeit)" value={time}/>
-                <MovementField label="Zielflugplatz" value={formatLocationDisplay(props.data, { lineHeight: 1.2, nameMarginTop: '2px' })}/>
-                <MovementField label="Dauer" value={props.data.duration}/>
+              <DetailsBox label={t('movement.details.flightInfo')}>
+                <MovementField label={t('movement.details.date')} value={date}/>
+                <MovementField label={t('movement.details.departureTime')} value={time}/>
+                <MovementField label={t('movement.details.destination')} value={formatLocationDisplay(props.data, { lineHeight: 1.2, nameMarginTop: '2px' })}/>
+                <MovementField label={t('movement.details.duration')} value={props.data.duration}/>
               </DetailsBox>
             ) : (
-              <DetailsBox label="Start und Ziel">
-                <MovementField label="Datum" value={date}/>
-                <MovementField label="Landezeit (Lokalzeit)" value={time}/>
-                <MovementField label="Startflugplatz" value={formatLocationDisplay(props.data, { lineHeight: 1.2, nameMarginTop: '2px' })}/>
-                <MovementField label="Anzahl Landungen" value={props.data.landingCount}/>
-                <MovementField label="Anzahl Durchstarts" value={props.data.goAroundCount} defaultValue={0}/>
+              <DetailsBox label={t('movement.details.flightInfo')}>
+                <MovementField label={t('movement.details.date')} value={date}/>
+                <MovementField label={t('movement.details.landingTime')} value={time}/>
+                <MovementField label={t('movement.details.origin')} value={formatLocationDisplay(props.data, { lineHeight: 1.2, nameMarginTop: '2px' })}/>
+                <MovementField label={t('movement.details.landingCount')} value={props.data.landingCount}/>
+                <MovementField label={t('movement.details.goAroundCount')} value={props.data.goAroundCount} defaultValue={0}/>
               </DetailsBox>
             )
           }
           {props.data.type === 'departure'
             ? (
-              <DetailsBox label="Flug">
-                <MovementField label="Flugtyp" value={getFlightTypeLabel(props.data.flightType)}/>
-                <MovementField label="Pistenrichtung" value={props.data.runway}/>
-                <MovementField label="Abflugroute" value={getDepartureRouteLabel(props.data.departureRoute)}/>
-                <MovementField label="Routing" value={newLineToBr(props.data.route)}/>
-                <MovementField label="Bemerkungen" value={newLineToBr(props.data.remarks)}/>
+              <DetailsBox label={t('movement.details.flight')}>
+                <MovementField label={t('movement.details.flightType')} value={getFlightTypeLabel(props.data.flightType)}/>
+                <MovementField label={t('movement.details.runway')} value={props.data.runway}/>
+                <MovementField label={t('movement.details.departureRoute')} value={getDepartureRouteLabel(props.data.departureRoute)}/>
+                <MovementField label={t('movement.details.routing')} value={newLineToBr(props.data.route)}/>
+                <MovementField label={t('movement.details.remarks')} value={newLineToBr(props.data.remarks)}/>
               </DetailsBox>
             ) : (
-              <DetailsBox label="Flug">
-                <MovementField label="Flugtyp" value={getFlightTypeLabel(props.data.flightType)}/>
-                <MovementField label="Pistenrichtung" value={props.data.runway}/>
-                <MovementField label="Ankunftsroute" value={getArrivalRouteLabel(props.data.arrivalRoute)}/>
-                <MovementField label="Bemerkungen" value={newLineToBr(props.data.remarks)}/>
+              <DetailsBox label={t('movement.details.flight')}>
+                <MovementField label={t('movement.details.flightType')} value={getFlightTypeLabel(props.data.flightType)}/>
+                <MovementField label={t('movement.details.runway')} value={props.data.runway}/>
+                <MovementField label={t('movement.details.arrivalRoute')} value={getArrivalRouteLabel(props.data.arrivalRoute)}/>
+                <MovementField label={t('movement.details.remarks')} value={newLineToBr(props.data.remarks)}/>
               </DetailsBox>
             )
           }
           {props.data.type === 'arrival' && props.data.landingFeeTotal !== undefined && (
-            <DetailsBox label="Gebühren">
-              <MovementField label="Referenznummer" value={getFromItemKey(props.data.key)}/>
-              <MovementField label="Landetaxe" value={getLandingFee(props.data)}/>
+            <DetailsBox label={t('movement.details.fees')}>
+              <MovementField label={t('movement.details.referenceNumber')} value={getFromItemKey(props.data.key)}/>
+              <MovementField label={t('movement.details.landingFee')} value={getLandingFee(props.data)}/>
               {showPaymentMethod && (
                 <MovementField
-                  label="Zahlungsart"
+                  label={t('movement.details.paymentMethod')}
                   value={props.data.paymentMethod && props.data.paymentMethod.status !== 'pending'
                     ? getPaymentMethodLabel(props.data.paymentMethod)
                     : <NoPaymentFieldValue arrivalId={props.data.key}/>}
@@ -159,4 +161,4 @@ MovementDetails.propTypes = {
   isAdmin: PropTypes.bool.isRequired
 };
 
-export default MovementDetails;
+export default withTranslation()(MovementDetails);

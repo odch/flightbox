@@ -146,6 +146,60 @@ describe('modules', () => {
           });
         });
       });
+
+      describe('SAVE_MESSAGE_SUCCESS', () => {
+        it('should set sent flag and clear commitFailed', () => {
+          expect(
+            messages({
+              form: {
+                sent: false,
+                commitFailed: true,
+              },
+            }, actions.saveMessageSuccess())
+          ).toEqual({
+            form: {
+              sent: true,
+              commitFailed: false,
+            },
+          });
+        });
+      });
+
+      describe('SAVE_MESSAGE_FAILURE', () => {
+        it('should set commitFailed flag and clear sent', () => {
+          expect(
+            messages({
+              form: {
+                sent: false,
+                commitFailed: false,
+              },
+            }, actions.saveMessageFailure())
+          ).toEqual({
+            form: {
+              sent: false,
+              commitFailed: true,
+            },
+          });
+        });
+      });
+
+      describe('RESET_MESSAGE_FORM', () => {
+        it('should reset form to initial state', () => {
+          expect(
+            messages({
+              form: {
+                sent: true,
+                commitFailed: true,
+              },
+            }, actions.resetMessageForm())
+          ).toEqual({
+            form: {
+              sent: false,
+              commitFailed: false,
+            },
+          });
+        });
+      });
     });
   });
 });

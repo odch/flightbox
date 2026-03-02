@@ -2,22 +2,21 @@ import React from 'react';
 import LabeledBox from '../../LabeledBox';
 import AircraftsItemList from '../../../containers/AircraftsItemListContainer';
 import DescriptionText from '../DescriptionText';
+import { useTranslation } from 'react-i18next';
 
 const AdminAircraftPage = () => {
+  const { t } = useTranslation();
   return (
     <>
-      <LabeledBox label="Club-Flugzeuge">
+      <LabeledBox label={t('adminAircraft.clubAircraftTitle')}>
         <DescriptionText>
-          Geben Sie hier die Immatrikulationen der Club-Flugzeuge ein.
-          Die Immatrikulationen dürfen nur Grossbuchstaben und Zahlen enthalten.
+          {t('adminAircraft.clubAircraftDesc1')} {t('adminAircraft.clubAircraftDesc2')}
         </DescriptionText>
         <AircraftsItemList type="club"/>
       </LabeledBox>
-      <LabeledBox label="Auf diesem Flugplatz stationierte Flugzeuge (ohne Club-Flugzeuge)">
+      <LabeledBox label={t('adminAircraft.homeBaseTitle')}>
         <DescriptionText>
-          Geben Sie hier die Immatrikulationen aller auf diesem Flugplatz stationierten Flugzeuge ein
-          (ohne die Club-Flugzeuge).
-          Die Immatrikulationen dürfen nur Grossbuchstaben und Zahlen enthalten.
+          {t('adminAircraft.homeBaseDesc1')} {t('adminAircraft.homeBaseDesc2')} {t('adminAircraft.homeBaseDesc3')}
         </DescriptionText>
         <AircraftsItemList type="homeBase"/>
       </LabeledBox>

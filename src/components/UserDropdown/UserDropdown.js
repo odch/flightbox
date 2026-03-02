@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Dropdown from '../Dropdown';
 import Option from './Option';
+import { useTranslation } from 'react-i18next';
 
 const optionRenderer = users => {
   const map = users.reduce((map, obj) => {
@@ -37,23 +38,26 @@ const callWithValue = (delegate, users, value) => {
   }
 };
 
-const UserDropdown = props => (
-  <Dropdown
-    className="UserDropdown"
-    options={props.users.data.array.sort(usersComparator).map(userToOption)}
-    optionRenderer={optionRenderer(props.users.data.array)}
-    onChange={callWithValue.bind(null, props.onChange, props.users.data.array)}
-    value={props.value}
-    showOptionsOnFocus={false}
-    noOptionsText="Kein Mitglied gefunden"
-    moreOptionsText="Mehr Mitglieder vorhanden! Tippen Sie einen Teil der Mitgliedernummer, um die Liste einzuschränken."
-    onFocus={props.onFocus}
-    onBlur={callWithValue.bind(null, props.onBlur, props.users.data.array)}
-    readOnly={props.readOnly}
-    dataCy={props.dataCy}
-    clearable
-  />
-);
+const UserDropdown = props => {
+  const { t } = useTranslation();
+  return (
+    <Dropdown
+      className="UserDropdown"
+      options={props.users.data.array.sort(usersComparator).map(userToOption)}
+      optionRenderer={optionRenderer(props.users.data.array)}
+      onChange={callWithValue.bind(null, props.onChange, props.users.data.array)}
+      value={props.value}
+      showOptionsOnFocus={false}
+      noOptionsText={t('userDropdown.noMember')}
+      moreOptionsText={t('userDropdown.moreMembers')}
+      onFocus={props.onFocus}
+      onBlur={callWithValue.bind(null, props.onBlur, props.users.data.array)}
+      readOnly={props.readOnly}
+      dataCy={props.dataCy}
+      clearable
+    />
+  );
+};
 
 UserDropdown.propTypes = {
   value: PropTypes.string.isRequired,

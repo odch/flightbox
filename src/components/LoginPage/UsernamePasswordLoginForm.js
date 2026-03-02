@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import LabeledComponent from '../LabeledComponent';
 import Failure from './Failure';
 import Button from '../Button';
+import { useTranslation } from 'react-i18next';
 
 const handleSubmit = (authenticate, username, password, e) => {
   e.preventDefault();
@@ -32,6 +33,7 @@ const SubmitButton = styled(LoginDialogButton)`
 `;
 
 const UsernamePasswordLoginForm = props => {
+  const { t } = useTranslation();
   const { authenticate, username, password, submitting, failure, updateUsername, updatePassword } = props;
 
   const usernameInput = (
@@ -61,12 +63,12 @@ const UsernamePasswordLoginForm = props => {
         disabled={props.submitting}
         data-cy="login-form"
       >
-        <StyledLabeledComponent label="Benutzername" component={usernameInput}/>
-        <StyledLabeledComponent label="Passwort" component={passwordInput}/>
+        <StyledLabeledComponent label={t('login.username')} component={usernameInput}/>
+        <StyledLabeledComponent label={t('login.password')} component={passwordInput}/>
         <Failure failure={failure}/>
         <SubmitButton
           type="submit"
-          label="Anmelden"
+          label={t('common.login')}
           icon="send"
           disabled={submitting || username.length === 0 || password.length === 0}
           primary
@@ -74,7 +76,7 @@ const UsernamePasswordLoginForm = props => {
           loading={props.submitting}
         />
         {props.showCancel === true && (
-          <LoginDialogButton type="button" label="Abbrechen" onClick={props.onCancel} dataCy="cancel"/>
+          <LoginDialogButton type="button" label={t('common.cancel')} onClick={props.onCancel} dataCy="cancel"/>
         )}
       </form>
     </div>

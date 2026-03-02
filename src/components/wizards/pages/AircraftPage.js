@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import {Field, Form} from 'react-final-form'
 import validate from '../validate';
 import {renderAircraftCategoryDropdown, renderAircraftDropdown, renderInputField} from '../renderField';
@@ -9,6 +10,7 @@ import WizardNavigation from '../../WizardNavigation';
 import {getAircraftOrigin, updateFeesTotal, updateGoAroundFees, updateLandingFees} from '../../../util/landingFees'
 
 const AircraftPage = (props) => {
+  const { t } = useTranslation();
   const {onSubmit, formValues, aircraftSettings} = props;
   return (
     <Form
@@ -53,7 +55,7 @@ const AircraftPage = (props) => {
                     }
                   },
                   meta,
-                  label: "Immatrikulation",
+                  label: t('movement.details.immatriculation'),
                   readOnly: props.readOnly,
                 })
               }
@@ -62,13 +64,13 @@ const AircraftPage = (props) => {
               name="aircraftType"
               type="text"
               component={renderInputField}
-              label="Typ"
+              label={t('common.type')}
               readOnly={props.readOnly}
             />
             <Field
               name="mtow"
               type="number"
-              label="Maximales Abfluggewicht (in Kilogramm)"
+              label={t('profile.mtow')}
               readOnly={props.readOnly}
               parse={input => {
                 if (typeof input === 'number') {
@@ -104,7 +106,7 @@ const AircraftPage = (props) => {
                     },
                   },
                   meta,
-                  label: "Maximales Abfluggewicht (in Kilogramm)",
+                  label: t('profile.mtow'),
                   type: "number",
                   readOnly: props.readOnly,
                 })
@@ -134,7 +136,7 @@ const AircraftPage = (props) => {
                     },
                   },
                   meta,
-                  label: "Kategorie",
+                  label: t('movement.details.category'),
                   readOnly: props.readOnly,
                 })
               )}

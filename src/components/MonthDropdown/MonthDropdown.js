@@ -2,12 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Dropdown from '../Dropdown';
-import dates from '../../util/dates'
-
-const months = dates.monthNames.map((monthName, index) => ({
-  key: (index + 1).toString(),
-  label: monthName
-}))
+import { useTranslation } from 'react-i18next'
 
 const Option = styled.div`
   padding: 0.2em;
@@ -38,21 +33,28 @@ const handleChange = (onChange, value) => {
   }
 };
 
-const MonthDropdown = props => (
-  <Dropdown
-    className={props.className}
-    options={months}
-    value={toStringValue(props.value)}
-    onChange={handleChange.bind(null, props.onChange)}
-    readOnly={props.readOnly}
-    optionFilter={filterOptions}
-    optionRenderer={renderOption}
-    valueRenderer={renderValue}
-    optionsRenderLimit={months.length}
-    noOptionsText="Monat nicht gefunden"
-    mustSelect
-  />
-);
+const MonthDropdown = props => {
+  const { t } = useTranslation();
+  const months = Array.from({ length: 12 }, (_, i) => ({
+    key: (i + 1).toString(),
+    label: t(`months.${i}`),
+  }));
+  return (
+    <Dropdown
+      className={props.className}
+      options={months}
+      value={toStringValue(props.value)}
+      onChange={handleChange.bind(null, props.onChange)}
+      readOnly={props.readOnly}
+      optionFilter={filterOptions}
+      optionRenderer={renderOption}
+      valueRenderer={renderValue}
+      optionsRenderLimit={months.length}
+      noOptionsText={t('dropdown.monthNotFound')}
+      mustSelect
+    />
+  );
+};
 
 MonthDropdown.propTypes = {
   className: PropTypes.string,

@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import {Field, Form} from 'react-final-form';
 import validate from '../../validate';
 import {renderAerodromeDropdown, renderDateField, renderIncrementationField, renderTimeField} from '../../renderField';
@@ -19,6 +20,7 @@ const toNumber = value => {
 };
 
 const DepartureArrivalPage = (props) => {
+  const { t } = useTranslation();
   const { previousPage, onSubmit, cancel, formValues, aircraftSettings, readOnly, hiddenFields } = props;
   return (
     <Form
@@ -42,7 +44,7 @@ const DepartureArrivalPage = (props) => {
                     }
                   },
                   meta,
-                  label: "Startflugplatz",
+                  label: t('movement.details.origin'),
                 })
               }
             </Field>
@@ -52,14 +54,14 @@ const DepartureArrivalPage = (props) => {
               name="date"
               component={renderDateField}
               parse={e => e.value}
-              label="Datum"
+              label={t('movement.details.date')}
               readOnly={readOnly}
             />
             <Field
               name="time"
               component={renderTimeField}
               parse={e => e.value}
-              label="Landezeit (Lokalzeit)"
+              label={t('movement.details.landingTime')}
               readOnly={readOnly}
             />
           </FieldSet>
@@ -85,7 +87,7 @@ const DepartureArrivalPage = (props) => {
                   },
                   meta,
                   name: input.name,
-                  label: "Anzahl Landungen",
+                  label: t('movement.details.landingCount'),
                   readOnly,
                 })
               }
@@ -111,7 +113,7 @@ const DepartureArrivalPage = (props) => {
                   },
                   meta,
                   name: input.name,
-                  label: "Anzahl Durchstarts (ohne Aufsetzen)",
+                  label: t('wizard.goAroundCount'),
                   readOnly,
                 })
               }

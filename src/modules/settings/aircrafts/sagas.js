@@ -8,13 +8,13 @@ const paths = {
   homeBase: '/settings/aircrafts/homeBase',
 };
 
-function* loadByType(channel, type) {
+export function* loadByType(channel, type) {
   firebase(paths[type]).on('value', (snapshot) => {
     channel.put(actions.loadAircraftSettingsSuccess(type, snapshot.val() || {}));
   });
 }
 
-function* add(type, name) {
+export function* add(type, name) {
   return new Promise((resolve, reject) => {
     firebase(paths[type]).child(name).set(true, error => {
       if (error) {
@@ -26,7 +26,7 @@ function* add(type, name) {
   });
 }
 
-function* remove(type, name) {
+export function* remove(type, name) {
   return new Promise((resolve, reject) => {
     firebase(paths[type]).child(name).remove(error => {
       if (error) {
@@ -38,7 +38,7 @@ function* remove(type, name) {
   });
 }
 
-function* watchLoadAircrafts(channel) {
+export function* watchLoadAircrafts(channel) {
   yield take(actions.LOAD_AIRCRAFT_SETTINGS);
   yield all([
     call(loadByType, channel, 'club'),
@@ -46,7 +46,7 @@ function* watchLoadAircrafts(channel) {
   ])
 }
 
-function* addAircraft(action) {
+export function* addAircraft(action) {
   const { type, name } = action.payload;
   if (name) {
     yield call(add, type, name);
@@ -54,7 +54,7 @@ function* addAircraft(action) {
   }
 }
 
-function* removeAircraft(action) {
+export function* removeAircraft(action) {
   yield call(remove, action.payload.type, action.payload.name);
 }
 

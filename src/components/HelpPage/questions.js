@@ -1,109 +1,94 @@
 import React from 'react';
 import {Link} from 'react-router-dom'
 
-export default [
-  { question: 'Wann muss ich einen Abflug und wann eine Ankunft erfassen?',
+const getQuestions = (t) => [
+  { question: t('help.q1'),
     answer: (
       <div>
         <p>
-          Grundsätzlich muss vor jedem Start ein Abflug und nach jeder Landung eine Ankunft erfasst
-          werden. Wird während eines Fluges der Platzbereich mehrfach verlassen, ist für jeden Ausflug
-          ein Abflug und für jeden Einflug eine Ankunft zu erfassen.
+          {t('help.a1')}
         </p>
       </div>
     ),
   },
-  { question: 'Wie erfasse ich einen Flug auf einen anderen Flugplatz?',
+  { question: t('help.q2'),
     answer: (
       <div>
         <p>
-          Geben Sie beim Abflug Ihren Zielflugplatz und die Abflugroute an und bei der Ankunft
-          den Startflugplatz und die Ankunftsroute.
+          {t('help.a2')}
         </p>
       </div>
     ),
   },
-  { question: 'Wie erfasse ich einen Lokalflug?',
+  { question: t('help.q3'),
     answer: (
       <div>
         <p>
-          Geben Sie beim Abflug {__CONF__.aerodrome.name} ({__CONF__.aerodrome.ICAO}) als Zielflugplatz und bei
-          der Ankunft als Startflugplatz an.
+          {t('help.a3pre')} {__CONF__.aerodrome.name} ({__CONF__.aerodrome.ICAO}) {t('help.a3post')}
         </p>
       </div>
     ),
   },
-  { question: 'Wie erfasse ich Platzrunden?',
+  { question: t('help.q4'),
     answer: (
       <div>
         <p>
-          Wenn Sie den Platzbereich nicht verlassen und in der Platzrunde bleiben, wählen Sie beim Abflug
-          als Zielflugplatz {__CONF__.aerodrome.name} ({__CONF__.aerodrome.ICAO}) und als Abflugroute "Platzrunden".
-          Bei der Ankunft wählen Sie ebenfalls "Platzrunden" als Anflugroute. Wählen Sie "Anzahl Landungen"
-          bei der Ankunft entsprechend.
+          {t('help.a4_1pre')} {__CONF__.aerodrome.name} ({__CONF__.aerodrome.ICAO}) {t('help.a4_1post')}
         </p>
         <p>
-          Wenn Sie den Platzbereich verlassen und vor dem Verlassen des Platzverkehrs Platzrunden durchführen,
-          wählen Sie "Anzahl Landungen" bei der dazugehörigen Ankunft entsprechend.
+          {t('help.a4_2')}
         </p>
         <p>
-          Wenn Sie den Platzbereich verlassen und bei der Ankunft Platzrunden durchführen,
-          wählen Sie "Anzahl Landungen" entsprechend.
+          {t('help.a4_3')}
         </p>
       </div>
     ),
   },
-  { question: 'Warum sind die Flugzeugdaten nicht aktuell?',
+  { question: t('help.q5'),
     answer: (
       <div>
         <p>
-          Die Flugzeugdaten werden regelmässig aus dem Luftfahrzeugregister des BAZL importiert.
-          Prüfen Sie die Daten im Luftfahrzeugregister des BAZL auf Richtigkeit.
-          Sind die Daten dort korrekt, aber in diesem System über längere Zeit nicht aktuell,
-          kontaktieren Sie uns über das <Link to="/message">Rückmeldungsformular</Link>.
+          {t('help.a5pre')} <Link to="/message">{t('help.a5feedback')}</Link>{t('help.a5post')}
         </p>
       </div>
     ),
   },
-  { question: 'Ich habe bei der Erfassung einen Fehler gemacht. Kann ich den Fehler korrigieren?',
+  { question: t('help.q6'),
     answer: (
       <div>
         <p>
-          Ja. Wählen Sie hierfür die entsprechende Bewegung aus der <Link to="/movements">Liste</Link> aus,
-          korrigieren Sie die fehlerhaften Daten und speichern Sie die Bewegung neu.
+          {t('help.a6pre')} <Link to="/movements">{t('help.a6list')}</Link> {t('help.a6post')}
         </p>
       </div>
     ),
   },
-  { question: 'Ich habe eine Bewegung doppelt erfasst. Kann ich den doppelten Eintrag löschen?',
+  { question: t('help.q7'),
     answer: (
       <div>
         <p>
-          Ja. Wählen Sie hierfür die entsprechende Bewegung aus der <Link to="/movements">Liste</Link> aus
-          und betätigen Sie die Schaltfläche "Löschen". Bitte überprüfen Sie die Bestätigungsabfrage
-          sorgfältig, damit Sie aus Versehen nicht die falsche Bewegung löschen.
+          {t('help.a7pre')} <Link to="/movements">{t('help.a7list')}</Link> {t('help.a7post')}
         </p>
       </div>
     ),
   },
-  { question: 'Ich führe einen Schulungsflug mit Fluglehrer durch. Wen muss ich als Piloten erfassen?',
+  { question: t('help.q8'),
     answer: (
       <div>
         <p>
-          Der Flugschüler soll als Pilot erfasst werden. Vermerken Sie zusätzlich den Namen und
-          die Telefonnummer des Fluglehrers im Bemerkungsfeld.
+          {t('help.a8')}
         </p>
       </div>
     ),
   },
-  { question: 'Ich habe eine weitere Frage, die auf dieser Seite nicht behandelt wird. An wen kann ich mich wenden?',
+  { question: t('help.q9'),
     answer: (
       <div>
         <p>
-          Wenden Sie sich an den diensthabenden Flugdienstleiter oder lassen Sie uns über
-          das <Link to="/message">Rückmeldungsformular</Link> eine Nachricht zukommen.
+          {t('help.a9pre')} <Link to="/message">{t('help.a9feedback')}</Link> {t('help.a9post')}
         </p>
       </div>
     ),
   },
 ];
+
+export default getQuestions;
