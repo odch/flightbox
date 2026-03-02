@@ -2,6 +2,9 @@ const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 const utils = require('./utils')
 
+const toValidAssoc = data =>
+  data && ['departure', 'arrival'].includes(data.type) ? data : null
+
 const setAssociatedMovementPending = async (movementKey, movementType) => {
   await admin.database().ref(utils.path(movementType)).child(movementKey).update({
     associatedMovement: null
@@ -9,9 +12,10 @@ const setAssociatedMovementPending = async (movementKey, movementType) => {
 }
 
 const loadMovement = async (movementKey, movementType) => {
+  const movementsPath = movementType === 'departure' ? '/departures' : '/arrivals'
   const movementSnapshot = await admin.database()
-    .ref(utils.path(movementType)).child(movementKey).
-    once('value')
+    .ref(movementsPath).child(movementKey)
+    .once('value')
   if (movementSnapshot.exists()) {
     const movement = movementSnapshot.val()
     movement.key = movementKey
@@ -37,13 +41,22 @@ const updateAssociatedMovement = async (movement, aircraftMovements, updatedMove
     return
   }
 
-  const oldAssociatedMovementOfMovement = movement.associatedMovement
+  // Read old association before any writes so cascade can clean up the previous partner
+  const oldMovAssocSnap = await admin.database()
+    .ref(utils.path(movement.type)).child(movement.key).once('value')
+  const oldAssociatedMovementOfMovement = toValidAssoc(oldMovAssocSnap.val())
 
   await setAssociatedMovementPending(movement.key, movement.type)
 
   const associatedMovement = utils.getAssociatedMovement(movement, isHomeBase, aircraftMovements)
 
-  const oldAssociatedMovementOfAssociatedMovement = associatedMovement ? associatedMovement.associatedMovement : null
+  // Read the new partner's current association before overwriting it
+  let oldAssociatedMovementOfAssociatedMovement = null
+  if (associatedMovement) {
+    const oldAssocOfAssocSnap = await admin.database()
+      .ref(utils.path(associatedMovement.type)).child(associatedMovement.key).once('value')
+    oldAssociatedMovementOfAssociatedMovement = toValidAssoc(oldAssocOfAssocSnap.val())
+  }
 
   await utils.setAssociatedMovement(movement.key, movement.type, associatedMovement)
   if (associatedMovement) {
@@ -65,10 +78,7 @@ const updateAssociatedMovement = async (movement, aircraftMovements, updatedMove
     )
   }
 
-  if (
-    oldAssociatedMovementOfMovement &&
-    ['departure', 'arrival'].includes(oldAssociatedMovementOfMovement.type)
-  ) {
+  if (oldAssociatedMovementOfMovement) {
     await loadAndUpdateAssociatedMovement(
       oldAssociatedMovementOfMovement.key,
       oldAssociatedMovementOfMovement.type,
@@ -78,10 +88,7 @@ const updateAssociatedMovement = async (movement, aircraftMovements, updatedMove
     )
   }
 
-  if (
-    oldAssociatedMovementOfAssociatedMovement &&
-    ['departure', 'arrival'].includes(oldAssociatedMovementOfAssociatedMovement.type)
-  ) {
+  if (oldAssociatedMovementOfAssociatedMovement) {
     await loadAndUpdateAssociatedMovement(
       oldAssociatedMovementOfAssociatedMovement.key,
       oldAssociatedMovementOfAssociatedMovement.type,
@@ -121,6 +128,10 @@ const updateOnCreate = async (snap, type) => {
 }
 
 const updateOnWrite = async (change, type) => {
+  // onWrite fires for creates, updates, and deletes. Skip creates and deletes
+  // — those are handled by the dedicated onCreate and onDelete triggers.
+  if (!change.before.val() || !change.after.val()) return
+
   const snap = change.after
 
   functions.logger.log(`Setting associated movement for updated ${type} ${snap.ref.key}`)
@@ -140,16 +151,23 @@ const updateOnWrite = async (change, type) => {
 const updateOnDelete = async (snap, type) => {
   functions.logger.log(`Setting associated movement for deleted ${type} ${snap.ref.key}`)
 
-  const movement = snap.val()
+  const movementKey = snap.ref.key
 
-  if (movement.associatedMovement && ['departure', 'arrival'].includes(movement.associatedMovement.type)) {
-    await setAssociatedMovementPending(movement.associatedMovement.key, movement.associatedMovement.type)
-    const associatedMovement = await loadMovement(movement.associatedMovement.key, movement.associatedMovement.type)
-    const aircraftMovements = await utils.loadAircraftMovements(associatedMovement.immatriculation)
-    const homeBase = await utils.isHomeBase(movement.immatriculation)
-    await updateAssociatedMovement(associatedMovement, aircraftMovements, {
-      [snap.ref.key]: true
-    }, homeBase)
+  const assocSnap = await admin.database().ref(utils.path(type)).child(movementKey).once('value')
+  const assocData = toValidAssoc(assocSnap.val())
+
+  await admin.database().ref(utils.path(type)).child(movementKey).remove()
+
+  if (assocData) {
+    await setAssociatedMovementPending(assocData.key, assocData.type)
+    const associatedMovement = await loadMovement(assocData.key, assocData.type)
+    if (associatedMovement) {
+      const aircraftMovements = await utils.loadAircraftMovements(associatedMovement.immatriculation)
+      const homeBase = await utils.isHomeBase(associatedMovement.immatriculation)
+      await updateAssociatedMovement(associatedMovement, aircraftMovements, {
+        [movementKey]: true // prevent cascade from trying to reload the deleted movement
+      }, homeBase)
+    }
   }
 }
 
