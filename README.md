@@ -6,9 +6,9 @@
 
 #### Required Node Versions
 
-Node Version for building the app: 20
+Node Version for building the app: 22
 
-Node Version for deploying to Firebase and for the cloud functions: 20
+Node Version for deploying to Firebase and for the cloud functions: 22
 
 #### Start locally
 
@@ -58,7 +58,7 @@ $ npm run build:prod [--project={PROJECT_NAME}]
 
 #### Push to Firebase
 
-Node version for this step: 20
+Node version for this step: 22
 
 Prerequisites: Firebase Tools must be installed (`npm install -g firebase-tools@13`).
 
