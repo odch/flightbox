@@ -29,12 +29,13 @@ export const renderInputField = (props) => {
       name={props.name}
       type={props.type}
       readOnly={props.readOnly}
+      data-cy={props.input.name}
     />
   );
   return renderLabeledComponent(props, cmp);
 };
 
 export const renderTextArea = (props) => {
-  const cmp = <TextArea {...props.input} readOnly={props.readOnly}/>;
+  const cmp = <TextArea {...props.input} readOnly={props.readOnly} data-cy={props.input.name}/>;
   return renderLabeledComponent(props, cmp);
 };

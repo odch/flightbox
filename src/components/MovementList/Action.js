@@ -42,7 +42,7 @@ class Action extends React.PureComponent {
 
   render() {
     return (
-      <StyledAction onClick={this.handleClick} className={this.props.className} $disabled={this.props.disabled}>
+      <StyledAction onClick={this.handleClick} className={this.props.className} $disabled={this.props.disabled} data-cy={this.props.dataCy}>
         <MaterialIcon icon={this.props.icon} rotate={this.props.rotateIcon}/>
         <ActionLabel $responsive={this.props.responsive}>&nbsp;{this.props.label}</ActionLabel>
       </StyledAction>
@@ -57,7 +57,8 @@ Action.propTypes = {
   label: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   responsive: PropTypes.bool,
-  rotateIcon: PropTypes.oneOf(['left', 'right'])
+  rotateIcon: PropTypes.oneOf(['left', 'right']),
+  dataCy: PropTypes.string,
 };
 
 export default Action;

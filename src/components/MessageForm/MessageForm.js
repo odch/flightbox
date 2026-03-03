@@ -50,7 +50,7 @@ class MessageForm extends React.Component {
                 label={t('message.message')}
               />
             </div>
-            <Button type="submit" icon="send" label={t('message.send')} primary/>
+            <Button type="submit" icon="send" label={t('message.send')} primary dataCy="send"/>
             {this.props.sent && (
               <Dialog
                 heading={t('message.successHeading')}
