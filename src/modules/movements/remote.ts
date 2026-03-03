@@ -5,9 +5,9 @@ import {
 } from 'firebase/database';
 import {toOrderKey} from './pagination'
 
-const associationListeners = new Map();
+const associationListeners = new Map<string, () => void>();
 
-export function loadLimited(path, start, limit, endAt, createdBy) {
+export function loadLimited(path: string, start: any, limit: number | null | undefined, endAt: any, createdBy?: string) {
   const startAtParam = createdBy ? `${createdBy}_${typeof start === 'number' ? start : ''}`: start
   const endAtParam = createdBy && endAt ? toOrderKey(createdBy, endAt) : createdBy ? createdBy : endAt
 
@@ -23,15 +23,15 @@ export function loadLimited(path, start, limit, endAt, createdBy) {
   return get(limitedQuery).then(snapshot => ({snapshot, ref: limitedQuery}));
 }
 
-export function loadByKey(path, key) {
+export function loadByKey(path: string, key: string) {
   return get(child(firebase(path), key));
 }
 
-export function removeMovement(path, key) {
+export function removeMovement(path: string, key: string) {
   return remove(child(firebase(path), key));
 }
 
-export function saveMovement(path, key, movement) {
+export function saveMovement(path: string, key: string | null | undefined, movement: Record<string, unknown>): Promise<string> {
   return new Promise(async (resolve, reject) => {
     try {
       if (key) {
@@ -39,7 +39,7 @@ export function saveMovement(path, key, movement) {
         resolve(key);
       } else {
         const newRef = await push(firebase(path), movement);
-        resolve(newRef.key);
+        resolve(newRef.key as string);
       }
     } catch (error) {
       reject(error);
@@ -47,7 +47,7 @@ export function saveMovement(path, key, movement) {
   });
 }
 
-export function addMovementAssociationListener(movementType, movementKey, callback) {
+export function addMovementAssociationListener(movementType: string, movementKey: string, callback: (snapshot: any) => void) {
   const dbRef = child(
     child(firebase('/movementAssociations'), movementType === 'departure' ? 'departures' : 'arrivals'),
     movementKey
@@ -56,7 +56,7 @@ export function addMovementAssociationListener(movementType, movementKey, callba
   associationListeners.set(`${movementType}:${movementKey}`, unsubscribe);
 }
 
-export function removeMovementAssociationListener(movementType, movementKey) {
+export function removeMovementAssociationListener(movementType: string, movementKey: string) {
   const key = `${movementType}:${movementKey}`;
   associationListeners.get(key)?.();
   associationListeners.delete(key);

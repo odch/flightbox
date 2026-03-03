@@ -12,7 +12,7 @@ interface AuthState {
   authenticated: boolean;
   submitting: boolean;
   failure: boolean;
-  emailAuthenticationCompletionFailure: boolean;
+  emailAuthenticationCompletionFailure?: boolean;
   guestAuthentication: GuestAuthState;
   data?: unknown;
 }
@@ -72,10 +72,9 @@ const ACTION_HANDLERS = {
         authenticated: true,
         failure: false,
         submitting: false,
-        emailAuthenticationCompletionFailure: false,
         data: action.payload.authData,
         guestAuthentication: INITIAL_STATE.guestAuthentication
-      };
+      } as AuthState;
     }
     return INITIAL_STATE;
   },

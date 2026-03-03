@@ -11,13 +11,13 @@ import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import {loadRemote} from '../profile'
 
-export const stateSelector = state => state.movements;
+export const stateSelector = (state: any) => state.movements;
 
-export const movementSelector = (state, key) => state.movements.data.getByKey(key);
+export const movementSelector = (state: any, key: string) => state.movements.data.getByKey(key);
 
-export const wizardFormValuesSelector = state => state.ui.wizard.values;
+export const wizardFormValuesSelector = (state: any) => state.ui.wizard.values;
 
-export const authSelector = state => state.auth.data
+export const authSelector = (state: any) => state.auth.data;
 
 export function* getProfileDefaultValues() {
   const auth = yield select(authSelector)
@@ -53,7 +53,7 @@ export function* getArrivalDefaultValues() {
   };
 }
 
-export function* getDefaultValuesFromArrival(arrivalKey) {
+export function* getDefaultValuesFromArrival(arrivalKey: string) {
   const snapshot = yield call(remote.loadByKey, '/arrivals', arrivalKey);
 
   const initialValues = yield call(getDepartureDefaultValues);
@@ -80,7 +80,7 @@ export function* getDefaultValuesFromArrival(arrivalKey) {
   return initialValues;
 }
 
-export function* getDefaultValuesFromDeparture(departureKey) {
+export function* getDefaultValuesFromDeparture(departureKey: string) {
   const snapshot = yield call(remote.loadByKey, '/departures', departureKey);
 
   const initialValues = yield call(getArrivalDefaultValues);
@@ -111,9 +111,9 @@ export function* getDefaultValuesFromDeparture(departureKey) {
   return initialValues;
 }
 
-export function getOldest(snapshot) {
-  let oldest = null;
-  snapshot.forEach(item => {
+export function getOldest(snapshot: any) {
+  let oldest: any = null;
+  snapshot.forEach((item: any) => {
     const val = item.val();
     if (!oldest || oldest.negativeTimestamp < val.negativeTimestamp) {
       oldest = val
@@ -122,7 +122,7 @@ export function getOldest(snapshot) {
   return oldest;
 }
 
-function hasFilterDateChanged(newFilter, previousFilter) {
+function hasFilterDateChanged(newFilter: any, previousFilter: any) {
   const newStart = newFilter.date.start
   const newEnd = newFilter.date.end
 
@@ -139,7 +139,7 @@ export function* filterMovements() {
   }
 }
 
-export function* loadMovements(channel, action) {
+export function* loadMovements(channel: any, action: any) {
   try {
     const {clear} = action.payload;
 
@@ -158,7 +158,7 @@ export function* loadMovements(channel, action) {
       yield call(monitorRef, departures.ref, channel, 'departure', eventActions);
       yield call(monitorRef, arrivals.ref, channel, 'arrival', eventActions);
 
-      const existingMovements = clear ? new ImmutableItemsArray() : movements.data;
+      const existingMovements = clear ? new ImmutableItemsArray([]) : movements.data;
 
       yield call(addMovements, departures.snapshot, arrivals.snapshot, existingMovements, channel);
 
@@ -173,7 +173,7 @@ export function* loadMovements(channel, action) {
   }
 }
 
-export function* loadDeparturesAndArrivals(movements, clear) {
+export function* loadDeparturesAndArrivals(movements: any, clear: boolean) {
   if (movements.filter.date.start && movements.filter.date.end) {
     return yield call(loadDeparturesAndArrivalsFiltered, movements);
   } else {
@@ -181,9 +181,8 @@ export function* loadDeparturesAndArrivals(movements, clear) {
   }
 }
 
-export function* loadDeparturesAndArrivalsFiltered(movements) {
+export function* loadDeparturesAndArrivalsFiltered(movements: any) {
   // start and end is the other way round because we're sorting (ascending) by negative timestamp
-  // (we can't fetch data sorted descending in firebase)
   const start = dates.negativeTimestampEndOfDay(movements.filter.date.end);
   const end = dates.negativeTimestampStartOfDay(movements.filter.date.start);
 
@@ -206,19 +205,17 @@ export function* loadDeparturesAndArrivalsFiltered(movements) {
   return {departures, arrivals};
 }
 
-export function getReloadParams(movements) {
+export function getReloadParams(movements: any) {
   const oldestDeparture = getOldest(movements.departures.snapshot);
   const oldestArrival = getOldest(movements.arrivals.snapshot);
 
   if (oldestDeparture && oldestArrival) {
     if (oldestDeparture.negativeTimestamp > oldestArrival.negativeTimestamp) {
-      // departure is older -> reload arrivals with new pagination
       return {
         reloadType: 'arrivals',
         reloadEnd: oldestDeparture.negativeTimestamp
       }
     } else {
-      // arrival is older -> reload departures with new pagination
       return {
         reloadType: 'departures',
         reloadEnd: oldestArrival.negativeTimestamp
@@ -227,7 +224,6 @@ export function getReloadParams(movements) {
   }
 
   if (oldestDeparture) {
-    // no arrivals -> reload arrivals with new pagination
     return {
       reloadType: 'arrivals',
       reloadEnd: oldestDeparture.negativeTimestamp
@@ -235,7 +231,6 @@ export function getReloadParams(movements) {
   }
 
   if (oldestArrival) {
-    // no departures -> reload departures with new pagination
     return {
       reloadType: 'departures',
       reloadEnd: oldestArrival.negativeTimestamp
@@ -245,7 +240,7 @@ export function getReloadParams(movements) {
   return null
 }
 
-export function* loadLatestDeparturesAndArrivalsPaged(movements, clear) {
+export function* loadLatestDeparturesAndArrivalsPaged(movements: any, clear: boolean) {
   const auth = yield select(authSelector);
 
   const pagination = getPagination(clear ? [] : movements.data.array);
@@ -268,12 +263,11 @@ export function* loadLatestDeparturesAndArrivalsPaged(movements, clear) {
     !auth.admin ? auth.email : undefined
   );
 
-  const loadedMovements = {
+  const loadedMovements: any = {
     departures,
     arrivals
   }
 
-  // make sure we load both collections until oldest in pagination
   const reloadParams = getReloadParams(loadedMovements)
 
   if (reloadParams) {
@@ -290,8 +284,8 @@ export function* loadLatestDeparturesAndArrivalsPaged(movements, clear) {
   return loadedMovements
 }
 
-export function* addMovements(departuresSnapshot, arrivalsSnapshot, existingMovements, channel) {
-  const movements = [];
+export function* addMovements(departuresSnapshot: any, arrivalsSnapshot: any, existingMovements: any, channel: any) {
+  const movements: any[] = [];
 
   departuresSnapshot.forEach(transformToLocal(movements, 'departure'));
   arrivalsSnapshot.forEach(transformToLocal(movements, 'arrival'));
@@ -300,7 +294,7 @@ export function* addMovements(departuresSnapshot, arrivalsSnapshot, existingMove
 
   const filteredMovements = auth.admin || !auth.email
     ? movements
-    : movements.filter(movement => movement.createdBy === auth.email)
+    : movements.filter((movement: any) => movement.createdBy === auth.email)
 
   const newData = existingMovements.insertAll(filteredMovements, compareDescending);
 
@@ -309,25 +303,25 @@ export function* addMovements(departuresSnapshot, arrivalsSnapshot, existingMove
   channel.put(actions.setMovements(newData));
 }
 
-export function* monitorAssociations(newMovements, oldMovements, channel) {
+export function* monitorAssociations(newMovements: any, oldMovements: any, channel: any) {
   newMovements.array
-    .filter(movement => !oldMovements.containsKey(movement.key))
-    .forEach(movement => monitorAssociation(movement, channel))
+    .filter((movement: any) => !oldMovements.containsKey(movement.key))
+    .forEach((movement: any) => monitorAssociation(movement, channel))
 
   oldMovements.array
-    .filter(movement => !newMovements.containsKey(movement.key))
-    .forEach(movement => removeMovementAssociationListener(movement.type, movement.key))
+    .filter((movement: any) => !newMovements.containsKey(movement.key))
+    .forEach((movement: any) => removeMovementAssociationListener(movement.type, movement.key))
 }
 
-export function monitorAssociation(movement, channel) {
+export function monitorAssociation(movement: any, channel: any) {
   addMovementAssociationListener(movement.type, movement.key, (snapshot) => {
     channel.put(actions.setAssociatedMovement(movement.type, movement.key, snapshot.val()));
   })
 }
 
-const movementListeners = { departure: [], arrival: [] };
+const movementListeners: Record<string, Array<() => void>> = { departure: [], arrival: [] };
 
-export function* monitorRef(ref, channel, movementType, eventActions) {
+export function* monitorRef(ref: any, channel: any, movementType: string, eventActions: any) {
   movementListeners[movementType].forEach(fn => fn());
   movementListeners[movementType] = [
     onChildAdded(ref, createDelegate(channel, eventActions.added, movementType)),
@@ -336,28 +330,28 @@ export function* monitorRef(ref, channel, movementType, eventActions) {
   ];
 }
 
-export function createDelegate(channel, action, movementType) {
-  return snapshot => channel.put(action(snapshot, movementType))
+export function createDelegate(channel: any, action: Function, movementType: string) {
+  return (snapshot: any) => channel.put(action(snapshot, movementType))
 }
 
-export function* movementAdded(channel, action) {
+export function* movementAdded(channel: any, action: any) {
   const {snapshot, movementType} = action.payload;
   const state = yield select(stateSelector);
   yield call(addMovementToState, snapshot, movementType, state, channel, true);
 }
 
-export function* movementChanged(channel, action) {
+export function* movementChanged(channel: any, action: any) {
   const {snapshot, movementType} = action.payload;
   const currentState = yield call(removeMovementFromState, snapshot, channel);
   yield call(addMovementToState, snapshot, movementType, currentState, channel, false);
 }
 
-export function* movementDeleted(channel, action) {
+export function* movementDeleted(channel: any, action: any) {
   const {snapshot} = action.payload;
   yield call(removeMovementFromState, snapshot, channel);
 }
 
-export function* addMovementToState(snapshot, movementType, currentState, channel, applyFillInGuard = false) {
+export function* addMovementToState(snapshot: any, movementType: string, currentState: any, channel: any, applyFillInGuard = false) {
   const {data} = currentState;
 
   if (!data.getByKey(snapshot.key)) {
@@ -370,11 +364,6 @@ export function* addMovementToState(snapshot, movementType, currentState, channe
 
     const newData = data.insert(movement, compareDescending);
 
-    // if is last element, it was added to the range only because a movement
-    // in the range was deleted. to prevent the `movementAdded` callback
-    // from messing up the state, because it's executed parallel to the
-    // `movementDeleted` callback, we ignore it here.
-    // This guard only applies to movementAdded (fill-ins), not movementChanged.
     if (applyFillInGuard && newData.array[newData.array.length - 1].key === movement.key) {
       return;
     }
@@ -385,7 +374,7 @@ export function* addMovementToState(snapshot, movementType, currentState, channe
   }
 }
 
-export function* removeMovementFromState(snapshot, channel) {
+export function* removeMovementFromState(snapshot: any, channel: any) {
   const {data} = yield select(stateSelector);
 
   const movement = data.getByKey(snapshot.key)
@@ -407,7 +396,7 @@ export function* removeMovementFromState(snapshot, channel) {
   return newState;
 }
 
-export function* loadMovement(action) {
+export function* loadMovement(action: any) {
   const {key, type} = action.payload;
 
   const path = getPathByMovementType(type);
@@ -420,13 +409,13 @@ export function* loadMovement(action) {
   yield put(actions.addMovementByKey(movement));
 }
 
-export function* deleteMovement(action) {
+export function* deleteMovement(action: any) {
   const {movementType, key, successAction} = action.payload;
   yield call(remote.removeMovement, getPathByMovementType(movementType), key);
   yield put(successAction());
 }
 
-export function* initNewMovement(action) {
+export function* initNewMovement(action: any) {
   const {movementType} = action.payload;
   const loadInitialValuesSaga = movementType === 'departure'
     ? getDepartureDefaultValues
@@ -434,7 +423,7 @@ export function* initNewMovement(action) {
   yield call(initMovement, loadInitialValuesSaga);
 }
 
-export function* initNewMovementFromMovement(action) {
+export function* initNewMovementFromMovement(action: any) {
   const {movementType, sourceMovementKey} = action.payload;
   const loadInitialValuesSaga = movementType === 'departure'
     ? getDefaultValuesFromArrival
@@ -442,13 +431,13 @@ export function* initNewMovementFromMovement(action) {
   yield call(initMovement, loadInitialValuesSaga, sourceMovementKey);
 }
 
-export function* initMovement(loadInitialValuesSaga, ...loadInitialValuesArgs) {
+export function* initMovement(loadInitialValuesSaga: (...args: any[]) => any, ...loadInitialValuesArgs: unknown[]) {
   yield put(actions.startInitializeWizard());
   const initialValues = yield call(loadInitialValuesSaga, ...loadInitialValuesArgs);
   yield put(actions.wizardInitialized(initialValues));
 }
 
-export function* editMovement(action) {
+export function* editMovement(action: any) {
   const {movementType, key} = action.payload;
   yield put(actions.startInitializeWizard());
   let movement = yield(select(movementSelector, key));
@@ -493,7 +482,7 @@ export function* saveMovement() {
   }
 }
 
-export function* saveMovementPaymentMethod(action) {
+export function* saveMovementPaymentMethod(action: any) {
   const {movementType, key, paymentMethod} = action.payload;
   const path = getPathByMovementType(movementType);
   try {
@@ -508,7 +497,7 @@ export function* saveMovementPaymentMethod(action) {
   }
 }
 
-function getPathByMovementType(type) {
+function getPathByMovementType(type: string) {
   switch(type) {
     case 'departure':
       return '/departures';
@@ -519,15 +508,14 @@ function getPathByMovementType(type) {
   }
 }
 
-
-const transformSnapshotToLocal = (snapshot, movementType) => {
+const transformSnapshotToLocal = (snapshot: any, movementType: string) => {
   const movement = firebaseToLocal(snapshot.val());
   movement.key = snapshot.key;
   movement.type = movementType;
   return movement;
 }
 
-const transformToLocal = (movements, movementType) => item => {
+const transformToLocal = (movements: any[], movementType: string) => (item: any) => {
   const movement = transformSnapshotToLocal(item, movementType);
   movements.push(movement);
 }
@@ -538,7 +526,7 @@ export default function* sagas() {
   yield all([
     fork(monitor, channel),
     takeEvery(actions.LOAD_MOVEMENTS, loadMovements, channel),
-    takeEvery(actions.SET_MOVEMENTS_FILTER, filterMovements, channel),
+    takeEvery(actions.SET_MOVEMENTS_FILTER, filterMovements),
     takeEvery(actions.MOVEMENT_ADDED, movementAdded, channel),
     takeEvery(actions.MOVEMENT_CHANGED, movementChanged, channel),
     takeEvery(actions.MOVEMENT_DELETED, movementDeleted, channel),
