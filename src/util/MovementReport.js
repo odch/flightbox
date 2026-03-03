@@ -1,4 +1,5 @@
 import firebase from './firebase.js';
+import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
 import Download from './Download.js';
 import {compareAscending, firebaseToLocal} from './movements.js';
 import {fetch as fetchAircrafts} from './aircrafts';
@@ -46,19 +47,12 @@ class MovementReport {
   }
 
   readMovements(type) {
-    return new Promise(fulfill => {
-      firebase(type.path, (error, ref) => {
-        ref.orderByChild('dateTime')
-          .startAt(dates.isoStartOfDay(this.startDate))
-          .endAt(dates.isoEndOfDay(this.endDate))
-          .once('value', (snapshot) => {
-            fulfill({
-              type,
-              snapshot,
-            });
-          }, this);
-      });
-    });
+    return get(query(
+      firebase(type.path),
+      orderByChild('dateTime'),
+      startAt(dates.isoStartOfDay(this.startDate)),
+      endAt(dates.isoEndOfDay(this.endDate))
+    )).then(snapshot => ({type, snapshot}));
   }
 
   build(snapshots, aircrafts, aerodromes, callback) {

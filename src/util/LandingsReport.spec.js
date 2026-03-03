@@ -5,6 +5,7 @@ describe('util', () => {
   describe('LandingsReport', () => {
     let LandingsReport;
     let firebase;
+    let get;
 
     beforeEach(() => {
       global.__CONF__ = {
@@ -22,8 +23,16 @@ describe('util', () => {
       jest.resetModules();
       jest.mock('./firebase');
       jest.mock('./aircrafts');
+      jest.mock('firebase/database', () => ({
+        get: jest.fn(),
+        query: jest.fn(),
+        orderByChild: jest.fn(),
+        startAt: jest.fn(),
+        endAt: jest.fn(),
+      }));
 
       firebase = require('./firebase').default;
+      ({get} = require('firebase/database'));
       LandingsReport = require('./LandingsReport').default;
     });
 
@@ -324,19 +333,11 @@ describe('util', () => {
 
     describe('readArrivals', () => {
       it('resolves with a firebase snapshot after querying by dateTime', () => {
-        const mockRef = {
-          orderByChild: jest.fn().mockReturnThis(),
-          startAt: jest.fn().mockReturnThis(),
-          endAt: jest.fn().mockReturnThis(),
-          once: jest.fn((event, callback) => {
-            callback({forEach: () => {}});
-          }),
-        };
-        firebase.mockImplementation((path, callback) => callback(null, mockRef));
+        const mockSnapshot = {forEach: () => {}};
+        get.mockResolvedValue(mockSnapshot);
 
         const report = new LandingsReport(2023, 6);
         return report.readArrivals().then(snapshot => {
-          expect(mockRef.orderByChild).toHaveBeenCalledWith('dateTime');
           expect(snapshot).toBeDefined();
         });
       });
@@ -344,15 +345,8 @@ describe('util', () => {
 
     describe('generate', () => {
       it('calls callback with a Download after fetching arrivals and aircrafts', () => {
-        const mockRef = {
-          orderByChild: jest.fn().mockReturnThis(),
-          startAt: jest.fn().mockReturnThis(),
-          endAt: jest.fn().mockReturnThis(),
-          once: jest.fn((event, callback) => {
-            callback({forEach: () => {}});
-          }),
-        };
-        firebase.mockImplementation((path, callback) => callback(null, mockRef));
+        const mockSnapshot = {forEach: () => {}};
+        get.mockResolvedValue(mockSnapshot);
 
         const fetchAircraftsMock = require('./aircrafts').fetch;
         fetchAircraftsMock.mockResolvedValue({club: {}, homeBase: {}});

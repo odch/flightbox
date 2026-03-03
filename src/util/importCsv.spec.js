@@ -1,48 +1,35 @@
 jest.mock('./firebase');
+jest.mock('firebase/database', () => ({
+  get: jest.fn(),
+  child: jest.fn(),
+  set: jest.fn(),
+  remove: jest.fn(),
+  push: jest.fn(),
+}));
 
 import firebase from './firebase';
+import {get, child, set, remove, push} from 'firebase/database';
 import importCsv from './importCsv';
 
 describe('util', () => {
   describe('importCsv', () => {
     let mockRef;
+    let childRef;
 
     beforeEach(() => {
       jest.clearAllMocks();
 
-      mockRef = {
-        once: jest.fn(),
-        child: jest.fn(),
-        push: jest.fn(),
-        remove: jest.fn(),
-        set: jest.fn(),
-      };
+      mockRef = {};
+      childRef = {};
 
-      // Default child mock returns a ref with set/remove
-      mockRef.child.mockReturnValue({
-        set: jest.fn(),
-        remove: jest.fn(),
-      });
+      firebase.mockReturnValue(mockRef);
+      child.mockReturnValue(childRef);
 
-      // Default: firebase called with callback -> calls callback(null, mockRef)
-      //          firebase called without callback -> returns mockRef
-      firebase.mockImplementation((path, callback) => {
-        if (typeof callback === 'function') {
-          callback(null, mockRef);
-        } else {
-          return mockRef;
-        }
-      });
-
-      // Default once: with callback arg (updateExisting pattern) -> call it with empty snapshot
-      //               without callback (additionalEntriesPath) -> return Promise with non-existing snapshot
-      mockRef.once.mockImplementation((event, cb) => {
-        if (typeof cb === 'function') {
-          cb({ forEach: () => {} });
-        } else {
-          return Promise.resolve({ exists: () => false, val: () => null });
-        }
-      });
+      // Default: empty snapshot (no existing firebase entries)
+      get.mockResolvedValue({forEach: () => {}, exists: () => false, val: () => null});
+      set.mockResolvedValue();
+      remove.mockResolvedValue();
+      push.mockResolvedValue();
     });
 
     const baseOptions = {
@@ -72,47 +59,30 @@ describe('util', () => {
 
     describe('updateExisting - removes items absent from CSV', () => {
       it('removes firebase entries whose key is not in CSV', async () => {
-        const childRef = { set: jest.fn(), remove: jest.fn() };
-        mockRef.child.mockReturnValue(childRef);
-
-        mockRef.once.mockImplementation((event, cb) => {
-          if (typeof cb === 'function') {
-            // memberNr '9999' is not in the CSV (which has '1001' and '1002')
-            cb({
-              forEach: fn =>
-                fn({ key: 'existingFirebaseKey', val: () => ({ memberNr: '9999' }) }),
-            });
-          } else {
-            return Promise.resolve({ exists: () => false, val: () => null });
-          }
+        // memberNr '9999' is not in the CSV (which has '1001' and '1002')
+        get.mockResolvedValue({
+          forEach: fn =>
+            fn({key: 'existingFirebaseKey', val: () => ({memberNr: '9999'})}),
         });
 
         await importCsv(csvString, baseOptions);
 
-        expect(childRef.remove).toHaveBeenCalled();
+        expect(remove).toHaveBeenCalledWith(childRef);
       });
     });
 
     describe('updateExisting - sets matching items', () => {
       it('sets firebase entries that are in CSV', async () => {
-        const childRef = { set: jest.fn(), remove: jest.fn() };
-        mockRef.child.mockReturnValue(childRef);
-
-        mockRef.once.mockImplementation((event, cb) => {
-          if (typeof cb === 'function') {
-            // memberNr '1001' is in the CSV
-            cb({
-              forEach: fn =>
-                fn({ key: 'someFirebaseKey', val: () => ({ memberNr: '1001' }) }),
-            });
-          } else {
-            return Promise.resolve({ exists: () => false, val: () => null });
-          }
+        // memberNr '1001' is in the CSV
+        get.mockResolvedValue({
+          forEach: fn =>
+            fn({key: 'someFirebaseKey', val: () => ({memberNr: '1001'})}),
         });
 
         await importCsv(csvString, baseOptions);
 
-        expect(childRef.set).toHaveBeenCalledWith(
+        expect(set).toHaveBeenCalledWith(
+          childRef,
           expect.objectContaining({ memberNr: '1001', lastname: 'Smith', firstname: 'John' })
         );
       });
@@ -120,9 +90,6 @@ describe('util', () => {
 
     describe('addNew with isFirebaseKey', () => {
       it('uses child(key).set when isFirebaseKey is true', async () => {
-        const childRef = { set: jest.fn(), remove: jest.fn() };
-        mockRef.child.mockReturnValue(childRef);
-
         const options = {
           path: '/users',
           columns: [
@@ -134,8 +101,8 @@ describe('util', () => {
         const csv = 'UserName,LastName\n1001,Smith\n';
         await importCsv(csv, options);
 
-        expect(mockRef.child).toHaveBeenCalledWith('1001');
-        expect(childRef.set).toHaveBeenCalled();
+        expect(child).toHaveBeenCalledWith(mockRef, '1001');
+        expect(set).toHaveBeenCalled();
       });
     });
 
@@ -152,15 +119,12 @@ describe('util', () => {
 
         await importCsv(csv, options);
 
-        expect(mockRef.push).toHaveBeenCalled();
+        expect(push).toHaveBeenCalled();
       });
     });
 
     describe('modifications', () => {
       it('applies uppercase modification', async () => {
-        const childRef = { set: jest.fn(), remove: jest.fn() };
-        mockRef.child.mockReturnValue(childRef);
-
         const csv = 'UserName,LastName\nabc123,smith\n';
         const options = {
           path: '/users',
@@ -172,15 +136,13 @@ describe('util', () => {
 
         await importCsv(csv, options);
 
-        expect(childRef.set).toHaveBeenCalledWith(
+        expect(set).toHaveBeenCalledWith(
+          childRef,
           expect.objectContaining({ lastname: 'SMITH' })
         );
       });
 
       it('applies lowercase modification', async () => {
-        const childRef = { set: jest.fn(), remove: jest.fn() };
-        mockRef.child.mockReturnValue(childRef);
-
         const csv = 'UserName,Email\nabc123,TEST@EXAMPLE.COM\n';
         const options = {
           path: '/users',
@@ -192,15 +154,13 @@ describe('util', () => {
 
         await importCsv(csv, options);
 
-        expect(childRef.set).toHaveBeenCalledWith(
+        expect(set).toHaveBeenCalledWith(
+          childRef,
           expect.objectContaining({ email: 'test@example.com' })
         );
       });
 
       it('applies parseint modification', async () => {
-        const childRef = { set: jest.fn(), remove: jest.fn() };
-        mockRef.child.mockReturnValue(childRef);
-
         const csv = 'UserName,Age\nabc123,42\n';
         const options = {
           path: '/users',
@@ -212,7 +172,8 @@ describe('util', () => {
 
         await importCsv(csv, options);
 
-        expect(childRef.set).toHaveBeenCalledWith(
+        expect(set).toHaveBeenCalledWith(
+          childRef,
           expect.objectContaining({ age: 42 })
         );
       });
@@ -245,36 +206,6 @@ describe('util', () => {
 
     describe('additionalEntriesPath', () => {
       it('merges additional entries from firebase when snapshot exists', async () => {
-        const childRef = { set: jest.fn(), remove: jest.fn() };
-        mockRef.child.mockReturnValue(childRef);
-
-        const additionalRef = {
-          once: jest.fn().mockResolvedValue({
-            exists: () => true,
-            val: () => ({ extra1: { memberNr: 'extra', lastname: 'Extra' } }),
-          }),
-        };
-
-        firebase.mockImplementation((path, callback) => {
-          if (typeof callback === 'function') {
-            callback(null, mockRef);
-          } else {
-            if (path === '/settings/extra') {
-              return additionalRef;
-            }
-            return mockRef;
-          }
-        });
-
-        // updateExisting fires callback
-        mockRef.once.mockImplementation((event, cb) => {
-          if (typeof cb === 'function') {
-            cb({ forEach: () => {} });
-          } else {
-            return Promise.resolve({ exists: () => false, val: () => null });
-          }
-        });
-
         const options = {
           path: '/users',
           additionalEntriesPath: '/settings/extra',
@@ -285,39 +216,23 @@ describe('util', () => {
         };
 
         const csv = 'UserName,LastName\n1001,Smith\n';
+
+        // First get call: additionalEntriesPath snapshot (exists with extra entry)
+        // Second get call: updateExisting snapshot (empty)
+        get
+          .mockResolvedValueOnce({
+            exists: () => true,
+            val: () => ({extra1: {memberNr: 'extra', lastname: 'Extra'}}),
+          })
+          .mockResolvedValue({forEach: () => {}});
+
         await importCsv(csv, options);
 
-        // Both CSV entry and additional entry should be pushed (new, not existing)
-        expect(mockRef.push).toHaveBeenCalledTimes(2);
+        // Both CSV entry (1001) and additional entry (extra1) should be pushed
+        expect(push).toHaveBeenCalledTimes(2);
       });
 
       it('does not merge when additional entries snapshot does not exist', async () => {
-        const additionalRef = {
-          once: jest.fn().mockResolvedValue({
-            exists: () => false,
-            val: () => null,
-          }),
-        };
-
-        firebase.mockImplementation((path, callback) => {
-          if (typeof callback === 'function') {
-            callback(null, mockRef);
-          } else {
-            if (path === '/settings/extra') {
-              return additionalRef;
-            }
-            return mockRef;
-          }
-        });
-
-        mockRef.once.mockImplementation((event, cb) => {
-          if (typeof cb === 'function') {
-            cb({ forEach: () => {} });
-          } else {
-            return Promise.resolve({ exists: () => false, val: () => null });
-          }
-        });
-
         const options = {
           path: '/users',
           additionalEntriesPath: '/settings/extra',
@@ -328,10 +243,17 @@ describe('util', () => {
         };
 
         const csv = 'UserName,LastName\n1001,Smith\n';
+
+        // First get call: additionalEntriesPath snapshot (does not exist)
+        // Second get call: updateExisting snapshot (empty)
+        get
+          .mockResolvedValueOnce({exists: () => false, val: () => null})
+          .mockResolvedValue({forEach: () => {}});
+
         await importCsv(csv, options);
 
         // Only the CSV entry should be pushed
-        expect(mockRef.push).toHaveBeenCalledTimes(1);
+        expect(push).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -347,7 +269,7 @@ describe('util', () => {
         };
 
         await importCsv(csv, options);
-        expect(mockRef.push).toHaveBeenCalled();
+        expect(push).toHaveBeenCalled();
       });
     });
   });
