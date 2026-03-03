@@ -1,24 +1,10 @@
 import firebase from '../../../util/firebase';
+import {get, query, orderByChild, limitToLast, push} from 'firebase/database';
 
 export function loadLatest() {
-  return new Promise(resolve => {
-    const ref = firebase('/status');
-    ref.orderByChild('timestamp').limitToLast(10).once('value', snapshot => {
-      resolve(snapshot);
-    });
-  });
+  return get(query(firebase('/status'), orderByChild('timestamp'), limitToLast(10)));
 }
 
 export function save(status) {
-  return new Promise((resolve, reject) => {
-    firebase('/status/', (error, ref) => {
-      ref.push(status, commitError => {
-        if (commitError) {
-          reject(commitError);
-        } else {
-          resolve();
-        }
-      });
-    });
-  });
+  return push(firebase('/status'), status).then(() => undefined);
 }

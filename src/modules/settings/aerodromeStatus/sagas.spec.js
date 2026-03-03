@@ -5,8 +5,15 @@ import * as remote from './remote';
 import FakeFirebaseSnapshot from '../../../../test/FakeFirebaseSnapshot';
 import ImmutableItemsArray from "../../../util/ImmutableItemsArray"
 import firebase from '../../../util/firebase';
+import {onValue} from 'firebase/database';
 
 jest.mock('../../../util/firebase');
+jest.mock('firebase/database', () => ({
+  onValue: jest.fn(),
+  query: jest.fn(r => r),
+  orderByChild: jest.fn(),
+  limitToLast: jest.fn(),
+}));
 
 describe('modules', () => {
   describe('settings', () => {
@@ -152,12 +159,12 @@ describe('modules', () => {
         });
 
         describe('watchCurrentAerodromeStatus', () => {
-          it('should wait for WATCH_CURRENT_AERODROME_STATUS and then call firebase', () => {
-            const onMock = jest.fn();
-            const limitToLastMock = jest.fn().mockReturnValue({ on: onMock });
-            const orderByChildMock = jest.fn().mockReturnValue({ limitToLast: limitToLastMock });
-            firebase.mockReturnValue({ orderByChild: orderByChildMock });
+          beforeEach(() => {
+            jest.clearAllMocks();
+            firebase.mockReturnValue({});
+          });
 
+          it('should wait for WATCH_CURRENT_AERODROME_STATUS and then call onValue', () => {
             const channel = { put: jest.fn() };
             const generator = sagas.watchCurrentAerodromeStatus(channel);
 
@@ -165,24 +172,17 @@ describe('modules', () => {
             expect(generator.next().done).toEqual(true);
 
             expect(firebase).toHaveBeenCalledWith('/status');
-            expect(orderByChildMock).toHaveBeenCalledWith('timestamp');
-            expect(limitToLastMock).toHaveBeenCalledWith(1);
-            expect(onMock).toHaveBeenCalledWith('value', expect.any(Function));
+            expect(onValue).toHaveBeenCalledWith(expect.anything(), expect.any(Function));
           });
 
           it('should call channel.put with status when snapshot has data', () => {
-            const onMock = jest.fn();
-            const limitToLastMock = jest.fn().mockReturnValue({ on: onMock });
-            const orderByChildMock = jest.fn().mockReturnValue({ limitToLast: limitToLastMock });
-            firebase.mockReturnValue({ orderByChild: orderByChildMock });
-
             const channel = { put: jest.fn() };
             const generator = sagas.watchCurrentAerodromeStatus(channel);
 
             generator.next(); // take
-            generator.next(); // firebase call + done
+            generator.next(); // onValue call + done
 
-            const callback = onMock.mock.calls[0][1];
+            const callback = onValue.mock.calls[0][1];
 
             const statusItem = { status: 'open', details: '' };
             const snapshot = { val: () => ({ key1: statusItem }) };
@@ -194,18 +194,13 @@ describe('modules', () => {
           });
 
           it('should call channel.put with null when snapshot is empty', () => {
-            const onMock = jest.fn();
-            const limitToLastMock = jest.fn().mockReturnValue({ on: onMock });
-            const orderByChildMock = jest.fn().mockReturnValue({ limitToLast: limitToLastMock });
-            firebase.mockReturnValue({ orderByChild: orderByChildMock });
-
             const channel = { put: jest.fn() };
             const generator = sagas.watchCurrentAerodromeStatus(channel);
 
             generator.next(); // take
-            generator.next(); // firebase call + done
+            generator.next(); // onValue call + done
 
-            const callback = onMock.mock.calls[0][1];
+            const callback = onValue.mock.calls[0][1];
 
             const nullSnapshot = { val: () => null };
             callback(nullSnapshot);

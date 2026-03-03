@@ -1,4 +1,5 @@
 import {all, call, fork, put, take, takeEvery} from 'redux-saga/effects';
+import {onValue, set} from 'firebase/database';
 import * as actions from './actions';
 import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
@@ -6,7 +7,7 @@ import firebase from '../../../util/firebase';
 export function* watchLoadLockDate(channel) {
   yield take(actions.LOAD_LOCK_DATE);
   yield put(actions.lockDateLoading());
-  firebase('/settings/lockDate').on('value', (snapshot) => {
+  onValue(firebase('/settings/lockDate'), (snapshot) => {
     channel.put(actions.lockDateLoaded(snapshot.val()));
   });
 }
@@ -18,11 +19,7 @@ export function* setLockDate(action) {
 }
 
 export function saveLockDate(date) {
-  return new Promise((resolve) => {
-    firebase('/settings/lockDate').set(date, () => {
-      resolve();
-    });
-  });
+  return set(firebase('/settings/lockDate'), date);
 }
 
 export default function* sagas() {

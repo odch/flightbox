@@ -1,4 +1,5 @@
 import {all, call, fork, put, select, take, takeEvery} from 'redux-saga/effects';
+import {onValue, query, orderByChild, limitToLast} from 'firebase/database';
 import * as actions from './actions';
 import * as remote from './remote';
 import ImmutableItemsArray from "../../../util/ImmutableItemsArray"
@@ -72,15 +73,17 @@ export function* saveAerodromeStatus(action) {
 
 export function* watchCurrentAerodromeStatus(channel) {
   yield take(actions.WATCH_CURRENT_AERODROME_STATUS);
-  firebase('/status')
-    .orderByChild('timestamp')
-    .limitToLast(1)
-    .on('value', (snapshot) => {
-      const map = snapshot.val();
-      const arr = map ? Object.values(map) : [];
-      const status = arr.length > 0 ? arr[0] : null;
-      channel.put(actions.setCurrentAerodromeStatus(status));
-    });
+  const queryRef = query(
+    firebase('/status'),
+    orderByChild('timestamp'),
+    limitToLast(1)
+  );
+  onValue(queryRef, (snapshot) => {
+    const map = snapshot.val();
+    const arr = map ? Object.values(map) : [];
+    const status = arr.length > 0 ? arr[0] : null;
+    channel.put(actions.setCurrentAerodromeStatus(status));
+  });
 }
 
 export default function* sagas() {

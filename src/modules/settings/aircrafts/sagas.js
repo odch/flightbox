@@ -1,4 +1,5 @@
 import {all, call, fork, put, take, takeEvery} from 'redux-saga/effects';
+import {onValue, set, remove as fbRemove, child} from 'firebase/database';
 import * as actions from './actions';
 import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
@@ -8,34 +9,18 @@ const paths = {
   homeBase: '/settings/aircrafts/homeBase',
 };
 
-export function* loadByType(channel, type) {
-  firebase(paths[type]).on('value', (snapshot) => {
+export function loadByType(channel, type) {
+  onValue(firebase(paths[type]), (snapshot) => {
     channel.put(actions.loadAircraftSettingsSuccess(type, snapshot.val() || {}));
   });
 }
 
-export function* add(type, name) {
-  return new Promise((resolve, reject) => {
-    firebase(paths[type]).child(name).set(true, error => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve();
-      }
-    });
-  });
+export function add(type, name) {
+  return set(child(firebase(paths[type]), name), true);
 }
 
-export function* remove(type, name) {
-  return new Promise((resolve, reject) => {
-    firebase(paths[type]).child(name).remove(error => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve();
-      }
-    });
-  });
+export function remove(type, name) {
+  return fbRemove(child(firebase(paths[type]), name));
 }
 
 export function* watchLoadAircrafts(channel) {

@@ -2,8 +2,13 @@ import {call, select, take} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import firebase from '../../../util/firebase';
+import {set} from 'firebase/database';
 
 jest.mock('../../../util/firebase');
+jest.mock('firebase/database', () => ({
+  onValue: jest.fn(),
+  set: jest.fn(),
+}));
 
 describe('modules', () => {
   describe('settings', () => {
@@ -145,12 +150,15 @@ describe('modules', () => {
         });
 
         describe('saveInvoiceRecipients', () => {
-          it('should return a Promise and complete', () => {
-            const mockRef = {set: jest.fn()};
+          it('should call set with recipients', async () => {
+            const mockRef = {};
             firebase.mockReturnValue(mockRef);
-            const generator = sagas.saveInvoiceRecipients([{name: 'Recipient A'}]);
-            const result = generator.next();
-            expect(result.done).toEqual(true);
+            set.mockResolvedValue();
+
+            await sagas.saveInvoiceRecipients([{name: 'Recipient A'}]);
+
+            expect(firebase).toHaveBeenCalledWith('/settings/invoiceRecipients');
+            expect(set).toHaveBeenCalledWith(mockRef, [{name: 'Recipient A'}]);
           });
         });
       });

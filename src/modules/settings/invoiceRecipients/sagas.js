@@ -1,12 +1,13 @@
 import {all, call, fork, select, take, takeEvery} from 'redux-saga/effects';
+import {onValue, set} from 'firebase/database';
 import * as actions from './actions';
 import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
 
 export const invoiceRecipientsSelector = state => state.settings.invoiceRecipients.recipients;
 
-export function* loadRecipients(channel) {
-  firebase('/settings/invoiceRecipients').on('value', (snapshot) => {
+export function loadRecipients(channel) {
+  onValue(firebase('/settings/invoiceRecipients'), (snapshot) => {
     channel.put(actions.loadInvoiceRecipientSettingsSuccess(snapshot.val() || []));
   });
 }
@@ -62,15 +63,8 @@ export function* removeInvoiceRecipientEmail(action) {
   yield call(saveInvoiceRecipients, newRecipients);
 }
 
-export function* saveInvoiceRecipients(invoiceRecipients) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      await firebase('/settings/invoiceRecipients').set(invoiceRecipients);
-      resolve();
-    } catch (error) {
-      reject(error);
-    }
-  });
+export function saveInvoiceRecipients(invoiceRecipients) {
+  return set(firebase('/settings/invoiceRecipients'), invoiceRecipients);
 }
 
 export default function* sagas() {

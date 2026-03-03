@@ -1,35 +1,35 @@
 import * as actions from './actions';
 import * as sagas from './sagas';
 import firebase from '../../../util/firebase';
+import {onValue} from 'firebase/database';
 import FakeFirebaseSnapshot from '../../../../test/FakeFirebaseSnapshot';
 
 jest.mock('../../../util/firebase');
+jest.mock('firebase/database', () => ({
+  onValue: jest.fn(),
+}));
 
 describe('modules', () => {
   describe('settings', () => {
     describe('kioskAccessToken', () => {
       describe('sagas', () => {
+        beforeEach(() => {
+          jest.clearAllMocks();
+          firebase.mockReturnValue({});
+        });
+
         describe('loadKioskAccessToken', () => {
-          it('should register firebase listener and complete', () => {
+          it('should register onValue listener', () => {
             const channel = {put: jest.fn()};
-            const mockRef = {on: jest.fn()};
-            firebase.mockReturnValue(mockRef);
-
-            const generator = sagas.loadKioskAccessToken(channel);
-            expect(generator.next().done).toEqual(true);
-
-            expect(mockRef.on).toHaveBeenCalledWith('value', expect.any(Function));
+            sagas.loadKioskAccessToken(channel);
+            expect(onValue).toHaveBeenCalledWith(expect.anything(), expect.any(Function));
           });
 
           it('should put kioskAccessTokenLoaded when firebase value changes', () => {
             const channel = {put: jest.fn()};
-            const mockRef = {on: jest.fn()};
-            firebase.mockReturnValue(mockRef);
+            sagas.loadKioskAccessToken(channel);
 
-            const generator = sagas.loadKioskAccessToken(channel);
-            generator.next();
-
-            const callback = mockRef.on.mock.calls[0][1];
+            const callback = onValue.mock.calls[0][1];
             const token = 'kiosk-token-456';
             const snapshot = new FakeFirebaseSnapshot('kioskAccessToken', token);
             callback(snapshot);
