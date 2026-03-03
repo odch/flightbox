@@ -7,6 +7,15 @@ import {Step} from './reducer';
 jest.mock('./remote');
 jest.mock('../../../util/createChannel');
 
+let capturedOnValueCallback;
+const mockUnsubscribe = jest.fn();
+jest.mock('firebase/database', () => ({
+  onValue: jest.fn((ref, callback) => {
+    capturedOnValueCallback = callback;
+    return mockUnsubscribe;
+  }),
+}));
+
 describe('modules', () => {
   describe('ui', () => {
     describe('arrivalPayment', () => {
@@ -115,29 +124,31 @@ describe('modules', () => {
           let channel;
 
           beforeEach(() => {
-            paymentRef = {on: jest.fn(), off: jest.fn()};
+            paymentRef = {};
             channel = {put: jest.fn()};
+            capturedOnValueCallback = undefined;
+            mockUnsubscribe.mockClear();
           });
 
           it('should register firebase listener and complete', () => {
+            const {onValue} = require('firebase/database');
             const generator = sagas.monitorPaymentStatus(paymentRef, channel);
             expect(generator.next().done).toEqual(true);
-            expect(paymentRef.on).toHaveBeenCalledWith('value', expect.any(Function));
+            expect(onValue).toHaveBeenCalledWith(paymentRef, expect.any(Function));
           });
 
           it('should redirect when data is present', () => {
             const generator = sagas.monitorPaymentStatus(paymentRef, channel);
             generator.next();
 
-            const callback = paymentRef.on.mock.calls[0][1];
             const redirectUrl = 'https://payment.example.com/redirect';
             const snapshot = {val: () => ({data: redirectUrl, status: 'pending'})};
 
             // jsdom 26 defines window.location as non-configurable, so we can't
             // replace it. Verify the redirect branch via its side effects instead.
-            callback(snapshot);
+            capturedOnValueCallback(snapshot);
 
-            expect(paymentRef.off).toHaveBeenCalledWith('value');
+            expect(mockUnsubscribe).toHaveBeenCalled();
             expect(channel.put).not.toHaveBeenCalled();
           });
 
@@ -145,41 +156,38 @@ describe('modules', () => {
             const generator = sagas.monitorPaymentStatus(paymentRef, channel);
             generator.next();
 
-            const callback = paymentRef.on.mock.calls[0][1];
             const snapshot = {val: () => ({data: null, status: 'success'})};
-            callback(snapshot);
+            capturedOnValueCallback(snapshot);
 
             expect(channel.put).toHaveBeenCalledWith(actions.setStep(Step.COMPLETED));
-            expect(paymentRef.off).toHaveBeenCalledWith('value');
+            expect(mockUnsubscribe).toHaveBeenCalled();
           });
 
           it('should put failure actions on failure status', () => {
             const generator = sagas.monitorPaymentStatus(paymentRef, channel);
             generator.next();
 
-            const callback = paymentRef.on.mock.calls[0][1];
             const snapshot = {val: () => ({data: null, status: 'failure'})};
-            callback(snapshot);
+            capturedOnValueCallback(snapshot);
 
             expect(channel.put).toHaveBeenCalledTimes(3);
             expect(channel.put).toHaveBeenNthCalledWith(1, actions.setMethod(null));
             expect(channel.put).toHaveBeenNthCalledWith(2, actions.cardPaymentFailure());
             expect(channel.put).toHaveBeenNthCalledWith(3, actions.setStep(Step.OPTIONS));
-            expect(paymentRef.off).toHaveBeenCalledWith('value');
+            expect(mockUnsubscribe).toHaveBeenCalled();
           });
 
           it('should put cancelled actions on cancelled status', () => {
             const generator = sagas.monitorPaymentStatus(paymentRef, channel);
             generator.next();
 
-            const callback = paymentRef.on.mock.calls[0][1];
             const snapshot = {val: () => ({data: null, status: 'cancelled'})};
-            callback(snapshot);
+            capturedOnValueCallback(snapshot);
 
             expect(channel.put).toHaveBeenCalledTimes(2);
             expect(channel.put).toHaveBeenNthCalledWith(1, actions.setMethod(null));
             expect(channel.put).toHaveBeenNthCalledWith(2, actions.setStep(Step.OPTIONS));
-            expect(paymentRef.off).toHaveBeenCalledWith('value');
+            expect(mockUnsubscribe).toHaveBeenCalled();
           });
         });
 

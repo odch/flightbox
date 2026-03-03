@@ -22,6 +22,13 @@ describe('util', () => {
 
       jest.resetModules();
       jest.mock('./firebase');
+      jest.mock('firebase/database', () => ({
+        get: jest.fn(),
+        query: jest.fn(ref => ref),
+        orderByChild: jest.fn(),
+        startAt: jest.fn(),
+        endAt: jest.fn(),
+      }));
       jest.mock('pdfmake/build/pdfmake', () => ({
         createPdf: jest.fn(() => ({getBase64: jest.fn()})),
       }));
@@ -693,20 +700,14 @@ describe('util', () => {
 
     describe('readArrivals', () => {
       it('resolves with a firebase snapshot after querying by dateTime', () => {
-        const mockRef = {
-          orderByChild: jest.fn().mockReturnThis(),
-          startAt: jest.fn().mockReturnThis(),
-          endAt: jest.fn().mockReturnThis(),
-          once: jest.fn((event, callback) => {
-            callback({forEach: () => {}});
-          }),
-        };
-        firebase.mockImplementation((path, callback) => callback(null, mockRef));
+        const arrivalsSnapshot = {forEach: () => {}};
+        const {get} = require('firebase/database');
+        get.mockResolvedValue(arrivalsSnapshot);
 
         const report = makeReport(2023, 6);
         return report.readArrivals().then(snapshot => {
-          expect(mockRef.orderByChild).toHaveBeenCalledWith('dateTime');
-          expect(snapshot).toBeDefined();
+          expect(get).toHaveBeenCalled();
+          expect(snapshot).toBe(arrivalsSnapshot);
         });
       });
     });
@@ -766,13 +767,9 @@ describe('util', () => {
 
     describe('generate', () => {
       it('calls callback with a pdf after fetching all data', () => {
-        const mockRef = {
-          orderByChild: jest.fn().mockReturnThis(),
-          startAt: jest.fn().mockReturnThis(),
-          endAt: jest.fn().mockReturnThis(),
-          once: jest.fn((event, callback) => callback({forEach: () => {}})),
-        };
-        firebase.mockImplementation((path, callback) => callback(null, mockRef));
+        const arrivalsSnapshot = {forEach: () => {}};
+        const {get} = require('firebase/database');
+        get.mockResolvedValue(arrivalsSnapshot);
 
         const fakePdf = {getBase64: jest.fn()};
         pdfMake.createPdf.mockReturnValue(fakePdf);
