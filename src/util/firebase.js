@@ -1,9 +1,24 @@
-import Firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
-import 'firebase/compat/database';
+import { initializeApp, getApps } from 'firebase/app';
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithCustomToken,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  signOut,
+} from 'firebase/auth';
+import {
+  getDatabase,
+  ref,
+  query,
+  orderByKey,
+  get,
+  push,
+  remove,
+} from 'firebase/database';
 
 function initialize() {
-  if (Firebase.apps.length > 0) {
+  if (getApps().length > 0) {
     return;
   }
 
@@ -12,48 +27,22 @@ function initialize() {
     databaseURL: __FIREBASE_DATABASE_URL__ || `https://${__FIREBASE_DATABASE_NAME__ || __FIREBASE_PROJECT_ID__}.firebaseio.com`
   };
 
-  Firebase.initializeApp(config);
+  initializeApp(config);
 }
 
-/**
- * Get a firebase ref.
- *
- * @param path The path of the firebase resource (without domain part) (if not given, '/' is used).
- * @param callback The function to call after authentication (arguments: error, ref, authData).
- */
-function firebase(path, callback) {
-  if (!path || typeof path === 'function') {
-    callback = path;
-    path = '/';
-  }
-
+function firebase(path) {
   initialize();
-
-  const ref = Firebase.database().ref(path);
-
-  if (typeof callback === 'function') {
-    callback(null, ref);
-  } else {
-    return ref;
-  }
+  return ref(getDatabase(), path || '/');
 }
 
 export function watchAuthState(callback) {
   initialize();
-  Firebase.auth().onAuthStateChanged(callback);
+  onAuthStateChanged(getAuth(), callback);
 }
 
 export function authenticate(token) {
-  return new Promise((resolve, reject) => {
-    initialize();
-    Firebase.auth().signInWithCustomToken(token)
-      .then(user => {
-        resolve(user);
-      })
-      .catch(error => {
-        reject(error);
-      });
-  });
+  initialize();
+  return signInWithCustomToken(getAuth(), token);
 }
 
 export function authenticateEmail(email, local) {
@@ -94,40 +83,47 @@ export function authenticateEmail(email, local) {
 }
 
 export function isSignInWithEmail() {
-  return Firebase.auth().isSignInWithEmailLink(window.location.href)
+  initialize();
+  return isSignInWithEmailLink(getAuth(), window.location.href);
 }
 
 export function signInWithEmail() {
   const email = window.localStorage.getItem('emailForSignIn');
-  return Firebase.auth().signInWithEmailLink(email, window.location.href)
+  initialize();
+  return signInWithEmailLink(getAuth(), email, window.location.href)
     .then(() => {
       window.localStorage.removeItem('emailForSignIn');
-    })
+    });
 }
 
 export function unauth() {
-  Firebase.auth().signOut();
+  initialize();
+  signOut(getAuth());
 }
 
 export function loadValue(path) {
-  return new Promise(resolve => {
-    const ref = firebase(path);
-    ref.orderByKey().once('value', snapshot => {
-      resolve(snapshot);
-    });
-  });
+  return get(query(firebase(path), orderByKey()));
 }
 
 export function getIdToken() {
-  return Firebase.auth().currentUser.getIdToken()
+  initialize();
+  return getAuth().currentUser.getIdToken();
 }
 
 export default firebase;
 
 if (window.Cypress) {
   window.firebase = {
-    authenticate: authenticate,
-    unauth: unauth,
-    getRef: firebase
+    authenticate,
+    unauth,
+    getRef: (path) => {
+      initialize();
+      const dbRef = ref(getDatabase(), path || '/');
+      return {
+        once: () => get(dbRef),
+        remove: () => remove(dbRef),
+        push: (data) => push(dbRef, data),
+      };
+    }
   };
 }

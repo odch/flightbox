@@ -1,54 +1,42 @@
-// Set up globals required by firebase.js before importing
 global.__FIREBASE_API_KEY__ = 'test-api-key';
 global.__FIREBASE_DATABASE_URL__ = 'https://test-db.firebaseio.com';
 global.__FIREBASE_DATABASE_NAME__ = 'test-db';
 global.__FIREBASE_PROJECT_ID__ = 'test-project';
 
-jest.mock('firebase/compat/app', () => {
-  const mockRef = {
-    orderByKey: jest.fn().mockReturnThis(),
-    once: jest.fn(),
-  };
+jest.mock('firebase/app', () => ({
+  initializeApp: jest.fn(),
+  getApps: jest.fn(() => []),
+}));
 
-  const mockDb = {
-    ref: jest.fn(() => mockRef),
-  };
+jest.mock('firebase/database', () => ({
+  getDatabase: jest.fn(),
+  ref: jest.fn(),
+  query: jest.fn(),
+  orderByKey: jest.fn(),
+  get: jest.fn(),
+  push: jest.fn(),
+  remove: jest.fn(),
+}));
 
-  const mockAuth = {
-    onAuthStateChanged: jest.fn(),
-    signInWithCustomToken: jest.fn(),
-    signInWithEmailLink: jest.fn(),
-    isSignInWithEmailLink: jest.fn(),
-    signOut: jest.fn(),
-    currentUser: {
-      getIdToken: jest.fn(),
-    },
-  };
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(),
+  onAuthStateChanged: jest.fn(),
+  signInWithCustomToken: jest.fn(),
+  isSignInWithEmailLink: jest.fn(),
+  signInWithEmailLink: jest.fn(),
+  signOut: jest.fn(),
+}));
 
-  const apps = [];
-
-  const Firebase = {
-    _mockRef: mockRef,
-    _mockDb: mockDb,
-    _mockAuth: mockAuth,
-    get apps() {
-      return apps;
-    },
-    _apps: apps,
-    initializeApp: jest.fn(() => {
-      apps.push({});
-    }),
-    database: jest.fn(() => mockDb),
-    auth: jest.fn(() => mockAuth),
-  };
-
-  return Firebase;
-});
-
-jest.mock('firebase/compat/auth', () => ({}));
-jest.mock('firebase/compat/database', () => ({}));
-
-import Firebase from 'firebase/compat/app';
+import { initializeApp, getApps } from 'firebase/app';
+import { getDatabase, ref, query, orderByKey, get } from 'firebase/database';
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithCustomToken,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  signOut,
+} from 'firebase/auth';
 import firebaseDefault, {
   watchAuthState,
   authenticate,
@@ -61,82 +49,80 @@ import firebaseDefault, {
 } from './firebase';
 
 describe('util/firebase', () => {
-  let mockRef;
   let mockDb;
+  let mockRef;
+  let mockQueryRef;
   let mockAuth;
 
   beforeEach(() => {
-    mockRef = Firebase._mockRef;
-    mockDb = Firebase._mockDb;
-    mockAuth = Firebase._mockAuth;
+    mockDb = { _type: 'db' };
+    mockRef = { _type: 'ref' };
+    mockQueryRef = { _type: 'queryRef' };
+    mockAuth = {
+      currentUser: { getIdToken: jest.fn() },
+    };
+
     jest.clearAllMocks();
-    // Reset apps array so initialize() runs
-    Firebase._apps.length = 0;
+    getApps.mockReturnValue([]);
+    getDatabase.mockReturnValue(mockDb);
+    ref.mockReturnValue(mockRef);
+    query.mockReturnValue(mockQueryRef);
+    orderByKey.mockReturnValue('orderByKey_constraint');
+    getAuth.mockReturnValue(mockAuth);
   });
 
   describe('default export (firebase function)', () => {
-    it('returns a ref when called without callback', () => {
+    it('returns a ref when called with a path', () => {
       const result = firebaseDefault('/test');
-      expect(Firebase.database).toHaveBeenCalled();
-      expect(mockDb.ref).toHaveBeenCalledWith('/test');
+      expect(ref).toHaveBeenCalledWith(mockDb, '/test');
       expect(result).toBe(mockRef);
     });
 
-    it('calls callback with null error and ref when callback provided', () => {
-      const callback = jest.fn();
-      firebaseDefault('/test/path', callback);
-      expect(callback).toHaveBeenCalledWith(null, mockRef);
+    it('returns root ref when called without path', () => {
+      const result = firebaseDefault();
+      expect(ref).toHaveBeenCalledWith(mockDb, '/');
+      expect(result).toBe(mockRef);
     });
 
-    it('uses root path when path argument is a function', () => {
-      const callback = jest.fn();
-      firebaseDefault(callback);
-      expect(mockDb.ref).toHaveBeenCalledWith('/');
-      expect(callback).toHaveBeenCalledWith(null, mockRef);
-    });
-
-    it('returns ref when null path provided without callback', () => {
-      // When path is null (!path is true), callback=path=null and path='/'
-      // Since callback is null, the function returns the ref
+    it('returns root ref when null path provided', () => {
       const result = firebaseDefault(null);
-      expect(mockDb.ref).toHaveBeenCalledWith('/');
+      expect(ref).toHaveBeenCalledWith(mockDb, '/');
       expect(result).toBe(mockRef);
     });
 
     it('calls initializeApp when apps list is empty', () => {
-      Firebase._apps.length = 0;
+      getApps.mockReturnValue([]);
       firebaseDefault('/test');
-      expect(Firebase.initializeApp).toHaveBeenCalled();
+      expect(initializeApp).toHaveBeenCalled();
     });
 
     it('does not call initializeApp when already initialized', () => {
-      Firebase._apps.push({});
+      getApps.mockReturnValue([{}]);
       firebaseDefault('/test');
-      expect(Firebase.initializeApp).not.toHaveBeenCalled();
+      expect(initializeApp).not.toHaveBeenCalled();
     });
   });
 
   describe('watchAuthState', () => {
-    it('calls Firebase.auth().onAuthStateChanged with callback', () => {
+    it('calls onAuthStateChanged with auth instance and callback', () => {
       const cb = jest.fn();
       watchAuthState(cb);
-      expect(Firebase.auth).toHaveBeenCalled();
-      expect(mockAuth.onAuthStateChanged).toHaveBeenCalledWith(cb);
+      expect(onAuthStateChanged).toHaveBeenCalledWith(mockAuth, cb);
     });
   });
 
   describe('authenticate', () => {
     it('resolves with user when signInWithCustomToken succeeds', async () => {
       const mockUser = { uid: 'user123' };
-      mockAuth.signInWithCustomToken.mockResolvedValue(mockUser);
+      signInWithCustomToken.mockResolvedValue(mockUser);
 
       const result = await authenticate('valid-token');
       expect(result).toBe(mockUser);
-      expect(mockAuth.signInWithCustomToken).toHaveBeenCalledWith('valid-token');
+      expect(signInWithCustomToken).toHaveBeenCalledWith(mockAuth, 'valid-token');
     });
 
     it('rejects when signInWithCustomToken fails', async () => {
-      mockAuth.signInWithCustomToken.mockRejectedValue(new Error('auth error'));
+      signInWithCustomToken.mockRejectedValue(new Error('auth error'));
       await expect(authenticate('bad-token')).rejects.toThrow('auth error');
     });
   });
@@ -203,18 +189,19 @@ describe('util/firebase', () => {
   });
 
   describe('isSignInWithEmail', () => {
-    it('calls Firebase.auth().isSignInWithEmailLink with current href', () => {
-      mockAuth.isSignInWithEmailLink.mockReturnValue(true);
+    it('calls isSignInWithEmailLink with auth and current href', () => {
+      isSignInWithEmailLink.mockReturnValue(true);
 
       const result = isSignInWithEmail();
-      expect(mockAuth.isSignInWithEmailLink).toHaveBeenCalledWith(
+      expect(isSignInWithEmailLink).toHaveBeenCalledWith(
+        mockAuth,
         window.location.href
       );
       expect(result).toBe(true);
     });
 
     it('returns false when not a sign-in link', () => {
-      mockAuth.isSignInWithEmailLink.mockReturnValue(false);
+      isSignInWithEmailLink.mockReturnValue(false);
       expect(isSignInWithEmail()).toBe(false);
     });
   });
@@ -222,10 +209,11 @@ describe('util/firebase', () => {
   describe('signInWithEmail', () => {
     it('calls signInWithEmailLink and removes localStorage item', async () => {
       localStorage.setItem('emailForSignIn', 'test@example.com');
-      mockAuth.signInWithEmailLink.mockResolvedValue({});
+      signInWithEmailLink.mockResolvedValue({});
 
       await signInWithEmail();
-      expect(mockAuth.signInWithEmailLink).toHaveBeenCalledWith(
+      expect(signInWithEmailLink).toHaveBeenCalledWith(
+        mockAuth,
         'test@example.com',
         window.location.href
       );
@@ -234,20 +222,23 @@ describe('util/firebase', () => {
   });
 
   describe('unauth', () => {
-    it('calls Firebase.auth().signOut()', () => {
+    it('calls signOut with auth instance', () => {
       unauth();
-      expect(mockAuth.signOut).toHaveBeenCalled();
+      expect(signOut).toHaveBeenCalledWith(mockAuth);
     });
   });
 
   describe('loadValue', () => {
     it('resolves with snapshot from firebase ref', async () => {
       const mockSnapshot = { val: () => ({ data: 'test' }) };
-      mockRef.once.mockImplementation((event, cb) => cb(mockSnapshot));
+      get.mockResolvedValue(mockSnapshot);
 
       const result = await loadValue('/some/path');
       expect(result).toBe(mockSnapshot);
-      expect(mockRef.orderByKey).toHaveBeenCalled();
+      expect(ref).toHaveBeenCalledWith(mockDb, '/some/path');
+      expect(orderByKey).toHaveBeenCalled();
+      expect(query).toHaveBeenCalledWith(mockRef, 'orderByKey_constraint');
+      expect(get).toHaveBeenCalledWith(mockQueryRef);
     });
   });
 

@@ -1,4 +1,5 @@
 import {all, call, fork, put, takeEvery} from 'redux-saga/effects'
+import {get, query, orderByChild, equalTo, limitToFirst} from 'firebase/database';
 import * as actions from './actions';
 import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
 import createChannel from '../../util/createChannel';
@@ -14,27 +15,18 @@ import {error as logError} from '../../util/log';
 import {getKioskAuthQueryToken} from '../../util/getAuthQueryToken'
 
 export function getLoginData(uid) {
-  return new Promise((resolve, reject) => {
-    firebase('/logins/' + uid, (error, ref) => {
-      if (error) {
-        reject(error);
-      } else {
-        ref.once('value', snapshot => {
-          if (snapshot.exists()) {
-            resolve(snapshot.val());
-          } else {
-            resolve(null);
-          }
-        }, () => {
-          resolve(null);
-        });
+  return get(firebase('/logins/' + uid))
+    .then(snapshot => {
+      if (snapshot.exists()) {
+        return snapshot.val();
       }
-    });
-  });
+      return null;
+    })
+    .catch(() => null);
 }
 
-export const findByMemberNr = (usersRef, uid) =>
-  usersRef.orderByChild('memberNr').equalTo(uid).limitToFirst(1).once('value')
+export const findByMemberNr = (dbRef, uid) =>
+  get(query(dbRef, orderByChild('memberNr'), equalTo(uid), limitToFirst(1)))
 
 export function* loadUser(uid) {
   const usersRef = yield call(firebase, '/users');

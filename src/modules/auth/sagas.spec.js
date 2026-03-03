@@ -4,8 +4,16 @@ import * as sagas from './sagas';
 import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
 import {expectDoneWithoutReturn, expectDoneWithReturn} from '../../../test/sagaUtils';
 import firebase, {authenticate as fbAuth, authenticateEmail as fbAuthEmail, isSignInWithEmail, signInWithEmail, unauth as fbUnauth} from '../../util/firebase';
+import {get} from 'firebase/database';
 
 jest.mock('../../util/firebase');
+jest.mock('firebase/database', () => ({
+  get: jest.fn(),
+  query: jest.fn(r => r),
+  orderByChild: jest.fn(),
+  equalTo: jest.fn(),
+  limitToFirst: jest.fn(),
+}));
 jest.mock('../../../theme/lszt', () => ({ colors: { main: '#003863' } }));
 jest.mock('../../../theme/lspv', () => ({ colors: { main: '#003863' } }));
 jest.mock('../../../theme/lszo', () => ({ colors: { main: '#003863' } }));
@@ -391,60 +399,33 @@ describe('modules', () => {
             exists: () => true,
             val: () => ({ admin: true })
           };
-          const mockRef = {
-            once: jest.fn((event, successCb) => {
-              successCb(mockSnapshot);
-            })
-          };
-          firebase.mockImplementation((path, cb) => {
-            if (cb) cb(null, mockRef);
-            return mockRef;
-          });
+          const mockRef = {};
+          firebase.mockReturnValue(mockRef);
+          get.mockResolvedValue(mockSnapshot);
 
           const result = await sagas.getLoginData('uid123');
           expect(result).toEqual({ admin: true });
+          expect(firebase).toHaveBeenCalledWith('/logins/uid123');
+          expect(get).toHaveBeenCalledWith(mockRef);
         });
 
         it('should resolve with null if snapshot does not exist', async () => {
-          const mockSnapshot = {
-            exists: () => false,
-            val: () => null
-          };
-          const mockRef = {
-            once: jest.fn((event, successCb) => {
-              successCb(mockSnapshot);
-            })
-          };
-          firebase.mockImplementation((path, cb) => {
-            if (cb) cb(null, mockRef);
-            return mockRef;
-          });
+          const mockSnapshot = { exists: () => false };
+          const mockRef = {};
+          firebase.mockReturnValue(mockRef);
+          get.mockResolvedValue(mockSnapshot);
 
           const result = await sagas.getLoginData('uid123');
           expect(result).toBeNull();
         });
 
-        it('should resolve with null if once error callback is called', async () => {
-          const mockRef = {
-            once: jest.fn((event, successCb, errorCb) => {
-              errorCb(new Error('permission denied'));
-            })
-          };
-          firebase.mockImplementation((path, cb) => {
-            if (cb) cb(null, mockRef);
-            return mockRef;
-          });
+        it('should resolve with null if get rejects', async () => {
+          const mockRef = {};
+          firebase.mockReturnValue(mockRef);
+          get.mockRejectedValue(new Error('permission denied'));
 
           const result = await sagas.getLoginData('uid123');
           expect(result).toBeNull();
-        });
-
-        it('should reject if firebase returns error', async () => {
-          firebase.mockImplementation((path, cb) => {
-            if (cb) cb(new Error('firebase error'), null);
-          });
-
-          await expect(sagas.getLoginData('uid123')).rejects.toThrow('firebase error');
         });
       });
 
