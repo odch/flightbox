@@ -3,6 +3,11 @@ import * as actions from './actions';
 import * as sagas from './sagas';
 
 jest.mock('../../util/firebase');
+jest.mock('firebase/database', () => ({
+  get: jest.fn(),
+  query: jest.fn(),
+  orderByKey: jest.fn(),
+}));
 
 describe('modules', () => {
   describe('users', () => {

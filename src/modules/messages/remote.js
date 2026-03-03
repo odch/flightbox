@@ -1,29 +1,15 @@
 import firebase from '../../util/firebase';
+import {get, query, orderByKey, push} from 'firebase/database';
 
 export function loadAll() {
-  return new Promise(resolve => {
-    const ref = firebase('/messages');
-    ref.orderByKey().once('value', snapshot => {
-      resolve(snapshot);
-    });
-  });
+  return get(query(firebase('/messages'), orderByKey()));
 }
 
 export function save(message) {
-  return new Promise((resolve, reject) => {
-    const timestamp = new Date().getTime();
-    const withDate = Object.assign({}, message, {
-      timestamp,
-      negativeTimestamp: timestamp * -1,
-    });
-    firebase('/messages/', (error, ref) => {
-      ref.push(withDate, commitError => {
-        if (commitError) {
-          reject(commitError);
-        } else {
-          resolve();
-        }
-      });
-    });
+  const timestamp = new Date().getTime();
+  const withDate = Object.assign({}, message, {
+    timestamp,
+    negativeTimestamp: timestamp * -1,
   });
+  return push(firebase('/messages'), withDate).then(() => undefined);
 }
