@@ -94,11 +94,13 @@ class Movement extends React.PureComponent {
                   label={t('movement.edit')}
                   icon="edit"
                   onClick={this.handleEditClick}
+                  dataCy="action-edit"
                 />
                 <Action
                   label={t('movement.delete')}
                   icon="delete"
                   onClick={this.handleDeleteClick}
+                  dataCy="action-delete"
                 />
               </Footer>
             )}

@@ -24,6 +24,7 @@ class LockMovementsForm extends Component {
           this.props.setLockDate(ms);
         }}
         clearable={true}
+        dataCy="lock-date"
       />
     );
 

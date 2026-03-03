@@ -130,6 +130,7 @@ const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange }) => {
             key={item.key}
             $active={activeTab === item.key}
             onClick={() => onTabChange(item.key)}
+            data-cy={item.key}
           >
             <IconWrapper>
               <MaterialIcon icon={item.icon} />

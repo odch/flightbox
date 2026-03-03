@@ -53,7 +53,7 @@ const MovementDeleteConfirmationDialog = props => {
       <div>
         <DeleteButton label={t('movement.deleteConfirm.deleteButton')} icon="delete" onClick={() => {
           confirm(item.type, item.key, hide);
-        }} danger/>
+        }} danger dataCy="delete-confirm"/>
         <DialogButton label={t('movement.deleteConfirm.cancelButton')} onClick={hide} neutral/>
       </div>
     </div>
