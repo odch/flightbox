@@ -6,14 +6,14 @@ import {get as getAerodrome} from '../../util/aerodromes'
 import {getIdToken} from '../../util/firebase.js'
 import * as remote from '../movements/remote'
 
-export const getCustomsAircraftType = aircraftCategory => {
+export const getCustomsAircraftType = (aircraftCategory: string) => {
   if (['Hubschrauber', 'Eigenbauhubschrauber'].includes(aircraftCategory)) {
     return 'helicopter'
   }
   return 'airplane'
 }
 
-export const parseDuration = (duration) => {
+export const parseDuration = (duration: string) => {
   const durationParts = duration.split(':');
   return {
     hours: parseInt(durationParts[0], 10),
@@ -21,7 +21,7 @@ export const parseDuration = (duration) => {
   };
 }
 
-export const calculateTimeWithDuration = (time, duration, operation = 'add') => {
+export const calculateTimeWithDuration = (time: string, duration: string, operation = 'add') => {
   const timeMoment = moment(time, 'HH:mm');
 
   const { hours, minutes } = parseDuration(duration);
@@ -33,30 +33,30 @@ export const calculateTimeWithDuration = (time, duration, operation = 'add') => 
   return resultMoment.format('HH:mm');
 }
 
-export const calculateArrivalTime = (departureTime, duration) => {
+export const calculateArrivalTime = (departureTime: string, duration: string) => {
   return calculateTimeWithDuration(departureTime, duration, 'add');
 }
 
-export const getDirectionDependingData = async movementData => {
+export const getDirectionDependingData = async (movementData: any) => {
   const aerodrome = await getAerodrome(movementData.location)
 
   if (movementData.type === 'departure') {
     return {
       departureTime: movementData.time,
-      arrivalCountry: aerodrome.country,
-      arrivalLocation: aerodrome.name,
+      arrivalCountry: (aerodrome as any).country,
+      arrivalLocation: (aerodrome as any).name,
       arrivalTime: calculateArrivalTime(movementData.time, movementData.duration),
     }
   }
 
   return {
     arrivalTime: movementData.time,
-    departureCountry: aerodrome.country,
-    departureLocation: aerodrome.name,
+    departureCountry: (aerodrome as any).country,
+    departureLocation: (aerodrome as any).name,
   }
 }
 
-export const getCustomsPayload = async movementData => {
+export const getCustomsPayload = async (movementData: any) => {
   return {
     aerodromeId: __CONF__.aerodrome.ICAO.toLowerCase(),
     externalId: movementData.key,
@@ -73,7 +73,7 @@ export const getCustomsPayload = async movementData => {
   }
 }
 
-export const postPrepopulatedFormToCustoms = async (formData) => {
+export const postPrepopulatedFormToCustoms = async (formData: unknown) => {
   const idToken = await getIdToken()
   const url = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/prepopulated-forms`
 
@@ -93,7 +93,7 @@ export const postPrepopulatedFormToCustoms = async (formData) => {
   return await response.json()
 }
 
-export const getPathByMovementType = (type) => {
+export const getPathByMovementType = (type: string) => {
   switch(type) {
     case 'departure':
       return '/departures';
@@ -104,7 +104,7 @@ export const getPathByMovementType = (type) => {
   }
 }
 
-export const saveCustomsFormData = async (movementData, customsFormId, completionUrl) => {
+export const saveCustomsFormData = async (movementData: any, customsFormId: string, completionUrl: string) => {
   const path = getPathByMovementType(movementData.type)
   return remote.saveMovement(path, movementData.key, {
     customsFormId,
@@ -112,14 +112,14 @@ export const saveCustomsFormData = async (movementData, customsFormId, completio
   })
 }
 
-export const openCompletionUrl = (url) => {
+export const openCompletionUrl = (url: string) => {
   const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
   if (!newWindow) {
     console.warn('Popup blocked for completion URL:', url)
   }
 }
 
-export function* startCustoms(action) {
+export function* startCustoms(action: any) {
   const { movementData } = action.payload
 
   if (movementData.customsFormId && movementData.customsFormUrl) {
@@ -148,7 +148,7 @@ export function* startCustoms(action) {
     yield put(actions.setStartCustomsSuccess())
   } catch (error) {
     console.error('Customs submission failed:', error)
-    yield put(actions.setStartCustomsFailure(error.message || 'Failed to send customs data'))
+    yield put(actions.setStartCustomsFailure((error as Error).message || 'Failed to send customs data'))
   }
 }
 

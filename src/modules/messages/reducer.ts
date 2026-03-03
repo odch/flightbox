@@ -1,9 +1,22 @@
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
+import { MessagesAction } from './actions';
 import reducer from '../../util/reducer';
 
-const INITIAL_STATE = {
-  data: new ImmutableItemsArray(),
+interface MessagesFormState {
+  sent: boolean;
+  commitFailed: boolean;
+}
+
+interface MessagesState {
+  data: InstanceType<typeof ImmutableItemsArray>;
+  loading: boolean;
+  selected: string | null;
+  form: MessagesFormState;
+}
+
+const INITIAL_STATE: MessagesState = {
+  data: new ImmutableItemsArray([]),
   loading: false,
   selected: null,
   form: {
@@ -12,12 +25,12 @@ const INITIAL_STATE = {
   },
 };
 
-function messagesLoaded(state, action) {
-  const snapshot = action.payload.snapshot;
+function messagesLoaded(state: MessagesState, action: MessagesAction & { type: typeof actions.MESSAGES_LOADED }) {
+  const snapshot = action.payload.snapshot as any;
 
-  const messages = [];
+  const messages: any[] = [];
 
-  snapshot.forEach(item => {
+  snapshot.forEach((item: any) => {
     const message = item.val();
     message.key = item.key;
     messages.unshift(message);
@@ -29,19 +42,19 @@ function messagesLoaded(state, action) {
   });
 }
 
-function setLoading(state) {
+function setLoading(state: MessagesState) {
   return Object.assign({}, state, {
     loading: true,
   });
 }
 
-function selectMessage(state, action) {
+function selectMessage(state: MessagesState, action: MessagesAction & { type: typeof actions.SELECT_MESSAGE }) {
   return Object.assign({}, state, {
     selected: action.payload.key,
   });
 }
 
-function saveMessageSuccess(state) {
+function saveMessageSuccess(state: MessagesState) {
   return Object.assign({}, state, {
     form: {
       sent: true,
@@ -50,7 +63,7 @@ function saveMessageSuccess(state) {
   });
 }
 
-function saveMessageFailure(state) {
+function saveMessageFailure(state: MessagesState) {
   return Object.assign({}, state, {
     form: {
       sent: false,
@@ -59,7 +72,7 @@ function saveMessageFailure(state) {
   });
 }
 
-function resetForm(state) {
+function resetForm(state: MessagesState) {
   return Object.assign({}, state, {
     form: INITIAL_STATE.form,
   });
@@ -74,4 +87,5 @@ const ACTION_HANDLERS = {
   [actions.RESET_MESSAGE_FORM]: resetForm,
 };
 
-export default reducer(INITIAL_STATE, ACTION_HANDLERS);
+export type { MessagesState };
+export default reducer<MessagesState, MessagesAction>(INITIAL_STATE, ACTION_HANDLERS);

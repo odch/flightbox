@@ -3,7 +3,7 @@ import {history} from '../../history'
 import * as actions from './actions';
 import * as remote from './remote';
 
-export const messagesSelector = state => state.messages;
+export const messagesSelector = (state: any) => state.messages;
 
 export function* loadMessages() {
   const messages = yield select(messagesSelector);
@@ -14,7 +14,7 @@ export function* loadMessages() {
   }
 }
 
-export function* saveMessage(action) {
+export function* saveMessage(action: any) {
   const values = action.payload.values
   try {
     yield call(remote.save, values);

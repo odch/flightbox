@@ -1,9 +1,21 @@
 import * as actions from './actions';
+import { ImportsAction } from './actions';
 import reducer from '../../util/reducer';
 
-const INITIAL_STATE = {};
+interface ImportItem {
+  file: File | null;
+  inProgress: boolean;
+  done: boolean;
+  failed: boolean;
+}
 
-function initImport(state, action) {
+interface ImportsState {
+  [importName: string]: ImportItem;
+}
+
+const INITIAL_STATE: ImportsState = {};
+
+function initImport(state: ImportsState, action: ImportsAction & { type: typeof actions.INIT_IMPORT }) {
   return Object.assign({}, state, {
     [action.payload.name]: {
       file: null,
@@ -14,7 +26,7 @@ function initImport(state, action) {
   });
 }
 
-function setImportFile(state, action) {
+function setImportFile(state: ImportsState, action: ImportsAction & { type: typeof actions.SELECT_IMPORT_FILE }) {
   const { importName, file } = action.payload;
 
   const newImportObj = Object.assign({}, state[importName], {
@@ -25,7 +37,7 @@ function setImportFile(state, action) {
   });
 }
 
-function setImportInProgress(state, action) {
+function setImportInProgress(state: ImportsState, action: ImportsAction & { type: typeof actions.SET_IMPORT_IN_PROGRESS }) {
   const { importName, inProgress } = action.payload;
 
   const newImportObj = Object.assign({}, state[importName], {
@@ -36,7 +48,7 @@ function setImportInProgress(state, action) {
   });
 }
 
-function importSuccess(state, action) {
+function importSuccess(state: ImportsState, action: ImportsAction & { type: typeof actions.IMPORT_SUCCESS }) {
   const { importName } = action.payload;
   const newImportObj = Object.assign({}, state[importName], {
     inProgress: false,
@@ -47,7 +59,7 @@ function importSuccess(state, action) {
   });
 }
 
-function importFailure(state, action) {
+function importFailure(state: ImportsState, action: ImportsAction & { type: typeof actions.IMPORT_FAILURE }) {
   const { importName } = action.payload;
   const newImportObj = Object.assign({}, state[importName], {
     inProgress: false,
@@ -66,4 +78,5 @@ const ACTION_HANDLERS = {
   [actions.IMPORT_FAILURE]: importFailure,
 };
 
-export default reducer(INITIAL_STATE, ACTION_HANDLERS);
+export type { ImportsState };
+export default reducer<ImportsState, ImportsAction>(INITIAL_STATE, ACTION_HANDLERS);

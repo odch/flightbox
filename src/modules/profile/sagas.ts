@@ -2,11 +2,13 @@ import * as actions from './actions'
 import * as remote from './remote'
 import {all, call, put, select, takeEvery} from 'redux-saga/effects'
 
-const str = (value) => typeof value === 'string' && value.trim().length > 0 ? value : null
+const str = (value: unknown): string | null =>
+  typeof value === 'string' && value.trim().length > 0 ? value : null;
 
-const nr = (value) => typeof value === 'number' ? value : null
+const nr = (value: unknown): number | null =>
+  typeof value === 'number' ? value : null;
 
-export const authSelector = state => state.auth.data
+export const authSelector = (state: any) => state.auth.data;
 
 export function* loadProfile() {
   try {
@@ -20,7 +22,7 @@ export function* loadProfile() {
   }
 }
 
-export function* saveProfile(action) {
+export function* saveProfile(action: any) {
   try {
     const values = action.payload.values;
 
