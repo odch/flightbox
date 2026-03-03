@@ -79,9 +79,10 @@ describe('functions/enrichMovements', () => {
             }))
           };
         }
-        // For updating the movement path (departures/arrivals)
+        // For the movement existence check and update (departures/arrivals)
         return {
           child: jest.fn(() => ({
+            once: jest.fn().mockResolvedValue({ exists: () => true }),
             update: mockUpdate.mockResolvedValue()
           }))
         };
@@ -123,7 +124,10 @@ describe('functions/enrichMovements', () => {
           return { child: childMock };
         }
         return {
-          child: jest.fn(() => ({ update: mockUpdate.mockResolvedValue() }))
+          child: jest.fn(() => ({
+            once: jest.fn().mockResolvedValue({ exists: () => true }),
+            update: mockUpdate.mockResolvedValue()
+          }))
         };
       });
 
@@ -265,7 +269,10 @@ describe('functions/enrichMovements', () => {
       };
 
       const updateMock = jest.fn().mockResolvedValue();
-      const childForMovement = jest.fn(() => ({ update: updateMock }));
+      const childForMovement = jest.fn(() => ({
+        once: jest.fn().mockResolvedValue({ exists: () => true }),
+        update: updateMock
+      }));
 
       mockRef.mockImplementation(path => {
         if (path === 'aerodromes') {
@@ -338,7 +345,10 @@ describe('functions/enrichMovements', () => {
           };
         }
         return {
-          child: jest.fn(() => ({ update: mockUpdate.mockResolvedValue() }))
+          child: jest.fn(() => ({
+            once: jest.fn().mockResolvedValue({ exists: () => true }),
+            update: mockUpdate.mockResolvedValue()
+          }))
         };
       });
 
@@ -365,7 +375,10 @@ describe('functions/enrichMovements', () => {
           };
         }
         return {
-          child: jest.fn(() => ({ update: mockUpdate.mockResolvedValue() }))
+          child: jest.fn(() => ({
+            once: jest.fn().mockResolvedValue({ exists: () => true }),
+            update: mockUpdate.mockResolvedValue()
+          }))
         };
       });
 

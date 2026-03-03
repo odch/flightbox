@@ -41,10 +41,15 @@ async function enrichMovementWithAerodromeMetadata(movement, movementType, movem
 
     if (hasChanges) {
       const movementPath = movementType === 'departure' ? 'departures' : 'arrivals';
-      await admin.database()
-        .ref(movementPath)
-        .child(movementKey)
-        .update(enrichedData);
+      const movementRef = admin.database().ref(movementPath).child(movementKey);
+      const currentSnapshot = await movementRef.once('value');
+      if (!currentSnapshot.exists()) {
+        functions.logger.info(
+          `${movementType} ${movementKey} no longer exists, skipping enrichment`
+        );
+        return;
+      }
+      await movementRef.update(enrichedData);
 
       functions.logger.info(
         `Enriched ${movementType} ${movementKey} with aerodrome metadata for ${icaoCode}: ${enrichedData.locationName}, ${enrichedData.country}`
