@@ -1,5 +1,5 @@
 const through = require('gulp-through');
-const aircraftCategories = require('../src/util/aircraftCategories');
+const aircraftCategoriesData = require('../src/util/aircraftCategoriesData');
 
 const processors = {
   "runway": processRunway,
@@ -36,7 +36,7 @@ function processFlightType(config) {
 }
 
 function processAircraftCategory() {
-  return aircraftCategories.categories.map(type => newValEquals(type)).join(" || ");
+  return aircraftCategoriesData.map(category => newValEquals(category.name)).join(" || ");
 }
 
 function processValidationString(rules, config, key, value) {
