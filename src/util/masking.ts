@@ -1,4 +1,4 @@
-export function maskEmail(email) {
+export function maskEmail(email: string | null | undefined): string | null | undefined {
   if (!email) {
     return email
   }
@@ -8,13 +8,13 @@ export function maskEmail(email) {
   }
 
   const [localPart, domain] = email.split('@')
-  const maskedLocal = maskText(localPart)
+  const maskedLocal = maskText(localPart)!
   const [domainName, tld] = domain.split('.')
-  const maskedDomain = maskText(domainName) + '.' + tld
+  const maskedDomain = maskText(domainName)! + '.' + tld
   return `${maskedLocal}@${maskedDomain}`
 }
 
-export function maskPhone(phone) {
+export function maskPhone(phone: string | null | undefined): string | null | undefined {
   if (!phone) {
     return phone
   }
@@ -24,7 +24,7 @@ export function maskPhone(phone) {
   return '*'.repeat(maskedLength) + phone.slice(-visibleDigits)
 }
 
-export function maskText(text) {
+export function maskText(text: string | null | undefined): string | null | undefined {
   if (!text) {
     return text
   }

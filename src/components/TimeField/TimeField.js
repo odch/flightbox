@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { parse, normalize } from '../../util/time.js';
+import { parse, normalize } from '../../util/time';
 import Wrapper from './Wrapper';
 import NumberBlock from './NumberBlock';
 import update from 'immutability-helper';

@@ -1,7 +1,7 @@
 import firebase from './firebase.js';
 import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
 import Download from './Download.js';
-import { firebaseToLocal } from './movements.js';
+import { firebaseToLocal } from './movements';
 import { fetch as fetchAircrafts } from './aircrafts';
 import dates from '../util/dates';
 import moment from 'moment';

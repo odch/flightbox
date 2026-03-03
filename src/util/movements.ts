@@ -3,21 +3,30 @@ import { filter } from '../util/filter';
 import update from 'immutability-helper';
 import moment from 'moment';
 
-function removeValues(movement, values) {
-  return filter(movement, (key) => {
-    return values.indexOf(key) === -1;
-  });
+interface Movement {
+  date: string;
+  time: string;
+  dateTime?: string;
+  negativeTimestamp?: number;
+  immatriculation: string;
+  [key: string]: any;
 }
 
-function convertLocalDateToUtc(movement) {
+function removeValues(movement: Movement, values: string[]): Movement {
+  return filter(movement as any, (key) => {
+    return values.indexOf(key) === -1;
+  }) as unknown as Movement;
+}
+
+function convertLocalDateToUtc(movement: Movement): Movement {
   const withUtcDate = update(movement, {
     dateTime: { $set: dates.localToIsoUtc(movement.date, movement.time) },
   });
   return removeValues(withUtcDate, ['date', 'time']);
 }
 
-function convertUtcToLocalDate(movement) {
-  const localDate = dates.isoUtcToLocal(movement.dateTime);
+function convertUtcToLocalDate(movement: Movement): Movement {
+  const localDate = dates.isoUtcToLocal(movement.dateTime!);
   const withLocalDate = update(movement, {
     date: { $set: localDate.date },
     time: { $set: localDate.time },
@@ -25,28 +34,28 @@ function convertUtcToLocalDate(movement) {
   return removeValues(withLocalDate, ['dateTime']);
 }
 
-function removeNegativeTimestamp(movement) {
+function removeNegativeTimestamp(movement: Movement): Movement {
   return removeValues(movement, ['negativeTimestamp']);
 }
 
-function addNegativeTimestamp(movement) {
-  const negativeTimestamp = dates.isoUtcToMilliseconds(movement.dateTime) * -1;
+function addNegativeTimestamp(movement: Movement): Movement {
+  const negativeTimestamp = dates.isoUtcToMilliseconds(movement.dateTime!) * -1;
   return update(movement, {
     negativeTimestamp: { $set: negativeTimestamp },
   });
 }
 
-export function firebaseToLocal(movement) {
+export function firebaseToLocal(movement: Movement): Movement {
   const withLocalDate = convertUtcToLocalDate(movement);
   return removeNegativeTimestamp(withLocalDate);
 }
 
-export function localToFirebase(movement) {
+export function localToFirebase(movement: Movement): Movement {
   const withUtc = convertLocalDateToUtc(movement);
   return addNegativeTimestamp(withUtc);
 }
 
-export function isLocked(movement, lockDate) {
+export function isLocked(movement: Movement, lockDate: number | unknown): boolean {
   if (typeof lockDate === 'number') {
     const movementDayTimestamp = dates.isoUtcToMilliseconds(dates.localToIsoUtc(movement.date, '00:00'));
     return movementDayTimestamp <= lockDate;
@@ -54,7 +63,16 @@ export function isLocked(movement, lockDate) {
   return false;
 }
 
-export function transferValues(from, to, properties) {
+interface TransferProperty {
+  name: string;
+  defaultValue?: any;
+}
+
+export function transferValues(
+  from: Record<string, any>,
+  to: Record<string, any>,
+  properties: (string | TransferProperty)[]
+): void {
   properties.forEach(prop => {
     if (typeof prop === 'string') {
       prop = {
@@ -76,7 +94,7 @@ export function transferValues(from, to, properties) {
  * @param b the other movement
  * @returns {number} 1 if movement a takes place before movement b, if after -1, otherwise 0.
  */
-function compareDateDescending(a, b) {
+function compareDateDescending(a: Movement, b: Movement): number {
   const momentA = moment(dates.localToIsoUtc(a.date, a.time));
   const momentB = moment(dates.localToIsoUtc(b.date, b.time));
 
@@ -93,7 +111,7 @@ function compareDateDescending(a, b) {
 /**
  * Reverse of #compareDateAscending(a, b).
  */
-function compareDateAscending(a, b) {
+function compareDateAscending(a: Movement, b: Movement): number {
   return compareDateDescending(a, b) * -1;
 }
 
@@ -104,7 +122,7 @@ function compareDateAscending(a, b) {
  * If two movements take place at the same time, they are sorted lexicographically
  * by immatriculation (ascending).
  */
-export function compareDescending(a, b) {
+export function compareDescending(a: Movement, b: Movement): number {
   const dateCompare = compareDateDescending(a, b);
 
   if (dateCompare !== 0) {
@@ -119,7 +137,7 @@ export function compareDescending(a, b) {
  *
  * Still ordered by immatriculation ascending if movements take place at the same time.
  */
-export function compareAscending(a, b) {
+export function compareAscending(a: Movement, b: Movement): number {
   const dateCompare = compareDateAscending(a, b);
 
   if (dateCompare !== 0) {

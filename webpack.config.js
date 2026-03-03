@@ -45,7 +45,7 @@ module.exports = {
       "path": false,
       "fs": false
     },
-    extensions: ['.js', '.jsx', '.json']
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json']
   },
   module: {
     rules: [
@@ -56,7 +56,7 @@ module.exports = {
         },
       },
       {
-        test: /\.jsx?$/,
+        test: /\.[jt]sx?$/,
         exclude: /node_modules\/(?!(idb|@firebase)\/).*/,
         use: {
           loader: 'babel-loader',

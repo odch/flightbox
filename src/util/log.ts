@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/react";
 
-export function error(message, e) {
+export function error(message: string, e?: unknown): void {
   if (console && typeof console.error === 'function') {
     console.error(message, e);
   }

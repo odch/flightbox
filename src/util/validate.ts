@@ -1,12 +1,33 @@
-function getMessage(message, type) {
-  if (!type || typeof message === 'string') {
-    return message;
-  }
-  return message[type];
+type ValidationMessage = string | Record<string, string>;
+
+interface ValidationRule {
+  types?: {
+    required?: boolean;
+    integer?: boolean;
+    match?: RegExp;
+    values?: any[];
+  };
+  message: ValidationMessage;
 }
 
-function validate(data, config, type) {
-  const validationErrors = [];
+interface ValidationError {
+  key: string;
+  message: string | undefined;
+}
+
+function getMessage(message: ValidationMessage, type?: string): string | undefined {
+  if (!type || typeof message === 'string') {
+    return message as string;
+  }
+  return (message as Record<string, string>)[type];
+}
+
+function validate(
+  data: Record<string, any>,
+  config: Record<string, ValidationRule>,
+  type?: string
+): ValidationError[] {
+  const validationErrors: ValidationError[] = [];
 
   for (const key in config) {
     if (config.hasOwnProperty(key)) {
@@ -30,12 +51,12 @@ function validate(data, config, type) {
               }
               break;
             case 'match':
-              if (!validationTypes[typeKey].test(dataValue)) {
+              if (!validationTypes[typeKey]!.test(dataValue)) {
                 valid = false;
               }
               break;
             case 'values':
-              if (validationTypes[typeKey].indexOf(dataValue) === -1) {
+              if (validationTypes[typeKey]!.indexOf(dataValue) === -1) {
                 valid = false;
               }
               break;
