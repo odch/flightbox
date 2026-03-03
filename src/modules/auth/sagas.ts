@@ -14,7 +14,7 @@ import firebase, {
 import {error as logError} from '../../util/log';
 import {getKioskAuthQueryToken} from '../../util/getAuthQueryToken'
 
-export function getLoginData(uid) {
+export function getLoginData(uid: string) {
   return get(firebase('/logins/' + uid))
     .then(snapshot => {
       if (snapshot.exists()) {
@@ -25,10 +25,10 @@ export function getLoginData(uid) {
     .catch(() => null);
 }
 
-export const findByMemberNr = (dbRef, uid) =>
-  get(query(dbRef, orderByChild('memberNr'), equalTo(uid), limitToFirst(1)))
+export const findByMemberNr = (dbRef: any, uid: string) =>
+  get(query(dbRef, orderByChild('memberNr'), equalTo(uid), limitToFirst(1)));
 
-export function* loadUser(uid) {
+export function* loadUser(uid: string) {
   const usersRef = yield call(firebase, '/users');
   const snapshot = yield call(findByMemberNr, usersRef, uid)
   const map = snapshot.val()
@@ -36,9 +36,9 @@ export function* loadUser(uid) {
   return arr.length > 0 ? arr[0] : null
 }
 
-export function* getName(uid) {
+export function* getName(uid: string) {
   const user = yield call(loadUser, uid)
-  return user ? `${user.firstname} ${user.lastname}` : null
+  return user ? `${(user as any).firstname} ${(user as any).lastname}` : null
 }
 
 export function* doIpAuthentication() {
@@ -59,7 +59,7 @@ export function* doIpAuthentication() {
   }
 }
 
-export function* doUsernamePasswordAuthentication(action) {
+export function* doUsernamePasswordAuthentication(action: any) {
   try {
     yield put(actions.setSubmitting());
     const { username, password } = action.payload;
@@ -83,7 +83,7 @@ export function* doUsernamePasswordAuthentication(action) {
   }
 }
 
-export function* sendAuthenticationEmail(action) {
+export function* sendAuthenticationEmail(action: any) {
   try {
     yield put(actions.setSubmitting());
     const { email, local } = action.payload;
@@ -121,7 +121,7 @@ export function* sendAuthenticationEmail(action) {
   }
 }
 
-export function* completeEmailAuthentication(action) {
+export function* completeEmailAuthentication(action: any) {
   try {
     yield put(actions.setSubmitting());
     const { email } = action.payload;
@@ -151,7 +151,7 @@ export function* cleanUpLoginBrowserState() {
   yield call([window.history, 'replaceState'], {}, document.title, cleanUrl);
 }
 
-export function* doGuestTokenAuthentication(action) {
+export function* doGuestTokenAuthentication(action: any) {
   try {
     const queryToken = action.payload.token
     const guestToken = yield call(loadGuestToken, queryToken);
@@ -169,7 +169,7 @@ export function* doGuestTokenAuthentication(action) {
   }
 }
 
-export function* doKioskTokenAuthentication(action) {
+export function* doKioskTokenAuthentication(action: any) {
   try {
     const queryToken = action.payload.token
     const kioskToken = yield call(loadKioskToken, queryToken);
@@ -187,7 +187,7 @@ export function* doKioskTokenAuthentication(action) {
   }
 }
 
-export function* doFirebaseAuthentication(action) {
+export function* doFirebaseAuthentication(action: any) {
   try {
     yield call(fbAuth, action.payload.token);
   } catch (e) {
@@ -201,7 +201,7 @@ export function* doLogout() {
   window.location.href = '/'
 }
 
-export function* doListenFirebaseAuthentication(action) {
+export function* doListenFirebaseAuthentication(action: any) {
   const authenticated = !!action.payload.authData;
 
   let authData = null;
@@ -257,11 +257,11 @@ function isSignInEmailInStorage() {
   return !!email
 }
 
-function isNotEmptyString(str) {
+function isNotEmptyString(str: unknown): str is string {
   return typeof str === 'string' && str.length > 0;
 }
 
-function* monitorFirebaseAuthentication(channel) {
+function* monitorFirebaseAuthentication(channel: any) {
   while (true) {
     const authData = yield call(channel.take);
     yield put(actions.firebaseAuthentication(authData));
