@@ -4,7 +4,7 @@ import { withTranslation } from 'react-i18next';
 import {Field, Form} from 'react-final-form'
 import H1 from '../H1';
 import Button from '../Button';
-import validate from './validate.js';
+import validate from './validate';
 import {renderInputField, renderTextArea} from './renderField';
 import Intro from './Intro';
 import Dialog from './Dialog';
