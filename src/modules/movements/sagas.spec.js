@@ -8,6 +8,7 @@ import {addMovementAssociationListener, removeMovementAssociationListener} from 
 import {LIMIT} from './pagination';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
 import {loadRemote} from '../profile'
+import {compareDescending, firebaseToLocal} from '../../util/movements'
 
 jest.mock('./remote');
 
@@ -1172,6 +1173,111 @@ describe('modules', () => {
           const auth = { admin: false, email: 'pilot@example.com' };
           expect(generator.next(auth).done).toEqual(true);
           expect(channel.put).not.toHaveBeenCalled();
+        });
+
+        it('should call monitorAssociation and set movements when movement is new and not last element', () => {
+          const channel = { put: jest.fn() };
+          const recentMovement = {
+            key: 'dep1', type: 'departure', immatriculation: 'HBAAA',
+            date: '2022-01-01', time: '10:00'
+          };
+          const oldMovement = {
+            key: 'dep3', type: 'departure', immatriculation: 'HBAAA',
+            date: '2000-01-01', time: '10:00'
+          };
+          const existingData = new ImmutableItemsArray([recentMovement, oldMovement]);
+          const snapshotVal = {
+            immatriculation: 'HBABC',
+            dateTime: '2011-01-01T10:00:00.000Z',
+            negativeTimestamp: -1293879600000
+          };
+          const snapshot = new FakeFirebaseSnapshot('dep2', snapshotVal);
+
+          const generator = sagas.addMovementToState(
+            snapshot, 'departure', { data: existingData }, channel
+          );
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { admin: true };
+          const expectedMovement = {
+            ...firebaseToLocal(snapshotVal),
+            key: 'dep2',
+            type: 'departure'
+          };
+          const expectedNewData = existingData.insert(expectedMovement, compareDescending);
+
+          expect(generator.next(auth).value).toEqual(
+            call(sagas.monitorAssociation, expectedMovement, channel)
+          );
+
+          generator.next();
+          expect(channel.put).toHaveBeenCalledWith(actions.setMovements(expectedNewData));
+        });
+
+        it('should skip and not call monitorAssociation when movement ends up as last element', () => {
+          const channel = { put: jest.fn() };
+          const recentMovement = {
+            key: 'dep1', type: 'departure', immatriculation: 'HBAAA',
+            date: '2022-01-01', time: '10:00'
+          };
+          const existingData = new ImmutableItemsArray([recentMovement]);
+          const snapshot = new FakeFirebaseSnapshot('dep2', {
+            immatriculation: 'HBABC',
+            dateTime: '2000-01-01T00:00:00.000Z',
+            negativeTimestamp: -946684800000
+          });
+
+          const generator = sagas.addMovementToState(
+            snapshot, 'departure', { data: existingData }, channel
+          );
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { admin: true };
+          expect(generator.next(auth).done).toEqual(true);
+          expect(channel.put).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('createDelegate', () => {
+        it('returns a function that calls channel.put with action result', () => {
+          const channel = { put: jest.fn() };
+          const action = jest.fn().mockReturnValue({ type: 'SOME_ACTION' });
+          const snapshot = { key: 'snap1' };
+
+          const delegate = sagas.createDelegate(channel, action, 'departure');
+          delegate(snapshot);
+
+          expect(action).toHaveBeenCalledWith(snapshot, 'departure');
+          expect(channel.put).toHaveBeenCalledWith({ type: 'SOME_ACTION' });
+        });
+      });
+
+      describe('monitorAssociation', () => {
+        beforeEach(() => {
+          addMovementAssociationListener.mockClear();
+        });
+
+        it('calls addMovementAssociationListener with correct args and invokes callback', () => {
+          const channel = { put: jest.fn() };
+          const movement = { type: 'departure', key: 'dep1' };
+
+          sagas.monitorAssociation(movement, channel);
+
+          expect(addMovementAssociationListener).toHaveBeenCalledWith(
+            'departure',
+            'dep1',
+            expect.any(Function)
+          );
+
+          const callback = addMovementAssociationListener.mock.calls[0][2];
+          const assocVal = { type: 'arrival', key: 'arr1' };
+          callback({ val: () => assocVal });
+
+          expect(channel.put).toHaveBeenCalledWith(
+            actions.setAssociatedMovement('departure', 'dep1', assocVal)
+          );
         });
       });
 

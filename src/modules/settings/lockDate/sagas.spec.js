@@ -37,8 +37,23 @@ describe('modules', () => {
         });
 
         describe('saveLockDate', () => {
-          it('should be a function', () => {
-            expect(typeof sagas.saveLockDate).toEqual('function');
+          it('calls firebase set and resolves the promise', async () => {
+            const mockRef = { set: jest.fn((date, cb) => cb()) };
+            firebase.mockReturnValue(mockRef);
+
+            await sagas.saveLockDate('2024-06-01');
+
+            expect(firebase).toHaveBeenCalledWith('/settings/lockDate');
+            expect(mockRef.set).toHaveBeenCalledWith('2024-06-01', expect.any(Function));
+          });
+
+          it('calls firebase set with null and resolves', async () => {
+            const mockRef = { set: jest.fn((date, cb) => cb()) };
+            firebase.mockReturnValue(mockRef);
+
+            await sagas.saveLockDate(null);
+
+            expect(mockRef.set).toHaveBeenCalledWith(null, expect.any(Function));
           });
         });
       });
