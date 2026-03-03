@@ -1,6 +1,6 @@
 import '../reset.css';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {Route, Router} from 'react-router-dom';
 import {Provider} from 'react-redux';
 import {applyMiddleware, compose, createStore} from 'redux';
@@ -40,7 +40,7 @@ const store = createStore(reducer(history), middleware);
 
 sagaMiddleware.run(autoRestart(sagas));
 
-ReactDOM.render((
+createRoot(document.getElementById('app')).render(
   <Provider store={store}>
     <GlobalStyle/>
     <ThemeProvider theme={theme}>
@@ -49,7 +49,7 @@ ReactDOM.render((
       </Router>
     </ThemeProvider>
   </Provider>
-), document.getElementById('app'));
+);
 
 setTimeout(
   () => window.location.reload(),

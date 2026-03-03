@@ -15,7 +15,6 @@ exports[`components ImageButton propagates href to OptionalLink 1`] = `
         <img
           src=""
         />
-        
       </div>
     </a>
   </div>
@@ -36,7 +35,6 @@ exports[`components ImageButton propagates onClick to OptionalLink 1`] = `
         <img
           src=""
         />
-        
       </div>
     </div>
   </div>
