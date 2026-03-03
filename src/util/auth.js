@@ -1,7 +1,7 @@
 
 const post = (data) =>
   new Promise((resolve, reject) => {
-    fetch(`https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/auth`, {
+    fetch(`https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/auth`, {
       method: 'POST',
       headers: new Headers({
         'Content-Type': 'application/json'

@@ -26,7 +26,7 @@ const validateRequest = (method, body) => {
   return null;
 };
 
-exports.generateSignInLink = functions.https.onRequest((req, res) => {
+exports.generateSignInLink = functions.region('europe-west1').https.onRequest((req, res) => {
   return cors(req, res, async () => {
     try {
       const validationError = validateRequest(req.method, req.body);

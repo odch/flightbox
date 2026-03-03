@@ -64,7 +64,7 @@ function getAerodromesToRemove(existingIcaoCodes, importedIcaoCodes) {
 /**
  * Scheduled Cloud Function to synchronize aerodromes data with GitHub repository
  */
-exports.scheduledAerodromesUpdate = functions.pubsub
+exports.scheduledAerodromesUpdate = functions.region('europe-west1').pubsub
   .schedule(SCHEDULE)
   .timeZone(TIMEZONE)
   .onRun(async () => {

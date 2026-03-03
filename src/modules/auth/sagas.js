@@ -93,7 +93,7 @@ export function* sendAuthenticationEmail(action) {
 
       const airportName = __CONF__.aerodrome.name;
       const theme = require(`../../../theme/${__CONF__.theme}`);
-      const emailFunctionUrl = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/sendSignInEmail`;
+      const emailFunctionUrl = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/sendSignInEmail`;
 
       const emailRequest = {
         method: 'POST',

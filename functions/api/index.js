@@ -100,4 +100,4 @@ api.get('(/api)?/users/me/invoice-recipients', fbAuth, async (req, res) => {
   }
 })
 
-module.exports = functions.https.onRequest(api)
+module.exports = functions.region('europe-west1').https.onRequest(api)

@@ -22,6 +22,7 @@ describe('functions', () => {
           onRequest: jest.fn().mockImplementation(handler => { capturedHandler = handler; })
         }
       };
+      mockFunctions.region = jest.fn(() => mockFunctions);
 
       jest.mock('firebase-admin', () => mockAdmin);
       jest.mock('firebase-functions', () => mockFunctions);

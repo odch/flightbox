@@ -1,5 +1,5 @@
 const login = (username, password) => {
-  cy.request('POST', 'https://us-central1-cypress-testing.cloudfunctions.net/auth', {
+  cy.request('POST', 'https://europe-west1-cypress-testing.cloudfunctions.net/auth', {
     mode: 'flightnet',
     username,
     password

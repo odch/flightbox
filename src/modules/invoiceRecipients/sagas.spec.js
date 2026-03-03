@@ -20,7 +20,7 @@ describe('modules', () => {
           expect(generator.next().value).toEqual(call(getIdToken));
 
           const idToken = 'test-token';
-          const url = 'https://us-central1-test-project.cloudfunctions.net/api/users/me/invoice-recipients';
+          const url = 'https://europe-west1-test-project.cloudfunctions.net/api/users/me/invoice-recipients';
           expect(generator.next(idToken).value).toEqual(
             call(fetch, url, {
               method: 'GET',
@@ -47,7 +47,7 @@ describe('modules', () => {
           expect(generator.next().value).toEqual(call(getIdToken));
 
           const idToken = 'test-token';
-          const url = 'https://us-central1-test-project.cloudfunctions.net/api/users/me/invoice-recipients';
+          const url = 'https://europe-west1-test-project.cloudfunctions.net/api/users/me/invoice-recipients';
           expect(generator.next(idToken).value).toEqual(
             call(fetch, url, {
               method: 'GET',

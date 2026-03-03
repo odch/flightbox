@@ -54,7 +54,7 @@ class InvoicesReport {
 
   async fetchCustomsData(endpoint) {
     const idToken = await getIdToken()
-    const url = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/${endpoint}?year=${this.year}&month=${this.month}`
+    const url = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/${endpoint}?year=${this.year}&month=${this.month}`
     const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${idToken}`

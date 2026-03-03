@@ -102,22 +102,22 @@ const handleUpdate = (change, movementType) => {
   return enrichOnUpdate(change, movementType);
 };
 
-exports.enrichDepartureOnCreate = functions.database
+exports.enrichDepartureOnCreate = functions.region('europe-west1').database
   .instance(instance)
   .ref('/departures/{departureId}')
   .onCreate((snapshot) => enrichOnCreate(snapshot, 'departure'));
 
-exports.enrichDepartureOnUpdate = functions.database
+exports.enrichDepartureOnUpdate = functions.region('europe-west1').database
   .instance(instance)
   .ref('/departures/{departureId}')
   .onWrite((change) => handleUpdate(change, 'departure'));
 
-exports.enrichArrivalOnCreate = functions.database
+exports.enrichArrivalOnCreate = functions.region('europe-west1').database
   .instance(instance)
   .ref('/arrivals/{arrivalId}')
   .onCreate((snapshot) => enrichOnCreate(snapshot, 'arrival'));
 
-exports.enrichArrivalOnUpdate = functions.database
+exports.enrichArrivalOnUpdate = functions.region('europe-west1').database
   .instance(instance)
   .ref('/arrivals/{arrivalId}')
   .onWrite((change) => handleUpdate(change, 'arrival'));
