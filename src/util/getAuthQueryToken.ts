@@ -1,6 +1,10 @@
 const PATTERN = /\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b/
 
-const getAuthQueryToken = (location, queryParamName = 't', stateParamName = 'queryToken') => {
+const getAuthQueryToken = (
+  location: { state?: Record<string, string>; search: string },
+  queryParamName = 't',
+  stateParamName = 'queryToken'
+): string | null => {
   if (location.state && location.state[stateParamName]) {
     return location.state[stateParamName]
   }
@@ -8,16 +12,20 @@ const getAuthQueryToken = (location, queryParamName = 't', stateParamName = 'que
   const query = new URLSearchParams(location.search)
   const queryToken = query.get(queryParamName)
 
-  if (PATTERN.test(queryToken)) {
+  if (PATTERN.test(queryToken!)) {
     return queryToken
   }
 
   return null
 }
 
-export const getKioskAuthQueryToken = location => getAuthQueryToken(location, 'kt', 'kioskQueryToken')
+export const getKioskAuthQueryToken = (
+  location: { state?: Record<string, string>; search: string }
+): string | null => getAuthQueryToken(location, 'kt', 'kioskQueryToken')
 
-export const getGuestOnly = location => {
+export const getGuestOnly = (
+  location: { state?: Record<string, boolean>; search: string }
+): boolean => {
   if (location.state && location.state.guestOnly) {
     return location.state.guestOnly
   }

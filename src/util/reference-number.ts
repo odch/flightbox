@@ -1,6 +1,6 @@
 
-function getFromItemKey(key) {
-  const parts = [];
+function getFromItemKey(key: string): string {
+  const parts: string[] = [];
 
   for (let i = key.length - 1; i >= 0 && parts.length < 4; i--) {
     if (/[a-zA-Z0-9]/.test(key[i])) {

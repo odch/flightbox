@@ -1,7 +1,7 @@
 import firebase from './firebase.js';
 import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
 import Download from './Download.js';
-import {compareAscending, firebaseToLocal} from './movements.js';
+import {compareAscending, firebaseToLocal} from './movements';
 import {fetch as fetchAircrafts} from './aircrafts';
 import {fetch as fetchAerodromes} from './aerodromes';
 import {getFromItemKey} from './reference-number';

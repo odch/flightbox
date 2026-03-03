@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Movement from '../../containers/MovementListMovementContainer';
-import {isLocked} from '../../util/movements.js';
+import {isLocked} from '../../util/movements';
 
 const GroupWrapper = styled.div`
   margin: 0 0 2em 0;

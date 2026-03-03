@@ -1,18 +1,18 @@
 import firebase from './firebase';
 import {get as fbGet} from 'firebase/database';
 
-export function fetch() {
+export function fetch(): Promise<Record<string, any>> {
   return fbGet(firebase('/aerodromes'))
     .then(snapshot => {
-      const aerodromes = {};
+      const aerodromes: Record<string, any> = {};
       snapshot.forEach(record => {
-        aerodromes[record.key] = record.val();
+        aerodromes[record.key!] = record.val();
       });
       return aerodromes;
     });
 }
 
-export function get(key) {
+export function get(key: string): Promise<any | null> {
   return fbGet(firebase('/aerodromes/' + key))
     .then(snapshot => {
       if (snapshot.exists()) {
@@ -22,7 +22,7 @@ export function get(key) {
     });
 }
 
-export function exists(key) {
+export function exists(key: string): Promise<boolean> {
   return fbGet(firebase('/aerodromes/' + key))
     .then(snapshot => !snapshot.exists())
     .catch(() => true);

@@ -1,6 +1,6 @@
 import firebase, {getIdToken} from './firebase.js';
 import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
-import {firebaseToLocal} from './movements.js';
+import {firebaseToLocal} from './movements';
 import dates from '../util/dates';
 import {getLabel as getFlightTypeLabel} from '../util/flightTypes';
 import formatMoney from './formatMoney'

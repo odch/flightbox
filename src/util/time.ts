@@ -1,4 +1,9 @@
-function normalize(time) {
+interface Time {
+  hours: number;
+  minutes: number;
+}
+
+function normalize(time: Time): Time {
   const hoursInMinutePart = Math.floor(time.minutes / 60);
 
   const hours = ((time.hours + hoursInMinutePart) % 24 + 24) % 24;
@@ -10,7 +15,7 @@ function normalize(time) {
   };
 }
 
-function parse(timeString) {
+function parse(timeString: unknown): Time | null {
   if (typeof timeString === 'string') {
     const match = timeString.match(/^(\d{2}):(\d{2})$/);
     if (match) {

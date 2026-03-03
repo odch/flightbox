@@ -10,11 +10,11 @@
  *
  * ['foo', 'bar']
  */
-export default function objectToArray(obj) {
+export default function objectToArray<T>(obj: Record<string, T>): T[] {
   const keys = Object.keys(obj);
   keys.sort();
 
-  const newArr = [];
+  const newArr: T[] = [];
   keys.forEach(key => {
     newArr.push(obj[key]);
   });

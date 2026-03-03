@@ -5,8 +5,8 @@ module.exports = {
   moduleDirectories: ['node_modules', 'functions/node_modules'],
   coverageDirectory: './coverage/',
   collectCoverageFrom: [
-    'src/**/*.{js,jsx}',
-    'functions/**/*.{js,jsx}',
+    'src/**/*.{js,jsx,ts,tsx}',
+    'functions/**/*.{js,jsx,ts,tsx}',
     '!<rootDir>/node_modules/',
     '!<rootDir>/test/'
   ],

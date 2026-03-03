@@ -2,32 +2,38 @@ import React from 'react';
 
 /**
  * Converts a two-letter country code to its corresponding flag emoji
- * @param {string} countryCode - Two-letter country code (e.g., 'AT', 'DE')
- * @returns {string} Flag emoji or empty string if invalid
+ * @param countryCode - Two-letter country code (e.g., 'AT', 'DE')
+ * @returns Flag emoji or empty string if invalid
  */
-export const countryCodeToFlag = (countryCode) => {
+export const countryCodeToFlag = (countryCode: string): string => {
   if (!countryCode || countryCode.length !== 2) return '';
   return countryCode
     .toUpperCase()
     .replace(/./g, char => String.fromCodePoint(char.charCodeAt(0) + 127397));
 };
 
+interface LocationData {
+  location: string;
+  locationCountry?: string;
+  locationName?: string;
+  departureRoute?: string;
+  arrivalRoute?: string;
+}
+
+interface LocationDisplayOptions {
+  lineHeight?: number;
+  nameColor?: string;
+  nameFontSize?: string;
+  nameMarginTop?: string;
+}
+
 /**
  * Formats location display with country flags and aerodrome names for movements
- * @param {Object} data - Movement data object
- * @param {string} data.location - ICAO code of the location
- * @param {string} [data.locationCountry] - Country code of the location
- * @param {string} [data.locationName] - Full name of the aerodrome
- * @param {string} [data.departureRoute] - Departure route (for circuit detection)
- * @param {string} [data.arrivalRoute] - Arrival route (for circuit detection)
- * @param {Object} [options] - Display options
- * @param {number} [options.lineHeight=1.1] - Line height for multi-line display
- * @param {string} [options.nameColor='#666'] - Color for aerodrome name
- * @param {string} [options.nameFontSize='0.8em'] - Font size for aerodrome name
- * @param {string} [options.nameMarginTop] - Top margin for aerodrome name (details view)
- * @returns {string|JSX.Element} Formatted location display
  */
-export const formatLocationDisplay = (data, options = {}) => {
+export const formatLocationDisplay = (
+  data: LocationData,
+  options: LocationDisplayOptions = {}
+): string | React.ReactElement => {
   const {
     lineHeight = 1.1,
     nameColor = '#666',
@@ -53,9 +59,9 @@ export const formatLocationDisplay = (data, options = {}) => {
   }
 
   // Rich display with flag and/or name
-  const flag = shouldShowFlag ? countryCodeToFlag(data.locationCountry) : '';
-  
-  const nameStyle = {
+  const flag = shouldShowFlag ? countryCodeToFlag(data.locationCountry!) : '';
+
+  const nameStyle: React.CSSProperties = {
     fontSize: nameFontSize,
     color: nameColor,
     ...(nameMarginTop && { marginTop: nameMarginTop })
