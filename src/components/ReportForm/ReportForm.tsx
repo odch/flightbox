@@ -47,48 +47,69 @@ const handleMonthChange = (props, value) => props.setDate({
   month: value
 });
 
-const ReportForm = props => {
+const ReportForm = ({
+  disabled,
+  children,
+  date,
+  delimiter = ',',
+  withMonth = true,
+  withDelimiter = true,
+  setDate,
+  setDelimiter,
+  generate,
+  parameters,
+}: {
+  disabled?: boolean;
+  children?: React.ReactNode;
+  date?: { year?: number | null; month?: number | null };
+  delimiter?: string;
+  withMonth?: boolean;
+  withDelimiter?: boolean;
+  setDate: (date: any) => void;
+  setDelimiter?: (delimiter: string) => void;
+  generate: (date: any, parameters: any) => void;
+  parameters?: any;
+}) => {
   const { t } = useTranslation();
-  const year = props.date && props.date.year ? props.date.year : '';
-  const month = props.date && props.date.month ? props.date.month : null;
-  const delimiter = props.delimiter || ',';
+  const year = date && date.year ? date.year : '';
+  const month = date && date.month ? date.month : null;
 
   const yearInput = (
     <Input
       type="number"
       value={year}
-      onChange={handleYearChange.bind(null, props)}
+      onChange={handleYearChange.bind(null, { setDate, date })}
     />
   );
   const monthInput = (
     <MonthDropdown
       value={month}
-      onChange={handleMonthChange.bind(null, props)}
+      onChange={handleMonthChange.bind(null, { setDate, date })}
     />
   );
 
   const delimiterInput = (
     <DelimiterDropdown
       value={delimiter}
-      onChange={props.setDelimiter}
+      onChange={setDelimiter}
     />
   )
 
   return (
     <form
       className="ReportForm"
-      onSubmit={handleSubmit.bind(null, props.generate, props.date, props.parameters)}
+      onSubmit={handleSubmit.bind(null, generate, date, parameters)}
     >
-      <fieldset disabled={props.disabled}>
+      <fieldset disabled={disabled}>
         <StyledLabeledComponent label={t('report.year')} component={yearInput}/>
-        {props.withMonth && <StyledLabeledComponent label={t('report.month')} component={monthInput}/>}
-        {props.withDelimiter && <StyledLabeledComponent label={t('report.delimiter')} component={delimiterInput}/>}
-        {props.children}
+        {withMonth && <StyledLabeledComponent label={t('report.month')} component={monthInput}/>}
+        {withDelimiter && <StyledLabeledComponent label={t('report.delimiter')} component={delimiterInput}/>}
+        {children}
         <Button
           type="submit"
           label={t('common.download')}
           icon="file_download"
-          disabled={props.disabled || !year || !month}
+          disabled={disabled || !year || !month}
           primary/>
       </fieldset>
     </form>
@@ -110,9 +131,5 @@ ReportForm.propTypes = {
   generate: PropTypes.func.isRequired,
 };
 
-ReportForm.defaultProps = {
-  withMonth: true,
-  withDelimiter: true
-};
 
 export default ReportForm;
