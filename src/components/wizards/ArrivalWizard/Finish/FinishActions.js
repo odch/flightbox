@@ -20,6 +20,7 @@ const FinishActions = ({itemKey, createMovementFromMovement, finish}) => {
         label={t('common.finish')}
         img={exitImagePath}
         onClick={finish}
+        dataCy="finish-button"
       />
     </ActionsWrapper>
   )
