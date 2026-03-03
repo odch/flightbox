@@ -61,7 +61,7 @@
     "react-hot-loader": "^4.2.0",
     "react-redux": "^8.1.3",
     "react-router-dom": "^4.2.2",
-    "redux": "^4.2.1",
+    "redux": "^5.0.1",
     "redux-saga": "^1.4.2",
     "scroll-into-view": "^1.16.2",
     "start-server-and-test": "^2.1.5",
