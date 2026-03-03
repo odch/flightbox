@@ -1,6 +1,6 @@
 import firebase from './firebase';
 import {get, child, set, remove, push} from 'firebase/database';
-import parseCsv from "./parseCsv.js";
+import parseCsv from "./parseCsv";
 
 function findIndex(row, name) {
   const index = row.indexOf(name);

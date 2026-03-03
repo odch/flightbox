@@ -1,3 +1,5 @@
+/// <reference types="@testing-library/jest-dom" />
+
 declare module '*.png' {
   const value: string;
   export default value;
@@ -33,15 +35,15 @@ declare module '*.ttf' {
   export default value;
 }
 
-declare const __DEV__: boolean;
-declare const __CONF__: any;
-declare const __THEME__: string;
-declare const __FIREBASE_PROJECT_ID__: string;
-declare const __FIREBASE_DATABASE_NAME__: string;
-declare const __FIREBASE_DATABASE_URL__: string;
-declare const __FIREBASE_API_KEY__: string;
-declare const __DISABLE_IP_AUTHENTICATION__: boolean;
-declare const __FLIGHTNET_COMPANY__: string;
-declare const __LANDING_FEES_STRATEGY__: string;
-declare const __LANDING_FEES__: any;
-declare const __GO_AROUND_FEES__: any;
+declare var __DEV__: boolean;
+declare var __CONF__: any;
+declare var __THEME__: string;
+declare var __FIREBASE_PROJECT_ID__: string;
+declare var __FIREBASE_DATABASE_NAME__: string;
+declare var __FIREBASE_DATABASE_URL__: string;
+declare var __FIREBASE_API_KEY__: string;
+declare var __DISABLE_IP_AUTHENTICATION__: boolean;
+declare var __FLIGHTNET_COMPANY__: string;
+declare var __LANDING_FEES_STRATEGY__: string;
+declare var __LANDING_FEES__: any;
+declare var __GO_AROUND_FEES__: any;
