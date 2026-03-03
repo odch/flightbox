@@ -1,4 +1,5 @@
 import {all, call, fork, put, select, takeEvery} from 'redux-saga/effects'
+import {onValue} from 'firebase/database'
 import * as actions from './actions';
 import * as remote from './remote'
 import createChannel, {monitor} from '../../../util/createChannel'
@@ -54,26 +55,26 @@ export function* createCardPayment(channel, action) {
 }
 
 export function* monitorPaymentStatus(paymentRef, channel) {
-  paymentRef.on('value', snapshot => {
+  const unsubscribe = onValue(paymentRef, snapshot => {
     const val = snapshot.val()
     const data = val.data
     const status = val.status
 
     if (data) {
-      paymentRef.off('value')
+      unsubscribe()
       window.location.href = data
     } else if (status === 'success') {
       channel.put(actions.setStep(Step.COMPLETED))
-      paymentRef.off('value')
+      unsubscribe()
     } else if (status === 'failure') {
       channel.put(actions.setMethod(null))
       channel.put(actions.cardPaymentFailure())
       channel.put(actions.setStep(Step.OPTIONS))
-      paymentRef.off('value')
+      unsubscribe()
     } else if (status === 'cancelled') {
       channel.put(actions.setMethod(null))
       channel.put(actions.setStep(Step.OPTIONS))
-      paymentRef.off('value')
+      unsubscribe()
     }
   })
 }

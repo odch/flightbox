@@ -1,4 +1,5 @@
 import firebase, {getIdToken} from './firebase.js';
+import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
 import {firebaseToLocal} from './movements.js';
 import dates from '../util/dates';
 import {getLabel as getFlightTypeLabel} from '../util/flightTypes';
@@ -42,14 +43,12 @@ class InvoicesReport {
   }
 
   readArrivals() {
-    return new Promise(resolve => {
-      firebase('/arrivals', (error, ref) => {
-        ref.orderByChild('dateTime')
-          .startAt(dates.isoStartOfDay(this.startDate))
-          .endAt(dates.isoEndOfDay(this.endDate))
-          .once('value', resolve, this);
-      });
-    });
+    return get(query(
+      firebase('/arrivals'),
+      orderByChild('dateTime'),
+      startAt(dates.isoStartOfDay(this.startDate)),
+      endAt(dates.isoEndOfDay(this.endDate))
+    ));
   }
 
   async fetchCustomsData(endpoint) {
