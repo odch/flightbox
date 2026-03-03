@@ -4,10 +4,10 @@ export const LIMIT = 10;
 
 /**
  * @param items The items which are already available locally (newest item comes first)
- * @returns and object containing the pagination params (`start` and `limit`)
+ * @returns an object containing the pagination params (`start` and `limit`)
  */
-export function getPagination(items) {
-  let start = undefined;
+export function getPagination(items: any[]) {
+  let start: number | undefined = undefined;
   let limit = LIMIT;
 
   let i = items.length;
@@ -32,6 +32,6 @@ export function getPagination(items) {
   };
 }
 
-export function toOrderKey(createdBy, negativeTimestamp) {
+export function toOrderKey(createdBy: string, negativeTimestamp: number) {
   return `${createdBy}_${9999999999999 - negativeTimestamp * -1}`
 }

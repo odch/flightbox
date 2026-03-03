@@ -32,6 +32,9 @@ const createRootReducer = () => combineReducers({
   profile
 });
 
+export type RootState = ReturnType<ReturnType<typeof createRootReducer>>;
+export type AppDispatch = import('redux').Dispatch;
+
 const forkSagas = map(fork);
 
 export const sagas = function* rootSaga() {
