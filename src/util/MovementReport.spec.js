@@ -7,6 +7,7 @@ describe('util', () => {
     let firebase;
     let fetchAircrafts;
     let fetchAerodromes;
+    let get;
 
     let mockAircrafts;
     let mockAerodromes;
@@ -28,10 +29,18 @@ describe('util', () => {
       jest.mock('./firebase');
       jest.mock('./aircrafts');
       jest.mock('./aerodromes');
+      jest.mock('firebase/database', () => ({
+        get: jest.fn(),
+        query: jest.fn(),
+        orderByChild: jest.fn(),
+        startAt: jest.fn(),
+        endAt: jest.fn(),
+      }));
 
       firebase = require('./firebase').default;
       fetchAircrafts = require('./aircrafts').fetch;
       fetchAerodromes = require('./aerodromes').fetch;
+      ({get} = require('firebase/database'));
       MovementReport = require('./MovementReport').default;
 
       mockAircrafts = {club: {}, homeBase: {}};
@@ -661,15 +670,8 @@ describe('util', () => {
 
     describe('readMovements', () => {
       it('resolves with type and snapshot after firebase query', () => {
-        const mockRef = {
-          orderByChild: jest.fn().mockReturnThis(),
-          startAt: jest.fn().mockReturnThis(),
-          endAt: jest.fn().mockReturnThis(),
-          once: jest.fn((event, callback) => {
-            callback({forEach: () => {}});
-          }),
-        };
-        firebase.mockImplementation((path, callback) => callback(null, mockRef));
+        const mockSnapshot = {forEach: () => {}};
+        get.mockResolvedValue(mockSnapshot);
 
         const report = new MovementReport(2023, 6);
         const type = {key: 'D', path: '/departures'};
@@ -683,15 +685,8 @@ describe('util', () => {
 
     describe('generate', () => {
       it('calls callback with a Download after fetching all data', () => {
-        const mockRef = {
-          orderByChild: jest.fn().mockReturnThis(),
-          startAt: jest.fn().mockReturnThis(),
-          endAt: jest.fn().mockReturnThis(),
-          once: jest.fn((event, callback) => {
-            callback({forEach: () => {}});
-          }),
-        };
-        firebase.mockImplementation((path, callback) => callback(null, mockRef));
+        const mockSnapshot = {forEach: () => {}};
+        get.mockResolvedValue(mockSnapshot);
 
         const report = new MovementReport(2023, 6);
 

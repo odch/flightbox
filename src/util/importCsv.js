@@ -1,4 +1,5 @@
 import firebase from './firebase.js';
+import {get, child, set, remove, push} from 'firebase/database';
 import parseCsv from "./parseCsv.js";
 
 function findIndex(row, name) {
@@ -68,7 +69,7 @@ async function getMap(array, options) {
   });
 
   if (options.additionalEntriesPath) {
-    const snapshot = await firebase(options.additionalEntriesPath).once('value');
+    const snapshot = await get(firebase(options.additionalEntriesPath));
     if (snapshot.exists()) {
       itemMap = {
         ...itemMap,
@@ -80,30 +81,26 @@ async function getMap(array, options) {
   return itemMap;
 }
 
-function updateExisting(firebaseRef, itemMap, options, callback) {
-  firebaseRef.once('value', (snapshot) => {
-    const existing = {};
+async function updateExisting(firebaseRef, itemMap, options) {
+  const snapshot = await get(firebaseRef);
+  const existing = {};
+  const keyColumn = findKey(options.columns);
 
-    const keyColumn = findKey(options.columns);
+  snapshot.forEach(firebaseRow => {
+    const keyValue = firebaseRow.val()[keyColumn.firebase];
+    const item = itemMap[keyValue];
+    const childRef = child(firebaseRef, firebaseRow.key);
 
-    snapshot.forEach(firebaseRow => {
-      const keyValue = firebaseRow.val()[keyColumn.firebase];
+    if (!item) {
+      remove(childRef);
+    } else {
+      set(childRef, item);
+    }
 
-      const item = itemMap[keyValue];
-
-      const childRef = firebaseRef.child(firebaseRow.key);
-
-      if (!item) {
-        childRef.remove();
-      } else {
-        childRef.set(item);
-      }
-
-      existing[keyValue] = true;
-    });
-
-    callback(existing);
+    existing[keyValue] = true;
   });
+
+  return existing;
 }
 
 function addNew(firebaseRef, itemMap, existing, options) {
@@ -113,9 +110,9 @@ function addNew(firebaseRef, itemMap, existing, options) {
     if (existing[key] !== true && itemMap.hasOwnProperty(key)) {
       const item = itemMap[key];
       if (keyColumn.isFirebaseKey === true) {
-        firebaseRef.child(key).set(item);
+        set(child(firebaseRef, key), item);
       } else {
-        firebaseRef.push(item);
+        push(firebaseRef, item);
       }
     }
   }
@@ -138,21 +135,10 @@ function addNew(firebaseRef, itemMap, existing, options) {
  */
 async function importCsv(csvString, options) {
   const data = await parseCsv(csvString);
-
   const itemMap = await getMap(data, options);
-
-  const ref = firebase(options.path);
-
-  return new Promise((resolve, reject) => {
-    try {
-      updateExisting(ref, itemMap, options, existing => {
-        addNew(ref, itemMap, existing, options);
-        resolve();
-      });
-    } catch(e) {
-      reject(e);
-    }
-  });
+  const dbRef = firebase(options.path);
+  const existing = await updateExisting(dbRef, itemMap, options);
+  addNew(dbRef, itemMap, existing, options);
 }
 
 export default importCsv;

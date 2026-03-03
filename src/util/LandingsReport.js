@@ -1,4 +1,5 @@
 import firebase from './firebase.js';
+import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
 import Download from './Download.js';
 import { firebaseToLocal } from './movements.js';
 import { fetch as fetchAircrafts } from './aircrafts';
@@ -31,14 +32,12 @@ class LandingsReport {
   }
 
   readArrivals() {
-    return new Promise(resolve => {
-      firebase('/arrivals', (error, ref) => {
-        ref.orderByChild('dateTime')
-          .startAt(dates.isoStartOfDay(this.startDate))
-          .endAt(dates.isoEndOfDay(this.endDate))
-          .once('value', resolve, this);
-      });
-    });
+    return get(query(
+      firebase('/arrivals'),
+      orderByChild('dateTime'),
+      startAt(dates.isoStartOfDay(this.startDate)),
+      endAt(dates.isoEndOfDay(this.endDate))
+    ));
   }
 
   build(arrivals, aircrafts, callback) {
