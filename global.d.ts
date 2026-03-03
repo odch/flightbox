@@ -1,3 +1,18 @@
+declare module '*.png' {
+  const value: string;
+  export default value;
+}
+
+declare module '*.jpg' {
+  const value: string;
+  export default value;
+}
+
+declare module '*.svg' {
+  const value: string;
+  export default value;
+}
+
 declare const __DEV__: boolean;
 declare const __CONF__: any;
 declare const __THEME__: string;
