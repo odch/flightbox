@@ -1031,7 +1031,7 @@ describe('modules', () => {
           const state = { data: new ImmutableItemsArray() };
 
           expect(generator.next(state).value).toEqual(
-            call(sagas.addMovementToState, snapshot, 'departure', state, channel)
+            call(sagas.addMovementToState, snapshot, 'departure', state, channel, true)
           );
 
           expect(generator.next().done).toEqual(true);
@@ -1057,7 +1057,7 @@ describe('modules', () => {
           const currentState = { data: new ImmutableItemsArray() };
 
           expect(generator.next(currentState).value).toEqual(
-            call(sagas.addMovementToState, snapshot, 'departure', currentState, channel)
+            call(sagas.addMovementToState, snapshot, 'departure', currentState, channel, false)
           );
 
           expect(generator.next().done).toEqual(true);
@@ -1217,7 +1217,7 @@ describe('modules', () => {
           expect(channel.put).toHaveBeenCalledWith(actions.setMovements(expectedNewData));
         });
 
-        it('should skip and not call monitorAssociation when movement ends up as last element', () => {
+        it('should skip and not call monitorAssociation when movement ends up as last element (fill-in guard)', () => {
           const channel = { put: jest.fn() };
           const recentMovement = {
             key: 'dep1', type: 'departure', immatriculation: 'HBAAA',
@@ -1231,7 +1231,7 @@ describe('modules', () => {
           });
 
           const generator = sagas.addMovementToState(
-            snapshot, 'departure', { data: existingData }, channel
+            snapshot, 'departure', { data: existingData }, channel, true
           );
 
           expect(generator.next().value).toEqual(select(sagas.authSelector));

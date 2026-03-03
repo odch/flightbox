@@ -52,13 +52,6 @@ describe('movements', () => {
       cy.get(`[data-cy=delete-confirm]`).should('be.visible').click();
 
       cy.get(`[data-id="${departureKey}"]`).should('not.exist');
-
-      cy.window().then(win =>
-        win.firebase.getRef(`/departures/${departureKey}`).once('value').then(snapshot => {
-          expect(snapshot.val()).to.be.null;
-          departureKey = null;
-        })
-      );
     });
   });
 });

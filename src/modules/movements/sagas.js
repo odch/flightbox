@@ -343,13 +343,13 @@ export function createDelegate(channel, action, movementType) {
 export function* movementAdded(channel, action) {
   const {snapshot, movementType} = action.payload;
   const state = yield select(stateSelector);
-  yield call(addMovementToState, snapshot, movementType, state, channel);
+  yield call(addMovementToState, snapshot, movementType, state, channel, true);
 }
 
 export function* movementChanged(channel, action) {
   const {snapshot, movementType} = action.payload;
   const currentState = yield call(removeMovementFromState, snapshot, channel);
-  yield call(addMovementToState, snapshot, movementType, currentState, channel);
+  yield call(addMovementToState, snapshot, movementType, currentState, channel, false);
 }
 
 export function* movementDeleted(channel, action) {
@@ -357,7 +357,7 @@ export function* movementDeleted(channel, action) {
   yield call(removeMovementFromState, snapshot, channel);
 }
 
-export function* addMovementToState(snapshot, movementType, currentState, channel) {
+export function* addMovementToState(snapshot, movementType, currentState, channel, applyFillInGuard = false) {
   const {data} = currentState;
 
   if (!data.getByKey(snapshot.key)) {
@@ -374,7 +374,8 @@ export function* addMovementToState(snapshot, movementType, currentState, channe
     // in the range was deleted. to prevent the `movementAdded` callback
     // from messing up the state, because it's executed parallel to the
     // `movementDeleted` callback, we ignore it here.
-    if (newData.array[newData.array.length - 1].key === movement.key) {
+    // This guard only applies to movementAdded (fill-ins), not movementChanged.
+    if (applyFillInGuard && newData.array[newData.array.length - 1].key === movement.key) {
       return;
     }
 
