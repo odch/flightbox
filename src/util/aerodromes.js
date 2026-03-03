@@ -1,41 +1,29 @@
 import firebase from './firebase';
+import {get as fbGet} from 'firebase/database';
 
 export function fetch() {
-  return new Promise(resolve => {
-    firebase('/aerodromes', (error, ref) => {
-      ref.once('value', snapshot => {
-        const aerodromes = {};
-        snapshot.forEach(record => {
-          aerodromes[record.key] = record.val();
-        });
-        resolve(aerodromes);
+  return fbGet(firebase('/aerodromes'))
+    .then(snapshot => {
+      const aerodromes = {};
+      snapshot.forEach(record => {
+        aerodromes[record.key] = record.val();
       });
+      return aerodromes;
     });
-  });
 }
 
 export function get(key) {
-  return new Promise(resolve => {
-    firebase('/aerodromes/' + key, (error, ref) => {
-      ref.once('value', snapshot => {
-        if (snapshot.exists()) {
-          resolve(snapshot.val());
-        } else {
-          resolve(null);
-        }
-      });
+  return fbGet(firebase('/aerodromes/' + key))
+    .then(snapshot => {
+      if (snapshot.exists()) {
+        return snapshot.val();
+      }
+      return null;
     });
-  });
 }
 
 export function exists(key) {
-  return new Promise(resolve => {
-    firebase('/aerodromes/' + key, (error, ref) => {
-      ref.once('value', snapshot => {
-        resolve(!snapshot.exists());
-      }, () => {
-        resolve(true);
-      });
-    });
-  });
+  return fbGet(firebase('/aerodromes/' + key))
+    .then(snapshot => !snapshot.exists())
+    .catch(() => true);
 }

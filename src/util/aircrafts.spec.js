@@ -1,6 +1,10 @@
 jest.mock('./firebase');
+jest.mock('firebase/database', () => ({
+  get: jest.fn(),
+}));
 
 import firebase from './firebase';
+import {get} from 'firebase/database';
 import {fetch, REGISTRATION_REGEX} from './aircrafts';
 
 describe('util', () => {
@@ -8,10 +12,9 @@ describe('util', () => {
     let mockRef;
 
     beforeEach(() => {
-      mockRef = {once: jest.fn()};
-      firebase.mockImplementation((path, callback) => {
-        callback(null, mockRef);
-      });
+      mockRef = {};
+      jest.clearAllMocks();
+      firebase.mockReturnValue(mockRef);
     });
 
     describe('REGISTRATION_REGEX', () => {
@@ -26,12 +29,10 @@ describe('util', () => {
 
     describe('fetch', () => {
       it('returns club and homeBase aircraft maps', async () => {
-        mockRef.once.mockImplementation((event, cb) => {
-          cb({
-            forEach: fn => {
-              fn({key: 'HBKOF', val: () => ({name: 'Cessna'})});
-            }
-          });
+        get.mockResolvedValue({
+          forEach: fn => {
+            fn({key: 'HBKOF', val: () => ({name: 'Cessna'})});
+          }
         });
 
         const result = await fetch();
@@ -42,9 +43,7 @@ describe('util', () => {
       });
 
       it('returns empty maps when no aircraft', async () => {
-        mockRef.once.mockImplementation((event, cb) => {
-          cb({forEach: () => {}});
-        });
+        get.mockResolvedValue({forEach: () => {}});
 
         const result = await fetch();
         expect(result.club).toEqual({});
