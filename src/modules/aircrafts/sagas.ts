@@ -3,7 +3,7 @@ import {get, query, orderByKey} from 'firebase/database';
 import * as actions from './actions';
 import firebase from '../../util/firebase';
 
-export const aircraftsSelector = state => state.aircrafts;
+export const aircraftsSelector = (state: any) => state.aircrafts;
 
 export function loadAll() {
   return get(query(firebase('/aircrafts'), orderByKey()));

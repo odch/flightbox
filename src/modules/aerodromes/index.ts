@@ -1,6 +1,6 @@
 import { loadAerodromes } from './actions';
 import reducer from './reducer';
-import sagas from './sagas.js';
+import sagas from './sagas';
 
 export { loadAerodromes };
 

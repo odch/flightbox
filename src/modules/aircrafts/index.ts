@@ -1,6 +1,6 @@
 import { loadAircrafts } from './actions';
 import reducer from './reducer';
-import sagas from './sagas.js';
+import sagas from './sagas';
 
 export { loadAircrafts };
 

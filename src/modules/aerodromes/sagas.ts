@@ -2,7 +2,7 @@ import {all, call, put, select, takeLatest} from 'redux-saga/effects'
 import * as actions from './actions';
 import {loadValue} from '../../util/firebase';
 
-export const aerodromesSelector = state => state.aerodromes;
+export const aerodromesSelector = (state: any) => state.aerodromes;
 
 export function* loadAerodromes() {
   const aerodromes = yield select(aerodromesSelector);
