@@ -4,7 +4,7 @@ const request = require('request-promise');
 
 const instance = functions.config().rtdb.instance;
 
-module.exports = functions.database.instance(instance).ref('status/{statusId}').onCreate(async (snap) => {
+module.exports = functions.region('europe-west1').database.instance(instance).ref('status/{statusId}').onCreate(async (snap) => {
   const r = await admin.database().ref("settings/webhookUrl").once('value')
   const webhook_url = r.val();
   if (webhook_url == null || webhook_url == "") {

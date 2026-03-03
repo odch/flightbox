@@ -5,7 +5,7 @@ import {getIdToken} from '../../util/firebase'
 export function* loadUserInvoiceRecipients() {
   try {
     const idToken = yield call(getIdToken)
-    const url = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/users/me/invoice-recipients`
+    const url = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/users/me/invoice-recipients`
     const response = yield call(fetch, url, {
       method: 'GET',
       headers: {

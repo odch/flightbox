@@ -75,7 +75,7 @@ export const getCustomsPayload = async movementData => {
 
 export const postPrepopulatedFormToCustoms = async (formData) => {
   const idToken = await getIdToken()
-  const url = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/prepopulated-forms`
+  const url = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/prepopulated-forms`
 
   const response = await fetch(url, {
     method: 'POST',
@@ -155,7 +155,7 @@ export function* startCustoms(action) {
 export function* checkAvailability() {
   try {
     const idToken = yield call(getIdToken)
-    const url = `https://us-central1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/availability`
+    const url = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/availability`
     const response = yield call(fetch, url, {
       method: 'GET',
       headers: {

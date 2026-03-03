@@ -15,7 +15,7 @@ jest.mock('firebase-functions', () => {
     })
   });
 
-  return {
+  const mock = {
     config: jest.fn(() => ({ rtdb: { instance: 'test-instance' } })),
     logger: {
       info: jest.fn(),
@@ -29,6 +29,8 @@ jest.mock('firebase-functions', () => {
       }))
     }
   };
+  mock.region = jest.fn(() => mock);
+  return mock;
 });
 
 const mockOnce = jest.fn();

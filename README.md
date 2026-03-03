@@ -152,7 +152,7 @@ $ curl \
     -X POST \
     -H "Content-Type: application/json" \
     -d '{"mode": "ip"}' \
-    https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
+    https://europe-west1-<PROJECT_ID>.cloudfunctions.net/auth
 ```
 
 #### Mode *flightnet*
@@ -167,7 +167,7 @@ $ curl \
     -X POST \
     -H "Content-Type: application/json" \
     -d '{"mode": "flightnet", "company": "<FLIGHTNET_COMPANY>", "username": "<FLIGHTNET_USERNAME>", "password": "<FLIGHTNET_PASSWORD>"}' \
-    https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
+    https://europe-west1-<PROJECT_ID>.cloudfunctions.net/auth
 ```
 
 ##### Test credentials #####
@@ -187,12 +187,12 @@ curl \
     -X POST \
     -H "Content-Type: application/json" \
     -d '{"mode": "flightnet", "username": "foo", "password": "bar"}' \
-    https://us-central1-<PROJECT_ID>.cloudfunctions.net/auth
+    https://europe-west1-<PROJECT_ID>.cloudfunctions.net/auth
 ```
 
 ### API
 
-URL: `https://us-central1-<PROJECT_ID>.cloudfunctions.net/api`
+URL: `https://europe-west1-<PROJECT_ID>.cloudfunctions.net/api`
 
 #### Aerodrome status ####
 

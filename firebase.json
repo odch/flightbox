@@ -7,7 +7,8 @@
     "public": "build",
     "rewrites": [{
       "source": "/api/**",
-      "function": "api"
+      "function": "api",
+      "region": "europe-west1"
     }],
     "headers": [
       {

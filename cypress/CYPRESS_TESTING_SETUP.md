@@ -5,7 +5,7 @@ Documents the required persistent data in the `cypress-testing` Firebase project
 ## Firebase project
 
 Project: `cypress-testing`
-Auth endpoint: `https://us-central1-cypress-testing.cloudfunctions.net/auth`
+Auth endpoint: `https://europe-west1-cypress-testing.cloudfunctions.net/auth`
 
 ## Auth credentials (already in place)
 

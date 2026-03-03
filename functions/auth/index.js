@@ -27,7 +27,7 @@ const createAndSendToken = (req, res, uid) => {
 };
 
 const onRequest = (allowed, handler) =>
-  functions.https.onRequest((req, res) =>
+  functions.region('europe-west1').https.onRequest((req, res) =>
     cors(req, res, () => {
       if (allowed.includes(req.method)) {
         return handler(req, res);

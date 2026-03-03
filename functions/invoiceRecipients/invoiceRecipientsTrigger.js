@@ -4,7 +4,7 @@ const admin = require('firebase-admin')
 const instance = functions.config().rtdb.instance
 
 module.exports.updateCustomsInvoiceRecipientsOnUpdate =
-  functions.database.instance(instance).ref('/settings/invoiceRecipients')
+  functions.region('europe-west1').database.instance(instance).ref('/settings/invoiceRecipients')
     .onWrite(async (change, context) => {
       const before = change.before.val()
       const after = change.after.val()

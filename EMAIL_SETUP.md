@@ -91,14 +91,14 @@ In your webpack config or build process, make sure `__FIREBASE_PROJECT_ID__` is 
 
 ### Test Link Generation
 ```bash
-curl -X POST https://us-central1-YOUR-PROJECT-ID.cloudfunctions.net/generateSignInLink \
+curl -X POST https://europe-west1-YOUR-PROJECT-ID.cloudfunctions.net/generateSignInLink \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","continueUrl":"https://yourapp.com"}'
 ```
 
 ### Test Email Sending
 ```bash
-curl -X POST https://us-central1-YOUR-PROJECT-ID.cloudfunctions.net/sendSignInEmail \
+curl -X POST https://europe-west1-YOUR-PROJECT-ID.cloudfunctions.net/sendSignInEmail \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","signInLink":"https://example.com","customMessage":"Test message"}'
 ```

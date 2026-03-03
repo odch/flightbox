@@ -35,6 +35,7 @@ describe('functions', () => {
           onRequest: jest.fn().mockImplementation(handler => { capturedHandler = handler; })
         }
       };
+      mockFunctions.region = jest.fn(() => mockFunctions);
 
       const mockSendMail = jest.fn().mockResolvedValue({ messageId: 'msg123' });
       const mockTransporter = { sendMail: mockSendMail };
