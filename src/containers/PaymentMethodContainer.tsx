@@ -18,4 +18,4 @@ const mapActionCreators = {
   saveMovementPaymentMethod,
 };
 
-export default connect(mapStateToProps, mapActionCreators)(PaymentMethod);
+export default connect(mapStateToProps, mapActionCreators)(PaymentMethod as any);

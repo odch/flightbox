@@ -13,4 +13,4 @@ export const getOptions = () => [{
 
 export const options = getOptions();
 
-export const getLabel = key => getOptions().find(option => option.key === key).label;
+export const getLabel = (key: string) => getOptions().find(option => option.key === key)?.label;

@@ -26,7 +26,7 @@ class AircraftDropdownContainer extends Component<OwnProps & {
     return (
       <AircraftDropdown
         aircrafts={this.props.aircrafts}
-        value={this.props.value}
+        value={this.props.value ?? ''}
         onChange={this.props.onChange}
         onFocus={this.props.onFocus}
         onBlur={this.props.onBlur}
