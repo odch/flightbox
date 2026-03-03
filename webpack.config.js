@@ -30,7 +30,7 @@ module.exports = {
   mode: process.env.ENV === 'production' ? 'production' : 'development',
   entry: [
     '@babel/polyfill',
-    path.resolve(__dirname, './src/app.js'),
+    path.resolve(__dirname, './src/app.tsx'),
     path.resolve(__dirname, './theme/' + projectConf.theme)
   ],
   output: {
