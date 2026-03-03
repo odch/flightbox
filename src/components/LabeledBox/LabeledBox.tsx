@@ -9,8 +9,8 @@ const Wrapper = styled.div`
   background-color: #fefefe;
 `;
 
-const Label = styled.div<{ $padding?: number }>`
-  padding: ${props => typeof props.$padding === 'number' ? `${props.$padding}px` : '1rem'};
+const Label = styled.div`
+  padding: 1rem;
   font-weight: bold;
   font-size: 1.5em;
 `;
@@ -37,7 +37,7 @@ interface LabeledBoxProps {
 const LabeledBox = React.forwardRef<HTMLDivElement, LabeledBoxProps>(
   ({ className, label, contentPadding, children }, ref) => (
     <Wrapper className={className} ref={ref}>
-      <Label $padding={contentPadding}>{label}</Label>
+      <Label>{label}</Label>
       <Content
         $padding={contentPadding}
       >{children}</Content>
