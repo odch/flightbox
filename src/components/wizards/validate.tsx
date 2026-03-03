@@ -123,7 +123,7 @@ const getConfig = () => ({
   },
 });
 
-const getFilteredConfig = (fields = []) => {
+const getFilteredConfig = (fields: string[] = []) => {
   const config = getConfig();
   return Object.keys(config)
     .filter(key => fields.includes(key))
@@ -133,7 +133,7 @@ const getFilteredConfig = (fields = []) => {
     }, {});
 };
 
-const getRelevantFields = (fields, hiddenFields = []) => {
+const getRelevantFields = (fields: string[], hiddenFields: string[] = []) => {
   if (hiddenFields.length === 0) {
     return fields
   }

@@ -31,7 +31,7 @@ const AerodromeDropdownContainer = ({
   return (
     <AerodromeDropdown
       aerodromes={aerodromes}
-      value={value}
+      value={value ?? ''}
       onChange={onChange}
       onFocus={onFocus}
       onBlur={onBlur}

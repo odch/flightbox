@@ -52,4 +52,4 @@ const mapActionCreators = {
   removeInvoiceRecipientEmail,
 };
 
-export default connect(mapStateToProps, mapActionCreators)(InvoiceRecipientsListContainer);
+export default connect(mapStateToProps, mapActionCreators)(InvoiceRecipientsListContainer as any);

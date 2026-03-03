@@ -467,7 +467,7 @@ export function* saveMovement() {
 
   if (auth.email) {
     movement.createdBy = auth.email
-    movement.createdBy_orderKey = toOrderKey(auth.email, movement.negativeTimestamp)
+    movement.createdBy_orderKey = toOrderKey(auth.email, movement.negativeTimestamp as number)
   }
 
   try {

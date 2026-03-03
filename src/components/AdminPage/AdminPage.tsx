@@ -83,7 +83,7 @@ class AdminPage extends Component<any, any> {
   };
 
   render() {
-    const hiddenTabs = []
+    const hiddenTabs: string[] = []
 
     const invoicePaymentEnabled = objectToArray(__CONF__.paymentMethods).includes('invoice')
     const guestAccessEnabled = this.props.guestAccessToken && this.props.guestAccessToken.token

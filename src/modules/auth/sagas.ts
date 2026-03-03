@@ -204,7 +204,7 @@ export function* doLogout() {
 export function* doListenFirebaseAuthentication(action: any) {
   const authenticated = !!action.payload.authData;
 
-  let authData = null;
+  let authData: any = null;
 
   if (authenticated) {
     const { uid, expires, token, email } = action.payload.authData;
@@ -241,7 +241,7 @@ export function* doListenFirebaseAuthentication(action: any) {
     if (isSignInWithEmail() && isSignInEmailInStorage()) {
       yield put(actions.requestEmailAuthentication())
     } else if (isSignInWithKioskAccessToken()) {
-      yield put(actions.authenticateAsKiosk(getKioskAuthQueryToken(window.location)))
+      yield put(actions.authenticateAsKiosk(getKioskAuthQueryToken(window.location)!))
     } else {
       yield put(actions.requestIpAuthentication());
     }
