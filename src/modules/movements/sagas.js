@@ -1,3 +1,4 @@
+import {onChildAdded, onChildChanged, onChildRemoved} from 'firebase/database';
 import {getPagination, toOrderKey} from './pagination';
 import {all, call, fork, put, select, takeEvery, takeLatest} from 'redux-saga/effects'
 import createChannel, {monitor} from '../../util/createChannel';
@@ -324,18 +325,15 @@ export function monitorAssociation(movement, channel) {
   })
 }
 
+const movementListeners = { departure: [], arrival: [] };
+
 export function* monitorRef(ref, channel, movementType, eventActions) {
-  ref.off('child_added');
-  ref.off('child_changed');
-  ref.off('child_removed');
-
-  const childAdded = createDelegate(channel, eventActions.added, movementType);
-  const childChanged = createDelegate(channel, eventActions.changed, movementType);
-  const childRemoved = createDelegate(channel, eventActions.removed, movementType);
-
-  ref.on('child_added', childAdded);
-  ref.on('child_changed', childChanged);
-  ref.on('child_removed', childRemoved);
+  movementListeners[movementType].forEach(fn => fn());
+  movementListeners[movementType] = [
+    onChildAdded(ref, createDelegate(channel, eventActions.added, movementType)),
+    onChildChanged(ref, createDelegate(channel, eventActions.changed, movementType)),
+    onChildRemoved(ref, createDelegate(channel, eventActions.removed, movementType)),
+  ];
 }
 
 export function createDelegate(channel, action, movementType) {

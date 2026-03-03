@@ -1,63 +1,70 @@
 jest.mock('../../util/firebase');
+jest.mock('firebase/database', () => ({
+  get: jest.fn(),
+  child: jest.fn(),
+  query: jest.fn(),
+  orderByChild: jest.fn(),
+  startAt: jest.fn(),
+  limitToFirst: jest.fn(),
+  endAt: jest.fn(),
+  onValue: jest.fn(),
+  remove: jest.fn(),
+  update: jest.fn(),
+  push: jest.fn(),
+}));
 
 import firebase from '../../util/firebase';
+import {get, child, query, orderByChild, startAt, limitToFirst, endAt, onValue, remove, update, push} from 'firebase/database';
 import {loadLimited, loadByKey, removeMovement, saveMovement, addMovementAssociationListener, removeMovementAssociationListener} from './remote';
 
 describe('modules', () => {
   describe('movements/remote', () => {
     let mockRef;
+    let queryRef;
+    let childRef;
+    let mockSnapshot;
 
     beforeEach(() => {
-      mockRef = {
-        orderByChild: jest.fn().mockReturnThis(),
-        startAt: jest.fn().mockReturnThis(),
-        limitToFirst: jest.fn().mockReturnThis(),
-        endAt: jest.fn().mockReturnThis(),
-        once: jest.fn(),
-        child: jest.fn().mockReturnThis(),
-        remove: jest.fn().mockResolvedValue(),
-        update: jest.fn().mockResolvedValue(),
-        push: jest.fn().mockResolvedValue({key: 'new-key'}),
-        on: jest.fn(),
-        off: jest.fn(),
-      };
+      jest.clearAllMocks();
+
+      mockRef = {};
+      queryRef = {};
+      childRef = {};
+      mockSnapshot = {val: () => ({})};
+
       firebase.mockReturnValue(mockRef);
+      query.mockReturnValue(queryRef);
+      child.mockReturnValue(childRef);
+      get.mockResolvedValue(mockSnapshot);
+      remove.mockResolvedValue();
+      update.mockResolvedValue();
+      push.mockResolvedValue({key: 'new-key'});
+      onValue.mockReturnValue(jest.fn());
     });
 
     describe('loadLimited', () => {
       it('resolves with snapshot and ref', async () => {
-        const mockSnapshot = {val: () => ({})};
-        mockRef.once.mockImplementation((event, cb) => cb(mockSnapshot));
-
         const result = await loadLimited('/departures', null, 10, null, null);
         expect(result).toHaveProperty('snapshot', mockSnapshot);
         expect(result).toHaveProperty('ref');
-        expect(mockRef.limitToFirst).toHaveBeenCalledWith(10);
+        expect(limitToFirst).toHaveBeenCalledWith(10);
       });
 
       it('uses endAt when no limit provided', async () => {
-        const mockSnapshot = {val: () => ({})};
-        mockRef.once.mockImplementation((event, cb) => cb(mockSnapshot));
-
         await loadLimited('/departures', null, null, 'endVal', null);
-        expect(mockRef.endAt).toHaveBeenCalled();
+        expect(endAt).toHaveBeenCalled();
       });
 
       it('uses createdBy ordering when provided', async () => {
-        const mockSnapshot = {val: () => ({})};
-        mockRef.once.mockImplementation((event, cb) => cb(mockSnapshot));
-
         await loadLimited('/departures', null, 5, null, 'user123');
-        expect(mockRef.orderByChild).toHaveBeenCalledWith('createdBy_orderKey');
+        expect(orderByChild).toHaveBeenCalledWith('createdBy_orderKey');
       });
     });
 
     describe('loadByKey', () => {
       it('resolves with snapshot', async () => {
-        const mockSnapshot = {val: () => ({immatriculation: 'HBKOF'})};
-        mockRef.once.mockImplementation((event, cb) => cb(mockSnapshot));
-
         const result = await loadByKey('/departures', 'key123');
+        expect(child).toHaveBeenCalledWith(mockRef, 'key123');
         expect(result).toBe(mockSnapshot);
       });
     });
@@ -65,12 +72,12 @@ describe('modules', () => {
     describe('removeMovement', () => {
       it('resolves when firebase remove succeeds', async () => {
         await expect(removeMovement('/departures', 'key123')).resolves.toBeUndefined();
-        expect(mockRef.child).toHaveBeenCalledWith('key123');
-        expect(mockRef.remove).toHaveBeenCalled();
+        expect(child).toHaveBeenCalledWith(mockRef, 'key123');
+        expect(remove).toHaveBeenCalledWith(childRef);
       });
 
       it('rejects when firebase remove fails', async () => {
-        mockRef.remove.mockRejectedValue(new Error('Permission denied'));
+        remove.mockRejectedValue(new Error('Permission denied'));
         await expect(removeMovement('/departures', 'key123')).rejects.toThrow('Permission denied');
       });
     });
@@ -78,19 +85,19 @@ describe('modules', () => {
     describe('saveMovement', () => {
       it('updates existing movement when key is provided', async () => {
         const result = await saveMovement('/departures', 'existing-key', {immatriculation: 'HBKOF'});
-        expect(mockRef.child).toHaveBeenCalledWith('existing-key');
-        expect(mockRef.update).toHaveBeenCalled();
+        expect(child).toHaveBeenCalledWith(mockRef, 'existing-key');
+        expect(update).toHaveBeenCalled();
         expect(result).toBe('existing-key');
       });
 
       it('pushes new movement when no key provided', async () => {
         const result = await saveMovement('/departures', null, {immatriculation: 'HBKOF'});
-        expect(mockRef.push).toHaveBeenCalled();
+        expect(push).toHaveBeenCalled();
         expect(result).toBe('new-key');
       });
 
       it('rejects when firebase operation fails', async () => {
-        mockRef.update.mockRejectedValue(new Error('Save failed'));
+        update.mockRejectedValue(new Error('Save failed'));
         await expect(saveMovement('/departures', 'key', {})).rejects.toThrow('Save failed');
       });
     });
@@ -99,27 +106,36 @@ describe('modules', () => {
       it('listens on correct firebase path for departure', () => {
         const cb = jest.fn();
         addMovementAssociationListener('departure', 'dep-key', cb);
-        expect(mockRef.child).toHaveBeenCalledWith('departures');
-        expect(mockRef.on).toHaveBeenCalledWith('value', cb);
+        expect(child).toHaveBeenCalledWith(expect.anything(), 'departures');
+        expect(onValue).toHaveBeenCalledWith(expect.anything(), cb);
       });
 
       it('listens on correct firebase path for arrival', () => {
         const cb = jest.fn();
         addMovementAssociationListener('arrival', 'arr-key', cb);
-        expect(mockRef.child).toHaveBeenCalledWith('arrivals');
+        expect(child).toHaveBeenCalledWith(expect.anything(), 'arrivals');
       });
     });
 
     describe('removeMovementAssociationListener', () => {
-      it('removes listener for departure', () => {
-        removeMovementAssociationListener('departure', 'dep-key');
-        expect(mockRef.child).toHaveBeenCalledWith('departures');
-        expect(mockRef.off).toHaveBeenCalledWith('value');
+      it('calls unsubscribe function for departure', () => {
+        const mockUnsubscribe = jest.fn();
+        onValue.mockReturnValue(mockUnsubscribe);
+
+        addMovementAssociationListener('departure', 'dep-key-r1', jest.fn());
+        removeMovementAssociationListener('departure', 'dep-key-r1');
+
+        expect(mockUnsubscribe).toHaveBeenCalled();
       });
 
-      it('removes listener for arrival', () => {
-        removeMovementAssociationListener('arrival', 'arr-key');
-        expect(mockRef.child).toHaveBeenCalledWith('arrivals');
+      it('calls unsubscribe function for arrival', () => {
+        const mockUnsubscribe = jest.fn();
+        onValue.mockReturnValue(mockUnsubscribe);
+
+        addMovementAssociationListener('arrival', 'arr-key-r1', jest.fn());
+        removeMovementAssociationListener('arrival', 'arr-key-r1');
+
+        expect(mockUnsubscribe).toHaveBeenCalled();
       });
     });
   });
