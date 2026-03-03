@@ -5,7 +5,7 @@ import {getMtowFee} from './utils'
 /**
  * CAUTION: Declared fees in lsze_data.json are INCLUDING VAT.
  */
-const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
+const getLandingFee = (mtow: number, flightType: string, aircraftOrigin: any, aircraftCategory: string) => {
   const fee = getFee(mtow, flightType, aircraftOrigin, aircraftCategory)
   if (fee) {
     const netFee = fee / (1 + getVatRate(flightType, aircraftOrigin, aircraftCategory) / 100)
@@ -15,15 +15,15 @@ const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
   return undefined
 }
 
-const getGoAroundFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
+const getGoAroundFee = (mtow: number, flightType: string, aircraftOrigin: any, aircraftCategory: string) =>
   undefined
 
-const getMtowFeeHeavy = mtow => {
+const getMtowFeeHeavy = (mtow: number) => {
   const tons = Math.ceil(mtow / 1000)
   return tons * 20
 }
 
-const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
+const getFee = (mtow: number, flightType: string, aircraftOrigin: any, aircraftCategory: string) => {
   if (mtow > 3000) {
     return getMtowFeeHeavy(mtow)
   }
@@ -37,7 +37,7 @@ const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
   return getMtowFee(data.fees.plane, mtow)
 }
 
-const getVatRate = (flightType, aircraftOrigin, aircraftCategory) => {
+const getVatRate = (flightType: string, aircraftOrigin: any, aircraftCategory: string) => {
   return 8.1
 }
 

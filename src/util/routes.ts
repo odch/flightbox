@@ -16,7 +16,7 @@ const circuitRoute = {
 };
 
 const buildArray = routes => objectToArray(routes)
-  .map(route => ({
+  .map((route: any) => ({
     label: route.label,
     value: route.name,
     available: route.condition ? conditions[route.condition] : undefined

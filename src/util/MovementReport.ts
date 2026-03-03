@@ -1,6 +1,6 @@
-import firebase from './firebase.js';
+import firebase from './firebase';
 import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
-import Download from './Download.js';
+import Download from './Download';
 import {compareAscending, firebaseToLocal} from './movements';
 import {fetch as fetchAircrafts} from './aircrafts';
 import {fetch as fetchAerodromes} from './aerodromes';
@@ -16,6 +16,14 @@ import objectToArray from './objectToArray';
 const CIRCUITS_KEY_SUFFIX = '_circuits';
 
 class MovementReport {
+
+  startDate: string;
+  endDate: string;
+  options: any;
+  creationDate: any;
+  static header: string[];
+  static internalHeader: string[];
+  static LOCATION_DEFAULT: string;
 
   constructor(year, month, options = {}) {
     month = month < 10 ? '0' + month : month;
@@ -37,7 +45,7 @@ class MovementReport {
     const promises = types.map(this.readMovements, this);
     const aircrafts = fetchAircrafts();
     const aerodromes = fetchAerodromes();
-    Promise.all(promises.concat([aircrafts, aerodromes]))
+    Promise.all((promises as any[]).concat([aircrafts, aerodromes]))
       .then((results) => {
         const snapshots = [results[0], results[1]];
         const aircrafts = results[2];
@@ -215,7 +223,7 @@ class MovementReport {
   }
 
   getTypeOfRunway(movement) {
-    const runway = objectToArray(__CONF__.aerodrome.runways).find(rwy => rwy.name === movement.runway);
+    const runway = objectToArray(__CONF__.aerodrome.runways).find((rwy: any) => rwy.name === movement.runway) as any;
     return runway ? runway.type : '';
   }
 

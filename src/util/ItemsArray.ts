@@ -11,6 +11,10 @@ import bs from 'binary-search';
  */
 class ItemsArray {
 
+  comparator: any;
+  array: any[];
+  keys: Record<string, boolean>;
+
   constructor(array, comparator) {
     this.comparator = comparator;
     this.array = [];

@@ -11,6 +11,9 @@ import bs from 'binary-search';
  */
 class ImmutableItemsArray {
 
+  array: any[];
+  keys: Record<string, number>;
+
   /**
    * @param array A sorted array
    */

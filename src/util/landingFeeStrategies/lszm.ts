@@ -3,13 +3,13 @@ import {AircraftOrigin} from '../landingFees'
 import {flightTypeAircraftType, isHelicopter} from '../aircraftCategories'
 import {getMtowFee} from './utils'
 
-const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
+const getLandingFee = (mtow: number, flightType: string, aircraftOrigin: any, aircraftCategory: string) =>
   getFee(mtow, flightType, aircraftOrigin, aircraftCategory)
 
-const getGoAroundFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
+const getGoAroundFee = (mtow: number, flightType: string, aircraftOrigin: any, aircraftCategory: string) =>
   undefined
 
-const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
+const getFee = (mtow: number, flightType: string, aircraftOrigin: any, aircraftCategory: string) => {
   const isHomebase = aircraftOrigin === AircraftOrigin.HOME_BASE || aircraftOrigin === AircraftOrigin.CLUB
 
   if (flightTypeAircraftType(aircraftCategory) === 'glider') {
@@ -30,7 +30,7 @@ const getVat = (isHomebase, isHeli, isInstruction) => {
   return data.vat[factorName]
 }
 
-const getVatRate = (flightType, aircraftOrigin, aircraftCategory) => {
+const getVatRate = (flightType: string, aircraftOrigin: any, aircraftCategory: string) => {
   const isHomebase = aircraftOrigin === AircraftOrigin.HOME_BASE || aircraftOrigin === AircraftOrigin.CLUB
 
   if (flightTypeAircraftType(aircraftCategory) === 'glider') {

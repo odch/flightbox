@@ -1,4 +1,4 @@
-import firebase, {getIdToken} from './firebase.js';
+import firebase, {getIdToken} from './firebase';
 import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
 import {firebaseToLocal} from './movements';
 import dates from '../util/dates';
@@ -11,11 +11,18 @@ import moment from 'moment';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 
-window.pdfFonts = pdfFonts; // actually not necessary, but otherwise `pdfFonts` is unused and would be removed
+(window as any).pdfFonts = pdfFonts; // actually not necessary, but otherwise `pdfFonts` is unused and would be removed
 
 const CHECKOUT_RECIPIENT_NAME = i18n.t('invoicesReport.onlinePayments')
 
 class InvoicesReport {
+
+  year: number;
+  month: number;
+  startDate: string;
+  endDate: string;
+  creationDate: any;
+  options: any;
 
   constructor(year, month, options = {}) {
     const monthStr = (month < 10 ? '0' : '') + month
@@ -90,7 +97,7 @@ class InvoicesReport {
       }
     };
 
-    const pdf = pdfMake.createPdf(docDefinition)
+    const pdf = pdfMake.createPdf(docDefinition as any)
 
     callback(pdf)
   }
@@ -114,7 +121,7 @@ class InvoicesReport {
 
     const monthLabel = this.getMonthLabel()
 
-    const content = []
+    const content: any[] = []
 
     recipientNames
       .forEach(((recipientName, index) => {
@@ -137,7 +144,7 @@ class InvoicesReport {
   }
 
   filterArrivals(arrivals) {
-    const filtered = []
+    const filtered: any[] = []
 
     arrivals.forEach(record => {
       const arrival = firebaseToLocal(record.val());
@@ -207,7 +214,7 @@ class InvoicesReport {
     let roundingDiffSum = 0
     let grossFeeSum = 0
 
-    const rows = []
+    const rows: any[] = []
 
     arrivals.forEach(arrival => {
       const {
@@ -326,7 +333,7 @@ class InvoicesReport {
     let roundingDiffSum = 0
     let grossFeeSum = 0
 
-    const rows = []
+    const rows: any[] = []
 
     relevantDeclarations.forEach(declaration => {
       const {

@@ -31,7 +31,7 @@ const getHiddenFields = (values: any) => {
 const mapStateToProps = (state: RootState, ownProps: any) => {
   const values = state.ui.wizard.values;
   return Object.assign({}, ownProps, {
-    flightTypes: filter(getEnabledFlightTypes(values.aircraftCategory), values),
+    flightTypes: filter(getEnabledFlightTypes(values.aircraftCategory as string), values),
     runways: filter(runways, values),
     departureRoutes: filter(departureRoutes, values),
     hiddenFields: getHiddenFields(values),

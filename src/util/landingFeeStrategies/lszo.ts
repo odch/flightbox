@@ -3,7 +3,7 @@ import data from './lszo_data.json'
 import {isHelicopter} from '../aircraftCategories'
 import {getMtowFee} from './utils'
 
-const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
+const getLandingFee = (mtow: number, flightType: string, aircraftOrigin: any, aircraftCategory: string) => {
   const fee = getFee(mtow, flightType, aircraftOrigin, aircraftCategory)
   if (fee) {
     return {fee}
@@ -11,10 +11,10 @@ const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
   return undefined
 }
 
-const getGoAroundFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
+const getGoAroundFee = (mtow: number, flightType: string, aircraftOrigin: any, aircraftCategory: string) =>
   undefined
 
-const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
+const getFee = (mtow: number, flightType: string, aircraftOrigin: any, aircraftCategory: string) => {
   const isHomebase = aircraftOrigin === AircraftOrigin.HOME_BASE || aircraftOrigin === AircraftOrigin.CLUB
   const isInstruction = flightType === 'instruction'
   const isHeli = isHelicopter(aircraftCategory)
@@ -33,7 +33,7 @@ const getFee = (mtow, flightType, aircraftOrigin, aircraftCategory) => {
   return getMtowFee(data.fees.plane, mtow)
 }
 
-const getVatRate = (flightType, aircraftOrigin, aircraftCategory) => {
+const getVatRate = (flightType: string, aircraftOrigin: any, aircraftCategory: string) => {
   const isHomebase = aircraftOrigin === AircraftOrigin.HOME_BASE || aircraftOrigin === AircraftOrigin.CLUB
   const isInstruction = flightType === 'instruction'
 

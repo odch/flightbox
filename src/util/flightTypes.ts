@@ -81,7 +81,7 @@ const flightTypes = [
   }
 ];
 
-const findByValue = type => {
+const findByValue = (type: string) => {
   const obj = flightTypes.find(item => item.value === type);
   if (!obj) {
     throw new Error('Flight type "' + type + '" not found');
@@ -89,23 +89,23 @@ const findByValue = type => {
   return obj;
 };
 
-export const getEnabledFlightTypes = (aircraftCategory) => flightTypes
+export const getEnabledFlightTypes = (aircraftCategory: string) => flightTypes
   .filter(type => enabledTypes.includes(type.value))
-  .filter(type => !!type.airstatType[flightTypeAircraftType(aircraftCategory)])
+  .filter(type => !!type.airstatType[flightTypeAircraftType(aircraftCategory) as string])
   .map(type => ({ ...type, label: i18n.t(`flightTypes.${type.value}`) }));
 
-export const getAirstatType = (type, aircraftCategory) =>
-  findByValue(type).airstatType[flightTypeAircraftType(aircraftCategory)];
+export const getAirstatType = (type: string, aircraftCategory: string) =>
+  findByValue(type).airstatType[flightTypeAircraftType(aircraftCategory) as string];
 
-export const getLabel = type => i18n.t(`flightTypes.${findByValue(type).value}`);
+export const getLabel = (type: string) => i18n.t(`flightTypes.${findByValue(type).value}`);
 
-export const isHelicopterAirstatType = airstatType => !!flightTypes.find(
+export const isHelicopterAirstatType = (airstatType: number) => !!flightTypes.find(
   flightType => flightType.airstatType.helicopter && flightType.airstatType.helicopter === airstatType
 )
 
-const flightTypeContainsAirstatType = (flightTypeIds, airstatType) => {
+const flightTypeContainsAirstatType = (flightTypeIds: string[], airstatType: number) => {
   for (const flightTypeId of flightTypeIds) {
-    const flightType= flightTypes.find(type => type.value === flightTypeId)
+    const flightType= flightTypes.find(type => type.value === flightTypeId)!
     const containsAirstatType = Object.values(flightType.airstatType).includes(airstatType)
     if (containsAirstatType) {
       return true
@@ -114,17 +114,17 @@ const flightTypeContainsAirstatType = (flightTypeIds, airstatType) => {
   return false
 }
 
-export const isPrivateFlightAirstatType = airstatType => flightTypeContainsAirstatType(
+export const isPrivateFlightAirstatType = (airstatType: number) => flightTypeContainsAirstatType(
   ['private', 'glider_private_aerotow', 'glider_private_winch', 'glider_private_self'],
   airstatType
 )
 
-export const isInstructionFlightAirstatType = airstatType => flightTypeContainsAirstatType(
+export const isInstructionFlightAirstatType = (airstatType: number) => flightTypeContainsAirstatType(
   ['instruction', 'glider_instruction_aerotow', 'glider_instruction_winch', 'glider_instruction_self'],
   airstatType
 )
 
-export const isCommercialFlightAirstatType = airstatType => flightTypeContainsAirstatType(
+export const isCommercialFlightAirstatType = (airstatType: number) => flightTypeContainsAirstatType(
   ['commercial'],
   airstatType
 )

@@ -1,4 +1,4 @@
-import importCsv from './importCsv.js';
+import importCsv from './importCsv';
 
 function importUsers(csvString) {
   const options = {

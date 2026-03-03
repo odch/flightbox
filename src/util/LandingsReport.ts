@@ -1,12 +1,19 @@
-import firebase from './firebase.js';
+import firebase from './firebase';
 import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
-import Download from './Download.js';
+import Download from './Download';
 import { firebaseToLocal } from './movements';
 import { fetch as fetchAircrafts } from './aircrafts';
 import dates from '../util/dates';
 import moment from 'moment';
 
 class LandingsReport {
+
+  startDate: string;
+  endDate: string;
+  options: any;
+  delimiter: string;
+  creationDate: any;
+  static header: string[];
 
   constructor(year, month, options = {}) {
     month = month < 10 ? '0' + month : month;
@@ -55,7 +62,7 @@ class LandingsReport {
   }
 
   getAircraftsSummary(arrivals) {
-    const map = {};
+    const map: Record<string, any> = {};
 
     arrivals.forEach(record => {
       const arrival = firebaseToLocal(record.val());
@@ -79,7 +86,7 @@ class LandingsReport {
       }
     });
 
-    const arr = [];
+    const arr: any[] = [];
     Object.keys(map).forEach(key => {
       arr.push(map[key]);
     });
