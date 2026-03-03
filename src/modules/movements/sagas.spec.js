@@ -9,8 +9,14 @@ import {LIMIT} from './pagination';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
 import {loadRemote} from '../profile'
 import {compareDescending, firebaseToLocal} from '../../util/movements'
+import {onChildAdded, onChildChanged, onChildRemoved} from 'firebase/database';
 
 jest.mock('./remote');
+jest.mock('firebase/database', () => ({
+  onChildAdded: jest.fn(() => jest.fn()),
+  onChildChanged: jest.fn(() => jest.fn()),
+  onChildRemoved: jest.fn(() => jest.fn()),
+}));
 
 describe('modules', () => {
   describe('movements', () => {
@@ -353,41 +359,37 @@ describe('modules', () => {
       });
 
       describe('monitorRef', () => {
-        it('should remove old listeners and attach new ones', () => {
-          const ref = {
-            off: jest.fn(),
-            on: jest.fn()
-          };
-
+        it('should attach child event listeners', () => {
+          const ref = {};
           const channel = {};
-
           const eventActions = {
             added: () => {},
             changed: () => {},
             removed: () => {}
-          }
+          };
 
           const generator = sagas.monitorRef(ref, channel, 'departure', eventActions);
-
           expect(generator.next().done).toEqual(true);
 
-          const offCalls = ref.off.mock.calls;
-          expect(offCalls.length).toBe(3);
-          expect(offCalls[0]).toEqual(['child_added']);
-          expect(offCalls[1]).toEqual(['child_changed']);
-          expect(offCalls[2]).toEqual(['child_removed']);
+          expect(onChildAdded).toHaveBeenCalledWith(ref, expect.any(Function));
+          expect(onChildChanged).toHaveBeenCalledWith(ref, expect.any(Function));
+          expect(onChildRemoved).toHaveBeenCalledWith(ref, expect.any(Function));
+        });
 
-          const onCalls = ref.on.mock.calls;
-          expect(onCalls.length).toBe(3);
+        it('should call previous unsubscribers when called again', () => {
+          const mockUnsubscribe = jest.fn();
+          onChildAdded.mockReturnValue(mockUnsubscribe);
+          onChildChanged.mockReturnValue(mockUnsubscribe);
+          onChildRemoved.mockReturnValue(mockUnsubscribe);
 
-          expect(onCalls[0][0]).toBe('child_added');
-          expect(typeof onCalls[0][1]).toBe('function');
+          const ref = {};
+          const channel = {};
+          const eventActions = { added: () => {}, changed: () => {}, removed: () => {} };
 
-          expect(onCalls[1][0]).toBe('child_changed');
-          expect(typeof onCalls[1][1]).toBe('function');
+          sagas.monitorRef(ref, channel, 'departure', eventActions).next();
+          sagas.monitorRef(ref, channel, 'departure', eventActions).next();
 
-          expect(onCalls[2][0]).toBe('child_removed');
-          expect(typeof onCalls[2][1]).toBe('function');
+          expect(mockUnsubscribe).toHaveBeenCalledTimes(3);
         });
       });
 
