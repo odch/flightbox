@@ -17,7 +17,7 @@ class ImmutableItemsArray {
   /**
    * @param array A sorted array
    */
-  constructor(array) {
+  constructor(array?: any[]) {
     this.array = [];
     this.keys = {}; // map for quick lookup (keys must be kept in sync with items in the array)
 
@@ -99,7 +99,7 @@ class ImmutableItemsArray {
     return this;
   }
 
-  insertAll(items, comparator) {
+  insertAll(items: any[], comparator?: any) {
     const newArr = this.array.slice();
 
     items.forEach(item => {
