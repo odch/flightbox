@@ -1,12 +1,10 @@
 import firebase from '../../../util/firebase';
+import {push, update as fbUpdate} from 'firebase/database';
 
 export async function create(cardPayment) {
-  const cardPaymentsRef = await firebase('/card-payments/')
-  const newPaymentRef = await cardPaymentsRef.push(cardPayment)
-  return newPaymentRef
+  return push(firebase('/card-payments'), cardPayment);
 }
 
 export async function update(id, cardPayment) {
-  const cardPaymentRef = await firebase('/card-payments/' + id)
-  await cardPaymentRef.update(cardPayment)
+  await fbUpdate(firebase('/card-payments/' + id), cardPayment);
 }

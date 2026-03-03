@@ -1,6 +1,11 @@
 jest.mock('../../util/firebase');
+jest.mock('firebase/database', () => ({
+  get: jest.fn(),
+  update: jest.fn(),
+}));
 
 import firebase from '../../util/firebase';
+import {get, update} from 'firebase/database';
 import {load, save} from './remote';
 
 describe('modules', () => {
@@ -8,31 +13,32 @@ describe('modules', () => {
     let mockRef;
 
     beforeEach(() => {
-      mockRef = {
-        once: jest.fn(),
-        update: jest.fn().mockResolvedValue(),
-      };
+      mockRef = {};
+      jest.clearAllMocks();
       firebase.mockReturnValue(mockRef);
     });
 
     describe('load', () => {
       it('resolves with snapshot', async () => {
         const snapshot = {val: () => ({firstname: 'Hans'})};
-        mockRef.once.mockImplementation((event, cb) => cb(snapshot));
+        get.mockResolvedValue(snapshot);
         const result = await load('user123');
         expect(result).toBe(snapshot);
         expect(firebase).toHaveBeenCalledWith('/profiles/user123');
+        expect(get).toHaveBeenCalledWith(mockRef);
       });
     });
 
     describe('save', () => {
       it('resolves when update succeeds', async () => {
+        update.mockResolvedValue();
         await expect(save('user123', {firstname: 'Hans'})).resolves.toBeUndefined();
-        expect(mockRef.update).toHaveBeenCalledWith({firstname: 'Hans'});
+        expect(firebase).toHaveBeenCalledWith('/profiles/user123');
+        expect(update).toHaveBeenCalledWith(mockRef, {firstname: 'Hans'});
       });
 
       it('rejects when update fails', async () => {
-        mockRef.update.mockRejectedValue(new Error('Permission denied'));
+        update.mockRejectedValue(new Error('Permission denied'));
         await expect(save('user123', {})).rejects.toThrow('Permission denied');
       });
     });

@@ -1,16 +1,12 @@
 import {all, call, put, select, takeEvery} from 'redux-saga/effects'
+import {get, query, orderByKey} from 'firebase/database';
 import * as actions from './actions';
 import firebase from '../../util/firebase';
 
 export const usersSelector = state => state.users;
 
 export function loadAll() {
-  return new Promise(resolve => {
-    const ref = firebase('/users');
-    ref.orderByKey().once('value', snapshot => {
-      resolve(snapshot);
-    });
-  });
+  return get(query(firebase('/users'), orderByKey()));
 }
 
 export function* loadUsers() {
