@@ -1,5 +1,5 @@
 // Note: this list must be kept in sync with the map in `updateAircraftList.js`
-const categories = [
+const allCategories = [
   {name: 'Flugzeug', flightTypeAircraftType: 'aircraft'},
   {name: 'Eigenbauflugzeug', flightTypeAircraftType: 'aircraft'},
   {name: 'Motorsegler', flightTypeAircraftType: 'motor_glider'},
@@ -17,32 +17,33 @@ const categories = [
   {name: 'Eigenbautragschrauber', flightTypeAircraftType: 'aircraft'},
 ];
 
-const categoryNames = categories.map(category => category.name)
+const categoryNames = allCategories.map(category => category.name)
 
-const isHelicopter = aircraftCategory => ['Hubschrauber', 'Eigenbauhubschrauber',].includes(aircraftCategory);
+const isHelicopter = (aircraftCategory: string) => ['Hubschrauber', 'Eigenbauhubschrauber',].includes(aircraftCategory);
 
-const flightTypeAircraftType = aircraftCategory => {
+const flightTypeAircraftType = (aircraftCategory: string | null) => {
   if (!aircraftCategory) {
     return null
   }
 
-  const category = categories.find(category => category.name === aircraftCategory)
+  const category = allCategories.find(category => category.name === aircraftCategory)
 
   if (category) {
     return category.flightTypeAircraftType
   }
 }
 
-const icon = aircraftCategory => {
+const icon = (aircraftCategory: string | null) => {
   if (!aircraftCategory) {
     return null
   }
 
-  const category = categories.find(category => category.name === aircraftCategory)
+  const category = allCategories.find(category => category.name === aircraftCategory)
 
   if (category) {
     return category.icon
   }
 }
 
-module.exports = {categories: categoryNames, isHelicopter, flightTypeAircraftType, icon} // no ES6 export as this file is also required in build process without ES6 support
+export const categories = categoryNames;
+export { isHelicopter, flightTypeAircraftType, icon };

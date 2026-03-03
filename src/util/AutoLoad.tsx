@@ -4,7 +4,10 @@ import isElementInViewport from '../util/isElementInViewport';
 
 const DEFAULT_BOTTOM_THRESHOLD = 50
 
-export const AutoLoad = (List) => class extends Component {
+export const AutoLoad = (List: any) => class extends Component<any, any> {
+
+  element: any;
+  bottomMarker: any;
 
   constructor(props) {
     super(props);

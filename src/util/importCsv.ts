@@ -1,4 +1,4 @@
-import firebase from './firebase.js';
+import firebase from './firebase';
 import {get, child, set, remove, push} from 'firebase/database';
 import parseCsv from "./parseCsv.js";
 

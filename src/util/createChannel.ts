@@ -1,8 +1,8 @@
-import { call, put } from 'redux-saga/effects'
+import { call, put as sagaPut } from 'redux-saga/effects'
 
 export default function createChannel() {
-  const messageQueue = [];
-  const resolveQueue = [];
+  const messageQueue: any[] = [];
+  const resolveQueue: any[] = [];
 
   function put(msg) {
     // anyone waiting for a message ?
@@ -37,6 +37,6 @@ export default function createChannel() {
 export function* monitor(channel) {
   while (true) {
     const action = yield call(channel.take);
-    yield put(action);
+    yield sagaPut(action);
   }
 }

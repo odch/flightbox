@@ -1,5 +1,9 @@
 class Download {
 
+  filename: string;
+  mimeType: string;
+  content: string;
+
   constructor(filename, mimeType, content) {
     this.filename = filename;
     this.mimeType = mimeType;
@@ -9,11 +13,11 @@ class Download {
   start() {
     const encodedUri = encodeURI(this.content);
 
-    if (window.navigator.msSaveOrOpenBlob) {
+    if ((window.navigator as any).msSaveOrOpenBlob) {
       const blob = new Blob([decodeURIComponent(encodedUri)], {
         type: this.mimeType,
       });
-      navigator.msSaveBlob(blob, this.filename);
+      (navigator as any).msSaveBlob(blob, this.filename);
     } else {
       const link = document.createElement('a');
       link.setAttribute('href', encodedUri);

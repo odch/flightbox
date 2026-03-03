@@ -3,7 +3,7 @@ import moment from 'moment-timezone';
 import * as actions from './actions';
 import dates from '../../util/dates'
 import {get as getAerodrome} from '../../util/aerodromes'
-import {getIdToken} from '../../util/firebase.js'
+import {getIdToken} from '../../util/firebase'
 import * as remote from '../movements/remote'
 
 export const getCustomsAircraftType = (aircraftCategory: string) => {

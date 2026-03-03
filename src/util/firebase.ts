@@ -90,7 +90,7 @@ export function isSignInWithEmail() {
 export function signInWithEmail() {
   const email = window.localStorage.getItem('emailForSignIn');
   initialize();
-  return signInWithEmailLink(getAuth(), email, window.location.href)
+  return signInWithEmailLink(getAuth(), email!, window.location.href)
     .then(() => {
       window.localStorage.removeItem('emailForSignIn');
     });
@@ -107,13 +107,13 @@ export function loadValue(path) {
 
 export function getIdToken() {
   initialize();
-  return getAuth().currentUser.getIdToken();
+  return getAuth().currentUser!.getIdToken();
 }
 
 export default firebase;
 
-if (window.Cypress) {
-  window.firebase = {
+if ((window as any).Cypress) {
+  (window as any).firebase = {
     authenticate,
     unauth,
     getRef: (path) => {

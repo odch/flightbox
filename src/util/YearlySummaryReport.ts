@@ -1,4 +1,4 @@
-import Download from './Download.js';
+import Download from './Download';
 import MovementReport from "./MovementReport";
 import {
   isCommercialFlightAirstatType,
@@ -8,6 +8,11 @@ import {
 } from './flightTypes';
 
 class YearlySummaryReport {
+
+  year: number;
+  options: any;
+  delimiter: string;
+  static header: string[];
 
   constructor(year, options) {
     this.year = year;
@@ -20,7 +25,7 @@ class YearlySummaryReport {
   }
 
   readMovementData() {
-    const months = [];
+    const months: any[] = [];
     for (let month = 1; month <= 12; month++) {
       months.push(new Promise(resolve => {
         new MovementReport(this.year, month, {
@@ -138,7 +143,7 @@ class YearlySummaryReport {
             summary.InstructionAway += movCount;
           }
         }
-      } else if (movFlightType === isCommercialFlightAirstatType(movFlightType)) {
+      } else if ((movFlightType as any) === isCommercialFlightAirstatType(movFlightType)) {
         summary.CommercialPax += movPax;
 
         if (movLocation === __CONF__.aerodrome.ICAO) {

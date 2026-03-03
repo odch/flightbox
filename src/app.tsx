@@ -30,17 +30,17 @@ const theme = require('../theme/' + __THEME__);
 
 const sagaMiddleware = createSagaMiddleware();
 
-let middleware = applyMiddleware(sagaMiddleware);
+let middleware: any = applyMiddleware(sagaMiddleware);
 
-if (window.__REDUX_DEVTOOLS_EXTENSION__) {
-  middleware = compose(middleware, window.__REDUX_DEVTOOLS_EXTENSION__({ trace: true }));
+if ((window as any).__REDUX_DEVTOOLS_EXTENSION__) {
+  middleware = compose(middleware, (window as any).__REDUX_DEVTOOLS_EXTENSION__({ trace: true }));
 }
 
-const store = createStore(reducer(history), middleware);
+const store = createStore((reducer as any)(history), middleware);
 
 sagaMiddleware.run(autoRestart(sagas));
 
-createRoot(document.getElementById('app')).render(
+createRoot(document.getElementById('app')!).render(
   <Provider store={store}>
     <GlobalStyle/>
     <ThemeProvider theme={theme}>
