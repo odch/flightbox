@@ -2,24 +2,32 @@ import {call, put, take} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import firebase from '../../../util/firebase';
+import {onValue, set} from 'firebase/database';
 
 jest.mock('../../../util/firebase');
+jest.mock('firebase/database', () => ({
+  onValue: jest.fn(),
+  set: jest.fn(),
+}));
 
 describe('modules', () => {
   describe('settings', () => {
     describe('lockDate', () => {
       describe('sagas', () => {
+        beforeEach(() => {
+          jest.clearAllMocks();
+          firebase.mockReturnValue({});
+        });
+
         describe('watchLoadLockDate', () => {
-          it('should wait for load action, dispatch loading, and register firebase listener', () => {
+          it('should wait for load action, dispatch loading, and register onValue listener', () => {
             const channel = {put: jest.fn()};
-            const mockRef = {on: jest.fn()};
-            firebase.mockReturnValue(mockRef);
             const generator = sagas.watchLoadLockDate(channel);
 
             expect(generator.next().value).toEqual(take(actions.LOAD_LOCK_DATE));
             expect(generator.next().value).toEqual(put(actions.lockDateLoading()));
             expect(generator.next().done).toEqual(true);
-            expect(mockRef.on).toHaveBeenCalledWith('value', expect.any(Function));
+            expect(onValue).toHaveBeenCalledWith(expect.anything(), expect.any(Function));
           });
         });
 
@@ -37,23 +45,25 @@ describe('modules', () => {
         });
 
         describe('saveLockDate', () => {
-          it('calls firebase set and resolves the promise', async () => {
-            const mockRef = { set: jest.fn((date, cb) => cb()) };
+          it('calls set and resolves', async () => {
+            const mockRef = {};
             firebase.mockReturnValue(mockRef);
+            set.mockResolvedValue();
 
             await sagas.saveLockDate('2024-06-01');
 
             expect(firebase).toHaveBeenCalledWith('/settings/lockDate');
-            expect(mockRef.set).toHaveBeenCalledWith('2024-06-01', expect.any(Function));
+            expect(set).toHaveBeenCalledWith(mockRef, '2024-06-01');
           });
 
-          it('calls firebase set with null and resolves', async () => {
-            const mockRef = { set: jest.fn((date, cb) => cb()) };
+          it('calls set with null and resolves', async () => {
+            const mockRef = {};
             firebase.mockReturnValue(mockRef);
+            set.mockResolvedValue();
 
             await sagas.saveLockDate(null);
 
-            expect(mockRef.set).toHaveBeenCalledWith(null, expect.any(Function));
+            expect(set).toHaveBeenCalledWith(mockRef, null);
           });
         });
       });
