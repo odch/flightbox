@@ -20,6 +20,9 @@ npm test
 npm run test:watch
 npm run test:coverage
 
+# TypeScript type check
+npm run typecheck
+
 # Firebase Cloud Functions tests
 npm run test:functions
 
@@ -68,3 +71,9 @@ Subject and body lines max 72 characters.
 - Custom render helper: `test/renderWithTheme.js` — wraps components with ThemeProvider + BrowserRouter
 - Redux saga tests: generator `.next().value` assertions
 - Cypress E2E: `cypress/` directory, separate `cypress-testing` project config
+
+## Verification
+
+Before committing, ensure:
+- `npm test` — all tests pass
+- `npm run typecheck` — no TypeScript errors
