@@ -1,4 +1,4 @@
-import Predicates from './Predicates.js';
+import Predicates from './Predicates';
 
 describe('components', () => {
   describe('MovementList', () => {
