@@ -3,9 +3,9 @@ import * as actions from './actions';
 import importUsers from '../../util/importUsers';
 import {error} from '../../util/log';
 
-export const selectImport = importName => state => state.imports[importName];
+export const selectImport = (importName: string) => (state: any) => state.imports[importName];
 
-export function doImport(importName, csvString) {
+export function doImport(importName: string, csvString: string) {
   switch (importName) {
     case 'users':
       return importUsers(csvString);
@@ -14,16 +14,16 @@ export function doImport(importName, csvString) {
   }
 }
 
-export function getString(file) {
+export function getString(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = event => resolve(event.target.result);
-    reader.onerror = error => reject(error);
+    reader.onload = event => resolve((event.target as FileReader).result as string);
+    reader.onerror = err => reject(err);
     reader.readAsText(file);
   });
 }
 
-export function* importSaga(action) {
+export function* importSaga(action: any) {
   const importName = action.payload.importName;
   try {
     yield put(actions.setImportInProgress(importName, true));

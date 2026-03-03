@@ -1,10 +1,21 @@
 import moment from 'moment';
 import * as actions from './actions';
+import { ReportsAction, ReportDate } from './actions';
 import reducer from '../../util/reducer';
 
-const INITIAL_STATE = {};
+interface ReportItem {
+  date: ReportDate;
+  parameters: Record<string, unknown>;
+  generationInProgress?: boolean;
+}
 
-function initReport(state, action) {
+interface ReportsState {
+  [reportName: string]: ReportItem;
+}
+
+const INITIAL_STATE: ReportsState = {};
+
+function initReport(state: ReportsState, action: ReportsAction & { type: typeof actions.INIT_REPORT }) {
   const date = moment().subtract(1, 'month');
   return Object.assign({}, state, {
     [action.payload.name]: {
@@ -17,7 +28,7 @@ function initReport(state, action) {
   });
 }
 
-function setReportDate(state, action) {
+function setReportDate(state: ReportsState, action: ReportsAction & { type: typeof actions.SET_REPORT_DATE }) {
   const { report, date } = action.payload;
 
   const newReportObj = Object.assign({}, state[report], {
@@ -28,7 +39,7 @@ function setReportDate(state, action) {
   });
 }
 
-function setReportParameter(state, action) {
+function setReportParameter(state: ReportsState, action: ReportsAction & { type: typeof actions.SET_REPORT_PARAMETER }) {
   const { report, parameterName, parameterValue } = action.payload;
   const reportObj = state[report];
 
@@ -43,7 +54,7 @@ function setReportParameter(state, action) {
   });
 }
 
-function setReportGenerationInProgress(state, action) {
+function setReportGenerationInProgress(state: ReportsState, action: ReportsAction & { type: typeof actions.SET_REPORT_GENERATION_IN_PROGRESS }) {
   const { report, inProgress } = action.payload;
 
   const newReportObj = Object.assign({}, state[report], {
@@ -61,4 +72,5 @@ const ACTION_HANDLERS = {
   [actions.SET_REPORT_GENERATION_IN_PROGRESS]: setReportGenerationInProgress,
 };
 
-export default reducer(INITIAL_STATE, ACTION_HANDLERS);
+export type { ReportsState };
+export default reducer<ReportsState, ReportsAction>(INITIAL_STATE, ACTION_HANDLERS);

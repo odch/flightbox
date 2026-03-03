@@ -1,5 +1,5 @@
 import reducer from './reducer';
-import sagas from './sagas.js';
+import sagas from './sagas';
 
 export { initImport, selectImportFile, startImport, setImportInProgress } from './actions';
 

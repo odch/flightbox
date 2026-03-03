@@ -2,9 +2,9 @@ import {all, call, put, select, takeEvery} from 'redux-saga/effects';
 import * as actions from './actions';
 import {airstat, invoices, landings, yearlySummary} from '../../util/report';
 
-export const selectReport = report => state => state.reports[report];
+export const selectReport = (report: string) => (state: any) => state.reports[report];
 
-function* generate(report, year, month, options) {
+function* generate(report: string, year: number, month: number, options: unknown) {
   switch (report) {
     case 'airstat':
       const airstatResult = yield call(airstat, year, month, options)
@@ -26,14 +26,14 @@ function* generate(report, year, month, options) {
   }
 }
 
-function csv(result) {
-    return {
-      type: 'csv',
-      result
-    }
+function csv(result: unknown) {
+  return {
+    type: 'csv',
+    result
+  }
 }
 
-function pdf(filename, result) {
+function pdf(filename: string, result: unknown) {
   return {
     type: 'pdf',
     filename,
@@ -41,11 +41,11 @@ function pdf(filename, result) {
   }
 }
 
-function* startDownload(download) {
+function* startDownload(download: any) {
   download.start();
 }
 
-export function* generateReport(action) {
+export function* generateReport(action: any) {
   const report = action.payload.report;
 
   yield put(actions.setReportGenerationInProgress(report, true));
