@@ -10,14 +10,23 @@ class TimeField extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: this.parse(props.value),
+      value: TimeField.parseValue(props.value),
+      prevPropsValue: props.value,
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      value: this.parse(nextProps.value),
-    });
+  static getDerivedStateFromProps(props, state) {
+    if (props.value !== state.prevPropsValue) {
+      return {
+        value: TimeField.parseValue(props.value),
+        prevPropsValue: props.value,
+      };
+    }
+    return null;
+  }
+
+  static parseValue(timeString) {
+    return parse(timeString) || { hours: 0, minutes: 0 };
   }
 
   render() {
@@ -73,10 +82,6 @@ class TimeField extends Component {
         value: stringValue !== '00:00' ? stringValue : null,
       });
     }
-  }
-
-  parse(timeString) {
-    return parse(timeString) || { hours: 0, minutes: 0 };
   }
 
   formatString(time) {
