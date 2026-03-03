@@ -60,13 +60,17 @@ describe('movements', () => {
       cy.get(`[data-cy=next-button]`).click();
       // Page 3: PassengerPage
       cy.get(`[data-cy=next-button]`).click();
-      // Page 4: DepartureArrivalPage — confirm location dialog if it appears
+      // Page 4: DepartureArrivalPage
       cy.get(`[data-cy=next-button]`).click();
-      cy.get('body').then($body => {
-        if ($body.find('[data-cy=location-confirmation-dialog-confirm]').length > 0) {
-          cy.get(`[data-cy=location-confirmation-dialog-confirm]`).click();
-        }
-      });
+      // After clicking next the wizard runs an async Firebase check on the location.
+      // Wait for either the location-confirmation dialog or page 5's remarks field,
+      // whichever appears first, then confirm the dialog if it showed up.
+      cy.get('[data-cy=location-confirmation-dialog-confirm], [data-cy=remarks]', {timeout: 8000})
+        .then($els => {
+          if ($els.filter('[data-cy=location-confirmation-dialog-confirm]').length > 0) {
+            cy.get('[data-cy=location-confirmation-dialog-confirm]').click();
+          }
+        });
 
       // Page 5: FlightPage — update remarks
       cy.get(`[data-cy=remarks]`).clear().type('Updated remark');
