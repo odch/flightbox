@@ -9,10 +9,14 @@ const handleMaskClick = onBlur => {
   }
 };
 
-const ModalDialog = props => (
+const ModalDialog = ({ content, onBlur, fullWidthThreshold = 600 }: {
+  content: React.ReactElement;
+  onBlur?: () => void;
+  fullWidthThreshold?: number;
+}) => (
   <div>
-    <Mask onClick={handleMaskClick.bind(null, props.onBlur)}/>
-    <Content $fullWidthThreshold={props.fullWidthThreshold}>{props.content}</Content>
+    <Mask onClick={handleMaskClick.bind(null, onBlur)}/>
+    <Content $fullWidthThreshold={fullWidthThreshold}>{content}</Content>
   </div>
 );
 
@@ -20,10 +24,6 @@ ModalDialog.propTypes = {
   content: PropTypes.element.isRequired,
   onBlur: PropTypes.func,
   fullWidthThreshold: PropTypes.number
-};
-
-ModalDialog.defaultProps = {
-  fullWidthThreshold: 600
 };
 
 export default ModalDialog;
