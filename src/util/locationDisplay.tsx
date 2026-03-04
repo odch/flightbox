@@ -1,4 +1,5 @@
 import React from 'react';
+import i18n from '../i18n';
 
 /**
  * Converts a two-letter country code to its corresponding flag emoji
@@ -44,9 +45,9 @@ export const formatLocationDisplay = (
   // Handle local flights at home aerodrome
   if (data.location.toUpperCase() === __CONF__.aerodrome.ICAO) {
     if (data.departureRoute === 'circuits' || data.arrivalRoute === 'circuits') {
-      return 'Platzrunden';
+      return i18n.t('routes.circuits');
     }
-    return 'Lokalflug';
+    return i18n.t('routes.localFlight');
   }
 
   const location = data.location;
