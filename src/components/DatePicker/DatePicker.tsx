@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
+import { withTranslation } from 'react-i18next';
 import ModalDialog from '../ModalDialog';
 import MaterialIcon from '../MaterialIcon';
 import MomentLocaleUtils from 'react-day-picker/moment';
@@ -69,13 +70,15 @@ class DatePicker extends Component<any, any> {
 
   renderPicker() {
     const date = this.state.value ? new Date(this.state.value) : undefined;
+    const locale = this.props.i18n?.language === 'en' ? 'en' : 'de-ch';
     return (
       <DayPicker
         selectedDays={date}
         initialMonth={date}
         onDayClick={this.handleDayClick}
         localeUtils={MomentLocaleUtils}
-        locale="de"
+        locale={locale}
+        firstDayOfWeek={1}
       />
     );
   }
@@ -122,4 +125,4 @@ class DatePicker extends Component<any, any> {
   clearable: false,
 };
 
-export default DatePicker;
+export default withTranslation()(DatePicker);

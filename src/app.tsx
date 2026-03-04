@@ -8,8 +8,10 @@ import createSagaMiddleware from 'redux-saga';
 import {ThemeProvider} from 'styled-components';
 import moment from 'moment';
 
-import 'moment/locale/de';
+import 'moment/locale/de-ch';
 import './i18n';
+
+moment.locale('de-ch');
 
 import {history} from './history'
 import reducer, {sagas} from './modules';
