@@ -6,6 +6,8 @@ import {getLabel as getFlightTypeLabel} from '../util/flightTypes';
 import formatMoney from './formatMoney'
 import i18n from '../i18n';
 
+const t = i18n.getFixedT('de');
+
 import moment from 'moment';
 
 import pdfMake from 'pdfmake/build/pdfmake';
@@ -13,9 +15,12 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 (window as any).pdfFonts = pdfFonts; // actually not necessary, but otherwise `pdfFonts` is unused and would be removed
 
-const CHECKOUT_RECIPIENT_NAME = i18n.t('invoicesReport.onlinePayments')
-
 class InvoicesReport {
+
+  get checkoutRecipientName() {
+    return t('invoicesReport.onlinePayments');
+  }
+
 
   year: number;
   month: number;
@@ -107,17 +112,17 @@ class InvoicesReport {
     const arrivalRecipients = this.groupArrivalsByRecipient(filteredArrivals)
     const customsRecipients = this.groupCustomsDeclarationsByRecipient(customsInvoices)
 
-    customsRecipients[CHECKOUT_RECIPIENT_NAME] = customsCheckouts
+    customsRecipients[this.checkoutRecipientName] = customsCheckouts
 
     let recipientNames = Array.from(new Set([
       ...Object.keys(arrivalRecipients),
       ...Object.keys(customsRecipients)
     ]))
 
-    // sort names, but CHECKOUT_RECIPIENT_NAME should always be the first
-    recipientNames = recipientNames.filter(name => name !== CHECKOUT_RECIPIENT_NAME)
+    // sort names, but this.checkoutRecipientName should always be the first
+    recipientNames = recipientNames.filter(name => name !== this.checkoutRecipientName)
     recipientNames.sort()
-    recipientNames.unshift(CHECKOUT_RECIPIENT_NAME)
+    recipientNames.unshift(this.checkoutRecipientName)
 
     const monthLabel = this.getMonthLabel()
 
@@ -137,7 +142,7 @@ class InvoicesReport {
       }))
 
     if (content.length === 0) {
-      content.push(i18n.t('invoicesReport.noRecipients', { month: this.getMonthLabel() }))
+      content.push(t('invoicesReport.noRecipients', { month: this.getMonthLabel() }))
     }
 
     return content
@@ -163,7 +168,7 @@ class InvoicesReport {
       const invoiceRecipientName = arrival.paymentMethod.method === 'invoice'
         ? arrival.paymentMethod.invoiceRecipientName
         : arrival.paymentMethod.method === 'checkout'
-          ? CHECKOUT_RECIPIENT_NAME
+          ? this.checkoutRecipientName
           : undefined
 
       if (invoiceRecipientName) {
@@ -195,7 +200,7 @@ class InvoicesReport {
   }
 
   getMonthLabel() {
-    const monthName = i18n.t(`months.${this.month - 1}`)
+    const monthName = t(`months.${this.month - 1}`)
     return `${monthName} ${this.year}`
   }
 
@@ -205,7 +210,7 @@ class InvoicesReport {
     }
 
     content.push({
-      text: i18n.t('invoicesReport.landingFees'),
+      text: t('invoicesReport.landingFees'),
       style: 'subHeader'
     })
 
@@ -292,18 +297,18 @@ class InvoicesReport {
       table: {
         body: [
           [
-            {text: i18n.t('invoicesReport.colDate'), bold: true, alignment: 'right'},
-            {text: i18n.t('invoicesReport.colTime'), bold: true, alignment: 'right'},
-            {text: i18n.t('invoicesReport.colImmatriculation'), bold: true},
+            {text: t('invoicesReport.colDate'), bold: true, alignment: 'right'},
+            {text: t('invoicesReport.colTime'), bold: true, alignment: 'right'},
+            {text: t('invoicesReport.colImmatriculation'), bold: true},
             {text: 'MTOW', bold: true, alignment: 'right'},
-            {text: i18n.t('invoicesReport.colFirstname'), bold: true},
-            {text: i18n.t('invoicesReport.colLastname'), bold: true},
-            {text: i18n.t('invoicesReport.colEmail'), bold: true},
-            {text: i18n.t('invoicesReport.colFlightType'), bold: true},
-            {text: i18n.t('invoicesReport.colSubtotal'), bold: true, alignment: 'right'},
-            {text: i18n.t('invoicesReport.colVat'), bold: true, alignment: 'right'},
-            {text: i18n.t('invoicesReport.colRounding'), bold: true, alignment: 'right'},
-            {text: i18n.t('invoicesReport.colTotal'), bold: true, alignment: 'right'}
+            {text: t('invoicesReport.colFirstname'), bold: true},
+            {text: t('invoicesReport.colLastname'), bold: true},
+            {text: t('invoicesReport.colEmail'), bold: true},
+            {text: t('invoicesReport.colFlightType'), bold: true},
+            {text: t('invoicesReport.colSubtotal'), bold: true, alignment: 'right'},
+            {text: t('invoicesReport.colVat'), bold: true, alignment: 'right'},
+            {text: t('invoicesReport.colRounding'), bold: true, alignment: 'right'},
+            {text: t('invoicesReport.colTotal'), bold: true, alignment: 'right'}
           ],
           ...rows
         ]
@@ -324,7 +329,7 @@ class InvoicesReport {
     }
 
     content.push({
-      text: cancelled ? i18n.t('invoicesReport.customsFeesCancelled') : i18n.t('invoicesReport.customsFees'),
+      text: cancelled ? t('invoicesReport.customsFeesCancelled') : t('invoicesReport.customsFees'),
       style: 'subHeader'
     })
 
@@ -370,7 +375,7 @@ class InvoicesReport {
         {text: date, alignment: 'right'},
         registration,
         email,
-        direction === 'arrival' ? i18n.t('invoicesReport.directionArrival') : i18n.t('invoicesReport.directionDeparture'),
+        direction === 'arrival' ? t('invoicesReport.directionArrival') : t('invoicesReport.directionDeparture'),
         {text: totalNetFormatted, alignment: 'right'},
         {text: vatFormatted, alignment: 'right'},
         {text: roundingDiffFormatted, alignment: 'right'},
@@ -400,14 +405,14 @@ class InvoicesReport {
       table: {
         body: [
           [
-            {text: i18n.t('invoicesReport.colDate'), bold: true, alignment: 'right'},
-            {text: i18n.t('invoicesReport.colImmatriculation'), bold: true},
-            {text: i18n.t('invoicesReport.colEmail'), bold: true},
-            {text: i18n.t('invoicesReport.colDirection'), bold: true},
-            {text: i18n.t('invoicesReport.colSubtotal'), bold: true, alignment: 'right'},
-            {text: i18n.t('invoicesReport.colVat'), bold: true, alignment: 'right'},
-            {text: i18n.t('invoicesReport.colRounding'), bold: true, alignment: 'right'},
-            {text: i18n.t('invoicesReport.colTotal'), bold: true, alignment: 'right'}
+            {text: t('invoicesReport.colDate'), bold: true, alignment: 'right'},
+            {text: t('invoicesReport.colImmatriculation'), bold: true},
+            {text: t('invoicesReport.colEmail'), bold: true},
+            {text: t('invoicesReport.colDirection'), bold: true},
+            {text: t('invoicesReport.colSubtotal'), bold: true, alignment: 'right'},
+            {text: t('invoicesReport.colVat'), bold: true, alignment: 'right'},
+            {text: t('invoicesReport.colRounding'), bold: true, alignment: 'right'},
+            {text: t('invoicesReport.colTotal'), bold: true, alignment: 'right'}
           ],
           ...rows
         ]
