@@ -12,8 +12,6 @@ const runways = objectToArray(__CONF__.aerodrome.runways)
     value: runway.name,
   }));
 
-const departureRoutes = getDepartureRoutes();
-
 const filter = (items: any[], values: any) =>
   items.filter(item => !item.available || item.available(values) === true);
 
@@ -33,7 +31,7 @@ const mapStateToProps = (state: RootState, ownProps: any) => {
   return Object.assign({}, ownProps, {
     flightTypes: filter(getEnabledFlightTypes(values.aircraftCategory as string), values),
     runways: filter(runways, values),
-    departureRoutes: filter(departureRoutes, values),
+    departureRoutes: filter(getDepartureRoutes(), values),
     hiddenFields: getHiddenFields(values),
     departureRoute: values.departureRoute,
   });
