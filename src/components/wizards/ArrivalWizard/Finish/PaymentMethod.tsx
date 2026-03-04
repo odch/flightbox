@@ -173,7 +173,9 @@ class PaymentMethod extends Component<any, any> {
       .filter(method => enabledPaymentMethods.includes(method.value) && method.value !== 'invoice')
       .map(method => ({
         ...method,
-        label: method.ctaLabel || method.label
+        label: method.value === 'checkout'
+          ? t('arrival.payment.checkoutCta')
+          : t(`paymentMethods.${method.value}`)
       }))
 
     if (enabledPaymentMethods.includes('invoice')) {

@@ -6,7 +6,6 @@ import validate from '../../validate';
 import {renderIncrementationField, renderSingleSelect} from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
-import {ITEMS} from '../../../../util/carriageVoucher';
 
 const toNumber = value => {
   if (typeof value === 'number') {
@@ -39,7 +38,10 @@ const PassengerPage = (props) => {
             />
             <Field
               name="carriageVoucher"
-              items={ITEMS}
+              items={[
+                { value: 'yes', label: t('carriageVoucher.yes') },
+                { value: 'no', label: t('carriageVoucher.no') },
+              ]}
               label={t('movement.details.carriageVoucher')}
               component={renderSingleSelect}
               readOnly={readOnly}

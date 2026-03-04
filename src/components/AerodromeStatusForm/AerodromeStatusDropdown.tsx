@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Dropdown from '../Dropdown';
-import {options} from './StatusOptions'
+import {getOptions} from './StatusOptions'
 import { useTranslation } from 'react-i18next'
 
 const Option = styled.div`
@@ -24,6 +24,7 @@ const handleChange = (onChange, value) => {
 
 const AerodromeStatusDropdown = props => {
   const { t } = useTranslation();
+  const options = getOptions();
   return (
     <Dropdown
       className={props.className}

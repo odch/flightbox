@@ -47,25 +47,27 @@ describe('util', () => {
     });
 
     describe('getLabel', () => {
-      it('returns label for card payment', () => {
-        expect(getLabel({method: 'card'})).toBe('Karte');
+      const t = (key: string) => key;
+
+      it('returns translation key for card payment', () => {
+        expect(getLabel({method: 'card'}, t)).toBe('paymentMethods.card');
       });
 
-      it('returns label for cash payment', () => {
-        expect(getLabel({method: 'cash'})).toBe('Bar');
+      it('returns translation key for cash payment', () => {
+        expect(getLabel({method: 'cash'}, t)).toBe('paymentMethods.cash');
       });
 
-      it('returns label for twint_external payment', () => {
-        expect(getLabel({method: 'twint_external'})).toBe('Twint');
+      it('returns translation key for twint_external payment', () => {
+        expect(getLabel({method: 'twint_external'}, t)).toBe('paymentMethods.twint_external');
       });
 
-      it('returns label with recipient name for invoice payment', () => {
-        const result = getLabel({method: 'invoice', invoiceRecipientName: 'Müller AG'});
-        expect(result).toBe('Rechnung (Müller AG)');
+      it('returns translation key with recipient name for invoice payment', () => {
+        const result = getLabel({method: 'invoice', invoiceRecipientName: 'Müller AG'}, t);
+        expect(result).toBe('paymentMethods.invoice (Müller AG)');
       });
 
       it('returns method value as-is for unknown payment method', () => {
-        expect(getLabel({method: 'unknown_method'})).toBe('unknown_method');
+        expect(getLabel({method: 'unknown_method'}, t)).toBe('unknown_method');
       });
     });
   });
