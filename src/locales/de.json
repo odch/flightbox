@@ -82,6 +82,7 @@
     "paymentPending": "Zahlung offen",
     "payNow": "Jetzt bezahlen",
     "noMovements": "Keine Bewegungen gefunden.",
+    "loading": "Bewegungen werden geladen ...",
     "loadingFailed": "Bewegungen konnten nicht geladen werden.",
     "groups": {
       "tomorrow": "Ab morgen",
@@ -244,6 +245,7 @@
       "selectMethod": "Bitte wählen Sie eine Zahlungsart:",
       "next": "Weiter",
       "invoice": "Rechnung ({{recipient}})",
+      "checkoutCta": "Direkt zahlen",
       "twintMessage": "Bitte überweisen Sie die fällige Landetaxe über den ausliegenden TWINT QR-Code.",
       "cardExternalMessage": "Bitte bezahlen Sie die fällige Landetaxe über das Kartenlesegerät.",
       "cashMessage": "Bitte deponieren Sie die fällige Landetaxe im Briefkasten vor dem C-Büro und kennzeichnen Sie den Umschlag mit der Referenznummer {{referenceNumber}}."
@@ -308,7 +310,8 @@
     "open": "Offen",
     "restricted": "Eingeschränkt",
     "closed": "Geschlossen",
-    "unavailable": "Flugplatzstatus nicht verfügbar"
+    "unavailable": "Flugplatzstatus nicht verfügbar",
+    "active": "Aktiv"
   },
   "airstatReport": {
     "includeInternal": "Zusätzliche Informationen inkludieren (nur für internen Gebrauch)",
@@ -489,6 +492,22 @@
     "glider_instruction_self": "Schulung (Selbststart)",
     "military": "Militär",
     "sar": "Such- und Rettungsflüge SAR"
+  },
+  "carriageVoucher": {
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "routes": {
+    "circuits": "Platzrunden",
+    "localFlight": "Lokalflug"
+  },
+  "paymentMethods": {
+    "card": "Karte",
+    "checkout": "Online-Zahlung",
+    "cash": "Bar",
+    "card_external": "Karte",
+    "twint_external": "Twint",
+    "invoice": "Rechnung"
   },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."

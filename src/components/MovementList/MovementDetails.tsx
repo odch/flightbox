@@ -6,7 +6,6 @@ import dates from '../../util/dates';
 import {getLabel as getFlightTypeLabel} from '../../util/flightTypes';
 import {getLabel as getPaymentMethodLabel} from '../../util/paymentMethods';
 import {getArrivalRouteLabel, getDepartureRouteLabel} from '../../util/routes';
-import {getItemLabel as getCarriageVoucherItemLabel} from '../../util/carriageVoucher';
 import newLineToBr from '../../util/newLineToBr';
 import DetailsBox from './DetailsBox';
 import MovementField from './MovementField';
@@ -28,12 +27,6 @@ const StyledHomeBaseIcon = styled(HomeBaseIcon)`
   margin-top: 1em;
 `;
 
-const getCarriageVoucher = props => {
-  if (props.data.carriageVoucher) {
-    return getCarriageVoucherItemLabel(props.data.carriageVoucher)
-  }
-  return null;
-};
 
 const getLandingFee = data => {
   if (typeof data.feeTotalGross === 'number') {
@@ -90,7 +83,7 @@ class MovementDetails extends React.PureComponent<any, any> {
             ? (
               <DetailsBox label={t('movement.details.passengers')}>
                 <MovementField label={t('movement.details.passengerCount')} value={props.data.passengerCount} defaultValue={0}/>
-                <MovementField label={t('movement.details.carriageVoucher')} value={getCarriageVoucher(props)}/>
+                <MovementField label={t('movement.details.carriageVoucher')} value={props.data.carriageVoucher ? t(`carriageVoucher.${props.data.carriageVoucher}`) : null}/>
               </DetailsBox>
             ) : (
               <DetailsBox label={t('movement.details.passengers')}>
@@ -142,7 +135,7 @@ class MovementDetails extends React.PureComponent<any, any> {
                 <MovementField
                   label={t('movement.details.paymentMethod')}
                   value={props.data.paymentMethod && props.data.paymentMethod.status !== 'pending'
-                    ? getPaymentMethodLabel(props.data.paymentMethod)
+                    ? getPaymentMethodLabel(props.data.paymentMethod, t)
                     : <NoPaymentFieldValue arrivalId={props.data.key}/>}
                 />
               )}
