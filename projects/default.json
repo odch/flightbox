@@ -5,11 +5,26 @@
     "instruction"
   ],
   "departureCommitRequirements": [
-    "Meine Ausweise sind gültig.",
-    "Das maximale Abfluggewicht und der Schwerpunkt sind innerhalb der zulässigen Limiten.",
-    "Die verfügbare Pistenlänge ist ausreichend.",
-    "Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.",
-    "Der Preflight-Check wurde ausgeführt."
+    {
+      "de": "Meine Ausweise sind gültig.",
+      "en": "My documents are valid."
+    },
+    {
+      "de": "Das maximale Abfluggewicht und der Schwerpunkt sind innerhalb der zulässigen Limiten.",
+      "en": "The maximum take-off weight and centre of gravity are within the permitted limits."
+    },
+    {
+      "de": "Die verfügbare Pistenlänge ist ausreichend.",
+      "en": "The available runway length is sufficient."
+    },
+    {
+      "de": "Bei Passagierflügen: Ich habe in den letzten 90 Tagen mindestens 3 Landungen absolviert.",
+      "en": "For passenger flights: I have completed at least 3 landings in the last 90 days."
+    },
+    {
+      "de": "Der Preflight-Check wurde ausgeführt.",
+      "en": "The pre-flight check has been completed."
+    }
   ],
   "paymentMethods": ["cash"],
   "homebasePayment": false,

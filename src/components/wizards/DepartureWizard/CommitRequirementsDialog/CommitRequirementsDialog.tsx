@@ -9,16 +9,23 @@ import Item from './Item';
 import CancelButton from './CancelButton';
 import ConfirmButton from './ConfirmButton';
 
+const getReqText = (req: any, lang: string): string => {
+  if (typeof req === 'string') return req;
+  if (req.de !== undefined) return req[lang] ?? req.de;
+  return req.text;
+};
+
 const CommitRequirementsDialog = props => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const content = (
     <div>
       <Heading>{t('departure.confirm.heading')}</Heading>
       <Items>
         {(objectToArray(__CONF__.departureCommitRequirements) as any[]).map((req, index) => (
-          typeof req === 'string'
-            ? <Item key={index}>{req}</Item>
-            : <Item key={index} styles={req.styles}>{req.text}</Item>
+          <Item key={index} styles={typeof req === 'object' ? req.styles : undefined}>
+            {getReqText(req, lang)}
+          </Item>
         ))}
       </Items>
       <div>
