@@ -1,22 +1,14 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import Header from './Header';
 import Content from './Content';
 
-class VerticalHeaderLayout extends React.PureComponent<any, any> {
-
-  render() {
-    return (
-      <div>
-        <Header/>
-        <Content>{this.props.children}</Content>
-      </div>
-    );
-  }
+function VerticalHeaderLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div>
+      <Header/>
+      <Content>{children}</Content>
+    </div>
+  );
 }
-
-(VerticalHeaderLayout as any).propTypes = {
-  children: PropTypes.element.isRequired
-};
 
 export default VerticalHeaderLayout;
