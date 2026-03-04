@@ -44,21 +44,18 @@ const StyledAerodromeName = styled.div`
   word-break: break-word;
 `
 
-class Header extends React.PureComponent<any, any> {
-
-  render() {
-    return (
-      <Wrapper>
-        <Link to="/">
-          <StyledLogo/>
-        </Link>
-        <StyledTitle>
-          <StyledFlightboxLabel>Flightbox</StyledFlightboxLabel>
-          <StyledAerodromeName>{__CONF__.aerodrome.name}</StyledAerodromeName>
-        </StyledTitle>
-      </Wrapper>
-    );
-  }
+function Header() {
+  return (
+    <Wrapper>
+      <Link to="/">
+        <StyledLogo/>
+      </Link>
+      <StyledTitle>
+        <StyledFlightboxLabel>Flightbox</StyledFlightboxLabel>
+        <StyledAerodromeName>{__CONF__.aerodrome.name}</StyledAerodromeName>
+      </StyledTitle>
+    </Wrapper>
+  );
 }
 
 export default Header;
