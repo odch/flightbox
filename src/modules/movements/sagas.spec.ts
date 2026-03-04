@@ -604,7 +604,7 @@ describe('modules', () => {
           expect(next.done).toEqual(true);
         });
 
-        it('should load profile and return values if auth has uid', () => {
+        it('should load profile and return only movement-relevant fields', () => {
           const generator = sagas.getProfileDefaultValues();
 
           expect(generator.next().value).toEqual(select(sagas.authSelector));
@@ -612,11 +612,47 @@ describe('modules', () => {
           const auth = { uid: 'user-123' };
           expect(generator.next(auth).value).toEqual(call(loadRemote, 'user-123'));
 
-          const profileData = { firstname: 'John', lastname: 'Doe' };
+          const profileData = {
+            memberNr: '42',
+            email: 'john@example.com',
+            firstname: 'John',
+            lastname: 'Doe',
+            phone: '+41791234567',
+            immatriculation: 'HBABC',
+            aircraftCategory: 'Motorflugzeug',
+            aircraftType: 'C172',
+            mtow: 1111,
+            language: 'en',
+          };
           const snapshot = { val: () => profileData };
 
           const next = generator.next(snapshot);
-          expect(next.value).toEqual(profileData);
+          expect(next.value).toEqual({
+            memberNr: '42',
+            email: 'john@example.com',
+            firstname: 'John',
+            lastname: 'Doe',
+            phone: '+41791234567',
+            immatriculation: 'HBABC',
+            aircraftCategory: 'Motorflugzeug',
+            aircraftType: 'C172',
+            mtow: 1111,
+          });
+          expect(next.done).toEqual(true);
+        });
+
+        it('should not include fields absent from profile', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { uid: 'user-123' };
+          expect(generator.next(auth).value).toEqual(call(loadRemote, 'user-123'));
+
+          const snapshot = { val: () => ({ firstname: 'John', language: 'en' }) };
+
+          const next = generator.next(snapshot);
+          expect(next.value).toEqual({ firstname: 'John' });
           expect(next.done).toEqual(true);
         });
       });

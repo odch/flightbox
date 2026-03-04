@@ -28,9 +28,12 @@ export function* getProfileDefaultValues() {
 
   const snapshot = yield call(loadRemote, auth.uid);
 
-  return {
-    ...snapshot.val()
+  const p = snapshot.val() || {};
+  const result: Record<string, any> = {};
+  for (const key of ['memberNr', 'email', 'firstname', 'lastname', 'phone', 'immatriculation', 'aircraftCategory', 'aircraftType', 'mtow']) {
+    if (key in p) result[key] = p[key];
   }
+  return result;
 }
 
 export function* getDepartureDefaultValues() {
