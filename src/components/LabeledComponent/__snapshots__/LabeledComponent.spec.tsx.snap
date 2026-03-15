@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`components LabeledComponent is built correctly 1`] = `
+<div>
+  <div
+    class="sc-kAycey jFsSGD"
+  >
+    <label
+      class="sc-aXZVf kzwLGz"
+    >
+      My label
+    </label>
+    <div
+      class="sc-gEvEes krbxZC"
+    >
+      <input
+        id="my-input"
+        type="text"
+      />
+    </div>
+  </div>
+</div>
+`;

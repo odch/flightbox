@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`components ImageButton propagates href to OptionalLink 1`] = `
+<div>
+  <div
+    class="sc-eqUAAB eyRPyt"
+  >
+    <a
+      class="sc-aXZVf gkDXom"
+      href="/some/path"
+    >
+      <div
+        class="sc-fqkvVO SMonO"
+      >
+        <img
+          src=""
+        />
+      </div>
+    </a>
+  </div>
+</div>
+`;
+
+exports[`components ImageButton propagates onClick to OptionalLink 1`] = `
+<div>
+  <div
+    class="sc-eqUAAB eyRPyt"
+  >
+    <div
+      class="sc-gEvEes ioecDg"
+    >
+      <div
+        class="sc-fqkvVO SMonO"
+      >
+        <img
+          src=""
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`components ImageButton renders label and image 1`] = `
+<div>
+  <div
+    class="sc-eqUAAB eyRPyt"
+  >
+    <div
+      class="sc-gEvEes ioecDg"
+    >
+      <div
+        class="sc-fqkvVO SMonO"
+      >
+        <img
+          src="imgsource.jpg"
+        />
+        my label
+      </div>
+    </div>
+  </div>
+</div>
+`;

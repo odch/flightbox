@@ -1,0 +1,123 @@
+import firebase from './firebase';
+import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
+import Download from './Download';
+import { firebaseToLocal } from './movements';
+import { fetch as fetchAircrafts } from './aircrafts';
+import dates from '../util/dates';
+import moment from 'moment';
+
+class LandingsReport {
+
+  startDate: string;
+  endDate: string;
+  options: any;
+  delimiter: string;
+  creationDate: any;
+  static header: string[];
+
+  constructor(year, month, options = {}) {
+    month = month < 10 ? '0' + month : month;
+    const day = '01';
+
+    this.startDate = year + '-' + month + '-' + day;
+    this.endDate = moment(this.startDate).endOf('month').format('YYYY-MM-DD');
+
+    this.creationDate = moment();
+
+    this.options = options;
+    this.delimiter = this.options.delimiter || ',';
+  }
+
+  generate(callback) {
+    const arrivals = this.readArrivals();
+    const aircrafts = fetchAircrafts();
+
+    Promise.all([arrivals, aircrafts])
+      .then(results => {
+        this.build(results[0], results[1], callback);
+      });
+  }
+
+  readArrivals() {
+    return get(query(
+      firebase('/arrivals'),
+      orderByChild('dateTime'),
+      startAt(dates.isoStartOfDay(this.startDate)),
+      endAt(dates.isoEndOfDay(this.endDate))
+    ));
+  }
+
+  build(arrivals, aircrafts, callback) {
+    const content = 'data:text/csv;charset=utf-8,' + this.buildContent(arrivals, aircrafts);
+    const filename = 'landings_' + this.startDate + '_' + this.endDate + '.csv';
+    const download = new Download(filename, 'text/csv;charset=utf-8;', content);
+    callback(download);
+  }
+
+  buildContent(arrivals, aircrafts) {
+    const summary = this.getAircraftsSummary(arrivals);
+    const csvRecords = summary.map(record => this.getRecordString(record, aircrafts), this);
+    csvRecords.unshift(LandingsReport.header.join(this.delimiter));
+    return csvRecords.join('\n');
+  }
+
+  getAircraftsSummary(arrivals) {
+    const map: Record<string, any> = {};
+
+    arrivals.forEach(record => {
+      const arrival = firebaseToLocal(record.val());
+      const { immatriculation, mtow, landingCount } = arrival;
+
+      if (!map[immatriculation]) {
+        map[immatriculation] = {
+          immatriculation,
+          mtow,
+          landingCount: 0,
+          invalidMtow: false,
+        };
+      }
+
+      if (typeof landingCount === 'number') {
+        map[immatriculation].landingCount += landingCount;
+      }
+
+      if (mtow !== map[immatriculation].mtow) {
+        map[immatriculation].invalidMtow = true;
+      }
+    });
+
+    const arr: any[] = [];
+    Object.keys(map).forEach(key => {
+      arr.push(map[key]);
+    });
+    arr.sort((a1, a2) => a1.immatriculation.localeCompare(a2.immatriculation));
+
+    return arr;
+  }
+
+  getRecordString(record, aircrafts) {
+    const csvRecord = {
+      Registration: record.immatriculation,
+      MTOW: record.mtow,
+      Landings: record.landingCount,
+      Club: aircrafts.club[record.immatriculation] === true ? 1 : undefined,
+      HomeBase: aircrafts.homeBase[record.immatriculation] === true ? 1 : undefined,
+      InvalidMTOW: record.invalidMtow === true ? 1 : undefined,
+    };
+
+    return LandingsReport.header
+      .map(header => csvRecord[header])
+      .join(this.delimiter);
+  }
+}
+
+LandingsReport.header = [
+  'Registration',
+  'MTOW',
+  'Landings',
+  'Club',
+  'Homebase',
+  'InvalidMTOW',
+];
+
+export default LandingsReport;

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`components ModalDialog renders given content 1`] = `
+<div>
+  <div>
+    <div
+      class="sc-aXZVf cJfMdK"
+      data-testid="modal-mask"
+    />
+    <div
+      class="sc-gEvEes sc-eqUAAB kbqIPi feGQdz"
+    >
+      <div>
+        My test content
+      </div>
+    </div>
+  </div>
+</div>
+`;

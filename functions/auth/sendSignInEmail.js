@@ -47,7 +47,7 @@ const createTransporter = (settings) => {
   });
 };
 
-exports.sendSignInEmail = functions.https.onRequest((req, res) => {
+exports.sendSignInEmail = functions.region('europe-west1').https.onRequest((req, res) => {
   return cors(req, res, async () => {
     try {
       const validationError = validateRequest(req.method, req.body);

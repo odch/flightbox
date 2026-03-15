@@ -38,7 +38,13 @@
   "environments": {
     "test": {
       "firebaseProjectId": "lszo-test",
+      "firebaseDatabaseUrl": "https://lszo-test-eu.europe-west1.firebasedatabase.app",
       "firebaseApiKey": "AIzaSyB6YhIf-vJBbSFgNZxcUH5NTk1MRWJGIAU"
+    },
+    "production": {
+      "firebaseProjectId": "lszo-prod",
+      "firebaseDatabaseUrl": "https://lszo-prod-default-rtdb.europe-west1.firebasedatabase.app",
+      "firebaseApiKey": "AIzaSyCSNFVN4__gWMYKLYfxyg6Dr7SIvzpdpgE"
     }
   },
   "theme": "lszo",

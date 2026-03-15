@@ -1,0 +1,25 @@
+import {all, call, put, select, takeEvery} from 'redux-saga/effects'
+import {get, query, orderByKey} from 'firebase/database';
+import * as actions from './actions';
+import firebase from '../../util/firebase';
+
+export const aircraftsSelector = (state: any) => state.aircrafts;
+
+export function loadAll() {
+  return get(query(firebase('/aircrafts'), orderByKey()));
+}
+
+export function* loadAircrafts() {
+  const aircrafts = yield select(aircraftsSelector);
+  if (aircrafts.loading !== true) {
+    yield put(actions.setAircraftsLoading());
+    const snapshot = yield call(loadAll);
+    yield put(actions.aircraftsLoaded(snapshot));
+  }
+}
+
+export default function* sagas() {
+  yield all([
+    takeEvery(actions.LOAD_AIRCRAFTS, loadAircrafts),
+  ])
+}

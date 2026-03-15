@@ -1,0 +1,54 @@
+import PropTypes from 'prop-types';
+import React from 'react';
+import styled from 'styled-components';
+
+const Wrapper = styled.div`
+  margin: 0 0 2em 0;
+  border: 1px solid #ddd;
+  box-shadow: 0 -1px 0 rgba(0,0,0,.03), 0 0 2px rgba(0,0,0,.03), 0 2px 4px rgba(0,0,0,.06);
+  background-color: #fefefe;
+`;
+
+const Label = styled.div`
+  padding: 1rem;
+  font-weight: bold;
+  font-size: 1.5em;
+`;
+
+const Content = styled.div<{ $padding?: number }>`
+  padding: ${props => typeof props.$padding === 'number' ? `${props.$padding}px` : '1rem'};
+
+  a {
+    text-decoration: underline;
+  }
+
+  p:not(:last-child) {
+    margin-bottom: 1em;
+  }
+`;
+
+interface LabeledBoxProps {
+  children?: React.ReactNode;
+  label: string;
+  className?: string;
+  contentPadding?: number;
+}
+
+const LabeledBox = React.forwardRef<HTMLDivElement, LabeledBoxProps>(
+  ({ className, label, contentPadding, children }, ref) => (
+    <Wrapper className={className} ref={ref}>
+      <Label>{label}</Label>
+      <Content
+        $padding={contentPadding}
+      >{children}</Content>
+    </Wrapper>
+  )
+);
+
+(LabeledBox as any).propTypes = {
+  label: PropTypes.string.isRequired,
+  className: PropTypes.string,
+  contentPadding: PropTypes.number,
+};
+
+export default LabeledBox;
