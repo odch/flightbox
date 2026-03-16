@@ -1,5 +1,5 @@
 import {onChildAdded, onChildChanged, onChildRemoved} from 'firebase/database';
-import {getPagination, toOrderKey} from './pagination';
+import {getPagination} from './pagination';
 import {all, call, fork, put, select, takeEvery, takeLatest} from 'redux-saga/effects'
 import createChannel, {monitor} from '../../util/createChannel';
 import * as actions from './actions';
@@ -456,7 +456,6 @@ export function* editMovement(action: any) {
 
 export function* saveMovement() {
   const values = yield select(wizardFormValuesSelector);
-  const auth = yield select(authSelector);
 
   const movement = localToFirebase(values);
 
@@ -467,11 +466,6 @@ export function* saveMovement() {
 
   delete movement.type;
   delete movement.associatedMovement;
-
-  if (auth.email) {
-    movement.createdBy = auth.email
-    movement.createdBy_orderKey = toOrderKey(auth.email, movement.negativeTimestamp as number)
-  }
 
   try {
     key = yield call(remote.saveMovement, path, key, movement);

@@ -127,6 +127,14 @@ class MovementDetails extends React.PureComponent<any, any> {
               </DetailsBox>
             )
           }
+          {props.isAdmin && (props.data.createdBy || props.data.createdAt) && (
+            <DetailsBox label={t('movement.details.audit')}>
+              <MovementField label={t('movement.details.createdBy')} value={props.data.createdByName || props.data.createdBy}/>
+              {props.data.createdAt && <MovementField label={t('movement.details.createdAt')} value={dates.formatDateTime(new Date(props.data.createdAt).toISOString())}/>}
+              {props.data.updatedBy && <MovementField label={t('movement.details.updatedBy')} value={props.data.updatedByName || props.data.updatedBy}/>}
+              {props.data.updatedAt && <MovementField label={t('movement.details.updatedAt')} value={dates.formatDateTime(new Date(props.data.updatedAt).toISOString())}/>}
+            </DetailsBox>
+          )}
           {props.data.type === 'arrival' && props.data.landingFeeTotal !== undefined && (
             <DetailsBox label={t('movement.details.fees')}>
               <MovementField label={t('movement.details.referenceNumber')} value={getFromItemKey(props.data.key)}/>
