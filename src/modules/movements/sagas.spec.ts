@@ -540,20 +540,8 @@ describe('modules', () => {
             negativeTimestamp: -1476021600000,
           };
 
-          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
-
-          const auth = {
-            email: 'pilot@example.com'
-          }
-
-          const expectedMovementForFirebase = {
-            ...formValuesForFirebase,
-            createdBy: 'pilot@example.com',
-            createdBy_orderKey: 'pilot@example.com_8523978399999'
-          };
-
-          expect(generator.next(auth).value)
-            .toEqual(call(remote.saveMovement, '/departures', undefined, expectedMovementForFirebase));
+          expect(generator.next(formValues).value)
+            .toEqual(call(remote.saveMovement, '/departures', undefined, formValuesForFirebase));
 
           const key = 'new-departure-key';
 
@@ -737,11 +725,7 @@ describe('modules', () => {
             time: '16:00',
           };
 
-          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
-
-          const auth = { email: 'pilot@example.com' };
-
-          expect(generator.next(auth).value).toMatchObject({ type: 'CALL' });
+          expect(generator.next(formValues).value).toMatchObject({ type: 'CALL' });
 
           const error = new Error('save failed');
           expect(generator.throw(error).value).toEqual(put(actions.saveMovementFailed(error)));

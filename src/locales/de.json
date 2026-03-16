@@ -125,7 +125,12 @@
       "referenceNumber": "Referenznummer",
       "landingFee": "Landetaxe",
       "paymentMethod": "Zahlungsart",
-      "mtow": "MTOW"
+      "mtow": "MTOW",
+      "audit": "Änderungsprotokoll",
+      "createdBy": "Erstellt von",
+      "createdAt": "Erstellt am",
+      "updatedBy": "Geändert von",
+      "updatedAt": "Geändert am"
     },
     "filter": {
       "label": "Filter",
