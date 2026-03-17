@@ -49,6 +49,8 @@
   },
   "theme": "lszo",
   "title": "Flightbox - Flugplatz Luzern-Beromünster",
+  "themeColor": "#19295d",
+  "shortName": "Flightbox LSZO",
   "paymentMethods": [
     "checkout",
     "cash",

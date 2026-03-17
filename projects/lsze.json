@@ -57,6 +57,8 @@
   },
   "theme": "lsze",
   "title": "Flightbox - Flugplatz Bad Ragaz",
+  "themeColor": "#063155",
+  "shortName": "Flightbox LSZE",
   "paymentMethods": [
     {
       "name": "checkout",

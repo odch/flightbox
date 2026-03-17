@@ -46,6 +46,8 @@
   "flightnetCompany": "fgzo",
   "theme": "lszk",
   "title": "FGZO Bewegungen",
+  "themeColor": "#284496",
+  "shortName": "Flightbox LSZK",
   "enabledFlightTypes": [
     "private",
     "instruction",

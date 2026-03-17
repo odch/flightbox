@@ -57,3 +57,9 @@ setTimeout(
   () => window.location.reload(),
   moment('24:00:00', 'hh:mm:ss').diff(moment(), 'milliseconds')
 );
+
+if (!__DEV__ && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js');
+  });
+}
