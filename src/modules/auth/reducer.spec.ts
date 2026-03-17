@@ -58,6 +58,22 @@ describe('modules', () => {
         });
       });
 
+      describe('SEND_AUTHENTICATION_EMAIL_FAILURE', () => {
+        it('should set submitting to false and failure to true', () => {
+          expect(
+            reducer({
+              ...INITIAL_STATE,
+              submitting: true,
+              failure: false,
+            }, actions.sendAuthenticationEmailFailure())
+          ).toEqual({
+            ...INITIAL_STATE,
+            submitting: false,
+            failure: true,
+          });
+        });
+      });
+
       describe('REQUEST_GUEST_TOKEN_AUTHENTICATION', () => {
         it('should set guestAuthentication submitting to true and clear failure', () => {
           expect(

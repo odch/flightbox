@@ -101,13 +101,6 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, o
     return () => clearTimeout(timer);
   }, [cooldown]);
 
-  const handleResend = useCallback(() => {
-    if (onResend && cooldown === 0) {
-      onResend();
-      setCooldown(RESEND_COOLDOWN_SECONDS);
-    }
-  }, [onResend, cooldown]);
-
   const focusInput = useCallback((index: number) => {
     const el = inputRefs.current[index];
     if (el) {
@@ -115,6 +108,15 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, o
       el.select();
     }
   }, []);
+
+  const handleResend = useCallback(() => {
+    if (onResend && cooldown === 0) {
+      onResend();
+      setCooldown(RESEND_COOLDOWN_SECONDS);
+      setDigits(Array(CODE_LENGTH).fill(''));
+      setTimeout(() => focusInput(0), 0);
+    }
+  }, [onResend, cooldown, focusInput]);
 
   const submitCode = useCallback((code: string) => {
     if (code.length === CODE_LENGTH && !submitting) {
