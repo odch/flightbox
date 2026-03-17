@@ -5,9 +5,8 @@ import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from 
 import createChannel from '../../util/createChannel';
 import firebase, {
   authenticate as fbAuth,
-  authenticateEmail as fbAuthEmail,
-  isSignInWithEmail,
-  signInWithEmail,
+  requestSignInCode as fbRequestSignInCode,
+  verifyOtpCode as fbVerifyOtpCode,
   unauth as fbUnauth,
   watchAuthState
 } from '../../util/firebase';
@@ -89,7 +88,9 @@ export function* sendAuthenticationEmail(action: any) {
     const { email, local } = action.payload;
 
     if (isNotEmptyString(email)) {
-      const result = yield call(fbAuthEmail, email, local);
+      window.localStorage.setItem('isLocalSignIn', String(local));
+
+      const result = yield call(fbRequestSignInCode, email);
 
       const airportName = __CONF__.aerodrome.name;
       const theme = require(`../../../theme/${__CONF__.theme}`);
@@ -100,7 +101,7 @@ export function* sendAuthenticationEmail(action: any) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: result.email,
-          signInLink: result.signInLink,
+          signInCode: result.code,
           airportName: airportName,
           themeColor: theme.colors.main
         })
@@ -121,34 +122,16 @@ export function* sendAuthenticationEmail(action: any) {
   }
 }
 
-export function* completeEmailAuthentication(action: any) {
+export function* doVerifyOtpCode(action: any) {
   try {
     yield put(actions.setSubmitting());
-    const { email } = action.payload;
-    window.localStorage.setItem('emailForSignIn', email);
-    yield call(signInWithEmail);
-    yield call(cleanUpLoginBrowserState);
+    const { email, code } = action.payload;
+    const token = yield call(fbVerifyOtpCode, email, code);
+    yield put(actions.requestFirebaseAuthentication(token, actions.otpVerificationFailure()));
   } catch(e) {
-    logError('Failed to complete email authentication', e);
-    yield put(actions.emailAuthenticationCompletionFailure());
+    logError('Failed to verify OTP code', e);
+    yield put(actions.otpVerificationFailure());
   }
-}
-
-export function* doEmailAuthentication() {
-  try {
-    yield call(signInWithEmail);
-  } catch(e) {
-    logError('Failed to execute email authentication', e);
-  } finally {
-    yield call(cleanUpLoginBrowserState);
-    window.location.reload();
-  }
-}
-
-export function* cleanUpLoginBrowserState() {
-  window.localStorage.removeItem('emailForSignIn');
-  const cleanUrl = location.origin + location.pathname + location.hash;
-  yield call([window.history, 'replaceState'], {}, document.title, cleanUrl);
 }
 
 export function* doGuestTokenAuthentication(action: any) {
@@ -238,9 +221,7 @@ export function* doListenFirebaseAuthentication(action: any) {
   yield put(actions.firebaseAuthenticationEvent(authData));
 
   if (!authenticated) {
-    if (isSignInWithEmail() && isSignInEmailInStorage()) {
-      yield put(actions.requestEmailAuthentication())
-    } else if (isSignInWithKioskAccessToken()) {
+    if (isSignInWithKioskAccessToken()) {
       yield put(actions.authenticateAsKiosk(getKioskAuthQueryToken(window.location)!))
     } else {
       yield put(actions.requestIpAuthentication());
@@ -250,11 +231,6 @@ export function* doListenFirebaseAuthentication(action: any) {
 
 function isSignInWithKioskAccessToken() {
   return !!getKioskAuthQueryToken(window.location)
-}
-
-function isSignInEmailInStorage() {
-  const email = window.localStorage.getItem('emailForSignIn');
-  return !!email
 }
 
 function isNotEmptyString(str: unknown): str is string {
@@ -285,8 +261,7 @@ export default function* sagas() {
     takeEvery(actions.REQUEST_GUEST_TOKEN_AUTHENTICATION, doGuestTokenAuthentication),
     takeEvery(actions.REQUEST_KIOSK_TOKEN_AUTHENTICATION, doKioskTokenAuthentication),
     takeEvery(actions.SEND_AUTHENTICATION_EMAIL, sendAuthenticationEmail),
-    takeEvery(actions.COMPLETE_EMAIL_AUTHENTICATION, completeEmailAuthentication),
-    takeEvery(actions.REQUEST_EMAIL_AUTHENTICATION, doEmailAuthentication),
+    takeEvery(actions.VERIFY_OTP_CODE, doVerifyOtpCode),
     takeEvery(actions.REQUEST_FIREBASE_AUTHENTICATION, doFirebaseAuthentication),
     takeEvery(actions.LOGOUT, doLogout),
     takeEvery(actions.FIREBASE_AUTHENTICATION, doListenFirebaseAuthentication),

@@ -1,13 +1,13 @@
 Hallo!
 
-Willkommen bei Flightbox! Klicken Sie auf den folgenden Link, um sich sicher bei Ihrem Konto anzumelden:
+Geben Sie den folgenden Code in der Flightbox-App ein, um sich anzumelden:
 
-{{signInLink}}
+  {{signInCode}}
 
 SICHERHEITSHINWEIS:
-• Dieser Link läuft in 1 Stunde aus Sicherheitsgründen ab
-• Falls Sie diesen Anmelde-Link nicht angefordert haben, können Sie diese E-Mail ignorieren
-• Teilen Sie diesen Link niemals mit anderen
+- Dieser Code ist 10 Minuten gültig
+- Falls Sie diesen Code nicht angefordert haben, können Sie diese E-Mail ignorieren
+- Teilen Sie diesen Code niemals mit anderen
 
 ---
 Diese E-Mail wurde von der open digital Flightbox gesendet

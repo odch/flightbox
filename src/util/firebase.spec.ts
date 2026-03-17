@@ -22,8 +22,6 @@ jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(),
   onAuthStateChanged: jest.fn(),
   signInWithCustomToken: jest.fn(),
-  isSignInWithEmailLink: jest.fn(),
-  signInWithEmailLink: jest.fn(),
   signOut: jest.fn(),
 }));
 
@@ -33,16 +31,13 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithCustomToken,
-  isSignInWithEmailLink,
-  signInWithEmailLink,
   signOut,
 } from 'firebase/auth';
 import firebaseDefault, {
   watchAuthState,
   authenticate,
-  authenticateEmail,
-  isSignInWithEmail,
-  signInWithEmail,
+  requestSignInCode,
+  verifyOtpCode,
   unauth,
   loadValue,
   getIdToken,
@@ -127,7 +122,7 @@ describe('util/firebase', () => {
     });
   });
 
-  describe('authenticateEmail', () => {
+  describe('requestSignInCode', () => {
     let originalFetch;
 
     beforeEach(() => {
@@ -136,44 +131,38 @@ describe('util/firebase', () => {
 
     afterEach(() => {
       global.fetch = originalFetch;
-      localStorage.clear();
     });
 
-    it('resolves with signInLink and email on success', async () => {
+    it('resolves with code and email on success', async () => {
       const mockResponse = {
         ok: true,
         json: jest.fn().mockResolvedValue({
-          signInLink: 'https://example.com/link',
+          code: '123456',
           email: 'user@example.com',
         }),
       };
       global.fetch = jest.fn().mockResolvedValue(mockResponse);
 
-      const result = await authenticateEmail('user@example.com', true);
+      const result = await requestSignInCode('user@example.com');
       expect(result).toEqual({
-        signInLink: 'https://example.com/link',
+        code: '123456',
         email: 'user@example.com',
       });
-      expect(localStorage.getItem('emailForSignIn')).toBe('user@example.com');
-      expect(localStorage.getItem('isLocalSignIn')).toBe('true');
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('generateSignInCode'),
+        expect.objectContaining({ method: 'POST' })
+      );
     });
 
     it('rejects when response is not ok with error from body', async () => {
       const mockResponse = {
         ok: false,
-        json: jest.fn().mockResolvedValue({ error: 'Not found' }),
+        json: jest.fn().mockResolvedValue({ error: 'Invalid email' }),
       };
       global.fetch = jest.fn().mockResolvedValue(mockResponse);
 
-      await expect(authenticateEmail('user@example.com', false))
-        .rejects.toThrow('Not found');
-    });
-
-    it('rejects when fetch throws', async () => {
-      global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
-
-      await expect(authenticateEmail('user@example.com', false))
-        .rejects.toThrow('Network error');
+      await expect(requestSignInCode('bad@example.com'))
+        .rejects.toThrow('Invalid email');
     });
 
     it('uses fallback error message when response has no error field', async () => {
@@ -183,41 +172,64 @@ describe('util/firebase', () => {
       };
       global.fetch = jest.fn().mockResolvedValue(mockResponse);
 
-      await expect(authenticateEmail('user@example.com', false))
-        .rejects.toThrow('Failed to generate sign-in link');
+      await expect(requestSignInCode('user@example.com'))
+        .rejects.toThrow('Failed to generate sign-in code');
+    });
+
+    it('rejects when fetch throws', async () => {
+      global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
+
+      await expect(requestSignInCode('user@example.com'))
+        .rejects.toThrow('Network error');
     });
   });
 
-  describe('isSignInWithEmail', () => {
-    it('calls isSignInWithEmailLink with auth and current href', () => {
-      (isSignInWithEmailLink as jest.Mock).mockReturnValue(true);
+  describe('verifyOtpCode', () => {
+    let originalFetch;
 
-      const result = isSignInWithEmail();
-      expect(isSignInWithEmailLink).toHaveBeenCalledWith(
-        mockAuth,
-        window.location.href
-      );
-      expect(result).toBe(true);
+    beforeEach(() => {
+      originalFetch = global.fetch;
     });
 
-    it('returns false when not a sign-in link', () => {
-      (isSignInWithEmailLink as jest.Mock).mockReturnValue(false);
-      expect(isSignInWithEmail()).toBe(false);
+    afterEach(() => {
+      global.fetch = originalFetch;
     });
-  });
 
-  describe('signInWithEmail', () => {
-    it('calls signInWithEmailLink and removes localStorage item', async () => {
-      localStorage.setItem('emailForSignIn', 'test@example.com');
-      (signInWithEmailLink as jest.Mock).mockResolvedValue({});
+    it('resolves with token on success', async () => {
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({ token: 'custom-token-abc' }),
+      };
+      global.fetch = jest.fn().mockResolvedValue(mockResponse);
 
-      await signInWithEmail();
-      expect(signInWithEmailLink).toHaveBeenCalledWith(
-        mockAuth,
-        'test@example.com',
-        window.location.href
+      const result = await verifyOtpCode('user@example.com', '123456');
+      expect(result).toBe('custom-token-abc');
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('verifySignInCode'),
+        expect.objectContaining({ method: 'POST' })
       );
-      expect(localStorage.getItem('emailForSignIn')).toBeNull();
+    });
+
+    it('rejects when response is not ok', async () => {
+      const mockResponse = {
+        ok: false,
+        json: jest.fn().mockResolvedValue({ error: 'Invalid or expired code' }),
+      };
+      global.fetch = jest.fn().mockResolvedValue(mockResponse);
+
+      await expect(verifyOtpCode('user@example.com', '000000'))
+        .rejects.toThrow('Invalid or expired code');
+    });
+
+    it('uses fallback error message when response has no error field', async () => {
+      const mockResponse = {
+        ok: false,
+        json: jest.fn().mockResolvedValue({}),
+      };
+      global.fetch = jest.fn().mockResolvedValue(mockResponse);
+
+      await expect(verifyOtpCode('user@example.com', '000000'))
+        .rejects.toThrow('Invalid or expired code');
     });
   });
 

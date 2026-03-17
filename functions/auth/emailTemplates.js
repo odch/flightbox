@@ -14,9 +14,9 @@ const readTemplate = (templateName, format) => {
   return fs.readFileSync(templatePath, 'utf8');
 };
 
-const getSignInEmailContent = ({ signInLink, airportName, themeColor }) => {
+const getSignInEmailContent = ({ signInCode, airportName, themeColor }) => {
   const replacements = {
-    signInLink,
+    signInCode,
     airportName,
     themeColor
   };

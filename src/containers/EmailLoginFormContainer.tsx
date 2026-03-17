@@ -1,9 +1,8 @@
 import {connect} from 'react-redux';
 import {updateEmail} from '../modules/ui/loginPage';
-import {completeEmailAuthentication, sendAuthenticationEmail} from '../modules/auth';
+import {sendAuthenticationEmail, verifyOtpCode} from '../modules/auth';
 import {hideLogin} from '../modules/ui/showLogin';
 import EmailLoginForm from '../components/LoginPage/EmailLoginForm';
-import {isSignInWithEmail} from '../util/firebase';
 import {RootState} from '../modules';
 
 const mapStateToProps = (state: RootState) => {
@@ -12,13 +11,13 @@ const mapStateToProps = (state: RootState) => {
 
   let submitting = false;
   let failure = false;
+  let otpVerificationFailure = false;
 
   if (state.auth) {
     submitting = state.auth.submitting || false;
     failure = state.auth.failure || false;
+    otpVerificationFailure = state.auth.otpVerificationFailure || false;
   }
-
-  const emailLoginParamsPresent = isSignInWithEmail();
 
   return {
     email,
@@ -26,15 +25,14 @@ const mapStateToProps = (state: RootState) => {
     failure,
     emailSent,
     showCancel,
-    emailLoginParamsPresent,
-    emailLoginCompletionFailure: state.auth.emailAuthenticationCompletionFailure,
+    otpVerificationFailure,
   };
 };
 
 const mapActionCreators = {
   updateEmail,
   sendAuthenticationEmail,
-  completeEmailAuthentication,
+  verifyOtpCode,
   onCancel: hideLogin,
 };
 

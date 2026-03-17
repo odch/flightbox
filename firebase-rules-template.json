@@ -423,6 +423,11 @@
         }
       }
     },
+    "signInCodes": {
+      ".read": false,
+      ".write": false,
+      ".indexOn": ["email"]
+    },
     "profiles": {
       "$profile_id": {
         ".read": "auth !== null && $profile_id === auth.uid",

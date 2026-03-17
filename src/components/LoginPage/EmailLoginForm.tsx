@@ -6,6 +6,7 @@ import LabeledComponent from '../LabeledComponent';
 import Failure from './Failure';
 import Button from '../Button';
 import GuestTokenLogin from '../../containers/GuestTokenLoginContainer'
+import OtpCodeForm from './OtpCodeForm';
 
 const handleSubmit = (authenticate, email, local, e) => {
   e.preventDefault();
@@ -61,20 +62,24 @@ const EmailLoginForm = props => {
     queryToken,
     guestOnly,
     sendAuthenticationEmail,
-    completeEmailAuthentication,
+    verifyOtpCode,
     email,
     submitting,
     failure,
     emailSent,
-    emailLoginParamsPresent,
-    emailLoginCompletionFailure,
+    otpVerificationFailure,
     updateEmail
   } = props;
 
   if (emailSent) {
-    return <div style={{textAlign: 'center'}}>{t('login.emailSentPre')} <span
-      style={{fontWeight: 'bold'}}>{email}</span> {t('login.emailSentPost')}
-    </div>
+    return (
+      <OtpCodeForm
+        email={email}
+        submitting={submitting}
+        failure={otpVerificationFailure}
+        onSubmit={(code) => verifyOtpCode(email, code)}
+      />
+    );
   }
 
   const emailInput = (
@@ -89,31 +94,6 @@ const EmailLoginForm = props => {
       data-cy="email"
     />
   );
-
-  if (emailLoginParamsPresent) {
-    return (
-      <div>
-        <div style={{marginBottom: '2rem'}}>{t('login.completeLogin')}</div>
-        <StyledForm
-          onSubmit={handleSubmit.bind(null, completeEmailAuthentication, email, !!queryToken)}
-          disabled={props.submitting}
-          data-cy="login-form"
-        >
-          <StyledLabeledComponent label={t('login.emailLabel')} component={emailInput}/>
-          {emailLoginCompletionFailure && <Failure failure/>}
-          <SubmitButton
-            type="submit"
-            label={t('login.loginButton')}
-            icon="send"
-            disabled={submitting || email.length === 0}
-            primary
-            dataCy="submit"
-            loading={props.submitting}
-          />
-        </StyledForm>
-      </div>
-    )
-  }
 
   return (
     <div>
@@ -159,7 +139,7 @@ const EmailLoginForm = props => {
   queryToken: PropTypes.string,
   guestOnly: PropTypes.bool,
   sendAuthenticationEmail: PropTypes.func.isRequired,
-  completeEmailAuthentication: PropTypes.func.isRequired,
+  verifyOtpCode: PropTypes.func.isRequired,
   updateEmail: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   showCancel: PropTypes.bool.isRequired,
@@ -167,8 +147,7 @@ const EmailLoginForm = props => {
   submitting: PropTypes.bool.isRequired,
   failure: PropTypes.bool.isRequired,
   emailSent: PropTypes.bool.isRequired,
-  emailLoginParamsPresent: PropTypes.bool.isRequired,
-  emailLoginCompletionFailure: PropTypes.bool.isRequired,
+  otpVerificationFailure: PropTypes.bool.isRequired,
 };
 
 export default EmailLoginForm;

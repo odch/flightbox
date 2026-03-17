@@ -47,8 +47,8 @@ describe('functions', () => {
       mockEmailTemplates = {
         getSignInEmailContent: jest.fn().mockReturnValue({
           subject: 'Sign in',
-          html: '<p>Click here</p>',
-          text: 'Click here'
+          html: '<p>Your code</p>',
+          text: 'Your code'
         })
       };
 
@@ -75,14 +75,14 @@ describe('functions', () => {
     });
 
     it('returns 400 when email is missing', async () => {
-      const req = makeReq('POST', { signInLink: 'https://link' });
+      const req = makeReq('POST', { signInCode: '123456' });
       const res = makeRes();
       await capturedHandler(req, res);
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Email and signInLink are required' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Email and signInCode are required' });
     });
 
-    it('returns 400 when signInLink is missing', async () => {
+    it('returns 400 when signInCode is missing', async () => {
       const req = makeReq('POST', { email: 'user@example.com' });
       const res = makeRes();
       await capturedHandler(req, res);
@@ -92,7 +92,7 @@ describe('functions', () => {
     it('sends email and returns 200 on success', async () => {
       const req = makeReq('POST', {
         email: 'user@example.com',
-        signInLink: 'https://sign-in.example.com',
+        signInCode: '123456',
         airportName: 'Thun',
         themeColor: '#003863'
       });
@@ -108,14 +108,14 @@ describe('functions', () => {
     it('calls getSignInEmailContent with correct params', async () => {
       const req = makeReq('POST', {
         email: 'user@example.com',
-        signInLink: 'https://link',
+        signInCode: '123456',
         airportName: 'Thun',
         themeColor: '#003'
       });
       const res = makeRes();
       await capturedHandler(req, res);
       expect(mockEmailTemplates.getSignInEmailContent).toHaveBeenCalledWith({
-        signInLink: 'https://link',
+        signInCode: '123456',
         airportName: 'Thun',
         themeColor: '#003'
       });
@@ -125,7 +125,7 @@ describe('functions', () => {
       mockAdmin.database().ref().once.mockResolvedValue({ val: () => null });
       const req = makeReq('POST', {
         email: 'user@example.com',
-        signInLink: 'https://link'
+        signInCode: '123456'
       });
       const res = makeRes();
       await capturedHandler(req, res);
@@ -138,7 +138,7 @@ describe('functions', () => {
       });
       const req = makeReq('POST', {
         email: 'user@example.com',
-        signInLink: 'https://link'
+        signInCode: '123456'
       });
       const res = makeRes();
       await capturedHandler(req, res);
@@ -148,7 +148,7 @@ describe('functions', () => {
     it('creates transporter with correct SMTP settings', async () => {
       const req = makeReq('POST', {
         email: 'user@example.com',
-        signInLink: 'https://link'
+        signInCode: '123456'
       });
       const res = makeRes();
       await capturedHandler(req, res);

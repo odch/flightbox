@@ -11,9 +11,9 @@ const validateRequest = (method, body) => {
     return { error: 'Method not allowed', status: 405 };
   }
 
-  const { email, signInLink } = body;
-  if (!email || !signInLink) {
-    return { error: 'Email and signInLink are required', status: 400 };
+  const { email, signInCode } = body;
+  if (!email || !signInCode) {
+    return { error: 'Email and signInCode are required', status: 400 };
   }
 
   return null;
@@ -55,10 +55,10 @@ exports.sendSignInEmail = functions.region('europe-west1').https.onRequest((req,
         return res.status(validationError.status).json({ error: validationError.error });
       }
 
-      const { email, signInLink, airportName, themeColor } = req.body;
+      const { email, signInCode, airportName, themeColor } = req.body;
 
       const smtpSettings = await loadSmtpSettings();
-      const emailContent = getSignInEmailContent({ signInLink, airportName, themeColor });
+      const emailContent = getSignInEmailContent({ signInCode, airportName, themeColor });
       const transporter = createTransporter(smtpSettings);
 
       const info = await transporter.sendMail({

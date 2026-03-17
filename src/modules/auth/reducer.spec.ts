@@ -6,7 +6,7 @@ const INITIAL_STATE = {
   authenticated: false,
   submitting: false,
   failure: false,
-  emailAuthenticationCompletionFailure: false,
+  otpVerificationFailure: false,
   guestAuthentication: {
     submitting: false,
     failure: false,
@@ -30,7 +30,7 @@ describe('modules', () => {
               authenticated: false,
               submitting: false,
               failure: true,
-              emailAuthenticationCompletionFailure: false,
+              otpVerificationFailure: false,
               guestAuthentication: { submitting: false, failure: false },
             }, actions.setSubmitting())
           ).toEqual({
@@ -38,7 +38,7 @@ describe('modules', () => {
             authenticated: false,
             submitting: true,
             failure: false,
-            emailAuthenticationCompletionFailure: false,
+            otpVerificationFailure: false,
             guestAuthentication: { submitting: false, failure: false },
           });
         });
@@ -128,7 +128,7 @@ describe('modules', () => {
               authenticated: true,
               submitting: false,
               failure: false,
-              emailAuthenticationCompletionFailure: false,
+              otpVerificationFailure: false,
               data: { uid: 'user-123' },
               guestAuthentication: { submitting: false, failure: false },
             }, actions.firebaseAuthenticationEvent(null))
@@ -136,18 +136,18 @@ describe('modules', () => {
         });
       });
 
-      describe('EMAIL_AUTHENTICATION_COMPLETION_FAILURE', () => {
-        it('should set submitting to false and emailAuthenticationCompletionFailure to true', () => {
+      describe('OTP_VERIFICATION_FAILURE', () => {
+        it('should set submitting to false and otpVerificationFailure to true', () => {
           expect(
             reducer({
               ...INITIAL_STATE,
               submitting: true,
-              emailAuthenticationCompletionFailure: false,
-            }, actions.emailAuthenticationCompletionFailure())
+              otpVerificationFailure: false,
+            }, actions.otpVerificationFailure())
           ).toEqual({
             ...INITIAL_STATE,
             submitting: false,
-            emailAuthenticationCompletionFailure: true,
+            otpVerificationFailure: true,
           });
         });
       });
