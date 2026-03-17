@@ -43,7 +43,7 @@ export function authenticate(token) {
   return signInWithCustomToken(getAuth(), token);
 }
 
-export function requestSignInCode(email: string) {
+export function requestSignInCode(email: string, airportName: string, themeColor: string) {
   initialize();
 
   const functionUrl = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/generateSignInCode`;
@@ -51,20 +51,15 @@ export function requestSignInCode(email: string) {
   return fetch(functionUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, airportName, themeColor }),
   })
     .then(response => {
       if (!response.ok) {
         return response.json().then(errorData => {
-          throw new Error(errorData.error || 'Failed to generate sign-in code');
+          throw new Error(errorData.error || 'Failed to send sign-in code');
         });
       }
-      return response.json();
-    })
-    .then(data => ({
-      code: data.code,
-      email: data.email,
-    }));
+    });
 }
 
 export function verifyOtpCode(email: string, code: string) {

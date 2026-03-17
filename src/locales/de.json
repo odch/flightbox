@@ -46,7 +46,9 @@
     "otpInstruction": "Geben Sie den 6-stelligen Code ein, der an",
     "otpAriaLabel": "Anmelde-Code Eingabe",
     "otpDigitLabel": "Ziffer",
-    "otpVerificationFailure": "Ungültiger oder abgelaufener Code. Bitte versuchen Sie es erneut."
+    "otpVerificationFailure": "Ungültiger oder abgelaufener Code. Bitte versuchen Sie es erneut.",
+    "otpResend": "Code erneut senden",
+    "otpResendIn": "Code erneut senden ({{seconds}}s)"
   },
   "hints": {
     "departureBeforeStart_text": "Abflug immer vor dem Start",

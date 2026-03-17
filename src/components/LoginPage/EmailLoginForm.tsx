@@ -78,6 +78,7 @@ const EmailLoginForm = props => {
         submitting={submitting}
         failure={otpVerificationFailure}
         onSubmit={(code) => verifyOtpCode(email, code)}
+        onResend={() => sendAuthenticationEmail(email, !!queryToken)}
       />
     );
   }

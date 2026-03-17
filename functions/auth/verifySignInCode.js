@@ -55,10 +55,7 @@ exports.verifySignInCode = functions.region('europe-west1').https.onRequest((req
 
       snapshot.forEach(child => {
         const data = child.val();
-        if (data.expiry <= now) {
-          return;
-        }
-        if (data.attempts >= MAX_ATTEMPTS) {
+        if (data.expiry <= now || data.attempts >= MAX_ATTEMPTS) {
           return;
         }
         if (validKey === null && data.codeHash === codeHash) {
@@ -71,18 +68,6 @@ exports.verifySignInCode = functions.region('europe-west1').https.onRequest((req
       if (!validKey) {
         if (Object.keys(attemptsUpdates).length > 0) {
           await codesRef.update(attemptsUpdates);
-        } else {
-          // Increment attempts on unexpired, non-exhausted entries
-          const fallbackUpdates = {};
-          snapshot.forEach(child => {
-            const data = child.val();
-            if (data.expiry > now && data.attempts < MAX_ATTEMPTS) {
-              fallbackUpdates[`${child.key}/attempts`] = (data.attempts || 0) + 1;
-            }
-          });
-          if (Object.keys(fallbackUpdates).length > 0) {
-            await codesRef.update(fallbackUpdates);
-          }
         }
         return res.status(400).json({ error: 'Invalid or expired code' });
       }
@@ -110,7 +95,6 @@ exports.verifySignInCode = functions.region('europe-west1').https.onRequest((req
       console.error('Error verifying sign-in code:', error);
       res.status(500).json({
         error: 'Failed to verify sign-in code',
-        details: error.message,
       });
     }
   });
