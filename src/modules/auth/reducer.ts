@@ -42,6 +42,12 @@ const ACTION_HANDLERS = {
       submitting: false,
     });
   },
+  [actions.SEND_AUTHENTICATION_EMAIL_FAILURE]: (state: AuthState) => {
+    return Object.assign({}, state, {
+      submitting: false,
+      failure: true,
+    });
+  },
   [actions.REQUEST_GUEST_TOKEN_AUTHENTICATION]: (state: AuthState) => {
     return {
       ...state,

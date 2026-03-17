@@ -36,9 +36,6 @@ describe('functions', () => {
       jest.mock('cors', () => () => mockCors);
       jest.mock('./sendSignInEmail', () => ({ sendSignInEmail: mockSendSignInEmail }));
 
-      // Use a fixed random value for predictable code generation
-      jest.spyOn(global.Math, 'random').mockReturnValue(0);
-
       require('./generateSignInCode');
     });
 
