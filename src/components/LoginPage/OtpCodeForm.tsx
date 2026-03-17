@@ -1,8 +1,7 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import Button from '../Button';
-import Failure from './Failure';
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -55,6 +54,13 @@ const DigitInput = styled.input<DigitInputProps>`
     height: 2.8rem;
     font-size: 1.2rem;
   }
+`;
+
+const FailureMessage = styled.p`
+  margin: 0;
+  font-size: 0.9rem;
+  color: #ed351c;
+  text-align: center;
 `;
 
 const Actions = styled.div`
@@ -189,7 +195,11 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, o
   return (
     <Wrapper>
       <Instruction>
-        {t('login.otpInstruction')} <strong>{email}</strong>
+        <Trans
+          i18nKey="login.otpInstruction"
+          values={{ email }}
+          components={{ bold: <strong /> }}
+        />
       </Instruction>
       <OtpInputsRow onPaste={handlePaste} role="group" aria-label={t('login.otpAriaLabel')}>
         {digits.map((digit, index) => (
@@ -212,7 +222,7 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, o
           />
         ))}
       </OtpInputsRow>
-      {failure && <Failure failure={failure} />}
+      {failure && <FailureMessage>{t('login.otpVerificationFailure')}</FailureMessage>}
       <Actions>
         <Button
           type="button"

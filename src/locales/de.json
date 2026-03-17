@@ -43,7 +43,7 @@
     "profile": "Profil",
     "guest": "Gast",
     "kiosk": "Kiosk",
-    "otpInstruction": "Geben Sie den 6-stelligen Code ein, der an",
+    "otpInstruction": "Geben Sie den 6-stelligen Code ein, der an <bold>{{email}}</bold> gesendet wurde.",
     "otpAriaLabel": "Anmelde-Code Eingabe",
     "otpDigitLabel": "Ziffer",
     "otpVerificationFailure": "Ungültiger oder abgelaufener Code. Bitte versuchen Sie es erneut.",

@@ -1,7 +1,7 @@
 import reducer from './reducer';
 import * as actions from './actions';
 import { FIREBASE_AUTHENTICATION_EVENT, USERNAME_PASSWORD_AUTHENTICATION_FAILURE } from '../../auth';
-import { SEND_AUTHENTICATION_EMAIL_SUCCESS } from '../../auth/actions';
+import { SEND_AUTHENTICATION_EMAIL_FAILURE, SEND_AUTHENTICATION_EMAIL_SUCCESS } from '../../auth/actions';
 
 const INITIAL_STATE = {
   username: '',
@@ -72,6 +72,22 @@ describe('modules', () => {
               ...INITIAL_STATE,
               email: 'hans@example.com',
               emailSent: true,
+            });
+          });
+        });
+
+        describe('SEND_AUTHENTICATION_EMAIL_FAILURE', () => {
+          it('should reset emailSent to false', () => {
+            expect(
+              reducer({
+                ...INITIAL_STATE,
+                email: 'hans@example.com',
+                emailSent: true,
+              }, { type: SEND_AUTHENTICATION_EMAIL_FAILURE })
+            ).toEqual({
+              ...INITIAL_STATE,
+              email: 'hans@example.com',
+              emailSent: false,
             });
           });
         });

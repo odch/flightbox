@@ -87,6 +87,43 @@ describe('functions', () => {
       expect(mockCodesRef.update).toHaveBeenCalledWith({ k1: null, k3: null });
     });
 
+    it('deletes exhausted codes (attempts >= 5) that have not yet expired', async () => {
+      const snapshot = makeSnapshot([
+        { key: 'k1', val: { expiry: now + 60000, attempts: 5 } },
+        { key: 'k2', val: { expiry: now + 60000, attempts: 6 } },
+      ]);
+      mockCodesRef.once.mockResolvedValue(snapshot);
+
+      await capturedHandler();
+
+      expect(mockCodesRef.update).toHaveBeenCalledWith({ k1: null, k2: null });
+    });
+
+    it('keeps non-exhausted non-expired codes', async () => {
+      const snapshot = makeSnapshot([
+        { key: 'k1', val: { expiry: now + 60000, attempts: 4 } },
+        { key: 'k2', val: { expiry: now + 60000, attempts: 0 } },
+      ]);
+      mockCodesRef.once.mockResolvedValue(snapshot);
+
+      await capturedHandler();
+
+      expect(mockCodesRef.update).not.toHaveBeenCalled();
+    });
+
+    it('deletes both expired and exhausted codes in one pass', async () => {
+      const snapshot = makeSnapshot([
+        { key: 'k1', val: { expiry: now - 1000, attempts: 0 } },
+        { key: 'k2', val: { expiry: now + 60000, attempts: 5 } },
+        { key: 'k3', val: { expiry: now + 60000, attempts: 2 } },
+      ]);
+      mockCodesRef.once.mockResolvedValue(snapshot);
+
+      await capturedHandler();
+
+      expect(mockCodesRef.update).toHaveBeenCalledWith({ k1: null, k2: null });
+    });
+
     it('is scheduled to run every 60 minutes', () => {
       expect(mockFunctions.pubsub.schedule).toHaveBeenCalledWith('every 60 minutes');
     });

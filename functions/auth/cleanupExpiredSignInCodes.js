@@ -3,6 +3,8 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
+const MAX_ATTEMPTS = 5;
+
 exports.cleanupExpiredSignInCodes = functions
   .region('europe-west1')
   .pubsub
@@ -20,7 +22,8 @@ exports.cleanupExpiredSignInCodes = functions
     const now = Date.now();
 
     snapshot.forEach(child => {
-      if (child.val().expiry <= now) {
+      const val = child.val();
+      if (val.expiry <= now || val.attempts >= MAX_ATTEMPTS) {
         updates[child.key] = null;
       }
     });
