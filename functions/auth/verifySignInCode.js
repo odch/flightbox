@@ -65,10 +65,11 @@ exports.verifySignInCode = functions.region('europe-west1').https.onRequest((req
         }
       });
 
+      if (Object.keys(attemptsUpdates).length > 0) {
+        await codesRef.update(attemptsUpdates);
+      }
+
       if (!validKey) {
-        if (Object.keys(attemptsUpdates).length > 0) {
-          await codesRef.update(attemptsUpdates);
-        }
         return res.status(400).json({ error: 'Invalid or expired code' });
       }
 
