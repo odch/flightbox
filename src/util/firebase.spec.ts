@@ -133,25 +133,46 @@ describe('util/firebase', () => {
       global.fetch = originalFetch;
     });
 
-    it('resolves with code and email on success', async () => {
+    it('resolves on success (returns undefined, no code in response)', async () => {
       const mockResponse = {
         ok: true,
-        json: jest.fn().mockResolvedValue({
-          code: '123456',
-          email: 'user@example.com',
-        }),
+        json: jest.fn().mockResolvedValue({ success: true }),
       };
       global.fetch = jest.fn().mockResolvedValue(mockResponse);
 
-      const result = await requestSignInCode('user@example.com');
-      expect(result).toEqual({
-        code: '123456',
-        email: 'user@example.com',
-      });
+      const result = await requestSignInCode('user@example.com', 'Thun', '#003863');
+      expect(result).toBeUndefined();
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('generateSignInCode'),
         expect.objectContaining({ method: 'POST' })
       );
+    });
+
+    it('sends airportName and themeColor to server', async () => {
+      const mockResponse = { ok: true };
+      global.fetch = jest.fn().mockResolvedValue(mockResponse);
+
+      await requestSignInCode('user@example.com', 'Thun', '#003863');
+
+      const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
+      expect(body).toEqual({
+        email: 'user@example.com',
+        airportName: 'Thun',
+        themeColor: '#003863',
+      });
+    });
+
+    it('does not expose code in response', async () => {
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({ success: true }),
+      };
+      global.fetch = jest.fn().mockResolvedValue(mockResponse);
+
+      const result = await requestSignInCode('user@example.com', 'Thun', '#003863');
+      // Result should be undefined (not an object with code)
+      expect(result).toBeUndefined();
     });
 
     it('rejects when response is not ok with error from body', async () => {
@@ -161,7 +182,7 @@ describe('util/firebase', () => {
       };
       global.fetch = jest.fn().mockResolvedValue(mockResponse);
 
-      await expect(requestSignInCode('bad@example.com'))
+      await expect(requestSignInCode('bad@example.com', 'Thun', '#003863'))
         .rejects.toThrow('Invalid email');
     });
 
@@ -172,14 +193,14 @@ describe('util/firebase', () => {
       };
       global.fetch = jest.fn().mockResolvedValue(mockResponse);
 
-      await expect(requestSignInCode('user@example.com'))
-        .rejects.toThrow('Failed to generate sign-in code');
+      await expect(requestSignInCode('user@example.com', 'Thun', '#003863'))
+        .rejects.toThrow('Failed to send sign-in code');
     });
 
     it('rejects when fetch throws', async () => {
       global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
 
-      await expect(requestSignInCode('user@example.com'))
+      await expect(requestSignInCode('user@example.com', 'Thun', '#003863'))
         .rejects.toThrow('Network error');
     });
   });

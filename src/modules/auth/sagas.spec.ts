@@ -418,6 +418,23 @@ describe('modules', () => {
           global.__FIREBASE_PROJECT_ID__ = 'test-project';
         });
 
+        it('should call requestSignInCode with email, airportName and themeColor', () => {
+          const action = actions.sendAuthenticationEmail('user@example.com', false);
+          const generator = sagas.sendAuthenticationEmail(action);
+
+          expect(generator.next().value).toEqual(put(actions.setSubmitting()));
+          // next: sets isLocalSignIn in localStorage (synchronous)
+          expect(generator.next().value).toEqual(
+            call(fbRequestSignInCode, 'user@example.com', 'Test Airport', '#003863')
+          );
+
+          expect(generator.next().value).toEqual(
+            put(actions.sendAuthenticationEmailSuccess())
+          );
+
+          expectDoneWithoutReturn(generator);
+        });
+
         it('should put sendAuthenticationEmailFailure on exception', () => {
           const action = actions.sendAuthenticationEmail('user@example.com', false);
           const generator = sagas.sendAuthenticationEmail(action);
@@ -425,7 +442,7 @@ describe('modules', () => {
           expect(generator.next().value).toEqual(put(actions.setSubmitting()));
           // next: sets isLocalSignIn in localStorage (synchronous), then calls requestSignInCode
           expect(generator.next().value).toEqual(
-            call(fbRequestSignInCode, 'user@example.com')
+            call(fbRequestSignInCode, 'user@example.com', 'Test Airport', '#003863')
           );
 
           const error = new Error('Network error');

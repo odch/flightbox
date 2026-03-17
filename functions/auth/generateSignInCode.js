@@ -4,6 +4,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const crypto = require('crypto');
 const cors = require('cors')({origin: true});
+const { sendSignInEmail } = require('./sendSignInEmail');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
@@ -38,7 +39,7 @@ exports.generateSignInCode = functions.region('europe-west1').https.onRequest((r
         return res.status(validationError.status).json({ error: validationError.error });
       }
 
-      const { email } = req.body;
+      const { email, airportName, themeColor } = req.body;
       const normalizedEmail = email.toLowerCase();
 
       const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
@@ -52,12 +53,13 @@ exports.generateSignInCode = functions.region('europe-west1').https.onRequest((r
         attempts: 0,
       });
 
-      res.status(200).json({ code, email: normalizedEmail });
+      await sendSignInEmail({ email: normalizedEmail, signInCode: code, airportName, themeColor });
+
+      res.status(200).json({ success: true });
     } catch (error) {
       console.error('Error generating sign-in code:', error);
       res.status(500).json({
-        error: 'Failed to generate sign-in code',
-        details: error.message,
+        error: 'Failed to send sign-in code',
       });
     }
   });
