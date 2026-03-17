@@ -95,7 +95,7 @@ module.exports = {
       themeColor: projectConf.themeColor || '#ffffff',
       shortName: projectConf.shortName || projectConf.title,
     }),
-    ...(process.env.ENV === 'production' ? [
+    ...(!process.env.DEV ? [
       new GenerateSW({
         clientsClaim: true,
         skipWaiting: true,
