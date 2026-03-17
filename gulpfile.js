@@ -69,7 +69,8 @@ function copyFavicons(done) {
 
   return gulp.src(path.join(faviconDir, '*'), {
     base: path.join(__dirname, 'theme', projectConf.theme),
-    allowEmpty: true
+    allowEmpty: true,
+    encoding: false
   })
     .pipe(gulp.dest(config.output.path));
 }
