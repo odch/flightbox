@@ -64,6 +64,8 @@
   },
   "theme": "lszm",
   "title": "Flightbox - Flugplatz Mollis",
+  "themeColor": "#324158",
+  "shortName": "Flightbox LSZM",
   "paymentMethods": ["checkout", "invoice"],
   "homebasePayment": true,
   "loginForm": "email",

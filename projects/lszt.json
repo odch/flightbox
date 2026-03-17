@@ -102,6 +102,8 @@
   "flightnetCompany": "mfgt",
   "theme": "lszt",
   "title": "Flightbox - Flugplatz Lommis",
+  "themeColor": "#003863",
+  "shortName": "Flightbox LSZT",
   "paymentMethods": ["cash", "card"],
   "memberManagement": true
 }

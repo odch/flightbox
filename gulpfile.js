@@ -75,6 +75,56 @@ function copyFavicons(done) {
     .pipe(gulp.dest(config.output.path));
 }
 
+function generateManifest(done) {
+  const config = require('./webpack.config.js');
+  const projectName = process.env.npm_config_project || 'lszt';
+  const projectConf = projects.load(projectName);
+
+  const themeColor = projectConf.themeColor || '#ffffff';
+  const shortName = projectConf.shortName || projectConf.title;
+  const themeName = projectConf.theme;
+
+  const faviconDir = path.join(__dirname, 'theme', themeName, 'favicons');
+  const manifestPath = path.join(faviconDir, 'manifest.json');
+
+  let icons;
+  if (fs.existsSync(manifestPath)) {
+    const existing = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    icons = existing.icons || [];
+  } else {
+    const pngFiles = fs.existsSync(faviconDir)
+      ? fs.readdirSync(faviconDir).filter(f => f.startsWith('android-chrome') && f.endsWith('.png'))
+      : [];
+    icons = pngFiles.map(f => {
+      const match = f.match(/(\d+)x(\d+)/);
+      const size = match ? `${match[1]}x${match[2]}` : '192x192';
+      return { src: `/favicons/${f}`, sizes: size, type: 'image/png' };
+    });
+  }
+
+  const manifest = {
+    name: projectConf.title,
+    short_name: shortName,
+    icons,
+    theme_color: themeColor,
+    background_color: '#ffffff',
+    display: 'standalone',
+    start_url: '/',
+    scope: '/',
+    orientation: 'portrait',
+  };
+
+  const outDir = path.join(config.output.path, 'favicons');
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+  }
+  fs.writeFileSync(
+    path.join(outDir, 'manifest.json'),
+    JSON.stringify(manifest, null, 2)
+  );
+  done();
+}
+
 function buildFirebaseRules() {
   const config = require('./webpack.config.js');
   const projectName = process.env.npm_config_project || 'lszt';
@@ -87,7 +137,7 @@ function buildFirebaseRules() {
     .pipe(gulp.dest(config.output.path));
 }
 
-const assets = gulp.parallel(copyResetCss, copyFavicons, buildFirebaseRules);
+const assets = gulp.parallel(copyResetCss, copyFavicons, buildFirebaseRules, generateManifest);
 
 exports.clean = clean;
 exports.build = gulp.series(clean, bundleJS, assets);
