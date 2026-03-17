@@ -23,14 +23,14 @@ describe('modules', () => {
       });
 
       describe('SET_SUBMITTING', () => {
-        it('should set submitting to true and clear failure', () => {
+        it('should set submitting to true, clear failure, and clear otpVerificationFailure', () => {
           expect(
             reducer({
               initialized: false,
               authenticated: false,
               submitting: false,
               failure: true,
-              otpVerificationFailure: false,
+              otpVerificationFailure: true,
               guestAuthentication: { submitting: false, failure: false },
             }, actions.setSubmitting())
           ).toEqual({
@@ -40,6 +40,20 @@ describe('modules', () => {
             failure: false,
             otpVerificationFailure: false,
             guestAuthentication: { submitting: false, failure: false },
+          });
+        });
+      });
+
+      describe('SEND_AUTHENTICATION_EMAIL_SUCCESS', () => {
+        it('should set submitting to false', () => {
+          expect(
+            reducer({
+              ...INITIAL_STATE,
+              submitting: true,
+            }, actions.sendAuthenticationEmailSuccess())
+          ).toEqual({
+            ...INITIAL_STATE,
+            submitting: false,
           });
         });
       });
