@@ -3,8 +3,6 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithCustomToken,
-  isSignInWithEmailLink,
-  signInWithEmailLink,
   signOut,
 } from 'firebase/auth';
 import {
@@ -45,55 +43,49 @@ export function authenticate(token) {
   return signInWithCustomToken(getAuth(), token);
 }
 
-export function authenticateEmail(email, local) {
-  return new Promise((resolve, reject) => {
-    initialize();
+export function requestSignInCode(email: string) {
+  initialize();
 
-    const functionUrl = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/generateSignInLink`;
+  const functionUrl = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/generateSignInCode`;
 
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email,
-        continueUrl: window.location.href
-      })
-    };
-
-    fetch(functionUrl, requestOptions)
-      .then(response => {
-        if (!response.ok) {
-          return response.json().then(errorData => {
-            throw new Error(errorData.error || 'Failed to generate sign-in link');
-          });
-        }
-        return response.json();
-      })
-      .then(data => {
-        window.localStorage.setItem('emailForSignIn', email);
-        window.localStorage.setItem('isLocalSignIn', local);
-
-        resolve({
-          signInLink: data.signInLink,
-          email: data.email
+  return fetch(functionUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(errorData => {
+          throw new Error(errorData.error || 'Failed to generate sign-in code');
         });
-      })
-      .catch(reject);
-  });
+      }
+      return response.json();
+    })
+    .then(data => ({
+      code: data.code,
+      email: data.email,
+    }));
 }
 
-export function isSignInWithEmail() {
+export function verifyOtpCode(email: string, code: string) {
   initialize();
-  return isSignInWithEmailLink(getAuth(), window.location.href);
-}
 
-export function signInWithEmail() {
-  const email = window.localStorage.getItem('emailForSignIn');
-  initialize();
-  return signInWithEmailLink(getAuth(), email!, window.location.href)
-    .then(() => {
-      window.localStorage.removeItem('emailForSignIn');
-    });
+  const functionUrl = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/verifySignInCode`;
+
+  return fetch(functionUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code }),
+  })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(errorData => {
+          throw new Error(errorData.error || 'Invalid or expired code');
+        });
+      }
+      return response.json();
+    })
+    .then(data => data.token);
 }
 
 export function unauth() {

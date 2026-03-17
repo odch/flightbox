@@ -29,9 +29,6 @@
     "admin": "Administration"
   },
   "login": {
-    "emailSent": "Es wurde eine E-Mail an <strong>{{email}}</strong> gesendet. Folgen Sie bitte den Anweisungen in der E-Mail, um die Anmeldung abzuschliessen.",
-    "emailSentPlain": "Es wurde eine E-Mail an {{email}} gesendet. Folgen Sie bitte den Anweisungen in der E-Mail, um die Anmeldung abzuschliessen.",
-    "completeLogin": "Sie wollen sich über einen Login-Link anmelden. Geben Sie Ihre E-Mail-Adresse noch einmal ein, um die Anmeldung abzuschliessen.",
     "emailLabel": "E-Mail",
     "loginButton": "Anmelden",
     "cancelButton": "Abbrechen",
@@ -40,14 +37,16 @@
     "hintGuestLogin": "Wenn Sie sich als Gast anmelden, können Sie nur Ihre Ankunft und Ihren Abflug erfassen. Die erfassten Bewegungen können Sie anschliessend nicht mehr einsehen.",
     "failure": "Anmeldung fehlgeschlagen",
     "loginAsGuest": "Als Gast anmelden",
-    "emailSentPre": "Es wurde eine E-Mail an",
-    "emailSentPost": "gesendet. Folgen Sie bitte den Anweisungen in der E-Mail, um die Anmeldung abzuschliessen.",
     "username": "Benutzername",
     "password": "Passwort",
     "logout": "Abmelden",
     "profile": "Profil",
     "guest": "Gast",
-    "kiosk": "Kiosk"
+    "kiosk": "Kiosk",
+    "otpInstruction": "Geben Sie den 6-stelligen Code ein, der an",
+    "otpAriaLabel": "Anmelde-Code Eingabe",
+    "otpDigitLabel": "Ziffer",
+    "otpVerificationFailure": "Ungültiger oder abgelaufener Code. Bitte versuchen Sie es erneut."
   },
   "hints": {
     "departureBeforeStart_text": "Abflug immer vor dem Start",

@@ -18,26 +18,23 @@
     <div style="padding: 20px 30px;">
       <p style="font-size: 16px; margin-bottom: 20px;">Hallo!</p>
 
-      <p style="font-size: 16px; margin-bottom: 30px;">Klicken Sie auf die Schaltfläche unten, um sich sicher bei Ihrem Flightbox-Konto anzumelden:</p>
+      <p style="font-size: 16px; margin-bottom: 30px;">Geben Sie den folgenden Code in der Flightbox-App ein, um sich anzumelden:</p>
 
-      <!-- Sign In Button -->
+      <!-- OTP Code Display -->
       <div style="text-align: center; margin: 40px 0;">
-        <a href="{{signInLink}}"
-           style="display: inline-block; background: {{themeColor}}; color: white; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); transition: all 0.3s ease;">
-          Bei Flightbox anmelden
-        </a>
+        <div style="display: inline-block; background-color: #f8f9fa; border: 2px solid {{themeColor}}; border-radius: 12px; padding: 20px 40px;">
+          <p style="margin: 0 0 8px 0; font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 1px;">Ihr Anmelde-Code</p>
+          <p style="margin: 0; font-size: 42px; font-weight: 700; letter-spacing: 12px; color: #222; font-family: 'Courier New', Courier, monospace;">{{signInCode}}</p>
+        </div>
       </div>
-
-      <p style="font-size: 14px; color: #666; margin-top: 30px;">Falls die Schaltfläche nicht funktioniert, kopieren Sie diesen Link und fügen Sie ihn in Ihren Browser ein:</p>
-      <p style="word-break: break-all; font-size: 14px; color: #667eea; background-color: #f8f9fa; padding: 15px; border-radius: 4px; font-family: monospace;">{{signInLink}}</p>
 
       <!-- Security Notice -->
       <div style="margin-top: 40px; padding: 20px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;">
-        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #856404;">🔒 Sicherheitshinweis</h3>
+        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #856404;">Sicherheitshinweis</h3>
         <p style="margin: 0; font-size: 14px; color: #856404;">
-          • Dieser Link läuft in <strong>1 Stunde</strong> aus Sicherheitsgründen ab<br>
-          • Falls Sie diesen Anmelde-Link nicht angefordert haben, können Sie diese E-Mail ignorieren<br>
-          • Teilen Sie diesen Link niemals mit anderen
+          &#x2022; Dieser Code ist <strong>10 Minuten</strong> g&uuml;ltig<br>
+          &#x2022; Falls Sie diesen Code nicht angefordert haben, k&ouml;nnen Sie diese E-Mail ignorieren<br>
+          &#x2022; Teilen Sie diesen Code niemals mit anderen
         </p>
       </div>
     </div>

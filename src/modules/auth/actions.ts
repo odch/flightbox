@@ -9,9 +9,8 @@ export const KIOSK_TOKEN_AUTHENTICATION_FAILURE = 'KIOSK_TOKEN_AUTHENTICATION_FA
 export const SEND_AUTHENTICATION_EMAIL = 'SEND_AUTHENTICATION_EMAIL' as const;
 export const SEND_AUTHENTICATION_EMAIL_SUCCESS = 'SEND_AUTHENTICATION_EMAIL_SUCCESS' as const;
 export const SEND_AUTHENTICATION_EMAIL_FAILURE = 'SEND_AUTHENTICATION_EMAIL_FAILURE' as const;
-export const COMPLETE_EMAIL_AUTHENTICATION = 'COMPLETE_EMAIL_AUTHENTICATION' as const;
-export const EMAIL_AUTHENTICATION_COMPLETION_FAILURE = 'EMAIL_AUTHENTICATION_COMPLETION_FAILURE' as const;
-export const REQUEST_EMAIL_AUTHENTICATION = 'REQUEST_EMAIL_AUTHENTICATION' as const;
+export const VERIFY_OTP_CODE = 'VERIFY_OTP_CODE' as const;
+export const OTP_VERIFICATION_FAILURE = 'OTP_VERIFICATION_FAILURE' as const;
 export const REQUEST_FIREBASE_AUTHENTICATION = 'REQUEST_FIREBASE_AUTHENTICATION' as const;
 export const FIREBASE_AUTHENTICATION = 'FIREBASE_AUTHENTICATION' as const;
 export const LOGOUT = 'LOGOUT' as const;
@@ -30,9 +29,8 @@ export type AuthAction =
   | { type: typeof SEND_AUTHENTICATION_EMAIL; payload: { email: string; local: boolean } }
   | { type: typeof SEND_AUTHENTICATION_EMAIL_SUCCESS }
   | { type: typeof SEND_AUTHENTICATION_EMAIL_FAILURE }
-  | { type: typeof COMPLETE_EMAIL_AUTHENTICATION; payload: { email: string } }
-  | { type: typeof EMAIL_AUTHENTICATION_COMPLETION_FAILURE }
-  | { type: typeof REQUEST_EMAIL_AUTHENTICATION }
+  | { type: typeof VERIFY_OTP_CODE; payload: { email: string; code: string } }
+  | { type: typeof OTP_VERIFICATION_FAILURE }
   | { type: typeof REQUEST_FIREBASE_AUTHENTICATION; payload: { token: string; failureAction?: AuthAction; local?: boolean } }
   | { type: typeof FIREBASE_AUTHENTICATION; payload: { authData: unknown } }
   | { type: typeof LOGOUT }
@@ -48,12 +46,6 @@ export function requestIpAuthentication() {
 export function ipAuthenticationFailure() {
   return {
     type: IP_AUTHENTICATION_FAILURE,
-  };
-}
-
-export function requestEmailAuthentication() {
-  return {
-    type: REQUEST_EMAIL_AUTHENTICATION,
   };
 }
 
@@ -107,18 +99,19 @@ export function sendAuthenticationEmail(email: string, local: boolean) {
   };
 }
 
-export function completeEmailAuthentication(email: string) {
+export function verifyOtpCode(email: string, code: string) {
   return {
-    type: COMPLETE_EMAIL_AUTHENTICATION,
+    type: VERIFY_OTP_CODE,
     payload: {
       email,
+      code,
     },
   };
 }
 
-export function emailAuthenticationCompletionFailure() {
+export function otpVerificationFailure() {
   return {
-    type: EMAIL_AUTHENTICATION_COMPLETION_FAILURE,
+    type: OTP_VERIFICATION_FAILURE,
   };
 }
 
