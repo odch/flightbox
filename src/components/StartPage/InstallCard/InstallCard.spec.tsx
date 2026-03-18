@@ -8,10 +8,10 @@ jest.mock('react-i18next', () => ({
 
 import InstallCard from './InstallCard';
 
-const regularAuthData = { uid: 'user-123', email: 'test@example.com' };
+const regularAuthData = { uid: 'user-123' };
 const guestAuthData = { uid: 'guest-uid', guest: true };
 const kioskAuthData = { uid: 'kiosk-uid', kiosk: true };
-const ipauthData = { uid: 'ipauth', email: 'ip@a.ch' };
+const ipauthData = { uid: 'ipauth' };
 
 function setVisitDays(count: number) {
   const days: string[] = [];
@@ -90,6 +90,13 @@ describe('InstallCard', () => {
     expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
   });
 
+  it('renders with exactly 3 visit days (threshold boundary)', () => {
+    setVisitDays(3);
+    fireBeforeInstallPrompt();
+    renderWithTheme(<InstallCard authData={regularAuthData} />);
+    expect(screen.getByTestId('install-card')).toBeInTheDocument();
+  });
+
   it('does not render when permanently dismissed', () => {
     setVisitDays(5);
     localStorage.setItem(DISMISS_COUNT_KEY, '2');
@@ -135,6 +142,18 @@ describe('InstallCard', () => {
 
     Object.defineProperty(navigator, 'userAgent', { writable: true, value: originalUA });
     Object.defineProperty(navigator, 'platform', { writable: true, value: originalPlatform });
+  });
+
+  it('renders iOS instructions on macOS Safari 17+', () => {
+    setVisitDays(5);
+    const originalUA = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      writable: true,
+      value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+    });
+    renderWithTheme(<InstallCard authData={regularAuthData} />);
+    expect(screen.getByTestId('ios-instructions')).toBeInTheDocument();
+    Object.defineProperty(navigator, 'userAgent', { writable: true, value: originalUA });
   });
 
   it('install button calls event.prompt()', () => {
