@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { usePwaInstall } from './usePwaInstall';
+import { usePwaInstall, AuthData } from './usePwaInstall';
 
 const Wrapper = styled.div`
   border-radius: 10px;
@@ -68,11 +68,7 @@ const ShareIcon = () => (
 );
 
 interface InstallCardProps {
-  authData: {
-    guest?: boolean;
-    kiosk?: boolean;
-    uid?: string;
-  };
+  authData: AuthData;
 }
 
 const InstallCard: React.FC<InstallCardProps> = ({ authData }) => {

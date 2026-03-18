@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderWithTheme, screen, fireEvent } from '../../../../test/renderWithTheme';
+import { renderWithTheme, screen, fireEvent, act } from '../../../../test/renderWithTheme';
 import { VISIT_DAYS_KEY, DISMISS_TS_KEY, DISMISS_COUNT_KEY, _resetCachedPromptForTesting } from './usePwaInstall';
 
 jest.mock('react-i18next', () => ({
@@ -35,10 +35,10 @@ function mockStandalone(standalone: boolean) {
   });
 }
 
-function fireBeforeInstallPrompt() {
+function fireBeforeInstallPrompt(outcome: 'accepted' | 'dismissed' = 'dismissed') {
   const event = new Event('beforeinstallprompt');
   (event as any).prompt = jest.fn().mockResolvedValue(undefined);
-  (event as any).userChoice = Promise.resolve({ outcome: 'dismissed' });
+  (event as any).userChoice = Promise.resolve({ outcome });
   Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
   window.dispatchEvent(event);
   return event as any;
@@ -143,6 +143,28 @@ describe('InstallCard', () => {
     renderWithTheme(<InstallCard authData={regularAuthData} />);
     fireEvent.click(screen.getByTestId('install-button'));
     expect(event.prompt).toHaveBeenCalled();
+  });
+
+  it('install button hides the card immediately regardless of native prompt outcome', () => {
+    setVisitDays(5);
+    fireBeforeInstallPrompt('dismissed');
+    renderWithTheme(<InstallCard authData={regularAuthData} />);
+    expect(screen.getByTestId('install-card')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('install-button'));
+    expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
+  });
+
+  it('install button hides the card when native prompt is accepted', async () => {
+    setVisitDays(5);
+    fireBeforeInstallPrompt('accepted');
+    renderWithTheme(<InstallCard authData={regularAuthData} />);
+    expect(screen.getByTestId('install-card')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('install-button'));
+    });
+    expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
   });
 
   it('dismiss hides card and writes localStorage', () => {
