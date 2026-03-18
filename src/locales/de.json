@@ -510,6 +510,14 @@
     "twint_external": "Twint",
     "invoice": "Rechnung"
   },
+  "pwaInstall": {
+    "title": "App installieren",
+    "description": "Installieren Sie Flightbox für schnelleren Zugriff direkt vom Startbildschirm.",
+    "installButton": "Installieren",
+    "iosInstructionsPre": "Tippen Sie auf ",
+    "iosInstructionsPost": " und wählen Sie \"Zum Home-Bildschirm\".",
+    "dismiss": "Nicht jetzt"
+  },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."
   },
