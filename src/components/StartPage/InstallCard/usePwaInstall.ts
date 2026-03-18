@@ -14,7 +14,7 @@ interface PwaInstallResult {
   dismiss: () => void;
 }
 
-interface AuthData {
+export interface AuthData {
   guest?: boolean;
   kiosk?: boolean;
   uid?: string;
@@ -43,12 +43,13 @@ function isStandalone(): boolean {
     || (navigator as any).standalone === true;
 }
 
-function detectPlatform(promptAvailable: boolean): Platform {
-  if (isStandalone()) return null;
+function detectPlatform(promptAvailable: boolean, standalone: boolean): Platform {
+  if (standalone) return null;
 
   if (promptAvailable) return 'chromium';
 
   const ua = navigator.userAgent;
+  // TODO: navigator.platform is deprecated; use navigator.userAgentData?.platform when Safari supports it
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   if (isIOS) {
     const isInAppBrowser = /CriOS|FxiOS|OPiOS|EdgiOS/.test(ua);
@@ -124,12 +125,13 @@ export function usePwaInstall(authData: AuthData): PwaInstallResult {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  const platform = detectPlatform(promptAvailable);
+  const standalone = isStandalone();
+  const platform = detectPlatform(promptAvailable, standalone);
   const eligible = isEligibleUser(authData);
   const enoughVisits = visitDays.length >= VISIT_THRESHOLD;
 
   const shouldShow = eligible
-    && !isStandalone()
+    && !standalone
     && platform !== null
     && enoughVisits
     && !isDismissed()
@@ -141,6 +143,8 @@ export function usePwaInstall(authData: AuthData): PwaInstallResult {
       const p = promptRef.current;
       promptRef.current = null;
       cachedPromptEvent = null;
+      // Hide the card immediately regardless of the user's choice on the native prompt
+      setPromptAvailable(false);
       p.prompt();
       p.userChoice.then(result => {
         if (result.outcome === 'accepted') {
