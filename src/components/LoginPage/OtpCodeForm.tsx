@@ -23,6 +23,7 @@ const Instruction = styled.p`
 const OtpInputsRow = styled.div`
   display: flex;
   gap: 0.5rem;
+  max-width: 100%;
 `;
 
 interface DigitInputProps {
@@ -49,10 +50,16 @@ const DigitInput = styled.input<DigitInputProps>`
     background-color: #fff;
   }
 
+  @media (max-width: 480px) {
+    width: 2.4rem;
+    height: 2.9rem;
+    font-size: 1.3rem;
+  }
+
   @media (max-width: 360px) {
-    width: 2.2rem;
-    height: 2.8rem;
-    font-size: 1.2rem;
+    width: 2rem;
+    height: 2.5rem;
+    font-size: 1.1rem;
   }
 `;
 
