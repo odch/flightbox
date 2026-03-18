@@ -513,10 +513,12 @@
   },
   "pwaInstall": {
     "title": "App installieren",
-    "description": "Installieren Sie Flightbox für schnelleren Zugriff direkt vom Startbildschirm.",
+    "description": "Installieren Sie Flightbox als App für schnelleren Zugriff.",
     "installButton": "Installieren",
     "iosInstructionsPre": "Tippen Sie auf ",
     "iosInstructionsPost": " und wählen Sie \"Zum Home-Bildschirm\".",
+    "macosInstructionsPre": "Klicken Sie auf ",
+    "macosInstructionsPost": " und wählen Sie \"Zum Dock hinzufügen\".",
     "dismiss": "Nicht jetzt"
   },
   "maskedInput": {
