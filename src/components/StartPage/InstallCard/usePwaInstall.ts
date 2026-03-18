@@ -146,11 +146,6 @@ export function usePwaInstall(authData: AuthData): PwaInstallResult {
       // Hide the card immediately regardless of the user's choice on the native prompt
       setPromptAvailable(false);
       p.prompt();
-      p.userChoice.then(result => {
-        if (result.outcome === 'accepted') {
-          setDismissed(true);
-        }
-      });
     }
   }, []);
 
