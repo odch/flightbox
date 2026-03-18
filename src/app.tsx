@@ -60,6 +60,18 @@ setTimeout(
 
 if (!__DEV__ && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js');
+    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+      setInterval(() => {
+        registration.update();
+      }, 3 * 60 * 1000);
+    }).catch(() => {});
+  });
+
+  let hasController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hasController) {
+      window.location.reload();
+    }
+    hasController = true;
   });
 }
