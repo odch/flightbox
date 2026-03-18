@@ -23,7 +23,7 @@ export interface AuthData {
 const VISIT_DAYS_KEY = 'flightbox_pwa_visit_days';
 const DISMISS_TS_KEY = 'flightbox_pwa_dismiss_ts';
 const DISMISS_COUNT_KEY = 'flightbox_pwa_dismiss_count';
-const VISIT_THRESHOLD = 1;
+const VISIT_THRESHOLD = 3;
 const DISMISS_DAYS = 90;
 
 let cachedPromptEvent: BeforeInstallPromptEvent | null = null;
