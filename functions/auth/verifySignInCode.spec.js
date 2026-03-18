@@ -164,6 +164,7 @@ describe('functions', () => {
 
       expect(mockCodesRef.child).toHaveBeenCalledWith('k1');
       expect(mockCodesRef.remove).toHaveBeenCalled();
+      expect(mockAuthAdmin.createCustomToken).toHaveBeenCalledWith('user-uid-123', { email: 'user@example.com' });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({ token: 'custom-token-xyz' });
     });
@@ -184,6 +185,7 @@ describe('functions', () => {
       await capturedHandler(req, res);
 
       expect(mockAuthAdmin.createUser).toHaveBeenCalledWith({ email: 'new@example.com' });
+      expect(mockAuthAdmin.createCustomToken).toHaveBeenCalledWith('new-uid-456', { email: 'new@example.com' });
       expect(res.status).toHaveBeenCalledWith(200);
     });
 

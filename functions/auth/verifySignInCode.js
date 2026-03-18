@@ -90,7 +90,7 @@ exports.verifySignInCode = functions.region('europe-west1').https.onRequest((req
         }
       }
 
-      const customToken = await admin.auth().createCustomToken(uid);
+      const customToken = await admin.auth().createCustomToken(uid, { email: normalizedEmail });
       res.status(200).json({ token: customToken });
     } catch (error) {
       console.error('Error verifying sign-in code:', error);
