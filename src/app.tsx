@@ -62,9 +62,11 @@ if (!__DEV__ && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js').then(registration => {
       setInterval(() => {
-        registration.update();
+        registration.update().catch(() => {});
       }, 3 * 60 * 1000);
-    }).catch(() => {});
+    }).catch(err => {
+      console.error('SW registration failed', err);
+    });
   });
 
   let hasController = !!navigator.serviceWorker.controller;
