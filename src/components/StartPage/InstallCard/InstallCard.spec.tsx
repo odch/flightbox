@@ -139,12 +139,13 @@ describe('InstallCard', () => {
     renderWithTheme(<InstallCard authData={regularAuthData} />);
     expect(screen.getByTestId('ios-instructions')).toBeInTheDocument();
     expect(screen.getByTestId('share-icon')).toBeInTheDocument();
+    expect(screen.queryByTestId('macos-instructions')).not.toBeInTheDocument();
 
     Object.defineProperty(navigator, 'userAgent', { writable: true, value: originalUA });
     Object.defineProperty(navigator, 'platform', { writable: true, value: originalPlatform });
   });
 
-  it('renders iOS instructions on macOS Safari 17+', () => {
+  it('renders macOS instructions on macOS Safari 17+', () => {
     setVisitDays(5);
     const originalUA = navigator.userAgent;
     Object.defineProperty(navigator, 'userAgent', {
@@ -152,7 +153,9 @@ describe('InstallCard', () => {
       value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
     });
     renderWithTheme(<InstallCard authData={regularAuthData} />);
-    expect(screen.getByTestId('ios-instructions')).toBeInTheDocument();
+    expect(screen.getByTestId('macos-instructions')).toBeInTheDocument();
+    expect(screen.getByTestId('share-icon')).toBeInTheDocument();
+    expect(screen.queryByTestId('ios-instructions')).not.toBeInTheDocument();
     Object.defineProperty(navigator, 'userAgent', { writable: true, value: originalUA });
   });
 

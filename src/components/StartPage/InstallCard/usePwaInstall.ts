@@ -5,7 +5,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-type Platform = 'chromium' | 'ios-safari' | null;
+type Platform = 'chromium' | 'ios-safari' | 'macos-safari' | null;
 
 interface PwaInstallResult {
   shouldShow: boolean;
@@ -60,7 +60,7 @@ function detectPlatform(promptAvailable: boolean, standalone: boolean): Platform
   // macOS Safari 17+
   const safariMatch = ua.match(/Version\/(\d+).*Safari/);
   if (safariMatch && parseInt(safariMatch[1], 10) >= 17 && !/Chrome|Chromium/.test(ua)) {
-    return 'ios-safari'; // Same manual install flow
+    return 'macos-safari';
   }
 
   return null;

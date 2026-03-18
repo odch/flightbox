@@ -44,7 +44,7 @@ const DismissLink = styled.button`
   display: block;
 `;
 
-const IosInstructions = styled(Description)`
+const Instructions = styled(Description)`
   margin-bottom: 0.5em;
 `;
 
@@ -87,9 +87,14 @@ const InstallCard: React.FC<InstallCardProps> = ({ authData }) => {
         </InstallButton>
       )}
       {platform === 'ios-safari' && (
-        <IosInstructions data-testid="ios-instructions">
+        <Instructions data-testid="ios-instructions">
           {t('pwaInstall.iosInstructionsPre')}<ShareIcon />{t('pwaInstall.iosInstructionsPost')}
-        </IosInstructions>
+        </Instructions>
+      )}
+      {platform === 'macos-safari' && (
+        <Instructions data-testid="macos-instructions">
+          {t('pwaInstall.macosInstructionsPre')}<ShareIcon />{t('pwaInstall.macosInstructionsPost')}
+        </Instructions>
       )}
       <DismissLink onClick={dismiss} data-testid="dismiss-link">
         {t('pwaInstall.dismiss')}
