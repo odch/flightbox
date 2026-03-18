@@ -28,6 +28,9 @@ const DISMISS_DAYS = 90;
 
 let cachedPromptEvent: BeforeInstallPromptEvent | null = null;
 
+// Module-level listener captures `beforeinstallprompt` events that fire
+// before any component has mounted (e.g. during initial page load).
+// The hook's useEffect listener handles events that fire after mount.
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (e: Event) => {
     e.preventDefault();
@@ -105,6 +108,8 @@ function isEligibleUser(authData: AuthData): boolean {
 export function usePwaInstall(authData: AuthData): PwaInstallResult {
   const [promptAvailable, setPromptAvailable] = useState(cachedPromptEvent !== null);
   const [dismissed, setDismissed] = useState(false);
+  // useState initializer runs once on mount — avoids writing localStorage on every render
+  const [visitDays] = useState<string[]>(() => recordVisitDay());
   const promptRef = useRef<BeforeInstallPromptEvent | null>(cachedPromptEvent);
 
   useEffect(() => {
@@ -119,7 +124,6 @@ export function usePwaInstall(authData: AuthData): PwaInstallResult {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  const visitDays = recordVisitDay();
   const platform = detectPlatform(promptAvailable);
   const eligible = isEligibleUser(authData);
   const enoughVisits = visitDays.length >= VISIT_THRESHOLD;
@@ -133,8 +137,12 @@ export function usePwaInstall(authData: AuthData): PwaInstallResult {
 
   const install = useCallback(() => {
     if (promptRef.current) {
-      promptRef.current.prompt();
-      promptRef.current.userChoice.then(result => {
+      // Clear refs before calling prompt() — a consumed event cannot be reused
+      const p = promptRef.current;
+      promptRef.current = null;
+      cachedPromptEvent = null;
+      p.prompt();
+      p.userChoice.then(result => {
         if (result.outcome === 'accepted') {
           setDismissed(true);
         }
@@ -152,6 +160,7 @@ export function usePwaInstall(authData: AuthData): PwaInstallResult {
   return { shouldShow, platform, install, dismiss };
 }
 
+/** @internal Test-only helper to reset the module-level prompt cache between tests. */
 export function _resetCachedPromptForTesting() {
   cachedPromptEvent = null;
 }
