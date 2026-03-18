@@ -68,7 +68,8 @@ const EmailLoginForm = props => {
     failure,
     emailSent,
     otpVerificationFailure,
-    updateEmail
+    updateEmail,
+    resetOtp
   } = props;
 
   if (emailSent) {
@@ -79,6 +80,7 @@ const EmailLoginForm = props => {
         failure={otpVerificationFailure}
         onSubmit={(code) => verifyOtpCode(email, code)}
         onResend={() => sendAuthenticationEmail(email, !!queryToken)}
+        onChangeEmail={resetOtp}
       />
     );
   }
@@ -142,6 +144,7 @@ const EmailLoginForm = props => {
   sendAuthenticationEmail: PropTypes.func.isRequired,
   verifyOtpCode: PropTypes.func.isRequired,
   updateEmail: PropTypes.func.isRequired,
+  resetOtp: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   showCancel: PropTypes.bool.isRequired,
   email: PropTypes.string.isRequired,

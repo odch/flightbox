@@ -48,7 +48,8 @@
     "otpDigitLabel": "Ziffer",
     "otpVerificationFailure": "Ungültiger oder abgelaufener Code. Bitte versuchen Sie es erneut.",
     "otpResend": "Code erneut senden",
-    "otpResendIn": "Code erneut senden ({{seconds}}s)"
+    "otpResendIn": "Code erneut senden ({{seconds}}s)",
+    "otpChangeEmail": "Falsche E-Mail-Adresse? Hier ändern"
   },
   "hints": {
     "departureBeforeStart_text": "Abflug immer vor dem Start",

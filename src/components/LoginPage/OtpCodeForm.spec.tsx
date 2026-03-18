@@ -318,6 +318,27 @@ describe('OtpCodeForm', () => {
     });
   });
 
+  // ─── Change email ─────────────────────────────────────────────────────────
+
+  describe('change email button', () => {
+    it('does not render change email button when onChangeEmail is not provided', () => {
+      renderWithTheme(<OtpCodeForm {...baseProps} />);
+      expect(screen.queryByText('login.otpChangeEmail')).not.toBeInTheDocument();
+    });
+
+    it('renders change email button when onChangeEmail is provided', () => {
+      renderWithTheme(<OtpCodeForm {...baseProps} onChangeEmail={jest.fn()} />);
+      expect(screen.getByText('login.otpChangeEmail')).toBeInTheDocument();
+    });
+
+    it('calls onChangeEmail when the button is clicked', () => {
+      const onChangeEmail = jest.fn();
+      renderWithTheme(<OtpCodeForm {...baseProps} onChangeEmail={onChangeEmail} />);
+      fireEvent.click(screen.getByText('login.otpChangeEmail'));
+      expect(onChangeEmail).toHaveBeenCalledTimes(1);
+    });
+  });
+
   // ─── Resend ───────────────────────────────────────────────────────────────
 
   describe('resend button', () => {

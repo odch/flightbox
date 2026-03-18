@@ -47,6 +47,13 @@ function setEmailSent(state: LoginPageState) {
   };
 }
 
+function resetOtp(state: LoginPageState) {
+  return {
+    ...state,
+    emailSent: false,
+  };
+}
+
 function sendAuthenticationEmailFailure(state: LoginPageState) {
   return {
     ...state,
@@ -70,6 +77,7 @@ const ACTION_HANDLERS = {
   [actions.UPDATE_USERNAME]: updateUsername,
   [actions.UPDATE_PASSWORD]: updatePassword,
   [actions.UPDATE_EMAIL]: updateEmail,
+  [actions.RESET_OTP]: resetOtp,
   [USERNAME_PASSWORD_AUTHENTICATION_FAILURE]: usernamePasswordAuthenticationFailure,
   [FIREBASE_AUTHENTICATION_EVENT]: firebaseAuthenticationEvent,
   [SEND_AUTHENTICATION_EMAIL_SUCCESS]: setEmailSent,
