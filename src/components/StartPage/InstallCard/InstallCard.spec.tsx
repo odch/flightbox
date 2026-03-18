@@ -4,11 +4,6 @@ import { VISIT_DAYS_KEY, DISMISS_TS_KEY, DISMISS_COUNT_KEY, _resetCachedPromptFo
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: key => key }),
-  withTranslation: () => Component => {
-    const WrappedComponent = props => <Component {...props} t={key => key} />;
-    WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
-    return WrappedComponent;
-  },
 }));
 
 import InstallCard from './InstallCard';
@@ -125,6 +120,7 @@ describe('InstallCard', () => {
   it('renders iOS instructions on iOS Safari UA', () => {
     setVisitDays(5);
     const originalUA = navigator.userAgent;
+    const originalPlatform = navigator.platform;
     Object.defineProperty(navigator, 'userAgent', {
       writable: true,
       value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
@@ -138,6 +134,7 @@ describe('InstallCard', () => {
     expect(screen.getByTestId('share-icon')).toBeInTheDocument();
 
     Object.defineProperty(navigator, 'userAgent', { writable: true, value: originalUA });
+    Object.defineProperty(navigator, 'platform', { writable: true, value: originalPlatform });
   });
 
   it('install button calls event.prompt()', () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { usePwaInstall } from './usePwaInstall';
 
 const Wrapper = styled.div`
@@ -44,10 +44,8 @@ const DismissLink = styled.button`
   display: block;
 `;
 
-const IosInstructions = styled.p`
-  margin: 0 0 0.5em;
-  font-size: 0.95em;
-  line-height: 1.4;
+const IosInstructions = styled(Description)`
+  margin-bottom: 0.5em;
 `;
 
 const ShareIcon = () => (
@@ -75,10 +73,10 @@ interface InstallCardProps {
     kiosk?: boolean;
     uid?: string;
   };
-  t: (key: string) => string;
 }
 
-const InstallCard: React.FC<InstallCardProps> = ({ authData, t }) => {
+const InstallCard: React.FC<InstallCardProps> = ({ authData }) => {
+  const { t } = useTranslation();
   const { shouldShow, platform, install, dismiss } = usePwaInstall(authData);
 
   if (!shouldShow) return null;
@@ -104,4 +102,4 @@ const InstallCard: React.FC<InstallCardProps> = ({ authData, t }) => {
   );
 };
 
-export default withTranslation()(InstallCard);
+export default InstallCard;
