@@ -94,15 +94,30 @@ const ResendButton = styled.button`
   }
 `;
 
+const ChangeEmailButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #777;
+  text-decoration: underline;
+
+  &:hover {
+    color: #444;
+  }
+`;
+
 interface OtpCodeFormProps {
   email: string;
   submitting: boolean;
   failure: boolean;
   onSubmit: (code: string) => void;
   onResend?: () => void;
+  onChangeEmail?: () => void;
 }
 
-const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, onSubmit, onResend }) => {
+const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, onSubmit, onResend, onChangeEmail }) => {
   const { t } = useTranslation();
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -252,6 +267,15 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, o
               ? t('login.otpResendIn', { seconds: cooldown })
               : t('login.otpResend')}
           </ResendButton>
+        )}
+        {onChangeEmail && (
+          <ChangeEmailButton
+            type="button"
+            onClick={onChangeEmail}
+            data-cy="otp-change-email"
+          >
+            {t('login.otpChangeEmail')}
+          </ChangeEmailButton>
         )}
       </Actions>
     </Wrapper>

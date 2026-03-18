@@ -1,6 +1,6 @@
-import {updateEmail, updatePassword, updateUsername} from './actions';
+import {updateEmail, updatePassword, updateUsername, resetOtp} from './actions';
 import reducer from './reducer';
 
-export { updateUsername, updatePassword, updateEmail };
+export { updateUsername, updatePassword, updateEmail, resetOtp };
 
 export default reducer;

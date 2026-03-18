@@ -1,5 +1,5 @@
 import {connect} from 'react-redux';
-import {updateEmail} from '../modules/ui/loginPage';
+import {updateEmail, resetOtp} from '../modules/ui/loginPage';
 import {sendAuthenticationEmail, verifyOtpCode} from '../modules/auth';
 import {hideLogin} from '../modules/ui/showLogin';
 import EmailLoginForm from '../components/LoginPage/EmailLoginForm';
@@ -31,6 +31,7 @@ const mapStateToProps = (state: RootState) => {
 
 const mapActionCreators = {
   updateEmail,
+  resetOtp,
   sendAuthenticationEmail,
   verifyOtpCode,
   onCancel: hideLogin,
