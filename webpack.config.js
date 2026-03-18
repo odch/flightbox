@@ -100,24 +100,6 @@ module.exports = {
         clientsClaim: true,
         skipWaiting: true,
         exclude: [/\.map$/],
-        runtimeCaching: [
-          {
-            urlPattern: /^https?.*/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'html-cache',
-              expiration: { maxEntries: 10 },
-            },
-          },
-          {
-            urlPattern: /\.(?:js|css|woff2?|png|jpg|svg)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'static-cache',
-              expiration: { maxEntries: 60, maxAgeSeconds: 30 * 24 * 60 * 60 },
-            },
-          },
-        ],
       }),
     ] : []),
   ],
