@@ -1,0 +1,12 @@
+PPR request rejected
+
+Unfortunately, your PPR request has been rejected.
+
+Aircraft: {{immatriculation}}
+Date: {{plannedDate}}
+Time: {{plannedTime}}
+
+Remarks: {{reviewRemarks}}
+
+---
+This email was sent by open digital Flightbox
