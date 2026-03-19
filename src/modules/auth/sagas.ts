@@ -225,13 +225,16 @@ function* monitorFirebaseAuthentication(channel: any) {
   }
 }
 
-function createFbAuthenticationChannel() {
+export function createFbAuthenticationChannel() {
   try {
     const channel = createChannel();
     watchAuthState(channel.put);
     return channel;
   } catch(e) {
     logError('Failed to create authentication watch channel', e);
+    const channel = createChannel();
+    channel.put(null);
+    return channel;
   }
 }
 
