@@ -155,14 +155,14 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Add `admin.ppr`, `nav.ppr` keys
 
 ### Phase 4: Redux Module (`src/modules/ppr/`)
-- [ ] Create `src/modules/ppr/actions.ts` — LOAD, SUBMIT, UPDATE_STATUS, DELETE, SELECT
-- [ ] Create `src/modules/ppr/reducer.ts` — `{ data, loading, selected, form: { submitted, commitFailed } }`
-- [ ] Create `src/modules/ppr/remote.ts` — HTTP calls to API (fetch with auth token)
-- [ ] Create `src/modules/ppr/sagas.ts` — load, submit, review, delete
-- [ ] Create `src/modules/ppr/index.ts` — barrel export
-- [ ] Register in `src/modules/index.ts` — combineReducers + fork sagas
-- [ ] Write tests: `src/modules/ppr/reducer.spec.ts`
-- [ ] Write tests: `src/modules/ppr/sagas.spec.ts`
+- [x] Create `src/modules/ppr/actions.ts` — LOAD, SUBMIT, UPDATE_STATUS, DELETE, SELECT
+- [x] Create `src/modules/ppr/reducer.ts` — `{ data, loading, selected, form: { submitted, commitFailed, reviewFailed, deleteFailed } }`
+- [x] Create `src/modules/ppr/remote.ts` — HTTP calls to API (fetch with auth token)
+- [x] Create `src/modules/ppr/sagas.ts` — load, submit, review, delete
+- [x] Create `src/modules/ppr/index.ts` — barrel export
+- [x] Register in `src/modules/index.ts` — combineReducers + fork sagas
+- [x] Write tests: `src/modules/ppr/reducer.spec.ts`
+- [x] Write tests: `src/modules/ppr/sagas.spec.ts`
 
 ### Phase 5: Pilot UI
 - [ ] Create `src/components/PprRequestForm/` — single-page react-final-form
