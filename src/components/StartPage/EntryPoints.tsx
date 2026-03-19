@@ -10,6 +10,8 @@ const movementsImagePath = require('./ic_list_black_48dp_2x.png');
 const messageImagePath = require('./ic_message_black_48dp_2x.png');
 const helpImagePath = require('./ic_help_outline_black_48dp_2x.png');
 const adminImagePath = require('./ic_settings_black_48dp_2x.png');
+const pprImagePath = require('./ic_message_black_48dp_2x.png');
+const pprListImagePath = require('./ic_list_black_48dp_2x.png');
 
 const Wrapper = styled.div`
   display: flex;
@@ -27,7 +29,7 @@ const EntryPoint = styled(ImageButton)`
   }
 `;
 
-const EntryPoints = ({ admin, guest, kiosk }: any) => {
+const EntryPoints = ({ admin, guest, kiosk, email }: any) => {
   const { t } = useTranslation();
   if (guest === true || kiosk === true) {
     return (
@@ -39,12 +41,18 @@ const EntryPoints = ({ admin, guest, kiosk }: any) => {
     );
   }
 
+  // PPR requests belong to the pilot's email address, so logins without
+  // one (username/password) cannot use them.
+  const pprAvailable = typeof __CONF__ !== 'undefined' && __CONF__.ppr === true && !!email;
+
   return (
     <Wrapper>
       <EntryPoint img={departureImagePath} label={t('nav.departure')} href="/departure/new" dataCy="new-departure"/>
       <EntryPoint img={arrivalImagePath} label={t('nav.arrival')} href="/arrival/new" dataCy="new-arrival"/>
       <EntryPoint img={movementsImagePath} label={t('nav.movements')} href="/movements" dataCy="movements"/>
       <EntryPoint img={messageImagePath} label={t('nav.message')} href="/message" dataCy="message"/>
+      {pprAvailable && <EntryPoint img={pprImagePath} label={t('nav.ppr')} href="/ppr/new" dataCy="new-ppr"/>}
+      {pprAvailable && <EntryPoint img={pprListImagePath} label={t('nav.pprList')} href="/ppr" dataCy="ppr-list"/>}
       <EntryPoint img={helpImagePath} label={t('nav.help')} href="/help" dataCy="help"/>
       {admin === true && <EntryPoint img={adminImagePath} label={t('nav.admin')} href="/admin" dataCy="admin"/>}
     </Wrapper>
@@ -55,6 +63,7 @@ EntryPoints.propTypes = {
   admin: PropTypes.bool,
   guest: PropTypes.bool,
   kiosk: PropTypes.bool,
+  email: PropTypes.string,
 };
 
 export default EntryPoints;

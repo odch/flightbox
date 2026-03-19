@@ -72,6 +72,14 @@ jest.mock(
   '../../containers/ProfilePageContainer',
   () => ({ __esModule: true, default: () => <div>profile-page</div> })
 );
+jest.mock(
+  '../../containers/PprRequestPageContainer',
+  () => ({ __esModule: true, default: () => <div>ppr-request-page</div> })
+);
+jest.mock(
+  '../../containers/PprStatusListContainer',
+  () => ({ __esModule: true, default: () => <div>ppr-status-list</div> })
+);
 
 import App from './App';
 

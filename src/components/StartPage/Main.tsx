@@ -23,7 +23,7 @@ const Main = ({ auth }: any) => (
   <Wrapper>
     <AerodromeStatusBanner/>
     <Hints guest={auth.data.guest} kiosk={auth.data.kiosk} hintsDismissable={auth.data.hintsDismissable}/>
-    <EntryPoints admin={auth.data.admin} guest={auth.data.guest} kiosk={auth.data.kiosk}/>
+    <EntryPoints admin={auth.data.admin} guest={auth.data.guest} kiosk={auth.data.kiosk} email={auth.data.email}/>
     <Promotions>
       <PostLoginPasskeyPrompt/>
       <InstallCard authData={auth.data} />
