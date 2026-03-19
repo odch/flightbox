@@ -23,6 +23,8 @@ import GlobalStyle from './style/global-style';
 
 import * as Sentry from "@sentry/react";
 
+import { getMidnightDelayMs } from './util/getMidnightDelay';
+
 Sentry.init({
   dsn: "https://8a606d82aa68850021fbfac2ffda30b5@o4509293310967808.ingest.de.sentry.io/4509293314113617",
   sendDefaultPii: true
@@ -53,10 +55,7 @@ createRoot(document.getElementById('app')!).render(
   </Provider>
 );
 
-setTimeout(
-  () => window.location.reload(),
-  moment('24:00:00', 'hh:mm:ss').diff(moment(), 'milliseconds')
-);
+setTimeout(() => window.location.reload(), getMidnightDelayMs());
 
 if (!__DEV__ && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
