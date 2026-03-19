@@ -14,6 +14,20 @@ Auth endpoint: `https://europe-west1-cypress-testing.cloudfunctions.net/auth`
 | `foo`    | `bar`    | user  |
 | `admin`  | `12345`  | admin |
 
+## Email user login (for `loginEmail` command)
+
+The `cy.loginEmail()` command authenticates as `cypress-pilot@example.com` via the
+`createTestEmailToken` Cloud Function. This function is gated behind a config flag
+that must be enabled on the `cypress-testing` project:
+
+```bash
+firebase functions:config:set testing.enabled=true --project cypress-testing
+firebase deploy --only functions --project cypress-testing
+```
+
+The function always creates a token for the hardcoded email `cypress-pilot@example.com`
+and returns 403 on any project where `testing.enabled` is not set.
+
 ## Aerodrome settings (already in place)
 
 - Runway `36` with `departureRoute` options including `west`
