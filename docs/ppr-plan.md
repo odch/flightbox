@@ -137,17 +137,17 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
   - Generic error messages, proper HTTP status codes
 
 #### 2g. Mount in API
-- [ ] Add `api.use('(/api)?/ppr', pprRoutes)` to `functions/api/index.js`
+- [x] Add `api.use('(/api)?/ppr', pprRoutes)` to `functions/api/index.js`
 
 #### Security tests (backend)
-- [ ] HTML tags stripped from all string fields
-- [ ] Oversized inputs rejected (remarks > 500 chars)
-- [ ] Past dates rejected for plannedDate
-- [ ] Non-admin cannot call review endpoint (403)
-- [ ] Pilot cannot delete another pilot's request (403)
-- [ ] Invalid status transitions rejected
-- [ ] Unauthenticated requests return 401
-- [ ] Email templates HTML-escape user input
+- [x] HTML tags stripped from all string fields (pprRequest.spec.js)
+- [x] Oversized inputs rejected (pprRequest.spec.js)
+- [x] Past dates rejected for plannedDate (pprRequest.spec.js)
+- [x] Non-admin cannot call review endpoint - 403 (routes.spec.js)
+- [x] Pilot cannot delete another pilot's request - 403 (deleteRequest.spec.js, routes.spec.js)
+- [x] Invalid status transitions rejected (pprRequest.spec.js, reviewRequest.spec.js)
+- [x] Unauthenticated requests return 401 (routes.spec.js)
+- [x] Email templates HTML-escape user input (emailTemplates.spec.js)
 
 ### Phase 3: Internationalization
 - [x] Add `ppr.*` keys to `src/locales/de.json`
@@ -175,8 +175,8 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Create `src/containers/PprStatusListContainer.tsx`
 - [x] Add PPR entry to `src/components/StartPage/EntryPoints.tsx` (when `__CONF__.ppr && !guest && !kiosk`)
 - [x] Add routes to `src/components/App/App.tsx`: `/ppr/new`, `/ppr` (guarded by `__CONF__.ppr`)
-- [ ] Write tests: `PprRequestForm.spec.tsx`
-- [ ] Write tests: `PprStatusList.spec.tsx`
+- [x] Write tests: `PprRequestForm/validate.spec.ts`
+- [x] Write tests: `PprStatusList/PprStatusList.spec.tsx`
 
 ### Phase 6: Admin UI
 - [x] Create `src/components/AdminPage/subpages/AdminPprPage.tsx`
@@ -184,7 +184,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Create `src/containers/PprRequestListContainer.tsx`
 - [x] Add PPR tab to `src/components/AdminPage/AdminPage.tsx` (hide when `__CONF__.ppr !== true`)
 - [x] Add PPR nav item to AdminNavigation
-- [ ] Write tests: `PprRequestList.spec.tsx`
+- [x] Write tests: `PprRequestList/PprRequestList.spec.tsx`
 
 ### Phase 7: GDPR/DSGVO Compliance
 - [x] Create `functions/ppr/cleanup.js` — scheduled function, deletes requests 30 days past plannedDate
