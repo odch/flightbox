@@ -127,7 +127,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Create `functions/ppr/adapters/emailNotifier.js`
 
 #### 2f. Express router
-- [ ] Create `functions/ppr/routes.js`
+- [x] Create `functions/ppr/routes.js`
   - `POST /requests` — pilot submits (fbAuth + rate limit)
   - `GET /requests` — list (fbAuth, server-side admin check)
   - `POST /requests/:key/review` — admin approves/rejects (fbAdminAuth)

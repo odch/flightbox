@@ -8,10 +8,12 @@ const syncUsers = require('./syncUsers')
 const fetchUserInvoiceRecipients = require('./fetchUserInvoiceRecipients')
 const {fetchInvoices, fetchCheckouts, postPrepopulatedForm, isCustomsDeclarationAppAvailable} = require('./customs/fetchFromCustoms')
 const {fbAuth, fbAdminAuth} = require('./fbAuth')
+const pprRoutes = require('../ppr/routes')
 
 const api = express()
 
 api.use(cors)
+api.use('(/api)?/ppr', pprRoutes)
 
 api.get('(/api)?/aerodrome/status', async (req, res) => {
   const status = await fetchAerodromeStatus(admin.database())
