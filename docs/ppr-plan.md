@@ -85,32 +85,32 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Write tests: `functions/ppr/domain/pprRequest.spec.js`
 
 #### 2b. Ports
-- [ ] Create `functions/ppr/ports/pprRepository.js` — JSDoc interface
+- [x] Create `functions/ppr/ports/pprRepository.js` — JSDoc interface
   - `save(pprRequest) → { key }`
   - `updateStatus(key, { status, reviewedBy, reviewedAt, reviewRemarks })`
   - `findByKey(key) → pprRequest | null`
   - `findAll() → pprRequest[]`
   - `findByEmail(email) → pprRequest[]`
   - `deleteByKey(key) → void`
-- [ ] Create `functions/ppr/ports/notifier.js` — JSDoc interface
+- [x] Create `functions/ppr/ports/notifier.js` — JSDoc interface
   - `notifyRequestSubmitted(pprRequest, adminEmail)`
   - `notifyRequestReviewed(pprRequest)`
 
 #### 2c. Use cases
-- [ ] Create `functions/ppr/usecases/submitRequest.js`
+- [x] Create `functions/ppr/usecases/submitRequest.js`
   - Receives `{ repository, notifier }`, input, adminEmail
   - Creates entity, saves, notifies admin
-- [ ] Create `functions/ppr/usecases/reviewRequest.js`
+- [x] Create `functions/ppr/usecases/reviewRequest.js`
   - Receives `{ repository, notifier }`, key, review
   - Validates exists + status transition (only pending → approved/rejected)
   - Sanitizes admin reviewRemarks
   - Updates status, notifies pilot
-- [ ] Create `functions/ppr/usecases/listRequests.js`
+- [x] Create `functions/ppr/usecases/listRequests.js`
   - Admin: findAll(), Pilot: findByEmail()
-- [ ] Create `functions/ppr/usecases/deleteRequest.js`
+- [x] Create `functions/ppr/usecases/deleteRequest.js`
   - Validates ownership (createdBy === email)
-- [ ] Write tests: `functions/ppr/usecases/submitRequest.spec.js`
-- [ ] Write tests: `functions/ppr/usecases/reviewRequest.spec.js`
+- [x] Write tests: `functions/ppr/usecases/submitRequest.spec.js`
+- [x] Write tests: `functions/ppr/usecases/reviewRequest.spec.js`
 
 #### 2d. Firebase adapter
 - [ ] Create `functions/ppr/adapters/firebasePprRepository.js`
