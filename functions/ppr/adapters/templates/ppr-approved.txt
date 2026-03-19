@@ -1,0 +1,10 @@
+PPR-Anfrage genehmigt
+
+Ihre PPR-Anfrage wurde genehmigt.
+
+Luftfahrzeug: {{immatriculation}}
+Datum: {{plannedDate}}
+Zeit: {{plannedTime}}
+
+---
+Diese E-Mail wurde von der open digital Flightbox gesendet

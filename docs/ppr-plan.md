@@ -118,13 +118,13 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Write tests: `functions/ppr/adapters/firebasePprRepository.spec.js`
 
 #### 2e. Email notifier
-- [ ] Extract shared SMTP utils from `functions/auth/sendSignInEmail.js` into `functions/email/smtp.js`
-- [ ] Create `functions/ppr/adapters/emailTemplates.js`
+- [x] Extract shared SMTP utils from `functions/auth/sendSignInEmail.js` into `functions/email/smtp.js`
+- [x] Create `functions/ppr/adapters/emailTemplates.js`
   - Request submitted → admin: pilot name, aircraft, date/time
   - Request approved → pilot: confirmation
   - Request rejected → pilot: with admin remarks
   - HTML-escape all user-supplied values; include text/plain alternative
-- [ ] Create `functions/ppr/adapters/emailNotifier.js`
+- [x] Create `functions/ppr/adapters/emailNotifier.js`
 
 #### 2f. Express router
 - [ ] Create `functions/ppr/routes.js`

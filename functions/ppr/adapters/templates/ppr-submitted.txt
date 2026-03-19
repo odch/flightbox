@@ -1,0 +1,12 @@
+Neue PPR-Anfrage
+
+Eine neue PPR-Anfrage ist eingegangen:
+
+Pilot: {{pilotName}}
+Luftfahrzeug: {{immatriculation}}
+Datum: {{plannedDate}}
+Zeit: {{plannedTime}}
+Flugart: {{flightType}}
+
+---
+Diese E-Mail wurde von der open digital Flightbox gesendet
