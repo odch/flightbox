@@ -150,9 +150,9 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [ ] Email templates HTML-escape user input
 
 ### Phase 3: Internationalization
-- [ ] Add `ppr.*` keys to `src/locales/de.json`
-- [ ] Add `ppr.*` keys to `src/locales/en.json`
-- [ ] Add `admin.ppr`, `nav.ppr` keys
+- [x] Add `ppr.*` keys to `src/locales/de.json`
+- [ ] Add `ppr.*` keys to `src/locales/en.json` (no en.json exists yet — skip)
+- [x] Add `admin.ppr`, `nav.ppr` keys
 
 ### Phase 4: Redux Module (`src/modules/ppr/`)
 - [ ] Create `src/modules/ppr/actions.ts` — LOAD, SUBMIT, UPDATE_STATUS, DELETE, SELECT

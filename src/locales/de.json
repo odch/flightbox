@@ -26,7 +26,9 @@
     "movements": "Erfasste Bewegungen",
     "message": "Rückmeldung",
     "help": "Hilfe",
-    "admin": "Administration"
+    "admin": "Administration",
+    "ppr": "PPR-Anfrage",
+    "pprList": "Meine PPR-Anfragen"
   },
   "login": {
     "emailLabel": "E-Mail",
@@ -73,7 +75,8 @@
     "invoiceRecipients": "Rechnungsempfänger",
     "kioskAccess": "Kiosk-Login",
     "guestAccess": "Gast-Login",
-    "import": "Import"
+    "import": "Import",
+    "ppr": "PPR-Anfragen"
   },
   "movement": {
     "openCustoms": "Zollanmeldung öffnen",
@@ -520,6 +523,28 @@
     "macosInstructionsPre": "Klicken Sie auf ",
     "macosInstructionsPost": " und wählen Sie \"Zum Dock hinzufügen\".",
     "dismiss": "Nicht jetzt"
+  },
+  "ppr": {
+    "title": "PPR-Anfrage",
+    "newRequest": "Neue PPR-Anfrage",
+    "myRequests": "Meine PPR-Anfragen",
+    "submit": "Anfrage senden",
+    "plannedDate": "Geplantes Datum",
+    "plannedTime": "Geplante Zeit",
+    "remarks": "Zweck / Bemerkungen",
+    "status": {
+      "pending": "Ausstehend",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt"
+    },
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "adminRemarks": "Bemerkungen (Admin)",
+    "noRequests": "Keine PPR-Anfragen vorhanden.",
+    "submitSuccess": "PPR-Anfrage wurde gesendet.",
+    "submitFailed": "PPR-Anfrage konnte nicht gesendet werden.",
+    "deleteConfirm": "Möchten Sie diese PPR-Anfrage wirklich löschen?",
+    "deleted": "PPR-Anfrage wurde gelöscht."
   },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."
