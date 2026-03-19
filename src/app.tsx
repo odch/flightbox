@@ -23,6 +23,7 @@ import GlobalStyle from './style/global-style';
 
 import * as Sentry from "@sentry/react";
 
+import ErrorFallback from './components/ErrorFallback';
 import { getMidnightDelayMs } from './util/getMidnightDelay';
 
 Sentry.init({
@@ -46,12 +47,14 @@ sagaMiddleware.run(autoRestart(sagas));
 
 createRoot(document.getElementById('app')!).render(
   <Provider store={store}>
-    <GlobalStyle/>
-    <ThemeProvider theme={theme}>
-      <Router history={history}>
-        <Route component={App}/>
-      </Router>
-    </ThemeProvider>
+    <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
+      <GlobalStyle/>
+      <ThemeProvider theme={theme}>
+        <Router history={history}>
+          <Route component={App}/>
+        </Router>
+      </ThemeProvider>
+    </Sentry.ErrorBoundary>
   </Provider>
 );
 
