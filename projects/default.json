@@ -30,5 +30,6 @@
   "homebasePayment": false,
   "loginForm": "usernamePassword",
   "maskContactInformation": true,
-  "memberManagement": false
+  "memberManagement": false,
+  "ppr": false
 }
