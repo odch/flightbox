@@ -33,5 +33,6 @@
   "memberManagement": false,
   "privacySettings": false,
   "profileEnabled": true,
-  "passkeysEnabled": false
+  "passkeysEnabled": false,
+  "ppr": false
 }
