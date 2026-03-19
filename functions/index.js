@@ -28,6 +28,7 @@ const {
   revokeGuestSessionsOnTokenRotation,
 } = require('./auth/revokeSharedSessionsOnTokenRotation');
 const api = require('./api');
+const { isPprEnabled } = require('./ppr/enabled');
 const webhook = require('./webhook');
 const associatedMovementsTriggers = require('./associatedMovements/setAssociatedMovementsTriggers');
 const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsTrigger');
@@ -74,6 +75,14 @@ exports.updateArrivalPaymentStatusOnCardPaymentUpdate = updateArrivalPaymentStat
 exports.computeArrivalFeesOnWrite = computeArrivalFeesOnWrite;
 
 exports.deriveLockDateIsoOnWrite = deriveLockDateIsoOnWrite;
+
+// PPR is enabled per aerodrome (`ppr` in projects/<name>.json); see
+// functions/ppr/enabled.js. The PPR routes in the api function follow the
+// same flag.
+if (isPprEnabled()) {
+  const { scheduledPprCleanup } = require('./ppr/cleanup');
+  exports.scheduledPprCleanup = scheduledPprCleanup;
+}
 
 let privacyFunctionsEnabled = false;
 try {
