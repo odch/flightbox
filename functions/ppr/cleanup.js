@@ -1,0 +1,77 @@
+'use strict'
+
+const { onSchedule } = require('firebase-functions/v2/scheduler')
+const { getDatabase } = require('firebase-admin/database')
+const { zurichDate, addDays } = require('./domain/pprRequest')
+const rateLimiter = require('./adapters/firebaseRateLimiter')
+
+const SCHEDULE = '0 2 * * *' // Daily at 2 AM
+const TIMEZONE = 'Europe/Zurich'
+const DEFAULT_RETENTION_DAYS = 30
+// Larger values would push the cutoff out of the 'YYYY-MM-DD' range that the
+// string comparison below relies on (and then delete everything).
+const MAX_RETENTION_DAYS = 3650
+
+function isValidRetention(value) {
+  return Number.isInteger(value) && value > 0 && value <= MAX_RETENTION_DAYS
+}
+
+async function getRetentionDays() {
+  const snapshot = await getDatabase().ref('/settings/ppr/retentionDays').once('value')
+  const value = snapshot.val()
+  if (isValidRetention(value)) {
+    return value
+  }
+  if (value !== null) {
+    console.warn(`Ignoring invalid /settings/ppr/retentionDays (${JSON.stringify(value)}), using ${DEFAULT_RETENTION_DAYS}`)
+  }
+  return DEFAULT_RETENTION_DAYS
+}
+
+// The aerodrome's (Zurich) date `retentionDays` days ago, as 'YYYY-MM-DD'
+function getCutoffDate(retentionDays, now = Date.now()) {
+  return addDays(zurichDate(now), -retentionDays)
+}
+
+async function cleanupExpiredPprRequests() {
+  const retentionDays = await getRetentionDays()
+  const cutoffDate = getCutoffDate(retentionDays)
+
+  const snapshot = await getDatabase().ref('/pprRequests').once('value')
+  if (!snapshot.exists()) return 0
+
+  const updates = {}
+  let count = 0
+
+  snapshot.forEach(child => {
+    const request = child.val()
+    if (request.plannedDate && request.plannedDate < cutoffDate) {
+      updates[child.key] = null
+      count++
+    }
+  })
+
+  if (count > 0) {
+    await getDatabase().ref('/pprRequests').update(updates)
+  }
+
+  return count
+}
+
+exports.scheduledPprCleanup = onSchedule(
+  {
+    region: 'europe-west1',
+    schedule: SCHEDULE,
+    timeZone: TIMEZONE,
+  },
+  async () => {
+    const count = await cleanupExpiredPprRequests()
+    if (count > 0) {
+      console.log(`Cleaned up ${count} expired PPR requests`)
+    }
+    await rateLimiter.pruneExpired()
+  }
+)
+
+exports.cleanupExpiredPprRequests = cleanupExpiredPprRequests
+exports.getCutoffDate = getCutoffDate
