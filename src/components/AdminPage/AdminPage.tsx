@@ -16,6 +16,7 @@ import AdminGuestAccessPage from './subpages/AdminGuestAccessPage';
 import AdminKioskAccessPage from './subpages/AdminKioskAccessPage';
 import AdminPrivacySettingsPage from './subpages/AdminPrivacySettingsPage';
 import AdminApiAccessPage from './subpages/AdminApiAccessPage';
+import AdminPprPage from './subpages/AdminPprPage';
 import Content from './Content';
 import objectToArray from '../../util/objectToArray';
 
@@ -64,6 +65,8 @@ const renderSubPage = (activeTab: string) => {
       return <AdminPrivacySettingsPage/>;
     case 'api-access':
       return <AdminApiAccessPage/>;
+    case 'ppr':
+      return <AdminPprPage/>;
     default:
       return <AdminExportPage/>;
   }
@@ -119,6 +122,9 @@ const AdminPage = ({auth, guestAccessToken, kioskAccessToken, customsAvailable, 
   const apiAccessEnabled = __CONF__.reportApiEnabled === true;
   if (!apiAccessEnabled) {
     hiddenTabs.push('api-access');
+  }
+  if (__CONF__.ppr !== true) {
+    hiddenTabs.push('ppr');
   }
 
   return (
