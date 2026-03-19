@@ -15,7 +15,8 @@ import ArrivalPage from "../../containers/ArrivalPageContainer";
 import ArrivalPaymentPage from "../../containers/ArrivalPaymentPageContainer";
 import AerodromeStatusPage from '../../containers/AerodromeStatusPageContainer';
 import ProfilePage from '../../containers/ProfilePageContainer';
-
+import PprRequestPage from '../../containers/PprRequestPageContainer';
+import PprStatusList from '../../containers/PprStatusListContainer';
 
 const UNPROTECTED_ROUTES = [
   '/aerodrome-status'
@@ -60,6 +61,8 @@ const App = (props: any) => {
       <Route path="/help" element={<HelpPage/>}/>
       <Route path="/aerodrome-status" element={<AerodromeStatusPage/>}/>
       {(typeof __CONF__ === 'undefined' || __CONF__.profileEnabled !== false) && <Route path="/profile" element={<ProfilePage/>}/>}
+      {typeof __CONF__ !== 'undefined' && __CONF__.ppr === true && <Route path="/ppr/new" element={<PprRequestPage/>}/>}
+      {typeof __CONF__ !== 'undefined' && __CONF__.ppr === true && <Route path="/ppr" element={<PprStatusList/>}/>}
       <Route path="*" element={<Navigate to="/" replace/>}/>
     </Routes>
   );
