@@ -13,6 +13,7 @@ import settings, {sagas as settingsSagas} from './settings';
 import messages, {sagas as messagesSagas} from './messages';
 import reports, {sagas as reportsSagas} from './reports';
 import ui, {sagas as uiSagas} from './ui';
+import ppr, {sagas as pprSagas} from './ppr';
 import profile, {sagas as profileSagas} from './profile';
 import frequentAerodromes, {sagas as frequentAerodromesSagas} from './frequentAerodromes';
 
@@ -26,6 +27,7 @@ const createRootReducer = () => combineReducers({
   movements,
   settings,
   messages,
+  ppr,
   reports,
   ui,
   profile,
@@ -47,6 +49,7 @@ export const sagas = function* rootSaga() {
     movementSagas,
     settingsSagas,
     messagesSagas,
+    pprSagas,
     reportsSagas,
     uiSagas,
     profileSagas,
