@@ -23,6 +23,7 @@ const { verifySignInCode } = require('./auth/verifySignInCode');
 const { cleanupExpiredSignInCodes } = require('./auth/cleanupExpiredSignInCodes');
 const { createTestEmailToken } = require('./auth/createTestEmailToken');
 const api = require('./api');
+const { scheduledPprCleanup } = require('./ppr/cleanup');
 const webhook = require('./webhook');
 const associatedMovementsTriggers = require('./associatedMovements/setAssociatedMovementsTriggers');
 const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsTrigger');
@@ -53,3 +54,5 @@ exports.enrichArrivalOnCreate = enrichMovements.enrichArrivalOnCreate;
 exports.enrichArrivalOnUpdate = enrichMovements.enrichArrivalOnUpdate;
 
 exports.updateArrivalPaymentStatusOnCardPaymentUpdate = updateArrivalPaymentStatus.updateArrivalPaymentStatusOnCardPaymentUpdate;
+
+exports.scheduledPprCleanup = scheduledPprCleanup;

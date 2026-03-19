@@ -187,12 +187,12 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [ ] Write tests: `PprRequestList.spec.tsx`
 
 ### Phase 7: GDPR/DSGVO Compliance
-- [ ] Create `functions/ppr/cleanup.js` — scheduled function, deletes requests 30 days past plannedDate
+- [x] Create `functions/ppr/cleanup.js` — scheduled function, deletes requests 30 days past plannedDate
   - Configurable via `/settings/ppr/retentionDays` (default: 30)
-- [ ] Register cleanup in `functions/index.js` as pubsub.schedule trigger
-- [ ] Ensure delete endpoint validates ownership server-side (done in Phase 2f)
-- [ ] Audit all Cloud Function handlers: no PII in logs (keys + status only)
-- [ ] Audit email templates: minimal content, no phone numbers
+- [x] Register cleanup in `functions/index.js` as pubsub.schedule trigger
+- [x] Ensure delete endpoint validates ownership server-side (done in Phase 2f)
+- [x] Audit all Cloud Function handlers: no PII in logs (keys + status only)
+- [x] Audit email templates: minimal content, no phone numbers
 
 ### Phase 8: Movement–PPR Link (Deferred)
 - [ ] Add optional PPR dropdown to departure wizard FlightPage (when `__CONF__.ppr`)
