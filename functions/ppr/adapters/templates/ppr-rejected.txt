@@ -1,0 +1,12 @@
+PPR-Anfrage abgelehnt
+
+Ihre PPR-Anfrage wurde leider abgelehnt.
+
+Luftfahrzeug: {{immatriculation}}
+Datum: {{plannedDate}}
+Zeit: {{plannedTime}}
+
+Bemerkung: {{reviewRemarks}}
+
+---
+Diese E-Mail wurde von der open digital Flightbox gesendet

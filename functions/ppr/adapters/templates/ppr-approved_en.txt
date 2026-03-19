@@ -1,0 +1,10 @@
+PPR request approved
+
+Your PPR request has been approved.
+
+Aircraft: {{immatriculation}}
+Date: {{plannedDate}}
+Time: {{plannedTime}}{{remarksText}}
+
+---
+This email was sent by open digital Flightbox
