@@ -3,7 +3,7 @@ import * as actions from './actions';
 import * as sagas from './sagas';
 import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
 import {expectDoneWithoutReturn, expectDoneWithReturn} from '../../../test/sagaUtils';
-import firebase, {authenticate as fbAuth, requestSignInCode as fbRequestSignInCode, verifyOtpCode as fbVerifyOtpCode, unauth as fbUnauth} from '../../util/firebase';
+import firebase, {authenticate as fbAuth, requestSignInCode as fbRequestSignInCode, verifyOtpCode as fbVerifyOtpCode, unauth as fbUnauth, watchAuthState} from '../../util/firebase';
 import {get} from 'firebase/database';
 
 jest.mock('../../util/firebase');
@@ -526,6 +526,26 @@ describe('modules', () => {
           expectDoneWithoutReturn(generator);
 
           global.__DISABLE_IP_AUTHENTICATION__ = origVal;
+        });
+      });
+
+      describe('createFbAuthenticationChannel', () => {
+        it('should return a channel when watchAuthState succeeds', () => {
+          (watchAuthState as jest.Mock).mockImplementation(() => {});
+          const channel = sagas.createFbAuthenticationChannel();
+          expect(channel).toBeDefined();
+          expect(channel.take).toBeDefined();
+          expect(channel.put).toBeDefined();
+        });
+
+        it('should return a fallback channel with null when watchAuthState throws', async () => {
+          (watchAuthState as jest.Mock).mockImplementation(() => {
+            throw new Error('Firebase not initialized');
+          });
+          const channel = sagas.createFbAuthenticationChannel();
+          expect(channel).toBeDefined();
+          const value = await channel.take();
+          expect(value).toBeNull();
         });
       });
 
