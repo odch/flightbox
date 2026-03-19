@@ -113,9 +113,9 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Write tests: `functions/ppr/usecases/reviewRequest.spec.js`
 
 #### 2d. Firebase adapter
-- [ ] Create `functions/ppr/adapters/firebasePprRepository.js`
+- [x] Create `functions/ppr/adapters/firebasePprRepository.js`
   - Implements pprRepository using `admin.database().ref('/pprRequests')`
-- [ ] Write tests: `functions/ppr/adapters/firebasePprRepository.spec.js`
+- [x] Write tests: `functions/ppr/adapters/firebasePprRepository.spec.js`
 
 #### 2e. Email notifier
 - [ ] Extract shared SMTP utils from `functions/auth/sendSignInEmail.js` into `functions/email/smtp.js`
