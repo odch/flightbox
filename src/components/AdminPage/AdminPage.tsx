@@ -14,6 +14,7 @@ import AdminAircraftPage from './subpages/AdminAircraftPage';
 import AdminInvoiceRecipientsPage from './subpages/AdminInvoiceRecipientsPage';
 import AdminGuestAccessPage from './subpages/AdminGuestAccessPage';
 import AdminKioskAccessPage from './subpages/AdminKioskAccessPage';
+import AdminPprPage from './subpages/AdminPprPage';
 import Content from './Content';
 import objectToArray from '../../util/objectToArray';
 
@@ -77,6 +78,8 @@ class AdminPage extends Component<any, any> {
         return <AdminGuestAccessPage/>;
       case 'kiosk-access':
         return <AdminKioskAccessPage/>;
+      case 'ppr':
+        return <AdminPprPage/>;
       default:
         return <AdminExportPage/>;
     }
@@ -101,6 +104,9 @@ class AdminPage extends Component<any, any> {
     }
     if (!memberManagementEnabled) {
       hiddenTabs.push('import')
+    }
+    if (__CONF__.ppr !== true) {
+      hiddenTabs.push('ppr')
     }
 
     return (

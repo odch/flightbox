@@ -116,6 +116,7 @@ const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange }) => {
     { key: 'invoice-recipients', label: t('admin.invoiceRecipients'), icon: 'receipt' },
     { key: 'kiosk-access', label: t('admin.kioskAccess'), icon: 'person_add' },
     { key: 'guest-access', label: t('admin.guestAccess'), icon: 'person_add' },
+    { key: 'ppr', label: t('admin.ppr'), icon: 'assignment' },
     { key: 'import', label: t('admin.import'), icon: 'file_upload' },
   ].filter(item => !hiddenTabs.includes(item.key));
 

@@ -179,11 +179,11 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [ ] Write tests: `PprStatusList.spec.tsx`
 
 ### Phase 6: Admin UI
-- [ ] Create `src/components/AdminPage/subpages/AdminPprPage.tsx`
-- [ ] Create `src/components/PprRequestList/` — all requests with approve/reject actions
-- [ ] Create `src/containers/PprRequestListContainer.tsx`
-- [ ] Add PPR tab to `src/components/AdminPage/AdminPage.tsx` (hide when `__CONF__.ppr !== true`)
-- [ ] Add PPR nav item to AdminNavigation
+- [x] Create `src/components/AdminPage/subpages/AdminPprPage.tsx`
+- [x] Create `src/components/PprRequestList/` — all requests with approve/reject actions
+- [x] Create `src/containers/PprRequestListContainer.tsx`
+- [x] Add PPR tab to `src/components/AdminPage/AdminPage.tsx` (hide when `__CONF__.ppr !== true`)
+- [x] Add PPR nav item to AdminNavigation
 - [ ] Write tests: `PprRequestList.spec.tsx`
 
 ### Phase 7: GDPR/DSGVO Compliance
