@@ -1,8 +1,18 @@
 import {all, call, put, takeEvery} from 'redux-saga/effects'
 import {history} from '../../history'
 import {getIdToken} from '../../util/firebase'
+import {getProfileDefaultValues} from '../movements/sagas'
 import * as actions from './actions';
 import * as remote from './remote';
+
+export function* initPprForm() {
+  try {
+    const profileValues = yield call(getProfileDefaultValues);
+    yield put(actions.pprFormInitialized(profileValues));
+  } catch (e) {
+    yield put(actions.pprFormInitialized({}));
+  }
+}
 
 export function* loadPprRequests() {
   yield put(actions.setPprLoading());
@@ -73,6 +83,7 @@ export function* confirmPprSubmitSuccess() {
 
 export default function* sagas() {
   yield all([
+    takeEvery(actions.INIT_PPR_FORM, initPprForm),
     takeEvery(actions.LOAD_PPR_REQUESTS, loadPprRequests),
     takeEvery(actions.SUBMIT_PPR_REQUEST, submitPprRequest),
     takeEvery(actions.REVIEW_PPR_REQUEST, reviewPprRequest),

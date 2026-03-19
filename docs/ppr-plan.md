@@ -165,16 +165,16 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Write tests: `src/modules/ppr/sagas.spec.ts`
 
 ### Phase 5: Pilot UI
-- [ ] Create `src/components/PprRequestForm/` — single-page react-final-form
+- [x] Create `src/components/PprRequestForm/` — single-page react-final-form
   - Aircraft: immatriculation, type, mtow (reuse wizard field components)
   - Pilot: name, email, phone (optional) — pre-populated from profile
   - Flight: plannedDate, plannedTime, flightType, remarks
   - Submit button
-- [ ] Create `src/components/PprStatusList/` — pilot's own requests with status badges
-- [ ] Create `src/containers/PprRequestFormContainer.tsx`
-- [ ] Create `src/containers/PprStatusListContainer.tsx`
-- [ ] Add PPR entry to `src/components/StartPage/EntryPoints.tsx` (when `__CONF__.ppr && !guest && !kiosk`)
-- [ ] Add routes to `src/components/App/App.tsx`: `/ppr/new`, `/ppr`
+- [x] Create `src/components/PprStatusList/` — pilot's own requests with status badges
+- [x] Create `src/containers/PprRequestPageContainer.tsx`
+- [x] Create `src/containers/PprStatusListContainer.tsx`
+- [x] Add PPR entry to `src/components/StartPage/EntryPoints.tsx` (when `__CONF__.ppr && !guest && !kiosk`)
+- [x] Add routes to `src/components/App/App.tsx`: `/ppr/new`, `/ppr` (guarded by `__CONF__.ppr`)
 - [ ] Write tests: `PprRequestForm.spec.tsx`
 - [ ] Write tests: `PprStatusList.spec.tsx`
 

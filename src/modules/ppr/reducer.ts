@@ -13,6 +13,7 @@ interface PprState {
   data: unknown[];
   loading: boolean;
   selected: string | null;
+  initialValues: Record<string, any>;
   form: PprFormState;
 }
 
@@ -20,6 +21,7 @@ const INITIAL_STATE: PprState = {
   data: [],
   loading: false,
   selected: null,
+  initialValues: {},
   form: {
     submitted: false,
     commitFailed: false,
@@ -38,6 +40,13 @@ function pprRequestsLoaded(state: PprState, action: PprAction & { type: typeof a
   return Object.assign({}, state, {
     data: action.payload.data,
     loading: false,
+    form: Object.assign({}, state.form, { deleteFailed: false, reviewFailed: false }),
+  });
+}
+
+function formInitialized(state: PprState, action: PprAction & { type: typeof actions.PPR_FORM_INITIALIZED }) {
+  return Object.assign({}, state, {
+    initialValues: action.payload.initialValues,
   });
 }
 
@@ -97,6 +106,7 @@ function resetForm(state: PprState) {
 }
 
 const ACTION_HANDLERS = {
+  [actions.PPR_FORM_INITIALIZED]: formInitialized,
   [actions.SET_PPR_LOADING]: setLoading,
   [actions.PPR_REQUESTS_LOADED]: pprRequestsLoaded,
   [actions.PPR_LOAD_FAILED]: loadFailed,

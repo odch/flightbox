@@ -11,8 +11,15 @@ describe('modules', () => {
           data: [],
           loading: false,
           selected: null,
+          initialValues: {},
           form: { submitted: false, commitFailed: false, reviewFailed: false, deleteFailed: false },
         });
+      });
+
+      it('should set initialValues on form initialized', () => {
+        const values = { firstname: 'Max', lastname: 'Muster' };
+        const state = reducer(initialState, actions.pprFormInitialized(values));
+        expect(state.initialValues).toEqual(values);
       });
 
       it('should set loading', () => {

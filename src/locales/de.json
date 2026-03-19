@@ -543,6 +543,7 @@
     "noRequests": "Keine PPR-Anfragen vorhanden.",
     "submitSuccess": "PPR-Anfrage wurde gesendet.",
     "submitFailed": "PPR-Anfrage konnte nicht gesendet werden.",
+    "deleteFailed": "PPR-Anfrage konnte nicht gelöscht werden.",
     "deleteConfirm": "Möchten Sie diese PPR-Anfrage wirklich löschen?",
     "deleted": "PPR-Anfrage wurde gelöscht."
   },

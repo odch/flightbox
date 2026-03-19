@@ -11,6 +11,8 @@ export const DELETE_PPR_REQUEST = 'DELETE_PPR_REQUEST' as const;
 export const DELETE_PPR_REQUEST_SUCCESS = 'DELETE_PPR_REQUEST_SUCCESS' as const;
 export const DELETE_PPR_REQUEST_FAILURE = 'DELETE_PPR_REQUEST_FAILURE' as const;
 export const SELECT_PPR_REQUEST = 'SELECT_PPR_REQUEST' as const;
+export const INIT_PPR_FORM = 'INIT_PPR_FORM' as const;
+export const PPR_FORM_INITIALIZED = 'PPR_FORM_INITIALIZED' as const;
 export const PPR_LOAD_FAILED = 'PPR_LOAD_FAILED' as const;
 export const RESET_PPR_FORM = 'RESET_PPR_FORM' as const;
 export const CONFIRM_PPR_SUBMIT_SUCCESS = 'CONFIRM_PPR_SUBMIT_SUCCESS' as const;
@@ -29,6 +31,8 @@ export type PprAction =
   | { type: typeof DELETE_PPR_REQUEST_SUCCESS; payload: { key: string } }
   | { type: typeof DELETE_PPR_REQUEST_FAILURE }
   | { type: typeof SELECT_PPR_REQUEST; payload: { key: string | null } }
+  | { type: typeof INIT_PPR_FORM }
+  | { type: typeof PPR_FORM_INITIALIZED; payload: { initialValues: Record<string, any> } }
   | { type: typeof PPR_LOAD_FAILED }
   | { type: typeof RESET_PPR_FORM }
   | { type: typeof CONFIRM_PPR_SUBMIT_SUCCESS };
@@ -83,6 +87,14 @@ export function deletePprRequestFailure() {
 
 export function selectPprRequest(key: string | null) {
   return { type: SELECT_PPR_REQUEST, payload: { key } };
+}
+
+export function initPprForm() {
+  return { type: INIT_PPR_FORM };
+}
+
+export function pprFormInitialized(initialValues: Record<string, any>) {
+  return { type: PPR_FORM_INITIALIZED, payload: { initialValues } };
 }
 
 export function pprLoadFailed() {
