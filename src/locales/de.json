@@ -30,7 +30,9 @@
     "movements": "Erfasste Bewegungen",
     "message": "Rückmeldung",
     "help": "Hilfe",
-    "admin": "Administration"
+    "admin": "Administration",
+    "ppr": "PPR-Anfrage",
+    "pprList": "Meine PPR-Anfragen"
   },
   "login": {
     "emailLabel": "E-Mail",
@@ -87,7 +89,8 @@
     "import": "Import",
     "privacy": "Datenschutz",
     "apiAccess": "API-Zugriff",
-    "customsSelfDeclaration": "Zoll-Selbstdeklaration"
+    "customsSelfDeclaration": "Zoll-Selbstdeklaration",
+    "ppr": "PPR-Anfragen"
   },
   "movement": {
     "openCustoms": "Zollanmeldung öffnen",
@@ -671,6 +674,30 @@
     "messageRetentionDaysHelp": "Nach Ablauf werden Nachrichten gelöscht.",
     "save": "Speichern",
     "saved": "Gespeichert"
+  },
+  "ppr": {
+    "title": "PPR-Anfrage",
+    "newRequest": "Neue PPR-Anfrage",
+    "myRequests": "Meine PPR-Anfragen",
+    "submit": "Anfrage senden",
+    "plannedDate": "Geplantes Datum",
+    "plannedTime": "Geplante Zeit",
+    "remarks": "Zweck / Bemerkungen",
+    "status": {
+      "pending": "Ausstehend",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt"
+    },
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "adminRemarks": "Bemerkungen (Admin)",
+    "noRequests": "Keine PPR-Anfragen vorhanden.",
+    "submitSuccess": "PPR-Anfrage wurde gesendet.",
+    "submitFailed": "PPR-Anfrage konnte nicht gesendet werden.",
+    "deleteFailed": "PPR-Anfrage konnte nicht gelöscht werden.",
+    "reviewFailed": "PPR-Anfrage konnte nicht bearbeitet werden.",
+    "deleteConfirm": "Möchten Sie diese PPR-Anfrage wirklich löschen?",
+    "deleted": "PPR-Anfrage wurde gelöscht."
   },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."
