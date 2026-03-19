@@ -41,12 +41,13 @@ const DigitInput = styled.input<DigitInputProps>`
   outline: none;
   caret-color: transparent;
   background-color: ${({ $filled }) => ($filled ? '#f8f9fa' : '#fff')};
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
   color: #222;
 
   &:focus {
     border-color: ${({ theme }) => theme.colors.main};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.main}33;
+    outline: 3px solid ${({ theme }) => theme.colors.main}33;
+    outline-offset: -1px;
     background-color: #fff;
   }
 
