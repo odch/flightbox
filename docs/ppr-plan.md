@@ -75,14 +75,14 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 ### Phase 2: Hexagonal Backend (`functions/ppr/`)
 
 #### 2a. Domain
-- [ ] Create `functions/ppr/domain/pprRequest.js` — entity factory + validation
+- [x] Create `functions/ppr/domain/pprRequest.js` — entity factory + validation
   - Required fields: firstname, lastname, email, immatriculation, plannedDate, plannedTime, flightType
   - Phone is optional
   - Input sanitization: strip HTML, enforce max lengths (name: 100, immatriculation: 10, remarks: 500)
   - Validate formats: email, date (YYYY-MM-DD), time (HH:MM)
   - plannedDate must be in the future
   - Status constants: PENDING, APPROVED, REJECTED
-- [ ] Write tests: `functions/ppr/domain/pprRequest.spec.js`
+- [x] Write tests: `functions/ppr/domain/pprRequest.spec.js`
 
 #### 2b. Ports
 - [ ] Create `functions/ppr/ports/pprRepository.js` — JSDoc interface
