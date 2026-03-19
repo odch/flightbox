@@ -47,4 +47,4 @@ function loadProjectConfig({ file = CONFIG_FILE, env = process.env } = {}) {
   return config;
 }
 
-module.exports = { loadProjectConfig };
+module.exports = { loadProjectConfig, runtimeProjectId };

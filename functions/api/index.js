@@ -9,10 +9,17 @@ const {buildCustomsPayload} = require('./customs/buildCustomsPayload')
 const {fbAuth, fbAdminAuth, fbAuthExcludingShared} = require('./fbAuth')
 const {loadProjectConfig} = require('../projectConfig')
 const {SCOPES, availableScopes} = require('../apiKeys/scopes')
+const {isPprEnabled} = require('../ppr/enabled')
 
 const api = express()
 
 api.use(cors)
+
+// PPR is enabled per aerodrome (`ppr` in projects/<name>.json, see
+// functions/ppr/enabled.js); elsewhere its routes do not exist.
+if (isPprEnabled()) {
+  api.use(['/ppr', '/api/ppr'], require('../ppr/routes'))
+}
 
 // Public. /v1 is the documented path; the unversioned one stays for
 // existing callers.

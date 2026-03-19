@@ -17,4 +17,5 @@ database-debug.log
 .runtimeconfig.json
 functions/privacy-config.generated.js
 functions/test-config.generated.js
+functions/ppr-config.generated.js
 functions/project-config.generated.json

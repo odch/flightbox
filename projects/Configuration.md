@@ -23,6 +23,7 @@ project.
 * `enabledFlightTypes`
 * `reportApiEnabled`
 * `customsSelfDeclarationEnabled`
+* `ppr`
 
 ### `aerodrome`
 
@@ -187,7 +188,7 @@ Description of the test environment.
 Description of the production environment.
 
 A property set in an environment replaces the top-level property of the same name in the app's configuration
-and in the functions' generated config (`reportApiEnabled`, `memberManagement`, `aerodrome`), e.g.
+and in the functions' generated config (`reportApiEnabled`, `memberManagement`, `aerodrome`) and PPR flag (`ppr`), e.g.
 `"reportApiEnabled": true` in `test` only. `theme`, the landing and go-around fees and `privacySettings` are
 always read from the top level.
 
@@ -229,6 +230,24 @@ Enables the "Zoll-Selbstdeklaration" tab in the admin area, where admins list th
 declarations the customs declaration app forwards to the authorities without review by the aerodrome (only for
 aeroplanes below 2250 kg MTOW; heavier aircraft and helicopters are always reviewed). The tab is only shown when
 the customs integration is configured (`/settings/customsDeclarationApp`). Disabled by default.
+
+Example: `true`
+
+### `ppr`
+
+Enables PPR (prior permission required) requests: pilots ask for permission to fly in and see the status of
+their requests in the app, the aerodrome gets an e-mail for each new request, admins approve or reject requests
+in the "PPR-Anfragen" tab, and pilots get an e-mail with the decision. Disabled by default.
+
+In the Cloud Functions the flag decides at deploy time whether the PPR endpoints (`/api/ppr/...`) and the daily
+cleanup job (`scheduledPprCleanup`) exist: the deploy workflows write it, together with the Firebase project it is for,
+to `functions/ppr-config.generated.js`, and the functions ignore it in any other project. Without that file (locally,
+in unit tests) PPR is off in the functions; for local work on PPR, create it for the project you run the emulator with:
+`echo "module.exports = { enabled: true, firebaseProjectId: '<project>' };" > functions/ppr-config.generated.js`.
+
+In the Realtime Database, `/settings/ppr/adminEmail` is the address new requests are sent to, and
+`/settings/ppr/retentionDays` (a whole number from 1 to 3650, default 30) the number of days after the planned date
+when requests are deleted.
 
 Example: `true`
 

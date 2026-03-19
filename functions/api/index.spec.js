@@ -10,17 +10,22 @@ jest.mock('./fbAuth', () => ({
   fbAuthExcludingShared: jest.fn(),
 }));
 jest.mock('firebase-admin/database', () => ({ getDatabase: jest.fn() }));
+jest.mock('../ppr/enabled', () => ({
+  isPprEnabled: jest.fn(),
+}));
 
 const routeLayers = app => app.router.stack.filter(layer => layer.route);
 
-function loadApi(projectConfig) {
+function loadApi(projectConfig, { pprEnabled = false } = {}) {
   let loaded;
   jest.isolateModules(() => {
     require('../projectConfig').loadProjectConfig.mockReturnValue(projectConfig);
+    require('../ppr/enabled').isPprEnabled.mockReturnValue(pprEnabled);
     loaded = {
       api: require('./index'),
       fbAdminAuth: require('./fbAuth').fbAdminAuth,
       getDatabase: require('firebase-admin/database').getDatabase,
+      pprRoutes: require('../ppr/routes'),
     };
   });
   return loaded;
@@ -28,8 +33,23 @@ function loadApi(projectConfig) {
 
 const findRoute = (api, path) => routeLayers(api).find(layer => layer.route.path.includes(path));
 
+const pprLayer = ({ api, pprRoutes }) => api.router.stack.find(layer => layer.handle === pprRoutes);
+
 describe('functions', () => {
   describe('api', () => {
+    it('has no PPR routes for aerodromes without PPR', () => {
+      expect(pprLayer(loadApi({ reportApiEnabled: false }))).toBeUndefined();
+    });
+
+    it('serves the PPR routes on /ppr and /api/ppr for aerodromes with PPR', () => {
+      const layer = pprLayer(loadApi({ reportApiEnabled: false }, { pprEnabled: true }));
+
+      expect(layer).toBeDefined();
+      expect(layer.match('/ppr/requests')).toBe(true);
+      expect(layer.match('/api/ppr/requests')).toBe(true);
+      expect(layer.match('/aerodrome/status')).toBe(false);
+    });
+
     it('serves the public aerodrome status on the v1 and the unversioned paths', async () => {
       const { api, getDatabase } = loadApi({ reportApiEnabled: false });
       const layer = findRoute(api, '/api/v1/aerodrome/status');
