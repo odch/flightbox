@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import Header from './Header';
 import EmailLoginForm from '../../containers/EmailLoginFormContainer'
 import UsernamePasswordLoginForm from '../../containers/UsernamePasswordLoginFormContainer'
@@ -44,15 +44,18 @@ const LoginInnerWrapper = styled.div`
   }
 `
 
-const PrivacyLink = styled.a`
-  display: block;
+const PrivacyText = styled.p`
   margin-top: 2em;
   font-size: 0.85em;
   color: #666;
-  text-decoration: underline;
+
+  a {
+    color: #666;
+    text-decoration: underline;
+  }
 `
 
-const LoginPage = ({location, privacyPolicyUrl}: {location: any, privacyPolicyUrl?: string | null}) => {
+const LoginPage = ({location, privacyPolicyUrl, emailSent}: {location: any, privacyPolicyUrl?: string | null, emailSent?: boolean}) => {
   const { t } = useTranslation();
   const queryToken = getAuthQueryToken(location)
   const guestOnly = getGuestOnly(location)
@@ -65,10 +68,12 @@ const LoginPage = ({location, privacyPolicyUrl}: {location: any, privacyPolicyUr
             ? <EmailLoginForm queryToken={queryToken} guestOnly={guestOnly}/>
             : <UsernamePasswordLoginForm/>
           }
-          {privacyPolicyUrl && /^https?:\/\//.test(privacyPolicyUrl) && (
-            <PrivacyLink href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer">
-              {t('legal.privacyPolicy')}
-            </PrivacyLink>
+          {privacyPolicyUrl && !emailSent && /^https?:\/\//.test(privacyPolicyUrl) && (
+            <PrivacyText>
+              <Trans i18nKey="legal.privacyConsent">
+                Mit der Anmeldung akzeptieren Sie die <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer">Datenschutzerklärung</a>.
+              </Trans>
+            </PrivacyText>
           )}
         </LoginInnerWrapper>
       </LoginWrapper>

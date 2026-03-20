@@ -523,7 +523,8 @@
     "dismiss": "Nicht jetzt"
   },
   "legal": {
-    "privacyPolicy": "Datenschutzerklärung"
+    "privacyPolicy": "Datenschutzerklärung",
+    "privacyConsent": "Mit der Anmeldung akzeptieren Sie die <1>Datenschutzerklärung</1>."
   },
   "privacy": {
     "title": "Datenschutz-Einstellungen",
