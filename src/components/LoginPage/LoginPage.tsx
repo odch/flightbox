@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Header from './Header';
 import EmailLoginForm from '../../containers/EmailLoginFormContainer'
 import UsernamePasswordLoginForm from '../../containers/UsernamePasswordLoginFormContainer'
@@ -43,7 +44,16 @@ const LoginInnerWrapper = styled.div`
   }
 `
 
-const LoginPage = ({location}) => {
+const PrivacyLink = styled.a`
+  display: block;
+  margin-top: 2em;
+  font-size: 0.85em;
+  color: #666;
+  text-decoration: underline;
+`
+
+const LoginPage = ({location, privacyPolicyUrl}: {location: any, privacyPolicyUrl?: string | null}) => {
+  const { t } = useTranslation();
   const queryToken = getAuthQueryToken(location)
   const guestOnly = getGuestOnly(location)
   return (
@@ -55,6 +65,11 @@ const LoginPage = ({location}) => {
             ? <EmailLoginForm queryToken={queryToken} guestOnly={guestOnly}/>
             : <UsernamePasswordLoginForm/>
           }
+          {privacyPolicyUrl && /^https?:\/\//.test(privacyPolicyUrl) && (
+            <PrivacyLink href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer">
+              {t('legal.privacyPolicy')}
+            </PrivacyLink>
+          )}
         </LoginInnerWrapper>
       </LoginWrapper>
     </StyledWrapper>

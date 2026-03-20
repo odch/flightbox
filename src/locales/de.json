@@ -521,6 +521,9 @@
     "macosInstructionsPost": " und wählen Sie \"Zum Dock hinzufügen\".",
     "dismiss": "Nicht jetzt"
   },
+  "legal": {
+    "privacyPolicy": "Datenschutzerklärung"
+  },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."
   },
