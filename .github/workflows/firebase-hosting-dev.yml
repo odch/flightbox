@@ -11,6 +11,7 @@ jobs:
         environment:
           - lszt_test
           - lszm_test
+          - lspl_test
           - lspv_test
           - lszo_test
           - lsze_test
@@ -37,6 +38,7 @@ jobs:
         environment:
           - lszt_test
           - lszm_test
+          - lspl_test
           - lspv_test
           - lszo_test
           - lsze_test
