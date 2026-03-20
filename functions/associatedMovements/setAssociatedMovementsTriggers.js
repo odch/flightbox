@@ -132,6 +132,9 @@ const updateOnWrite = async (change, type) => {
   // — those are handled by the dedicated onCreate and onDelete triggers.
   if (!change.before.val() || !change.after.val()) return
 
+  // Skip anonymized movements (PII has been stripped by the retention job)
+  if (change.after.val().anonymized) return
+
   const snap = change.after
 
   functions.logger.log(`Setting associated movement for updated ${type} ${snap.ref.key}`)

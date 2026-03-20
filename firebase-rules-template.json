@@ -294,6 +294,16 @@
         ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
         ".validate": "newData.isString()"
       },
+      "movementRetentionDays": {
+        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".validate": "newData.isNumber() && newData.val() > 0"
+      },
+      "messageRetentionDays": {
+        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".validate": "newData.isNumber() && newData.val() > 0"
+      },
       "$other": {
         ".validate": false
       }

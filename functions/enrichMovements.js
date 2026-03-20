@@ -99,6 +99,10 @@ const handleUpdate = (change, movementType) => {
   if (!change.before.exists() || !change.after.exists()) {
     return null;
   }
+  // Skip anonymized movements (PII has been stripped by the retention job)
+  if (change.after.val().anonymized) {
+    return null;
+  }
   return enrichOnUpdate(change, movementType);
 };
 
