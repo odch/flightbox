@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import {Redirect, Route, Switch} from 'react-router-dom';
-import LoginPage from '../../components/LoginPage';
+import LoginPage from '../../containers/LoginPageContainer';
 import Centered from '../Centered';
 import MaterialIcon from '../MaterialIcon';
 import MessagePage from "../../containers/MessagePageContainer";
