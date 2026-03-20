@@ -93,26 +93,65 @@ describe('anonymizeMovements', () => {
     const { scheduledAnonymizeMovements } = require('./anonymizeMovements');
     await scheduledAnonymizeMovements();
 
-    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockUpdate).toHaveBeenCalledTimes(2);
+
+    const departureUpdates = mockUpdate.mock.calls[0][0];
+
+    expect(departureUpdates['mov1/firstname']).toBeNull();
+    expect(departureUpdates['mov1/lastname']).toBeNull();
+    expect(departureUpdates['mov1/email']).toBeNull();
+    expect(departureUpdates['mov1/phone']).toBeNull();
+    expect(departureUpdates['mov1/memberNr']).toBeNull();
+    expect(departureUpdates['mov1/immatriculation']).toBeNull();
+    expect(departureUpdates['mov1/aircraftType']).toBeNull();
+    expect(departureUpdates['mov1/mtow']).toBeNull();
+    expect(departureUpdates['mov1/remarks']).toBeNull();
+    expect(departureUpdates['mov1/createdBy']).toBeNull();
+    expect(departureUpdates['mov1/createdBy_orderKey']).toBeNull();
+    expect(departureUpdates['mov1/anonymized']).toBe(true);
+
+    expect(departureUpdates['mov1/location']).toBeUndefined();
+    expect(departureUpdates['mov1/flightType']).toBeUndefined();
+    expect(departureUpdates['mov1/dateTime']).toBeUndefined();
+
+    const arrivalUpdates = mockUpdate.mock.calls[1][0];
+    expect(arrivalUpdates['mov1/firstname']).toBeNull();
+    expect(arrivalUpdates['mov1/anonymized']).toBe(true);
+    expect(arrivalUpdates['mov1/location']).toBeUndefined();
+  });
+
+  it('should only null out PII fields that are present on the record', async () => {
+    mockRefData['/settings/movementRetentionDays'] = createValueSnapshot(730);
+
+    // Movement without carriageVoucher, customsFormId, customsFormUrl
+    const snapshot = createSnapshot({
+      'mov1': {
+        dateTime: '2023-01-15T10:00:00.000Z',
+        firstname: 'Hans',
+        lastname: 'Muster',
+        location: 'LSZT',
+      },
+    });
+
+    mockRefData['/departures'] = snapshot;
+    mockRefData['/arrivals'] = { forEach: () => {} };
+
+    const { scheduledAnonymizeMovements } = require('./anonymizeMovements');
+    await scheduledAnonymizeMovements();
+
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
 
     const updates = mockUpdate.mock.calls[0][0];
-
     expect(updates['mov1/firstname']).toBeNull();
     expect(updates['mov1/lastname']).toBeNull();
-    expect(updates['mov1/email']).toBeNull();
-    expect(updates['mov1/phone']).toBeNull();
-    expect(updates['mov1/memberNr']).toBeNull();
-    expect(updates['mov1/immatriculation']).toBeNull();
-    expect(updates['mov1/aircraftType']).toBeNull();
-    expect(updates['mov1/mtow']).toBeNull();
-    expect(updates['mov1/remarks']).toBeNull();
-    expect(updates['mov1/createdBy']).toBeNull();
-    expect(updates['mov1/createdBy_orderKey']).toBeNull();
     expect(updates['mov1/anonymized']).toBe(true);
 
-    expect(updates['mov1/location']).toBeUndefined();
-    expect(updates['mov1/flightType']).toBeUndefined();
-    expect(updates['mov1/dateTime']).toBeUndefined();
+    // Fields absent from the record must not appear in the update object
+    expect(updates['mov1/carriageVoucher']).toBeUndefined();
+    expect(updates['mov1/customsFormId']).toBeUndefined();
+    expect(updates['mov1/customsFormUrl']).toBeUndefined();
+    expect(updates['mov1/email']).toBeUndefined();
+    expect(updates['mov1/phone']).toBeUndefined();
   });
 
   it('should skip already anonymized movements', async () => {
