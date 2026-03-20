@@ -10,6 +10,13 @@
           "cypress-testing-eu"
         ]
       }
+    },
+    "lspl-test": {
+      "database": {
+        "main": [
+          "lspl-test-default-rtdb"
+        ]
+      }
     }
   },
   "etags": {}

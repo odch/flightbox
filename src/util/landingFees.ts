@@ -2,6 +2,7 @@ import defaultGetFee from './landingFeeStrategies/default'
 import lszeGetFee from './landingFeeStrategies/lsze'
 import lszmGetFee from './landingFeeStrategies/lszm'
 import lszoGetFee from './landingFeeStrategies/lszo'
+import lsplGetFee from './landingFeeStrategies/lspl'
 
 export const AircraftOrigin = Object.freeze({
   CLUB: 'club',
@@ -13,7 +14,8 @@ const strategies = {
   default: defaultGetFee,
   lsze: lszeGetFee,
   lszm: lszmGetFee,
-  lszo: lszoGetFee
+  lszo: lszoGetFee,
+  lspl: lsplGetFee
 }
 
 export const getLandingFee = (mtow, flightType, aircraftOrigin, aircraftCategory) =>
