@@ -1,8 +1,8 @@
-import { setPrivacyPolicyUrl } from './actions';
+import { setMovementRetentionDays } from './actions';
 import reducer from './reducer';
 import sagas from './sagas';
 
-export { setPrivacyPolicyUrl };
+export { setMovementRetentionDays };
 
 export { sagas };
 
