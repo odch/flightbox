@@ -73,7 +73,8 @@
     "invoiceRecipients": "Rechnungsempfänger",
     "kioskAccess": "Kiosk-Login",
     "guestAccess": "Gast-Login",
-    "import": "Import"
+    "import": "Import",
+    "privacy": "Datenschutz"
   },
   "movement": {
     "openCustoms": "Zollanmeldung öffnen",
@@ -523,6 +524,17 @@
   },
   "legal": {
     "privacyPolicy": "Datenschutzerklärung"
+  },
+  "privacy": {
+    "title": "Datenschutz-Einstellungen",
+    "privacyPolicyUrl": "Link zur Datenschutzerklärung",
+    "privacyPolicyUrlHelp": "Wird auf der Anmeldeseite und im Footer angezeigt.",
+    "movementRetentionDays": "Aufbewahrungsdauer Bewegungen (Tage)",
+    "movementRetentionDaysHelp": "Nach Ablauf werden personenbezogene Daten anonymisiert. Statistische Daten bleiben erhalten.",
+    "messageRetentionDays": "Aufbewahrungsdauer Nachrichten (Tage)",
+    "messageRetentionDaysHelp": "Nach Ablauf werden Nachrichten gelöscht.",
+    "save": "Speichern",
+    "saved": "Gespeichert"
   },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."

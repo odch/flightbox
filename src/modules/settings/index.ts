@@ -8,6 +8,8 @@ import guestAccessToken, {sagas as guestAccessTokenSagas} from './guestAccessTok
 import kioskAccessToken, {sagas as kioskAccessTokenSagas} from './kioskAccessToken';
 import invoiceRecipients, {sagas as invoiceRecipientsSagas} from './invoiceRecipients';
 import privacyPolicyUrl, {sagas as privacyPolicyUrlSagas} from './privacyPolicyUrl';
+import movementRetentionDays, {sagas as movementRetentionDaysSagas} from './movementRetentionDays';
+import messageRetentionDays, {sagas as messageRetentionDaysSagas} from './messageRetentionDays';
 
 const reducer = combineReducers({
   aerodromeStatus,
@@ -17,6 +19,8 @@ const reducer = combineReducers({
   kioskAccessToken,
   invoiceRecipients,
   privacyPolicyUrl,
+  movementRetentionDays,
+  messageRetentionDays,
 });
 
 export function* sagas() {
@@ -28,6 +32,8 @@ export function* sagas() {
     fork(kioskAccessTokenSagas),
     fork(invoiceRecipientsSagas),
     fork(privacyPolicyUrlSagas),
+    fork(movementRetentionDaysSagas),
+    fork(messageRetentionDaysSagas),
   ])
 }
 
