@@ -1,25 +1,27 @@
-import PropTypes from 'prop-types';
 import React from 'react';
+import styled from 'styled-components';
 import Header from './Header';
 import Main from './Main';
+import MarketingLink from '../MarketingLink';
 
-class StartPage extends React.PureComponent<any, any> {
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+`
 
-  render() {
-    const props = this.props;
-    return (
-      <div>
-        <Header logout={props.logout} auth={props.auth} showLogin={props.showLogin}/>
-        <Main auth={props.auth}/>
-      </div>
-    );
-  }
-}
+const ContentArea = styled.div`
+  flex: 1;
+`
 
-(StartPage as any).propTypes = {
-  auth: PropTypes.object.isRequired,
-  logout: PropTypes.func.isRequired,
-  showLogin: PropTypes.func.isRequired,
+const StartPage = ({ auth, logout, showLogin }: { auth: any, logout: () => void, showLogin: () => void }) => {
+  return (
+    <Wrapper>
+      <Header logout={logout} auth={auth} showLogin={showLogin}/>
+      <ContentArea><Main auth={auth}/></ContentArea>
+      <MarketingLink/>
+    </Wrapper>
+  );
 };
 
 export default StartPage;
