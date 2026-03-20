@@ -29,7 +29,7 @@ function getAnonymizationUpdates(snapshot, cutoffIso) {
   snapshot.forEach(child => {
     const val = child.val();
 
-    if (val.dateTime < cutoffIso && !val.anonymized) {
+    if (val.dateTime <= cutoffIso && !val.anonymized) {
       PII_FIELDS.forEach(field => {
         if (val[field] !== undefined) {
           updates[`${child.key}/${field}`] = null;
@@ -64,6 +64,10 @@ exports.scheduledAnonymizeMovements = functions
 
     console.log(`Anonymizing movements older than ${cutoffIso} (retention: ${retentionDays} days)`);
 
+    // Note: endAt fetches all records up to cutoffIso, including already-anonymized ones.
+    // These are filtered out client-side via the !val.anonymized check below.
+    // Over time this may transfer growing amounts of anonymized data on each run,
+    // but is acceptable given bounded aerodrome data volumes.
     const departuresSnap = await db.ref('/departures')
       .orderByChild('dateTime')
       .endAt(cutoffIso)
