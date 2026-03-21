@@ -28,6 +28,7 @@ const getHiddenFields = (values: any) => {
 
 const mapStateToProps = (state: RootState, ownProps: any) => {
   const values = state.ui.wizard.values;
+  const authData = state.auth.data as any;
   return Object.assign({}, ownProps, {
     flightTypes: filter(getEnabledFlightTypes(values.aircraftCategory as string), values),
     runways: filter(runways, values),
@@ -35,6 +36,7 @@ const mapStateToProps = (state: RootState, ownProps: any) => {
     hiddenFields: getHiddenFields(values),
     departureRoute: values.departureRoute,
     privacyPolicyUrl: state.settings.privacyPolicyUrl.url,
+    isPersonalLogin: authData && authData.guest === false && authData.kiosk === false,
   });
 };
 

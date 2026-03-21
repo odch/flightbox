@@ -22,7 +22,8 @@ const FlightPage = (props) => {
     hiddenFields,
     readOnly,
     departureRoute,
-    privacyPolicyUrl
+    privacyPolicyUrl,
+    isPersonalLogin
   } = props;
   return (
     <Form
@@ -71,7 +72,7 @@ const FlightPage = (props) => {
               readOnly={readOnly}
             />
           </FieldSet>
-          {!formValues.key && (
+          {!formValues.key && !isPersonalLogin && (
             <PrivacyConsentText privacyPolicyUrl={privacyPolicyUrl} />
           )}
           <WizardNavigation
@@ -107,6 +108,7 @@ FlightPage.propTypes = {
   departureRoute: PropTypes.string,
   hiddenFields: PropTypes.arrayOf(PropTypes.string),
   privacyPolicyUrl: PropTypes.string,
+  isPersonalLogin: PropTypes.bool,
 };
 
 export default FlightPage;

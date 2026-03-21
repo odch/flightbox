@@ -1,5 +1,6 @@
 import * as actions from './actions'
 import * as remote from './remote'
+import {FIREBASE_AUTHENTICATION_EVENT} from '../auth'
 import {all, call, put, select, takeEvery} from 'redux-saga/effects'
 
 const str = (value: unknown): string | null =>
@@ -73,9 +74,17 @@ export function* saveProfile(action: any) {
   }
 }
 
+export function* onAuthentication(action: any) {
+  const authData = action.payload.authData;
+  if (authData && authData.guest === false && authData.kiosk === false) {
+    yield call(loadProfile);
+  }
+}
+
 export default function* sagas() {
   yield all([
     takeEvery(actions.LOAD_PROFILE, loadProfile),
     takeEvery(actions.SAVE_PROFILE, saveProfile),
+    takeEvery(FIREBASE_AUTHENTICATION_EVENT, onAuthentication),
   ])
 }

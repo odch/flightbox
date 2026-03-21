@@ -113,6 +113,54 @@ describe('modules', () => {
         });
       });
 
+      describe('onAuthentication', () => {
+        it('should call loadProfile for personal login', () => {
+          const action = {
+            payload: { authData: { uid: 'user-123', guest: false, kiosk: false } }
+          };
+          const generator = sagas.onAuthentication(action);
+
+          expect(generator.next().value).toEqual(call(sagas.loadProfile));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not call loadProfile for guest users', () => {
+          const action = {
+            payload: { authData: { uid: 'guest', guest: true, kiosk: false } }
+          };
+          const generator = sagas.onAuthentication(action);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not call loadProfile for kiosk users', () => {
+          const action = {
+            payload: { authData: { uid: 'kiosk', guest: false, kiosk: true } }
+          };
+          const generator = sagas.onAuthentication(action);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not call loadProfile when authData is null (logout)', () => {
+          const action = {
+            payload: { authData: null }
+          };
+          const generator = sagas.onAuthentication(action);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not call loadProfile for ipauth users', () => {
+          const action = {
+            payload: { authData: { local: true } }
+          };
+          const generator = sagas.onAuthentication(action);
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
       describe('saveProfile', () => {
         it('should save profile and reload it on success', () => {
           const values = {

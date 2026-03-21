@@ -25,7 +25,8 @@ const FlightPage = (props) => {
     readOnly,
     hiddenFields,
     arrivalRoute,
-    privacyPolicyUrl
+    privacyPolicyUrl,
+    isPersonalLogin
   } = props;
   return (
     <Form
@@ -90,7 +91,7 @@ const FlightPage = (props) => {
               hidden={hiddenFields && hiddenFields.includes('runway')}
             />
           </FieldSet>
-          {!formValues.key && (
+          {!formValues.key && !isPersonalLogin && (
             <PrivacyConsentText privacyPolicyUrl={privacyPolicyUrl} />
           )}
           <WizardNavigation
@@ -105,10 +106,14 @@ const FlightPage = (props) => {
   );
 };
 
-const mapStateToProps = state => ({
-  aircraftSettings: state.settings.aircrafts,
-  privacyPolicyUrl: state.settings.privacyPolicyUrl.url,
-});
+const mapStateToProps = state => {
+  const authData = state.auth.data;
+  return {
+    aircraftSettings: state.settings.aircrafts,
+    privacyPolicyUrl: state.settings.privacyPolicyUrl.url,
+    isPersonalLogin: authData && authData.guest === false && authData.kiosk === false,
+  };
+};
 
 FlightPage.propTypes = {
   previousPage: PropTypes.func.isRequired,
@@ -135,6 +140,7 @@ FlightPage.propTypes = {
   }).isRequired,
   hiddenFields: PropTypes.arrayOf(PropTypes.string),
   privacyPolicyUrl: PropTypes.string,
+  isPersonalLogin: PropTypes.bool,
 };
 
 export default connect(mapStateToProps)(FlightPage);
