@@ -53,12 +53,14 @@ describe('modules', () => {
       });
 
       describe('recordPrivacyPolicyAcceptance', () => {
-        it('should save privacyPolicyAcceptedAt when not already set', () => {
+        it('should save privacyPolicyAcceptedAt when not already set and URL is configured', () => {
           const auth = { uid: 'user-123', guest: false, kiosk: false };
           const profile = { firstname: 'Hans' };
           const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
 
-          const result = generator.next().value;
+          expect(generator.next().value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          const result = generator.next('https://example.com/privacy').value;
           expect(result).toEqual(call(remote.save, 'user-123', {
             privacyPolicyAcceptedAt: expect.any(String)
           }));
@@ -66,12 +68,24 @@ describe('modules', () => {
           expect(generator.next().done).toEqual(true);
         });
 
+        it('should not save when privacyPolicyUrl is not configured', () => {
+          const auth = { uid: 'user-123', guest: false, kiosk: false };
+          const profile = { firstname: 'Hans' };
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          expect(generator.next(null).done).toEqual(true);
+        });
+
         it('should not save when privacyPolicyAcceptedAt already exists', () => {
           const auth = { uid: 'user-123', guest: false, kiosk: false };
           const profile = { firstname: 'Hans', privacyPolicyAcceptedAt: '2026-01-01T00:00:00.000Z' };
           const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
 
-          expect(generator.next().done).toEqual(true);
+          expect(generator.next().value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          expect(generator.next('https://example.com/privacy').done).toEqual(true);
         });
 
         it('should not save for guest users', () => {

@@ -19,6 +19,8 @@ export const wizardFormValuesSelector = (state: any) => state.ui.wizard.values;
 
 export const authSelector = (state: any) => state.auth.data;
 
+export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl;
+
 export function* getProfileDefaultValues() {
   const auth = yield select(authSelector)
 
@@ -474,7 +476,10 @@ export function* saveMovement() {
   }
 
   if (!key) {
-    movement.privacyPolicyAcceptedAt = new Date().toISOString()
+    const privacyPolicyUrl = yield select(privacyPolicyUrlSelector);
+    if (privacyPolicyUrl) {
+      movement.privacyPolicyAcceptedAt = new Date().toISOString()
+    }
   }
 
   try {

@@ -9,6 +9,7 @@ const nr = (value: unknown): number | null =>
   typeof value === 'number' ? value : null;
 
 export const authSelector = (state: any) => state.auth.data;
+export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl;
 
 export function* loadProfile() {
   try {
@@ -26,6 +27,10 @@ export function* loadProfile() {
 
 export function* recordPrivacyPolicyAcceptance(auth: any, profile: any) {
   if (auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+    return;
+  }
+  const privacyPolicyUrl = yield select(privacyPolicyUrlSelector);
+  if (!privacyPolicyUrl) {
     return;
   }
   if (!profile.privacyPolicyAcceptedAt) {
