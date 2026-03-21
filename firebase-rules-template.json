@@ -92,6 +92,9 @@
         "customsFormUrl": {
           ".validate": "newData.isString()"
         },
+        "privacyPolicyAcceptedAt": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
+        },
         "$other": {
           ".validate": false
         }
@@ -224,6 +227,9 @@
         },
         "customsFormUrl": {
           ".validate": "newData.isString()"
+        },
+        "privacyPolicyAcceptedAt": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
         },
         "$other": {
           ".validate": false
@@ -475,6 +481,9 @@
         },
         "mtow": {
           ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "privacyPolicyAcceptedAt": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
         },
         "$other": {
           ".validate": false

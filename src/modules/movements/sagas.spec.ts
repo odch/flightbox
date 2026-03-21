@@ -549,7 +549,8 @@ describe('modules', () => {
           const expectedMovementForFirebase = {
             ...formValuesForFirebase,
             createdBy: 'pilot@example.com',
-            createdBy_orderKey: 'pilot@example.com_8523978399999'
+            createdBy_orderKey: 'pilot@example.com_8523978399999',
+            privacyPolicyAcceptedAt: expect.any(String)
           };
 
           expect(generator.next(auth).value)

@@ -21,6 +21,8 @@ describe('modules', () => {
           const snapshot = { val: () => profileData };
           expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded(profileData)));
 
+          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, profileData));
+
           expect(generator.next().done).toEqual(true);
         });
 
@@ -35,6 +37,8 @@ describe('modules', () => {
           const snapshot = { val: () => null };
           expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded({})));
 
+          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, {}));
+
           expect(generator.next().done).toEqual(true);
         });
 
@@ -45,6 +49,53 @@ describe('modules', () => {
 
           const error = new Error('Load error');
           expect(generator.throw(error).done).toEqual(true);
+        });
+      });
+
+      describe('recordPrivacyPolicyAcceptance', () => {
+        it('should save privacyPolicyAcceptedAt when not already set', () => {
+          const auth = { uid: 'user-123', guest: false, kiosk: false };
+          const profile = { firstname: 'Hans' };
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          const result = generator.next().value;
+          expect(result).toEqual(call(remote.save, 'user-123', {
+            privacyPolicyAcceptedAt: expect.any(String)
+          }));
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not save when privacyPolicyAcceptedAt already exists', () => {
+          const auth = { uid: 'user-123', guest: false, kiosk: false };
+          const profile = { firstname: 'Hans', privacyPolicyAcceptedAt: '2026-01-01T00:00:00.000Z' };
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not save for guest users', () => {
+          const auth = { uid: 'guest', guest: true, kiosk: false };
+          const profile = {};
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not save for kiosk users', () => {
+          const auth = { uid: 'kiosk', guest: false, kiosk: true };
+          const profile = {};
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not save for ipauth users', () => {
+          const auth = { uid: 'ipauth', guest: false, kiosk: false };
+          const profile = {};
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().done).toEqual(true);
         });
       });
 

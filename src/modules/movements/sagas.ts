@@ -473,6 +473,10 @@ export function* saveMovement() {
     movement.createdBy_orderKey = toOrderKey(auth.email, movement.negativeTimestamp as number)
   }
 
+  if (!key) {
+    movement.privacyPolicyAcceptedAt = new Date().toISOString()
+  }
+
   try {
     key = yield call(remote.saveMovement, path, key, movement);
     yield put(actions.saveMovementSuccess(key, values))

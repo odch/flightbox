@@ -9,6 +9,7 @@ import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
 import {getAircraftOrigin, updateFeesTotal, updateGoAroundFees, updateLandingFees} from '../../../../util/landingFees';
 import CircuitsFieldHint from '../../CircuitsFieldHint';
+import PrivacyConsentText from '../../../PrivacyConsentText';
 
 const FlightPage = (props) => {
   const { t } = useTranslation();
@@ -23,7 +24,8 @@ const FlightPage = (props) => {
     aircraftSettings,
     readOnly,
     hiddenFields,
-    arrivalRoute
+    arrivalRoute,
+    privacyPolicyUrl
   } = props;
   return (
     <Form
@@ -88,6 +90,9 @@ const FlightPage = (props) => {
               hidden={hiddenFields && hiddenFields.includes('runway')}
             />
           </FieldSet>
+          {!formValues.key && (
+            <PrivacyConsentText privacyPolicyUrl={privacyPolicyUrl} />
+          )}
           <WizardNavigation
             previousStep={() => previousPage(form.getState().values)}
             nextLabel={t('wizard.save')}
@@ -101,7 +106,8 @@ const FlightPage = (props) => {
 };
 
 const mapStateToProps = state => ({
-  aircraftSettings: state.settings.aircrafts
+  aircraftSettings: state.settings.aircrafts,
+  privacyPolicyUrl: state.settings.privacyPolicyUrl,
 });
 
 FlightPage.propTypes = {
@@ -127,7 +133,8 @@ FlightPage.propTypes = {
     club: PropTypes.objectOf(PropTypes.bool),
     homeBase: PropTypes.objectOf(PropTypes.bool)
   }).isRequired,
-  hiddenFields: PropTypes.arrayOf(PropTypes.string)
+  hiddenFields: PropTypes.arrayOf(PropTypes.string),
+  privacyPolicyUrl: PropTypes.string,
 };
 
 export default connect(mapStateToProps)(FlightPage);
