@@ -99,7 +99,7 @@ module.exports = {
       new GenerateSW({
         clientsClaim: true,
         skipWaiting: true,
-        exclude: [/\.map$/],
+        exclude: [/\.map$/, /index\.html$/],
       }),
     ] : []),
   ],
