@@ -107,7 +107,7 @@ const FlightPage = (props) => {
 
 const mapStateToProps = state => ({
   aircraftSettings: state.settings.aircrafts,
-  privacyPolicyUrl: state.settings.privacyPolicyUrl,
+  privacyPolicyUrl: state.settings.privacyPolicyUrl.url,
 });
 
 FlightPage.propTypes = {

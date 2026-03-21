@@ -19,7 +19,7 @@ export const wizardFormValuesSelector = (state: any) => state.ui.wizard.values;
 
 export const authSelector = (state: any) => state.auth.data;
 
-export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl;
+export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl.url;
 
 export function* getProfileDefaultValues() {
   const auth = yield select(authSelector)

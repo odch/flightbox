@@ -9,7 +9,7 @@ const nr = (value: unknown): number | null =>
   typeof value === 'number' ? value : null;
 
 export const authSelector = (state: any) => state.auth.data;
-export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl;
+export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl.url;
 
 export function* loadProfile() {
   try {
