@@ -1,5 +1,5 @@
 {
-  "license": "MIT",
+  "license": "UNLICENSED",
   "scripts": {
     "start": "DEV=1 webpack serve --host 0.0.0.0",
     "build": "gulp build",
