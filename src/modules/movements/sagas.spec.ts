@@ -522,7 +522,7 @@ describe('modules', () => {
       });
 
       describe('saveMovement', () => {
-        it('should save movement', () => {
+        it('should save movement with consent timestamp when privacyPolicyUrl is set', () => {
           const generator = sagas.saveMovement();
 
           expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
@@ -546,13 +546,58 @@ describe('modules', () => {
             email: 'pilot@example.com'
           }
 
+          expect(generator.next(auth).value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
           const expectedMovementForFirebase = {
             ...formValuesForFirebase,
             createdBy: 'pilot@example.com',
-            createdBy_orderKey: 'pilot@example.com_8523978399999'
+            createdBy_orderKey: 'pilot@example.com_8523978399999',
+            privacyPolicyAcceptedAt: expect.any(String)
           };
 
-          expect(generator.next(auth).value)
+          expect(generator.next('https://example.com/privacy').value)
+            .toEqual(call(remote.saveMovement, '/departures', undefined, expectedMovementForFirebase));
+
+          const key = 'new-departure-key';
+
+          expect(generator.next(key).value).toEqual(put(actions.saveMovementSuccess(key, formValues)));
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should save movement without consent timestamp when privacyPolicyUrl is not set', () => {
+          const generator = sagas.saveMovement();
+
+          expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
+
+          const formValues = {
+            type: 'departure',
+            immatriculation: 'HBABC',
+            date: '2016-10-09',
+            time: '16:00',
+          };
+
+          const formValuesForFirebase = {
+            immatriculation: 'HBABC',
+            dateTime: '2016-10-09T14:00:00.000Z',
+            negativeTimestamp: -1476021600000,
+          };
+
+          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
+
+          const auth = {
+            email: 'pilot@example.com'
+          }
+
+          expect(generator.next(auth).value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          const expectedMovementForFirebase = {
+            ...formValuesForFirebase,
+            createdBy: 'pilot@example.com',
+            createdBy_orderKey: 'pilot@example.com_8523978399999',
+          };
+
+          expect(generator.next(null).value)
             .toEqual(call(remote.saveMovement, '/departures', undefined, expectedMovementForFirebase));
 
           const key = 'new-departure-key';
@@ -741,7 +786,9 @@ describe('modules', () => {
 
           const auth = { email: 'pilot@example.com' };
 
-          expect(generator.next(auth).value).toMatchObject({ type: 'CALL' });
+          expect(generator.next(auth).value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          expect(generator.next(null).value).toMatchObject({ type: 'CALL' });
 
           const error = new Error('save failed');
           expect(generator.throw(error).value).toEqual(put(actions.saveMovementFailed(error)));

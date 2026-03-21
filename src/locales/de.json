@@ -524,12 +524,13 @@
   },
   "legal": {
     "privacyPolicy": "Datenschutzerklärung",
-    "privacyConsent": "Mit der Anmeldung akzeptieren Sie die <1>Datenschutzerklärung</1>."
+    "privacyConsent": "Mit der Anmeldung akzeptieren Sie die <1>Datenschutzerklärung</1>.",
+    "movementPrivacyConsent": "Mit dem Speichern akzeptieren Sie die <1>Datenschutzerklärung</1>."
   },
   "privacy": {
     "title": "Datenschutz-Einstellungen",
     "privacyPolicyUrl": "Link zur Datenschutzerklärung",
-    "privacyPolicyUrlHelp": "Wird auf der Anmeldeseite und im Footer angezeigt.",
+    "privacyPolicyUrlHelp": "Wird auf der Anmeldeseite, im Bewegungsformular und im Footer angezeigt.",
     "movementRetentionDays": "Aufbewahrungsdauer Bewegungen (Tage)",
     "movementRetentionDaysHelp": "Nach Ablauf werden personenbezogene Daten anonymisiert. Statistische Daten bleiben erhalten.",
     "messageRetentionDays": "Aufbewahrungsdauer Nachrichten (Tage)",

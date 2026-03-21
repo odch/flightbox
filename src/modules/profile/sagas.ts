@@ -9,16 +9,34 @@ const nr = (value: unknown): number | null =>
   typeof value === 'number' ? value : null;
 
 export const authSelector = (state: any) => state.auth.data;
+export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl.url;
 
 export function* loadProfile() {
   try {
     const auth = yield select(authSelector)
     const snapshot = yield call(remote.load, auth.uid);
-    yield put(actions.profileLoaded(snapshot.val() || {}));
+    const profile = snapshot.val() || {};
+    yield put(actions.profileLoaded(profile));
+    yield call(recordPrivacyPolicyAcceptance, auth, profile);
   } catch(e) {
     if (console && typeof console.error === 'function') {
       console.error('Failed to load profile', e);
     }
+  }
+}
+
+export function* recordPrivacyPolicyAcceptance(auth: any, profile: any) {
+  if (auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+    return;
+  }
+  const privacyPolicyUrl = yield select(privacyPolicyUrlSelector);
+  if (!privacyPolicyUrl) {
+    return;
+  }
+  if (!profile.privacyPolicyAcceptedAt) {
+    yield call(remote.save, auth.uid, {
+      privacyPolicyAcceptedAt: new Date().toISOString()
+    });
   }
 }
 

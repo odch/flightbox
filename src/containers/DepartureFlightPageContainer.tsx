@@ -34,6 +34,7 @@ const mapStateToProps = (state: RootState, ownProps: any) => {
     departureRoutes: filter(getDepartureRoutes(), values),
     hiddenFields: getHiddenFields(values),
     departureRoute: values.departureRoute,
+    privacyPolicyUrl: state.settings.privacyPolicyUrl.url,
   });
 };
 
