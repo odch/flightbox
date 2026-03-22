@@ -61,3 +61,8 @@ export function removeMovementAssociationListener(movementType: string, movement
   associationListeners.get(key)?.();
   associationListeners.delete(key);
 }
+
+export function removeAllAssociationListeners() {
+  associationListeners.forEach(unsubscribe => unsubscribe());
+  associationListeners.clear();
+}

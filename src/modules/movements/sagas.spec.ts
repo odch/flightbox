@@ -4,7 +4,7 @@ import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
-import {addMovementAssociationListener, removeMovementAssociationListener} from './remote';
+import {addMovementAssociationListener, removeMovementAssociationListener, removeAllAssociationListeners} from './remote';
 import {LIMIT} from './pagination';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
 import {loadRemote} from '../profile'
@@ -1447,6 +1447,44 @@ describe('modules', () => {
 
           expect(result.value.arrivalRoute).toEqual('circuits');
           expect(result.done).toEqual(true);
+        });
+      });
+
+      describe('teardownOnAuthLost', () => {
+        it('should unsubscribe listeners when auth data is lost', () => {
+          const unsubDeparture = jest.fn();
+          const unsubArrival = jest.fn();
+
+          (onChildAdded as jest.Mock).mockReturnValue(unsubDeparture);
+          (onChildChanged as jest.Mock).mockReturnValue(unsubDeparture);
+          (onChildRemoved as jest.Mock).mockReturnValue(unsubDeparture);
+
+          const channel = { put: jest.fn() };
+          const eventActions = {
+            added: jest.fn(),
+            changed: jest.fn(),
+            removed: jest.fn(),
+          };
+
+          const setupGen = sagas.monitorRef('ref1', channel, 'departure', eventActions);
+          setupGen.next();
+
+          const action = { payload: { authData: null } };
+          const generator = sagas.teardownOnAuthLost(action);
+          generator.next();
+
+          expect(unsubDeparture).toHaveBeenCalled();
+          expect(removeAllAssociationListeners).toHaveBeenCalled();
+        });
+
+        it('should not unsubscribe when auth data is present', () => {
+          (removeAllAssociationListeners as jest.Mock).mockClear();
+
+          const action = { payload: { authData: { uid: '123', admin: true } } };
+          const generator = sagas.teardownOnAuthLost(action);
+          generator.next();
+
+          expect(removeAllAssociationListeners).not.toHaveBeenCalled();
         });
       });
     });
