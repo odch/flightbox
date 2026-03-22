@@ -100,6 +100,13 @@ module.exports = {
         clientsClaim: true,
         skipWaiting: true,
         exclude: [/\.map$/, /index\.html$/],
+        runtimeCaching: [{
+          urlPattern: ({request}) => request.mode === 'navigate',
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'html-cache',
+          }
+        }],
       }),
     ] : []),
   ],
