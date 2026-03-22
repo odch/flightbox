@@ -7,10 +7,22 @@ import LabeledBox from '../LabeledBox';
 import Button from '../Button';
 import styled from 'styled-components';
 
+const FieldGroup = styled.div`
+  margin-bottom: 1.5em;
+  padding-bottom: 1.5em;
+  border-bottom: 1px solid #eee;
+
+  &:last-of-type {
+    border-bottom: none;
+    margin-bottom: 1em;
+    padding-bottom: 0;
+  }
+`;
+
 const HelpText = styled.p`
   color: #666;
   font-size: 0.9em;
-  margin: 0.25em 0 1em 0;
+  margin: 0.25em 0 0 0;
 `;
 
 interface PrivacySettingsFormProps {
@@ -56,45 +68,51 @@ function PrivacySettingsForm(props: PrivacySettingsFormProps) {
       <Form onSubmit={handleSubmit} initialValues={initialValues}>
         {({ handleSubmit, dirty }) => (
           <form onSubmit={handleSubmit}>
-            <FieldSet gutter={false}>
-              <Field
-                name="privacyPolicyUrl"
-                type="url"
-                label={t('privacy.privacyPolicyUrl')}
-                component={renderInputField}
-              />
-            </FieldSet>
-            <HelpText>{t('privacy.privacyPolicyUrlHelp')}</HelpText>
+            <FieldGroup>
+              <FieldSet gutter={false}>
+                <Field
+                  name="privacyPolicyUrl"
+                  type="url"
+                  label={t('privacy.privacyPolicyUrl')}
+                  component={renderInputField}
+                />
+              </FieldSet>
+              <HelpText>{t('privacy.privacyPolicyUrlHelp')}</HelpText>
+            </FieldGroup>
 
-            <FieldSet gutter={false}>
-              <Field
-                name="movementRetentionDays"
-                type="number"
-                label={t('privacy.movementRetentionDays')}
-                component={renderInputField}
-                parse={(value: string) => {
-                  if (value === '') return '';
-                  const num = parseInt(value, 10);
-                  return isNaN(num) ? '' : num;
-                }}
-              />
-            </FieldSet>
-            <HelpText>{t('privacy.movementRetentionDaysHelp')}</HelpText>
+            <FieldGroup>
+              <FieldSet gutter={false}>
+                <Field
+                  name="movementRetentionDays"
+                  type="number"
+                  label={t('privacy.movementRetentionDays')}
+                  component={renderInputField}
+                  parse={(value: string) => {
+                    if (value === '') return '';
+                    const num = parseInt(value, 10);
+                    return isNaN(num) ? '' : num;
+                  }}
+                />
+              </FieldSet>
+              <HelpText>{t('privacy.movementRetentionDaysHelp')}</HelpText>
+            </FieldGroup>
 
-            <FieldSet gutter={false}>
-              <Field
-                name="messageRetentionDays"
-                type="number"
-                label={t('privacy.messageRetentionDays')}
-                component={renderInputField}
-                parse={(value: string) => {
-                  if (value === '') return '';
-                  const num = parseInt(value, 10);
-                  return isNaN(num) ? '' : num;
-                }}
-              />
-            </FieldSet>
-            <HelpText>{t('privacy.messageRetentionDaysHelp')}</HelpText>
+            <FieldGroup>
+              <FieldSet gutter={false}>
+                <Field
+                  name="messageRetentionDays"
+                  type="number"
+                  label={t('privacy.messageRetentionDays')}
+                  component={renderInputField}
+                  parse={(value: string) => {
+                    if (value === '') return '';
+                    const num = parseInt(value, 10);
+                    return isNaN(num) ? '' : num;
+                  }}
+                />
+              </FieldSet>
+              <HelpText>{t('privacy.messageRetentionDaysHelp')}</HelpText>
+            </FieldGroup>
 
             <Button
               type="submit"
