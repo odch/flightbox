@@ -10,6 +10,7 @@ import {error} from '../../util/log';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import {loadRemote} from '../profile'
+import {history} from '../../history'
 
 export const stateSelector = (state: any) => state.movements;
 
@@ -361,6 +362,7 @@ export function* addMovementToState(snapshot: any, movementType: string, current
 
   if (!data.getByKey(snapshot.key)) {
     const movement = transformSnapshotToLocal(snapshot, movementType);
+    if (!movement) return;
 
     const auth = yield select(authSelector);
     if (!auth.admin && auth.email && movement.createdBy !== auth.email) {
@@ -407,7 +409,10 @@ export function* loadMovement(action: any) {
   const path = getPathByMovementType(type);
   const snapshot = yield call(remote.loadByKey, path, key);
 
-  const movement = firebaseToLocal(snapshot.val());
+  const val = snapshot.val();
+  if (!val) return;
+
+  const movement = firebaseToLocal(val);
   movement.key = snapshot.key;
   movement.type = type;
 
@@ -449,7 +454,12 @@ export function* editMovement(action: any) {
   if (!movement) {
     const path = getPathByMovementType(movementType);
     const snapshot = yield(call(remote.loadByKey, path, key));
-    movement = firebaseToLocal(snapshot.val());
+    const val = snapshot.val();
+    if (!val) {
+      history.push('/');
+      return;
+    }
+    movement = firebaseToLocal(val);
     movement.key = snapshot.key;
     movement.type = movementType;
   }
@@ -521,7 +531,9 @@ function getPathByMovementType(type: string) {
 }
 
 const transformSnapshotToLocal = (snapshot: any, movementType: string) => {
-  const movement = firebaseToLocal(snapshot.val());
+  const val = snapshot.val();
+  if (!val) return null;
+  const movement = firebaseToLocal(val);
   movement.key = snapshot.key;
   movement.type = movementType;
   return movement;
@@ -529,7 +541,7 @@ const transformSnapshotToLocal = (snapshot: any, movementType: string) => {
 
 const transformToLocal = (movements: any[], movementType: string) => (item: any) => {
   const movement = transformSnapshotToLocal(item, movementType);
-  movements.push(movement);
+  if (movement) movements.push(movement);
 }
 
 export default function* sagas() {

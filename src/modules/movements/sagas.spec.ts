@@ -10,6 +10,7 @@ import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
 import {loadRemote} from '../profile'
 import {compareDescending, firebaseToLocal} from '../../util/movements'
 import {onChildAdded, onChildChanged, onChildRemoved} from 'firebase/database';
+import {history} from '../../history'
 
 jest.mock('./remote');
 jest.mock('firebase/database', () => ({
@@ -519,6 +520,27 @@ describe('modules', () => {
 
           expect(generator.next().done).toEqual(true);
         });
+
+        it('should navigate back when movement not found in firebase', () => {
+          const action = actions.editMovement('departure', 'deleted-key');
+
+          const generator = sagas.editMovement(action);
+
+          expect(generator.next().value).toEqual(put(actions.startInitializeWizard()));
+
+          expect(generator.next().value).toEqual(select(sagas.movementSelector, 'deleted-key'));
+
+          expect(generator.next(null).value).toEqual(call(remote.loadByKey, '/departures', 'deleted-key'));
+
+          const snapshot = new FakeFirebaseSnapshot('deleted-key', null);
+
+          const pushSpy = jest.spyOn(history, 'push');
+          generator.next(snapshot);
+
+          expect(pushSpy).toHaveBeenCalledWith('/');
+          expect(generator.next().done).toEqual(true);
+          pushSpy.mockRestore();
+        });
       });
 
       describe('saveMovement', () => {
@@ -846,6 +868,19 @@ describe('modules', () => {
           });
 
           expect(generator.next().done).toEqual(true);
+        });
+
+        it('should return early when movement not found', () => {
+          const action = actions.loadMovement('deleted-key', 'departure');
+          const generator = sagas.loadMovement(action);
+
+          expect(generator.next().value).toEqual(
+            call(remote.loadByKey, '/departures', 'deleted-key')
+          );
+
+          const snapshot = new FakeFirebaseSnapshot('deleted-key', null);
+
+          expect(generator.next(snapshot).done).toEqual(true);
         });
       });
 
