@@ -4,12 +4,13 @@ import {all, call, fork, put, select, takeEvery, takeLatest} from 'redux-saga/ef
 import createChannel, {monitor} from '../../util/createChannel';
 import * as actions from './actions';
 import * as remote from './remote';
-import {addMovementAssociationListener, removeMovementAssociationListener} from './remote';
+import {addMovementAssociationListener, removeMovementAssociationListener, removeAllAssociationListeners} from './remote';
 import {compareDescending, firebaseToLocal, localToFirebase, transferValues} from '../../util/movements';
 import {error} from '../../util/log';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import {loadRemote} from '../profile'
+import {FIREBASE_AUTHENTICATION_EVENT} from '../auth'
 import {history} from '../../history'
 
 export const stateSelector = (state: any) => state.movements;
@@ -327,6 +328,14 @@ export function monitorAssociation(movement: any, channel: any) {
 
 const movementListeners: Record<string, Array<() => void>> = { departure: [], arrival: [] };
 
+function unsubscribeAllMovementListeners() {
+  Object.keys(movementListeners).forEach(type => {
+    movementListeners[type].forEach(fn => fn());
+    movementListeners[type] = [];
+  });
+  removeAllAssociationListeners();
+}
+
 export function* monitorRef(ref: any, channel: any, movementType: string, eventActions: any) {
   movementListeners[movementType].forEach(fn => fn());
   movementListeners[movementType] = [
@@ -365,6 +374,7 @@ export function* addMovementToState(snapshot: any, movementType: string, current
     if (!movement) return;
 
     const auth = yield select(authSelector);
+    if (!auth) return;
     if (!auth.admin && auth.email && movement.createdBy !== auth.email) {
       return;
     }
@@ -544,6 +554,12 @@ const transformToLocal = (movements: any[], movementType: string) => (item: any)
   if (movement) movements.push(movement);
 }
 
+export function* teardownOnAuthLost(action: any) {
+  if (!action.payload.authData) {
+    unsubscribeAllMovementListeners();
+  }
+}
+
 export default function* sagas() {
   const channel = createChannel();
 
@@ -561,5 +577,6 @@ export default function* sagas() {
     takeEvery(actions.SAVE_MOVEMENT, saveMovement),
     takeEvery(actions.SAVE_MOVEMENT_PAYMENT_METHOD, saveMovementPaymentMethod),
     takeLatest(actions.EDIT_MOVEMENT, editMovement),
+    takeEvery(FIREBASE_AUTHENTICATION_EVENT, teardownOnAuthLost),
   ])
 }
