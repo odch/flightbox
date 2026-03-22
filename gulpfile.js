@@ -111,7 +111,7 @@ function generateManifest(done) {
     display: 'standalone',
     start_url: '/',
     scope: '/',
-    orientation: 'portrait',
+    orientation: 'any',
   };
 
   const outDir = path.join(config.output.path, 'favicons');
