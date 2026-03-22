@@ -29,6 +29,58 @@ import { shouldReloadOnControllerChange, markReload } from './util/shouldReloadO
 
 Sentry.init({
   dsn: "https://8a606d82aa68850021fbfac2ffda30b5@o4509293310967808.ingest.de.sentry.io/4509293314113617",
+  ignoreErrors: [
+    // Browser extensions & injected scripts
+    /^Extension context invalidated/,
+    /message listener indicating a/,
+
+    // Benign browser quirks
+    "ResizeObserver loop",
+    "ResizeObserver loop completed with undelivered notifications",
+
+    // Network errors (transient connectivity)
+    "Failed to fetch",
+    "NetworkError when attempting to fetch resource",
+    "Load failed",
+    "Network request failed",
+    "The network connection was lost",
+    "AbortError",
+    "TypeError: cancelled",
+    "TypeError: Cancelled",
+
+    // Firebase internal errors
+    "FIREBASE FATAL ERROR",
+    /Cannot call write on a snapshot that is no longer connected/,
+    /Error: Permission denied/,
+
+    // User-initiated navigation
+    "ChunkLoadError",
+    /Loading chunk [\d]+ failed/,
+  ],
+  denyUrls: [
+    // Browser extensions
+    /extensions\//i,
+    /^chrome:\/\//i,
+    /^chrome-extension:\/\//i,
+    /^moz-extension:\/\//i,
+    /^safari-extension:\/\//i,
+    /^safari-web-extension:\/\//i,
+  ],
+  beforeSend(event) {
+    // Ignore errors from third-party scripts (no stack or only anonymous frames)
+    const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+    if (frames && frames.length > 0) {
+      const hasAppFrame = frames.some(
+        frame => frame.filename && !frame.filename.startsWith('http') && !frame.filename.includes('<anonymous>')
+          || frame.filename?.includes(window.location.host)
+      );
+      if (!hasAppFrame) {
+        return null;
+      }
+    }
+
+    return event;
+  },
 });
 
 const theme = require('../theme/' + __THEME__);
