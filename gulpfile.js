@@ -67,7 +67,11 @@ function copyFavicons(done) {
     return done();
   }
 
-  return gulp.src(path.join(faviconDir, '*'), {
+  return gulp.src([
+    path.join(faviconDir, '*'),
+    '!' + path.join(faviconDir, 'manifest.json'),
+    '!' + path.join(faviconDir, 'site.webmanifest'),
+  ], {
     base: path.join(__dirname, 'theme', projectConf.theme),
     allowEmpty: true,
     encoding: false
@@ -137,7 +141,7 @@ function buildFirebaseRules() {
     .pipe(gulp.dest(config.output.path));
 }
 
-const assets = gulp.parallel(copyResetCss, copyFavicons, buildFirebaseRules, generateManifest);
+const assets = gulp.parallel(copyResetCss, gulp.series(copyFavicons, generateManifest), buildFirebaseRules);
 
 exports.clean = clean;
 exports.build = gulp.series(clean, bundleJS, assets);
