@@ -535,10 +535,10 @@ describe('modules', () => {
           const snapshot = new FakeFirebaseSnapshot('deleted-key', null);
 
           const pushSpy = jest.spyOn(history, 'push');
-          generator.next(snapshot);
+          const result = generator.next(snapshot);
 
           expect(pushSpy).toHaveBeenCalledWith('/');
-          expect(generator.next().done).toEqual(true);
+          expect(result.done).toEqual(true);
           pushSpy.mockRestore();
         });
       });
@@ -1453,7 +1453,6 @@ describe('modules', () => {
       describe('teardownOnAuthLost', () => {
         it('should unsubscribe listeners when auth data is lost', () => {
           const unsubDeparture = jest.fn();
-          const unsubArrival = jest.fn();
 
           (onChildAdded as jest.Mock).mockReturnValue(unsubDeparture);
           (onChildChanged as jest.Mock).mockReturnValue(unsubDeparture);
