@@ -7,12 +7,12 @@ import MaterialIcon from '../MaterialIcon'
 import {getLabel} from '../AerodromeStatusForm/StatusOptions'
 import dates from '../../util/dates'
 import newLineToBr from '../../util/newLineToBr'
-import { withTranslation } from 'react-i18next'
+import {withTranslation} from 'react-i18next'
 
 const StyledLogo = styled(Logo)`
   width: 200px;
   float: left;
-  
+
   @media(max-width: 700px) {
     float: none;
     text-align: center;
@@ -24,7 +24,7 @@ const StyledLogo = styled(Logo)`
 
 const StyledContainer = styled.div`
   margin-left: 250px;
-  
+
   @media(max-width: 700px) {
     margin-left: 0;
   }
@@ -67,7 +67,7 @@ class AerodromeStatusPage extends Component<any, any> {
         <StyledContainer>
           <StyledStatusName>{getLabel(status.status)}</StyledStatusName>
           <div>{newLineToBr(status.details)}</div>
-          <StyledAuthor>{dates.formatDateTime(status.timestamp)}, {status.by}</StyledAuthor>
+          <StyledAuthor>{dates.formatDateTime(status.timestamp)}</StyledAuthor>
         </StyledContainer>
       </StyledCentered>
     );
