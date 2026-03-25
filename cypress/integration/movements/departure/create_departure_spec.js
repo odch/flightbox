@@ -15,10 +15,17 @@ describe('movements', () => {
   describe('departure', () => {
     describe('create_departure', () => {
       let createdDepartureKey;
+      let existingDepartureKeys = [];
 
       before(() => {
         cy.visit('#/departure/new');
         cy.login();
+        cy.window().then(win =>
+          win.firebase.getRef('/departures').once('value').then(snapshot => {
+            const existing = snapshot.val();
+            existingDepartureKeys = existing ? Object.keys(existing) : [];
+          })
+        );
       });
 
       after(() => {
@@ -72,10 +79,11 @@ describe('movements', () => {
         cy.window().then(win => win.firebase.getRef('/departures').once('value').then(snapshot => {
           const departures = snapshot.val();
 
-          const keys = Object.keys(departures);
-          expect(keys.length).to.equal(1);
+          const allKeys = Object.keys(departures);
+          const newKeys = allKeys.filter(k => !existingDepartureKeys.includes(k));
+          expect(newKeys.length).to.equal(1);
 
-          createdDepartureKey = keys[0];
+          createdDepartureKey = newKeys[0];
 
           const movement = firebaseToLocal(departures[createdDepartureKey]);
 
