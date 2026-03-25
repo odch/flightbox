@@ -40,7 +40,7 @@ class MovementGroup extends React.PureComponent<any, any> {
               timeWithDate={props.timeWithDate}
               createMovementFromMovement={props.createMovementFromMovement}
               onDelete={props.onDelete}
-              locked={isLocked(item, props.lockDate)}
+              locked={isLocked(item, props.lockDate) || item.anonymized === true}
               aircraftSettings={props.aircraftSettings}
               loading={props.loading}
               isAdmin={props.isAdmin}
