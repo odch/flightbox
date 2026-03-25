@@ -13,14 +13,12 @@ const PII_FIELDS = [
   'phone',
   'memberNr',
   'immatriculation',
-  'aircraftType',
-  'mtow',
   'remarks',
-  'carriageVoucher',
   'createdBy',
   'createdBy_orderKey',
   'customsFormId',
   'customsFormUrl',
+  'privacyPolicyAcceptedAt',
 ];
 
 function getAnonymizationUpdates(snapshot, cutoffIso) {
@@ -35,6 +33,9 @@ function getAnonymizationUpdates(snapshot, cutoffIso) {
           updates[`${child.key}/${field}`] = null;
         }
       });
+      if (val.paymentMethod && val.paymentMethod.invoiceRecipientName !== undefined) {
+        updates[`${child.key}/paymentMethod/invoiceRecipientName`] = null;
+      }
       updates[`${child.key}/anonymized`] = true;
     }
   });

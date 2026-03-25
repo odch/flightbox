@@ -81,6 +81,7 @@ describe('anonymizeMovements', () => {
         remarks: 'test',
         createdBy: 'uid1',
         createdBy_orderKey: 'uid1_123',
+        privacyPolicyAcceptedAt: '2023-01-15T09:55:00.000Z',
         location: 'LSZT',
         flightType: 'private',
         negativeTimestamp: -1673776800000,
@@ -103,13 +104,15 @@ describe('anonymizeMovements', () => {
     expect(departureUpdates['mov1/phone']).toBeNull();
     expect(departureUpdates['mov1/memberNr']).toBeNull();
     expect(departureUpdates['mov1/immatriculation']).toBeNull();
-    expect(departureUpdates['mov1/aircraftType']).toBeNull();
-    expect(departureUpdates['mov1/mtow']).toBeNull();
     expect(departureUpdates['mov1/remarks']).toBeNull();
     expect(departureUpdates['mov1/createdBy']).toBeNull();
     expect(departureUpdates['mov1/createdBy_orderKey']).toBeNull();
+    expect(departureUpdates['mov1/privacyPolicyAcceptedAt']).toBeNull();
     expect(departureUpdates['mov1/anonymized']).toBe(true);
 
+    // Non-PII fields are preserved
+    expect(departureUpdates['mov1/aircraftType']).toBeUndefined();
+    expect(departureUpdates['mov1/mtow']).toBeUndefined();
     expect(departureUpdates['mov1/location']).toBeUndefined();
     expect(departureUpdates['mov1/flightType']).toBeUndefined();
     expect(departureUpdates['mov1/dateTime']).toBeUndefined();
@@ -147,11 +150,64 @@ describe('anonymizeMovements', () => {
     expect(updates['mov1/anonymized']).toBe(true);
 
     // Fields absent from the record must not appear in the update object
-    expect(updates['mov1/carriageVoucher']).toBeUndefined();
     expect(updates['mov1/customsFormId']).toBeUndefined();
     expect(updates['mov1/customsFormUrl']).toBeUndefined();
     expect(updates['mov1/email']).toBeUndefined();
     expect(updates['mov1/phone']).toBeUndefined();
+  });
+
+  it('should anonymize invoiceRecipientName from paymentMethod', async () => {
+    mockRefData['/settings/movementRetentionDays'] = createValueSnapshot(730);
+
+    const snapshot = createSnapshot({
+      'mov1': {
+        dateTime: '2023-01-15T10:00:00.000Z',
+        firstname: 'Hans',
+        lastname: 'Muster',
+        paymentMethod: {
+          method: 'invoice',
+          invoiceRecipientName: 'Fluggruppe Thurgau',
+        },
+        location: 'LSZT',
+      },
+    });
+
+    mockRefData['/departures'] = { forEach: () => {} };
+    mockRefData['/arrivals'] = snapshot;
+
+    const { scheduledAnonymizeMovements } = require('./anonymizeMovements');
+    await scheduledAnonymizeMovements();
+
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+
+    const updates = mockUpdate.mock.calls[0][0];
+    expect(updates['mov1/paymentMethod/invoiceRecipientName']).toBeNull();
+    // payment method itself is preserved
+    expect(updates['mov1/paymentMethod']).toBeUndefined();
+  });
+
+  it('should not add paymentMethod update when invoiceRecipientName is absent', async () => {
+    mockRefData['/settings/movementRetentionDays'] = createValueSnapshot(730);
+
+    const snapshot = createSnapshot({
+      'mov1': {
+        dateTime: '2023-01-15T10:00:00.000Z',
+        firstname: 'Hans',
+        paymentMethod: { method: 'cash' },
+        location: 'LSZT',
+      },
+    });
+
+    mockRefData['/departures'] = { forEach: () => {} };
+    mockRefData['/arrivals'] = snapshot;
+
+    const { scheduledAnonymizeMovements } = require('./anonymizeMovements');
+    await scheduledAnonymizeMovements();
+
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+
+    const updates = mockUpdate.mock.calls[0][0];
+    expect(updates['mov1/paymentMethod/invoiceRecipientName']).toBeUndefined();
   });
 
   it('should skip already anonymized movements', async () => {
