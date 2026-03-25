@@ -129,7 +129,7 @@ export function compareDescending(a: Movement, b: Movement): number {
     return dateCompare;
   }
 
-  return a.immatriculation.localeCompare(b.immatriculation);
+  return (a.immatriculation || '').localeCompare(b.immatriculation || '');
 }
 
 /**
@@ -144,5 +144,5 @@ export function compareAscending(a: Movement, b: Movement): number {
     return dateCompare;
   }
 
-  return a.immatriculation.localeCompare(b.immatriculation);
+  return (a.immatriculation || '').localeCompare(b.immatriculation || '');
 }

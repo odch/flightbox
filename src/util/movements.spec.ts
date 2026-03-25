@@ -241,6 +241,55 @@ describe('util', () => {
       });
     });
 
+    describe('sorting with null immatriculation (anonymized records)', () => {
+      it('compareDescending does not crash when immatriculation is null', () => {
+        const a = {
+          date: '2016-03-08',
+          time: '08:30',
+          immatriculation: null,
+        };
+        const b = {
+          date: '2016-03-08',
+          time: '08:30',
+          immatriculation: 'HB-KFW',
+        };
+
+        expect(() => compareDescending(a as any, b as any)).not.toThrow();
+        expect(compareDescending(a as any, b as any)).toBe(-1);
+      });
+
+      it('compareAscending does not crash when immatriculation is null', () => {
+        const a = {
+          date: '2016-03-08',
+          time: '08:30',
+          immatriculation: 'HB-KFW',
+        };
+        const b = {
+          date: '2016-03-08',
+          time: '08:30',
+          immatriculation: null,
+        };
+
+        expect(() => compareAscending(a as any, b as any)).not.toThrow();
+        expect(compareAscending(a as any, b as any)).toBe(1);
+      });
+
+      it('compareDescending returns 0 when both immatriculations are null', () => {
+        const a = {
+          date: '2016-03-08',
+          time: '08:30',
+          immatriculation: null,
+        };
+        const b = {
+          date: '2016-03-08',
+          time: '08:30',
+          immatriculation: null,
+        };
+
+        expect(compareDescending(a as any, b as any)).toBe(0);
+      });
+    });
+
     describe('transferValues', () => {
       it('transfers values which are not undefined and not null', () => {
         const source = {
