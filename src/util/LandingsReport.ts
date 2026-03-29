@@ -68,6 +68,8 @@ class LandingsReport {
       const arrival = firebaseToLocal(record.val());
       const { immatriculation, mtow, landingCount } = arrival;
 
+      if (!immatriculation) return;
+
       if (!map[immatriculation]) {
         map[immatriculation] = {
           immatriculation,
@@ -90,7 +92,7 @@ class LandingsReport {
     Object.keys(map).forEach(key => {
       arr.push(map[key]);
     });
-    arr.sort((a1, a2) => a1.immatriculation.localeCompare(a2.immatriculation));
+    arr.sort((a1, a2) => (a1.immatriculation || '').localeCompare(a2.immatriculation || ''));
 
     return arr;
   }

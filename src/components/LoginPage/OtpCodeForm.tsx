@@ -1,0 +1,286 @@
+import React, { useRef, useState, useCallback, useEffect } from 'react';
+import styled from 'styled-components';
+import { useTranslation, Trans } from 'react-i18next';
+import Button from '../Button';
+
+const CODE_LENGTH = 6;
+const RESEND_COOLDOWN_SECONDS = 60;
+
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+`;
+
+const Instruction = styled.p`
+  margin: 0;
+  font-size: 0.95rem;
+  text-align: center;
+  color: #444;
+`;
+
+const OtpInputsRow = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  max-width: 100%;
+`;
+
+interface DigitInputProps {
+  $filled: boolean;
+}
+
+const DigitInput = styled.input<DigitInputProps>`
+  width: 2.8rem;
+  height: 3.2rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border: 2px solid ${({ $filled }) => ($filled ? '#aaa' : '#ddd')};
+  border-radius: 8px;
+  outline: none;
+  caret-color: transparent;
+  background-color: ${({ $filled }) => ($filled ? '#f8f9fa' : '#fff')};
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  color: #222;
+
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.main};
+    outline: 3px solid ${({ theme }) => theme.colors.main}33;
+    outline-offset: -1px;
+    background-color: #fff;
+  }
+
+  @media (max-width: 480px) {
+    width: 2.4rem;
+    height: 2.9rem;
+    font-size: 1.3rem;
+  }
+
+  @media (max-width: 360px) {
+    width: 2rem;
+    height: 2.5rem;
+    font-size: 1.1rem;
+  }
+`;
+
+const FailureMessage = styled.p`
+  margin: 0;
+  font-size: 0.9rem;
+  color: #ed351c;
+  text-align: center;
+`;
+
+const Actions = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+`;
+
+const ResendButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: ${({ theme }) => theme.colors.main};
+  text-decoration: underline;
+
+  &:disabled {
+    color: #aaa;
+    text-decoration: none;
+    cursor: default;
+  }
+`;
+
+const ChangeEmailButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #777;
+  text-decoration: underline;
+
+  &:hover {
+    color: #444;
+  }
+`;
+
+interface OtpCodeFormProps {
+  email: string;
+  submitting: boolean;
+  failure: boolean;
+  onSubmit: (code: string) => void;
+  onResend?: () => void;
+  onChangeEmail?: () => void;
+}
+
+const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, onSubmit, onResend, onChangeEmail }) => {
+  const { t } = useTranslation();
+  const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''));
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
+
+  const focusInput = useCallback((index: number) => {
+    const el = inputRefs.current[index];
+    if (el) {
+      el.focus();
+      el.select();
+    }
+  }, []);
+
+  const handleResend = useCallback(() => {
+    if (onResend && cooldown === 0) {
+      onResend();
+      setCooldown(RESEND_COOLDOWN_SECONDS);
+      setDigits(Array(CODE_LENGTH).fill(''));
+      setTimeout(() => focusInput(0), 0);
+    }
+  }, [onResend, cooldown, focusInput]);
+
+  const submitCode = useCallback((code: string) => {
+    if (code.length === CODE_LENGTH && !submitting) {
+      onSubmit(code);
+    }
+  }, [onSubmit, submitting]);
+
+  const handleChange = useCallback((index: number, value: string) => {
+    const digit = value.replace(/\D/g, '').slice(-1);
+    setDigits(prev => {
+      const next = [...prev];
+      next[index] = digit;
+      if (digit && index < CODE_LENGTH - 1) {
+        setTimeout(() => focusInput(index + 1), 0);
+      }
+      const code = next.join('');
+      if (code.length === CODE_LENGTH && next.every(d => d !== '')) {
+        setTimeout(() => submitCode(code), 0);
+      }
+      return next;
+    });
+  }, [focusInput, submitCode]);
+
+  const handleKeyDown = useCallback((index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      if (digits[index]) {
+        setDigits(prev => {
+          const next = [...prev];
+          next[index] = '';
+          return next;
+        });
+      } else if (index > 0) {
+        setDigits(prev => {
+          const next = [...prev];
+          next[index - 1] = '';
+          return next;
+        });
+        focusInput(index - 1);
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      focusInput(index - 1);
+    } else if (e.key === 'ArrowRight' && index < CODE_LENGTH - 1) {
+      focusInput(index + 1);
+    }
+  }, [digits, focusInput]);
+
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, CODE_LENGTH);
+    if (!pasted) return;
+
+    const next = Array(CODE_LENGTH).fill('');
+    for (let i = 0; i < pasted.length; i++) {
+      next[i] = pasted[i];
+    }
+    setDigits(next);
+
+    const focusIndex = Math.min(pasted.length, CODE_LENGTH - 1);
+    setTimeout(() => focusInput(focusIndex), 0);
+
+    if (pasted.length === CODE_LENGTH) {
+      setTimeout(() => submitCode(pasted), 0);
+    }
+  }, [focusInput, submitCode]);
+
+  const code = digits.join('');
+  const isComplete = code.length === CODE_LENGTH && digits.every(d => d !== '');
+
+  return (
+    <Wrapper>
+      <Instruction>
+        <Trans
+          i18nKey="login.otpInstruction"
+          values={{ email }}
+          components={{ bold: <strong /> }}
+        />
+      </Instruction>
+      <OtpInputsRow onPaste={handlePaste} role="group" aria-label={t('login.otpAriaLabel')}>
+        {digits.map((digit, index) => (
+          <DigitInput
+            key={index}
+            ref={el => { inputRefs.current[index] = el; }}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={1}
+            value={digit}
+            autoComplete={index === 0 ? 'one-time-code' : 'off'}
+            autoFocus={index === 0}
+            disabled={submitting}
+            $filled={digit !== ''}
+            onChange={e => handleChange(index, e.target.value)}
+            onKeyDown={e => handleKeyDown(index, e)}
+            aria-label={`${t('login.otpDigitLabel')} ${index + 1}`}
+            data-cy={`otp-digit-${index}`}
+          />
+        ))}
+      </OtpInputsRow>
+      {failure && <FailureMessage>{t('login.otpVerificationFailure')}</FailureMessage>}
+      <Actions>
+        <Button
+          type="button"
+          label={t('login.loginButton')}
+          icon="send"
+          disabled={submitting || !isComplete}
+          primary
+          dataCy="otp-submit"
+          loading={submitting}
+          onClick={() => submitCode(code)}
+        />
+        {onResend && (
+          <ResendButton
+            type="button"
+            disabled={cooldown > 0}
+            onClick={handleResend}
+            data-cy="otp-resend"
+          >
+            {cooldown > 0
+              ? t('login.otpResendIn', { seconds: cooldown })
+              : t('login.otpResend')}
+          </ResendButton>
+        )}
+        {onChangeEmail && (
+          <ChangeEmailButton
+            type="button"
+            onClick={onChangeEmail}
+            data-cy="otp-change-email"
+          >
+            {t('login.otpChangeEmail')}
+          </ChangeEmailButton>
+        )}
+      </Actions>
+    </Wrapper>
+  );
+};
+
+export default OtpCodeForm;

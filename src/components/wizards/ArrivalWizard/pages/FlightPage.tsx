@@ -9,6 +9,7 @@ import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
 import {getAircraftOrigin, updateFeesTotal, updateGoAroundFees, updateLandingFees} from '../../../../util/landingFees';
 import CircuitsFieldHint from '../../CircuitsFieldHint';
+import PrivacyConsentText from '../../../PrivacyConsentText';
 
 const FlightPage = (props) => {
   const { t } = useTranslation();
@@ -23,7 +24,9 @@ const FlightPage = (props) => {
     aircraftSettings,
     readOnly,
     hiddenFields,
-    arrivalRoute
+    arrivalRoute,
+    privacyPolicyUrl,
+    isPersonalLogin
   } = props;
   return (
     <Form
@@ -88,6 +91,9 @@ const FlightPage = (props) => {
               hidden={hiddenFields && hiddenFields.includes('runway')}
             />
           </FieldSet>
+          {!formValues.key && !isPersonalLogin && (
+            <PrivacyConsentText privacyPolicyUrl={privacyPolicyUrl} />
+          )}
           <WizardNavigation
             previousStep={() => previousPage(form.getState().values)}
             nextLabel={t('wizard.save')}
@@ -100,9 +106,14 @@ const FlightPage = (props) => {
   );
 };
 
-const mapStateToProps = state => ({
-  aircraftSettings: state.settings.aircrafts
-});
+const mapStateToProps = state => {
+  const authData = state.auth.data;
+  return {
+    aircraftSettings: state.settings.aircrafts,
+    privacyPolicyUrl: state.settings.privacyPolicyUrl.url,
+    isPersonalLogin: authData && authData.guest === false && authData.kiosk === false,
+  };
+};
 
 FlightPage.propTypes = {
   previousPage: PropTypes.func.isRequired,
@@ -127,7 +138,9 @@ FlightPage.propTypes = {
     club: PropTypes.objectOf(PropTypes.bool),
     homeBase: PropTypes.objectOf(PropTypes.bool)
   }).isRequired,
-  hiddenFields: PropTypes.arrayOf(PropTypes.string)
+  hiddenFields: PropTypes.arrayOf(PropTypes.string),
+  privacyPolicyUrl: PropTypes.string,
+  isPersonalLogin: PropTypes.bool,
 };
 
 export default connect(mapStateToProps)(FlightPage);

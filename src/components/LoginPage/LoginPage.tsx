@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import Header from './Header';
 import EmailLoginForm from '../../containers/EmailLoginFormContainer'
 import UsernamePasswordLoginForm from '../../containers/UsernamePasswordLoginFormContainer'
@@ -43,7 +44,19 @@ const LoginInnerWrapper = styled.div`
   }
 `
 
-const LoginPage = ({location}) => {
+const PrivacyText = styled.p`
+  margin-top: 2em;
+  font-size: 0.85em;
+  color: #666;
+
+  a {
+    color: #666;
+    text-decoration: underline;
+  }
+`
+
+const LoginPage = ({location, privacyPolicyUrl, emailSent}: {location: any, privacyPolicyUrl?: string | null, emailSent?: boolean}) => {
+  const { t } = useTranslation();
   const queryToken = getAuthQueryToken(location)
   const guestOnly = getGuestOnly(location)
   return (
@@ -55,6 +68,13 @@ const LoginPage = ({location}) => {
             ? <EmailLoginForm queryToken={queryToken} guestOnly={guestOnly}/>
             : <UsernamePasswordLoginForm/>
           }
+          {privacyPolicyUrl && !emailSent && /^https?:\/\//.test(privacyPolicyUrl) && (
+            <PrivacyText>
+              <Trans i18nKey="legal.privacyConsent">
+                Mit der Anmeldung akzeptieren Sie die <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer">Datenschutzerklärung</a>.
+              </Trans>
+            </PrivacyText>
+          )}
         </LoginInnerWrapper>
       </LoginWrapper>
     </StyledWrapper>

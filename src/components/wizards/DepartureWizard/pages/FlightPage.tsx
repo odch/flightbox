@@ -1,12 +1,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {Field, Form} from 'react-final-form';
+import { useTranslation } from 'react-i18next';
 import validate from '../../validate';
 import {renderSingleSelect, renderTextArea} from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
 import CircuitsFieldHint from '../../CircuitsFieldHint';
-import { useTranslation } from 'react-i18next';
+import PrivacyConsentText from '../../../PrivacyConsentText';
 
 const FlightPage = (props) => {
   const { t } = useTranslation();
@@ -20,7 +21,9 @@ const FlightPage = (props) => {
     formValues,
     hiddenFields,
     readOnly,
-    departureRoute
+    departureRoute,
+    privacyPolicyUrl,
+    isPersonalLogin
   } = props;
   return (
     <Form
@@ -69,6 +72,9 @@ const FlightPage = (props) => {
               readOnly={readOnly}
             />
           </FieldSet>
+          {!formValues.key && !isPersonalLogin && (
+            <PrivacyConsentText privacyPolicyUrl={privacyPolicyUrl} />
+          )}
           <WizardNavigation
             previousStep={() => previousPage(form.getState().values)}
             nextLabel={t('wizard.save')}
@@ -100,7 +106,9 @@ FlightPage.propTypes = {
     description: PropTypes.string,
   })).isRequired,
   departureRoute: PropTypes.string,
-  hiddenFields: PropTypes.arrayOf(PropTypes.string)
+  hiddenFields: PropTypes.arrayOf(PropTypes.string),
+  privacyPolicyUrl: PropTypes.string,
+  isPersonalLogin: PropTypes.bool,
 };
 
 export default FlightPage;

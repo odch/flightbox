@@ -2,6 +2,7 @@ const projects = require('./projects');
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { GenerateSW } = require('workbox-webpack-plugin');
 
 const projectName = process.env.npm_config_project || 'lszt';
 
@@ -91,6 +92,22 @@ module.exports = {
       filename: 'index.html',
       inject: 'body',
       title: projectConf.title,
+      themeColor: projectConf.themeColor || '#ffffff',
+      shortName: projectConf.shortName || projectConf.title,
     }),
+    ...(!process.env.DEV ? [
+      new GenerateSW({
+        clientsClaim: true,
+        skipWaiting: true,
+        exclude: [/\.map$/, /index\.html$/],
+        runtimeCaching: [{
+          urlPattern: ({request}) => request.mode === 'navigate',
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'html-cache',
+          }
+        }],
+      }),
+    ] : []),
   ],
 };

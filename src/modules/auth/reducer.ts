@@ -12,7 +12,7 @@ interface AuthState {
   authenticated: boolean;
   submitting: boolean;
   failure: boolean;
-  emailAuthenticationCompletionFailure?: boolean;
+  otpVerificationFailure?: boolean;
   guestAuthentication: GuestAuthState;
   data?: unknown;
 }
@@ -22,7 +22,7 @@ const INITIAL_STATE: AuthState = {
   authenticated: false,
   submitting: false,
   failure: false,
-  emailAuthenticationCompletionFailure: false,
+  otpVerificationFailure: false,
   guestAuthentication: {
     submitting: false,
     failure: false
@@ -34,6 +34,18 @@ const ACTION_HANDLERS = {
     return Object.assign({}, state, {
       submitting: true,
       failure: false,
+      otpVerificationFailure: false,
+    });
+  },
+  [actions.SEND_AUTHENTICATION_EMAIL_SUCCESS]: (state: AuthState) => {
+    return Object.assign({}, state, {
+      submitting: false,
+    });
+  },
+  [actions.SEND_AUTHENTICATION_EMAIL_FAILURE]: (state: AuthState) => {
+    return Object.assign({}, state, {
+      submitting: false,
+      failure: true,
     });
   },
   [actions.REQUEST_GUEST_TOKEN_AUTHENTICATION]: (state: AuthState) => {
@@ -78,12 +90,12 @@ const ACTION_HANDLERS = {
     }
     return INITIAL_STATE;
   },
-  [actions.EMAIL_AUTHENTICATION_COMPLETION_FAILURE]: (state: AuthState) => {
+  [actions.OTP_VERIFICATION_FAILURE]: (state: AuthState) => {
     return {
       ...state,
       submitting: false,
-      emailAuthenticationCompletionFailure: true
-    }
+      otpVerificationFailure: true,
+    };
   },
 };
 

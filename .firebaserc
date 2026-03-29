@@ -2,5 +2,22 @@
   "projects": {
     "staging": "mfgt-flights",
     "production": "project-8979611309653332047"
-  }
+  },
+  "targets": {
+    "cypress-testing": {
+      "database": {
+        "main": [
+          "cypress-testing-eu"
+        ]
+      }
+    },
+    "lspl-test": {
+      "database": {
+        "main": [
+          "lspl-test-default-rtdb"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

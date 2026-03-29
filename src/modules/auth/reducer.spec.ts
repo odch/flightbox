@@ -6,7 +6,7 @@ const INITIAL_STATE = {
   authenticated: false,
   submitting: false,
   failure: false,
-  emailAuthenticationCompletionFailure: false,
+  otpVerificationFailure: false,
   guestAuthentication: {
     submitting: false,
     failure: false,
@@ -23,14 +23,14 @@ describe('modules', () => {
       });
 
       describe('SET_SUBMITTING', () => {
-        it('should set submitting to true and clear failure', () => {
+        it('should set submitting to true, clear failure, and clear otpVerificationFailure', () => {
           expect(
             reducer({
               initialized: false,
               authenticated: false,
               submitting: false,
               failure: true,
-              emailAuthenticationCompletionFailure: false,
+              otpVerificationFailure: true,
               guestAuthentication: { submitting: false, failure: false },
             }, actions.setSubmitting())
           ).toEqual({
@@ -38,8 +38,38 @@ describe('modules', () => {
             authenticated: false,
             submitting: true,
             failure: false,
-            emailAuthenticationCompletionFailure: false,
+            otpVerificationFailure: false,
             guestAuthentication: { submitting: false, failure: false },
+          });
+        });
+      });
+
+      describe('SEND_AUTHENTICATION_EMAIL_SUCCESS', () => {
+        it('should set submitting to false', () => {
+          expect(
+            reducer({
+              ...INITIAL_STATE,
+              submitting: true,
+            }, actions.sendAuthenticationEmailSuccess())
+          ).toEqual({
+            ...INITIAL_STATE,
+            submitting: false,
+          });
+        });
+      });
+
+      describe('SEND_AUTHENTICATION_EMAIL_FAILURE', () => {
+        it('should set submitting to false and failure to true', () => {
+          expect(
+            reducer({
+              ...INITIAL_STATE,
+              submitting: true,
+              failure: false,
+            }, actions.sendAuthenticationEmailFailure())
+          ).toEqual({
+            ...INITIAL_STATE,
+            submitting: false,
+            failure: true,
           });
         });
       });
@@ -128,7 +158,7 @@ describe('modules', () => {
               authenticated: true,
               submitting: false,
               failure: false,
-              emailAuthenticationCompletionFailure: false,
+              otpVerificationFailure: false,
               data: { uid: 'user-123' },
               guestAuthentication: { submitting: false, failure: false },
             }, actions.firebaseAuthenticationEvent(null))
@@ -136,18 +166,18 @@ describe('modules', () => {
         });
       });
 
-      describe('EMAIL_AUTHENTICATION_COMPLETION_FAILURE', () => {
-        it('should set submitting to false and emailAuthenticationCompletionFailure to true', () => {
+      describe('OTP_VERIFICATION_FAILURE', () => {
+        it('should set submitting to false and otpVerificationFailure to true', () => {
           expect(
             reducer({
               ...INITIAL_STATE,
               submitting: true,
-              emailAuthenticationCompletionFailure: false,
-            }, actions.emailAuthenticationCompletionFailure())
+              otpVerificationFailure: false,
+            }, actions.otpVerificationFailure())
           ).toEqual({
             ...INITIAL_STATE,
             submitting: false,
-            emailAuthenticationCompletionFailure: true,
+            otpVerificationFailure: true,
           });
         });
       });

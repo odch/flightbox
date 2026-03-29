@@ -3,7 +3,7 @@ import * as actions from './actions';
 import * as sagas from './sagas';
 import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
 import {expectDoneWithoutReturn, expectDoneWithReturn} from '../../../test/sagaUtils';
-import firebase, {authenticate as fbAuth, authenticateEmail as fbAuthEmail, isSignInWithEmail, signInWithEmail, unauth as fbUnauth} from '../../util/firebase';
+import firebase, {authenticate as fbAuth, requestSignInCode as fbRequestSignInCode, verifyOtpCode as fbVerifyOtpCode, unauth as fbUnauth, watchAuthState} from '../../util/firebase';
 import {get} from 'firebase/database';
 
 jest.mock('../../util/firebase');
@@ -121,8 +121,6 @@ describe('modules', () => {
 
       describe('doListenFirebaseAuthentication', () => {
         it('should request IP authentication if currently logged out', () => {
-          (isSignInWithEmail as jest.Mock).mockReturnValue(false);
-
           const generator = sagas.doListenFirebaseAuthentication(actions.firebaseAuthentication(null));
 
           expect(generator.next().value).toEqual(put(actions.firebaseAuthenticationEvent(null)));
@@ -363,25 +361,7 @@ describe('modules', () => {
       });
 
       describe('doListenFirebaseAuthentication', () => {
-        it('should request email authentication when signed in with email link and email in storage', () => {
-          (isSignInWithEmail as jest.Mock).mockReturnValue(true);
-          localStorage.setItem('emailForSignIn', 'user@example.com');
-
-          const generator = sagas.doListenFirebaseAuthentication(
-            actions.firebaseAuthentication(null)
-          );
-
-          expect(generator.next().value).toEqual(put(actions.firebaseAuthenticationEvent(null)));
-          expect(generator.next().value).toEqual(put(actions.requestEmailAuthentication()));
-
-          expectDoneWithoutReturn(generator);
-          localStorage.removeItem('emailForSignIn');
-        });
-
-        it('should request ip authentication when not signed in with email and no kiosk token', () => {
-          (isSignInWithEmail as jest.Mock).mockReturnValue(false);
-          localStorage.removeItem('emailForSignIn');
-
+        it('should request ip authentication when not authenticated and no kiosk token', () => {
           const generator = sagas.doListenFirebaseAuthentication(
             actions.firebaseAuthentication(null)
           );
@@ -438,13 +418,31 @@ describe('modules', () => {
           global.__FIREBASE_PROJECT_ID__ = 'test-project';
         });
 
+        it('should call requestSignInCode with email, airportName and themeColor', () => {
+          const action = actions.sendAuthenticationEmail('user@example.com', false);
+          const generator = sagas.sendAuthenticationEmail(action);
+
+          expect(generator.next().value).toEqual(put(actions.setSubmitting()));
+          // next: sets isLocalSignIn in localStorage (synchronous)
+          expect(generator.next().value).toEqual(
+            call(fbRequestSignInCode, 'user@example.com', 'Test Airport', '#003863')
+          );
+
+          expect(generator.next().value).toEqual(
+            put(actions.sendAuthenticationEmailSuccess())
+          );
+
+          expectDoneWithoutReturn(generator);
+        });
+
         it('should put sendAuthenticationEmailFailure on exception', () => {
           const action = actions.sendAuthenticationEmail('user@example.com', false);
           const generator = sagas.sendAuthenticationEmail(action);
 
           expect(generator.next().value).toEqual(put(actions.setSubmitting()));
+          // next: sets isLocalSignIn in localStorage (synchronous), then calls requestSignInCode
           expect(generator.next().value).toEqual(
-            call(fbAuthEmail, 'user@example.com', false)
+            call(fbRequestSignInCode, 'user@example.com', 'Test Airport', '#003863')
           );
 
           const error = new Error('Network error');
@@ -464,72 +462,37 @@ describe('modules', () => {
         });
       });
 
-      describe('completeEmailAuthentication', () => {
-        it('should sign in with email and clean up browser state', () => {
-          const action = actions.completeEmailAuthentication('user@example.com');
-          const generator = sagas.completeEmailAuthentication(action);
+      describe('doVerifyOtpCode', () => {
+        it('should put requestFirebaseAuthentication on success', () => {
+          const action = actions.verifyOtpCode('user@example.com', '123456');
+          const generator = sagas.doVerifyOtpCode(action);
 
           expect(generator.next().value).toEqual(put(actions.setSubmitting()));
-          expect(generator.next().value).toEqual(call(signInWithEmail));
-          expect(generator.next().value).toEqual(call(sagas.cleanUpLoginBrowserState));
+          expect(generator.next().value).toEqual(
+            call(fbVerifyOtpCode, 'user@example.com', '123456')
+          );
 
-          expectDoneWithoutReturn(generator);
-        });
-
-        it('should put emailAuthenticationCompletionFailure on exception', () => {
-          const action = actions.completeEmailAuthentication('user@example.com');
-          const generator = sagas.completeEmailAuthentication(action);
-
-          expect(generator.next().value).toEqual(put(actions.setSubmitting()));
-
-          const error = new Error('sign in failed');
-          expect(generator.throw(error).value).toEqual(
-            put(actions.emailAuthenticationCompletionFailure())
+          const token = 'custom-token-abc';
+          expect(generator.next(token).value).toEqual(
+            put(actions.requestFirebaseAuthentication(token, actions.otpVerificationFailure()))
           );
 
           expectDoneWithoutReturn(generator);
         });
-      });
 
-      describe('doEmailAuthentication', () => {
-        it('should sign in with email and then clean up and reload', () => {
-          const generator = sagas.doEmailAuthentication();
+        it('should put otpVerificationFailure on exception', () => {
+          const action = actions.verifyOtpCode('user@example.com', '000000');
+          const generator = sagas.doVerifyOtpCode(action);
 
-          expect(generator.next().value).toEqual(call(signInWithEmail));
-          expect(generator.next().value).toEqual(call(sagas.cleanUpLoginBrowserState));
+          expect(generator.next().value).toEqual(put(actions.setSubmitting()));
+          expect(generator.next().value).toEqual(
+            call(fbVerifyOtpCode, 'user@example.com', '000000')
+          );
 
-          // after finally block generator is done
-          expectDoneWithoutReturn(generator);
-        });
-
-        it('should call cleanUpLoginBrowserState even if signInWithEmail throws', () => {
-          const generator = sagas.doEmailAuthentication();
-
-          expect(generator.next().value).toEqual(call(signInWithEmail));
-
-          const error = new Error('sign in error');
-          // throw causes finally to run
-          expect(generator.throw(error).value).toEqual(call(sagas.cleanUpLoginBrowserState));
-
-          expectDoneWithoutReturn(generator);
-        });
-      });
-
-      describe('cleanUpLoginBrowserState', () => {
-        it('should remove emailForSignIn and yield replaceState call', () => {
-          localStorage.setItem('emailForSignIn', 'test@example.com');
-
-          const generator = sagas.cleanUpLoginBrowserState();
-
-          // The generator first removes item synchronously, then yields replaceState
-          const step = generator.next();
-          // Step should be a CALL to window.history.replaceState
-          expect(step.value).toMatchObject({ type: 'CALL' });
-          expect((step.value as any).payload.context).toBe(window.history);
-          expect((step.value as any).payload.fn).toBe(window.history.replaceState);
-
-          // localStorage.removeItem was called synchronously before the yield
-          expect(localStorage.getItem('emailForSignIn')).toBeNull();
+          const error = new Error('Invalid or expired code');
+          expect(generator.throw(error).value).toEqual(
+            put(actions.otpVerificationFailure())
+          );
 
           expectDoneWithoutReturn(generator);
         });
@@ -563,6 +526,26 @@ describe('modules', () => {
           expectDoneWithoutReturn(generator);
 
           global.__DISABLE_IP_AUTHENTICATION__ = origVal;
+        });
+      });
+
+      describe('createFbAuthenticationChannel', () => {
+        it('should return a channel when watchAuthState succeeds', () => {
+          (watchAuthState as jest.Mock).mockImplementation(() => {});
+          const channel = sagas.createFbAuthenticationChannel();
+          expect(channel).toBeDefined();
+          expect(channel.take).toBeDefined();
+          expect(channel.put).toBeDefined();
+        });
+
+        it('should return a fallback channel with null when watchAuthState throws', async () => {
+          (watchAuthState as jest.Mock).mockImplementation(() => {
+            throw new Error('Firebase not initialized');
+          });
+          const channel = sagas.createFbAuthenticationChannel();
+          expect(channel).toBeDefined();
+          const value = await channel.take();
+          expect(value).toBeNull();
         });
       });
 

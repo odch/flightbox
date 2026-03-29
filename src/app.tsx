@@ -23,9 +23,12 @@ import GlobalStyle from './style/global-style';
 
 import * as Sentry from "@sentry/react";
 
+import ErrorFallback from './components/ErrorFallback';
+import { getMidnightDelayMs } from './util/getMidnightDelay';
+import { shouldReloadOnControllerChange, markReload } from './util/shouldReloadOnControllerChange';
+
 Sentry.init({
   dsn: "https://8a606d82aa68850021fbfac2ffda30b5@o4509293310967808.ingest.de.sentry.io/4509293314113617",
-  sendDefaultPii: true
 });
 
 const theme = require('../theme/' + __THEME__);
@@ -44,16 +47,36 @@ sagaMiddleware.run(autoRestart(sagas));
 
 createRoot(document.getElementById('app')!).render(
   <Provider store={store}>
-    <GlobalStyle/>
-    <ThemeProvider theme={theme}>
-      <Router history={history}>
-        <Route component={App}/>
-      </Router>
-    </ThemeProvider>
+    <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
+      <GlobalStyle/>
+      <ThemeProvider theme={theme}>
+        <Router history={history}>
+          <Route component={App}/>
+        </Router>
+      </ThemeProvider>
+    </Sentry.ErrorBoundary>
   </Provider>
 );
 
-setTimeout(
-  () => window.location.reload(),
-  moment('24:00:00', 'hh:mm:ss').diff(moment(), 'milliseconds')
-);
+setTimeout(() => window.location.reload(), getMidnightDelayMs());
+
+if (!__DEV__ && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+      setInterval(() => {
+        registration.update().catch(() => {});
+      }, 3 * 60 * 1000);
+    }).catch(err => {
+      console.error('SW registration failed', err);
+    });
+  });
+
+  let hasController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hasController && shouldReloadOnControllerChange()) {
+      markReload();
+      window.location.reload();
+    }
+    hasController = true;
+  });
+}

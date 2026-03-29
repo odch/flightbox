@@ -1,11 +1,13 @@
 export const UPDATE_USERNAME = 'UPDATE_USERNAME' as const;
 export const UPDATE_PASSWORD = 'UPDATE_PASSWORD' as const;
 export const UPDATE_EMAIL = 'UPDATE_EMAIL' as const;
+export const RESET_OTP = 'RESET_OTP' as const;
 
 export type LoginPageAction =
   | { type: typeof UPDATE_USERNAME; payload: { username: string } }
   | { type: typeof UPDATE_PASSWORD; payload: { password: string } }
-  | { type: typeof UPDATE_EMAIL; payload: { email: string } };
+  | { type: typeof UPDATE_EMAIL; payload: { email: string } }
+  | { type: typeof RESET_OTP };
 
 export function updateUsername(username: string) {
   return {
@@ -31,5 +33,11 @@ export function updateEmail(email: string) {
     payload: {
       email,
     },
+  };
+}
+
+export function resetOtp() {
+  return {
+    type: RESET_OTP,
   };
 }

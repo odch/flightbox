@@ -1,10 +1,10 @@
 import {
   authenticate,
   authenticateAsGuest,
-  completeEmailAuthentication,
   FIREBASE_AUTHENTICATION_EVENT,
   logout,
   sendAuthenticationEmail,
+  verifyOtpCode,
   USERNAME_PASSWORD_AUTHENTICATION_FAILURE
 } from './actions';
 import reducer from './reducer';
@@ -16,7 +16,7 @@ export {
   authenticate,
   authenticateAsGuest,
   sendAuthenticationEmail,
-  completeEmailAuthentication,
+  verifyOtpCode,
   logout
 };
 

@@ -11,9 +11,9 @@ describe('functions', () => {
     beforeEach(() => {
       fs.readFileSync.mockImplementation((filePath) => {
         if (filePath.endsWith('.html')) {
-          return '<a href="{{signInLink}}">{{airportName}}</a><span>{{themeColor}}</span>';
+          return '<p>{{signInCode}}</p><span>{{airportName}}</span><span>{{themeColor}}</span>';
         }
-        return 'Sign in at {{signInLink}} for {{airportName}}';
+        return 'Code: {{signInCode}} for {{airportName}}';
       });
     });
 
@@ -23,7 +23,7 @@ describe('functions', () => {
 
     it('returns subject, html, and text', () => {
       const result = getSignInEmailContent({
-        signInLink: 'https://example.com/signin',
+        signInCode: '123456',
         airportName: 'Thun Airport',
         themeColor: '#003863'
       });
@@ -32,19 +32,19 @@ describe('functions', () => {
       expect(result.text).toBeDefined();
     });
 
-    it('replaces signInLink placeholder in html', () => {
+    it('replaces signInCode placeholder in html', () => {
       const result = getSignInEmailContent({
-        signInLink: 'https://example.com/signin',
+        signInCode: '123456',
         airportName: 'Thun',
         themeColor: '#003863'
       });
-      expect(result.html).toContain('https://example.com/signin');
-      expect(result.html).not.toContain('{{signInLink}}');
+      expect(result.html).toContain('123456');
+      expect(result.html).not.toContain('{{signInCode}}');
     });
 
     it('replaces airportName placeholder in html', () => {
       const result = getSignInEmailContent({
-        signInLink: 'https://example.com/signin',
+        signInCode: '123456',
         airportName: 'Thun Airport',
         themeColor: '#003863'
       });
@@ -54,7 +54,7 @@ describe('functions', () => {
 
     it('replaces themeColor placeholder in html', () => {
       const result = getSignInEmailContent({
-        signInLink: 'https://example.com/signin',
+        signInCode: '123456',
         airportName: 'Thun',
         themeColor: '#003863'
       });
@@ -62,30 +62,30 @@ describe('functions', () => {
       expect(result.html).not.toContain('{{themeColor}}');
     });
 
-    it('replaces signInLink placeholder in text', () => {
+    it('replaces signInCode placeholder in text', () => {
       const result = getSignInEmailContent({
-        signInLink: 'https://example.com/signin',
+        signInCode: '123456',
         airportName: 'Thun',
         themeColor: '#003863'
       });
-      expect(result.text).toContain('https://example.com/signin');
-      expect(result.text).not.toContain('{{signInLink}}');
+      expect(result.text).toContain('123456');
+      expect(result.text).not.toContain('{{signInCode}}');
     });
 
     it('leaves unknown placeholders unchanged', () => {
-      fs.readFileSync.mockReturnValue('{{unknownKey}} {{signInLink}}');
+      fs.readFileSync.mockReturnValue('{{unknownKey}} {{signInCode}}');
       const result = getSignInEmailContent({
-        signInLink: 'https://example.com',
+        signInCode: '654321',
         airportName: 'Thun',
         themeColor: '#003863'
       });
       expect(result.html).toContain('{{unknownKey}}');
-      expect(result.html).toContain('https://example.com');
+      expect(result.html).toContain('654321');
     });
 
     it('reads html template from correct path', () => {
       getSignInEmailContent({
-        signInLink: 'https://example.com',
+        signInCode: '123456',
         airportName: 'Thun',
         themeColor: '#003863'
       });
@@ -97,7 +97,7 @@ describe('functions', () => {
 
     it('reads text template from correct path', () => {
       getSignInEmailContent({
-        signInLink: 'https://example.com',
+        signInCode: '123456',
         airportName: 'Thun',
         themeColor: '#003863'
       });

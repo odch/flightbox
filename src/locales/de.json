@@ -29,9 +29,6 @@
     "admin": "Administration"
   },
   "login": {
-    "emailSent": "Es wurde eine E-Mail an <strong>{{email}}</strong> gesendet. Folgen Sie bitte den Anweisungen in der E-Mail, um die Anmeldung abzuschliessen.",
-    "emailSentPlain": "Es wurde eine E-Mail an {{email}} gesendet. Folgen Sie bitte den Anweisungen in der E-Mail, um die Anmeldung abzuschliessen.",
-    "completeLogin": "Sie wollen sich über einen Login-Link anmelden. Geben Sie Ihre E-Mail-Adresse noch einmal ein, um die Anmeldung abzuschliessen.",
     "emailLabel": "E-Mail",
     "loginButton": "Anmelden",
     "cancelButton": "Abbrechen",
@@ -40,14 +37,19 @@
     "hintGuestLogin": "Wenn Sie sich als Gast anmelden, können Sie nur Ihre Ankunft und Ihren Abflug erfassen. Die erfassten Bewegungen können Sie anschliessend nicht mehr einsehen.",
     "failure": "Anmeldung fehlgeschlagen",
     "loginAsGuest": "Als Gast anmelden",
-    "emailSentPre": "Es wurde eine E-Mail an",
-    "emailSentPost": "gesendet. Folgen Sie bitte den Anweisungen in der E-Mail, um die Anmeldung abzuschliessen.",
     "username": "Benutzername",
     "password": "Passwort",
     "logout": "Abmelden",
     "profile": "Profil",
     "guest": "Gast",
-    "kiosk": "Kiosk"
+    "kiosk": "Kiosk",
+    "otpInstruction": "Geben Sie den 6-stelligen Code ein, der an <bold>{{email}}</bold> gesendet wurde.",
+    "otpAriaLabel": "Anmelde-Code Eingabe",
+    "otpDigitLabel": "Ziffer",
+    "otpVerificationFailure": "Ungültiger oder abgelaufener Code. Bitte versuchen Sie es erneut.",
+    "otpResend": "Code erneut senden",
+    "otpResendIn": "Code erneut senden ({{seconds}}s)",
+    "otpChangeEmail": "Falsche E-Mail-Adresse? Hier ändern"
   },
   "hints": {
     "departureBeforeStart_text": "Abflug immer vor dem Start",
@@ -71,7 +73,8 @@
     "invoiceRecipients": "Rechnungsempfänger",
     "kioskAccess": "Kiosk-Login",
     "guestAccess": "Gast-Login",
-    "import": "Import"
+    "import": "Import",
+    "privacy": "Datenschutz"
   },
   "movement": {
     "openCustoms": "Zollanmeldung öffnen",
@@ -508,6 +511,32 @@
     "card_external": "Karte",
     "twint_external": "Twint",
     "invoice": "Rechnung"
+  },
+  "pwaInstall": {
+    "title": "App installieren",
+    "description": "Installieren Sie Flightbox als App für schnelleren Zugriff.",
+    "installButton": "Installieren",
+    "iosInstructionsPre": "Tippen Sie auf ",
+    "iosInstructionsPost": " und wählen Sie \"Zum Home-Bildschirm\".",
+    "macosInstructionsPre": "Klicken Sie auf ",
+    "macosInstructionsPost": " und wählen Sie \"Zum Dock hinzufügen\".",
+    "dismiss": "Nicht jetzt"
+  },
+  "legal": {
+    "privacyPolicy": "Datenschutzerklärung",
+    "privacyConsent": "Mit der Anmeldung akzeptieren Sie die <1>Datenschutzerklärung</1>.",
+    "movementPrivacyConsent": "Mit dem Speichern akzeptieren Sie die <1>Datenschutzerklärung</1>."
+  },
+  "privacy": {
+    "title": "Datenschutz-Einstellungen",
+    "privacyPolicyUrl": "Link zur Datenschutzerklärung",
+    "privacyPolicyUrlHelp": "Wird auf der Anmeldeseite, im Bewegungsformular und im Footer angezeigt.",
+    "movementRetentionDays": "Aufbewahrungsdauer Bewegungen (Tage)",
+    "movementRetentionDaysHelp": "Nach Ablauf werden personenbezogene Daten anonymisiert. Statistische Daten bleiben erhalten.",
+    "messageRetentionDays": "Aufbewahrungsdauer Nachrichten (Tage)",
+    "messageRetentionDaysHelp": "Nach Ablauf werden Nachrichten gelöscht.",
+    "save": "Speichern",
+    "saved": "Gespeichert"
   },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."

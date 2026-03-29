@@ -11,21 +11,19 @@ jobs:
         environment:
           - lszt_test
           - lszm_test
+          - lspl_test
           - lspv_test
           - lszo_test
           - lsze_test
     environment: ${{ matrix.environment }}
     steps:
       - run: echo 'Running deplyoment for project ${{ vars.PROJECT }}'
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm ci
       - run: npm run build --project=${{ vars.PROJECT }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
       - uses: w9jds/setup-firebase@main
         with:
           project_id: ${{ vars.FIREBASE_PROJECT }}
@@ -40,6 +38,7 @@ jobs:
         environment:
           - lszt_test
           - lszm_test
+          - lspl_test
           - lspv_test
           - lszo_test
           - lsze_test

@@ -4,12 +4,14 @@ import {all, call, fork, put, select, takeEvery, takeLatest} from 'redux-saga/ef
 import createChannel, {monitor} from '../../util/createChannel';
 import * as actions from './actions';
 import * as remote from './remote';
-import {addMovementAssociationListener, removeMovementAssociationListener} from './remote';
+import {addMovementAssociationListener, removeMovementAssociationListener, removeAllAssociationListeners} from './remote';
 import {compareDescending, firebaseToLocal, localToFirebase, transferValues} from '../../util/movements';
 import {error} from '../../util/log';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import {loadRemote} from '../profile'
+import {FIREBASE_AUTHENTICATION_EVENT} from '../auth'
+import {history} from '../../history'
 
 export const stateSelector = (state: any) => state.movements;
 
@@ -18,6 +20,8 @@ export const movementSelector = (state: any, key: string) => state.movements.dat
 export const wizardFormValuesSelector = (state: any) => state.ui.wizard.values;
 
 export const authSelector = (state: any) => state.auth.data;
+
+export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl.url;
 
 export function* getProfileDefaultValues() {
   const auth = yield select(authSelector)
@@ -324,6 +328,14 @@ export function monitorAssociation(movement: any, channel: any) {
 
 const movementListeners: Record<string, Array<() => void>> = { departure: [], arrival: [] };
 
+function unsubscribeAllMovementListeners() {
+  Object.keys(movementListeners).forEach(type => {
+    movementListeners[type].forEach(fn => fn());
+    movementListeners[type] = [];
+  });
+  removeAllAssociationListeners();
+}
+
 export function* monitorRef(ref: any, channel: any, movementType: string, eventActions: any) {
   movementListeners[movementType].forEach(fn => fn());
   movementListeners[movementType] = [
@@ -359,8 +371,10 @@ export function* addMovementToState(snapshot: any, movementType: string, current
 
   if (!data.getByKey(snapshot.key)) {
     const movement = transformSnapshotToLocal(snapshot, movementType);
+    if (!movement) return;
 
     const auth = yield select(authSelector);
+    if (!auth) return;
     if (!auth.admin && auth.email && movement.createdBy !== auth.email) {
       return;
     }
@@ -405,7 +419,10 @@ export function* loadMovement(action: any) {
   const path = getPathByMovementType(type);
   const snapshot = yield call(remote.loadByKey, path, key);
 
-  const movement = firebaseToLocal(snapshot.val());
+  const val = snapshot.val();
+  if (!val) return;
+
+  const movement = firebaseToLocal(val);
   movement.key = snapshot.key;
   movement.type = type;
 
@@ -447,7 +464,12 @@ export function* editMovement(action: any) {
   if (!movement) {
     const path = getPathByMovementType(movementType);
     const snapshot = yield(call(remote.loadByKey, path, key));
-    movement = firebaseToLocal(snapshot.val());
+    const val = snapshot.val();
+    if (!val) {
+      history.push('/');
+      return;
+    }
+    movement = firebaseToLocal(val);
     movement.key = snapshot.key;
     movement.type = movementType;
   }
@@ -471,6 +493,13 @@ export function* saveMovement() {
   if (auth.email) {
     movement.createdBy = auth.email
     movement.createdBy_orderKey = toOrderKey(auth.email, movement.negativeTimestamp as number)
+  }
+
+  if (!key) {
+    const privacyPolicyUrl = yield select(privacyPolicyUrlSelector);
+    if (privacyPolicyUrl) {
+      movement.privacyPolicyAcceptedAt = new Date().toISOString()
+    }
   }
 
   try {
@@ -512,7 +541,9 @@ function getPathByMovementType(type: string) {
 }
 
 const transformSnapshotToLocal = (snapshot: any, movementType: string) => {
-  const movement = firebaseToLocal(snapshot.val());
+  const val = snapshot.val();
+  if (!val) return null;
+  const movement = firebaseToLocal(val);
   movement.key = snapshot.key;
   movement.type = movementType;
   return movement;
@@ -520,7 +551,13 @@ const transformSnapshotToLocal = (snapshot: any, movementType: string) => {
 
 const transformToLocal = (movements: any[], movementType: string) => (item: any) => {
   const movement = transformSnapshotToLocal(item, movementType);
-  movements.push(movement);
+  if (movement) movements.push(movement);
+}
+
+export function* teardownOnAuthLost(action: any) {
+  if (!action.payload.authData) {
+    unsubscribeAllMovementListeners();
+  }
 }
 
 export default function* sagas() {
@@ -540,5 +577,6 @@ export default function* sagas() {
     takeEvery(actions.SAVE_MOVEMENT, saveMovement),
     takeEvery(actions.SAVE_MOVEMENT_PAYMENT_METHOD, saveMovementPaymentMethod),
     takeLatest(actions.EDIT_MOVEMENT, editMovement),
+    takeEvery(FIREBASE_AUTHENTICATION_EVENT, teardownOnAuthLost),
   ])
 }

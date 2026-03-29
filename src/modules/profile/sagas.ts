@@ -1,5 +1,6 @@
 import * as actions from './actions'
 import * as remote from './remote'
+import {FIREBASE_AUTHENTICATION_EVENT} from '../auth'
 import {all, call, put, select, takeEvery} from 'redux-saga/effects'
 
 const str = (value: unknown): string | null =>
@@ -9,16 +10,34 @@ const nr = (value: unknown): number | null =>
   typeof value === 'number' ? value : null;
 
 export const authSelector = (state: any) => state.auth.data;
+export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl.url;
 
 export function* loadProfile() {
   try {
     const auth = yield select(authSelector)
     const snapshot = yield call(remote.load, auth.uid);
-    yield put(actions.profileLoaded(snapshot.val() || {}));
+    const profile = snapshot.val() || {};
+    yield put(actions.profileLoaded(profile));
+    yield call(recordPrivacyPolicyAcceptance, auth, profile);
   } catch(e) {
     if (console && typeof console.error === 'function') {
       console.error('Failed to load profile', e);
     }
+  }
+}
+
+export function* recordPrivacyPolicyAcceptance(auth: any, profile: any) {
+  if (auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+    return;
+  }
+  const privacyPolicyUrl = yield select(privacyPolicyUrlSelector);
+  if (!privacyPolicyUrl) {
+    return;
+  }
+  if (!profile.privacyPolicyAcceptedAt) {
+    yield call(remote.save, auth.uid, {
+      privacyPolicyAcceptedAt: new Date().toISOString()
+    });
   }
 }
 
@@ -55,9 +74,17 @@ export function* saveProfile(action: any) {
   }
 }
 
+export function* onAuthentication(action: any) {
+  const authData = action.payload.authData;
+  if (authData && authData.guest === false && authData.kiosk === false) {
+    yield call(loadProfile);
+  }
+}
+
 export default function* sagas() {
   yield all([
     takeEvery(actions.LOAD_PROFILE, loadProfile),
     takeEvery(actions.SAVE_PROFILE, saveProfile),
+    takeEvery(FIREBASE_AUTHENTICATION_EVENT, onAuthentication),
   ])
 }

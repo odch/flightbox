@@ -14,6 +14,15 @@ Cypress.Commands.add('login', () => login('foo', 'bar'));
 
 Cypress.Commands.add('loginAdmin', () => login('admin', '12345'));
 
+Cypress.Commands.add('loginEmail', () => {
+  cy.request('POST', 'https://europe-west1-cypress-testing.cloudfunctions.net/createTestEmailToken')
+    .then((response) => {
+      cy.window().then(win => {
+        return win.firebase.authenticate(response.body.token);
+      });
+    });
+});
+
 Cypress.Commands.add('logout', () => {
   cy.window().then(win => {
     win.firebase.unauth();

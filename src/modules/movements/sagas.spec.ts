@@ -4,12 +4,13 @@ import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
-import {addMovementAssociationListener, removeMovementAssociationListener} from './remote';
+import {addMovementAssociationListener, removeMovementAssociationListener, removeAllAssociationListeners} from './remote';
 import {LIMIT} from './pagination';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
 import {loadRemote} from '../profile'
 import {compareDescending, firebaseToLocal} from '../../util/movements'
 import {onChildAdded, onChildChanged, onChildRemoved} from 'firebase/database';
+import {history} from '../../history'
 
 jest.mock('./remote');
 jest.mock('firebase/database', () => ({
@@ -519,10 +520,31 @@ describe('modules', () => {
 
           expect(generator.next().done).toEqual(true);
         });
+
+        it('should navigate back when movement not found in firebase', () => {
+          const action = actions.editMovement('departure', 'deleted-key');
+
+          const generator = sagas.editMovement(action);
+
+          expect(generator.next().value).toEqual(put(actions.startInitializeWizard()));
+
+          expect(generator.next().value).toEqual(select(sagas.movementSelector, 'deleted-key'));
+
+          expect(generator.next(null).value).toEqual(call(remote.loadByKey, '/departures', 'deleted-key'));
+
+          const snapshot = new FakeFirebaseSnapshot('deleted-key', null);
+
+          const pushSpy = jest.spyOn(history, 'push');
+          const result = generator.next(snapshot);
+
+          expect(pushSpy).toHaveBeenCalledWith('/');
+          expect(result.done).toEqual(true);
+          pushSpy.mockRestore();
+        });
       });
 
       describe('saveMovement', () => {
-        it('should save movement', () => {
+        it('should save movement with consent timestamp when privacyPolicyUrl is set', () => {
           const generator = sagas.saveMovement();
 
           expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
@@ -546,13 +568,58 @@ describe('modules', () => {
             email: 'pilot@example.com'
           }
 
+          expect(generator.next(auth).value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
           const expectedMovementForFirebase = {
             ...formValuesForFirebase,
             createdBy: 'pilot@example.com',
-            createdBy_orderKey: 'pilot@example.com_8523978399999'
+            createdBy_orderKey: 'pilot@example.com_8523978399999',
+            privacyPolicyAcceptedAt: expect.any(String)
           };
 
-          expect(generator.next(auth).value)
+          expect(generator.next('https://example.com/privacy').value)
+            .toEqual(call(remote.saveMovement, '/departures', undefined, expectedMovementForFirebase));
+
+          const key = 'new-departure-key';
+
+          expect(generator.next(key).value).toEqual(put(actions.saveMovementSuccess(key, formValues)));
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should save movement without consent timestamp when privacyPolicyUrl is not set', () => {
+          const generator = sagas.saveMovement();
+
+          expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
+
+          const formValues = {
+            type: 'departure',
+            immatriculation: 'HBABC',
+            date: '2016-10-09',
+            time: '16:00',
+          };
+
+          const formValuesForFirebase = {
+            immatriculation: 'HBABC',
+            dateTime: '2016-10-09T14:00:00.000Z',
+            negativeTimestamp: -1476021600000,
+          };
+
+          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
+
+          const auth = {
+            email: 'pilot@example.com'
+          }
+
+          expect(generator.next(auth).value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          const expectedMovementForFirebase = {
+            ...formValuesForFirebase,
+            createdBy: 'pilot@example.com',
+            createdBy_orderKey: 'pilot@example.com_8523978399999',
+          };
+
+          expect(generator.next(null).value)
             .toEqual(call(remote.saveMovement, '/departures', undefined, expectedMovementForFirebase));
 
           const key = 'new-departure-key';
@@ -741,7 +808,9 @@ describe('modules', () => {
 
           const auth = { email: 'pilot@example.com' };
 
-          expect(generator.next(auth).value).toMatchObject({ type: 'CALL' });
+          expect(generator.next(auth).value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          expect(generator.next(null).value).toMatchObject({ type: 'CALL' });
 
           const error = new Error('save failed');
           expect(generator.throw(error).value).toEqual(put(actions.saveMovementFailed(error)));
@@ -799,6 +868,19 @@ describe('modules', () => {
           });
 
           expect(generator.next().done).toEqual(true);
+        });
+
+        it('should return early when movement not found', () => {
+          const action = actions.loadMovement('deleted-key', 'departure');
+          const generator = sagas.loadMovement(action);
+
+          expect(generator.next().value).toEqual(
+            call(remote.loadByKey, '/departures', 'deleted-key')
+          );
+
+          const snapshot = new FakeFirebaseSnapshot('deleted-key', null);
+
+          expect(generator.next(snapshot).done).toEqual(true);
         });
       });
 
@@ -1365,6 +1447,43 @@ describe('modules', () => {
 
           expect(result.value.arrivalRoute).toEqual('circuits');
           expect(result.done).toEqual(true);
+        });
+      });
+
+      describe('teardownOnAuthLost', () => {
+        it('should unsubscribe listeners when auth data is lost', () => {
+          const unsubDeparture = jest.fn();
+
+          (onChildAdded as jest.Mock).mockReturnValue(unsubDeparture);
+          (onChildChanged as jest.Mock).mockReturnValue(unsubDeparture);
+          (onChildRemoved as jest.Mock).mockReturnValue(unsubDeparture);
+
+          const channel = { put: jest.fn() };
+          const eventActions = {
+            added: jest.fn(),
+            changed: jest.fn(),
+            removed: jest.fn(),
+          };
+
+          const setupGen = sagas.monitorRef('ref1', channel, 'departure', eventActions);
+          setupGen.next();
+
+          const action = { payload: { authData: null } };
+          const generator = sagas.teardownOnAuthLost(action);
+          generator.next();
+
+          expect(unsubDeparture).toHaveBeenCalled();
+          expect(removeAllAssociationListeners).toHaveBeenCalled();
+        });
+
+        it('should not unsubscribe when auth data is present', () => {
+          (removeAllAssociationListeners as jest.Mock).mockClear();
+
+          const action = { payload: { authData: { uid: '123', admin: true } } };
+          const generator = sagas.teardownOnAuthLost(action);
+          generator.next();
+
+          expect(removeAllAssociationListeners).not.toHaveBeenCalled();
         });
       });
     });

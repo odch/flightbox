@@ -1,7 +1,7 @@
 import * as actions from './actions';
 import {FIREBASE_AUTHENTICATION_EVENT, USERNAME_PASSWORD_AUTHENTICATION_FAILURE} from '../../auth';
 import reducer from '../../../util/reducer';
-import {SEND_AUTHENTICATION_EMAIL_SUCCESS} from '../../auth/actions'
+import {SEND_AUTHENTICATION_EMAIL_FAILURE, SEND_AUTHENTICATION_EMAIL_SUCCESS} from '../../auth/actions'
 
 interface LoginPageState {
   username: string;
@@ -47,6 +47,20 @@ function setEmailSent(state: LoginPageState) {
   };
 }
 
+function resetOtp(state: LoginPageState) {
+  return {
+    ...state,
+    emailSent: false,
+  };
+}
+
+function sendAuthenticationEmailFailure(state: LoginPageState) {
+  return {
+    ...state,
+    emailSent: false,
+  };
+}
+
 function usernamePasswordAuthenticationFailure(state: LoginPageState) {
   return Object.assign({}, state, {
     password: '',
@@ -63,9 +77,11 @@ const ACTION_HANDLERS = {
   [actions.UPDATE_USERNAME]: updateUsername,
   [actions.UPDATE_PASSWORD]: updatePassword,
   [actions.UPDATE_EMAIL]: updateEmail,
+  [actions.RESET_OTP]: resetOtp,
   [USERNAME_PASSWORD_AUTHENTICATION_FAILURE]: usernamePasswordAuthenticationFailure,
   [FIREBASE_AUTHENTICATION_EVENT]: firebaseAuthenticationEvent,
   [SEND_AUTHENTICATION_EMAIL_SUCCESS]: setEmailSent,
+  [SEND_AUTHENTICATION_EMAIL_FAILURE]: sendAuthenticationEmailFailure,
 };
 
 export type { LoginPageState };

@@ -18,16 +18,24 @@ const enrichMovements = require('./enrichMovements');
 
 const auth = require('./auth');
 const { generateSignInLink } = require('./auth/generateSignInLink');
-const { sendSignInEmail } = require('./auth/sendSignInEmail');
+const { generateSignInCode } = require('./auth/generateSignInCode');
+const { verifySignInCode } = require('./auth/verifySignInCode');
+const { cleanupExpiredSignInCodes } = require('./auth/cleanupExpiredSignInCodes');
+const { createTestEmailToken } = require('./auth/createTestEmailToken');
 const api = require('./api');
 const webhook = require('./webhook');
 const associatedMovementsTriggers = require('./associatedMovements/setAssociatedMovementsTriggers');
 const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsTrigger');
 const updateArrivalPaymentStatus = require('./updateArrivalPaymentStatus');
+const { scheduledAnonymizeMovements } = require('./anonymizeMovements');
+const { scheduledCleanupMessages } = require('./cleanupMessages');
 
 exports.auth = auth;
 exports.generateSignInLink = generateSignInLink;
-exports.sendSignInEmail = sendSignInEmail;
+exports.generateSignInCode = generateSignInCode;
+exports.verifySignInCode = verifySignInCode;
+exports.cleanupExpiredSignInCodes = cleanupExpiredSignInCodes;
+exports.createTestEmailToken = createTestEmailToken;
 exports.api = api;
 exports.webhook = webhook;
 exports.setAssociatedMovementOnCreatedDeparture = associatedMovementsTriggers.setAssociatedMovementOnCreatedDeparture;
@@ -47,3 +55,6 @@ exports.enrichArrivalOnCreate = enrichMovements.enrichArrivalOnCreate;
 exports.enrichArrivalOnUpdate = enrichMovements.enrichArrivalOnUpdate;
 
 exports.updateArrivalPaymentStatusOnCardPaymentUpdate = updateArrivalPaymentStatus.updateArrivalPaymentStatusOnCardPaymentUpdate;
+
+exports.scheduledAnonymizeMovements = scheduledAnonymizeMovements;
+exports.scheduledCleanupMessages = scheduledCleanupMessages;

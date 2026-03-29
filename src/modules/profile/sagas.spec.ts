@@ -21,6 +21,8 @@ describe('modules', () => {
           const snapshot = { val: () => profileData };
           expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded(profileData)));
 
+          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, profileData));
+
           expect(generator.next().done).toEqual(true);
         });
 
@@ -35,6 +37,8 @@ describe('modules', () => {
           const snapshot = { val: () => null };
           expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded({})));
 
+          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, {}));
+
           expect(generator.next().done).toEqual(true);
         });
 
@@ -45,6 +49,115 @@ describe('modules', () => {
 
           const error = new Error('Load error');
           expect(generator.throw(error).done).toEqual(true);
+        });
+      });
+
+      describe('recordPrivacyPolicyAcceptance', () => {
+        it('should save privacyPolicyAcceptedAt when not already set and URL is configured', () => {
+          const auth = { uid: 'user-123', guest: false, kiosk: false };
+          const profile = { firstname: 'Hans' };
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          const result = generator.next('https://example.com/privacy').value;
+          expect(result).toEqual(call(remote.save, 'user-123', {
+            privacyPolicyAcceptedAt: expect.any(String)
+          }));
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not save when privacyPolicyUrl is not configured', () => {
+          const auth = { uid: 'user-123', guest: false, kiosk: false };
+          const profile = { firstname: 'Hans' };
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          expect(generator.next(null).done).toEqual(true);
+        });
+
+        it('should not save when privacyPolicyAcceptedAt already exists', () => {
+          const auth = { uid: 'user-123', guest: false, kiosk: false };
+          const profile = { firstname: 'Hans', privacyPolicyAcceptedAt: '2026-01-01T00:00:00.000Z' };
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          expect(generator.next('https://example.com/privacy').done).toEqual(true);
+        });
+
+        it('should not save for guest users', () => {
+          const auth = { uid: 'guest', guest: true, kiosk: false };
+          const profile = {};
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not save for kiosk users', () => {
+          const auth = { uid: 'kiosk', guest: false, kiosk: true };
+          const profile = {};
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not save for ipauth users', () => {
+          const auth = { uid: 'ipauth', guest: false, kiosk: false };
+          const profile = {};
+          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
+
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('onAuthentication', () => {
+        it('should call loadProfile for personal login', () => {
+          const action = {
+            payload: { authData: { uid: 'user-123', guest: false, kiosk: false } }
+          };
+          const generator = sagas.onAuthentication(action);
+
+          expect(generator.next().value).toEqual(call(sagas.loadProfile));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not call loadProfile for guest users', () => {
+          const action = {
+            payload: { authData: { uid: 'guest', guest: true, kiosk: false } }
+          };
+          const generator = sagas.onAuthentication(action);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not call loadProfile for kiosk users', () => {
+          const action = {
+            payload: { authData: { uid: 'kiosk', guest: false, kiosk: true } }
+          };
+          const generator = sagas.onAuthentication(action);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not call loadProfile when authData is null (logout)', () => {
+          const action = {
+            payload: { authData: null }
+          };
+          const generator = sagas.onAuthentication(action);
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not call loadProfile for ipauth users', () => {
+          const action = {
+            payload: { authData: { local: true } }
+          };
+          const generator = sagas.onAuthentication(action);
+
+          expect(generator.next().done).toEqual(true);
         });
       });
 

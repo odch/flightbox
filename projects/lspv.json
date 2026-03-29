@@ -89,6 +89,8 @@
   },
   "theme": "lspv",
   "title": "Flightbox - Flugplatz Wangen-Lachen",
+  "themeColor": "#1d77d7",
+  "shortName": "Flightbox LSPV",
   "departureCommitRequirements": [
     {
       "de": "Keine Starts auf RWY 26 von 12:00h bis 13:30h LT!",
