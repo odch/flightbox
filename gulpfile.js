@@ -89,22 +89,15 @@ function generateManifest(done) {
   const themeName = projectConf.theme;
 
   const faviconDir = path.join(__dirname, 'theme', themeName, 'favicons');
-  const manifestPath = path.join(faviconDir, 'manifest.json');
 
-  let icons;
-  if (fs.existsSync(manifestPath)) {
-    const existing = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    icons = existing.icons || [];
-  } else {
-    const pngFiles = fs.existsSync(faviconDir)
-      ? fs.readdirSync(faviconDir).filter(f => f.startsWith('android-chrome') && f.endsWith('.png'))
-      : [];
-    icons = pngFiles.map(f => {
-      const match = f.match(/(\d+)x(\d+)/);
-      const size = match ? `${match[1]}x${match[2]}` : '192x192';
-      return { src: `/favicons/${f}`, sizes: size, type: 'image/png' };
-    });
-  }
+  const pngFiles = fs.existsSync(faviconDir)
+    ? fs.readdirSync(faviconDir).filter(f => f.startsWith('android-chrome') && f.endsWith('.png'))
+    : [];
+  const icons = pngFiles.map(f => {
+    const match = f.match(/(\d+)x(\d+)/);
+    const size = match ? `${match[1]}x${match[2]}` : '192x192';
+    return { src: `/favicons/${f}`, sizes: size, type: 'image/png' };
+  });
 
   const manifest = {
     name: projectConf.title,
