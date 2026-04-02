@@ -71,7 +71,7 @@
     "redux": "^5.0.1",
     "redux-saga": "^1.4.2",
     "scroll-into-view": "^1.16.2",
-    "start-server-and-test": "^2.1.5",
+    "start-server-and-test": "^3.0.0",
     "stream-browserify": "^3.0.0",
     "style-loader": "^4.0.0",
     "styled-components": "^6.3.11",
