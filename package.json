@@ -92,6 +92,6 @@
     "i18next": "^26.0.3",
     "process": "^0.11.10",
     "react-final-form": "^7.0.0",
-    "react-i18next": "^16.5.4"
+    "react-i18next": "^17.0.2"
   }
 }
