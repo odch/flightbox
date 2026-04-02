@@ -35,6 +35,9 @@ declare module '*.ttf' {
   export default value;
 }
 
+declare module '*.css';
+declare module 'moment/locale/*';
+
 declare var __DEV__: boolean;
 declare var __CONF__: any;
 declare var __THEME__: string;
