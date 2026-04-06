@@ -59,6 +59,7 @@
     },
     "production": {
       "firebaseProjectId": "lszm-prod",
+      "firebaseDatabaseUrl": "https://lszm-prod-eu.europe-west1.firebasedatabase.app",
       "firebaseApiKey": "AIzaSyBeSPI8y2oli06U-29zBC6Ehce_sWWnkSE"
     }
   },
