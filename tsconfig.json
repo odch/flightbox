@@ -10,7 +10,8 @@
     "noImplicitAny": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*", "global.d.ts"],
   "exclude": ["node_modules", "functions"]
