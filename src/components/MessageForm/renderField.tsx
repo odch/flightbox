@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import LabeledComponent from '../../components/LabeledComponent';
 import Input from '../../components/Input';
+import PhoneInput from '../PhoneInput';
 import TextArea from '../../components/TextArea';
 
 const StyledLabeledComponent = styled(LabeledComponent)`
@@ -28,6 +29,18 @@ export const renderInputField = (props) => {
       {...props.input}
       name={props.name}
       type={props.type}
+      readOnly={props.readOnly}
+      data-cy={props.input.name}
+    />
+  );
+  return renderLabeledComponent(props, cmp);
+};
+
+export const renderPhoneField = (props) => {
+  const cmp = (
+    <PhoneInput
+      {...props.input}
+      name={props.name}
       readOnly={props.readOnly}
       data-cy={props.input.name}
     />
