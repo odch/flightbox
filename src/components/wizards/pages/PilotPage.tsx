@@ -3,7 +3,7 @@ import React from 'react';
 import {Field, Form} from 'react-final-form';
 import { useTranslation } from 'react-i18next';
 import validate from '../validate';
-import {renderInputField, renderUserDropdown} from '../renderField';
+import {renderInputField, renderPhoneField, renderUserDropdown} from '../renderField';
 import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
 
@@ -71,9 +71,8 @@ const PilotPage = (props) => {
             />
             <Field
               name="phone"
-              type="tel"
               label={t('movement.details.phone')}
-              component={renderInputField}
+              component={renderPhoneField}
               readOnly={props.readOnly}
               masked={__CONF__.maskContactInformation === true && !props.isAdmin}
             />

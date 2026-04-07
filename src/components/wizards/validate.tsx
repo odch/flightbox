@@ -50,6 +50,12 @@ const getConfig = () => ({
     },
     message: i18n.t('validate.email'),
   },
+  phone: {
+    types: {
+      match: /^\+?[\d\s\-().\/]{7,20}$/,
+    },
+    message: i18n.t('validate.phone'),
+  },
   date: {
     types: {
       required: true,

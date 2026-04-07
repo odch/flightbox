@@ -12,6 +12,7 @@ import AircraftDropdown from '../../containers/AircraftDropdownContainer';
 import AircraftCategoryDropdown from '../../components/AircraftCategoryDropdown';
 import UserDropdown from '../../containers/UserDropdownContainer';
 import MaskedInput from '../MaskedInput'
+import PhoneInput from '../PhoneInput'
 
 const StyledLabeledComponent = styled(LabeledComponent)`
   width: 45%;
@@ -50,6 +51,20 @@ export const renderInputField = (props) => {
       {...props.input}
       name={props.name}
       type={props.type}
+      readOnly={props.readOnly}
+      data-cy={props.input.name}
+    />
+  );
+  return renderLabeledComponent(props, cmp);
+};
+
+export const renderPhoneField = (props) => {
+  const cmp = props.masked ? (
+    <MaskedInput {...props} type="tel"/>
+  ) : (
+    <PhoneInput
+      {...props.input}
+      name={props.name}
       readOnly={props.readOnly}
       data-cy={props.input.name}
     />

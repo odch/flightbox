@@ -55,6 +55,16 @@ describe('util', () => {
         const errors = validate({email: 'user@example.com'}, config);
         expect(errors).toHaveLength(0);
       });
+
+      it('returns no error when value is empty and field is not required', () => {
+        const errors = validate({}, config);
+        expect(errors).toHaveLength(0);
+      });
+
+      it('returns no error when value is undefined and field is not required', () => {
+        const errors = validate({email: undefined}, config);
+        expect(errors).toHaveLength(0);
+      });
     });
 
     describe('values', () => {
