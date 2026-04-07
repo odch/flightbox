@@ -271,7 +271,7 @@
     "errorMessage": "Ihre Nachricht konnte nicht gesendet werden.",
     "validate": {
       "name": "Geben Sie hier Ihren Namen ein.",
-      "phone": "Geben Sie hier Ihre Telefonnummer ein.",
+      "phone": "Geben Sie hier eine gültige Telefonnummer ein.",
       "email": "Geben Sie hier Ihre E-Mail-Adresse ein.",
       "message": "Geben Sie hier Ihre Nachricht ein."
     }

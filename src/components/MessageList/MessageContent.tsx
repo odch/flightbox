@@ -25,9 +25,11 @@ const MessageContent = props => {
         <div>
           <label>{t('message.emailLabel')} <a href={'mailto:' + props.item.email} target="_blank">{props.item.email}</a></label>
         </div>
-        <div>
-          <label>{t('message.phoneLabel')} <a href={'tel:' + props.item.phone} target="_blank">{props.item.phone}</a></label>
-        </div>
+        {props.item.phone && (
+          <div>
+            <label>{t('message.phoneLabel')} <a href={'tel:' + props.item.phone} target="_blank">{props.item.phone}</a></label>
+          </div>
+        )}
       </Contact>
       <Message>{newLineToBr(props.item.message)}</Message>
     </Wrapper>

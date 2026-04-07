@@ -321,7 +321,7 @@
       ],
       "$message_id": {
         ".write": "auth !== null && !data.exists() && newData.exists()",
-        ".validate": "newData.hasChildren(['name', 'email', 'phone', 'message', 'timestamp', 'negativeTimestamp'])",
+        ".validate": "newData.hasChildren(['name', 'email', 'message', 'timestamp', 'negativeTimestamp'])",
         "name": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
@@ -329,7 +329,7 @@
           ".validate": "newData.isString() && newData.val().matches(/^(([^<>()\\[\\]\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$/)"
         },
         "phone": {
-          ".validate": "newData.isString() && newData.val().length > 0"
+          ".validate": "newData.isString()"
         },
         "message": {
           ".validate": "newData.isString() && newData.val().length > 0"

@@ -5,7 +5,7 @@ import {Field, Form} from 'react-final-form'
 import H1 from '../H1';
 import Button from '../Button';
 import validate from './validate';
-import {renderInputField, renderTextArea} from './renderField';
+import {renderInputField, renderPhoneField, renderTextArea} from './renderField';
 import Intro from './Intro';
 import Dialog from './Dialog';
 
@@ -40,8 +40,7 @@ class MessageForm extends React.Component<any, any> {
               />
               <Field
                 name="phone"
-                type="tel"
-                component={renderInputField}
+                component={renderPhoneField}
                 label={t('message.phone')}
               />
               <Field
