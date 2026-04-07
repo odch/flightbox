@@ -446,7 +446,8 @@
     "runwayArrival": "Wählen Sie hier die Pistenrichtung für die Landung aus.",
     "departureRoute": "Wählen Sie hier die Abflugroute aus.",
     "arrivalRoute": "Wählen Sie hier die Ankunftsroute aus.",
-    "landingCount": "Geben Sie hier die Anzahl Landungen ein."
+    "landingCount": "Geben Sie hier die Anzahl Landungen ein.",
+    "phone": "Geben Sie hier eine gültige Telefonnummer ein."
   },
   "help": {
     "q1": "Wann muss ich einen Abflug und wann eine Ankunft erfassen?",
