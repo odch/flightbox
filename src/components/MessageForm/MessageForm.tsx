@@ -18,7 +18,7 @@ class MessageForm extends React.Component<any, any> {
   render() {
     const { t } = this.props;
     return (
-      <Form validate={validate} onSubmit={this.props.onSubmit}>
+      <Form validate={validate} onSubmit={this.props.onSubmit} initialValues={this.props.initialValues}>
         {({handleSubmit}) => (
           <form className="MessageForm" onSubmit={handleSubmit}>
             <H1>{t('message.heading')}</H1>
@@ -77,6 +77,7 @@ class MessageForm extends React.Component<any, any> {
   onSubmit: PropTypes.func.isRequired,
   resetMessageForm: PropTypes.func.isRequired,
   confirmSaveMessageSuccess: PropTypes.func.isRequired,
+  initialValues: PropTypes.object,
 };
 
 export default withTranslation()(MessageForm);

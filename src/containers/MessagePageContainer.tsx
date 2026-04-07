@@ -6,6 +6,8 @@ import {RootState} from '../modules';
 const mapStateToProps = (state: RootState) => ({
   sent: state.messages.form.sent,
   commitFailed: state.messages.form.commitFailed,
+  profile: state.profile.profile,
+  auth: state.auth.data,
 });
 
 const mapActionCreators = {
