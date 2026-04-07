@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import FieldSet from '../wizards/FieldSet'
 import { useTranslation } from 'react-i18next';
 import {Field, Form} from 'react-final-form'
-import {renderAircraftCategoryDropdown, renderAircraftDropdown, renderInputField} from '../wizards/renderField'
+import {renderAircraftCategoryDropdown, renderAircraftDropdown, renderInputField, renderPhoneField} from '../wizards/renderField'
 import React from 'react'
 import Button from '../Button'
 import styled from 'styled-components'
@@ -74,9 +74,8 @@ function ProfileForm(props) {
               />
               <Field
                 name="phone"
-                type="tel"
                 label={t('profile.phone')}
-                component={renderInputField}
+                component={renderPhoneField}
               />
             </FieldSet>
           </StyledSection>
