@@ -30,10 +30,18 @@ describe('movements', () => {
       cy.get(`[data-cy=aircraftCategory-option-Flugzeug]`).click();
       cy.get(`[data-cy=next-button]`).click();
 
-      cy.get(`[data-cy=lastname]`).type('Cypress');
-      cy.get(`[data-cy=firstname]`).type('Pilot');
-      cy.get(`[data-cy=email]`).type('pilot@example.com');
-      cy.get(`[data-cy=phone]`).type('0790000000');
+      cy.get(`[data-cy=lastname]`).clear().type('Cypress');
+      cy.get(`[data-cy=firstname]`).clear().type('Pilot');
+      // Email may be masked when prefilled; clear masked value then type
+      cy.get(`[data-cy=email]`).then($el => {
+        if ($el.is('input')) {
+          cy.wrap($el).clear().type('pilot@example.com');
+        } else {
+          cy.wrap($el).find('button').click();
+          cy.get(`[data-cy=email]`).type('pilot@example.com');
+        }
+      });
+      cy.get(`[data-cy=phone]`).clear().type('0790000000');
       cy.get(`[data-cy=next-button]`).click();
 
       cy.get(`[data-cy=passengerCount-increment]`).click();
