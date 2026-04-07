@@ -23,12 +23,16 @@
     "noRunwayIfHelicopter": true,
     "departureRoutes": [
       {
-        "name": "O",
-        "label": "Ost"
+        "name": "NW",
+        "label": "Nord-West"
       },
       {
-        "name": "W",
-        "label": "West"
+        "name": "SW",
+        "label": "Süd-West"
+      },
+      {
+        "name": "O",
+        "label": "Ost"
       }
     ],
     "arrivalRoutes": [
