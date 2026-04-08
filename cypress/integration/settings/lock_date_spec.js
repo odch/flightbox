@@ -18,7 +18,7 @@ describe('settings', () => {
       cy.get(`[data-cy=lock-movements]`).click();
 
       cy.get(`[data-cy=lock-date]`).click();
-      cy.get(`.DayPicker-Day[aria-disabled=false]`).first().click();
+      cy.get(`.rdp-day:not(.rdp-disabled) .rdp-day_button`).first().click();
 
       cy.window().then(win =>
         win.firebase.getRef('/settings/lockDate').once('value').then(snapshot => {
