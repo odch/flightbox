@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import {Link} from 'react-router-dom';
 import PropTypes from 'prop-types'
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 const Wrapper = styled.div`
   border-radius: 10px;
@@ -39,26 +39,23 @@ const StyledLink = styled(Link)`
   text-decoration: underline;
 `;
 
-class Hints extends React.PureComponent<any, any> {
+const Hints = ({ guest, kiosk }: any) => {
+  const { t } = useTranslation();
+  return (
+    <Wrapper>
+      <ul>
+        <Hint>{t('hints.departureBeforeStart_pre')} <Strong>{t('hints.departureBeforeStart_text')}</Strong>.</Hint>
+        <Hint>{t('hints.arrivalAfterLanding_pre')} <Strong>{t('hints.arrivalAfterLanding_text')}</Strong>.</Hint>
+        {guest !== true && kiosk !== true && (<Hint>{t('hints.associatedMovement_pre')} <I>{t('hints.recordArrival')}</I> {t('hints.associatedMovement_mid')} <I>{t('hints.recordDeparture')}</I>{t('hints.associatedMovement_post')} <StyledLink to="/movements">{t('hints.recordedMovement')}</StyledLink>.
+        </Hint>)}
+      </ul>
+    </Wrapper>
+  );
+};
 
-  render() {
-    const { t } = this.props;
-    return (
-      <Wrapper>
-        <ul>
-          <Hint>{t('hints.departureBeforeStart_pre')} <Strong>{t('hints.departureBeforeStart_text')}</Strong>.</Hint>
-          <Hint>{t('hints.arrivalAfterLanding_pre')} <Strong>{t('hints.arrivalAfterLanding_text')}</Strong>.</Hint>
-          {this.props.guest !== true && this.props.kiosk !== true && (<Hint>{t('hints.associatedMovement_pre')} <I>{t('hints.recordArrival')}</I> {t('hints.associatedMovement_mid')} <I>{t('hints.recordDeparture')}</I>{t('hints.associatedMovement_post')} <StyledLink to="/movements">{t('hints.recordedMovement')}</StyledLink>.
-          </Hint>)}
-        </ul>
-      </Wrapper>
-    );
-  }
-}
-
-(Hints as any).propTypes = {
+Hints.propTypes = {
   guest: PropTypes.bool,
   kiosk: PropTypes.bool
 }
 
-export default withTranslation()(Hints);
+export default Hints;

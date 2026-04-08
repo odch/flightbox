@@ -86,30 +86,24 @@ const Text = styled.div<{ $active?: boolean }>`
   }
 `;
 
-class WizardBreadcrumbs extends React.PureComponent<any, any> {
+const WizardBreadcrumbs = ({ title, items, activeItem }: any) => (
+  <Wrapper>
+    {title && <Title>{title}</Title>}
+    <List>
+      {items.map((item, index) => {
+        const active = index === activeItem;
+        return (
+          <Item key={index}>
+            <Number $active={active} $first={index === 0}>{index + 1}</Number>
+            <Text $active={active}>{item.label.replace(/ /g, '\u00a0')}</Text>
+          </Item>
+        );
+      })}
+    </List>
+  </Wrapper>
+);
 
-  render() {
-    const props = this.props;
-    return (
-      <Wrapper>
-        {props.title && <Title>{props.title}</Title>}
-        <List>
-          {props.items.map((item, index) => {
-            const active = index === props.activeItem;
-            return (
-              <Item key={index}>
-                <Number $active={active} $first={index === 0}>{index + 1}</Number>
-                <Text $active={active}>{item.label.replace(/ /g, '\u00a0')}</Text>
-              </Item>
-            );
-          })}
-        </List>
-      </Wrapper>
-    );
-  }
-}
-
-(WizardBreadcrumbs as any).propTypes = {
+WizardBreadcrumbs.propTypes = {
   title: PropTypes.string,
   items: PropTypes.arrayOf(
     PropTypes.shape({

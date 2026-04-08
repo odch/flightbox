@@ -15,24 +15,18 @@ const LinkContent = styled.div`
   align-items: center;
 `
 
-class ImageButton extends React.PureComponent<any, any> {
+const ImageButton = ({ className, label, img, href, onClick, dataCy }: any) => (
+  <Wrapper className={className}>
+    <OptionalLink href={href} onClick={onClick} dataCy={dataCy}>
+      <LinkContent>
+        <img src={img}/>
+        {label}
+      </LinkContent>
+    </OptionalLink>
+  </Wrapper>
+);
 
-  render() {
-    const props = this.props;
-    return (
-      <Wrapper className={props.className}>
-        <OptionalLink href={props.href} onClick={props.onClick} dataCy={props.dataCy}>
-          <LinkContent>
-            <img src={props.img}/>
-            {props.label}
-          </LinkContent>
-        </OptionalLink>
-      </Wrapper>
-    )
-  }
-}
-
-(ImageButton as any).propTypes = {
+ImageButton.propTypes = {
   className: PropTypes.string,
   label: PropTypes.string.isRequired,
   img: PropTypes.string.isRequired,

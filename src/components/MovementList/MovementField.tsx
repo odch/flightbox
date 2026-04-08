@@ -20,28 +20,17 @@ const Value = styled.div<{ $hasValue?: boolean }>`
   ${props => !props.$hasValue && 'opacity: 0.5;'}
 `;
 
-class MovementField extends React.PureComponent<any, any> {
+const MovementField = ({ label, value, defaultValue = 'k.A.' }: any) => (
+  <Wrapper>
+    <Label>{label}</Label>
+    <Value $hasValue={!!value}>{value == null ? defaultValue : value}</Value>
+  </Wrapper>
+);
 
-  render() {
-    const props = this.props;
-
-    return (
-      <Wrapper>
-        <Label>{props.label}</Label>
-        <Value $hasValue={!!props.value}>{props.value == null ? props.defaultValue : props.value}</Value>
-      </Wrapper>
-    )
-  }
-}
-
-(MovementField as any).propTypes = {
+MovementField.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.any,
   defaultValue: PropTypes.any,
-};
-
-(MovementField as any).defaultProps = {
-  defaultValue: 'k.A.'
 };
 
 export default MovementField;

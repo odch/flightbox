@@ -16,43 +16,43 @@ const GroupLabel = styled.div`
 const ItemsContainer = styled.div`
 `;
 
-class MovementGroup extends React.PureComponent<any, any> {
+const MovementGroup = ({
+  label, items, selected, onSelect, onEdit, timeWithDate,
+  createMovementFromMovement, onDelete, lockDate, aircraftSettings,
+  loading, isAdmin, predicate
+}: any) => {
+  const filteredItems = items.array.filter(predicate);
 
-  render() {
-    const props = this.props;
-    const filteredItems = props.items.array.filter(props.predicate);
-
-    if (filteredItems.length === 0) {
-      return null;
-    }
-
-    return (
-      <GroupWrapper>
-        <GroupLabel>{props.label}</GroupLabel>
-        <ItemsContainer>
-          {filteredItems.map(item =>
-            <Movement
-              key={item.key}
-              data={item}
-              selected={item.key === props.selected}
-              onSelect={props.onSelect}
-              onEdit={props.onEdit}
-              timeWithDate={props.timeWithDate}
-              createMovementFromMovement={props.createMovementFromMovement}
-              onDelete={props.onDelete}
-              locked={isLocked(item, props.lockDate) || item.anonymized === true}
-              aircraftSettings={props.aircraftSettings}
-              loading={props.loading}
-              isAdmin={props.isAdmin}
-            />
-          )}
-        </ItemsContainer>
-      </GroupWrapper>
-    );
+  if (filteredItems.length === 0) {
+    return null;
   }
-}
 
-(MovementGroup as any).propTypes = {
+  return (
+    <GroupWrapper>
+      <GroupLabel>{label}</GroupLabel>
+      <ItemsContainer>
+        {filteredItems.map(item =>
+          <Movement
+            key={item.key}
+            data={item}
+            selected={item.key === selected}
+            onSelect={onSelect}
+            onEdit={onEdit}
+            timeWithDate={timeWithDate}
+            createMovementFromMovement={createMovementFromMovement}
+            onDelete={onDelete}
+            locked={isLocked(item, lockDate) || item.anonymized === true}
+            aircraftSettings={aircraftSettings}
+            loading={loading}
+            isAdmin={isAdmin}
+          />
+        )}
+      </ItemsContainer>
+    </GroupWrapper>
+  );
+};
+
+MovementGroup.propTypes = {
   label: PropTypes.string,
   items: PropTypes.object.isRequired,
   selected: PropTypes.string,

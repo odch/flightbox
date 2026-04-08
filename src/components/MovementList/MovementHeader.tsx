@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import dates from '../../util/dates';
 import Action from './Action';
@@ -135,114 +135,109 @@ const StyledLockIcon = styled(MaterialIcon)`
   color: #666;
 `
 
-class MovementHeader extends React.PureComponent<any, any> {
+const MovementHeader = ({
+  data, selected, createMovementFromMovement, locked,
+  onClick, isHomeBase, isAdmin, timeWithDate
+}: any) => {
+  const { t } = useTranslation();
 
-  constructor(props) {
-    super(props);
-    this.handleActionClick = this.handleActionClick.bind(this);
-  }
+  const handleActionClick = () => {
+    createMovementFromMovement(data.type, data.key);
+  };
 
-  render() {
-    const props = this.props;
-    const { t } = this.props;
+  const date = timeWithDate === true
+    ? dates.formatDate(data.date)
+    : null;
+  const time = dates.formatTime(data.date, data.time);
 
-    const date = props.timeWithDate === true
-      ? dates.formatDate(props.data.date)
-      : null;
-    const time = dates.formatTime(props.data.date, props.data.time);
+  const showPayment = (isHomeBase === false || __CONF__.homebasePayment)
+  const paymentMissing = showPayment
+    && data.type === 'arrival'
+    && data.landingFeeTotal !== undefined
+    && (!data.paymentMethod || data.paymentMethod.status === 'pending')
+  const hasTags = paymentMissing
 
-    const showPayment = (props.isHomeBase === false || __CONF__.homebasePayment)
-    const paymentMissing = showPayment
-      && props.data.type === 'arrival'
-      && props.data.landingFeeTotal !== undefined
-      && (!props.data.paymentMethod || props.data.paymentMethod.status === 'pending')
-    const hasTags = paymentMissing
-
-    return (
-      <Wrapper
-        onClick={props.onClick}
-        selected={props.selected}
-        $locked={props.locked}>
-        <ColumnsWrapper
-          $hasAssociatedMovement={
-            props.data.associatedMovement
-            && ['departure', 'arrival'].includes(props.data.associatedMovement.type)
-          }
-        >
-          <Column className="type">
-            <div style={{ position: 'relative', display: 'inline-block' }}>
-              <StyledMovementTypeIcon
-                icon={TYPE_LABELS[props.data.type].icon}
-                size={ICON_HEIGHT}
-                title={TYPE_LABELS[props.data.type].label}
-                $locked={props.locked}
+  return (
+    <Wrapper
+      onClick={onClick}
+      selected={selected}
+      $locked={locked}>
+      <ColumnsWrapper
+        $hasAssociatedMovement={
+          data.associatedMovement
+          && ['departure', 'arrival'].includes(data.associatedMovement.type)
+        }
+      >
+        <Column className="type">
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <StyledMovementTypeIcon
+              icon={TYPE_LABELS[data.type].icon}
+              size={ICON_HEIGHT}
+              title={TYPE_LABELS[data.type].label}
+              $locked={locked}
+            />
+            {locked && (
+              <StyledLockIcon
+                icon="lock"
+                size={14}
+                title={t('movement.locked')}
               />
-              {props.locked && (
-                <StyledLockIcon
-                  icon="lock"
-                  size={14}
-                  title={t('movement.locked')}
-                />
-              )}
-            </div>
-          </Column>
-          <Column className="immatriculation" $alignMiddle>{props.data.immatriculation}</Column>
-          <Column className="homebase" $alignMiddle>
-            <HomeBaseIcon isHomeBase={props.isHomeBase}/>
-          </Column>
-          <Column className="aircraftType" $alignMiddle>
-            <AircraftTypeIcon aircraftCategory={props.data.aircraftCategory} mtow={props.data.mtow}/>
-          </Column>
-          <Column className="pilot" $alignMiddle>{props.data.lastname}</Column>
-          <Column className="datetime" $alignMiddle>
-            {date ? (<div style={{lineHeight: '1.1'}}>
-              <div style={{fontSize: '0.90em', color: '#666'}}>{date}</div>
+            )}
+          </div>
+        </Column>
+        <Column className="immatriculation" $alignMiddle>{data.immatriculation}</Column>
+        <Column className="homebase" $alignMiddle>
+          <HomeBaseIcon isHomeBase={isHomeBase}/>
+        </Column>
+        <Column className="aircraftType" $alignMiddle>
+          <AircraftTypeIcon aircraftCategory={data.aircraftCategory} mtow={data.mtow}/>
+        </Column>
+        <Column className="pilot" $alignMiddle>{data.lastname}</Column>
+        <Column className="datetime" $alignMiddle>
+          {date ? (<div style={{lineHeight: '1.1'}}>
+            <div style={{fontSize: '0.90em', color: '#666'}}>{date}</div>
+            <div>{time}</div>
+          </div>) : (
+            <div>
               <div>{time}</div>
-            </div>) : (
-              <div>
-                <div>{time}</div>
-              </div>
-            )}
-          </Column>
-          <Column className="location" $alignMiddle>{formatLocationDisplay(props.data)}</Column>
-          <ActionColumn className="action" $alignMiddle $highlight>
-            {props.data.associatedMovement && props.data.associatedMovement.type === 'none' ? (
-              <Action
-                label={ACTION_LABELS[props.data.type].label}
-                icon={ACTION_LABELS[props.data.type].icon}
-                onClick={this.handleActionClick}
-                responsive
-              />
-            ) : props.data.associatedMovement === null
-              ? <MaterialIcon icon="sync" rotate="left"/> // show rotating icon if `associatedMovement` is null (= state where the associated movement is being monitored, but not set yet)
-              : null // if `associatedMovement` is undefined, we don't want to show anything (= state before the associated movement is even being monitored)
-            }
-          </ActionColumn>
-        </ColumnsWrapper>
-        {hasTags && (
-          <TagsWrapper>
-            {props.isAdmin && paymentMissing && (
-              <NoPaymentTag/>
-            )}
-          </TagsWrapper>
-        )}
-      </Wrapper>
-    );
-  }
+            </div>
+          )}
+        </Column>
+        <Column className="location" $alignMiddle>{formatLocationDisplay(data)}</Column>
+        <ActionColumn className="action" $alignMiddle $highlight>
+          {data.associatedMovement && data.associatedMovement.type === 'none' ? (
+            <Action
+              label={ACTION_LABELS[data.type].label}
+              icon={ACTION_LABELS[data.type].icon}
+              onClick={handleActionClick}
+              responsive
+            />
+          ) : data.associatedMovement === null
+            ? <MaterialIcon icon="sync" rotate="left"/> // show rotating icon if `associatedMovement` is null (= state where the associated movement is being monitored, but not set yet)
+            : null // if `associatedMovement` is undefined, we don't want to show anything (= state before the associated movement is even being monitored)
+          }
+        </ActionColumn>
+      </ColumnsWrapper>
+      {hasTags && (
+        <TagsWrapper>
+          {isAdmin && paymentMissing && (
+            <NoPaymentTag/>
+          )}
+        </TagsWrapper>
+      )}
+    </Wrapper>
+  );
+};
 
-  handleActionClick() {
-    this.props.createMovementFromMovement(this.props.data.type, this.props.data.key);
-  }
-}
-
-(MovementHeader as any).propTypes = {
+MovementHeader.propTypes = {
   data: PropTypes.object.isRequired,
   selected: PropTypes.bool,
   createMovementFromMovement: PropTypes.func.isRequired,
   locked: PropTypes.bool,
   onClick: PropTypes.func,
   isHomeBase: PropTypes.bool.isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  isAdmin: PropTypes.bool.isRequired,
+  timeWithDate: PropTypes.bool
 };
 
-export default withTranslation()(MovementHeader);
+export default MovementHeader;
