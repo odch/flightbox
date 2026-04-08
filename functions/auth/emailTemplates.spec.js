@@ -21,7 +21,7 @@ describe('functions', () => {
       jest.clearAllMocks();
     });
 
-    it('returns subject, html, and text', () => {
+    it('returns German subject by default', () => {
       const result = getSignInEmailContent({
         signInCode: '123456',
         airportName: 'Thun Airport',
@@ -30,6 +30,16 @@ describe('functions', () => {
       expect(result.subject).toBe('Bei Flightbox anmelden');
       expect(result.html).toBeDefined();
       expect(result.text).toBeDefined();
+    });
+
+    it('returns English subject when language is en', () => {
+      const result = getSignInEmailContent({
+        signInCode: '123456',
+        airportName: 'Thun Airport',
+        themeColor: '#003863',
+        language: 'en'
+      });
+      expect(result.subject).toBe('Sign in to Flightbox');
     });
 
     it('replaces signInCode placeholder in html', () => {
@@ -83,7 +93,7 @@ describe('functions', () => {
       expect(result.html).toContain('654321');
     });
 
-    it('reads html template from correct path', () => {
+    it('reads German template by default', () => {
       getSignInEmailContent({
         signInCode: '123456',
         airportName: 'Thun',
@@ -93,16 +103,25 @@ describe('functions', () => {
         expect.stringContaining('signin.html'),
         'utf8'
       );
+      expect(fs.readFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('signin.txt'),
+        'utf8'
+      );
     });
 
-    it('reads text template from correct path', () => {
+    it('reads English template when language is en', () => {
       getSignInEmailContent({
         signInCode: '123456',
         airportName: 'Thun',
-        themeColor: '#003863'
+        themeColor: '#003863',
+        language: 'en'
       });
       expect(fs.readFileSync).toHaveBeenCalledWith(
-        expect.stringContaining('signin.txt'),
+        expect.stringContaining('signin_en.html'),
+        'utf8'
+      );
+      expect(fs.readFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('signin_en.txt'),
         'utf8'
       );
     });

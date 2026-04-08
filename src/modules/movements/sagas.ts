@@ -37,6 +37,9 @@ export function* getProfileDefaultValues() {
   for (const key of ['memberNr', 'email', 'firstname', 'lastname', 'phone', 'immatriculation', 'aircraftCategory', 'aircraftType', 'mtow']) {
     if (key in p) result[key] = p[key];
   }
+  if (!result.email && auth.email) {
+    result.email = auth.email;
+  }
   return result;
 }
 

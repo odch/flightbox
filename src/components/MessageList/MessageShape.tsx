@@ -5,6 +5,6 @@ export default PropTypes.shape({
   name: PropTypes.string.isRequired,
   timestamp: PropTypes.number.isRequired,
   email: PropTypes.string.isRequired,
-  phone: PropTypes.string.isRequired,
+  phone: PropTypes.string,
   message: PropTypes.string.isRequired
 })

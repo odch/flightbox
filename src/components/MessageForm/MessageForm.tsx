@@ -5,7 +5,7 @@ import {Field, Form} from 'react-final-form'
 import H1 from '../H1';
 import Button from '../Button';
 import validate from './validate';
-import {renderInputField, renderTextArea} from './renderField';
+import {renderInputField, renderPhoneField, renderTextArea} from './renderField';
 import Intro from './Intro';
 import Dialog from './Dialog';
 
@@ -18,7 +18,7 @@ class MessageForm extends React.Component<any, any> {
   render() {
     const { t } = this.props;
     return (
-      <Form validate={validate} onSubmit={this.props.onSubmit}>
+      <Form validate={validate} onSubmit={this.props.onSubmit} initialValues={this.props.initialValues}>
         {({handleSubmit}) => (
           <form className="MessageForm" onSubmit={handleSubmit}>
             <H1>{t('message.heading')}</H1>
@@ -40,8 +40,7 @@ class MessageForm extends React.Component<any, any> {
               />
               <Field
                 name="phone"
-                type="tel"
-                component={renderInputField}
+                component={renderPhoneField}
                 label={t('message.phone')}
               />
               <Field
@@ -78,6 +77,7 @@ class MessageForm extends React.Component<any, any> {
   onSubmit: PropTypes.func.isRequired,
   resetMessageForm: PropTypes.func.isRequired,
   confirmSaveMessageSuccess: PropTypes.func.isRequired,
+  initialValues: PropTypes.object,
 };
 
 export default withTranslation()(MessageForm);

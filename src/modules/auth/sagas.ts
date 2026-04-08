@@ -12,6 +12,7 @@ import firebase, {
 } from '../../util/firebase';
 import {error as logError} from '../../util/log';
 import {getKioskAuthQueryToken} from '../../util/getAuthQueryToken'
+import i18n from '../../i18n'
 
 export function getLoginData(uid: string) {
   return get(firebase('/logins/' + uid))
@@ -93,7 +94,7 @@ export function* sendAuthenticationEmail(action: any) {
       const airportName = __CONF__.aerodrome.name;
       const theme = require(`../../../theme/${__CONF__.theme}`);
 
-      yield call(fbRequestSignInCode, email, airportName, theme.colors.main);
+      yield call(fbRequestSignInCode, email, airportName, theme.colors.main, i18n.language);
 
       yield put(actions.sendAuthenticationEmailSuccess());
     }

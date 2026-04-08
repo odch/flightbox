@@ -16,5 +16,11 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+// Default to German so tests match German UI text
+// (CI browsers have English as default language)
+Cypress.on('window:before:load', (win) => {
+  win.localStorage.setItem('flightbox_language', 'de');
+});
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

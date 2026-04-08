@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import {Link} from 'react-router-dom';
 import Logo from '../Logo';
+import LanguageSwitch from '../LanguageSwitch';
 
 const Wrapper = styled.header`
   position: fixed;
@@ -13,6 +14,7 @@ const Wrapper = styled.header`
   background-color: ${props => props.theme.colors.background};
   text-align: center;
   box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;
+  z-index: 1;
 
   @media screen and (max-width: 768px) {
     display: none;
@@ -44,6 +46,10 @@ const StyledAerodromeName = styled.div`
   word-break: break-word;
 `
 
+const StyledLanguageSwitch = styled(LanguageSwitch)`
+  margin-top: 20px;
+`;
+
 function Header() {
   return (
     <Wrapper>
@@ -54,6 +60,7 @@ function Header() {
         <StyledFlightboxLabel>Flightbox</StyledFlightboxLabel>
         <StyledAerodromeName>{__CONF__.aerodrome.name}</StyledAerodromeName>
       </StyledTitle>
+      <StyledLanguageSwitch/>
     </Wrapper>
   );
 }

@@ -7,6 +7,9 @@ import firebase, {authenticate as fbAuth, requestSignInCode as fbRequestSignInCo
 import {get} from 'firebase/database';
 
 jest.mock('../../util/firebase');
+jest.mock('../../i18n', () => ({
+  language: 'de',
+}));
 jest.mock('firebase/database', () => ({
   get: jest.fn(),
   query: jest.fn(r => r),
@@ -425,7 +428,7 @@ describe('modules', () => {
           expect(generator.next().value).toEqual(put(actions.setSubmitting()));
           // next: sets isLocalSignIn in localStorage (synchronous)
           expect(generator.next().value).toEqual(
-            call(fbRequestSignInCode, 'user@example.com', 'Test Airport', '#003863')
+            call(fbRequestSignInCode, 'user@example.com', 'Test Airport', '#003863', 'de')
           );
 
           expect(generator.next().value).toEqual(
@@ -442,7 +445,7 @@ describe('modules', () => {
           expect(generator.next().value).toEqual(put(actions.setSubmitting()));
           // next: sets isLocalSignIn in localStorage (synchronous), then calls requestSignInCode
           expect(generator.next().value).toEqual(
-            call(fbRequestSignInCode, 'user@example.com', 'Test Airport', '#003863')
+            call(fbRequestSignInCode, 'user@example.com', 'Test Airport', '#003863', 'de')
           );
 
           const error = new Error('Network error');

@@ -71,7 +71,7 @@ class MaskedInput extends Component<any, any> {
   render() {
     if (this.props.input.value && !this.props.meta.active) {
       return (
-        <StyledMaskedComponent onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
+        <StyledMaskedComponent data-cy={this.props.input.name} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
           <MaskedContent>{
             this.props.type === 'email'
               ? maskEmail(this.props.input.value)

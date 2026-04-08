@@ -128,6 +128,28 @@ describe('components', () => {
       });
     });
 
+    describe('phone validation', () => {
+      it('returns no error when phone is empty', () => {
+        const validateFn = validate(null, ['phone'], []);
+        const errors = validateFn({});
+        expect(errors.phone).toBeUndefined();
+      });
+
+      it('returns no error for valid phone number', () => {
+        const validateFn = validate(null, ['phone'], []);
+        expect(validateFn({phone: '+41 79 123 45 67'}).phone).toBeUndefined();
+        expect(validateFn({phone: '079 123 45 67'}).phone).toBeUndefined();
+        expect(validateFn({phone: '+41791234567'}).phone).toBeUndefined();
+        expect(validateFn({phone: '0791234567'}).phone).toBeUndefined();
+      });
+
+      it('returns error for invalid phone number', () => {
+        const validateFn = validate(null, ['phone'], []);
+        expect(validateFn({phone: 'abc'}).phone).toBeDefined();
+        expect(validateFn({phone: '12'}).phone).toBeDefined();
+      });
+    });
+
     describe('getFilteredConfig (via validate)', () => {
       it('only validates requested fields', () => {
         // Only ask for immatriculation, not mtow

@@ -722,6 +722,36 @@ describe('modules', () => {
           expect(next.value).toEqual({ firstname: 'John' });
           expect(next.done).toEqual(true);
         });
+
+        it('should fall back to auth email when profile has no email', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { uid: 'user-123', email: 'auth@example.com' };
+          expect(generator.next(auth).value).toEqual(call(loadRemote, 'user-123'));
+
+          const snapshot = { val: () => ({ firstname: 'John' }) };
+
+          const next = generator.next(snapshot);
+          expect(next.value).toEqual({ firstname: 'John', email: 'auth@example.com' });
+          expect(next.done).toEqual(true);
+        });
+
+        it('should prefer profile email over auth email', () => {
+          const generator = sagas.getProfileDefaultValues();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { uid: 'user-123', email: 'auth@example.com' };
+          expect(generator.next(auth).value).toEqual(call(loadRemote, 'user-123'));
+
+          const snapshot = { val: () => ({ email: 'profile@example.com' }) };
+
+          const next = generator.next(snapshot);
+          expect(next.value).toEqual({ email: 'profile@example.com' });
+          expect(next.done).toEqual(true);
+        });
       });
 
       describe('filterMovements', () => {

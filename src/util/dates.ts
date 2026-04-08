@@ -6,8 +6,10 @@ const checkPattern = (value: string, pattern: RegExp, errorMsg: string): void =>
   }
 };
 
+const momentLocale = (locale: string) => locale === 'en' ? 'en' : 'de-ch';
+
 const parseWithLocale = (timestamp: string, locale: string) =>
-  moment.tz(timestamp, 'Europe/Zurich').locale(locale);
+  moment.tz(timestamp, 'Europe/Zurich').locale(momentLocale(locale));
 
 const dates = {
   localToIsoUtc(localDate: string, localTime: string): string {

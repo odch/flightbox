@@ -51,7 +51,7 @@ function validate(
               }
               break;
             case 'match':
-              if (!validationTypes[typeKey]!.test(dataValue)) {
+              if (dataValue && !validationTypes[typeKey]!.test(dataValue)) {
                 valid = false;
               }
               break;

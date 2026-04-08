@@ -34,9 +34,9 @@ const createTransporter = (settings) => {
   });
 };
 
-const sendSignInEmail = async ({ email, signInCode, airportName, themeColor }) => {
+const sendSignInEmail = async ({ email, signInCode, airportName, themeColor, language }) => {
   const smtpSettings = await loadSmtpSettings();
-  const emailContent = getSignInEmailContent({ signInCode, airportName, themeColor });
+  const emailContent = getSignInEmailContent({ signInCode, airportName, themeColor, language });
   const transporter = createTransporter(smtpSettings);
 
   const info = await transporter.sendMail({

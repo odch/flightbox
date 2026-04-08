@@ -10,7 +10,7 @@ const getConfig = () => ({
   },
   phone: {
     types: {
-      required: true,
+      match: /^\+?[\d\s\-().\/]{7,20}$/,
     },
     message: i18n.t('message.validate.phone'),
   },
