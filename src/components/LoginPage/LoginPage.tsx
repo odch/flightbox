@@ -6,16 +6,25 @@ import UsernamePasswordLoginForm from '../../containers/UsernamePasswordLoginFor
 import styled from 'styled-components'
 import {withRouter} from 'react-router-dom'
 import getAuthQueryToken, {getGuestOnly} from '../../util/getAuthQueryToken'
+import LanguageSwitch from '../LanguageSwitch';
 
 const StyledWrapper = styled.div`
   display: flex;
   min-height: 100vh;
+  position: relative;
 
   @media screen and (max-width: 520px) {
     & {
       flex-direction: column;
     }
   }
+`
+
+const StyledLanguageSwitch = styled(LanguageSwitch)`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
 `
 
 const LoginWrapper = styled.div`
@@ -61,6 +70,7 @@ const LoginPage = ({location, privacyPolicyUrl, emailSent}: {location: any, priv
   const guestOnly = getGuestOnly(location)
   return (
     <StyledWrapper>
+      <StyledLanguageSwitch/>
       <Header/>
       <LoginWrapper>
         <LoginInnerWrapper>
