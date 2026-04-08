@@ -43,7 +43,7 @@ export function authenticate(token) {
   return signInWithCustomToken(getAuth(), token);
 }
 
-export function requestSignInCode(email: string, airportName: string, themeColor: string) {
+export function requestSignInCode(email: string, airportName: string, themeColor: string, language: string) {
   initialize();
 
   const functionUrl = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/generateSignInCode`;
@@ -51,7 +51,7 @@ export function requestSignInCode(email: string, airportName: string, themeColor
   return fetch(functionUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, airportName, themeColor }),
+    body: JSON.stringify({ email, airportName, themeColor, language }),
   })
     .then(response => {
       if (!response.ok) {
