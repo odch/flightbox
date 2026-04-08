@@ -15,7 +15,7 @@ i18n
         translation: en,
       },
     },
-    lng: 'de',
+    lng: localStorage.getItem('flightbox_language') || 'de',
     fallbackLng: 'de',
     interpolation: {
       escapeValue: false,

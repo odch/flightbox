@@ -13,7 +13,10 @@ import i18n from './i18n';
 
 const momentLocale = (lang: string) => lang === 'en' ? 'en' : 'de-ch';
 moment.locale(momentLocale(i18n.language));
-i18n.on('languageChanged', lang => moment.locale(momentLocale(lang)));
+i18n.on('languageChanged', lang => {
+  moment.locale(momentLocale(lang));
+  localStorage.setItem('flightbox_language', lang);
+});
 
 import {history} from './history'
 import reducer, {sagas} from './modules';

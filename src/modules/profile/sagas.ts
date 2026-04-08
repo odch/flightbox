@@ -2,6 +2,7 @@ import * as actions from './actions'
 import * as remote from './remote'
 import {FIREBASE_AUTHENTICATION_EVENT} from '../auth'
 import {all, call, put, select, takeEvery} from 'redux-saga/effects'
+import i18n from '../../i18n'
 
 const str = (value: unknown): string | null =>
   typeof value === 'string' && value.trim().length > 0 ? value : null;
@@ -18,6 +19,9 @@ export function* loadProfile() {
     const snapshot = yield call(remote.load, auth.uid);
     const profile = snapshot.val() || {};
     yield put(actions.profileLoaded(profile));
+    if (profile.language && profile.language !== i18n.language) {
+      i18n.changeLanguage(profile.language);
+    }
     yield call(recordPrivacyPolicyAcceptance, auth, profile);
   } catch(e) {
     if (console && typeof console.error === 'function') {
@@ -74,6 +78,20 @@ export function* saveProfile(action: any) {
   }
 }
 
+export function* saveLanguage(action: any) {
+  try {
+    const auth = yield select(authSelector);
+    if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+      return;
+    }
+    yield call(remote.save, auth.uid, { language: action.payload.language });
+  } catch (e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to save language preference', e);
+    }
+  }
+}
+
 export function* onAuthentication(action: any) {
   const authData = action.payload.authData;
   if (authData && authData.guest === false && authData.kiosk === false) {
@@ -85,6 +103,7 @@ export default function* sagas() {
   yield all([
     takeEvery(actions.LOAD_PROFILE, loadProfile),
     takeEvery(actions.SAVE_PROFILE, saveProfile),
+    takeEvery(actions.SAVE_LANGUAGE, saveLanguage),
     takeEvery(FIREBASE_AUTHENTICATION_EVENT, onAuthentication),
   ])
 }
