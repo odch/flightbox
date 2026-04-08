@@ -14,18 +14,21 @@ const readTemplate = (templateName, format) => {
   return fs.readFileSync(templatePath, 'utf8');
 };
 
-const getSignInEmailContent = ({ signInCode, airportName, themeColor }) => {
+const getSignInEmailContent = ({ signInCode, airportName, themeColor, language }) => {
   const replacements = {
     signInCode,
     airportName,
     themeColor
   };
 
-  const htmlTemplate = readTemplate('signin', 'html');
-  const textTemplate = readTemplate('signin', 'txt');
+  const templateName = language === 'en' ? 'signin_en' : 'signin';
+  const subject = language === 'en' ? 'Sign in to Flightbox' : 'Bei Flightbox anmelden';
+
+  const htmlTemplate = readTemplate(templateName, 'html');
+  const textTemplate = readTemplate(templateName, 'txt');
 
   return {
-    subject: 'Bei Flightbox anmelden',
+    subject,
     html: replacePlaceholders(htmlTemplate, replacements),
     text: replacePlaceholders(textTemplate, replacements)
   };

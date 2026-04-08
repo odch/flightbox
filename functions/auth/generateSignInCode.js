@@ -39,7 +39,7 @@ exports.generateSignInCode = functions.region('europe-west1').https.onRequest((r
         return res.status(validationError.status).json({ error: validationError.error });
       }
 
-      const { email, airportName, themeColor } = req.body;
+      const { email, airportName, themeColor, language } = req.body;
       const normalizedEmail = email.toLowerCase();
 
       const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
@@ -53,7 +53,7 @@ exports.generateSignInCode = functions.region('europe-west1').https.onRequest((r
         attempts: 0,
       });
 
-      await sendSignInEmail({ email: normalizedEmail, signInCode: code, airportName, themeColor });
+      await sendSignInEmail({ email: normalizedEmail, signInCode: code, airportName, themeColor, language });
 
       res.status(200).json({ success: true });
     } catch (error) {
