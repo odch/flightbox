@@ -9,9 +9,11 @@ import {ThemeProvider} from 'styled-components';
 import moment from 'moment';
 
 import 'moment/locale/de-ch';
-import './i18n';
+import i18n from './i18n';
 
-moment.locale('de-ch');
+const momentLocale = (lang: string) => lang === 'en' ? 'en' : 'de-ch';
+moment.locale(momentLocale(i18n.language));
+i18n.on('languageChanged', lang => moment.locale(momentLocale(lang)));
 
 import {history} from './history'
 import reducer, {sagas} from './modules';
