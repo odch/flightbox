@@ -4,6 +4,13 @@ import { initReactI18next } from 'react-i18next';
 import de from './locales/de.json';
 import en from './locales/en.json';
 
+export const detectLanguage = (): string => {
+  const stored = localStorage.getItem('flightbox_language');
+  if (stored) return stored;
+  const browserLang = navigator.language || '';
+  return browserLang.startsWith('en') ? 'en' : 'de';
+};
+
 i18n
   .use(initReactI18next)
   .init({
@@ -15,7 +22,7 @@ i18n
         translation: en,
       },
     },
-    lng: localStorage.getItem('flightbox_language') || 'de',
+    lng: detectLanguage(),
     fallbackLng: 'de',
     interpolation: {
       escapeValue: false,
