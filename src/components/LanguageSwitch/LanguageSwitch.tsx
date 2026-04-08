@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
+import { saveLanguage } from '../../modules/profile/actions';
 
 const Wrapper = styled.div`
   display: inline-flex;
@@ -27,6 +29,12 @@ const LANGUAGES = ['de', 'en'] as const;
 
 function LanguageSwitch({ className }: { className?: string }) {
   const { i18n } = useTranslation();
+  const dispatch = useDispatch();
+
+  const handleChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    dispatch(saveLanguage(lang));
+  };
 
   return (
     <Wrapper className={className}>
@@ -34,7 +42,7 @@ function LanguageSwitch({ className }: { className?: string }) {
         <LangButton
           key={lang}
           $active={i18n.language === lang}
-          onClick={() => i18n.changeLanguage(lang)}
+          onClick={() => handleChange(lang)}
           aria-label={lang === 'de' ? 'Deutsch' : 'English'}
         >
           {lang.toUpperCase()}

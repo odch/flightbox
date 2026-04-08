@@ -5,6 +5,12 @@ import * as remote from './remote';
 
 jest.mock('./remote');
 
+const mockChangeLanguage = jest.fn();
+jest.mock('../../i18n', () => ({
+  language: 'de',
+  changeLanguage: (...args: any[]) => mockChangeLanguage(...args),
+}));
+
 describe('modules', () => {
   describe('profile', () => {
     describe('sagas', () => {
@@ -24,6 +30,25 @@ describe('modules', () => {
           expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, profileData));
 
           expect(generator.next().done).toEqual(true);
+        });
+
+        it('should apply language from profile when it differs from current', () => {
+          const generator = sagas.loadProfile();
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { uid: 'user-123' };
+          expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
+
+          const profileData = { firstname: 'Hans', language: 'en' };
+          const snapshot = { val: () => profileData };
+          expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded(profileData)));
+
+          // Next step should call recordPrivacyPolicyAcceptance (changeLanguage is called inline)
+          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, profileData));
+
+          expect(generator.next().done).toEqual(true);
+          expect(mockChangeLanguage).toHaveBeenCalledWith('en');
         });
 
         it('should put profileLoaded with empty object when snapshot.val() returns null', () => {
@@ -110,6 +135,50 @@ describe('modules', () => {
           const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
 
           expect(generator.next().done).toEqual(true);
+        });
+      });
+
+      describe('saveLanguage', () => {
+        it('should save language to Firebase for regular users', () => {
+          const action = actions.saveLanguage('en');
+          const generator = sagas.saveLanguage(action);
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { uid: 'user-123', guest: false, kiosk: false };
+          expect(generator.next(auth).value).toEqual(call(remote.save, 'user-123', { language: 'en' }));
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not save for guest users', () => {
+          const action = actions.saveLanguage('en');
+          const generator = sagas.saveLanguage(action);
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { uid: 'guest', guest: true, kiosk: false };
+          expect(generator.next(auth).done).toEqual(true);
+        });
+
+        it('should not save for kiosk users', () => {
+          const action = actions.saveLanguage('en');
+          const generator = sagas.saveLanguage(action);
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { uid: 'kiosk', guest: false, kiosk: true };
+          expect(generator.next(auth).done).toEqual(true);
+        });
+
+        it('should not save for ipauth users', () => {
+          const action = actions.saveLanguage('en');
+          const generator = sagas.saveLanguage(action);
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { uid: 'ipauth', guest: false, kiosk: false };
+          expect(generator.next(auth).done).toEqual(true);
         });
       });
 

@@ -485,6 +485,9 @@
         "privacyPolicyAcceptedAt": {
           ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
         },
+        "language": {
+          ".validate": "newData.isString() && newData.val().matches(/^(de|en)$/)"
+        },
         "$other": {
           ".validate": false
         }
