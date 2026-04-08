@@ -2,15 +2,15 @@ import React from 'react';
 import { renderWithTheme, screen, fireEvent } from '../../../test/renderWithTheme';
 import DatePicker from './DatePicker';
 
-// Mock the styled DayPicker wrapper (imported as ./DayPicker in DatePicker.js)
+// Mock the styled DayPicker wrapper (imported as ./DayPicker in DatePicker.tsx)
 jest.mock('./DayPicker', () => {
   const React = require('react');
-  const MockDayPicker = ({ onDayClick }) => (
+  const MockDayPicker = ({ onSelect }) => (
     <div data-testid="day-picker">
       <button
         data-testid="day-picker-day"
         type="button"
-        onClick={() => onDayClick && onDayClick(new Date('2024-06-15'))}
+        onClick={() => onSelect && onSelect(new Date('2024-06-15'))}
       >
         15
       </button>
@@ -18,8 +18,6 @@ jest.mock('./DayPicker', () => {
   );
   return MockDayPicker;
 });
-
-jest.mock('react-day-picker/moment', () => ({}));
 
 // Mock ModalDialog to render content directly for testability
 jest.mock('../ModalDialog', () => {
