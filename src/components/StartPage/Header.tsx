@@ -3,6 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import LoginInfo from './LoginInfo';
 import Logo from '../Logo';
+import LanguageSwitch from '../LanguageSwitch';
 
 const StyledHeader = styled.header`
   position: fixed;
@@ -21,8 +22,11 @@ const StyledLogoWrapper = styled.div`
   height: 100%;
 `
 
-const StyledLoginInfo = styled(LoginInfo)`
+const StyledTopRight = styled.div`
   float: right;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 `;
 
 const StyledLogo = styled(Logo)`
@@ -49,7 +53,10 @@ class Header extends React.PureComponent<any, any> {
     const props = this.props;
     return (
       <StyledHeader>
-        <StyledLoginInfo logout={props.logout} auth={props.auth} showLogin={props.showLogin}/>
+        <StyledTopRight>
+          <LanguageSwitch/>
+          <LoginInfo logout={props.logout} auth={props.auth} showLogin={props.showLogin}/>
+        </StyledTopRight>
         <StyledLogoWrapper>
           <StyledLogo/>
           <StyledTitle>
