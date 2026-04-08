@@ -1,6 +1,10 @@
 import React from 'react';
 import {renderWithTheme} from '../../../test/renderWithTheme';
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key, opts) => opts?.name ? `${key} ${opts.name}` : key }),
+}));
+
 jest.mock('../MaterialIcon', () => {
   const React = require('react');
   return function MockMaterialIcon({icon, title}) {
@@ -8,7 +12,6 @@ jest.mock('../MaterialIcon', () => {
   };
 });
 
-// HomeBaseIcon is a class component wrapped with withTranslation()
 import HomeBaseIcon from './HomeBaseIcon';
 
 describe('components', () => {

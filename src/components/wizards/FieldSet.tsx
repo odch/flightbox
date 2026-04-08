@@ -12,25 +12,14 @@ const Legend = styled.legend`
   margin-bottom: 1em;
 `;
 
-class FieldSet extends React.PureComponent<any, any> {
+const FieldSet = ({ legend, gutter = true, children }: any) => (
+  <Wrapper $gutter={gutter}>
+    {legend && <Legend>{legend}</Legend>}
+    {children}
+  </Wrapper>
+);
 
-  render() {
-    const props = this.props;
-    return (
-      <Wrapper $gutter={props.gutter}>
-        {props.legend && <Legend>{props.legend}</Legend>}
-        {props.children}
-      </Wrapper>
-    );
-  }
-}
-
-const FieldSetAny = FieldSet as any;
-FieldSetAny.defaultProps = {
-  gutter: true
-};
-
-FieldSetAny.propTypes = {
+FieldSet.propTypes = {
   legend: PropTypes.string,
   gutter: PropTypes.bool,
   children: PropTypes.oneOfType([

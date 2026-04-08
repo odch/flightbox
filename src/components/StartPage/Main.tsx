@@ -9,20 +9,15 @@ const Wrapper = styled.div`
   padding-top: 100px;
 `;
 
-class Main extends React.PureComponent<any, any> {
+const Main = ({ auth }: any) => (
+  <Wrapper>
+    <Hints guest={auth.data.guest} kiosk={auth.data.kiosk}/>
+    <EntryPoints admin={auth.data.admin} guest={auth.data.guest} kiosk={auth.data.kiosk}/>
+    <InstallCard authData={auth.data} />
+  </Wrapper>
+);
 
-  render() {
-    return (
-      <Wrapper>
-        <Hints guest={this.props.auth.data.guest} kiosk={this.props.auth.data.kiosk}/>
-        <EntryPoints admin={this.props.auth.data.admin} guest={this.props.auth.data.guest} kiosk={this.props.auth.data.kiosk}/>
-        <InstallCard authData={this.props.auth.data} />
-      </Wrapper>
-    );
-  }
-}
-
-(Main as any).propTypes = {
+Main.propTypes = {
   auth: PropTypes.shape({
     data: PropTypes.shape({
       admin: PropTypes.bool,

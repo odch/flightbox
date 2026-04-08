@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import Button from '../Button';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 const Wrapper = styled.div`
   padding: 10px 20px 10px 20px;
@@ -31,42 +31,46 @@ export const CancelButton = styled(WizardButton)`
   }
 `;
 
-class WizardNavigation extends React.PureComponent<any, any> {
+const WizardNavigation = ({
+  previousStep,
+  nextStep,
+  nextLabel,
+  nextVisible = true,
+  previousVisible = true,
+  cancel
+}: any) => {
+  const { t } = useTranslation();
+  return (
+    <Wrapper>
+      {nextVisible && (
+        <NextButton
+          type="submit"
+          label={nextLabel || t('wizard.next')}
+          icon="navigate_next"
+          onClick={nextStep}
+          dataCy="next-button"
+          primary
+        />
+      )}
+      {previousVisible && (
+        <BackButton
+          type="button"
+          label={t('wizard.back')}
+          onClick={previousStep}
+        />
+      )}
+      {cancel && (
+        <CancelButton
+          type="button"
+          label={t('wizard.cancel')}
+          onClick={cancel}
+        />
+      )}
+    </Wrapper>
+  );
+};
 
-  render() {
-    const props = this.props;
-    const { t } = this.props;
-    return (
-      <Wrapper>
-        {props.nextVisible && (
-          <NextButton
-            type="submit"
-            label={props.nextLabel || t('wizard.next')}
-            icon="navigate_next"
-            onClick={props.nextStep}
-            dataCy="next-button"
-            primary
-          />
-        )}
-        {props.previousVisible && (
-          <BackButton
-            type="button"
-            label={t('wizard.back')}
-            onClick={props.previousStep}
-          />
-        )}
-        {props.cancel && (
-          <CancelButton
-            type="button"
-            label={t('wizard.cancel')}
-            onClick={props.cancel}
-          />
-        )}
-      </Wrapper>)
-  }
-}
-
-(WizardNavigation as any).propTypes = {
+WizardNavigation.propTypes = {
   previousStep: PropTypes.func,
   nextStep: PropTypes.func,
   nextLabel: PropTypes.string,
@@ -75,9 +79,4 @@ class WizardNavigation extends React.PureComponent<any, any> {
   cancel: PropTypes.func
 };
 
-(WizardNavigation as any).defaultProps = {
-  nextVisible: true,
-  previousVisible: true
-};
-
-export default withTranslation()(WizardNavigation);
+export default WizardNavigation;
