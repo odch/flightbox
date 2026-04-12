@@ -44,7 +44,7 @@
     "css-loader": "^7.1.4",
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
-    "cypress": "^15.11.0",
+    "cypress": "^15.13.1",
     "del": "^8.0.1",
     "firebase": "^12.10.0",
     "gulp": "^5.0.1",
@@ -64,7 +64,7 @@
     "qrcode-svg": "^1.1.0",
     "ramda": "^0.32.0",
     "react": "^18.3.1",
-    "react-day-picker": "^7.1.9",
+    "react-day-picker": "^9.14.0",
     "react-dom": "^18.3.1",
     "react-redux": "^9.2.0",
     "react-router-dom": "^5.3.4",
@@ -77,7 +77,7 @@
     "styled-components": "^6.3.11",
     "typescript": "^6.0.2",
     "util": "^0.12.5",
-    "webpack": "^5.105.3",
+    "webpack": "^5.106.0",
     "webpack-cli": "^7.0.2",
     "webpack-dev-server": "^5.2.2",
     "webpack-stream": "^7.0.0",
@@ -88,8 +88,9 @@
     "url": "https://github.com/odch/flightbox.git"
   },
   "dependencies": {
+    "date-fns": "^4.1.0",
     "final-form": "^5.0.0",
-    "i18next": "^26.0.3",
+    "i18next": "^26.0.4",
     "process": "^0.11.10",
     "react-final-form": "^7.0.0",
     "react-i18next": "^17.0.2"

@@ -22,21 +22,16 @@ const Label = styled.div`
   color: ${props => props.theme.colors.main}
 `;
 
-class DetailsBox extends React.PureComponent<any, any> {
+const DetailsBox = ({ label, children }: any) => (
+  <Wrapper>
+    {label && <Label>{label}</Label>}
+    {children}
+  </Wrapper>
+);
 
-  render() {
-    const {label, children} = this.props;
-    return (
-      <Wrapper>
-        {label && <Label>{label}</Label>}
-        {children}
-      </Wrapper>
-    )
-  }
-}
-
-(DetailsBox as any).propTypes = {
-  label: PropTypes.string
+DetailsBox.propTypes = {
+  label: PropTypes.string,
+  children: PropTypes.node
 };
 
 export default DetailsBox;

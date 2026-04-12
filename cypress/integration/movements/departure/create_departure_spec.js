@@ -50,7 +50,7 @@ describe('movements', () => {
         cy.get(`[data-cy=next-button]`).click();
 
         cy.get(`[data-cy=date]`).click();
-        cy.get(`.DayPicker-Day[aria-disabled=false]`).last().click(); // select last day of month
+        cy.get(`.rdp-day:not(.rdp-disabled) .rdp-day_button`).last().click(); // select last day of month
         cy.get(`[data-cy=time-minutes-increment]`).click();
         cy.get(`[data-cy=location]`).type('LSZR');
         cy.get(`[data-cy=duration-hours-increment]`).click();

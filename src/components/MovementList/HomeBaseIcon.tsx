@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import MaterialIcon from '../MaterialIcon';
 
 const Wrapper = styled.div`
@@ -37,34 +37,31 @@ const Text = styled.div`
   line-height: 24px;
 `;
 
-class HomeBaseIcon extends React.PureComponent<any, any> {
+const HomeBaseIcon = ({ className, isHomeBase, showText }: any) => {
+  const { t } = useTranslation();
+  const text = t(
+    isHomeBase ? 'movement.homeBase.yes' : 'movement.homeBase.no',
+    { name: __CONF__.aerodrome.name }
+  );
 
-  render() {
-    const { t } = this.props;
-    const text = t(
-      this.props.isHomeBase ? 'movement.homeBase.yes' : 'movement.homeBase.no',
-      { name: __CONF__.aerodrome.name }
-    );
+  return (
+    <Wrapper className={className}>
+      <IconWrapper $withText={showText}>
+        <StyledIcon
+          icon="home"
+          title={text}
+          $isHomeBase={isHomeBase}
+        />
+      </IconWrapper>
+      {showText && <Text>{text}</Text>}
+    </Wrapper>
+  );
+};
 
-    return (
-      <Wrapper className={this.props.className}>
-        <IconWrapper $withText={this.props.showText}>
-          <StyledIcon
-            icon="home"
-            title={text}
-            $isHomeBase={this.props.isHomeBase}
-          />
-        </IconWrapper>
-        {this.props.showText && <Text>{text}</Text>}
-      </Wrapper>
-    );
-  }
-}
-
-(HomeBaseIcon as any).propTypes = {
+HomeBaseIcon.propTypes = {
   className: PropTypes.string,
   isHomeBase: PropTypes.bool.isRequired,
   showText: PropTypes.bool
 };
 
-export default withTranslation()(HomeBaseIcon);
+export default HomeBaseIcon;

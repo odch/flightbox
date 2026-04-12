@@ -49,7 +49,7 @@ describe('movements', () => {
         cy.get(`[data-cy=next-button]`).click();
 
         cy.get(`[data-cy=date]`).click();
-        cy.get(`.DayPicker-Day[aria-disabled=false]`).last().click();
+        cy.get(`.rdp-day:not(.rdp-disabled) .rdp-day_button`).last().click();
         cy.get(`[data-cy=time-minutes-increment]`).click();
         cy.get(`[data-cy=location]`).type('LSZR');
         cy.get(`[data-cy=landingCount-increment]`).click();

@@ -135,7 +135,7 @@ class MovementWizard extends Component<any, any> {
       return;
     }
 
-    dialogConf.predicate(data).then(show => {
+    return dialogConf.predicate(data).then(show => {
       if (show === true) {
         this.props.showDialog(dialogConf.name);
       } else {

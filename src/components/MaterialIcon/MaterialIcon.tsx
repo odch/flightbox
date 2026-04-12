@@ -45,31 +45,23 @@ const I = styled.i<{ $size?: number; $rotate?: string }>`
   ${props => props.$rotate && css`animation: ${animations[props.$rotate]} 2s linear infinite;`}
 `;
 
-class MaterialIcon extends React.PureComponent<any, any> {
-  render() {
-    return (
-      <I
-        className={this.props.className}
-        $size={this.props.size}
-        title={this.props.title}
-        $rotate={this.props.rotate}
-      >
-        {this.props.icon}
-      </I>
-    );
-  }
-}
+const MaterialIcon = ({ icon, className, size = 24, title, rotate }: any) => (
+  <I
+    className={className}
+    $size={size}
+    title={title}
+    $rotate={rotate}
+  >
+    {icon}
+  </I>
+);
 
-(MaterialIcon as any).propTypes = {
+MaterialIcon.propTypes = {
   icon: PropTypes.string.isRequired,
   className: PropTypes.string,
   size: PropTypes.number,
   title: PropTypes.string,
   rotate: PropTypes.oneOf(['left', 'right'])
-};
-
-(MaterialIcon as any).defaultProps = {
-  size: 24
 };
 
 export default MaterialIcon;

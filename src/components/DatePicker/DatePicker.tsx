@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
 import { withTranslation } from 'react-i18next';
+import { de } from 'date-fns/locale/de';
+import { enGB } from 'date-fns/locale/en-GB';
 import ModalDialog from '../ModalDialog';
 import MaterialIcon from '../MaterialIcon';
-import MomentLocaleUtils from 'react-day-picker/moment';
 import dates from '../../util/dates';
 import Wrapper from './Wrapper';
 import DayPicker from './DayPicker';
@@ -70,15 +71,15 @@ class DatePicker extends Component<any, any> {
 
   renderPicker() {
     const date = this.state.value ? new Date(this.state.value) : undefined;
-    const locale = this.props.i18n?.language === 'en' ? 'en' : 'de-ch';
+    const locale = this.props.i18n?.language === 'en' ? enGB : de;
     return (
       <DayPicker
-        selectedDays={date}
-        initialMonth={date}
-        onDayClick={this.handleDayClick}
-        localeUtils={MomentLocaleUtils}
+        mode="single"
+        selected={date}
+        defaultMonth={date}
+        onSelect={this.handleDayClick}
         locale={locale}
-        firstDayOfWeek={1}
+        weekStartsOn={1}
       />
     );
   }

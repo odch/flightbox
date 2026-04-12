@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 import ImageButton from '../ImageButton';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
 const arrivalImagePath = require('./ic_flight_land_black_48dp_2x.png');
@@ -27,37 +27,34 @@ const EntryPoint = styled(ImageButton)`
   }
 `;
 
-class EntryPoints extends React.PureComponent<any, any> {
-
-  render() {
-    const { t } = this.props;
-    if (this.props.guest === true || this.props.kiosk === true) {
-      return (
-        <Wrapper>
-          <EntryPoint img={departureImagePath} label={t('nav.departure')} href="/departure/new" dataCy="new-departure"/>
-          <EntryPoint img={arrivalImagePath} label={t('nav.arrival')} href="/arrival/new" dataCy="new-arrival"/>
-          <EntryPoint img={helpImagePath} label={t('nav.help')} href="/help" dataCy="help"/>
-        </Wrapper>
-      );
-    }
-
+const EntryPoints = ({ admin, guest, kiosk }: any) => {
+  const { t } = useTranslation();
+  if (guest === true || kiosk === true) {
     return (
       <Wrapper>
         <EntryPoint img={departureImagePath} label={t('nav.departure')} href="/departure/new" dataCy="new-departure"/>
         <EntryPoint img={arrivalImagePath} label={t('nav.arrival')} href="/arrival/new" dataCy="new-arrival"/>
-        <EntryPoint img={movementsImagePath} label={t('nav.movements')} href="/movements" dataCy="movements"/>
-        <EntryPoint img={messageImagePath} label={t('nav.message')} href="/message" dataCy="message"/>
         <EntryPoint img={helpImagePath} label={t('nav.help')} href="/help" dataCy="help"/>
-        {this.props.admin === true && <EntryPoint img={adminImagePath} label={t('nav.admin')} href="/admin" dataCy="admin"/>}
       </Wrapper>
     );
   }
-}
 
-(EntryPoints as any).propTypes = {
+  return (
+    <Wrapper>
+      <EntryPoint img={departureImagePath} label={t('nav.departure')} href="/departure/new" dataCy="new-departure"/>
+      <EntryPoint img={arrivalImagePath} label={t('nav.arrival')} href="/arrival/new" dataCy="new-arrival"/>
+      <EntryPoint img={movementsImagePath} label={t('nav.movements')} href="/movements" dataCy="movements"/>
+      <EntryPoint img={messageImagePath} label={t('nav.message')} href="/message" dataCy="message"/>
+      <EntryPoint img={helpImagePath} label={t('nav.help')} href="/help" dataCy="help"/>
+      {admin === true && <EntryPoint img={adminImagePath} label={t('nav.admin')} href="/admin" dataCy="admin"/>}
+    </Wrapper>
+  );
+};
+
+EntryPoints.propTypes = {
   admin: PropTypes.bool,
   guest: PropTypes.bool,
   kiosk: PropTypes.bool,
 };
 
-export default withTranslation()(EntryPoints);
+export default EntryPoints;

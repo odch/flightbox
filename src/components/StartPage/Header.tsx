@@ -47,29 +47,23 @@ const StyledAerodromeName = styled.div`
   color: #666;
 `
 
-class Header extends React.PureComponent<any, any> {
+const Header = ({ auth, logout, showLogin }: any) => (
+  <StyledHeader>
+    <StyledTopRight>
+      <LanguageSwitch/>
+      <LoginInfo logout={logout} auth={auth} showLogin={showLogin}/>
+    </StyledTopRight>
+    <StyledLogoWrapper>
+      <StyledLogo/>
+      <StyledTitle>
+        <StyledFlightboxLabel>Flightbox</StyledFlightboxLabel>
+        <StyledAerodromeName>{__CONF__.aerodrome.name}</StyledAerodromeName>
+      </StyledTitle>
+    </StyledLogoWrapper>
+  </StyledHeader>
+);
 
-  render() {
-    const props = this.props;
-    return (
-      <StyledHeader>
-        <StyledTopRight>
-          <LanguageSwitch/>
-          <LoginInfo logout={props.logout} auth={props.auth} showLogin={props.showLogin}/>
-        </StyledTopRight>
-        <StyledLogoWrapper>
-          <StyledLogo/>
-          <StyledTitle>
-            <StyledFlightboxLabel>Flightbox</StyledFlightboxLabel>
-            <StyledAerodromeName>{__CONF__.aerodrome.name}</StyledAerodromeName>
-          </StyledTitle>
-        </StyledLogoWrapper>
-      </StyledHeader>
-    );
-  }
-}
-
-(Header as any).propTypes = {
+Header.propTypes = {
   auth: PropTypes.object.isRequired,
   logout: PropTypes.func.isRequired,
   showLogin: PropTypes.func.isRequired,
