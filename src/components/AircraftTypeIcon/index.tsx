@@ -24,12 +24,12 @@ const ICON_MAP = {
   glider,
 }
 
-const JET_MTOW = 2550
+const JET_MTOW = 2250
 
-const getIconName = (aircraftCategory, mtow) => {
+export const getIconName = (aircraftCategory, mtow) => {
   let iconName = aircraftCategoryIcon(aircraftCategory)
 
-  if ((!iconName || iconName === 'plane') && mtow > JET_MTOW) {
+  if ((!iconName || iconName === 'plane') && mtow >= JET_MTOW) {
     iconName = 'jet'
   }
 
