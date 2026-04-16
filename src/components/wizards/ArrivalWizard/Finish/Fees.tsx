@@ -5,13 +5,13 @@ import MaterialIcon from '../../../MaterialIcon'
 import { withTranslation, useTranslation } from 'react-i18next'
 
 const ExpandableDetails = styled.div`
-  padding: 1.5rem;
-  width: 400px;
+  padding: 0.5em 0;
+  max-width: 100%;
 `
 
 const Amount = styled.div`
-  font-size: 1.5em;
-  margin-bottom: 1em;
+  font-size: 1.3em;
+  margin-bottom: 0.75em;
 `
 
 const DetailsContainer = styled.div`
@@ -23,10 +23,9 @@ const DetailsTrigger = styled.button`
   background-color: #eee;
   border: none;
   cursor: pointer;
-  font-size: 1.2em;
-  width: 100%;
-  padding: 0.4em;
-  border-radius: 2px;
+  font-size: 1em;
+  padding: 0.4em 1.5em;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;

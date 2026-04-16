@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import {getFromItemKey} from '../../../../util/reference-number';
 import Wrapper from './Wrapper';
 import Heading from './Heading';
@@ -10,6 +11,19 @@ import PaymentMethodImport from '../../../../containers/PaymentMethodContainer'
 const PaymentMethod = PaymentMethodImport as any
 import {HeadingType} from '../../MovementWizard'
 import Fees from './Fees'
+
+const InfoCard = styled.div`
+  background-color: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 1em;
+  width: 100%;
+  max-width: 500px;
+`;
+
+const FullWidth = styled.div`
+  width: 100%;
+`;
 
 const Finish = props => {
   const { t } = useTranslation();
@@ -51,29 +65,35 @@ const Finish = props => {
       {heading && <Heading>{heading}</Heading>}
       {showPayment ? (
         <>
-          <ReferenceNumberMessage>{t('arrival.referenceNumber', {number: getFromItemKey(itemKey)})}</ReferenceNumberMessage>
-          <Fees fees={fees}/>
-          <PaymentMethod
-            itemKey={itemKey}
-            email={email}
-            immatriculation={immatriculation}
-            createMovementFromMovement={createMovementFromMovement}
-            finish={finish}
-            amount={totalGross}
-            landings={landings}
-            landingFeeSingle={landingFeeSingle}
-            landingFeeCode={landingFeeCode}
-            landingFeeTotal={landingFeeTotal}
-            goArounds={goArounds}
-            goAroundFeeSingle={goAroundFeeSingle}
-            goAroundFeeCode={goAroundFeeCode}
-            goAroundFeeTotal={goAroundFeeTotal}
-            enabledPaymentMethods={enabledPaymentMethods}
-            invoiceRecipientNames={invoiceRecipientNames}
-          />
+          <InfoCard>
+            <ReferenceNumberMessage>{t('arrival.referenceNumber', {number: getFromItemKey(itemKey)})}</ReferenceNumberMessage>
+            <Fees fees={fees}/>
+          </InfoCard>
+          <FullWidth>
+            <PaymentMethod
+              itemKey={itemKey}
+              email={email}
+              immatriculation={immatriculation}
+              createMovementFromMovement={createMovementFromMovement}
+              finish={finish}
+              amount={totalGross}
+              landings={landings}
+              landingFeeSingle={landingFeeSingle}
+              landingFeeCode={landingFeeCode}
+              landingFeeTotal={landingFeeTotal}
+              goArounds={goArounds}
+              goAroundFeeSingle={goAroundFeeSingle}
+              goAroundFeeCode={goAroundFeeCode}
+              goAroundFeeTotal={goAroundFeeTotal}
+              enabledPaymentMethods={enabledPaymentMethods}
+              invoiceRecipientNames={invoiceRecipientNames}
+            />
+          </FullWidth>
         </>
       ) : (
-        <FinishActions itemKey={itemKey} createMovementFromMovement={createMovementFromMovement} finish={finish}/>
+        <FullWidth>
+          <FinishActions itemKey={itemKey} createMovementFromMovement={createMovementFromMovement} finish={finish}/>
+        </FullWidth>
       )}
     </Wrapper>
   );

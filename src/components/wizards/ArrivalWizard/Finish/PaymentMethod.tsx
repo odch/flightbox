@@ -12,6 +12,7 @@ import {withRouter} from 'react-router-dom'
 import {getFromItemKey} from '../../../../util/reference-number'
 import {PAYMENT_METHODS} from '../../../../util/paymentMethods'
 import CardExternalPaymentMessage from './CardExternalPaymentMessage'
+import Heading from './Heading'
 
 const Container = styled.div`
 `
@@ -26,15 +27,6 @@ const SelectContainer = styled.div`
 const InstructionMessage = styled.div`
   font-size: 1.2em;
   margin: 1em;
-`
-
-const SuccessMessage = styled.div`
-  font-size: 1.5em;
-  margin: 0 auto 3em auto;
-  max-width: 800px;
-  padding: 1em;
-  background-color: #bddda9;
-  border-radius: 10px;
 `
 
 const FailureMessage = styled(InstructionMessage)`
@@ -201,7 +193,7 @@ class PaymentMethod extends Component<any, any> {
             ) : method === 'card_external' ? (
               <CardExternalPaymentMessage {...{itemKey} as any}/>
             ) : method === 'checkout' ? (
-              <SuccessMessage>{t('arrival.payment.success')}</SuccessMessage>
+              <Heading>{t('arrival.payment.success')}</Heading>
             ) : null}
             <FinishActions itemKey={itemKey}
                            createMovementFromMovement={createMovementFromMovement}

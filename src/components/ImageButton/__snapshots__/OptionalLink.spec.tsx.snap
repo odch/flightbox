@@ -12,7 +12,7 @@ exports[`components ImageButton OptionalLink renders Link component if \`href\` 
 exports[`components ImageButton OptionalLink renders no Link component if \`href\` prop is not set 1`] = `
 <div>
   <div
-    class="sc-gtstET eMrqxt"
+    class="sc-gtstET BmhKC"
   />
 </div>
 `;

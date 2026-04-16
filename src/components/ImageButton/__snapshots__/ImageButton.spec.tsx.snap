@@ -27,7 +27,7 @@ exports[`components ImageButton propagates onClick to OptionalLink 1`] = `
     class="sc-dlnkDq iIJZep"
   >
     <div
-      class="sc-gtstET eMrqxt"
+      class="sc-gtstET BmhKC"
     >
       <div
         class="sc-hKFxUR rTqsk"
@@ -47,7 +47,7 @@ exports[`components ImageButton renders label and image 1`] = `
     class="sc-dlnkDq iIJZep"
   >
     <div
-      class="sc-gtstET eMrqxt"
+      class="sc-gtstET BmhKC"
     >
       <div
         class="sc-hKFxUR rTqsk"

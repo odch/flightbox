@@ -1,9 +1,15 @@
 import styled from 'styled-components';
 
 const ActionsWrapper = styled.div`
-  display: table;
-  width: 80%;
-  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 2em;
+  padding-top: 1em;
+
+  @media screen and (max-width: 500px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 export default ActionsWrapper;
