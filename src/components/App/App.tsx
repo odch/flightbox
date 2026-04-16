@@ -16,6 +16,7 @@ import ArrivalPaymentPage from "../../containers/ArrivalPaymentPageContainer";
 import AerodromeStatusPage from '../../containers/AerodromeStatusPageContainer';
 import ProfilePage from '../../containers/ProfilePageContainer';
 
+
 const UNPROTECTED_ROUTES = [
   '/aerodrome-status'
 ]
