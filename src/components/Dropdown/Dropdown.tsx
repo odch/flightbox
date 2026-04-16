@@ -90,6 +90,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     setFocusedOption(key);
     if (key !== null) {
       scrollIntoView(optionRefs.current[key], {
+        time: 50,
         validTarget: target => target.classList && target.classList.contains('flightbox-dropdown-options-container')
       });
     }
@@ -98,6 +99,9 @@ const Dropdown: React.FC<DropdownProps> = ({
   const setValueAndNotify = useCallback((newValue: string, focusContainer?: boolean) => {
     setFilter('');
     setValue(newValue);
+    if (focusContainer === true) {
+      setInputFocused(false);
+    }
     onChange?.(newValue);
     if (focusContainer === true) {
       window.requestAnimationFrame(() => containerRef.current?.focus());
@@ -233,7 +237,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       return;
     }
 
-    const filteredOptions = getFilteredOptions(filter);
+    const filteredOptions = getFilteredOptions(filter).slice(0, optionsRenderLimit);
     if (filteredOptions.length === 0) {
       return;
     }
@@ -295,6 +299,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     return (
       <OptionsContainer
         className="flightbox-dropdown-options-container"
+        onMouseDown={e => e.preventDefault()}
         onMouseLeave={handleOptionsMouseLeave}
       >
         {renderedOptions}
