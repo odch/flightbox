@@ -1,48 +1,46 @@
-import PropTypes from 'prop-types';
-import React, {Component} from 'react';
+import React from 'react';
 import Button from './Button';
 import Value from './Value';
 
-class IncrementationField extends Component<any, any> {
+interface IncrementationFieldProps {
+  value?: number;
+  minValue?: number;
+  onChange?: (event: { target: { value: number } }) => void;
+  readOnly?: boolean;
+  dataCy?: string;
+}
 
-  render() {
-    const value = typeof this.props.value === 'undefined' ? this.props.minValue : this.props.value;
+const IncrementationField: React.FC<IncrementationFieldProps> = ({
+  value: valueProp,
+  minValue = 0,
+  onChange,
+  readOnly,
+  dataCy,
+}) => {
+  const value = typeof valueProp === 'undefined' ? minValue : valueProp;
 
-    if (this.props.readOnly === true) {
-      return (
-        <div>
-          <Value>{value}</Value>
-        </div>
-      );
+  const change = (newValue: number) => {
+    if (newValue < minValue) newValue = minValue;
+    if (typeof onChange === 'function') {
+      onChange({ target: { value: newValue } });
     }
+  };
 
+  if (readOnly === true) {
     return (
       <div>
-        <Button type="button" onClick={() => this.change(value - 1)} data-cy={`${this.props.dataCy}-decrement`}>-</Button>
         <Value>{value}</Value>
-        <Button type="button" onClick={() => this.change(value + 1)} data-cy={`${this.props.dataCy}-increment`}>+</Button>
       </div>
     );
   }
 
-  change(newValue) {
-    if (newValue < this.props.minValue) newValue = this.props.minValue;
-    if (typeof this.props.onChange === 'function') {
-      this.props.onChange({ target: { value: newValue } });
-    }
-  }
-}
-
-(IncrementationField as any).propTypes = {
-  value: PropTypes.number,
-  minValue: PropTypes.number,
-  onChange: PropTypes.func,
-  readOnly: PropTypes.bool,
-  dataCy: PropTypes.string
-};
-
-(IncrementationField as any).defaultProps = {
-  minValue: 0,
+  return (
+    <div>
+      <Button type="button" onClick={() => change(value - 1)} data-cy={`${dataCy}-decrement`}>-</Button>
+      <Value>{value}</Value>
+      <Button type="button" onClick={() => change(value + 1)} data-cy={`${dataCy}-increment`}>+</Button>
+    </div>
+  );
 };
 
 export default IncrementationField;

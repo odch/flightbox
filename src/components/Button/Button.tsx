@@ -1,77 +1,64 @@
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 import MaterialIcon from '../MaterialIcon';
 import StyledButton from './StyledButton';
 import Overlay from './Overlay';
 import Label from './Label';
 
-class Button extends React.Component<any, any> {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      hovered: false
-    }
-  }
-
-  handleMouseEnter() {
-    this.setState({
-      hovered: true
-    })
-  }
-
-  handleMouseLeave() {
-    this.setState({
-      hovered: false
-    })
-  }
-
-  render() {
-    const { type, className, disabled, onClick, icon, label, primary, flat, danger, neutral, loading, dataCy } = this.props;
-    return (
-      <StyledButton
-        type={type}
-        className={className}
-        onClick={onClick}
-        disabled={disabled}
-        $primary={primary}
-        $flat={flat}
-        $danger={danger}
-        $neutral={neutral}
-        onMouseEnter={this.handleMouseEnter.bind(this)}
-        onMouseLeave={this.handleMouseLeave.bind(this)}
-        data-cy={dataCy}
-      >
-        <Overlay
-          disabled={disabled}
-          $hovered={this.state.hovered}
-          $danger={danger}
-          $flat={flat}
-        >
-          {loading ? <MaterialIcon icon="sync" rotate="left"/> : icon ? <MaterialIcon icon={icon}/> : undefined}<Label>{label}</Label>
-        </Overlay>
-      </StyledButton>
-    );
-  }
+interface ButtonProps {
+  type?: 'submit' | 'button' | 'reset';
+  label: string;
+  icon?: string;
+  className?: string;
+  disabled?: boolean;
+  onClick?: () => void;
+  primary?: boolean;
+  flat?: boolean;
+  danger?: boolean;
+  neutral?: boolean;
+  loading?: boolean;
+  dataCy?: string;
 }
 
-(Button as any).propTypes = {
-  type: PropTypes.oneOf(['submit', 'button', 'reset']),
-  label: PropTypes.string.isRequired,
-  icon: PropTypes.string,
-  className: PropTypes.string,
-  disabled: PropTypes.bool,
-  onClick: PropTypes.func,
-  primary: PropTypes.bool,
-  flat: PropTypes.bool,
-  danger: PropTypes.bool,
-  neutral: PropTypes.bool,
-  loading: PropTypes.bool,
-  dataCy: PropTypes.string
-};
+const Button: React.FC<ButtonProps> = ({
+  type = 'button',
+  label,
+  icon,
+  className,
+  disabled,
+  onClick,
+  primary,
+  flat,
+  danger,
+  neutral,
+  loading,
+  dataCy,
+}) => {
+  const [hovered, setHovered] = useState(false);
 
-(Button as any).defaultProps = {
-  type: 'button'
+  return (
+    <StyledButton
+      type={type}
+      className={className}
+      onClick={onClick}
+      disabled={disabled}
+      $primary={primary}
+      $flat={flat}
+      $danger={danger}
+      $neutral={neutral}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      data-cy={dataCy}
+    >
+      <Overlay
+        disabled={disabled}
+        $hovered={hovered}
+        $danger={danger}
+        $flat={flat}
+      >
+        {loading ? <MaterialIcon icon="sync" rotate="left"/> : icon ? <MaterialIcon icon={icon}/> : undefined}<Label>{label}</Label>
+      </Overlay>
+    </StyledButton>
+  );
 };
 
 export default Button;

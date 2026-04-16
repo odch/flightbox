@@ -1,8 +1,8 @@
-import React, {Component} from "react";
+import React, { useMemo, useCallback } from "react";
 import QRCode from "qrcode-svg";
 import Button from '../Button'
 import styled from 'styled-components'
-import { withTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 const Wrapper = styled.div`
   display: flex;
@@ -10,38 +10,39 @@ const Wrapper = styled.div`
   align-items: center;
   gap: 1em;
 `
-class QRCodeGenerator extends Component<any, any> {
 
-  constructor(props) {
-    super(props);
-    const qr = new QRCode({ content: props.url, width: 200, height: 200 });
-    this.state = { qrSvg: qr.svg() };
-    this.downloadQRCode = this.downloadQRCode.bind(this);
-  }
+interface QRCodeGeneratorProps {
+  url: string;
+}
 
-  downloadQRCode() {
-    const blob = new Blob([this.state.qrSvg], { type: "image/svg+xml" });
+const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({ url }) => {
+  const { t } = useTranslation();
+
+  const qrSvg = useMemo(() => {
+    const qr = new QRCode({ content: url, width: 200, height: 200 });
+    return qr.svg();
+  }, [url]);
+
+  const downloadQRCode = useCallback(() => {
+    const blob = new Blob([qrSvg], { type: "image/svg+xml" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "qrcode.svg";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
+  }, [qrSvg]);
 
-  render() {
-    const { t } = this.props;
-    return (
-      <Wrapper>
-        <div dangerouslySetInnerHTML={{ __html: this.state.qrSvg }} />
-        <Button
-          onClick={this.downloadQRCode}
-          label={t('common.download')}
-          icon="file_download"
-          />
-      </Wrapper>
-    );
-  }
-}
+  return (
+    <Wrapper>
+      <div dangerouslySetInnerHTML={{ __html: qrSvg }} />
+      <Button
+        onClick={downloadQRCode}
+        label={t('common.download')}
+        icon="file_download"
+      />
+    </Wrapper>
+  );
+};
 
-export default withTranslation()(QRCodeGenerator);
+export default QRCodeGenerator;
