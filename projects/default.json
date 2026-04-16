@@ -32,5 +32,6 @@
   "maskContactInformation": true,
   "memberManagement": false,
   "privacySettings": false,
-  "profileEnabled": true
+  "profileEnabled": true,
+  "passkeysEnabled": false
 }

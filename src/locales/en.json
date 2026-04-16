@@ -52,7 +52,10 @@
     "otpVerificationFailure": "Invalid or expired code. Please try again.",
     "otpResend": "Resend code",
     "otpResendIn": "Resend code ({{seconds}}s)",
-    "otpChangeEmail": "Wrong email address? Change it here"
+    "otpChangeEmail": "Wrong email address? Change it here",
+    "signInWithPasskey": "Sign in with passkey",
+    "passkeyFailure": "Passkey sign-in failed",
+    "useEmailCodeInstead": "Use email code instead"
   },
   "hints": {
     "departureBeforeStart_text": "Always record departure before takeoff",
@@ -300,7 +303,24 @@
     "noAircraft": "No aircraft saved.",
     "saveDetailsPrompt": "Save pilot info and aircraft so they're prefilled next time?",
     "saveAircraftPrompt": "Save {{immatriculation}} to your profile?",
-    "updateAircraftPrompt": "Update {{immatriculation}} in your profile?"
+    "updateAircraftPrompt": "Update {{immatriculation}} in your profile?",
+    "passkeysTitle": "Passkeys",
+    "passkeysDescription": "Sign in faster by using a passkey stored on your device.",
+    "passkeysEmpty": "No passkeys registered.",
+    "passkeysRegister": "Register a new passkey",
+    "passkeysRemove": "Remove",
+    "passkeysRemoveConfirm": "Do you really want to remove this passkey?",
+    "passkeysRemoveDevice": "Device:",
+    "passkeysCreatedAt": "Added on {{date}}",
+    "passkeysLastUsed": "Last used on {{date}}",
+    "passkeysLastUsedNever": "Never used yet",
+    "passkeysRegistrationFailure": "Could not register passkey. Please try again.",
+    "passkeysRemovalFailure": "Could not remove passkey. Please try again.",
+    "passkeyPromptTitle": "Sign in faster",
+    "passkeyPromptDescription": "Sign in with your fingerprint or face, without waiting for an email code.",
+    "passkeyPromptRegister": "Set up passkey",
+    "passkeyPromptDismiss": "Later",
+    "passkeyPromptDismissPermanent": "Don't show again"
   },
   "lockMovements": {
     "heading": "Lock recorded movements",

@@ -7,6 +7,8 @@ import Failure from './Failure';
 import Button from '../Button';
 import GuestTokenLogin from '../../containers/GuestTokenLoginContainer'
 import OtpCodeForm from './OtpCodeForm';
+import PasskeyLoginButton from './PasskeyLoginButton';
+import { isPasskeySupported } from '../../util/webauthn';
 
 const handleSubmit = (authenticate, email, local, e) => {
   e.preventDefault();
@@ -69,7 +71,11 @@ const EmailLoginForm = props => {
     emailSent,
     otpVerificationFailure,
     updateEmail,
-    resetOtp
+    resetOtp,
+    passkeysEnabled,
+    loginWithPasskey,
+    passkeyLoginSubmitting,
+    passkeyLoginFailure,
   } = props;
 
   if (emailSent) {
@@ -122,6 +128,17 @@ const EmailLoginForm = props => {
           )}
         </StyledForm>
       )}
+      {!guestOnly && passkeysEnabled && isPasskeySupported() && (
+        <>
+          <StyledOrContainer><StyledOrText>{t('login.or')}</StyledOrText></StyledOrContainer>
+          <PasskeyLoginButton
+            email={email}
+            submitting={!!passkeyLoginSubmitting}
+            failure={!!passkeyLoginFailure}
+            loginWithPasskey={loginWithPasskey}
+          />
+        </>
+      )}
       {queryToken && (
         guestOnly
           ? <GuestTokenLogin queryToken={queryToken}/>
@@ -152,6 +169,10 @@ const EmailLoginForm = props => {
   failure: PropTypes.bool.isRequired,
   emailSent: PropTypes.bool.isRequired,
   otpVerificationFailure: PropTypes.bool.isRequired,
+  passkeysEnabled: PropTypes.bool,
+  loginWithPasskey: PropTypes.func,
+  passkeyLoginSubmitting: PropTypes.bool,
+  passkeyLoginFailure: PropTypes.bool,
 };
 
 export default EmailLoginForm;

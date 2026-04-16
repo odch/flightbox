@@ -1,12 +1,18 @@
-import {call, put} from 'redux-saga/effects';
+import {call, put, select} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
 import {expectDoneWithoutReturn, expectDoneWithReturn} from '../../../test/sagaUtils';
 import firebase, {authenticate as fbAuth, requestSignInCode as fbRequestSignInCode, verifyOtpCode as fbVerifyOtpCode, unauth as fbUnauth, watchAuthState} from '../../util/firebase';
+import {
+  registerPasskey as fbRegisterPasskey,
+  authenticateWithPasskey as fbAuthenticateWithPasskey,
+  removePasskey as fbRemovePasskey,
+} from '../../util/webauthn';
 import {get} from 'firebase/database';
 
 jest.mock('../../util/firebase');
+jest.mock('../../util/webauthn');
 jest.mock('../../i18n', () => ({
   language: 'de',
 }));
@@ -567,6 +573,164 @@ describe('modules', () => {
           const error = new Error('network error');
           expect(generator.throw(error).value).toEqual(
             put(actions.usernamePasswordAuthenticationFailure())
+          );
+
+          expectDoneWithoutReturn(generator);
+        });
+      });
+
+      describe('doLoginWithPasskey', () => {
+        let setItemSpy: jest.SpyInstance;
+
+        beforeEach(() => {
+          setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+        });
+
+        afterEach(() => {
+          setItemSpy.mockRestore();
+        });
+
+        it('converges on requestFirebaseAuthentication like OTP flow', () => {
+          const action = actions.loginWithPasskey('user@example.com');
+          const generator = sagas.doLoginWithPasskey(action);
+
+          expect(generator.next().value).toEqual(
+            call(fbAuthenticateWithPasskey, 'user@example.com')
+          );
+
+          const token = 'ct-abc';
+          expect(generator.next(token).value).toEqual(
+            put(actions.requestFirebaseAuthentication(token, actions.loginWithPasskeyFailure()))
+          );
+
+          expectDoneWithoutReturn(generator);
+          expect(setItemSpy).toHaveBeenCalledWith('isLocalSignIn', 'true');
+        });
+
+        it('supports usernameless (no email) path', () => {
+          const action = actions.loginWithPasskey();
+          const generator = sagas.doLoginWithPasskey(action);
+
+          expect(generator.next().value).toEqual(
+            call(fbAuthenticateWithPasskey, undefined)
+          );
+        });
+
+        it('puts failure action on exception', () => {
+          const action = actions.loginWithPasskey('user@example.com');
+          const generator = sagas.doLoginWithPasskey(action);
+
+          expect(generator.next().value).toEqual(
+            call(fbAuthenticateWithPasskey, 'user@example.com')
+          );
+
+          const error = new Error('verification failed');
+          expect(generator.throw(error).value).toEqual(put(actions.loginWithPasskeyFailure()));
+
+          expectDoneWithoutReturn(generator);
+        });
+      });
+
+      describe('doRegisterPasskey', () => {
+        it('registers and reloads passkeys on success', () => {
+          const generator = sagas.doRegisterPasskey();
+
+          expect(generator.next().value).toEqual(call(fbRegisterPasskey));
+          expect(generator.next({ credentialId: 'c', deviceName: 'Mac', createdAt: 1 }).value)
+            .toEqual(put(actions.registerPasskeySuccess()));
+          expect(generator.next().value).toEqual(put(actions.loadPasskeys()));
+          expectDoneWithoutReturn(generator);
+        });
+
+        it('puts failure action with message on exception', () => {
+          const generator = sagas.doRegisterPasskey();
+
+          expect(generator.next().value).toEqual(call(fbRegisterPasskey));
+
+          const error = new Error('boom');
+          expect(generator.throw(error).value).toEqual(
+            put(actions.registerPasskeyFailure('boom'))
+          );
+
+          expectDoneWithoutReturn(generator);
+        });
+      });
+
+      describe('doLoadPasskeys', () => {
+        it('loads credentials for current user', () => {
+          const generator = sagas.doLoadPasskeys();
+
+          expect(generator.next().value).toEqual(select(sagas.authDataSelector));
+
+          const authData = { uid: 'u1' };
+          const mockRef = {};
+          (firebase as jest.Mock).mockReturnValue(mockRef);
+
+          expect(generator.next(authData).value).toEqual(call(get as any, mockRef));
+          expect(firebase).toHaveBeenCalledWith('/webauthnCredentials/u1');
+
+          const snapshot = {
+            exists: () => true,
+            val: () => ({
+              'cid-1': { deviceName: 'Laptop', createdAt: 100, lastUsedAt: 200 },
+              'cid-2': { deviceName: 'Phone', createdAt: 300, lastUsedAt: null },
+            }),
+          };
+          expect(generator.next(snapshot).value).toEqual(put(actions.loadPasskeysSuccess([
+            { credentialId: 'cid-1', deviceName: 'Laptop', createdAt: 100, lastUsedAt: 200 },
+            { credentialId: 'cid-2', deviceName: 'Phone', createdAt: 300, lastUsedAt: null },
+          ])));
+
+          expectDoneWithoutReturn(generator);
+        });
+
+        it('emits empty list when not authenticated', () => {
+          const generator = sagas.doLoadPasskeys();
+
+          expect(generator.next().value).toEqual(select(sagas.authDataSelector));
+          expect(generator.next(null).value).toEqual(put(actions.loadPasskeysSuccess([])));
+
+          expectDoneWithoutReturn(generator);
+        });
+
+        it('emits empty list when snapshot has no children', () => {
+          const generator = sagas.doLoadPasskeys();
+
+          expect(generator.next().value).toEqual(select(sagas.authDataSelector));
+
+          const authData = { uid: 'u1' };
+          const mockRef = {};
+          (firebase as jest.Mock).mockReturnValue(mockRef);
+
+          expect(generator.next(authData).value).toEqual(call(get as any, mockRef));
+
+          const snapshot = { exists: () => false, val: () => null };
+          expect(generator.next(snapshot).value).toEqual(put(actions.loadPasskeysSuccess([])));
+
+          expectDoneWithoutReturn(generator);
+        });
+      });
+
+      describe('doRemovePasskey', () => {
+        it('calls remove and dispatches success', () => {
+          const action = actions.removePasskey('cid-1');
+          const generator = sagas.doRemovePasskey(action);
+
+          expect(generator.next().value).toEqual(call(fbRemovePasskey, 'cid-1'));
+          expect(generator.next().value).toEqual(put(actions.removePasskeySuccess('cid-1')));
+
+          expectDoneWithoutReturn(generator);
+        });
+
+        it('dispatches failure with message on exception', () => {
+          const action = actions.removePasskey('cid-1');
+          const generator = sagas.doRemovePasskey(action);
+
+          expect(generator.next().value).toEqual(call(fbRemovePasskey, 'cid-1'));
+
+          const error = new Error('boom');
+          expect(generator.throw(error).value).toEqual(
+            put(actions.removePasskeyFailure('cid-1', 'boom'))
           );
 
           expectDoneWithoutReturn(generator);

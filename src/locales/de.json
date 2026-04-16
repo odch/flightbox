@@ -52,7 +52,10 @@
     "otpVerificationFailure": "Ungültiger oder abgelaufener Code. Bitte versuchen Sie es erneut.",
     "otpResend": "Code erneut senden",
     "otpResendIn": "Code erneut senden ({{seconds}}s)",
-    "otpChangeEmail": "Falsche E-Mail-Adresse? Hier ändern"
+    "otpChangeEmail": "Falsche E-Mail-Adresse? Hier ändern",
+    "signInWithPasskey": "Mit Passkey anmelden",
+    "passkeyFailure": "Anmeldung mit Passkey fehlgeschlagen",
+    "useEmailCodeInstead": "Stattdessen E-Mail-Code verwenden"
   },
   "hints": {
     "departureBeforeStart_text": "Abflug immer vor dem Start",
@@ -300,7 +303,24 @@
     "noAircraft": "Noch keine Flugzeuge gespeichert.",
     "saveDetailsPrompt": "Pilotendaten und Flugzeug speichern für das nächste Mal?",
     "saveAircraftPrompt": "{{immatriculation}} im Profil speichern?",
-    "updateAircraftPrompt": "{{immatriculation}} im Profil aktualisieren?"
+    "updateAircraftPrompt": "{{immatriculation}} im Profil aktualisieren?",
+    "passkeysTitle": "Passkeys",
+    "passkeysDescription": "Melden Sie sich schneller an mit einem auf Ihrem Gerät gespeicherten Passkey.",
+    "passkeysEmpty": "Keine Passkeys registriert.",
+    "passkeysRegister": "Neuen Passkey registrieren",
+    "passkeysRemove": "Entfernen",
+    "passkeysRemoveConfirm": "Möchten Sie diesen Passkey wirklich entfernen?",
+    "passkeysRemoveDevice": "Gerät:",
+    "passkeysCreatedAt": "Hinzugefügt am {{date}}",
+    "passkeysLastUsed": "Zuletzt verwendet am {{date}}",
+    "passkeysLastUsedNever": "Noch nie verwendet",
+    "passkeysRegistrationFailure": "Passkey konnte nicht registriert werden. Bitte versuchen Sie es erneut.",
+    "passkeysRemovalFailure": "Passkey konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
+    "passkeyPromptTitle": "Schneller anmelden",
+    "passkeyPromptDescription": "Künftig mit Fingerabdruck oder Gesichtserkennung anmelden, ohne auf den E-Mail-Code zu warten.",
+    "passkeyPromptRegister": "Passkey einrichten",
+    "passkeyPromptDismiss": "Später",
+    "passkeyPromptDismissPermanent": "Nicht mehr anzeigen"
   },
   "lockMovements": {
     "heading": "Erfasste Bewegungen sperren",

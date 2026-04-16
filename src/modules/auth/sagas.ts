@@ -1,6 +1,7 @@
-import {all, call, fork, put, takeEvery} from 'redux-saga/effects'
+import {all, call, fork, put, select, takeEvery} from 'redux-saga/effects'
 import {get, query, orderByChild, equalTo, limitToFirst} from 'firebase/database';
 import * as actions from './actions';
+import {Passkey} from './actions';
 import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
 import createChannel from '../../util/createChannel';
 import firebase, {
@@ -10,6 +11,11 @@ import firebase, {
   unauth as fbUnauth,
   watchAuthState
 } from '../../util/firebase';
+import {
+  registerPasskey as fbRegisterPasskey,
+  authenticateWithPasskey as fbAuthenticateWithPasskey,
+  removePasskey as fbRemovePasskey,
+} from '../../util/webauthn';
 import {error as logError} from '../../util/log';
 import {getKioskAuthQueryToken} from '../../util/getAuthQueryToken'
 import i18n from '../../i18n'
@@ -161,6 +167,68 @@ export function* doFirebaseAuthentication(action: any) {
   }
 }
 
+export const authDataSelector = (state: any) => state.auth && state.auth.data;
+
+export function* doLoginWithPasskey(action: any) {
+  try {
+    const email = action.payload && action.payload.email;
+    window.localStorage.setItem('isLocalSignIn', 'true');
+    const token = yield call(fbAuthenticateWithPasskey, email);
+    yield put(actions.requestFirebaseAuthentication(token, actions.loginWithPasskeyFailure()));
+  } catch (e) {
+    logError('Passkey login failed', e);
+    yield put(actions.loginWithPasskeyFailure());
+  }
+}
+
+export function* doRegisterPasskey() {
+  try {
+    yield call(fbRegisterPasskey);
+    yield put(actions.registerPasskeySuccess());
+    yield put(actions.loadPasskeys());
+  } catch (e) {
+    logError('Passkey registration failed', e);
+    const message = e && (e as Error).message ? (e as Error).message : undefined;
+    yield put(actions.registerPasskeyFailure(message));
+  }
+}
+
+export function* doLoadPasskeys() {
+  try {
+    const authData = yield select(authDataSelector);
+    if (!authData || !authData.uid) {
+      yield put(actions.loadPasskeysSuccess([]));
+      return;
+    }
+    const snapshot = yield call(get, firebase(`/webauthnCredentials/${authData.uid}`));
+    const value = snapshot.exists() ? snapshot.val() : null;
+    const passkeys: Passkey[] = value
+      ? Object.keys(value).map(credentialId => ({
+          credentialId,
+          deviceName: value[credentialId].deviceName,
+          createdAt: value[credentialId].createdAt,
+          lastUsedAt: value[credentialId].lastUsedAt || null,
+        }))
+      : [];
+    yield put(actions.loadPasskeysSuccess(passkeys));
+  } catch (e) {
+    logError('Failed to load passkeys', e);
+    yield put(actions.loadPasskeysSuccess([]));
+  }
+}
+
+export function* doRemovePasskey(action: any) {
+  const { credentialId } = action.payload;
+  try {
+    yield call(fbRemovePasskey, credentialId);
+    yield put(actions.removePasskeySuccess(credentialId));
+  } catch (e) {
+    logError('Failed to remove passkey', e);
+    const message = e && (e as Error).message ? (e as Error).message : undefined;
+    yield put(actions.removePasskeyFailure(credentialId, message));
+  }
+}
+
 export function* doLogout() {
   yield call(fbUnauth);
   window.location.href = '/'
@@ -250,6 +318,10 @@ export default function* sagas() {
     takeEvery(actions.REQUEST_FIREBASE_AUTHENTICATION, doFirebaseAuthentication),
     takeEvery(actions.LOGOUT, doLogout),
     takeEvery(actions.FIREBASE_AUTHENTICATION, doListenFirebaseAuthentication),
+    takeEvery(actions.LOGIN_WITH_PASSKEY, doLoginWithPasskey),
+    takeEvery(actions.REGISTER_PASSKEY, doRegisterPasskey),
+    takeEvery(actions.LOAD_PASSKEYS, doLoadPasskeys),
+    takeEvery(actions.REMOVE_PASSKEY, doRemovePasskey),
     fork(monitorFirebaseAuthentication, createFbAuthenticationChannel()),
   ])
 }

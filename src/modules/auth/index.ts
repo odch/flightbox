@@ -5,7 +5,12 @@ import {
   logout,
   sendAuthenticationEmail,
   verifyOtpCode,
-  USERNAME_PASSWORD_AUTHENTICATION_FAILURE
+  USERNAME_PASSWORD_AUTHENTICATION_FAILURE,
+  registerPasskey,
+  loginWithPasskey,
+  loadPasskeys,
+  removePasskey,
+  Passkey,
 } from './actions';
 import reducer from './reducer';
 import sagas from './sagas';
@@ -17,8 +22,14 @@ export {
   authenticateAsGuest,
   sendAuthenticationEmail,
   verifyOtpCode,
-  logout
+  logout,
+  registerPasskey,
+  loginWithPasskey,
+  loadPasskeys,
+  removePasskey,
 };
+
+export type { Passkey };
 
 export {sagas};
 
