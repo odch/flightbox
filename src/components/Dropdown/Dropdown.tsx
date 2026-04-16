@@ -1,12 +1,10 @@
-import PropTypes from 'prop-types';
-import React, {Component} from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import scrollIntoView from 'scroll-into-view';
 import MaterialIcon from '../MaterialIcon';
 import Wrapper from './Wrapper';
 import Input from './Input';
 import OptionsContainer from './OptionsContainer';
 import Option from './Option';
-import NoOptions from './NoOptions';
 import MoreOptions from './MoreOptions';
 import ClearButton from './ClearButton';
 
@@ -17,220 +15,217 @@ const KEY_CODE_ESCAPE = 27;
 
 const OPTIONS_RENDER_LIMIT = 10;
 
-class Dropdown extends Component<any, any> {
-  options: any;
-  container: any;
-  input: any;
+interface DropdownOption {
+  key: string;
+  [k: string]: any;
+}
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      value: props.value || '',
-      filter: '',
-      focusedOption: null,
-      inputFocused: false,
-    };
-    this.options = [];
-    this.handleContainerKeyDown = this.handleContainerKeyDown.bind(this);
-    this.handleContainerBlur = this.handleContainerBlur.bind(this);
-    this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleInputFocus = this.handleInputFocus.bind(this);
-    this.handleInputBlur = this.handleInputBlur.bind(this);
-    this.handleClear = this.handleClear.bind(this);
-    this.refContainerDom = this.refContainerDom.bind(this);
-    this.refInputDom = this.refInputDom.bind(this);
+interface DropdownProps {
+  className?: string;
+  options: DropdownOption[];
+  value?: string;
+  optionRenderer: (option: DropdownOption, focussed: boolean) => React.ReactNode;
+  valueRenderer?: (option: DropdownOption) => string;
+  optionFilter?: (options: DropdownOption[], filter: string) => DropdownOption[];
+  showOptionsOnFocus?: boolean;
+  noOptionsText?: string;
+  moreOptionsText?: string;
+  mustSelect?: boolean;
+  clearable?: boolean;
+  onChange?: (value: string) => void;
+  onBeforeInputChange?: (value: string) => string;
+  onFocus?: () => void;
+  onBlur?: (value: string) => void;
+  readOnly?: boolean;
+  optionsRenderLimit?: number;
+  dataCy?: string;
+}
+
+const Dropdown: React.FC<DropdownProps> = ({
+  className,
+  options,
+  value: valueProp,
+  optionRenderer,
+  valueRenderer,
+  optionFilter,
+  showOptionsOnFocus = true,
+  noOptionsText = 'No options found',
+  moreOptionsText = 'Too many options available. Type to filter...',
+  mustSelect = false,
+  clearable = false,
+  onChange,
+  onBeforeInputChange,
+  onFocus,
+  onBlur,
+  readOnly,
+  optionsRenderLimit = OPTIONS_RENDER_LIMIT,
+  dataCy,
+}) => {
+  const [value, setValue] = useState(valueProp || '');
+  const [filter, setFilter] = useState('');
+  const [focusedOption, setFocusedOption] = useState<string | null>(null);
+  const [inputFocused, setInputFocused] = useState(false);
+
+  const optionRefs = useRef<Record<string, any>>({});
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
+  // Sync value from prop during render (equivalent to componentWillReceiveProps).
+  // Using useEffect would cause a visible flash of the old value.
+  const [prevValueProp, setPrevValueProp] = useState(valueProp);
+  if (valueProp !== prevValueProp) {
+    setPrevValueProp(valueProp);
+    setValue(valueProp || '');
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      value: nextProps.value || '',
-    });
-  }
+  const getFilteredOptions = useCallback((filterValue: string) => {
+    return (typeof optionFilter === 'function')
+      ? optionFilter(options, filterValue)
+      : options.filter(option => option.key.indexOf(filterValue) > -1);
+  }, [options, optionFilter]);
 
-  render() {
-    return (
-      <Wrapper
-        className={this.props.className}
-        onKeyDown={this.handleContainerKeyDown}
-        onBlur={this.handleContainerBlur}
-        tabIndex={1}
-        ref={this.refContainerDom}
-      >
-        {this.renderInput()}
-        {this.renderOptions()}
-      </Wrapper>
-    );
-  }
+  const setFocusedOptionWithScroll = useCallback((key: string | null) => {
+    setFocusedOption(key);
+    if (key !== null) {
+      scrollIntoView(optionRefs.current[key], {
+        validTarget: target => target.classList && target.classList.contains('flightbox-dropdown-options-container')
+      });
+    }
+  }, []);
 
-  renderInput() {
-    const value = this.renderValue();
-    return (
-      <div>
-        <Input
-          type="text"
-          value={this.state.inputFocused === true ? this.state.filter : value}
-          placeholder={value}
-          onChange={this.handleInputChange}
-          onFocus={this.handleInputFocus}
-          onBlur={this.handleInputBlur}
-          ref={this.refInputDom}
-          readOnly={this.props.readOnly}
-          data-cy={this.props.dataCy}
-        />
-        {this.props.clearable && !this.props.readOnly && this.state.value && (
-          <ClearButton onClick={this.handleClear} type="button">
-            <MaterialIcon icon="clear"/>
-          </ClearButton>
-        )}
-      </div>
-    );
-  }
+  const setValueAndNotify = useCallback((newValue: string, focusContainer?: boolean) => {
+    setFilter('');
+    setValue(newValue);
+    onChange?.(newValue);
+    if (focusContainer === true) {
+      window.requestAnimationFrame(() => containerRef.current?.focus());
+    }
+  }, [onChange]);
 
-  renderValue() {
-    const value = this.state.value;
+  const isComponentElement = useCallback((element: Element | null) => {
+    let node = element;
+    while (node !== null) {
+      if (node === containerRef.current) {
+        return true;
+      }
+      node = node.parentNode as Element | null;
+    }
+    return false;
+  }, []);
+
+  const renderValue = () => {
     if (value) {
-      if (typeof this.props.valueRenderer === 'function') {
-        const option = this.props.options.find(option => option.key === value);
-        return this.props.valueRenderer(option);
+      if (typeof valueRenderer === 'function') {
+        const option = options.find(option => option.key === value);
+        return valueRenderer(option!);
       }
       return value;
     }
     return '';
-  }
+  };
 
-  renderOptions() {
-    if (this.state.filter.length === 0 && (!this.state.inputFocused || !this.props.showOptionsOnFocus)) {
-      return null;
-    }
-
-    const filteredOptions = this.getFilteredOptions(this.state.filter);
-
-    if (filteredOptions.length === 0) {
-      return null
-    }
-
-    const options = filteredOptions.slice(0, this.props.optionsRenderLimit).map(option => this.renderOption(option));
-
-    if (filteredOptions.length > this.props.optionsRenderLimit) {
-      options.push(this.renderMoreOptionsLabel());
-    }
-
-    return (
-      <OptionsContainer
-        className="flightbox-dropdown-options-container" // only for identification in scroll-into-view
-        onMouseLeave={this.handleOptionsMouseLeave.bind(this)}
-      >
-        {options}
-      </OptionsContainer>
-    );
-  }
-
-  renderOption(option) {
-    const focussed = this.state.focusedOption === option.key;
-    return (
-      <Option
-        key={option.key}
-        $focussed={focussed}
-        onMouseDown={this.handleOptionClick.bind(this, option)}
-        onMouseEnter={this.handleOptionMouseEnter.bind(this, option)}
-        ref={comp => this.options[option.key] = comp}
-        data-cy={this.props.dataCy && `${this.props.dataCy}-option-${option.key}` }
-      >
-        {this.props.optionRenderer(option, focussed)}
-      </Option>
-    );
-  }
-
-  renderNoOptionsLabel() {
-    return <NoOptions>{this.props.noOptionsText}</NoOptions>;
-  }
-
-  renderMoreOptionsLabel() {
-    return <MoreOptions key="more-options">{this.props.moreOptionsText}</MoreOptions>;
-  }
-
-  refContainerDom(comp) {
-    this.container = comp;
-  }
-
-  refInputDom(comp) {
-    this.input = comp;
-  }
-
-  handleInputChange(e) {
-    if (this.state.inputFocused !== true) {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (inputFocused !== true) {
       return;
     }
 
-    let filter = e.target.value;
+    let newFilter = e.target.value;
 
-    if (typeof this.props.onBeforeInputChange === 'function') {
-      filter = this.props.onBeforeInputChange(filter);
+    if (typeof onBeforeInputChange === 'function') {
+      newFilter = onBeforeInputChange(newFilter);
     }
 
-    let focusedOption = null;
+    let newFocusedOption: string | null = null;
 
-    const filteredOptions = this.getFilteredOptions(filter);
+    const filteredOptions = getFilteredOptions(newFilter);
     if (filteredOptions.length > 0) {
-      const focused = filteredOptions.find(option => option.key === this.state.focusedOption);
+      const focused = filteredOptions.find(option => option.key === focusedOption);
       if (focused) {
-        focusedOption = focused.key;
+        newFocusedOption = focused.key;
       } else {
-        focusedOption = filteredOptions[0].key;
+        newFocusedOption = filteredOptions[0].key;
       }
     }
 
-    this.setState({
-      filter,
-      focusedOption,
-    });
-  }
+    setFilter(newFilter);
+    setFocusedOption(newFocusedOption);
+  };
 
-  handleInputFocus() {
-    if (this.props.readOnly === true) {
+  const getInitiallyFocusedOption = () => {
+    if (value) {
+      return value;
+    }
+    if (options.length > 0) {
+      return options[0].key;
+    }
+    return null;
+  };
+
+  const handleInputFocus = () => {
+    if (readOnly === true) {
       return;
     }
-    this.setState({
-      inputFocused: true,
-      filter: '',
-    });
-    this.setFocusedOption(this.getInitiallyFocusedOption());
-    if (typeof this.props.onFocus === 'function') {
-      this.props.onFocus();
+    setInputFocused(true);
+    setFilter('');
+    setFocusedOptionWithScroll(getInitiallyFocusedOption());
+    if (typeof onFocus === 'function') {
+      onFocus();
     }
-  }
+  };
 
-  handleInputBlur() {
-    this.setState({
-      inputFocused: false,
-    });
-    if (this.state.filter && this.props.mustSelect !== true) {
-      this.setValue(this.state.filter);
+  const handleInputBlur = () => {
+    setInputFocused(false);
+    if (filter && mustSelect !== true) {
+      setValueAndNotify(filter);
     }
-  }
+  };
 
-  handleClear() {
-    this.setValue('');
-  }
+  const handleClear = () => {
+    setValueAndNotify('');
+  };
 
-  handleContainerBlur() {
+  const handleContainerBlur = () => {
     window.requestAnimationFrame(() => {
-      if (this.isComponentElement(document.activeElement) === false
-        && typeof this.props.onBlur === 'function') {
-        this.props.onBlur(this.state.value);
+      if (isComponentElement(document.activeElement) === false
+        && typeof onBlur === 'function') {
+        onBlur(valueRef.current);
       }
     });
-  }
+  };
 
-  handleContainerKeyDown(e) {
-    if (e.which === KEY_CODE_ENTER && this.state.focusedOption) {
+  const getCurrentlyFocusedIndex = (filteredOptions: DropdownOption[]) => {
+    return focusedOption !== null
+      ? filteredOptions.findIndex(option => option.key === focusedOption)
+      : -1;
+  };
+
+  const focusNextOption = (filteredOptions: DropdownOption[], currentlyFocused: number) => {
+    if (currentlyFocused === -1 || currentlyFocused === filteredOptions.length - 1) {
+      setFocusedOptionWithScroll(filteredOptions[0].key);
+    } else {
+      setFocusedOptionWithScroll(filteredOptions[currentlyFocused + 1].key);
+    }
+  };
+
+  const focusPreviousOption = (filteredOptions: DropdownOption[], currentlyFocused: number) => {
+    if (currentlyFocused === -1 || currentlyFocused === 0) {
+      setFocusedOptionWithScroll(filteredOptions[filteredOptions.length - 1].key);
+    } else {
+      setFocusedOptionWithScroll(filteredOptions[currentlyFocused - 1].key);
+    }
+  };
+
+  const handleContainerKeyDown = (e: React.KeyboardEvent) => {
+    if (e.which === KEY_CODE_ENTER && focusedOption) {
       e.preventDefault();
-      this.setValue(this.state.focusedOption, true);
+      setValueAndNotify(focusedOption, true);
       return;
     }
 
     if (e.which === KEY_CODE_ESCAPE) {
-      window.requestAnimationFrame(() => this.container.focus());
+      window.requestAnimationFrame(() => containerRef.current?.focus());
       return;
     }
 
@@ -238,135 +233,104 @@ class Dropdown extends Component<any, any> {
       return;
     }
 
-    const filteredOptions = this.getFilteredOptions(this.state.filter);
+    const filteredOptions = getFilteredOptions(filter);
     if (filteredOptions.length === 0) {
       return;
     }
 
-    const currentlyFocused = this.getCurrentlyFocusedIndex(filteredOptions);
+    const currentlyFocused = getCurrentlyFocusedIndex(filteredOptions);
 
     if (e.which === KEY_CODE_ARROW_DOWN) {
-      this.focusNextOption(filteredOptions, currentlyFocused);
+      focusNextOption(filteredOptions, currentlyFocused);
     } else if (e.which === KEY_CODE_ARROW_UP) {
-      this.focusPreviousOption(filteredOptions, currentlyFocused);
+      focusPreviousOption(filteredOptions, currentlyFocused);
     }
-  }
+  };
 
-  focusNextOption(filteredOptions, currentlyFocused) {
-    if (currentlyFocused === -1 || currentlyFocused === filteredOptions.length - 1) {
-      this.setFocusedOption(filteredOptions[0].key);
-    } else {
-      this.setFocusedOption(filteredOptions[currentlyFocused + 1].key);
-    }
-  }
+  const handleOptionClick = (option: DropdownOption) => {
+    setValueAndNotify(option.key, true);
+  };
 
-  focusPreviousOption(filteredOptions, currentlyFocused) {
-    if (currentlyFocused === -1 || currentlyFocused === 0) {
-      this.setFocusedOption(filteredOptions[filteredOptions.length - 1].key);
-    } else {
-      this.setFocusedOption(filteredOptions[currentlyFocused - 1].key);
-    }
-  }
+  const handleOptionMouseEnter = (option: DropdownOption) => {
+    setFocusedOption(option.key);
+  };
 
-  getInitiallyFocusedOption() {
-    if (this.state.value) {
-      return this.state.value;
-    }
-    if (this.props.options.length > 0) {
-      return this.props.options[0].key;
-    }
-    return null;
-  }
+  const handleOptionsMouseLeave = () => {
+    setFocusedOption(null);
+  };
 
-  setFocusedOption(focusedOption) {
-    this.setState({
-      focusedOption,
+  const renderedValue = renderValue();
+
+  const renderOptions = () => {
+    if (filter.length === 0 && (!inputFocused || !showOptionsOnFocus)) {
+      return null;
+    }
+
+    const filteredOptions = getFilteredOptions(filter);
+
+    if (filteredOptions.length === 0) {
+      return null;
+    }
+
+    const renderedOptions = filteredOptions.slice(0, optionsRenderLimit).map(option => {
+      const focussed = focusedOption === option.key;
+      return (
+        <Option
+          key={option.key}
+          $focussed={focussed}
+          onMouseDown={() => handleOptionClick(option)}
+          onMouseEnter={() => handleOptionMouseEnter(option)}
+          ref={comp => optionRefs.current[option.key] = comp}
+          data-cy={dataCy && `${dataCy}-option-${option.key}`}
+        >
+          {optionRenderer(option, focussed)}
+        </Option>
+      );
     });
-    scrollIntoView(this.options[focusedOption], {
-      validTarget: target => target.classList && target.classList.contains('flightbox-dropdown-options-container')
-    });
-  }
 
-  handleOptionClick(option) {
-    this.setValue(option.key, true);
-  }
-
-  handleOptionMouseEnter(option) {
-    this.setState({
-      focusedOption: option.key,
-    });
-  }
-
-  handleOptionsMouseLeave() {
-    this.setState({
-      focusedOption: null,
-    });
-  }
-
-  setValue(value, focusContainer?) {
-    this.setState({
-      filter: '',
-      value,
-    });
-    this.props.onChange(value);
-    if (focusContainer === true) {
-      window.requestAnimationFrame(() => this.container.focus());
-    }
-  }
-
-  getFilteredOptions(filter) {
-    return (typeof this.props.optionFilter === 'function')
-      ? this.props.optionFilter(this.props.options, filter)
-      : this.props.options.filter(option => option.key.indexOf(filter) > -1);
-  }
-
-  getCurrentlyFocusedIndex(filteredOptions) {
-    return this.state.focusedOption !== null
-      ? filteredOptions.findIndex(option => option.key === this.state.focusedOption)
-      : -1;
-  }
-
-  isComponentElement(element) {
-    let node = element;
-    while (node !== null) {
-      if (node === this.container) {
-        return true;
-      }
-      node = node.parentNode;
+    if (filteredOptions.length > optionsRenderLimit) {
+      renderedOptions.push(<MoreOptions key="more-options">{moreOptionsText}</MoreOptions>);
     }
 
-    return false;
-  }
-}
+    return (
+      <OptionsContainer
+        className="flightbox-dropdown-options-container"
+        onMouseLeave={handleOptionsMouseLeave}
+      >
+        {renderedOptions}
+      </OptionsContainer>
+    );
+  };
 
-(Dropdown as any).propTypes = {
-  className: PropTypes.string,
-  options: PropTypes.array.isRequired,
-  value: PropTypes.string,
-  optionRenderer: PropTypes.func.isRequired,
-  valueRenderer: PropTypes.func,
-  optionFilter: PropTypes.func,
-  showOptionsOnFocus: PropTypes.bool,
-  noOptionsText: PropTypes.string,
-  moreOptionsText: PropTypes.string,
-  mustSelect: PropTypes.bool,
-  clearable: PropTypes.bool,
-  onChange: PropTypes.func,
-  onBeforeInputChange: PropTypes.func,
-  onFocus: PropTypes.func,
-  onBlur: PropTypes.func,
-  readOnly: PropTypes.bool,
-  optionsRenderLimit: PropTypes.number,
-  dataCy: PropTypes.string
-};
-
-(Dropdown as any).defaultProps = {
-  showOptionsOnFocus: true,
-  noOptionsText: 'No options found',
-  moreOptionsText: 'Too many options available. Type to filter...',
-  mustSelect: false,
-  clearable: false,
-  optionsRenderLimit: OPTIONS_RENDER_LIMIT,
+  return (
+    <Wrapper
+      className={className}
+      onKeyDown={handleContainerKeyDown}
+      onBlur={handleContainerBlur}
+      tabIndex={1}
+      ref={containerRef}
+    >
+      <div>
+        <Input
+          type="text"
+          value={inputFocused === true ? filter : renderedValue}
+          placeholder={renderedValue}
+          onChange={handleInputChange}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
+          ref={inputRef}
+          readOnly={readOnly}
+          data-cy={dataCy}
+        />
+        {clearable && !readOnly && value && (
+          <ClearButton onClick={handleClear} type="button">
+            <MaterialIcon icon="clear"/>
+          </ClearButton>
+        )}
+      </div>
+      {renderOptions()}
+    </Wrapper>
+  );
 };
 
 export default Dropdown;

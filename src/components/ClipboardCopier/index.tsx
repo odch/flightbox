@@ -1,84 +1,75 @@
-import React from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon'
-import PropTypes from 'prop-types'
 
-class ClipboardCopier extends React.Component<any, any> {
-  timeoutId: any;
+interface ClipboardCopierProps {
+  text: string;
+}
 
-  constructor(props) {
-    super(props);
+const ClipboardCopier: React.FC<ClipboardCopierProps> = ({ text }) => {
+  const [showCopied, setShowCopied] = useState(false);
+  const timeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    this.state = {
-      showCopied: false
+  useEffect(() => {
+    return () => {
+      if (timeoutId.current !== null) {
+        clearTimeout(timeoutId.current);
+      }
     };
+  }, []);
 
-    this.timeoutId = null;
+  const hideCopiedMessage = useCallback(() => {
+    if (timeoutId.current !== null) {
+      clearTimeout(timeoutId.current);
+    }
+    timeoutId.current = setTimeout(() => {
+      setShowCopied(false);
+    }, 5000);
+  }, []);
 
-    this.handleCopy = this.handleCopy.bind(this)
-    this.hideCopiedMessage = this.hideCopiedMessage.bind(this)
-  }
-
-  handleCopy()  {
-    const text = this.props.text || '';
+  const handleCopy = useCallback(() => {
+    const copyText = text || '';
 
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(() => {
-        this.setState({ showCopied: true });
-        this.hideCopiedMessage();
+      navigator.clipboard.writeText(copyText).then(() => {
+        setShowCopied(true);
+        hideCopiedMessage();
       }).catch(err => {
         console.error('Failed to copy: ', err);
       });
     } else {
       const textarea = document.createElement('textarea');
-      textarea.value = text;
+      textarea.value = copyText;
       textarea.style.position = 'fixed';
       document.body.appendChild(textarea);
       textarea.focus();
       textarea.select();
       try {
         document.execCommand('copy');
-        this.setState({ showCopied: true });
-        this.hideCopiedMessage();
+        setShowCopied(true);
+        hideCopiedMessage();
       } catch (err) {
         console.error('Fallback: Failed to copy', err);
       }
       document.body.removeChild(textarea);
     }
-  };
+  }, [text, hideCopiedMessage]);
 
-  hideCopiedMessage() {
-    clearTimeout(this.timeoutId);
-    this.timeoutId = setTimeout(() => {
-      this.setState({ showCopied: false });
-    }, 5000);
-  };
-
-  componentWillUnmount() {
-    clearTimeout(this.timeoutId);
-  }
-
-  render() {
-    return (
-      <Container>
-        {this.state.showCopied ? (
-          <CopiedMessage>
-            <MaterialIcon icon="check"/>
-            Copied
-          </CopiedMessage>
-        ) : (
-          <CopyButton onClick={this.handleCopy} title="Copy to Clipboard">
-            <MaterialIcon icon="content_copy"/>
-          </CopyButton>
-        )}
-      </Container>
-    );
-  }
-}
-
-(ClipboardCopier as any).propTypes = {
-  text: PropTypes.string.isRequired
-}
+  return (
+    <Container>
+      {showCopied ? (
+        <CopiedMessage>
+          <MaterialIcon icon="check"/>
+          Copied
+        </CopiedMessage>
+      ) : (
+        <CopyButton onClick={handleCopy} title="Copy to Clipboard">
+          <MaterialIcon icon="content_copy"/>
+        </CopyButton>
+      )}
+    </Container>
+  );
+};
 
 const Container = styled.div`
   display: flex;
