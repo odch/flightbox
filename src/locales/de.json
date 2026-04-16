@@ -12,6 +12,9 @@
     "login": "Anmelden",
     "confirm": "Bestätigen",
     "finish": "Beenden",
+    "yes": "Ja",
+    "no": "Nein",
+    "saved": "Gespeichert!",
     "add": "Hinzufügen",
     "download": "Herunterladen",
     "status": "Status",
@@ -294,7 +297,10 @@
     "save": "Speichern",
     "addAircraft": "Flugzeug hinzufügen",
     "removeAircraft": "Entfernen",
-    "noAircraft": "Noch keine Flugzeuge gespeichert."
+    "noAircraft": "Noch keine Flugzeuge gespeichert.",
+    "saveDetailsPrompt": "Pilotendaten und Flugzeug speichern für das nächste Mal?",
+    "saveAircraftPrompt": "{{immatriculation}} im Profil speichern?",
+    "updateAircraftPrompt": "{{immatriculation}} im Profil aktualisieren?"
   },
   "lockMovements": {
     "heading": "Erfasste Bewegungen sperren",

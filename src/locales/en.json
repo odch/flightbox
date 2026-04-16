@@ -12,6 +12,9 @@
     "login": "Log in",
     "confirm": "Confirm",
     "finish": "Finish",
+    "yes": "Yes",
+    "no": "No",
+    "saved": "Saved!",
     "add": "Add",
     "download": "Download",
     "status": "Status",
@@ -294,7 +297,10 @@
     "save": "Save",
     "addAircraft": "Add aircraft",
     "removeAircraft": "Remove",
-    "noAircraft": "No aircraft saved."
+    "noAircraft": "No aircraft saved.",
+    "saveDetailsPrompt": "Save pilot info and aircraft so they're prefilled next time?",
+    "saveAircraftPrompt": "Save {{immatriculation}} to your profile?",
+    "updateAircraftPrompt": "Update {{immatriculation}} in your profile?"
   },
   "lockMovements": {
     "heading": "Lock recorded movements",
