@@ -6,10 +6,13 @@ import { usePwaInstall, AuthData } from './usePwaInstall';
 const Wrapper = styled.div`
   border-radius: 10px;
   background-color: ${props => props.theme.colors.background};
-  margin: 1em auto;
   padding: 1em;
-  width: 80%;
+  flex: 1 1 300px;
+  min-width: 280px;
   max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const Title = styled.h3`
@@ -40,6 +43,7 @@ const DismissLink = styled.button`
   color: #999;
   font-size: 0.85em;
   cursor: pointer;
+  margin-top: auto;
   padding: 1.5em 0 0;
   display: block;
 `;

@@ -88,6 +88,7 @@
     "url": "https://github.com/odch/flightbox.git"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^13.3.0",
     "date-fns": "^4.1.0",
     "final-form": "^5.0.0",
     "i18next": "^26.0.5",

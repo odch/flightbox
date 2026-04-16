@@ -451,6 +451,20 @@
       ".write": false,
       ".indexOn": ["email"]
     },
+    "webauthnCredentials": {
+      ".write": false,
+      "$uid": {
+        ".read": "auth !== null && ($uid === auth.uid || root.child('logins/' + auth.uid + '/admin').val() === true)"
+      }
+    },
+    "webauthnChallenges": {
+      ".read": false,
+      ".write": false
+    },
+    "webauthnCredentialOwners": {
+      ".read": false,
+      ".write": false
+    },
     "profiles": {
       "$profile_id": {
         ".read": "auth !== null && $profile_id === auth.uid",

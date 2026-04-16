@@ -7,7 +7,9 @@ import JumpNavigation from '../JumpNavigation'
 import VerticalHeaderLayout from '../VerticalHeaderLayout'
 import ProfileForm from './ProfileForm'
 import AircraftList from './AircraftList'
+import PasskeyManager from './PasskeyManager'
 import type { Aircraft } from '../../modules/profile/migration'
+import type { Passkey } from '../../modules/auth'
 
 const Content = styled.div`
   padding: 2em;
@@ -27,6 +29,16 @@ interface ProfilePageProps {
   addAircraft: (aircraft: Aircraft) => void;
   updateAircraft: (index: number, aircraft: Aircraft) => void;
   removeAircraft: (index: number) => void;
+  passkeysEnabled: boolean;
+  passkeys: Passkey[];
+  passkeyRegistrationSubmitting: boolean;
+  passkeyRegistrationFailure: boolean;
+  passkeyRegistrationErrorMessage?: string;
+  passkeyRemovalFailure: boolean;
+  passkeyRemovalErrorMessage?: string;
+  loadPasskeys: () => void;
+  registerPasskey: () => void;
+  removePasskey: (credentialId: string) => void;
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({
@@ -37,6 +49,16 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   addAircraft,
   updateAircraft,
   removeAircraft,
+  passkeysEnabled,
+  passkeys,
+  passkeyRegistrationSubmitting,
+  passkeyRegistrationFailure,
+  passkeyRegistrationErrorMessage,
+  passkeyRemovalFailure,
+  passkeyRemovalErrorMessage,
+  loadPasskeys,
+  registerPasskey,
+  removePasskey,
 }) => {
   const { t } = useTranslation();
 
@@ -60,6 +82,19 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
             updateAircraft={updateAircraft}
             removeAircraft={removeAircraft}
           />
+          {passkeysEnabled && (
+            <PasskeyManager
+              passkeys={passkeys}
+              submitting={passkeyRegistrationSubmitting}
+              failure={passkeyRegistrationFailure}
+              errorMessage={passkeyRegistrationErrorMessage}
+              removalFailure={passkeyRemovalFailure}
+              removalErrorMessage={passkeyRemovalErrorMessage}
+              loadPasskeys={loadPasskeys}
+              registerPasskey={registerPasskey}
+              removePasskey={removePasskey}
+            />
+          )}
         </FormLayout>
       </Content>
     </VerticalHeaderLayout>
