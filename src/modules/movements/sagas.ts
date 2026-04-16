@@ -10,6 +10,7 @@ import {error} from '../../util/log';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import {loadRemote} from '../profile'
+import {toAircraftsArray} from '../profile/migration'
 import {FIREBASE_AUTHENTICATION_EVENT} from '../auth'
 import {history} from '../../history'
 
@@ -34,9 +35,25 @@ export function* getProfileDefaultValues() {
 
   const p = snapshot.val() || {};
   const result: Record<string, any> = {};
-  for (const key of ['memberNr', 'email', 'firstname', 'lastname', 'phone', 'immatriculation', 'aircraftCategory', 'aircraftType', 'mtow']) {
+  for (const key of ['memberNr', 'email', 'firstname', 'lastname', 'phone']) {
     if (key in p) result[key] = p[key];
   }
+
+  const aircrafts = toAircraftsArray(p.aircrafts) || [];
+  if (aircrafts.length === 1) {
+    const defaultAircraft = aircrafts[0];
+    for (const key of ['immatriculation', 'aircraftCategory', 'aircraftType', 'mtow']) {
+      if (key in defaultAircraft && defaultAircraft[key] != null) {
+        result[key] = defaultAircraft[key];
+      }
+    }
+  } else if (!p.aircrafts) {
+    // Backwards compat: profile not yet migrated
+    for (const key of ['immatriculation', 'aircraftCategory', 'aircraftType', 'mtow']) {
+      if (key in p) result[key] = p[key];
+    }
+  }
+
   if (!result.email && auth.email) {
     result.email = auth.email;
   }

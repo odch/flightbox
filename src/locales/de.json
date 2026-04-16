@@ -286,12 +286,15 @@
     "firstname": "Vorname",
     "email": "E-Mail",
     "phone": "Telefon",
-    "aircraft": "Flugzeug",
+    "aircraft": "Flugzeuge",
     "immatriculation": "Immatrikulation",
     "type": "Typ",
     "mtow": "Maximales Abfluggewicht (in Kilogramm)",
     "category": "Kategorie",
-    "save": "Speichern"
+    "save": "Speichern",
+    "addAircraft": "Flugzeug hinzufügen",
+    "removeAircraft": "Entfernen",
+    "noAircraft": "Noch keine Flugzeuge gespeichert."
   },
   "lockMovements": {
     "heading": "Erfasste Bewegungen sperren",

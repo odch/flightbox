@@ -1,46 +1,69 @@
-import React, {Component} from 'react';
-import PropTypes from 'prop-types'
-import { withTranslation } from 'react-i18next';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components'
 import Centered from '../Centered'
 import MaterialIcon from '../MaterialIcon'
 import JumpNavigation from '../JumpNavigation'
 import VerticalHeaderLayout from '../VerticalHeaderLayout'
 import ProfileForm from './ProfileForm'
+import AircraftList from './AircraftList'
+import type { Aircraft } from '../../modules/profile/migration'
 
 const Content = styled.div`
   padding: 2em;
 `;
 
-class ProfilePage extends Component<any, any> {
+const FormLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+`;
 
-  componentDidMount() {
-    this.props.loadProfile()
-  }
-
-  render() {
-    const {profile, saving, saveProfile} = this.props;
-    const { t } = this.props;
-
-    if (!profile) {
-      return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('profile.loading')}</Centered>;
-    }
-
-    return (
-      <VerticalHeaderLayout>
-        <Content>
-          <JumpNavigation/>
-          <ProfileForm profile={profile} saveProfile={saveProfile} saving={saving}/>
-        </Content>
-      </VerticalHeaderLayout>
-    )
-  }
+interface ProfilePageProps {
+  profile: Record<string, unknown> | undefined;
+  saving: boolean;
+  loadProfile: () => void;
+  saveProfile: (values: Record<string, unknown>) => void;
+  addAircraft: (aircraft: Aircraft) => void;
+  updateAircraft: (index: number, aircraft: Aircraft) => void;
+  removeAircraft: (index: number) => void;
 }
 
-(ProfilePage as any).propTypes = {
-  profile: PropTypes.object,
-  loadProfile: PropTypes.func.isRequired,
-  saveProfile: PropTypes.func.isRequired
+const ProfilePage: React.FC<ProfilePageProps> = ({
+  profile,
+  saving,
+  loadProfile,
+  saveProfile,
+  addAircraft,
+  updateAircraft,
+  removeAircraft,
+}) => {
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  if (!profile) {
+    return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('profile.loading')}</Centered>;
+  }
+
+  return (
+    <VerticalHeaderLayout>
+      <Content>
+        <JumpNavigation/>
+        <FormLayout>
+          <ProfileForm profile={profile} saveProfile={saveProfile} saving={saving}/>
+          <AircraftList
+            aircrafts={(profile.aircrafts as Aircraft[]) || []}
+            addAircraft={addAircraft}
+            updateAircraft={updateAircraft}
+            removeAircraft={removeAircraft}
+          />
+        </FormLayout>
+      </Content>
+    </VerticalHeaderLayout>
+  );
 };
 
-export default withTranslation()(ProfilePage);
+export default ProfilePage;

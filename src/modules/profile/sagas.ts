@@ -1,5 +1,6 @@
 import * as actions from './actions'
 import * as remote from './remote'
+import { migrateProfile, toAircraftsArray } from './migration'
 import {FIREBASE_AUTHENTICATION_EVENT} from '../auth'
 import {all, call, put, select, takeEvery} from 'redux-saga/effects'
 import i18n from '../../i18n'
@@ -7,8 +8,8 @@ import i18n from '../../i18n'
 const str = (value: unknown): string | null =>
   typeof value === 'string' && value.trim().length > 0 ? value : null;
 
-const nr = (value: unknown): number | null =>
-  typeof value === 'number' ? value : null;
+const sortAircrafts = (aircrafts: any[]) =>
+  [...aircrafts].sort((a, b) => (a.immatriculation || '').localeCompare(b.immatriculation || ''));
 
 export const authSelector = (state: any) => state.auth.data;
 export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl.url;
@@ -17,10 +18,22 @@ export function* loadProfile() {
   try {
     const auth = yield select(authSelector)
     const snapshot = yield call(remote.load, auth.uid);
-    const profile = snapshot.val() || {};
+    const rawProfile = snapshot.val() || {};
+    const { profile, needsMigration } = migrateProfile(rawProfile);
+
+    if (needsMigration && auth.uid !== 'ipauth' && !auth.guest && !auth.kiosk) {
+      try {
+        yield call(remote.migrateAircrafts, auth.uid, profile.aircrafts as any[]);
+      } catch (migrationError) {
+        if (console && typeof console.error === 'function') {
+          console.error('Failed to persist profile migration', migrationError);
+        }
+      }
+    }
+
     yield put(actions.profileLoaded(profile));
     if (profile.language && profile.language !== i18n.language) {
-      i18n.changeLanguage(profile.language);
+      i18n.changeLanguage(profile.language as string);
     }
     yield call(recordPrivacyPolicyAcceptance, auth, profile);
   } catch(e) {
@@ -61,10 +74,6 @@ export function* saveProfile(action: any) {
       firstname: str(values.firstname),
       lastname: str(values.lastname),
       phone: str(values.phone),
-      immatriculation: str(values.immatriculation),
-      aircraftCategory: str(values.aircraftCategory),
-      aircraftType: str(values.aircraftType),
-      mtow: nr(values.mtow)
     }
 
     yield call(remote.save, auth.uid, valuesToSave);
@@ -75,6 +84,83 @@ export function* saveProfile(action: any) {
       console.error('Failed to save profile', e);
     }
     yield put(actions.saveProfileFailure());
+  }
+}
+
+export function* addAircraftSaga(action: any) {
+  try {
+    const auth = yield select(authSelector);
+
+    if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+      throw new Error('Current user not allowed to save profile');
+    }
+
+    const snapshot = yield call(remote.load, auth.uid);
+    const profile = snapshot.val() || {};
+    const currentAircrafts = toAircraftsArray(profile.aircrafts) || [];
+    const duplicate = currentAircrafts.some(
+      (a: any) => a.immatriculation === action.payload.aircraft.immatriculation
+    );
+    if (duplicate) {
+      return;
+    }
+    const newAircrafts = sortAircrafts([...currentAircrafts, action.payload.aircraft]);
+    yield call(remote.saveAircraftsList, auth.uid, newAircrafts);
+    yield call(loadProfile);
+  } catch (e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to add aircraft', e);
+    }
+  }
+}
+
+export function* updateAircraftSaga(action: any) {
+  try {
+    const auth = yield select(authSelector);
+
+    if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+      throw new Error('Current user not allowed to save profile');
+    }
+
+    const snapshot = yield call(remote.load, auth.uid);
+    const profile = snapshot.val() || {};
+    const currentAircrafts = toAircraftsArray(profile.aircrafts) || [];
+    const duplicate = currentAircrafts.some(
+      (a: any, i: number) => i !== action.payload.index && a.immatriculation === action.payload.aircraft.immatriculation
+    );
+    if (duplicate) {
+      return;
+    }
+    const newAircrafts = sortAircrafts(currentAircrafts.map((a: any, i: number) =>
+      i === action.payload.index ? action.payload.aircraft : a
+    ));
+    yield call(remote.saveAircraftsList, auth.uid, newAircrafts);
+    yield call(loadProfile);
+  } catch (e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to update aircraft', e);
+    }
+  }
+}
+
+export function* removeAircraftSaga(action: any) {
+  try {
+    const auth = yield select(authSelector);
+
+    if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+      throw new Error('Current user not allowed to save profile');
+    }
+
+    const snapshot = yield call(remote.load, auth.uid);
+    const profile = snapshot.val() || {};
+    const currentAircrafts = toAircraftsArray(profile.aircrafts) || [];
+    const newAircrafts = currentAircrafts.filter((_: any, i: number) => i !== action.payload.index);
+    yield call(remote.saveAircraftsList, auth.uid, newAircrafts);
+    yield call(loadProfile);
+  } catch (e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to remove aircraft', e);
+    }
   }
 }
 
@@ -104,6 +190,9 @@ export default function* sagas() {
     takeEvery(actions.LOAD_PROFILE, loadProfile),
     takeEvery(actions.SAVE_PROFILE, saveProfile),
     takeEvery(actions.SAVE_LANGUAGE, saveLanguage),
+    takeEvery(actions.ADD_PROFILE_AIRCRAFT, addAircraftSaga),
+    takeEvery(actions.UPDATE_PROFILE_AIRCRAFT, updateAircraftSaga),
+    takeEvery(actions.REMOVE_PROFILE_AIRCRAFT, removeAircraftSaga),
     takeEvery(FIREBASE_AUTHENTICATION_EVENT, onAuthentication),
   ])
 }

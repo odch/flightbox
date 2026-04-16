@@ -24,10 +24,11 @@ describe('modules', () => {
           expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
 
           const profileData = { firstname: 'Hans', lastname: 'Meier' };
+          const migratedProfile = { ...profileData, aircrafts: [] };
           const snapshot = { val: () => profileData };
-          expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded(profileData)));
+          expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded(migratedProfile)));
 
-          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, profileData));
+          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, migratedProfile));
 
           expect(generator.next().done).toEqual(true);
         });
@@ -41,11 +42,12 @@ describe('modules', () => {
           expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
 
           const profileData = { firstname: 'Hans', language: 'en' };
+          const migratedProfile = { ...profileData, aircrafts: [] };
           const snapshot = { val: () => profileData };
-          expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded(profileData)));
+          expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded(migratedProfile)));
 
           // Next step should call recordPrivacyPolicyAcceptance (changeLanguage is called inline)
-          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, profileData));
+          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, migratedProfile));
 
           expect(generator.next().done).toEqual(true);
           expect(mockChangeLanguage).toHaveBeenCalledWith('en');
@@ -60,9 +62,10 @@ describe('modules', () => {
           expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
 
           const snapshot = { val: () => null };
-          expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded({})));
+          const emptyProfile = { aircrafts: [] };
+          expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded(emptyProfile)));
 
-          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, {}));
+          expect(generator.next().value).toEqual(call(sagas.recordPrivacyPolicyAcceptance, auth, emptyProfile));
 
           expect(generator.next().done).toEqual(true);
         });
@@ -238,10 +241,6 @@ describe('modules', () => {
             firstname: 'Hans',
             lastname: 'Meier',
             phone: '+41791234567',
-            immatriculation: 'HBABC',
-            aircraftCategory: 'Motorflugzeug',
-            aircraftType: 'C172',
-            mtow: 1000
           };
           const action = actions.saveProfile(values);
           const generator = sagas.saveProfile(action);
@@ -255,10 +254,6 @@ describe('modules', () => {
             firstname: 'Hans',
             lastname: 'Meier',
             phone: '+41791234567',
-            immatriculation: 'HBABC',
-            aircraftCategory: 'Motorflugzeug',
-            aircraftType: 'C172',
-            mtow: 1000
           };
           expect(generator.next(auth).value).toEqual(call(remote.save, auth.uid, valuesToSave));
 
@@ -276,10 +271,6 @@ describe('modules', () => {
             firstname: 'Hans',
             lastname: 'Meier',
             phone: null,
-            immatriculation: null,
-            aircraftCategory: null,
-            aircraftType: null,
-            mtow: 'notanumber'
           };
           const action = actions.saveProfile(values);
           const generator = sagas.saveProfile(action);
@@ -293,10 +284,6 @@ describe('modules', () => {
             firstname: 'Hans',
             lastname: 'Meier',
             phone: null,
-            immatriculation: null,
-            aircraftCategory: null,
-            aircraftType: null,
-            mtow: null
           };
           expect(generator.next(auth).value).toEqual(call(remote.save, auth.uid, valuesToSave));
 
@@ -356,6 +343,225 @@ describe('modules', () => {
 
           expect(generator.next().done).toEqual(true);
         });
+      });
+    });
+
+    describe('loadProfile with migration', () => {
+      it('should migrate flat aircraft fields to aircrafts array', () => {
+        const generator = sagas.loadProfile();
+
+        expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+        const auth = { uid: 'user-123', guest: false, kiosk: false };
+        expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
+
+        const profileData = {
+          firstname: 'Hans',
+          immatriculation: 'HBABC',
+          aircraftType: 'C172',
+          mtow: 1100,
+          aircraftCategory: 'Flugzeug',
+        };
+        const snapshot = { val: () => profileData };
+        const migratedAircrafts = [{
+          immatriculation: 'HBABC',
+          aircraftType: 'C172',
+          mtow: 1100,
+          aircraftCategory: 'Flugzeug',
+        }];
+
+        // Should call migrateAircrafts since needsMigration is true
+        expect(generator.next(snapshot).value).toEqual(
+          call(remote.migrateAircrafts, auth.uid, migratedAircrafts)
+        );
+
+        const migratedProfile = { firstname: 'Hans', aircrafts: migratedAircrafts };
+        expect(generator.next().value).toEqual(put(actions.profileLoaded(migratedProfile)));
+      });
+
+      it('should not migrate when aircrafts array already exists', () => {
+        const generator = sagas.loadProfile();
+
+        expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+        const auth = { uid: 'user-123' };
+        expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
+
+        const profileData = {
+          firstname: 'Hans',
+          aircrafts: [{ immatriculation: 'HBABC', aircraftType: 'C172', mtow: 1100, aircraftCategory: 'Flugzeug' }],
+        };
+        const snapshot = { val: () => profileData };
+
+        // Should go straight to profileLoaded, no migrateAircrafts call
+        expect(generator.next(snapshot).value).toEqual(put(actions.profileLoaded(profileData)));
+      });
+    });
+
+    describe('addAircraftSaga', () => {
+      const aircraft = { immatriculation: 'HBNEW', aircraftType: 'PA28', mtow: 1100, aircraftCategory: 'Flugzeug' };
+
+      it('should add aircraft and reload profile', () => {
+        const action = actions.addAircraft(aircraft);
+        const generator = sagas.addAircraftSaga(action);
+
+        expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+        const auth = { uid: 'user-123', guest: false, kiosk: false };
+        expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
+
+        const profile = { aircrafts: [{ immatriculation: 'HBABC', aircraftType: 'C172', mtow: 1100, aircraftCategory: 'Flugzeug' }] };
+        const snapshot = { val: () => profile };
+
+        // Should save sorted list
+        expect(generator.next(snapshot).value).toEqual(
+          call(remote.saveAircraftsList, auth.uid, [
+            { immatriculation: 'HBABC', aircraftType: 'C172', mtow: 1100, aircraftCategory: 'Flugzeug' },
+            { immatriculation: 'HBNEW', aircraftType: 'PA28', mtow: 1100, aircraftCategory: 'Flugzeug' },
+          ])
+        );
+
+        expect(generator.next().value).toEqual(call(sagas.loadProfile));
+        expect(generator.next().done).toEqual(true);
+      });
+
+      it('should skip duplicate immatriculation', () => {
+        const dupeAircraft = { immatriculation: 'HBABC', aircraftType: 'PA28', mtow: 900, aircraftCategory: 'Flugzeug' };
+        const action = actions.addAircraft(dupeAircraft);
+        const generator = sagas.addAircraftSaga(action);
+
+        expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+        const auth = { uid: 'user-123', guest: false, kiosk: false };
+        expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
+
+        const profile = { aircrafts: [{ immatriculation: 'HBABC', aircraftType: 'C172', mtow: 1100, aircraftCategory: 'Flugzeug' }] };
+        const snapshot = { val: () => profile };
+
+        // Should return early — no save, no reload
+        expect(generator.next(snapshot).done).toEqual(true);
+      });
+
+      it('should add to empty list', () => {
+        const action = actions.addAircraft(aircraft);
+        const generator = sagas.addAircraftSaga(action);
+
+        expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+        const auth = { uid: 'user-123', guest: false, kiosk: false };
+        expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
+
+        const snapshot = { val: () => ({}) };
+
+        expect(generator.next(snapshot).value).toEqual(
+          call(remote.saveAircraftsList, auth.uid, [aircraft])
+        );
+      });
+    });
+
+    describe('updateAircraftSaga', () => {
+      it('should update aircraft at index and reload profile', () => {
+        const updated = { immatriculation: 'HBABC', aircraftType: 'C182', mtow: 1400, aircraftCategory: 'Flugzeug' };
+        const action = actions.updateAircraft(0, updated);
+        const generator = sagas.updateAircraftSaga(action);
+
+        expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+        const auth = { uid: 'user-123', guest: false, kiosk: false };
+        expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
+
+        const profile = { aircrafts: [
+          { immatriculation: 'HBABC', aircraftType: 'C172', mtow: 1100, aircraftCategory: 'Flugzeug' },
+          { immatriculation: 'HBXYZ', aircraftType: 'PA28', mtow: 1100, aircraftCategory: 'Flugzeug' },
+        ]};
+        const snapshot = { val: () => profile };
+
+        expect(generator.next(snapshot).value).toEqual(
+          call(remote.saveAircraftsList, auth.uid, [
+            { immatriculation: 'HBABC', aircraftType: 'C182', mtow: 1400, aircraftCategory: 'Flugzeug' },
+            { immatriculation: 'HBXYZ', aircraftType: 'PA28', mtow: 1100, aircraftCategory: 'Flugzeug' },
+          ])
+        );
+
+        expect(generator.next().value).toEqual(call(sagas.loadProfile));
+        expect(generator.next().done).toEqual(true);
+      });
+
+      it('should skip if registration conflicts with another entry', () => {
+        const updated = { immatriculation: 'HBXYZ', aircraftType: 'C172', mtow: 1100, aircraftCategory: 'Flugzeug' };
+        const action = actions.updateAircraft(0, updated);
+        const generator = sagas.updateAircraftSaga(action);
+
+        expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+        const auth = { uid: 'user-123', guest: false, kiosk: false };
+        expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
+
+        const profile = { aircrafts: [
+          { immatriculation: 'HBABC', aircraftType: 'C172', mtow: 1100, aircraftCategory: 'Flugzeug' },
+          { immatriculation: 'HBXYZ', aircraftType: 'PA28', mtow: 1100, aircraftCategory: 'Flugzeug' },
+        ]};
+        const snapshot = { val: () => profile };
+
+        // Duplicate — should return early
+        expect(generator.next(snapshot).done).toEqual(true);
+      });
+    });
+
+    describe('removeAircraftSaga', () => {
+      it('should remove aircraft at index and reload profile', () => {
+        const action = actions.removeAircraft(1);
+        const generator = sagas.removeAircraftSaga(action);
+
+        expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+        const auth = { uid: 'user-123', guest: false, kiosk: false };
+        expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
+
+        const profile = { aircrafts: [
+          { immatriculation: 'HBABC', aircraftType: 'C172', mtow: 1100, aircraftCategory: 'Flugzeug' },
+          { immatriculation: 'HBXYZ', aircraftType: 'PA28', mtow: 1100, aircraftCategory: 'Flugzeug' },
+        ]};
+        const snapshot = { val: () => profile };
+
+        expect(generator.next(snapshot).value).toEqual(
+          call(remote.saveAircraftsList, auth.uid, [
+            { immatriculation: 'HBABC', aircraftType: 'C172', mtow: 1100, aircraftCategory: 'Flugzeug' },
+          ])
+        );
+
+        expect(generator.next().value).toEqual(call(sagas.loadProfile));
+        expect(generator.next().done).toEqual(true);
+      });
+
+      it('should save empty list when removing last aircraft', () => {
+        const action = actions.removeAircraft(0);
+        const generator = sagas.removeAircraftSaga(action);
+
+        expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+        const auth = { uid: 'user-123', guest: false, kiosk: false };
+        expect(generator.next(auth).value).toEqual(call(remote.load, auth.uid));
+
+        const profile = { aircrafts: [
+          { immatriculation: 'HBABC', aircraftType: 'C172', mtow: 1100, aircraftCategory: 'Flugzeug' },
+        ]};
+        const snapshot = { val: () => profile };
+
+        expect(generator.next(snapshot).value).toEqual(
+          call(remote.saveAircraftsList, auth.uid, [])
+        );
+      });
+
+      it('should not save for guest users', () => {
+        const action = actions.removeAircraft(0);
+        const generator = sagas.removeAircraftSaga(action);
+
+        expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+        const auth = { uid: 'guest', guest: true, kiosk: false };
+        // Should throw and be caught — generator ends
+        expect(generator.next(auth).done).toEqual(true);
       });
     });
   });
