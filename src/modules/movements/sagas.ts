@@ -25,6 +25,10 @@ export const authSelector = (state: any) => state.auth.data;
 export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl.url;
 
 export function* getProfileDefaultValues() {
+  if (typeof __CONF__ !== 'undefined' && __CONF__.profileEnabled === false) {
+    return {}
+  }
+
   const auth = yield select(authSelector)
 
   if (!auth || !auth.uid || auth.guest === true || auth.kiosk === true) {

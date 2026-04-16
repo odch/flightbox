@@ -31,5 +31,6 @@
   "loginForm": "usernamePassword",
   "maskContactInformation": true,
   "memberManagement": false,
-  "privacySettings": false
+  "privacySettings": false,
+  "profileEnabled": true
 }

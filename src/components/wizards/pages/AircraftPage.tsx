@@ -228,7 +228,7 @@ const AircraftPage: React.FC<AircraftPageProps> = (props) => {
 
 const mapStateToProps = (state: any) => ({
   aircraftSettings: state.settings.aircrafts,
-  profileAircrafts: state.profile.profile?.aircrafts,
+  profileAircrafts: (typeof __CONF__ === 'undefined' || __CONF__.profileEnabled !== false) ? state.profile.profile?.aircrafts : undefined,
 });
 
 export default connect(mapStateToProps)(AircraftPage);

@@ -55,7 +55,7 @@ class App extends React.PureComponent<any, any> {
         <Route exact path="/message" component={MessagePage}/>
         <Route exact path="/help" component={HelpPage}/>
         <Route exact path="/aerodrome-status" component={AerodromeStatusPage}/>
-        <Route exact path="/profile" component={ProfilePage}/>
+        {(typeof __CONF__ === 'undefined' || __CONF__.profileEnabled !== false) && <Route exact path="/profile" component={ProfilePage}/>}
         <Redirect to="/"/>
       </Switch>
     );
