@@ -179,6 +179,9 @@ export function* saveLanguage(action: any) {
 }
 
 export function* onAuthentication(action: any) {
+  if (typeof __CONF__ !== 'undefined' && __CONF__.profileEnabled === false) {
+    return;
+  }
   const authData = action.payload.authData;
   if (authData && authData.guest === false && authData.kiosk === false) {
     yield call(loadProfile);

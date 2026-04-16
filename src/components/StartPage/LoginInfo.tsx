@@ -167,7 +167,7 @@ class LoginInfo extends React.Component<any, any> {
     return (
       <StyledMenu ref={this.setMenuRef}>
         <StyledMenuUsername>{getUsername(auth, t)}</StyledMenuUsername>
-        {auth && auth.guest !== true && auth.kiosk !== true && auth.uid !== 'ipauth' && (
+        {(typeof __CONF__ === 'undefined' || __CONF__.profileEnabled !== false) && auth && auth.guest !== true && auth.kiosk !== true && auth.uid !== 'ipauth' && (
           <StyledMenuLink to="/profile" data-cy="profile">{t('login.profile')}</StyledMenuLink>
         )}
         <StyledMenuButton onClick={this.props.logout} data-cy="logout">{t('login.logout')}</StyledMenuButton>
