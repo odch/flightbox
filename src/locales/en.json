@@ -291,7 +291,10 @@
     "type": "Type",
     "mtow": "Maximum takeoff weight (in kilograms)",
     "category": "Category",
-    "save": "Save"
+    "save": "Save",
+    "addAircraft": "Add aircraft",
+    "removeAircraft": "Remove",
+    "noAircraft": "No aircraft saved."
   },
   "lockMovements": {
     "heading": "Lock recorded movements",

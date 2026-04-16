@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import FieldSet from '../wizards/FieldSet'
 import { useTranslation } from 'react-i18next';
 import {Field, Form} from 'react-final-form'
-import {renderAircraftCategoryDropdown, renderAircraftDropdown, renderInputField, renderPhoneField} from '../wizards/renderField'
+import {renderInputField, renderPhoneField} from '../wizards/renderField'
 import React from 'react'
 import Button from '../Button'
 import styled from 'styled-components'
@@ -78,64 +78,6 @@ function ProfileForm(props) {
                 component={renderPhoneField}
               />
             </FieldSet>
-          </StyledSection>
-
-          <StyledSection>
-            <StyledSectionTitle>{t('profile.aircraft')}</StyledSectionTitle>
-            <FieldSet gutter={false}>
-              <Field name="immatriculation">
-                {({input, meta}) =>
-                  renderAircraftDropdown({
-                    input: {
-                      ...input,
-                      onChange: aircraft => {
-                        if (aircraft) {
-                          input.onChange(aircraft.key);
-                          form.change('aircraftType', aircraft.type);
-                          form.change('mtow', aircraft.mtow);
-                          form.change('aircraftCategory', aircraft.category);
-                        } else {
-                          input.onChange(null);
-                        }
-                      }
-                    },
-                    meta,
-                    label: t('profile.immatriculation'),
-                    clearable: true,
-                  })
-                }
-              </Field>
-              <Field
-                name="aircraftType"
-                type="text"
-                component={renderInputField}
-                label={t('profile.type')}
-              />
-              <Field
-                name="mtow"
-                type="number"
-                component={renderInputField}
-                label={t('profile.mtow')}
-                parse={input => {
-                  if (typeof input === 'number') {
-                    return input;
-                  }
-                  if (typeof input === 'string' && /^\d+$/.test(input)) {
-                    return parseInt(input);
-                  }
-                  return null;
-                }}
-              />
-              <Field
-                name="aircraftCategory"
-                component={renderAircraftCategoryDropdown}
-                label={t('profile.category')}
-                clearable
-              />
-            </FieldSet>
-          </StyledSection>
-
-          <div>
             <Button
               type="submit"
               label={t('profile.save')}
@@ -143,7 +85,7 @@ function ProfileForm(props) {
               disabled={!dirty || props.saving}
               loading={props.saving}
               primary/>
-          </div>
+          </StyledSection>
         </StyledForm>
       )}
     </Form>
