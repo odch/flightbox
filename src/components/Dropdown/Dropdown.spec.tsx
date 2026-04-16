@@ -242,34 +242,35 @@ describe('Dropdown', () => {
   });
 
   describe('keyboard navigation', () => {
-    it('navigates down through options with arrow key', () => {
+    it('arrow down then enter selects next option', () => {
+      const onChange = jest.fn();
       const { container } = renderWithTheme(
-        <Dropdown {...defaultProps} showOptionsOnFocus={true} />
+        <Dropdown {...defaultProps} onChange={onChange} showOptionsOnFocus={true} />
       );
       const input = screen.getByRole('textbox');
       const wrapper = container.firstChild!;
       fireEvent.focus(input);
-      fireEvent.keyDown(wrapper, { which: 40 }); // arrow down
-      // option should be focused — just verify no crash
-      expect(screen.getByText('apple')).toBeInTheDocument();
+      // Focus starts on 'apple' (first option). Arrow down moves to 'banana'.
+      fireEvent.keyDown(wrapper, { key: 'ArrowDown', keyCode: 40, which: 40 });
+      fireEvent.keyDown(wrapper, { key: 'Enter', keyCode: 13, which: 13 });
+      expect(onChange).toHaveBeenCalledWith('banana');
     });
 
-    it('navigates up through options with arrow key', () => {
+    it('arrow up then enter selects previous option', () => {
+      const onChange = jest.fn();
       const { container } = renderWithTheme(
-        <Dropdown {...defaultProps} showOptionsOnFocus={true} />
+        <Dropdown {...defaultProps} onChange={onChange} showOptionsOnFocus={true} value="banana" />
       );
       const input = screen.getByRole('textbox');
       const wrapper = container.firstChild!;
       fireEvent.focus(input);
-      fireEvent.keyDown(wrapper, { which: 38 }); // arrow up
-      expect(screen.getByText('apple')).toBeInTheDocument();
+      // Focus starts on 'banana' (current value). Arrow up moves to 'apple'.
+      fireEvent.keyDown(wrapper, { key: 'ArrowUp', keyCode: 38, which: 38 });
+      fireEvent.keyDown(wrapper, { key: 'Enter', keyCode: 13, which: 13 });
+      expect(onChange).toHaveBeenCalledWith('apple');
     });
 
     it('selects focused option on enter key', () => {
-      // Test that setValue is triggered by checking the input's placeholder
-      // (the input shows the selected value as placeholder)
-      // The enter key handler calls setValue which calls props.onChange
-      // We verify this by checking the component's internal state change
       const onChange = jest.fn();
       const { container } = renderWithTheme(
         <Dropdown
@@ -282,15 +283,12 @@ describe('Dropdown', () => {
       const input = screen.getByRole('textbox');
       const wrapper = container.firstChild!;
       fireEvent.focus(input);
-      // With value="banana", handleInputFocus sets focusedOption to "banana"
-      // Try with keyCode instead of which
-      fireEvent.keyDown(wrapper, { which: 13, keyCode: 13, key: 'Enter' });
+      fireEvent.keyDown(wrapper, { key: 'Enter', keyCode: 13, which: 13 });
       expect(onChange).toHaveBeenCalledWith('banana');
     });
 
     it('does nothing on enter when no focused option', () => {
       const onChange = jest.fn();
-      // Use options that are empty so focusedOption won't be set
       const { container } = renderWithTheme(
         <Dropdown
           options={[]}
@@ -302,7 +300,7 @@ describe('Dropdown', () => {
       const input = screen.getByRole('textbox');
       const wrapper = container.firstChild!;
       fireEvent.focus(input);
-      fireEvent.keyDown(wrapper, { which: 13 });
+      fireEvent.keyDown(wrapper, { key: 'Enter', keyCode: 13, which: 13 });
       expect(onChange).not.toHaveBeenCalled();
     });
 
@@ -314,10 +312,32 @@ describe('Dropdown', () => {
       const input = screen.getByRole('textbox');
       const wrapper = container.firstChild!;
       fireEvent.focus(input);
-      // Type something that matches nothing
       fireEvent.change(input, { target: { value: 'zzz' } });
-      fireEvent.keyDown(wrapper, { which: 40 });
+      fireEvent.keyDown(wrapper, { key: 'ArrowDown', keyCode: 40, which: 40 });
+      fireEvent.keyDown(wrapper, { key: 'Enter', keyCode: 13, which: 13 });
       expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('does not navigate beyond optionsRenderLimit', () => {
+      const onChange = jest.fn();
+      const manyOptions = Array.from({ length: 15 }, (_, i) => ({ key: `opt${i}` }));
+      const { container } = renderWithTheme(
+        <Dropdown
+          options={manyOptions}
+          optionRenderer={optionRenderer}
+          onChange={onChange}
+          showOptionsOnFocus={true}
+          optionsRenderLimit={3}
+          value="opt2"
+        />
+      );
+      const input = screen.getByRole('textbox');
+      const wrapper = container.firstChild!;
+      fireEvent.focus(input);
+      // Focus on opt2 (last rendered). Arrow down should wrap to opt0, not go to opt3.
+      fireEvent.keyDown(wrapper, { key: 'ArrowDown', keyCode: 40, which: 40 });
+      fireEvent.keyDown(wrapper, { key: 'Enter', keyCode: 13, which: 13 });
+      expect(onChange).toHaveBeenCalledWith('opt0');
     });
   });
 
@@ -410,29 +430,62 @@ describe('Dropdown', () => {
 
   describe('arrow navigation wrapping', () => {
     it('wraps to last option when pressing arrow up at first option', () => {
+      const onChange = jest.fn();
       const { container } = renderWithTheme(
-        <Dropdown {...defaultProps} showOptionsOnFocus={true} />
+        <Dropdown {...defaultProps} onChange={onChange} showOptionsOnFocus={true} />
       );
       const input = screen.getByRole('textbox');
       const wrapper = container.firstChild!;
       fireEvent.focus(input);
-      // handleInputFocus sets focusedOption to 'apple' (options[0])
-      // arrow up from first option wraps to last (cherry)
-      fireEvent.keyDown(wrapper, { which: 38 }); // up from apple -> cherry
-      expect(screen.getByText('cherry')).toBeInTheDocument();
+      // Focus starts on 'apple'. Arrow up wraps to 'cherry'.
+      fireEvent.keyDown(wrapper, { key: 'ArrowUp', keyCode: 38, which: 38 });
+      fireEvent.keyDown(wrapper, { key: 'Enter', keyCode: 13, which: 13 });
+      expect(onChange).toHaveBeenCalledWith('cherry');
     });
 
     it('wraps to first option when pressing arrow down at last option', () => {
+      const onChange = jest.fn();
       const { container } = renderWithTheme(
-        <Dropdown {...defaultProps} showOptionsOnFocus={true} value="cherry" />
+        <Dropdown {...defaultProps} onChange={onChange} showOptionsOnFocus={true} value="cherry" />
       );
       const input = screen.getByRole('textbox');
       const wrapper = container.firstChild!;
       fireEvent.focus(input);
-      // handleInputFocus sets focusedOption to 'cherry' (current value)
-      // arrow down from last option wraps to first (apple)
-      fireEvent.keyDown(wrapper, { which: 40 }); // down from cherry -> apple
+      // Focus starts on 'cherry'. Arrow down wraps to 'apple'.
+      fireEvent.keyDown(wrapper, { key: 'ArrowDown', keyCode: 40, which: 40 });
+      fireEvent.keyDown(wrapper, { key: 'Enter', keyCode: 13, which: 13 });
+      expect(onChange).toHaveBeenCalledWith('apple');
+    });
+  });
+
+  describe('options container mouse interaction', () => {
+    it('keeps options open when mousedown on options container (scrollbar)', () => {
+      renderWithTheme(
+        <Dropdown {...defaultProps} showOptionsOnFocus={true} />
+      );
+      const input = screen.getByRole('textbox');
+      fireEvent.focus(input);
       expect(screen.getByText('apple')).toBeInTheDocument();
+
+      const optionsContainer = document.querySelector('.flightbox-dropdown-options-container')!;
+      fireEvent.mouseDown(optionsContainer);
+      // Options should still be visible — preventDefault keeps focus on input
+      expect(screen.getByText('apple')).toBeInTheDocument();
+    });
+
+    it('hides options after selecting via mousedown on an option', () => {
+      const onChange = jest.fn();
+      renderWithTheme(
+        <Dropdown {...defaultProps} onChange={onChange} showOptionsOnFocus={true} />
+      );
+      const input = screen.getByRole('textbox');
+      fireEvent.focus(input);
+      expect(screen.getByText('banana')).toBeInTheDocument();
+
+      fireEvent.mouseDown(screen.getByText('banana'));
+      expect(onChange).toHaveBeenCalledWith('banana');
+      // Options should be hidden after selection
+      expect(screen.queryByText('apple')).not.toBeInTheDocument();
     });
   });
 });
