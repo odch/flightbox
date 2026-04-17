@@ -7,6 +7,7 @@ import MaterialIcon from '../MaterialIcon';
 import {getFromItemKey} from '../../util/reference-number';
 import Breadcrumbs from './Breadcrumbs';
 import { WizardState } from '../../modules/ui/wizard/reducer';
+import useWizardNavigation from './useWizardNavigation';
 
 export const HeadingType = {
   CREATED: 'CREATED',
@@ -76,48 +77,20 @@ const MovementWizard = (props: MovementWizardProps) => {
     label: page.label,
   }));
 
-  const goToPreviousPage = (data: Record<string, unknown>) => {
-    props.updateValues(data)
-    props.previousPage()
-  };
-
-  const submitPage = (data: Record<string, unknown>) => {
-    props.updateValues(data)
-
-    const isLast = props.wizard.page === props.pages.length;
-
-    const nextAction = isLast
-      ? props.saveMovement
-      : props.nextPage;
-
-    const dialogConf = props.pages[props.wizard.page - 1].dialog;
-
-    if (!dialogConf) {
-      nextAction();
-      return;
-    }
-
-    if (!dialogConf.predicate) {
-      props.showDialog(dialogConf.name);
-      return;
-    }
-
-    return dialogConf.predicate(data).then(show => {
-      if (show === true) {
-        props.showDialog(dialogConf.name);
-      } else {
-        nextAction();
-      }
-    });
-  };
+  const { goToPreviousPage, submitPage, getNextAction } = useWizardNavigation({
+    pages: props.pages,
+    wizard: props.wizard,
+    updateValues: props.updateValues,
+    nextPage: props.nextPage,
+    previousPage: props.previousPage,
+    saveMovement: props.saveMovement,
+    showDialog: props.showDialog,
+  });
 
   const getDialog = () => {
     const dialogConf = props.pages[props.wizard.page - 1].dialog;
     if (dialogConf && props.wizard.dialogs[dialogConf.name] === true) {
-      const isLast = props.wizard.page === props.pages.length;
-      const nextAction = isLast
-        ? props.saveMovement
-        : props.nextPage;
+      const nextAction = getNextAction();
       return (
         <dialogConf.component
           onCancel={props.hideDialog.bind(null, dialogConf.name)}
