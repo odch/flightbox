@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import React, {Component} from 'react';
-import {withRouter} from "react-router-dom";
+import React, {useEffect, useState} from 'react';
+import {useHistory} from 'react-router-dom';
 import styled from 'styled-components';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import JumpNavigation from '../JumpNavigation';
@@ -39,97 +39,88 @@ const AdminContent = styled.div`
   }
 `;
 
-class AdminPage extends Component<any, any> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      activeTab: 'export'
-    };
-    this.handleTabChange = this.handleTabChange.bind(this)
+const renderSubPage = (activeTab: string) => {
+  switch (activeTab) {
+    case 'export':
+      return <AdminExportPage/>;
+    case 'lock-movements':
+      return <AdminLockMovementsPage/>;
+    case 'aerodrome-status':
+      return <AdminAerodromeStatusPage/>;
+    case 'messages':
+      return <AdminMessagesPage/>;
+    case 'import':
+      return <AdminImportPage/>;
+    case 'aircraft':
+      return <AdminAircraftPage/>;
+    case 'invoice-recipients':
+      return <AdminInvoiceRecipientsPage/>;
+    case 'guest-access':
+      return <AdminGuestAccessPage/>;
+    case 'kiosk-access':
+      return <AdminKioskAccessPage/>;
+    case 'privacy':
+      return <AdminPrivacySettingsPage/>;
+    default:
+      return <AdminExportPage/>;
+  }
+};
+
+const AdminPage = ({auth, guestAccessToken, kioskAccessToken}: any) => {
+  const history = useHistory();
+  const [activeTab, setActiveTab] = useState('export');
+  const isAdmin = auth.data.admin === true;
+
+  useEffect(() => {
+    if (!isAdmin) {
+      history.push('/');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const hiddenTabs: string[] = [];
+
+  const invoicePaymentEnabled = objectToArray(__CONF__.paymentMethods).includes('invoice');
+  const guestAccessEnabled = guestAccessToken && guestAccessToken.token;
+  const kioskAccessEnabled = kioskAccessToken && kioskAccessToken.token;
+  const memberManagementEnabled = __CONF__.memberManagement === true;
+
+  if (!invoicePaymentEnabled) {
+    hiddenTabs.push('invoice-recipients');
+  }
+  if (!guestAccessEnabled) {
+    hiddenTabs.push('guest-access');
+  }
+  if (!kioskAccessEnabled) {
+    hiddenTabs.push('kiosk-access');
+  }
+  if (!memberManagementEnabled) {
+    hiddenTabs.push('import');
+  }
+  if (__CONF__.privacySettings !== true) {
+    hiddenTabs.push('privacy');
   }
 
-  componentWillMount() {
-    if (this.props.auth.data.admin !== true) {
-      this.props.history.push('/');
-    }
-  }
-
-  handleTabChange(tab) {
-    this.setState({activeTab: tab});
-  }
-
-  renderSubPage() {
-    switch (this.state.activeTab) {
-      case 'export':
-        return <AdminExportPage/>;
-      case 'lock-movements':
-        return <AdminLockMovementsPage/>;
-      case 'aerodrome-status':
-        return <AdminAerodromeStatusPage/>;
-      case 'messages':
-        return <AdminMessagesPage/>;
-      case 'import':
-        return <AdminImportPage/>;
-      case 'aircraft':
-        return <AdminAircraftPage/>;
-      case 'invoice-recipients':
-        return <AdminInvoiceRecipientsPage/>;
-      case 'guest-access':
-        return <AdminGuestAccessPage/>;
-      case 'kiosk-access':
-        return <AdminKioskAccessPage/>;
-      case 'privacy':
-        return <AdminPrivacySettingsPage/>;
-      default:
-        return <AdminExportPage/>;
-    }
-  };
-
-  render() {
-    const hiddenTabs: string[] = []
-
-    const invoicePaymentEnabled = objectToArray(__CONF__.paymentMethods).includes('invoice')
-    const guestAccessEnabled = this.props.guestAccessToken && this.props.guestAccessToken.token
-    const kioskAccessEnabled = this.props.kioskAccessToken && this.props.kioskAccessToken.token
-    const memberManagementEnabled = __CONF__.memberManagement === true
-
-    if (!invoicePaymentEnabled) {
-      hiddenTabs.push('invoice-recipients')
-    }
-    if (!guestAccessEnabled) {
-      hiddenTabs.push('guest-access')
-    }
-    if (!kioskAccessEnabled) {
-      hiddenTabs.push('kiosk-access')
-    }
-    if (!memberManagementEnabled) {
-      hiddenTabs.push('import')
-    }
-    if (__CONF__.privacySettings !== true) {
-      hiddenTabs.push('privacy')
-    }
-
-    return (
-      <VerticalHeaderLayout>
-        {this.props.auth.data.admin === true &&
-          <Content>
-            <JumpNavigation/>
-            <AdminLayout>
-              <AdminNavigation
-                activeTab={this.state.activeTab}
-                hiddenTabs={hiddenTabs}
-                onTabChange={this.handleTabChange}
-              />
-              <AdminContent>
-                {this.renderSubPage()}
-              </AdminContent>
-            </AdminLayout>
-          </Content>
-        }
-      </VerticalHeaderLayout>
-    );
-  }
-}
+  return (
+    <VerticalHeaderLayout>
+      {isAdmin &&
+        <Content>
+          <JumpNavigation/>
+          <AdminLayout>
+            <AdminNavigation
+              activeTab={activeTab}
+              hiddenTabs={hiddenTabs}
+              onTabChange={setActiveTab}
+            />
+            <AdminContent>
+              {renderSubPage(activeTab)}
+            </AdminContent>
+          </AdminLayout>
+        </Content>
+      }
+    </VerticalHeaderLayout>
+  );
+};
 
 (AdminPage as any).propTypes = {
   auth: PropTypes.object.isRequired,
@@ -141,4 +132,4 @@ class AdminPage extends Component<any, any> {
   })
 };
 
-export default withRouter(AdminPage);
+export default AdminPage;
