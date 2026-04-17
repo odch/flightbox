@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types';
 import React, {Component} from 'react';
-import { withTranslation } from 'react-i18next';
+import { withTranslation, WithTranslation } from 'react-i18next';
 import CommitFailureDialog from '../CommitFailureDialog';
 import Centered from '../Centered';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import MaterialIcon from '../MaterialIcon';
 import {getFromItemKey} from '../../util/reference-number';
 import Breadcrumbs from './Breadcrumbs';
+import { WizardState } from '../../modules/ui/wizard/reducer';
 
 export const HeadingType = {
   CREATED: 'CREATED',
@@ -14,7 +14,47 @@ export const HeadingType = {
   NONE: 'NONE'
 };
 
-class MovementWizard extends Component<any, any> {
+interface PageDialog {
+  name: string;
+  component: React.ComponentType<{ onCancel: () => void; onConfirm: () => void }>;
+  predicate?: (data: Record<string, unknown>) => Promise<boolean>;
+}
+
+export interface WizardPage {
+  component: React.ComponentType<any>;
+  label: string;
+  dialog?: PageDialog;
+}
+
+interface MovementWizardProps extends WithTranslation {
+  pages: WizardPage[];
+  finishComponentClass: React.ComponentType<any>;
+  wizard: WizardState;
+  match: { params: Record<string, string> };
+  auth: { data: { admin: boolean; guest: boolean } };
+  newMovementLabel: string;
+  updateMovementLabel: string;
+  lockDateLoading: boolean;
+  locked: boolean;
+  className?: string;
+
+  initNewMovement: () => void;
+  editMovement: (key: string) => void;
+  initMovement?: (() => void) | null;
+  updateValues: (values: Record<string, unknown>) => void;
+  nextPage: () => void;
+  previousPage: () => void;
+  cancel: () => void;
+  finish: () => void;
+  showDialog: (name: string) => void;
+  hideDialog: (name: string) => void;
+  saveMovement: () => void;
+  unsetCommitError: () => void;
+  loadLockDate: () => void;
+  loadAircraftSettings: () => void;
+}
+
+class MovementWizard extends Component<MovementWizardProps> {
 
   componentWillMount() {
     this.props.loadLockDate();
@@ -76,7 +116,7 @@ class MovementWizard extends Component<any, any> {
       ? (
         <CommitFailureDialog
           onClose={this.props.unsetCommitError}
-          errorMsg={this.props.wizard.commitError.message}
+          errorMsg={(this.props.wizard.commitError as any).message}
         />
       ) : null;
 
@@ -109,12 +149,12 @@ class MovementWizard extends Component<any, any> {
     return null;
   }
 
-  goToPreviousPage(data) {
+  goToPreviousPage(data: Record<string, unknown>) {
     this.props.updateValues(data)
     this.props.previousPage()
   }
 
-  submitPage(data) {
+  submitPage(data: Record<string, unknown>) {
     this.props.updateValues(data)
 
     const isLast = this.props.wizard.page === this.props.pages.length;
@@ -154,42 +194,5 @@ class MovementWizard extends Component<any, any> {
     return typeof this.props.match.params.key === 'string' && this.props.match.params.key.length > 0;
   }
 }
-
-(MovementWizard as any).propTypes = {
-  pages: PropTypes.arrayOf(PropTypes.shape({
-    component: PropTypes.object.isRequired,
-    label: PropTypes.string.isRequired,
-    dialog: PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      component: PropTypes.func.isRequired,
-      predicate: PropTypes.func,
-    })
-  })).isRequired,
-  finishComponentClass: PropTypes.func.isRequired,
-  wizard: PropTypes.object.isRequired,
-  match: PropTypes.shape({
-    params: PropTypes.object.isRequired
-  }).isRequired,
-  newMovementLabel: PropTypes.string.isRequired,
-  updateMovementLabel: PropTypes.string.isRequired,
-  lockDateLoading: PropTypes.bool.isRequired,
-  locked: PropTypes.bool.isRequired,
-  className: PropTypes.string,
-
-  initNewMovement: PropTypes.func.isRequired,
-  editMovement: PropTypes.func.isRequired,
-  initMovement: PropTypes.func,
-  updateValues: PropTypes.func.isRequired,
-  nextPage: PropTypes.func.isRequired,
-  previousPage: PropTypes.func.isRequired,
-  cancel: PropTypes.func.isRequired,
-  finish: PropTypes.func.isRequired,
-  showDialog: PropTypes.func,
-  hideDialog: PropTypes.func,
-  saveMovement: PropTypes.func.isRequired,
-  unsetCommitError: PropTypes.func,
-  loadLockDate: PropTypes.func.isRequired,
-  loadAircraftSettings: PropTypes.func.isRequired,
-};
 
 export default withTranslation()(MovementWizard);
