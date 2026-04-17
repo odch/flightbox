@@ -25,7 +25,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.0.0",
     "@babel/runtime": "^7.3.1",
-    "@sentry/react": "^10.48.0",
+    "@sentry/react": "^10.49.0",
     "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -44,7 +44,7 @@
     "css-loader": "^7.1.4",
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
-    "cypress": "^15.13.1",
+    "cypress": "^15.14.0",
     "del": "^8.0.1",
     "firebase": "^12.12.0",
     "gulp": "^5.0.1",
@@ -75,7 +75,7 @@
     "stream-browserify": "^3.0.0",
     "style-loader": "^4.0.0",
     "styled-components": "^6.4.0",
-    "typescript": "^6.0.2",
+    "typescript": "^6.0.3",
     "util": "^0.12.5",
     "webpack": "^5.106.2",
     "webpack-cli": "^7.0.2",
@@ -93,6 +93,6 @@
     "i18next": "^26.0.5",
     "process": "^0.11.10",
     "react-final-form": "^7.0.0",
-    "react-i18next": "^17.0.3"
+    "react-i18next": "^17.0.4"
   }
 }
