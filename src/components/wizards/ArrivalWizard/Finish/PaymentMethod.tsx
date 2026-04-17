@@ -1,6 +1,6 @@
-import React, {Component} from 'react'
+import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
-import { withTranslation } from 'react-i18next'
+import {useTranslation} from 'react-i18next'
 import styled from 'styled-components'
 import {Step} from '../../../../modules/ui/arrivalPayment'
 import SingleSelect from '../../../SingleSelect'
@@ -8,11 +8,13 @@ import {CancelButton, NextButton} from '../../../WizardNavigation'
 import CashPaymentMessage from './CashPaymentMessage'
 import FinishActions from './FinishActions'
 import TwintPaymentMessage from './TwintPaymentMessage'
-import {withRouter} from 'react-router-dom'
+import {useLocation} from 'react-router-dom'
 import {getFromItemKey} from '../../../../util/reference-number'
 import {PAYMENT_METHODS} from '../../../../util/paymentMethods'
 import CardExternalPaymentMessage from './CardExternalPaymentMessage'
 import Heading from './Heading'
+import Centered from '../../../Centered'
+import MaterialIcon from '../../../MaterialIcon'
 
 const Container = styled.div`
 `
@@ -43,39 +45,30 @@ const StyledCancelButton = styled(CancelButton)`
   margin-bottom: 1em;
 `
 
-class PaymentMethod extends Component<any, any> {
+const PaymentMethod = (props: any) => {
+  const {t} = useTranslation();
+  const location = useLocation();
+  const [initialized, setInitialized] = useState(false);
 
-  constructor(props) {
-    super(props)
-    this.confirmMethod = this.confirmMethod.bind(this);
-  }
+  const {
+    itemKey,
+    method,
+    step,
+    failure,
+    createMovementFromMovement,
+    finish,
+    setMethod,
+    cancelCardPayment,
+    enabledPaymentMethods,
+    invoiceRecipientNames,
+  } = props;
 
-  componentWillMount() {
-    // set to completed if success message from online checkout
-    const query = new URLSearchParams(this.props.location.search)
-    const successParam = query.get('success')
-    if (successParam === 'true') {
-      this.props.setMethod('checkout')
-      this.props.setStep(Step.COMPLETED)
-      return
-    }
-
-    // continue with only enabled payment method if only one
-    if (this.props.enabledPaymentMethods.length === 1) {
-      const method = this.props.enabledPaymentMethods[0]
-      this.props.setMethod(method)
-      this.confirmMethod(method)
-    }
-  }
-
-  confirmMethod(method) {
-    if (!method) {
-      return
+  const confirmMethod = (selectedMethod: string) => {
+    if (!selectedMethod) {
+      return;
     }
 
     const {
-      itemKey,
-      invoiceRecipientNames,
       email,
       immatriculation,
       amount,
@@ -89,21 +82,21 @@ class PaymentMethod extends Component<any, any> {
       goAroundFeeTotal,
       createCardPayment,
       setStep,
-      saveMovementPaymentMethod
-    } = this.props
+      saveMovementPaymentMethod,
+    } = props;
 
     const paymentMethodData: any = {
-      method
-    }
+      method: selectedMethod,
+    };
 
-    if (['cash', 'twint_external', 'card_external'].includes(method)) {
-      setStep(Step.COMPLETED)
-    } else if (method.startsWith('invoice')) {
-      paymentMethodData.method = 'invoice'
-      paymentMethodData.invoiceRecipientName = method.substring(method.indexOf('[') + 1, method.indexOf(']'))
-      setStep(Step.COMPLETED)
-    } else if (method === 'card') {
-      setStep(Step.CONFIRMED)
+    if (['cash', 'twint_external', 'card_external'].includes(selectedMethod)) {
+      setStep(Step.COMPLETED);
+    } else if (selectedMethod.startsWith('invoice')) {
+      paymentMethodData.method = 'invoice';
+      paymentMethodData.invoiceRecipientName = selectedMethod.substring(selectedMethod.indexOf('[') + 1, selectedMethod.indexOf(']'));
+      setStep(Step.COMPLETED);
+    } else if (selectedMethod === 'card') {
+      setStep(Step.CONFIRMED);
       createCardPayment(
         itemKey,
         getFromItemKey(itemKey),
@@ -120,10 +113,10 @@ class PaymentMethod extends Component<any, any> {
         goAroundFeeSingle,
         goAroundFeeCode,
         goAroundFeeTotal
-      )
-    } else if (method === 'checkout') {
-      paymentMethodData.status = 'pending'
-      setStep(Step.CONFIRMED)
+      );
+    } else if (selectedMethod === 'checkout') {
+      paymentMethodData.status = 'pending';
+      setStep(Step.CONFIRMED);
       createCardPayment(
         itemKey,
         getFromItemKey(itemKey),
@@ -140,109 +133,119 @@ class PaymentMethod extends Component<any, any> {
         goAroundFeeSingle,
         goAroundFeeCode,
         goAroundFeeTotal
-      )
+      );
     }
 
-    saveMovementPaymentMethod('arrival', itemKey, paymentMethodData)
+    saveMovementPaymentMethod('arrival', itemKey, paymentMethodData);
+  };
+
+  useEffect(() => {
+    // set to completed if success message from online checkout
+    const query = new URLSearchParams(location.search);
+    const successParam = query.get('success');
+    if (successParam === 'true') {
+      props.setMethod('checkout');
+      props.setStep(Step.COMPLETED);
+      setInitialized(true);
+      return;
+    }
+
+    // continue with only enabled payment method if only one
+    if (enabledPaymentMethods.length === 1) {
+      const onlyMethod = enabledPaymentMethods[0];
+      props.setMethod(onlyMethod);
+      confirmMethod(onlyMethod);
+    }
+
+    setInitialized(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!initialized) {
+    return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}</Centered>;
   }
 
-  render() {
-    const { t } = this.props;
-    const {
-      itemKey,
-      method,
-      step,
-      failure,
-      createMovementFromMovement,
-      finish,
-      setMethod,
-      cancelCardPayment,
-      enabledPaymentMethods,
-      invoiceRecipientNames
-    } = this.props
+  const availableMethods = PAYMENT_METHODS
+    .filter(m => enabledPaymentMethods.includes(m.value) && m.value !== 'invoice')
+    .map(m => ({
+      ...m,
+      label: m.value === 'checkout'
+        ? t('arrival.payment.checkoutCta')
+        : t(`paymentMethods.${m.value}`)
+    }));
 
-    const availableMethods = PAYMENT_METHODS
-      .filter(method => enabledPaymentMethods.includes(method.value) && method.value !== 'invoice')
-      .map(method => ({
-        ...method,
-        label: method.value === 'checkout'
-          ? t('arrival.payment.checkoutCta')
-          : t(`paymentMethods.${method.value}`)
-      }))
-
-    if (enabledPaymentMethods.includes('invoice')) {
-      for (const invoiceRecipientName of invoiceRecipientNames) {
-        availableMethods.push({
-          value: `invoice[${invoiceRecipientName}]`,
-          label: t('arrival.payment.invoice', {recipient: invoiceRecipientName})
-        })
-      }
+  if (enabledPaymentMethods.includes('invoice')) {
+    for (const invoiceRecipientName of invoiceRecipientNames) {
+      availableMethods.push({
+        value: `invoice[${invoiceRecipientName}]`,
+        label: t('arrival.payment.invoice', {recipient: invoiceRecipientName})
+      });
     }
+  }
 
-    return (
-      <Container>
-        {failure && (
-          <FailureMessage>{t('arrival.payment.failure')}</FailureMessage>
-        )}
-        {step === Step.COMPLETED ? (
-          <>
-            {method === 'cash' ? (
-              <CashPaymentMessage itemKey={itemKey}/>
-            ) : method === 'twint_external' ? (
-              <TwintPaymentMessage {...{itemKey} as any}/>
-            ) : method === 'card_external' ? (
-              <CardExternalPaymentMessage {...{itemKey} as any}/>
-            ) : method === 'checkout' ? (
-              <Heading>{t('arrival.payment.success')}</Heading>
-            ) : null}
-            <FinishActions itemKey={itemKey}
-                           createMovementFromMovement={createMovementFromMovement}
-                           finish={finish}/>
-          </>
-        ) : step === Step.CONFIRMED ? (
-          method === 'card' ? (
-            <>
-              <InstructionMessage>{t('arrival.payment.cardInstruction')}</InstructionMessage>
-              <StyledCancelButton
-                type="button"
-                label={t('arrival.payment.cancel')}
-                onClick={() => {
-                  cancelCardPayment()
-                }}
-              />
-            </>
+  return (
+    <Container>
+      {failure && (
+        <FailureMessage>{t('arrival.payment.failure')}</FailureMessage>
+      )}
+      {step === Step.COMPLETED ? (
+        <>
+          {method === 'cash' ? (
+            <CashPaymentMessage itemKey={itemKey}/>
+          ) : method === 'twint_external' ? (
+            <TwintPaymentMessage {...{itemKey} as any}/>
+          ) : method === 'card_external' ? (
+            <CardExternalPaymentMessage {...{itemKey} as any}/>
           ) : method === 'checkout' ? (
-            <>
-              <>
-                <InstructionMessage>{t('arrival.payment.redirect')}</InstructionMessage>
-              </>
-            </>
-          ) : null
-        ) : (<>
-            <InstructionMessage>{t('arrival.payment.selectMethod')}</InstructionMessage>
-            <SelectContainer>
-              <SingleSelect
-                items={availableMethods}
-                orientation="vertical"
-                onChange={e => setMethod(e.target.value)}
-                value={method}
-              />
-            </SelectContainer>
-            <StyledNextButton
-              type="submit"
-              label={t('arrival.payment.next')}
-              icon="navigate_next"
-              onClick={() => this.confirmMethod(method)}
-              dataCy="next-button"
-              primary
-              disabled={!method}
+            <Heading>{t('arrival.payment.success')}</Heading>
+          ) : null}
+          <FinishActions itemKey={itemKey}
+                         createMovementFromMovement={createMovementFromMovement}
+                         finish={finish}/>
+        </>
+      ) : step === Step.CONFIRMED ? (
+        method === 'card' ? (
+          <>
+            <InstructionMessage>{t('arrival.payment.cardInstruction')}</InstructionMessage>
+            <StyledCancelButton
+              type="button"
+              label={t('arrival.payment.cancel')}
+              onClick={() => {
+                cancelCardPayment()
+              }}
             />
           </>
-        )}
-      </Container>
-    )
-  }
-}
+        ) : method === 'checkout' ? (
+          <>
+            <>
+              <InstructionMessage>{t('arrival.payment.redirect')}</InstructionMessage>
+            </>
+          </>
+        ) : null
+      ) : (<>
+          <InstructionMessage>{t('arrival.payment.selectMethod')}</InstructionMessage>
+          <SelectContainer>
+            <SingleSelect
+              items={availableMethods}
+              orientation="vertical"
+              onChange={e => setMethod(e.target.value)}
+              value={method}
+            />
+          </SelectContainer>
+          <StyledNextButton
+            type="submit"
+            label={t('arrival.payment.next')}
+            icon="navigate_next"
+            onClick={() => confirmMethod(method)}
+            dataCy="next-button"
+            primary
+            disabled={!method}
+          />
+        </>
+      )}
+    </Container>
+  );
+};
 
 (PaymentMethod as any).propTypes = {
   itemKey: PropTypes.string.isRequired,
@@ -267,6 +270,6 @@ class PaymentMethod extends Component<any, any> {
   setStep: PropTypes.func.isRequired,
   cancelCardPayment: PropTypes.func.isRequired,
   saveMovementPaymentMethod: PropTypes.func.isRequired
-}
+};
 
-export default withRouter(withTranslation()(PaymentMethod) as any)
+export default PaymentMethod;
