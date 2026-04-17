@@ -1,5 +1,5 @@
-import React, {Component} from 'react';
-import { withTranslation, WithTranslation } from 'react-i18next';
+import React, {useEffect} from 'react';
+import { useTranslation } from 'react-i18next';
 import CommitFailureDialog from '../CommitFailureDialog';
 import Centered from '../Centered';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
@@ -26,7 +26,7 @@ export interface WizardPage {
   dialog?: PageDialog;
 }
 
-interface MovementWizardProps extends WithTranslation {
+interface MovementWizardProps {
   pages: WizardPage[];
   finishComponentClass: React.ComponentType<any>;
   wizard: WizardState;
@@ -54,69 +54,117 @@ interface MovementWizardProps extends WithTranslation {
   loadAircraftSettings: () => void;
 }
 
-class MovementWizard extends Component<MovementWizardProps> {
+const MovementWizard = (props: MovementWizardProps) => {
+  const { t } = useTranslation();
 
-  componentWillMount() {
-    this.props.loadLockDate();
-    this.props.loadAircraftSettings();
-    if (typeof this.props.initMovement === 'function') {
-      this.props.initMovement();
-    } else if (this.props.match.params.key) {
-      this.props.editMovement(this.props.match.params.key);
+  useEffect(() => {
+    props.loadLockDate();
+    props.loadAircraftSettings();
+    if (typeof props.initMovement === 'function') {
+      props.initMovement();
+    } else if (props.match.params.key) {
+      props.editMovement(props.match.params.key);
     } else {
-      this.props.initNewMovement();
+      props.initNewMovement();
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  render() {
-    const breadcrumbsTitle = this.isUpdate()
-      ? this.props.updateMovementLabel + ' (' + getFromItemKey(this.props.match.params.key) + ')'
-      : this.props.newMovementLabel;
-    return (
-      <VerticalHeaderLayout>
-        <div>
-          {this.props.wizard.initialized === true && this.props.wizard.committed !== true &&
-            <Breadcrumbs title={breadcrumbsTitle} items={this.buildBreadcrumbItems()} activeItem={this.props.wizard.page - 1}/>}
-          <div>{this.getMiddleItem()}</div>
-        </div>
-      </VerticalHeaderLayout>
-    );
-  }
+  const isUpdate = typeof props.match.params.key === 'string' && props.match.params.key.length > 0;
 
-  getMiddleItem() {
-    if (this.props.wizard.initialized !== true || this.props.lockDateLoading === true) {
-      const { t } = this.props;
+  const breadcrumbItems = props.pages.map(page => ({
+    label: page.label,
+  }));
+
+  const goToPreviousPage = (data: Record<string, unknown>) => {
+    props.updateValues(data)
+    props.previousPage()
+  };
+
+  const submitPage = (data: Record<string, unknown>) => {
+    props.updateValues(data)
+
+    const isLast = props.wizard.page === props.pages.length;
+
+    const nextAction = isLast
+      ? props.saveMovement
+      : props.nextPage;
+
+    const dialogConf = props.pages[props.wizard.page - 1].dialog;
+
+    if (!dialogConf) {
+      nextAction();
+      return;
+    }
+
+    if (!dialogConf.predicate) {
+      props.showDialog(dialogConf.name);
+      return;
+    }
+
+    return dialogConf.predicate(data).then(show => {
+      if (show === true) {
+        props.showDialog(dialogConf.name);
+      } else {
+        nextAction();
+      }
+    });
+  };
+
+  const getDialog = () => {
+    const dialogConf = props.pages[props.wizard.page - 1].dialog;
+    if (dialogConf && props.wizard.dialogs[dialogConf.name] === true) {
+      const isLast = props.wizard.page === props.pages.length;
+      const nextAction = isLast
+        ? props.saveMovement
+        : props.nextPage;
+      return (
+        <dialogConf.component
+          onCancel={props.hideDialog.bind(null, dialogConf.name)}
+          onConfirm={() => {
+            props.hideDialog(dialogConf.name);
+            nextAction();
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
+  const getMiddleItem = () => {
+    if (props.wizard.initialized !== true || props.lockDateLoading === true) {
       return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('wizard.loading')}</Centered>;
     }
 
-    if (this.props.wizard.committed === true) {
-      return <this.props.finishComponentClass
-        finish={this.props.finish}
-        isUpdate={this.isUpdate()}
-        headingType={this.isUpdate() ? HeadingType.UPDATED : HeadingType.CREATED}
+    if (props.wizard.committed === true) {
+      const FinishComponent = props.finishComponentClass;
+      return <FinishComponent
+        finish={props.finish}
+        isUpdate={isUpdate}
+        headingType={isUpdate ? HeadingType.UPDATED : HeadingType.CREATED}
       />;
     }
 
-    const pageObj = this.props.pages[this.props.wizard.page - 1];
+    const pageObj = props.pages[props.wizard.page - 1];
     const pageComponent = (
       <pageObj.component
-        previousPage={this.goToPreviousPage.bind(this)}
-        onSubmit={this.submitPage.bind(this)}
-        cancel={this.props.cancel}
-        readOnly={this.props.locked}
-        isAdmin={this.props.auth.data.admin}
-        isGuest={this.props.auth.data.guest}
-        formValues={this.props.wizard.values}
+        previousPage={goToPreviousPage}
+        onSubmit={submitPage}
+        cancel={props.cancel}
+        readOnly={props.locked}
+        isAdmin={props.auth.data.admin}
+        isGuest={props.auth.data.guest}
+        formValues={props.wizard.values}
       />
     );
 
-    const dialog = this.getDialog();
+    const dialog = getDialog();
 
-    const commitFailureDialog = this.props.wizard.commitError
+    const commitFailureDialog = props.wizard.commitError
       ? (
         <CommitFailureDialog
-          onClose={this.props.unsetCommitError}
-          errorMsg={(this.props.wizard.commitError as any).message}
+          onClose={props.unsetCommitError}
+          errorMsg={(props.wizard.commitError as any).message}
         />
       ) : null;
 
@@ -127,72 +175,21 @@ class MovementWizard extends Component<MovementWizardProps> {
         {commitFailureDialog}
       </div>
     );
-  }
+  };
 
-  getDialog() {
-    const dialogConf = this.props.pages[this.props.wizard.page - 1].dialog;
-    if (dialogConf && this.props.wizard.dialogs[dialogConf.name] === true) {
-      const isLast = this.props.wizard.page === this.props.pages.length;
-      const nextAction = isLast
-        ? this.props.saveMovement
-        : this.props.nextPage;
-      return (
-        <dialogConf.component
-          onCancel={this.props.hideDialog.bind(null, dialogConf.name)}
-          onConfirm={() => {
-            this.props.hideDialog(dialogConf.name);
-            nextAction();
-          }}
-        />
-      );
-    }
-    return null;
-  }
+  const breadcrumbsTitle = isUpdate
+    ? props.updateMovementLabel + ' (' + getFromItemKey(props.match.params.key) + ')'
+    : props.newMovementLabel;
 
-  goToPreviousPage(data: Record<string, unknown>) {
-    this.props.updateValues(data)
-    this.props.previousPage()
-  }
+  return (
+    <VerticalHeaderLayout>
+      <div>
+        {props.wizard.initialized === true && props.wizard.committed !== true &&
+          <Breadcrumbs title={breadcrumbsTitle} items={breadcrumbItems} activeItem={props.wizard.page - 1}/>}
+        <div>{getMiddleItem()}</div>
+      </div>
+    </VerticalHeaderLayout>
+  );
+};
 
-  submitPage(data: Record<string, unknown>) {
-    this.props.updateValues(data)
-
-    const isLast = this.props.wizard.page === this.props.pages.length;
-
-    const nextAction = isLast
-      ? this.props.saveMovement
-      : this.props.nextPage;
-
-    const dialogConf = this.props.pages[this.props.wizard.page - 1].dialog;
-
-    if (!dialogConf) {
-      nextAction();
-      return;
-    }
-
-    if (!dialogConf.predicate) {
-      this.props.showDialog(dialogConf.name);
-      return;
-    }
-
-    return dialogConf.predicate(data).then(show => {
-      if (show === true) {
-        this.props.showDialog(dialogConf.name);
-      } else {
-        nextAction();
-      }
-    });
-  }
-
-  buildBreadcrumbItems() {
-    return this.props.pages.map(page => ({
-      label: page.label,
-    }));
-  }
-
-  isUpdate() {
-    return typeof this.props.match.params.key === 'string' && this.props.match.params.key.length > 0;
-  }
-}
-
-export default withTranslation()(MovementWizard);
+export default MovementWizard;
