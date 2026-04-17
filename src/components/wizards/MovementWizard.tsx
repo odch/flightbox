@@ -8,6 +8,7 @@ import {getFromItemKey} from '../../util/reference-number';
 import Breadcrumbs from './Breadcrumbs';
 import { WizardState } from '../../modules/ui/wizard/reducer';
 import useWizardNavigation from './useWizardNavigation';
+import WizardDialog from './WizardDialog';
 
 export const HeadingType = {
   CREATED: 'CREATED',
@@ -87,22 +88,7 @@ const MovementWizard = (props: MovementWizardProps) => {
     showDialog: props.showDialog,
   });
 
-  const getDialog = () => {
-    const dialogConf = props.pages[props.wizard.page - 1].dialog;
-    if (dialogConf && props.wizard.dialogs[dialogConf.name] === true) {
-      const nextAction = getNextAction();
-      return (
-        <dialogConf.component
-          onCancel={props.hideDialog.bind(null, dialogConf.name)}
-          onConfirm={() => {
-            props.hideDialog(dialogConf.name);
-            nextAction();
-          }}
-        />
-      );
-    }
-    return null;
-  };
+  const currentPageDialog = props.pages[props.wizard.page - 1].dialog;
 
   const getMiddleItem = () => {
     if (props.wizard.initialized !== true || props.lockDateLoading === true) {
@@ -131,7 +117,14 @@ const MovementWizard = (props: MovementWizardProps) => {
       />
     );
 
-    const dialog = getDialog();
+    const dialog = (
+      <WizardDialog
+        dialogConf={currentPageDialog}
+        isVisible={!!(currentPageDialog && props.wizard.dialogs[currentPageDialog.name])}
+        hideDialog={props.hideDialog}
+        getNextAction={getNextAction}
+      />
+    );
 
     const commitFailureDialog = props.wizard.commitError
       ? (
