@@ -4,7 +4,7 @@ import Header from './Header';
 import EmailLoginForm from '../../containers/EmailLoginFormContainer'
 import UsernamePasswordLoginForm from '../../containers/UsernamePasswordLoginFormContainer'
 import styled from 'styled-components'
-import {withRouter} from 'react-router-dom'
+import {useLocation} from 'react-router-dom'
 import getAuthQueryToken, {getGuestOnly} from '../../util/getAuthQueryToken'
 import LanguageSwitch from '../LanguageSwitch';
 
@@ -64,8 +64,9 @@ const PrivacyText = styled.p`
   }
 `
 
-const LoginPage = ({location, privacyPolicyUrl, emailSent}: {location: any, privacyPolicyUrl?: string | null, emailSent?: boolean}) => {
+const LoginPage = ({privacyPolicyUrl, emailSent}: {privacyPolicyUrl?: string | null, emailSent?: boolean}) => {
   const { t } = useTranslation();
+  const location = useLocation<any>();
   const queryToken = getAuthQueryToken(location)
   const guestOnly = getGuestOnly(location)
   return (
@@ -91,4 +92,4 @@ const LoginPage = ({location, privacyPolicyUrl, emailSent}: {location: any, priv
   );
 }
 
-export default withRouter(LoginPage);
+export default LoginPage;
