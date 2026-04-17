@@ -1,36 +1,47 @@
-import React, {Component} from 'react'
-import { withTranslation } from 'react-i18next'
+import React, {useEffect} from 'react'
+import {useTranslation} from 'react-i18next'
+import {useParams} from 'react-router-dom'
 import Finish from '../../../../containers/ArrivalFinishContainer'
 import Centered from '../../../Centered'
 import MaterialIcon from '../../../MaterialIcon'
 import VerticalHeaderLayout from '../../../VerticalHeaderLayout'
 
-class ArrivalPaymentPage extends Component<any, any> {
+const ArrivalPaymentPage = (props: any) => {
+  const {t} = useTranslation();
+  const {key} = useParams<{key?: string}>();
+  const {
+    loadLockDate,
+    loadAircraftSettings,
+    initMovement,
+    editMovement,
+    initNewMovement,
+    wizard,
+    lockDateLoading,
+    finish,
+  } = props;
 
-  componentWillMount() {
-    this.props.loadLockDate();
-    this.props.loadAircraftSettings();
-    if (typeof this.props.initMovement === 'function') {
-      this.props.initMovement();
-    } else if (this.props.match.params.key) {
-      this.props.editMovement('arrival', this.props.match.params.key);
+  useEffect(() => {
+    loadLockDate();
+    loadAircraftSettings();
+    if (typeof initMovement === 'function') {
+      initMovement();
+    } else if (key) {
+      editMovement('arrival', key);
     } else {
-      this.props.initNewMovement();
+      initNewMovement();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (wizard.initialized !== true || lockDateLoading === true) {
+    return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}</Centered>;
   }
 
-  render() {
-    const { t } = this.props;
-    if (this.props.wizard.initialized !== true || this.props.lockDateLoading === true) {
-      return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}</Centered>;
-    }
-
-    return (
-      <VerticalHeaderLayout>
-        <Finish finish={this.props.finish}/>
-      </VerticalHeaderLayout>
-    )
-  }
+  return (
+    <VerticalHeaderLayout>
+      <Finish finish={finish}/>
+    </VerticalHeaderLayout>
+  )
 }
 
-export default withTranslation()(ArrivalPaymentPage)
+export default ArrivalPaymentPage
