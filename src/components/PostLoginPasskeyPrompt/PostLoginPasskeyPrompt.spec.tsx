@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { BrowserRouter } from 'react-router-dom';
-import { renderWithTheme, screen, fireEvent } from '../../../test/renderWithTheme';
+import { act, renderWithTheme, screen, fireEvent } from '../../../test/renderWithTheme';
 import PostLoginPasskeyPrompt from './PostLoginPasskeyPrompt';
 
 const theme = { colors: { main: '#003863', background: '#fafafa', danger: '#e00f00' }, images: { logo: '' } };
@@ -14,6 +14,13 @@ const withWrappers = (el: React.ReactElement) => (
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
+
+jest.mock('../MaterialIcon', () => {
+  const ReactLocal = require('react');
+  return function MockMaterialIcon({ icon }: { icon: string }) {
+    return ReactLocal.createElement('span', { 'data-testid': `icon-${icon}` });
+  };
+});
 
 describe('PostLoginPasskeyPrompt', () => {
   const baseProps = {
@@ -126,21 +133,44 @@ describe('PostLoginPasskeyPrompt', () => {
     expect(window.localStorage.getItem('passkeyPromptDismissCount')).toBe('2');
   });
 
-  it('auto-dismisses after a successful registration (submitting true → false, no failure)', () => {
-    const { container, rerender } = renderWithTheme(
-      <PostLoginPasskeyPrompt {...baseProps} submitting={true} />
-    );
-    expect(container.firstChild).not.toBeNull();
-    rerender(withWrappers(<PostLoginPasskeyPrompt {...baseProps} submitting={false} failure={false} />));
-    expect(container.firstChild).toBeNull();
-    expect(window.localStorage.getItem('passkeyPromptDismissCount')).toBe('1');
+  it('shows the loading spinner and disables the button while submitting', () => {
+    renderWithTheme(<PostLoginPasskeyPrompt {...baseProps} submitting />);
+    expect(screen.getByTestId('icon-sync')).toBeInTheDocument();
+    const btn = screen.getByText('profile.passkeyPromptRegister').closest('button') as HTMLButtonElement;
+    expect(btn).toBeDisabled();
   });
 
-  it('stays visible when registration fails', () => {
+  it('shows the success card after registration succeeds, then auto-dismisses', () => {
+    jest.useFakeTimers();
     const { container, rerender } = renderWithTheme(
-      <PostLoginPasskeyPrompt {...baseProps} submitting={true} />
+      <PostLoginPasskeyPrompt {...baseProps} submitting />
     );
-    rerender(withWrappers(<PostLoginPasskeyPrompt {...baseProps} submitting={false} failure={true} />));
+    rerender(withWrappers(<PostLoginPasskeyPrompt {...baseProps} submitting={false} failure={false} />));
+
+    expect(screen.getByText('profile.passkeyPromptSuccessTitle')).toBeInTheDocument();
+    expect(screen.getByText('profile.passkeyPromptSuccessDescription')).toBeInTheDocument();
+    expect(screen.queryByText('profile.passkeyPromptRegister')).not.toBeInTheDocument();
+    expect(window.localStorage.getItem('passkeyPromptDismissCount')).toBe('1');
+
+    act(() => {
+      jest.advanceTimersByTime(3500);
+    });
+    expect(container.firstChild).toBeNull();
+    jest.useRealTimers();
+  });
+
+  it('shows an error notice when registration fails, stays visible', () => {
+    const { container, rerender } = renderWithTheme(
+      <PostLoginPasskeyPrompt {...baseProps} submitting />
+    );
+    rerender(withWrappers(<PostLoginPasskeyPrompt {...baseProps} submitting={false} failure />));
     expect(container.firstChild).not.toBeNull();
+    expect(screen.getByText('profile.passkeysRegistrationFailure')).toBeInTheDocument();
+    expect(screen.queryByText('profile.passkeyPromptSuccessTitle')).not.toBeInTheDocument();
+  });
+
+  it('does not show error notice when idle', () => {
+    renderWithTheme(<PostLoginPasskeyPrompt {...baseProps} />);
+    expect(screen.queryByText('profile.passkeysRegistrationFailure')).not.toBeInTheDocument();
   });
 });

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import Button from '../Button';
 
 const DISMISS_TS_KEY = 'passkeyPromptDismissedAt';
 const DISMISS_COUNT_KEY = 'passkeyPromptDismissCount';
 const DISMISS_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const SUCCESS_DISMISS_MS = 3500;
 
 const Wrapper = styled.div`
   border-radius: 10px;
@@ -30,21 +32,6 @@ const Description = styled.p`
   line-height: 1.4;
 `;
 
-const RegisterButton = styled.button`
-  background-color: ${props => props.theme.colors.main};
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 0.6em 1.5em;
-  font-size: 1em;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
-
 const DismissLink = styled.button`
   background: none;
   border: none;
@@ -54,6 +41,12 @@ const DismissLink = styled.button`
   margin-top: auto;
   padding: 1.5em 0 0;
   display: block;
+`;
+
+const ErrorMessage = styled.p`
+  color: #ed351c;
+  font-size: 0.9em;
+  margin: 0.75em 0 0;
 `;
 
 function getDismissCount(): number {
@@ -107,6 +100,7 @@ const PostLoginPasskeyPrompt: React.FC<Props> = ({
   const [dismissed, setDismissed] = useState(isDismissed());
   const nextDismissIsPermanent = getDismissCount() >= 1;
   const [wasSubmitting, setWasSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (show) {
@@ -117,10 +111,16 @@ const PostLoginPasskeyPrompt: React.FC<Props> = ({
   useEffect(() => {
     if (wasSubmitting && !submitting && !failure) {
       markDismissed();
-      setDismissed(true);
+      setShowSuccess(true);
     }
     setWasSubmitting(submitting);
   }, [submitting, failure]);
+
+  useEffect(() => {
+    if (!showSuccess) return;
+    const timer = setTimeout(() => setDismissed(true), SUCCESS_DISMISS_MS);
+    return () => clearTimeout(timer);
+  }, [showSuccess]);
 
   if (!show || dismissed) return null;
 
@@ -132,18 +132,33 @@ const PostLoginPasskeyPrompt: React.FC<Props> = ({
     setDismissed(true);
   };
 
+  if (showSuccess) {
+    return (
+      <Wrapper data-cy="passkey-prompt-success">
+        <Title>{t('profile.passkeyPromptSuccessTitle')}</Title>
+        <Description>{t('profile.passkeyPromptSuccessDescription')}</Description>
+      </Wrapper>
+    );
+  }
+
   return (
     <Wrapper data-cy="passkey-prompt">
       <Title>{t('profile.passkeyPromptTitle')}</Title>
       <Description>{t('profile.passkeyPromptDescription')}</Description>
-      <RegisterButton
+      <Button
         type="button"
+        label={t('profile.passkeyPromptRegister')}
         onClick={() => registerPasskey()}
+        loading={submitting}
         disabled={submitting}
-        data-cy="passkey-prompt-register"
-      >
-        {t('profile.passkeyPromptRegister')}
-      </RegisterButton>
+        primary
+        dataCy="passkey-prompt-register"
+      />
+      {failure && (
+        <ErrorMessage data-cy="passkey-prompt-error">
+          {t('profile.passkeysRegistrationFailure')}
+        </ErrorMessage>
+      )}
       <DismissLink
         type="button"
         onClick={handleDismiss}
