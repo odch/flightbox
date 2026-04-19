@@ -110,7 +110,10 @@ const PostLoginPasskeyPrompt: React.FC<Props> = ({
 
   useEffect(() => {
     if (wasSubmitting && !submitting && !failure) {
-      markDismissed();
+      // Don't call markDismissed() here — the persistent dismiss counter is
+      // reserved for explicit user dismissals. After a successful
+      // registration the passkeys.length === 0 gate already hides the tile,
+      // and if the user later removes all passkeys the tile should return.
       setShowSuccess(true);
     }
     setWasSubmitting(submitting);

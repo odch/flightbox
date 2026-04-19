@@ -150,7 +150,10 @@ describe('PostLoginPasskeyPrompt', () => {
     expect(screen.getByText('profile.passkeyPromptSuccessTitle')).toBeInTheDocument();
     expect(screen.getByText('profile.passkeyPromptSuccessDescription')).toBeInTheDocument();
     expect(screen.queryByText('profile.passkeyPromptRegister')).not.toBeInTheDocument();
-    expect(window.localStorage.getItem('passkeyPromptDismissCount')).toBe('1');
+    // The persistent dismiss counter must NOT be bumped on successful
+    // registration — otherwise the tile can't return after the user removes
+    // all their passkeys.
+    expect(window.localStorage.getItem('passkeyPromptDismissCount')).toBeNull();
 
     act(() => {
       jest.advanceTimersByTime(3500);
@@ -193,5 +196,27 @@ describe('PostLoginPasskeyPrompt', () => {
   it('does not show error notice when idle', () => {
     renderWithTheme(<PostLoginPasskeyPrompt {...baseProps} />);
     expect(screen.queryByText('profile.passkeysRegistrationFailure')).not.toBeInTheDocument();
+  });
+
+  it('reappears on a fresh mount after a successful registration then passkey removal', () => {
+    jest.useFakeTimers();
+    // User registers a passkey from the tile.
+    const first = renderWithTheme(<PostLoginPasskeyPrompt {...baseProps} submitting />);
+    first.rerender(withWrappers(
+      <PostLoginPasskeyPrompt {...baseProps} submitting={false} show={false} />
+    ));
+    act(() => { jest.advanceTimersByTime(3500); });
+    jest.useRealTimers();
+    first.unmount();
+
+    // The persistent dismiss counter must remain empty so the tile can
+    // return after the user removes all their passkeys and revisits.
+    expect(window.localStorage.getItem('passkeyPromptDismissCount')).toBeNull();
+
+    // User removes all passkeys; the container flips show back to true on
+    // the next visit (fresh mount).
+    renderWithTheme(<PostLoginPasskeyPrompt {...baseProps} submitting={false} show={true} />);
+    expect(screen.getByText('profile.passkeyPromptTitle')).toBeInTheDocument();
+    expect(screen.getByText('profile.passkeyPromptRegister')).toBeInTheDocument();
   });
 });
