@@ -215,4 +215,22 @@ describe('InstallCard', () => {
     expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
     expect(localStorage.getItem(DISMISS_COUNT_KEY)).toBe('2');
   });
+
+  it('shows "later" label on first appearance', () => {
+    setVisitDays(5);
+    fireBeforeInstallPrompt();
+    renderWithTheme(<InstallCard authData={regularAuthData} />);
+    expect(screen.getByText('pwaInstall.dismiss')).toBeInTheDocument();
+    expect(screen.queryByText('pwaInstall.dismissPermanent')).not.toBeInTheDocument();
+  });
+
+  it('shows "don\'t show again" label when reappearing after one prior dismissal', () => {
+    setVisitDays(5);
+    localStorage.setItem(DISMISS_COUNT_KEY, '1');
+    localStorage.setItem(DISMISS_TS_KEY, String(Date.now() - 91 * 24 * 60 * 60 * 1000));
+    fireBeforeInstallPrompt();
+    renderWithTheme(<InstallCard authData={regularAuthData} />);
+    expect(screen.getByText('pwaInstall.dismissPermanent')).toBeInTheDocument();
+    expect(screen.queryByText('pwaInstall.dismiss')).not.toBeInTheDocument();
+  });
 });
