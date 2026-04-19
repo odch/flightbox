@@ -12,9 +12,12 @@ const env = process.env.ENV === 'production'
   ? projectConf.environments.production
   : projectConf.environments.test;
 
+const { environments, ...projectConfWithoutEnvironments } = projectConf;
+const mergedConf = { ...projectConfWithoutEnvironments, ...env };
+
 const globals = {
   __DEV__: process.env.DEV || false,
-  __CONF__: projects.packinize(projectConf),
+  __CONF__: projects.packinize(mergedConf),
   __THEME__: JSON.stringify(projectConf.theme),
   __FIREBASE_PROJECT_ID__: JSON.stringify(env.firebaseProjectId),
   __FIREBASE_DATABASE_NAME__: JSON.stringify(env.firebaseDatabaseName),
