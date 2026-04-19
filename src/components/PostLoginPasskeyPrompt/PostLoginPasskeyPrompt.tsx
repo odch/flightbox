@@ -122,15 +122,7 @@ const PostLoginPasskeyPrompt: React.FC<Props> = ({
     return () => clearTimeout(timer);
   }, [showSuccess]);
 
-  if (!show || dismissed) return null;
-
-  const supported = typeof window !== 'undefined' && !!(window as any).PublicKeyCredential;
-  if (!supported) return null;
-
-  const handleDismiss = () => {
-    markDismissed();
-    setDismissed(true);
-  };
+  if (dismissed) return null;
 
   if (showSuccess) {
     return (
@@ -140,6 +132,16 @@ const PostLoginPasskeyPrompt: React.FC<Props> = ({
       </Wrapper>
     );
   }
+
+  if (!show) return null;
+
+  const supported = typeof window !== 'undefined' && !!(window as any).PublicKeyCredential;
+  if (!supported) return null;
+
+  const handleDismiss = () => {
+    markDismissed();
+    setDismissed(true);
+  };
 
   return (
     <Wrapper data-cy="passkey-prompt">
