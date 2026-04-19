@@ -120,7 +120,6 @@ describe('InstallCard', () => {
     fireBeforeInstallPrompt();
     renderWithTheme(<InstallCard authData={regularAuthData} />);
     expect(screen.getByTestId('install-card')).toBeInTheDocument();
-    expect(screen.getByTestId('install-button')).toBeInTheDocument();
     expect(screen.getByText('pwaInstall.installButton')).toBeInTheDocument();
   });
 
@@ -163,7 +162,7 @@ describe('InstallCard', () => {
     setVisitDays(5);
     const event = fireBeforeInstallPrompt();
     renderWithTheme(<InstallCard authData={regularAuthData} />);
-    fireEvent.click(screen.getByTestId('install-button'));
+    fireEvent.click(screen.getByText('pwaInstall.installButton'));
     expect(event.prompt).toHaveBeenCalled();
   });
 
@@ -173,7 +172,7 @@ describe('InstallCard', () => {
     renderWithTheme(<InstallCard authData={regularAuthData} />);
     expect(screen.getByTestId('install-card')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('install-button'));
+    fireEvent.click(screen.getByText('pwaInstall.installButton'));
     expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
   });
 
@@ -184,7 +183,7 @@ describe('InstallCard', () => {
     expect(screen.getByTestId('install-card')).toBeInTheDocument();
 
     await act(async () => {
-      fireEvent.click(screen.getByTestId('install-button'));
+      fireEvent.click(screen.getByText('pwaInstall.installButton'));
     });
     expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
   });
