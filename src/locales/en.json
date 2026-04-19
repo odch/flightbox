@@ -319,6 +319,8 @@
     "passkeyPromptTitle": "Sign in faster",
     "passkeyPromptDescription": "Sign in with your fingerprint or face, without waiting for an email code.",
     "passkeyPromptRegister": "Set up passkey",
+    "passkeyPromptSuccessTitle": "All set!",
+    "passkeyPromptSuccessDescription": "Next time you sign in without an email code.",
     "passkeyPromptDismiss": "Later",
     "passkeyPromptDismissPermanent": "Don't show again"
   },

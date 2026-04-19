@@ -319,6 +319,8 @@
     "passkeyPromptTitle": "Schneller anmelden",
     "passkeyPromptDescription": "Künftig mit Fingerabdruck oder Gesichtserkennung anmelden, ohne auf den E-Mail-Code zu warten.",
     "passkeyPromptRegister": "Passkey einrichten",
+    "passkeyPromptSuccessTitle": "Eingerichtet!",
+    "passkeyPromptSuccessDescription": "Beim nächsten Mal melden Sie sich ohne E-Mail-Code an.",
     "passkeyPromptDismiss": "Später",
     "passkeyPromptDismissPermanent": "Nicht mehr anzeigen"
   },
