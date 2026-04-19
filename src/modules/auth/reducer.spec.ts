@@ -11,6 +11,10 @@ const INITIAL_STATE = {
     submitting: false,
     failure: false,
   },
+  passkeyRegistration: { submitting: false, failure: false },
+  passkeyLogin: { submitting: false, failure: false },
+  passkeyRemoval: { failure: false },
+  passkeys: [],
 };
 
 describe('modules', () => {
@@ -26,20 +30,15 @@ describe('modules', () => {
         it('should set submitting to true, clear failure, and clear otpVerificationFailure', () => {
           expect(
             reducer({
-              initialized: false,
-              authenticated: false,
-              submitting: false,
+              ...INITIAL_STATE,
               failure: true,
               otpVerificationFailure: true,
-              guestAuthentication: { submitting: false, failure: false },
             }, actions.setSubmitting())
           ).toEqual({
-            initialized: false,
-            authenticated: false,
+            ...INITIAL_STATE,
             submitting: true,
             failure: false,
             otpVerificationFailure: false,
-            guestAuthentication: { submitting: false, failure: false },
           });
         });
       });
@@ -148,6 +147,10 @@ describe('modules', () => {
             submitting: false,
             data: authData,
             guestAuthentication: INITIAL_STATE.guestAuthentication,
+            passkeyRegistration: { submitting: false, failure: false },
+            passkeyLogin: { submitting: false, failure: false },
+            passkeyRemoval: { failure: false },
+            passkeys: [],
           });
         });
 
@@ -161,6 +164,10 @@ describe('modules', () => {
               otpVerificationFailure: false,
               data: { uid: 'user-123' },
               guestAuthentication: { submitting: false, failure: false },
+              passkeyRegistration: { submitting: false, failure: false },
+              passkeyLogin: { submitting: false, failure: false },
+              passkeyRemoval: { failure: false },
+              passkeys: [],
             }, actions.firebaseAuthenticationEvent(null))
           ).toEqual(INITIAL_STATE);
         });
@@ -178,6 +185,126 @@ describe('modules', () => {
             ...INITIAL_STATE,
             submitting: false,
             otpVerificationFailure: true,
+          });
+        });
+      });
+
+      describe('REGISTER_PASSKEY', () => {
+        it('sets passkeyRegistration.submitting', () => {
+          expect(
+            reducer(INITIAL_STATE, actions.registerPasskey())
+          ).toEqual({
+            ...INITIAL_STATE,
+            passkeyRegistration: { submitting: true, failure: false },
+          });
+        });
+      });
+
+      describe('REGISTER_PASSKEY_FAILURE', () => {
+        it('sets passkeyRegistration.failure and error message', () => {
+          expect(
+            reducer(INITIAL_STATE, actions.registerPasskeyFailure('bad'))
+          ).toEqual({
+            ...INITIAL_STATE,
+            passkeyRegistration: { submitting: false, failure: true, errorMessage: 'bad' },
+          });
+        });
+      });
+
+      describe('REGISTER_PASSKEY_SUCCESS', () => {
+        it('clears submitting and failure', () => {
+          expect(
+            reducer({
+              ...INITIAL_STATE,
+              passkeyRegistration: { submitting: true, failure: false },
+            }, actions.registerPasskeySuccess())
+          ).toEqual({
+            ...INITIAL_STATE,
+            passkeyRegistration: { submitting: false, failure: false },
+          });
+        });
+      });
+
+      describe('LOGIN_WITH_PASSKEY', () => {
+        it('sets passkeyLogin.submitting and clears failure', () => {
+          expect(
+            reducer({
+              ...INITIAL_STATE,
+              passkeyLogin: { submitting: false, failure: true },
+            }, actions.loginWithPasskey('a@b.c'))
+          ).toEqual({
+            ...INITIAL_STATE,
+            passkeyLogin: { submitting: true, failure: false },
+          });
+        });
+      });
+
+      describe('LOGIN_WITH_PASSKEY_FAILURE', () => {
+        it('sets failure and clears submitting', () => {
+          expect(
+            reducer({
+              ...INITIAL_STATE,
+              passkeyLogin: { submitting: true, failure: false },
+            }, actions.loginWithPasskeyFailure())
+          ).toEqual({
+            ...INITIAL_STATE,
+            passkeyLogin: { submitting: false, failure: true },
+          });
+        });
+      });
+
+      describe('LOAD_PASSKEYS_SUCCESS', () => {
+        it('replaces passkeys list', () => {
+          const passkeys = [
+            { credentialId: 'c1', deviceName: 'Laptop', createdAt: 1, lastUsedAt: null },
+          ];
+          expect(
+            reducer(INITIAL_STATE, actions.loadPasskeysSuccess(passkeys))
+          ).toEqual({
+            ...INITIAL_STATE,
+            passkeys,
+          });
+        });
+      });
+
+      describe('REMOVE_PASSKEY_SUCCESS', () => {
+        it('removes the matching credentialId', () => {
+          const state = {
+            ...INITIAL_STATE,
+            passkeys: [
+              { credentialId: 'c1', deviceName: 'Laptop', createdAt: 1, lastUsedAt: null },
+              { credentialId: 'c2', deviceName: 'Phone', createdAt: 2, lastUsedAt: null },
+            ],
+          };
+          expect(
+            reducer(state, actions.removePasskeySuccess('c1'))
+          ).toEqual({
+            ...INITIAL_STATE,
+            passkeys: [
+              { credentialId: 'c2', deviceName: 'Phone', createdAt: 2, lastUsedAt: null },
+            ],
+          });
+        });
+      });
+
+      describe('REMOVE_PASSKEY / REMOVE_PASSKEY_FAILURE', () => {
+        it('clears removal failure state when remove starts', () => {
+          const state = {
+            ...INITIAL_STATE,
+            passkeyRemoval: { failure: true, errorMessage: 'boom' },
+          };
+          expect(reducer(state, actions.removePasskey('c1'))).toEqual({
+            ...INITIAL_STATE,
+            passkeyRemoval: { failure: false },
+          });
+        });
+
+        it('stores failure with message', () => {
+          expect(
+            reducer(INITIAL_STATE, actions.removePasskeyFailure('c1', 'boom'))
+          ).toEqual({
+            ...INITIAL_STATE,
+            passkeyRemoval: { failure: true, errorMessage: 'boom' },
           });
         });
       });

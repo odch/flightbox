@@ -1,14 +1,19 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import Button from '../../Button';
 import { usePwaInstall, AuthData } from './usePwaInstall';
 
 const Wrapper = styled.div`
   border-radius: 10px;
   background-color: ${props => props.theme.colors.background};
-  margin: 1em auto;
   padding: 1em;
-  width: 80%;
+  flex: 1 1 300px;
+  min-width: 280px;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const Title = styled.h3`
@@ -23,24 +28,14 @@ const Description = styled.p`
   line-height: 1.4;
 `;
 
-const InstallButton = styled.button`
-  background-color: ${props => props.theme.colors.main};
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 0.6em 1.5em;
-  font-size: 1em;
-  cursor: pointer;
-`;
-
 const DismissLink = styled.button`
   background: none;
   border: none;
   color: #999;
   font-size: 0.85em;
   cursor: pointer;
-  margin-top: 0.8em;
-  padding: 0;
+  margin-top: auto;
+  padding: 1.5em 0 0;
   display: block;
 `;
 
@@ -73,7 +68,7 @@ interface InstallCardProps {
 
 const InstallCard: React.FC<InstallCardProps> = ({ authData }) => {
   const { t } = useTranslation();
-  const { shouldShow, platform, install, dismiss } = usePwaInstall(authData);
+  const { shouldShow, platform, nextDismissIsPermanent, install, dismiss } = usePwaInstall(authData);
 
   if (!shouldShow) return null;
 
@@ -82,9 +77,13 @@ const InstallCard: React.FC<InstallCardProps> = ({ authData }) => {
       <Title>{t('pwaInstall.title')}</Title>
       <Description>{t('pwaInstall.description')}</Description>
       {platform === 'chromium' && (
-        <InstallButton onClick={install} data-testid="install-button">
-          {t('pwaInstall.installButton')}
-        </InstallButton>
+        <Button
+          type="button"
+          label={t('pwaInstall.installButton')}
+          onClick={install}
+          primary
+          dataCy="install-button"
+        />
       )}
       {platform === 'ios-safari' && (
         <Instructions data-testid="ios-instructions">
@@ -97,7 +96,7 @@ const InstallCard: React.FC<InstallCardProps> = ({ authData }) => {
         </Instructions>
       )}
       <DismissLink onClick={dismiss} data-testid="dismiss-link">
-        {t('pwaInstall.dismiss')}
+        {nextDismissIsPermanent ? t('pwaInstall.dismissPermanent') : t('pwaInstall.dismiss')}
       </DismissLink>
     </Wrapper>
   );

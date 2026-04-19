@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ActionButton from './ActionButton'
 import ActionsWrapper from './ActionsWrapper'
+import SaveProfilePrompt from '../../SaveProfilePrompt'
 import { useTranslation } from 'react-i18next'
 
 const FinishActions = ({itemKey, createMovementFromMovement, finish}) => {
@@ -10,6 +11,8 @@ const FinishActions = ({itemKey, createMovementFromMovement, finish}) => {
   const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
 
   return (
+    <>
+    <SaveProfilePrompt/>
     <ActionsWrapper>
       <ActionButton
         label={t('hints.recordDeparture')}
@@ -23,6 +26,7 @@ const FinishActions = ({itemKey, createMovementFromMovement, finish}) => {
         dataCy="finish-button"
       />
     </ActionsWrapper>
+    </>
   )
 }
 

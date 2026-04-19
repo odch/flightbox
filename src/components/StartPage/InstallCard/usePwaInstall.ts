@@ -10,6 +10,7 @@ type Platform = 'chromium' | 'ios-safari' | 'macos-safari' | null;
 interface PwaInstallResult {
   shouldShow: boolean;
   platform: Platform;
+  nextDismissIsPermanent: boolean;
   install: () => void;
   dismiss: () => void;
 }
@@ -136,6 +137,8 @@ export function usePwaInstall(authData: AuthData): PwaInstallResult {
     && enoughVisits
     && !isDismissed()
     && !dismissed;
+  const dismissCount = parseInt(localStorage.getItem(DISMISS_COUNT_KEY) || '0', 10);
+  const nextDismissIsPermanent = dismissCount >= 1;
 
   const install = useCallback(() => {
     if (promptRef.current) {
@@ -156,7 +159,7 @@ export function usePwaInstall(authData: AuthData): PwaInstallResult {
     setDismissed(true);
   }, []);
 
-  return { shouldShow, platform, install, dismiss };
+  return { shouldShow, platform, nextDismissIsPermanent, install, dismiss };
 }
 
 /** @internal Test-only helper to reset the module-level prompt cache between tests. */

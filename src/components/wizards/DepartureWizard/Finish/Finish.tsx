@@ -1,24 +1,18 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import styled from 'styled-components';
 import ImageButton from '../../../ImageButton';
+import SaveProfilePrompt from '../../SaveProfilePrompt';
+import Wrapper from '../../ArrivalWizard/Finish/Wrapper';
+import Heading from '../../ArrivalWizard/Finish/Heading';
 import { useTranslation } from 'react-i18next';
-
-const Wrapper = styled.div`
-  text-align: center;
-`;
-
-const Message = styled.div`
-  font-size: 2em;
-  padding: 2em;
-`;
 
 const Finish = props => {
   const { t } = useTranslation();
   const exitImagePath = require('./ic_exit_to_app_black_48dp_2x.png');
   return (
     <Wrapper>
-      <Message>{props.isUpdate === true ? t('departure.updated') : t('departure.created')}</Message>
+      <Heading>{props.isUpdate === true ? t('departure.updated') : t('departure.created')}</Heading>
+      {!props.isUpdate && <SaveProfilePrompt/>}
       <ImageButton label={t('departure.finish')} img={exitImagePath} onClick={props.finish} dataCy="finish-button"/>
     </Wrapper>
   );

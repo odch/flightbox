@@ -3,7 +3,10 @@ import sagas from './sagas';
 
 export {
   loadProfile,
-  saveProfile
+  saveProfile,
+  addAircraft,
+  updateAircraft,
+  removeAircraft,
 } from './actions';
 
 export {

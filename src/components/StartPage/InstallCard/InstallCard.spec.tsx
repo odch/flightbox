@@ -120,7 +120,6 @@ describe('InstallCard', () => {
     fireBeforeInstallPrompt();
     renderWithTheme(<InstallCard authData={regularAuthData} />);
     expect(screen.getByTestId('install-card')).toBeInTheDocument();
-    expect(screen.getByTestId('install-button')).toBeInTheDocument();
     expect(screen.getByText('pwaInstall.installButton')).toBeInTheDocument();
   });
 
@@ -163,7 +162,7 @@ describe('InstallCard', () => {
     setVisitDays(5);
     const event = fireBeforeInstallPrompt();
     renderWithTheme(<InstallCard authData={regularAuthData} />);
-    fireEvent.click(screen.getByTestId('install-button'));
+    fireEvent.click(screen.getByText('pwaInstall.installButton'));
     expect(event.prompt).toHaveBeenCalled();
   });
 
@@ -173,7 +172,7 @@ describe('InstallCard', () => {
     renderWithTheme(<InstallCard authData={regularAuthData} />);
     expect(screen.getByTestId('install-card')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('install-button'));
+    fireEvent.click(screen.getByText('pwaInstall.installButton'));
     expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
   });
 
@@ -184,7 +183,7 @@ describe('InstallCard', () => {
     expect(screen.getByTestId('install-card')).toBeInTheDocument();
 
     await act(async () => {
-      fireEvent.click(screen.getByTestId('install-button'));
+      fireEvent.click(screen.getByText('pwaInstall.installButton'));
     });
     expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
   });
@@ -214,5 +213,23 @@ describe('InstallCard', () => {
     fireEvent.click(screen.getByTestId('dismiss-link'));
     expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
     expect(localStorage.getItem(DISMISS_COUNT_KEY)).toBe('2');
+  });
+
+  it('shows "later" label on first appearance', () => {
+    setVisitDays(5);
+    fireBeforeInstallPrompt();
+    renderWithTheme(<InstallCard authData={regularAuthData} />);
+    expect(screen.getByText('pwaInstall.dismiss')).toBeInTheDocument();
+    expect(screen.queryByText('pwaInstall.dismissPermanent')).not.toBeInTheDocument();
+  });
+
+  it('shows "don\'t show again" label when reappearing after one prior dismissal', () => {
+    setVisitDays(5);
+    localStorage.setItem(DISMISS_COUNT_KEY, '1');
+    localStorage.setItem(DISMISS_TS_KEY, String(Date.now() - 91 * 24 * 60 * 60 * 1000));
+    fireBeforeInstallPrompt();
+    renderWithTheme(<InstallCard authData={regularAuthData} />);
+    expect(screen.getByText('pwaInstall.dismissPermanent')).toBeInTheDocument();
+    expect(screen.queryByText('pwaInstall.dismiss')).not.toBeInTheDocument();
   });
 });

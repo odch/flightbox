@@ -451,6 +451,20 @@
       ".write": false,
       ".indexOn": ["email"]
     },
+    "webauthnCredentials": {
+      ".write": false,
+      "$uid": {
+        ".read": "auth !== null && ($uid === auth.uid || root.child('logins/' + auth.uid + '/admin').val() === true)"
+      }
+    },
+    "webauthnChallenges": {
+      ".read": false,
+      ".write": false
+    },
+    "webauthnCredentialOwners": {
+      ".read": false,
+      ".write": false
+    },
     "profiles": {
       "$profile_id": {
         ".read": "auth !== null && $profile_id === auth.uid",
@@ -484,6 +498,26 @@
         },
         "privacyPolicyAcceptedAt": {
           ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
+        },
+        "aircrafts": {
+          "$index": {
+            ".validate": "newData.hasChildren(['immatriculation'])",
+            "immatriculation": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "aircraftType": {
+              ".validate": "newData.isString()"
+            },
+            "aircraftCategory": {
+              ".validate": "{aircraftCategory}"
+            },
+            "mtow": {
+              ".validate": "newData.isNumber() && newData.val() > 0"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
         },
         "language": {
           ".validate": "newData.isString() && newData.val().matches(/^(de|en)$/)"

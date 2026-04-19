@@ -17,6 +17,24 @@ export const LOGOUT = 'LOGOUT' as const;
 export const FIREBASE_AUTHENTICATION_EVENT = 'FIREBASE_AUTHENTICATION_EVENT' as const;
 export const SET_SUBMITTING = 'SET_SUBMITTING' as const;
 
+export const REGISTER_PASSKEY = 'REGISTER_PASSKEY' as const;
+export const REGISTER_PASSKEY_SUCCESS = 'REGISTER_PASSKEY_SUCCESS' as const;
+export const REGISTER_PASSKEY_FAILURE = 'REGISTER_PASSKEY_FAILURE' as const;
+export const LOGIN_WITH_PASSKEY = 'LOGIN_WITH_PASSKEY' as const;
+export const LOGIN_WITH_PASSKEY_FAILURE = 'LOGIN_WITH_PASSKEY_FAILURE' as const;
+export const LOAD_PASSKEYS = 'LOAD_PASSKEYS' as const;
+export const LOAD_PASSKEYS_SUCCESS = 'LOAD_PASSKEYS_SUCCESS' as const;
+export const REMOVE_PASSKEY = 'REMOVE_PASSKEY' as const;
+export const REMOVE_PASSKEY_SUCCESS = 'REMOVE_PASSKEY_SUCCESS' as const;
+export const REMOVE_PASSKEY_FAILURE = 'REMOVE_PASSKEY_FAILURE' as const;
+
+export interface Passkey {
+  credentialId: string;
+  deviceName: string;
+  createdAt: number;
+  lastUsedAt?: number | null;
+}
+
 export type AuthAction =
   | { type: typeof REQUEST_IP_AUTHENTICATION }
   | { type: typeof IP_AUTHENTICATION_FAILURE }
@@ -35,7 +53,17 @@ export type AuthAction =
   | { type: typeof FIREBASE_AUTHENTICATION; payload: { authData: unknown } }
   | { type: typeof LOGOUT }
   | { type: typeof FIREBASE_AUTHENTICATION_EVENT; payload: { authData: unknown } }
-  | { type: typeof SET_SUBMITTING };
+  | { type: typeof SET_SUBMITTING }
+  | { type: typeof REGISTER_PASSKEY }
+  | { type: typeof REGISTER_PASSKEY_SUCCESS }
+  | { type: typeof REGISTER_PASSKEY_FAILURE; payload: { message?: string } }
+  | { type: typeof LOGIN_WITH_PASSKEY; payload: { email?: string } }
+  | { type: typeof LOGIN_WITH_PASSKEY_FAILURE }
+  | { type: typeof LOAD_PASSKEYS }
+  | { type: typeof LOAD_PASSKEYS_SUCCESS; payload: { passkeys: Passkey[] } }
+  | { type: typeof REMOVE_PASSKEY; payload: { credentialId: string } }
+  | { type: typeof REMOVE_PASSKEY_SUCCESS; payload: { credentialId: string } }
+  | { type: typeof REMOVE_PASSKEY_FAILURE; payload: { credentialId: string; message?: string } };
 
 export function requestIpAuthentication() {
   return {
@@ -171,5 +199,65 @@ export function firebaseAuthentication(authData: unknown) {
     payload: {
       authData,
     },
+  };
+}
+
+export function registerPasskey() {
+  return {
+    type: REGISTER_PASSKEY,
+  };
+}
+
+export function registerPasskeySuccess() {
+  return { type: REGISTER_PASSKEY_SUCCESS };
+}
+
+export function registerPasskeyFailure(message?: string) {
+  return {
+    type: REGISTER_PASSKEY_FAILURE,
+    payload: { message },
+  };
+}
+
+export function loginWithPasskey(email?: string) {
+  return {
+    type: LOGIN_WITH_PASSKEY,
+    payload: { email },
+  };
+}
+
+export function loginWithPasskeyFailure() {
+  return { type: LOGIN_WITH_PASSKEY_FAILURE };
+}
+
+export function loadPasskeys() {
+  return { type: LOAD_PASSKEYS };
+}
+
+export function loadPasskeysSuccess(passkeys: Passkey[]) {
+  return {
+    type: LOAD_PASSKEYS_SUCCESS,
+    payload: { passkeys },
+  };
+}
+
+export function removePasskey(credentialId: string) {
+  return {
+    type: REMOVE_PASSKEY,
+    payload: { credentialId },
+  };
+}
+
+export function removePasskeySuccess(credentialId: string) {
+  return {
+    type: REMOVE_PASSKEY_SUCCESS,
+    payload: { credentialId },
+  };
+}
+
+export function removePasskeyFailure(credentialId: string, message?: string) {
+  return {
+    type: REMOVE_PASSKEY_FAILURE,
+    payload: { credentialId, message },
   };
 }

@@ -1,118 +1,93 @@
-import PropTypes from 'prop-types';
-import React, {Component} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Wrapper from './Wrapper';
 import Item from './Item';
 
-class SingleSelect extends Component<any, any> {
+interface SingleSelectItem {
+  value: string;
+  label: string;
+  description?: string;
+}
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      value: this.props.value || null,
+interface SingleSelectProps {
+  items: SingleSelectItem[];
+  value?: string;
+  onChange?: (event: { target: { value: string } }) => void;
+  orientation?: 'horizontal' | 'vertical';
+  readOnly?: boolean;
+  dataCy?: string;
+}
+
+const SingleSelect: React.FC<SingleSelectProps> = ({
+  items,
+  value: valueProp,
+  onChange,
+  orientation = 'horizontal',
+  readOnly,
+  dataCy,
+}) => {
+  const [value, setValue] = useState<string | null>(valueProp || null);
+
+  // Sync value from prop during render (equivalent to componentDidUpdate).
+  // Using useEffect would cause a visible flash of the old value.
+  const [prevValueProp, setPrevValueProp] = useState(valueProp);
+  if (valueProp !== prevValueProp) {
+    setPrevValueProp(valueProp);
+    setValue(valueProp || null);
+  }
+
+  useEffect(() => {
+    if (items.length === 1 && !valueProp && onChange) {
+      onChange({ target: { value: items[0].value } });
+    }
+  }, [items, valueProp, onChange]);
+
+  const handleClick = useCallback((newValue: string) => {
+    if (readOnly !== true) {
+      setValue(newValue);
+      if (typeof onChange === 'function') {
+        onChange({ target: { value: newValue } });
+      }
+    }
+  }, [readOnly, onChange]);
+
+  if (readOnly === true) {
+    const getReadOnlyValue = () => {
+      if (!value) {
+        return '-';
+      }
+      const selectedItem = items.find(item => item.value === value);
+      if (selectedItem) {
+        return selectedItem.label;
+      }
+      return value;
     };
-  }
-
-  componentDidMount() {
-    this.selectSingleItem()
-  }
-
-  componentDidUpdate(prevProps) {
-    this.selectSingleItem()
-    if (prevProps.value !== this.props.value) {
-      this.setState({
-        value: this.props.value
-      })
-    }
-  }
-
-  render() {
-    if (this.props.readOnly === true) {
-      return (
-        <div>{this.getReadOnlyValue()}</div>
-      )
-    }
-
-    const orientation = this.props.orientation;
-
-    const widthPercentage = orientation === 'horizontal'
-      ? 100 / this.props.items.length
-      : null;
 
     return (
-      <Wrapper $orientation={orientation}>
-        {this.props.items.map((item, index) => (
-          <Item
-            key={index}
-            value={item.value}
-            label={item.label}
-            description={item.description}
-            selected={this.state.value === item.value}
-            widthPercentage={widthPercentage}
-            orientation={orientation}
-            onClick={this.clickHandler.bind(this)}
-            dataCy={`${this.props.dataCy}-${item.value}`}
-          />
-        ))}
-      </Wrapper>
+      <div>{getReadOnlyValue()}</div>
     );
   }
 
-  clickHandler(value) {
-    if (this.props.readOnly !== true) {
-      this.setState({
-        value,
-      }, this.fireChangeEvent);
-    }
-  }
+  const widthPercentage = orientation === 'horizontal'
+    ? 100 / items.length
+    : null;
 
-  fireChangeEvent() {
-    if (typeof this.props.onChange === 'function') {
-      this.props.onChange({
-        target: {
-          value: this.state.value,
-        },
-      });
-    }
-  }
-
-  getReadOnlyValue() {
-    if (!this.state.value) {
-      return '-';
-    }
-
-    const selectedItem = this.props.items.find(item => item.value === this.state.value);
-    if (selectedItem) {
-      return selectedItem.label;
-    }
-
-    return this.state.value;
-  }
-
-  selectSingleItem() {
-    if (this.props.items.length === 1 && !this.props.value && this.props.onChange) {
-      this.props.onChange({
-        target: {
-          value: this.props.items[0].value
-        }
-      })
-    }
-  }
-}
-
-(SingleSelect as any).propTypes = {
-  items: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.string.isRequired,
-    label: PropTypes.string.isRequired
-  })).isRequired,
-  value: PropTypes.string,
-  onChange: PropTypes.func,
-  orientation: PropTypes.oneOf(['horizontal', 'vertical']),
-  readOnly: PropTypes.bool,
-  dataCy: PropTypes.string
-};
-
-(SingleSelect as any).defaultProps = {
-  orientation: 'horizontal'
+  return (
+    <Wrapper $orientation={orientation}>
+      {items.map((item, index) => (
+        <Item
+          key={index}
+          value={item.value}
+          label={item.label}
+          description={item.description}
+          selected={value === item.value}
+          widthPercentage={widthPercentage}
+          orientation={orientation}
+          onClick={handleClick}
+          dataCy={`${dataCy}-${item.value}`}
+        />
+      ))}
+    </Wrapper>
+  );
 };
 
 export default SingleSelect;

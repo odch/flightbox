@@ -1,31 +1,37 @@
 import PropTypes from 'prop-types';
-import React, {Component} from 'react';
+import React, {useEffect} from 'react';
+import {useHistory} from 'react-router-dom';
 import Content from './Content';
 import MovementList from '../../containers/MovementListContainer';
 import JumpNavigation from '../JumpNavigation';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
 
-class MovementsPage extends Component<any, any> {
+const MovementsPage = ({loadLockDate, auth}: any) => {
+  const history = useHistory();
+  const isGuestOrKiosk = auth.data.guest === true || auth.data.kiosk === true;
 
-  componentWillMount() {
-    this.props.loadLockDate();
+  useEffect(() => {
+    loadLockDate();
 
-    if (this.props.auth.data.guest === true || this.props.auth.data.kiosk === true) {
-      this.props.history.push('/');
+    if (isGuestOrKiosk) {
+      history.push('/');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (isGuestOrKiosk) {
+    return null;
   }
 
-  render() {
-    return (
-      <VerticalHeaderLayout>
-        <Content>
-          <JumpNavigation/>
-          <MovementList/>
-        </Content>
-      </VerticalHeaderLayout>
-    );
-  }
-}
+  return (
+    <VerticalHeaderLayout>
+      <Content>
+        <JumpNavigation/>
+        <MovementList/>
+      </Content>
+    </VerticalHeaderLayout>
+  );
+};
 
 (MovementsPage as any).propTypes = {
   loadLockDate: PropTypes.func.isRequired,

@@ -4,16 +4,28 @@ import styled from 'styled-components';
 import Hints from './Hints';
 import EntryPoints from './EntryPoints';
 import InstallCard from './InstallCard';
+import PostLoginPasskeyPrompt from '../../containers/PostLoginPasskeyPromptContainer';
 
 const Wrapper = styled.div`
   padding-top: 100px;
+`;
+
+const Promotions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1em;
+  margin: 1em 1em 0;
 `;
 
 const Main = ({ auth }: any) => (
   <Wrapper>
     <Hints guest={auth.data.guest} kiosk={auth.data.kiosk}/>
     <EntryPoints admin={auth.data.admin} guest={auth.data.guest} kiosk={auth.data.kiosk}/>
-    <InstallCard authData={auth.data} />
+    <Promotions>
+      <PostLoginPasskeyPrompt/>
+      <InstallCard authData={auth.data} />
+    </Promotions>
   </Wrapper>
 );
 
