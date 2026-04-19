@@ -159,6 +159,27 @@ describe('PostLoginPasskeyPrompt', () => {
     jest.useRealTimers();
   });
 
+  it('keeps showing the success card after show drops to false (loadPasskeys race)', () => {
+    jest.useFakeTimers();
+    const { container, rerender } = renderWithTheme(
+      <PostLoginPasskeyPrompt {...baseProps} submitting />
+    );
+    // Simulate the real flow: registerPasskeySuccess AND loadPasskeys both
+    // land in the same redux dispatch pair — submitting goes false, and
+    // the newly-loaded passkey list makes the container flip show to false.
+    rerender(withWrappers(
+      <PostLoginPasskeyPrompt {...baseProps} submitting={false} failure={false} show={false} />
+    ));
+    expect(screen.getByText('profile.passkeyPromptSuccessTitle')).toBeInTheDocument();
+    expect(screen.getByText('profile.passkeyPromptSuccessDescription')).toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(3500);
+    });
+    expect(container.firstChild).toBeNull();
+    jest.useRealTimers();
+  });
+
   it('shows an error notice when registration fails, stays visible', () => {
     const { container, rerender } = renderWithTheme(
       <PostLoginPasskeyPrompt {...baseProps} submitting />
