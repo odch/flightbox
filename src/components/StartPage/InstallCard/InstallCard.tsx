@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import Button from '../../Button';
 import { usePwaInstall, AuthData } from './usePwaInstall';
 
 const Wrapper = styled.div`
@@ -25,16 +26,6 @@ const Description = styled.p`
   margin: 0 0 1em;
   font-size: 0.95em;
   line-height: 1.4;
-`;
-
-const InstallButton = styled.button`
-  background-color: ${props => props.theme.colors.main};
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 0.6em 1.5em;
-  font-size: 1em;
-  cursor: pointer;
 `;
 
 const DismissLink = styled.button`
@@ -86,9 +77,13 @@ const InstallCard: React.FC<InstallCardProps> = ({ authData }) => {
       <Title>{t('pwaInstall.title')}</Title>
       <Description>{t('pwaInstall.description')}</Description>
       {platform === 'chromium' && (
-        <InstallButton onClick={install} data-testid="install-button">
-          {t('pwaInstall.installButton')}
-        </InstallButton>
+        <Button
+          type="button"
+          label={t('pwaInstall.installButton')}
+          onClick={install}
+          primary
+          dataCy="install-button"
+        />
       )}
       {platform === 'ios-safari' && (
         <Instructions data-testid="ios-instructions">
