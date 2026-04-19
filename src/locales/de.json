@@ -523,14 +523,15 @@
     "invoice": "Rechnung"
   },
   "pwaInstall": {
-    "title": "App installieren",
-    "description": "Installieren Sie Flightbox als App für schnelleren Zugriff.",
+    "title": "Direkt vom Startbildschirm",
+    "description": "Flightbox als App installieren und künftig mit einem Tipp öffnen, ohne Umweg über den Browser.",
     "installButton": "Installieren",
     "iosInstructionsPre": "Tippen Sie auf ",
     "iosInstructionsPost": " und wählen Sie \"Zum Home-Bildschirm\".",
     "macosInstructionsPre": "Klicken Sie auf ",
     "macosInstructionsPost": " und wählen Sie \"Zum Dock hinzufügen\".",
-    "dismiss": "Nicht jetzt"
+    "dismiss": "Später",
+    "dismissPermanent": "Nicht mehr anzeigen"
   },
   "legal": {
     "privacyPolicy": "Datenschutzerklärung",

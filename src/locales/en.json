@@ -523,14 +523,15 @@
     "invoice": "Invoice"
   },
   "pwaInstall": {
-    "title": "Install app",
-    "description": "Install Flightbox as an app for quicker access.",
+    "title": "Launch from your home screen",
+    "description": "Install Flightbox as an app and open it with one tap — no browser needed.",
     "installButton": "Install",
     "iosInstructionsPre": "Tap ",
     "iosInstructionsPost": " and select \"Add to Home Screen\".",
     "macosInstructionsPre": "Click ",
     "macosInstructionsPost": " and select \"Add to Dock\".",
-    "dismiss": "Not now"
+    "dismiss": "Later",
+    "dismissPermanent": "Don't show again"
   },
   "legal": {
     "privacyPolicy": "Privacy policy",

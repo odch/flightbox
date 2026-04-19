@@ -9,6 +9,7 @@ const Wrapper = styled.div`
   margin: 1em auto;
   padding: 1em;
   width: 80%;
+  max-width: 500px;
 `;
 
 const Title = styled.h3`
@@ -39,8 +40,7 @@ const DismissLink = styled.button`
   color: #999;
   font-size: 0.85em;
   cursor: pointer;
-  margin-top: 0.8em;
-  padding: 0;
+  padding: 1.5em 0 0;
   display: block;
 `;
 
@@ -73,7 +73,7 @@ interface InstallCardProps {
 
 const InstallCard: React.FC<InstallCardProps> = ({ authData }) => {
   const { t } = useTranslation();
-  const { shouldShow, platform, install, dismiss } = usePwaInstall(authData);
+  const { shouldShow, platform, nextDismissIsPermanent, install, dismiss } = usePwaInstall(authData);
 
   if (!shouldShow) return null;
 
@@ -97,7 +97,7 @@ const InstallCard: React.FC<InstallCardProps> = ({ authData }) => {
         </Instructions>
       )}
       <DismissLink onClick={dismiss} data-testid="dismiss-link">
-        {t('pwaInstall.dismiss')}
+        {nextDismissIsPermanent ? t('pwaInstall.dismissPermanent') : t('pwaInstall.dismiss')}
       </DismissLink>
     </Wrapper>
   );
