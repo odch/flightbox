@@ -153,17 +153,18 @@ describe('container mount dispatches', () => {
     ).default;
   });
 
-  it('InvoiceRecipientsListContainer dispatches LOAD_INVOICE_RECIPIENT_SETTINGS on mount', () => {
+  const countOf = (store: MockStore, type: string) =>
+    store.actions.filter(a => a.type === type).length;
+
+  it('InvoiceRecipientsListContainer dispatches LOAD_INVOICE_RECIPIENT_SETTINGS exactly once on mount', () => {
     const store = makeStore({
       settings: { invoiceRecipients: { recipients: [] } },
     });
     render(wrap(store, <InvoiceRecipientsListContainer />));
-    expect(
-      store.actions.some(a => a.type === 'LOAD_INVOICE_RECIPIENT_SETTINGS')
-    ).toBe(true);
+    expect(countOf(store, 'LOAD_INVOICE_RECIPIENT_SETTINGS')).toBe(1);
   });
 
-  it('UserDropdownContainer dispatches LOAD_USERS on mount', () => {
+  it('UserDropdownContainer dispatches LOAD_USERS exactly once on mount', () => {
     const store = makeStore({ users: { data: {} } });
     render(
       wrap(
@@ -175,10 +176,10 @@ describe('container mount dispatches', () => {
         />
       )
     );
-    expect(store.actions.some(a => a.type === 'LOAD_USERS')).toBe(true);
+    expect(countOf(store, 'LOAD_USERS')).toBe(1);
   });
 
-  it('AircraftDropdownContainer dispatches LOAD_AIRCRAFTS on mount', () => {
+  it('AircraftDropdownContainer dispatches LOAD_AIRCRAFTS exactly once on mount', () => {
     const store = makeStore({ aircrafts: { data: {} } });
     render(
       wrap(
@@ -190,21 +191,19 @@ describe('container mount dispatches', () => {
         />
       )
     );
-    expect(store.actions.some(a => a.type === 'LOAD_AIRCRAFTS')).toBe(true);
+    expect(countOf(store, 'LOAD_AIRCRAFTS')).toBe(1);
   });
 
-  it('AircraftsItemListContainer dispatches LOAD_AIRCRAFT_SETTINGS on mount', () => {
+  it('AircraftsItemListContainer dispatches LOAD_AIRCRAFT_SETTINGS exactly once on mount', () => {
     const store = makeStore({
       settings: { aircrafts: { club: {}, homeBase: {} } },
       ui: { settings: { aircrafts: { newItem: {} } } },
     });
     render(wrap(store, <AircraftsItemListContainer type="club" />));
-    expect(
-      store.actions.some(a => a.type === 'LOAD_AIRCRAFT_SETTINGS')
-    ).toBe(true);
+    expect(countOf(store, 'LOAD_AIRCRAFT_SETTINGS')).toBe(1);
   });
 
-  it('ArrivalFinishContainer dispatches LOAD_AIRCRAFT_SETTINGS and LOAD_USER_INVOICE_RECIPIENTS on mount', () => {
+  it('ArrivalFinishContainer dispatches LOAD_AIRCRAFT_SETTINGS and LOAD_USER_INVOICE_RECIPIENTS exactly once on mount', () => {
     const store = makeStore({
       settings: { aircrafts: {} },
       invoiceRecipients: { recipients: undefined },
@@ -225,51 +224,58 @@ describe('container mount dispatches', () => {
         />
       )
     );
-    expect(
-      store.actions.some(a => a.type === 'LOAD_AIRCRAFT_SETTINGS')
-    ).toBe(true);
-    expect(
-      store.actions.some(a => a.type === 'LOAD_USER_INVOICE_RECIPIENTS')
-    ).toBe(true);
+    expect(countOf(store, 'LOAD_AIRCRAFT_SETTINGS')).toBe(1);
+    expect(countOf(store, 'LOAD_USER_INVOICE_RECIPIENTS')).toBe(1);
   });
 
-  it('UserImportFormContainer dispatches INIT_IMPORT on mount', () => {
+  it('UserImportFormContainer dispatches INIT_IMPORT exactly once with name=users', () => {
     const store = makeStore({ imports: {} });
     render(wrap(store, <UserImportFormContainer />));
-    const initAction = store.actions.find(a => a.type === 'INIT_IMPORT');
-    expect(initAction).toBeDefined();
-    expect(initAction.payload.name).toBe('users');
+    const inits = store.actions.filter(a => a.type === 'INIT_IMPORT');
+    expect(inits.length).toBe(1);
+    expect(inits[0].payload.name).toBe('users');
   });
 
-  it('YearlySummaryReportFormContainer dispatches INIT_REPORT with yearlySummary', () => {
+  it('YearlySummaryReportFormContainer dispatches INIT_REPORT exactly once with name=yearlySummary', () => {
     const store = makeStore({ reports: {} });
     render(wrap(store, <YearlySummaryReportFormContainer />));
-    const initAction = store.actions.find(a => a.type === 'INIT_REPORT');
-    expect(initAction).toBeDefined();
-    expect(initAction.payload.name).toBe('yearlySummary');
+    const inits = store.actions.filter(a => a.type === 'INIT_REPORT');
+    expect(inits.length).toBe(1);
+    expect(inits[0].payload.name).toBe('yearlySummary');
   });
 
-  it('LandingsReportFormContainer dispatches INIT_REPORT with landings', () => {
+  it('LandingsReportFormContainer dispatches INIT_REPORT exactly once with name=landings', () => {
     const store = makeStore({ reports: {} });
     render(wrap(store, <LandingsReportFormContainer />));
-    const initAction = store.actions.find(a => a.type === 'INIT_REPORT');
-    expect(initAction).toBeDefined();
-    expect(initAction.payload.name).toBe('landings');
+    const inits = store.actions.filter(a => a.type === 'INIT_REPORT');
+    expect(inits.length).toBe(1);
+    expect(inits[0].payload.name).toBe('landings');
   });
 
-  it('AirstatReportFormContainer dispatches INIT_REPORT with airstat', () => {
+  it('AirstatReportFormContainer dispatches INIT_REPORT exactly once with name=airstat', () => {
     const store = makeStore({ reports: {} });
     render(wrap(store, <AirstatReportFormContainer />));
-    const initAction = store.actions.find(a => a.type === 'INIT_REPORT');
-    expect(initAction).toBeDefined();
-    expect(initAction.payload.name).toBe('airstat');
+    const inits = store.actions.filter(a => a.type === 'INIT_REPORT');
+    expect(inits.length).toBe(1);
+    expect(inits[0].payload.name).toBe('airstat');
   });
 
-  it('InvoicesReportFormContainer dispatches INIT_REPORT with invoices', () => {
+  it('InvoicesReportFormContainer dispatches INIT_REPORT exactly once with name=invoices', () => {
     const store = makeStore({ reports: {} });
     render(wrap(store, <InvoicesReportFormContainer />));
-    const initAction = store.actions.find(a => a.type === 'INIT_REPORT');
-    expect(initAction).toBeDefined();
-    expect(initAction.payload.name).toBe('invoices');
+    const inits = store.actions.filter(a => a.type === 'INIT_REPORT');
+    expect(inits.length).toBe(1);
+    expect(inits[0].payload.name).toBe('invoices');
+  });
+
+  it('does not re-dispatch init actions when the container re-renders with same props', () => {
+    const store = makeStore({ reports: {} });
+    const { rerender } = render(
+      wrap(store, <LandingsReportFormContainer />)
+    );
+    const initialInitCount = countOf(store, 'INIT_REPORT');
+    expect(initialInitCount).toBe(1);
+    rerender(wrap(store, <LandingsReportFormContainer />));
+    expect(countOf(store, 'INIT_REPORT')).toBe(initialInitCount);
   });
 });
