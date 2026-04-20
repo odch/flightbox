@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {connect} from 'react-redux';
 import {initReport, setReportDate, generateReport, setReportParameter} from '../modules/reports';
 import YearlySummaryReportForm from '../components/YearlySummaryReportForm';
@@ -8,7 +8,7 @@ interface ReportDate {
   year?: number;
 }
 
-class YearlySummaryReportFormContainer extends React.Component<{
+interface Props {
   initialized: boolean;
   date?: ReportDate;
   delimiter?: string;
@@ -17,24 +17,25 @@ class YearlySummaryReportFormContainer extends React.Component<{
   setDate: (date: ReportDate) => void;
   setDelimiter: (delimiter: string) => void;
   generate: () => void;
-}> {
-  componentWillMount() {
-    this.props.initReport();
-  }
-
-  render() {
-    return (
-      <YearlySummaryReportForm
-        disabled={!this.props.initialized || this.props.generationInProgress}
-        date={this.props.date}
-        delimiter={this.props.delimiter}
-        setDate={this.props.setDate}
-        setDelimiter={this.props.setDelimiter}
-        generate={this.props.generate}
-      />
-    );
-  }
 }
+
+const YearlySummaryReportFormContainer = (props: Props) => {
+  useEffect(() => {
+    props.initReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <YearlySummaryReportForm
+      disabled={!props.initialized || props.generationInProgress}
+      date={props.date}
+      delimiter={props.delimiter}
+      setDate={props.setDate}
+      setDelimiter={props.setDelimiter}
+      generate={props.generate}
+    />
+  );
+};
 
 const mapStateToProps = (state: RootState) => {
   let report = (state.reports as any).yearlySummary;

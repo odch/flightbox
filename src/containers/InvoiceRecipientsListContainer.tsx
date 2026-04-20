@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {connect} from 'react-redux';
 import {
   addInvoiceRecipient,
@@ -15,30 +15,31 @@ interface InvoiceRecipient {
   emails: string[];
 }
 
-class InvoiceRecipientsListContainer extends React.Component<{
+interface Props {
   invoiceRecipients: InvoiceRecipient[];
   loadInvoiceRecipientSettings: () => void;
   addInvoiceRecipient: (name: string) => void;
   addInvoiceRecipientEmail: (name: string, email: string) => void;
   removeInvoiceRecipient: (name: string) => void;
   removeInvoiceRecipientEmail: (name: string, email: string) => void;
-}> {
-  componentWillMount() {
-    this.props.loadInvoiceRecipientSettings();
-  }
-
-  render() {
-    return (
-      <InvoiceRecipientsList
-        invoiceRecipients={this.props.invoiceRecipients}
-        addInvoiceRecipient={this.props.addInvoiceRecipient}
-        addInvoiceRecipientEmail={this.props.addInvoiceRecipientEmail}
-        removeInvoiceRecipient={this.props.removeInvoiceRecipient}
-        removeInvoiceRecipientEmail={this.props.removeInvoiceRecipientEmail}
-      />
-    );
-  }
 }
+
+const InvoiceRecipientsListContainer = (props: Props) => {
+  useEffect(() => {
+    props.loadInvoiceRecipientSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <InvoiceRecipientsList
+      invoiceRecipients={props.invoiceRecipients}
+      addInvoiceRecipient={props.addInvoiceRecipient}
+      addInvoiceRecipientEmail={props.addInvoiceRecipientEmail}
+      removeInvoiceRecipient={props.removeInvoiceRecipient}
+      removeInvoiceRecipientEmail={props.removeInvoiceRecipientEmail}
+    />
+  );
+};
 
 const mapStateToProps = (state: RootState) => ({
   invoiceRecipients: state.settings.invoiceRecipients.recipients || [],
