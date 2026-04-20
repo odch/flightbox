@@ -1,46 +1,43 @@
-import React, {Component} from 'react';
+import React, { useRef } from 'react';
 import LabeledBox from '../LabeledBox';
 import JumpNavigation from '../JumpNavigation';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import getQuestions from './questions';
 import QuestionsList from './QuestionsList';
 import Content from './Content';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-class HelpPage extends Component<any, any> {
-  boxes: any[];
+const HelpPage = () => {
+  const { t } = useTranslation();
+  const boxes = useRef<(HTMLElement | null)[]>([]);
+  const questions = getQuestions(t);
 
-  constructor(props) {
-    super(props);
-    this.boxes = [];
-  }
-
-  render() {
-    const { t } = this.props;
-    const questions = getQuestions(t);
-    return (
-      <VerticalHeaderLayout>
-        <Content>
-          <JumpNavigation/>
-          <QuestionsList questions={questions} onClick={this.handleItemClick.bind(this)}/>
-          {questions.map((question, index) => (
-            <LabeledBox key={index} ref={box => this.boxes[index] = box} label={(index + 1) + '. ' + question.question}>
-              <div>
-                {question.answer}
-              </div>
-            </LabeledBox>
-          ))}
-        </Content>
-      </VerticalHeaderLayout>
-    );
-  }
-
-  handleItemClick(index) {
-    const domNode = this.boxes[index];
+  const handleItemClick = (index: number) => {
+    const domNode = boxes.current[index];
     if (domNode) {
       domNode.scrollIntoView();
     }
-  }
-}
+  };
 
-export default withTranslation()(HelpPage);
+  return (
+    <VerticalHeaderLayout>
+      <Content>
+        <JumpNavigation/>
+        <QuestionsList questions={questions} onClick={handleItemClick}/>
+        {questions.map((question, index) => (
+          <LabeledBox
+            key={index}
+            ref={box => { boxes.current[index] = box; }}
+            label={(index + 1) + '. ' + question.question}
+          >
+            <div>
+              {question.answer}
+            </div>
+          </LabeledBox>
+        ))}
+      </Content>
+    </VerticalHeaderLayout>
+  );
+};
+
+export default HelpPage;
