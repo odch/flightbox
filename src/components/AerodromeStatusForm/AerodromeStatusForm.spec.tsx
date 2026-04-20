@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 
-const theme = {
+const theme: any = {
   colors: { main: '#003863', background: '#fafafa', danger: '#e00f00' },
 };
 const wrap = (el: React.ReactElement) => (

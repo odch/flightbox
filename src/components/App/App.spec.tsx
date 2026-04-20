@@ -75,7 +75,7 @@ jest.mock(
 
 import App from './App';
 
-const theme = {
+const theme: any = {
   colors: { main: '#003863', background: '#fafafa', danger: '#e00f00' },
 };
 
