@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import Logo from '../Logo';
@@ -7,7 +7,7 @@ import MaterialIcon from '../MaterialIcon'
 import {getLabel} from '../AerodromeStatusForm/StatusOptions'
 import dates from '../../util/dates'
 import newLineToBr from '../../util/newLineToBr'
-import {withTranslation} from 'react-i18next'
+import {useTranslation} from 'react-i18next'
 
 const StyledLogo = styled(Logo)`
   width: 200px;
@@ -45,34 +45,33 @@ const StyledAuthor = styled.div`
   margin-top: 2em;
 `
 
-class AerodromeStatusPage extends Component<any, any> {
+const AerodromeStatusPage = (props: any) => {
+  const { t } = useTranslation();
+  const { status } = props;
 
-  componentDidMount() {
-    this.props.watchCurrentAerodromeStatus()
+  useEffect(() => {
+    props.watchCurrentAerodromeStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (status === undefined) {
+    return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}</Centered>;
+  }
+  if (status === null) {
+    return <Centered>{t('aerodromeStatus.unavailable')}</Centered>
   }
 
-  render() {
-    const {status, t} = this.props;
-
-    if (status === undefined) {
-      return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}</Centered>;
-    }
-    if (status === null) {
-      return <Centered>{t('aerodromeStatus.unavailable')}</Centered>
-    }
-
-    return (
-      <StyledCentered>
-        <StyledLogo/>
-        <StyledContainer>
-          <StyledStatusName>{getLabel(status.status)}</StyledStatusName>
-          <div>{newLineToBr(status.details)}</div>
-          <StyledAuthor>{dates.formatDateTime(status.timestamp)}</StyledAuthor>
-        </StyledContainer>
-      </StyledCentered>
-    );
-  }
-}
+  return (
+    <StyledCentered>
+      <StyledLogo/>
+      <StyledContainer>
+        <StyledStatusName>{getLabel(status.status)}</StyledStatusName>
+        <div>{newLineToBr(status.details)}</div>
+        <StyledAuthor>{dates.formatDateTime(status.timestamp)}</StyledAuthor>
+      </StyledContainer>
+    </StyledCentered>
+  );
+};
 
 (AerodromeStatusPage as any).propTypes = {
   status: PropTypes.shape({
@@ -83,4 +82,4 @@ class AerodromeStatusPage extends Component<any, any> {
   watchCurrentAerodromeStatus: PropTypes.func.isRequired
 };
 
-export default withTranslation()(AerodromeStatusPage);
+export default AerodromeStatusPage;

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import React, {Component} from 'react';
-import { withTranslation } from 'react-i18next';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import MessageShape from './MessageShape';
 import MessagesWrapper from './MessagesWrapper';
 import Message from './Message';
@@ -8,41 +8,40 @@ import MessageHeader from './MessageHeader';
 import MessageContent from './MessageContent';
 import Empty from './Empty';
 
-class MessageList extends Component<any, any> {
+const MessageList = (props: any) => {
+  const { t } = useTranslation();
 
-  componentWillMount() {
-    this.props.loadMessages();
+  useEffect(() => {
+    props.loadMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleMessageClick = (key: string) => {
+    props.selectMessage(props.messages.selected === key ? null : key);
+  };
+
+  if (props.messages.data.array.length === 0) {
+    return <Empty>{t('message.noMessages')}</Empty>;
   }
 
-  render() {
-    const { t } = this.props;
-    if (this.props.messages.data.array.length === 0) {
-      return <Empty>{t('message.noMessages')}</Empty>;
-    }
-
-    return (
-      <MessagesWrapper>
-        {this.props.messages.data.array.map((item, index) => {
-          const isSelected = this.props.messages.selected === item.key;
-          return (
-            <Message
-              key={index}
-              $selected={isSelected}
-              onClick={this.handleMessageClick.bind(this, item.key)}
-            >
-              <MessageHeader item={item} selected={isSelected}/>
-              {isSelected && <MessageContent item={item}/>}
-            </Message>
-          );
-        })}
-      </MessagesWrapper>
-    );
-  }
-
-  handleMessageClick(key) {
-    this.props.selectMessage(this.props.messages.selected === key ? null : key);
-  }
-}
+  return (
+    <MessagesWrapper>
+      {props.messages.data.array.map((item: any, index: number) => {
+        const isSelected = props.messages.selected === item.key;
+        return (
+          <Message
+            key={index}
+            $selected={isSelected}
+            onClick={() => handleMessageClick(item.key)}
+          >
+            <MessageHeader item={item} selected={isSelected}/>
+            {isSelected && <MessageContent item={item}/>}
+          </Message>
+        );
+      })}
+    </MessagesWrapper>
+  );
+};
 
 (MessageList as any).propTypes = {
   messages: PropTypes.shape({
@@ -55,4 +54,4 @@ class MessageList extends Component<any, any> {
   selectMessage: PropTypes.func.isRequired,
 };
 
-export default withTranslation()(MessageList);
+export default MessageList;
