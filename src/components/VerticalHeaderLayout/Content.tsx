@@ -10,9 +10,11 @@ const Wrapper = styled.div`
   }
 `;
 
-const Content = ({ children }: { children: React.ReactNode }) => (
+const Content = React.memo(({ children }: { children: React.ReactNode }) => (
   <Wrapper>{children}</Wrapper>
-);
+));
+
+(Content as any).displayName = 'Content';
 
 (Content as any).propTypes = {
   children: PropTypes.element.isRequired
