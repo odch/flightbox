@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components'
 import formatMoney from '../../../../util/formatMoney'
 import MaterialIcon from '../../../MaterialIcon'
-import { withTranslation, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 const ExpandableDetails = styled.div`
   padding: 0.5em 0;
@@ -110,43 +110,34 @@ const FeesDetails = ({fees}) => {
   );
 }
 
-class Fees extends React.Component<any, any> {
+const Fees = ({ fees }: { fees: any }) => {
+  const { t } = useTranslation();
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      detailsExpanded: false
-    }
-  }
+  return (
+    <div>
+      <DetailsContainer>
+        <ExpandableDetails>
+          <Amount>
+            {t('arrival.fees.landingFee', {amount: formatMoney(fees.totalGross)})}
+          </Amount>
+          <DetailsTrigger onClick={() => setDetailsExpanded(!detailsExpanded)}>
+            <div>
+              <MaterialIcon icon={detailsExpanded ? 'expand_less' : 'expand_more'}/>
+            </div>
+            <div>
+              {detailsExpanded
+                ? t('arrival.fees.hideDetails')
+                : t('arrival.fees.showDetails')}
+            </div>
+          </DetailsTrigger>
+          {detailsExpanded && (
+            <FeesDetails fees={fees}/>
+          )}
+        </ExpandableDetails>
+      </DetailsContainer>
+    </div>
+  );
+};
 
-  render() {
-    const {fees, t} = this.props;
-
-    return (
-      <div>
-        <DetailsContainer>
-          <ExpandableDetails>
-            <Amount>
-              {t('arrival.fees.landingFee', {amount: formatMoney(fees.totalGross)})}
-            </Amount>
-            <DetailsTrigger onClick={() => this.setState({detailsExpanded: !this.state.detailsExpanded})}>
-              <div>
-                <MaterialIcon icon={this.state.detailsExpanded ? 'expand_less' : 'expand_more'}/>
-              </div>
-              <div>
-                {this.state.detailsExpanded
-                  ? t('arrival.fees.hideDetails')
-                  : t('arrival.fees.showDetails')}
-              </div>
-            </DetailsTrigger>
-            {this.state.detailsExpanded && (
-              <FeesDetails fees={fees}/>
-            )}
-          </ExpandableDetails>
-        </DetailsContainer>
-      </div>
-    );
-  }
-}
-
-export default withTranslation()(Fees)
+export default Fees;
