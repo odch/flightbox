@@ -147,6 +147,30 @@ describe('<App>', () => {
       renderApp({ initialized: true, authenticated: true });
       expect(scrollToSpy).not.toHaveBeenCalled();
     });
+
+    it('scrolls on same-URL push (clicking nav link to current page)', () => {
+      const { history } = renderApp(
+        { initialized: true, authenticated: true },
+        ['/movements']
+      );
+      scrollToSpy.mockClear();
+      act(() => {
+        history.push('/movements');
+      });
+      expect(scrollToSpy).toHaveBeenCalledWith(0, 0);
+    });
+
+    it('scrolls on query-string-only change', () => {
+      const { history } = renderApp(
+        { initialized: true, authenticated: true },
+        ['/arrival/abc/payment']
+      );
+      scrollToSpy.mockClear();
+      act(() => {
+        history.push('/arrival/abc/payment?success=true');
+      });
+      expect(scrollToSpy).toHaveBeenCalledWith(0, 0);
+    });
   });
 
   describe('auth gating', () => {
