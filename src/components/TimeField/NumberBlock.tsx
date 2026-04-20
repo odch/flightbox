@@ -1,88 +1,15 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 import NumberBlockWrapper from './NumberBlockWrapper';
 import Button from './Button';
 import Input from './Input';
 
-class NumberBlock extends React.Component<any, any> {
+const formatTwoDigit = (number: number) => ('0' + number).slice(-2);
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      editingValue: null,
-    }
-  }
+const NumberBlock = (props: any) => {
+  const [editingValue, setEditingValue] = useState<string | null>(null);
 
-  render() {
-    return (
-      <NumberBlockWrapper>
-        <Button
-          type="button"
-          onMouseDown={this.handleIncrement.bind(this)}
-          data-cy={`${this.props.dataCy}-increment`}
-        >+</Button>
-        <Input
-          type="text"
-          value={this.state.editingValue !== null ? this.state.editingValue : this.formatTwoDigit(this.props.value)}
-          onFocus={this.handleFocus.bind(this)}
-          onChange={this.handleChange.bind(this)}
-          onBlur={this.handleBlur.bind(this)}
-          maxLength={2}
-          data-cy={`${this.props.dataCy}-input`}
-        />
-        <Button
-          type="button"
-          onMouseDown={this.handleDecrement.bind(this)}
-          data-cy={`${this.props.dataCy}-decrement`}
-        >-</Button>
-      </NumberBlockWrapper>
-    );
-  }
-
-  handleFocus(e) {
-    e.target.select();
-    this.setState({
-      editingValue: e.target.value
-    });
-  }
-
-  handleChange(e) {
-    if (/^\d{0,2}$/.test(e.target.value)) {
-      this.setState({
-        editingValue: e.target.value,
-      });
-    }
-  }
-
-  handleBlur() {
-    const value = /^\d{1,2}$/.test(this.state.editingValue)
-      ? parseInt(this.state.editingValue, 10)
-      : 0;
-    this.setState({
-      editingValue: null,
-    });
-    this.props.onChange(value);
-  }
-
-  handleIncrement(e) {
-    this.execWhilePressed(e.target, () => {
-      const value = this.props.value + 1;
-      this.props.onChange(value);
-    });
-  }
-
-  handleDecrement(e) {
-    this.execWhilePressed(e.target, () => {
-      const value = this.props.value - 1;
-      this.props.onChange(value);
-    });
-  }
-
-  formatTwoDigit(number) {
-    return ('0' + number).slice(-2);
-  }
-
-  execWhilePressed(element, func) {
+  const execWhilePressed = (element: HTMLElement, func: () => void) => {
     func();
 
     const interval = window.setInterval(func, 150);
@@ -93,8 +20,63 @@ class NumberBlock extends React.Component<any, any> {
 
     element.addEventListener('mouseup', clearFunc);
     element.addEventListener('mouseout', clearFunc);
-  }
-}
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.select();
+    setEditingValue(e.target.value);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (/^\d{0,2}$/.test(e.target.value)) {
+      setEditingValue(e.target.value);
+    }
+  };
+
+  const handleBlur = () => {
+    const value = /^\d{1,2}$/.test(editingValue ?? '')
+      ? parseInt(editingValue as string, 10)
+      : 0;
+    setEditingValue(null);
+    props.onChange(value);
+  };
+
+  const handleIncrement = (e: React.MouseEvent<HTMLButtonElement>) => {
+    execWhilePressed(e.target as HTMLElement, () => {
+      props.onChange(props.value + 1);
+    });
+  };
+
+  const handleDecrement = (e: React.MouseEvent<HTMLButtonElement>) => {
+    execWhilePressed(e.target as HTMLElement, () => {
+      props.onChange(props.value - 1);
+    });
+  };
+
+  return (
+    <NumberBlockWrapper>
+      <Button
+        type="button"
+        onMouseDown={handleIncrement}
+        data-cy={`${props.dataCy}-increment`}
+      >+</Button>
+      <Input
+        type="text"
+        value={editingValue !== null ? editingValue : formatTwoDigit(props.value)}
+        onFocus={handleFocus}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        maxLength={2}
+        data-cy={`${props.dataCy}-input`}
+      />
+      <Button
+        type="button"
+        onMouseDown={handleDecrement}
+        data-cy={`${props.dataCy}-decrement`}
+      >-</Button>
+    </NumberBlockWrapper>
+  );
+};
 
 (NumberBlock as any).propTypes = {
   value: PropTypes.number.isRequired,

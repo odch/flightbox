@@ -10,12 +10,11 @@ const Wrapper = styled.div`
   }
 `;
 
-class Content extends React.PureComponent<any, any> {
+const Content = React.memo(({ children }: { children: React.ReactNode }) => (
+  <Wrapper>{children}</Wrapper>
+));
 
-  render() {
-    return <Wrapper>{this.props.children}</Wrapper>;
-  }
-}
+(Content as any).displayName = 'Content';
 
 (Content as any).propTypes = {
   children: PropTypes.element.isRequired

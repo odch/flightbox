@@ -5,7 +5,7 @@ import Button from '../Button'
 import LabeledComponent from '../LabeledComponent';
 import TextArea from '../TextArea';
 import AerodromeStatusDropdown from './AerodromeStatusDropdown'
-import { withTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 const StyledForm = styled.form`
   padding: 1em
@@ -14,52 +14,54 @@ const StyledForm = styled.form`
 const StyledLabeledComponent = styled(LabeledComponent)`
   width: 50%;
   margin-bottom: 1.5em;
-  
+
   @media (max-width: 768px) {
     width: 100%;
   }
 `;
 
-class StatusForm extends React.Component<any, any> {
+const StatusForm = (props: any) => {
+  const { t } = useTranslation();
+  const { data, disabled, dirty } = props;
 
-  handleSubmit(e) {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    this.props.saveAerodromeStatus(this.props.data);
-  }
+    props.saveAerodromeStatus(data);
+  };
 
-  handleStatusChange(status) {
-    this.props.updateAerodromeStatus(status, this.props.data.details);
-  }
+  const handleStatusChange = (status: string) => {
+    props.updateAerodromeStatus(status, data.details);
+  };
 
-  handleDetailsChange(e) {
-    this.props.updateAerodromeStatus(this.props.data.status, e.target.value);
-  }
+  const handleDetailsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    props.updateAerodromeStatus(data.status, e.target.value);
+  };
 
-  render() {
-    const {data, disabled, dirty, t} = this.props;
+  const statusDropdown = (
+    <AerodromeStatusDropdown value={data.status} onChange={handleStatusChange}/>
+  );
+  const detailsTextArea = (
+    <TextArea value={data.details} rows={6} onChange={handleDetailsChange}/>
+  );
 
-    const statusDropdown = <AerodromeStatusDropdown value={data.status} onChange={this.handleStatusChange.bind(this)}/>;
-    const detailsTextArea = <TextArea value={data.details} rows={6} onChange={this.handleDetailsChange.bind(this)}/>;
-
-    return (
-      <StyledForm
-        className="AerodromeStatusForm"
-        onSubmit={this.handleSubmit.bind(this)}
-      >
-        <fieldset disabled={disabled}>
-          <StyledLabeledComponent label={t('common.status')} component={statusDropdown}/>
-          <StyledLabeledComponent label={t('common.details')} component={detailsTextArea}/>
-          <Button
-            type="submit"
-            label={t('common.save')}
-            icon="save"
-            disabled={disabled || !dirty}
-            primary/>
-        </fieldset>
-      </StyledForm>
-    );
-  }
-}
+  return (
+    <StyledForm
+      className="AerodromeStatusForm"
+      onSubmit={handleSubmit}
+    >
+      <fieldset disabled={disabled}>
+        <StyledLabeledComponent label={t('common.status')} component={statusDropdown}/>
+        <StyledLabeledComponent label={t('common.details')} component={detailsTextArea}/>
+        <Button
+          type="submit"
+          label={t('common.save')}
+          icon="save"
+          disabled={disabled || !dirty}
+          primary/>
+      </fieldset>
+    </StyledForm>
+  );
+};
 
 (StatusForm as any).propTypes = {
   data: PropTypes.shape({
@@ -72,4 +74,4 @@ class StatusForm extends React.Component<any, any> {
   saveAerodromeStatus: PropTypes.func.isRequired
 };
 
-export default withTranslation()(StatusForm);
+export default StatusForm;

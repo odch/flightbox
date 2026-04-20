@@ -1,5 +1,5 @@
-import React, {Component} from 'react'
-import { withTranslation } from 'react-i18next'
+import React, { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {maskEmail, maskPhone, maskText} from '../../util/masking'
 import MaterialIcon from '../MaterialIcon'
 import Input from '../Input'
@@ -27,77 +27,56 @@ const ClearButton = styled.button`
   right: 5px;
 `;
 
-class MaskedInput extends Component<any, any> {
-  inputRef: any;
+const MaskedInput = (props: any) => {
+  const { t } = useTranslation();
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  constructor(props) {
-    super(props)
+  const refInputDom = (input: HTMLInputElement | null) => {
+    inputRef.current = input;
+  };
 
-    this.state = {
-      tooltipVisible: false
-    }
-
-    this.refInputDom = this.refInputDom.bind(this)
-    this.handleClear = this.handleClear.bind(this)
-    this.handleMouseEnter = this.handleMouseEnter.bind(this)
-    this.handleMouseLeave = this.handleMouseLeave.bind(this)
-  }
-
-  refInputDom(input) {
-    this.inputRef = input
-  }
-
-  handleClear() {
-    this.props.input.onChange(null)
+  const handleClear = () => {
+    props.input.onChange(null);
     window.requestAnimationFrame(() => {
-      if (this.inputRef) {
-        this.inputRef.focus()
+      if (inputRef.current) {
+        inputRef.current.focus();
       }
     });
-  }
+  };
 
-  handleMouseEnter() {
-    this.setState({
-      tooltipVisible: true
-    })
-  }
-
-  handleMouseLeave() {
-    this.setState({
-      tooltipVisible: false
-    })
-  }
-
-  render() {
-    if (this.props.input.value && !this.props.meta.active) {
-      return (
-        <StyledMaskedComponent data-cy={this.props.input.name} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
-          <MaskedContent>{
-            this.props.type === 'email'
-              ? maskEmail(this.props.input.value)
-              : this.props.type === 'tel'
-                ? maskPhone(this.props.input.value)
-                : maskText(this.props.input.value)
-          }</MaskedContent>
-          <ClearButton onClick={this.handleClear} type="button">
-            <MaterialIcon icon="clear"/>
-          </ClearButton>
-          {this.state.tooltipVisible && <Tooltip>{this.props.t('maskedInput.tooltip')}</Tooltip>}
-        </StyledMaskedComponent>
-      )
-    }
-
+  if (props.input.value && !props.meta.active) {
     return (
-      <Input
-        {...this.props.input}
-        name={this.props.name}
-        type={this.props.type}
-        readOnly={this.props.readOnly}
-        data-cy={this.props.input.name}
-        ref={this.refInputDom}
-      />
+      <StyledMaskedComponent
+        data-cy={props.input.name}
+        onMouseEnter={() => setTooltipVisible(true)}
+        onMouseLeave={() => setTooltipVisible(false)}
+      >
+        <MaskedContent>{
+          props.type === 'email'
+            ? maskEmail(props.input.value)
+            : props.type === 'tel'
+              ? maskPhone(props.input.value)
+              : maskText(props.input.value)
+        }</MaskedContent>
+        <ClearButton onClick={handleClear} type="button">
+          <MaterialIcon icon="clear"/>
+        </ClearButton>
+        {tooltipVisible && <Tooltip>{t('maskedInput.tooltip')}</Tooltip>}
+      </StyledMaskedComponent>
     );
   }
-}
 
-export default withTranslation()(MaskedInput);
+  return (
+    <Input
+      {...props.input}
+      name={props.name}
+      type={props.type}
+      readOnly={props.readOnly}
+      data-cy={props.input.name}
+      ref={refInputDom}
+    />
+  );
+};
+
+export default MaskedInput;

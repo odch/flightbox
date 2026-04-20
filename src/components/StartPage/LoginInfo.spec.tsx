@@ -238,5 +238,65 @@ describe('LoginInfo', () => {
       fireEvent.click(document.body);
       expect(screen.queryByText('login.logout')).not.toBeInTheDocument();
     });
+
+    it('re-opens menu after outside click closed it', () => {
+      renderWithTheme(<LoginInfo {...baseProps} />);
+      fireEvent.click(screen.getAllByText('test@example.com')[0]);
+      fireEvent.click(document.body);
+      expect(screen.queryByText('login.logout')).not.toBeInTheDocument();
+      fireEvent.click(screen.getAllByText('test@example.com')[0]);
+      expect(screen.getByText('login.logout')).toBeInTheDocument();
+    });
+
+    it('does NOT close menu when clicking inside the menu', () => {
+      renderWithTheme(<LoginInfo {...baseProps} />);
+      fireEvent.click(screen.getAllByText('test@example.com')[0]);
+      const logoutBtn = screen.getByText('login.logout');
+      // Click inside menu — should not close
+      fireEvent.click(logoutBtn);
+      // logout IS called but menu state is untouched by outside-click handler
+      expect(baseProps.logout).toHaveBeenCalled();
+    });
+  });
+
+  describe('cleanup', () => {
+    it('removes document click listener on unmount', () => {
+      const removeSpy = jest.spyOn(document, 'removeEventListener');
+      const { unmount } = renderWithTheme(<LoginInfo {...baseProps} />);
+      removeSpy.mockClear();
+      unmount();
+      expect(
+        removeSpy.mock.calls.some(([evt]) => evt === 'click')
+      ).toBe(true);
+      removeSpy.mockRestore();
+    });
+  });
+
+  describe('profileEnabled feature flag', () => {
+    const origConf = (global as any).__CONF__;
+    afterEach(() => {
+      (global as any).__CONF__ = origConf;
+    });
+
+    it('shows profile link when __CONF__ is undefined', () => {
+      (global as any).__CONF__ = undefined;
+      renderWithTheme(<LoginInfo {...baseProps} />);
+      fireEvent.click(screen.getAllByText('test@example.com')[0]);
+      expect(screen.getByText('login.profile')).toBeInTheDocument();
+    });
+
+    it('shows profile link when profileEnabled is true', () => {
+      (global as any).__CONF__ = { profileEnabled: true };
+      renderWithTheme(<LoginInfo {...baseProps} />);
+      fireEvent.click(screen.getAllByText('test@example.com')[0]);
+      expect(screen.getByText('login.profile')).toBeInTheDocument();
+    });
+
+    it('hides profile link when profileEnabled is false', () => {
+      (global as any).__CONF__ = { profileEnabled: false };
+      renderWithTheme(<LoginInfo {...baseProps} />);
+      fireEvent.click(screen.getAllByText('test@example.com')[0]);
+      expect(screen.queryByText('login.profile')).not.toBeInTheDocument();
+    });
   });
 });

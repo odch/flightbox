@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { useEffect } from 'react';
 import {connect} from 'react-redux';
 import {loadAircraftSettings} from '../modules/settings/aircrafts';
 import {loadUserInvoiceRecipients} from '../modules/invoiceRecipients';
@@ -25,7 +25,7 @@ interface Fees {
   totalGross?: number;
 }
 
-class ArrivalFinishContainer extends Component<{
+interface Props {
   aircraftSettings: {club?: object; homeBase?: object};
   invoiceRecipients?: string[];
   createMovementFromMovement: (key: string, type: string) => void;
@@ -41,66 +41,67 @@ class ArrivalFinishContainer extends Component<{
   auth: any;
   localUser: any;
   saveMovement: () => void;
-}> {
-  componentWillMount() {
-    this.props.loadAircraftSettings();
-    this.props.loadUserInvoiceRecipients();
-  }
-
-  render() {
-    const {
-      aircraftSettings,
-      invoiceRecipients,
-      email,
-      immatriculation,
-      fees,
-      createMovementFromMovement,
-      finish,
-      isUpdate,
-      headingType,
-      itemKey,
-      auth,
-      localUser,
-    } = this.props;
-
-    if (!aircraftSettings.club || !aircraftSettings.homeBase) {
-      return <FinishLoading />;
-    }
-
-    if (!invoiceRecipients) {
-      return <FinishLoading />;
-    }
-
-    const enabledPaymentMethods = getEnabledPaymentMethods(
-      objectToArray(__CONF__.paymentMethods),
-      auth.data,
-    )
-      .filter((method: string) => method === 'card' ? localUser : true)
-      .filter((method: string) => method === 'invoice' ? invoiceRecipients.length > 0 : true);
-
-    const isHomeBase =
-      (aircraftSettings.club as any)[immatriculation] === true ||
-      (aircraftSettings.homeBase as any)[immatriculation] === true;
-
-    const FinishAny = Finish as any;
-    return (
-      <FinishAny
-        createMovementFromMovement={createMovementFromMovement}
-        finish={finish}
-        isUpdate={isUpdate}
-        headingType={headingType}
-        email={email}
-        immatriculation={immatriculation}
-        isHomeBase={isHomeBase}
-        itemKey={itemKey}
-        fees={fees}
-        localUser={localUser}
-        enabledPaymentMethods={enabledPaymentMethods}
-        invoiceRecipientNames={invoiceRecipients}
-      />
-    );
-  }
 }
+
+const ArrivalFinishContainer = (props: Props) => {
+  useEffect(() => {
+    props.loadAircraftSettings();
+    props.loadUserInvoiceRecipients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const {
+    aircraftSettings,
+    invoiceRecipients,
+    email,
+    immatriculation,
+    fees,
+    createMovementFromMovement,
+    finish,
+    isUpdate,
+    headingType,
+    itemKey,
+    auth,
+    localUser,
+  } = props;
+
+  if (!aircraftSettings.club || !aircraftSettings.homeBase) {
+    return <FinishLoading />;
+  }
+
+  if (!invoiceRecipients) {
+    return <FinishLoading />;
+  }
+
+  const enabledPaymentMethods = getEnabledPaymentMethods(
+    objectToArray(__CONF__.paymentMethods),
+    auth.data,
+  )
+    .filter((method: string) => method === 'card' ? localUser : true)
+    .filter((method: string) => method === 'invoice' ? invoiceRecipients.length > 0 : true);
+
+  const isHomeBase =
+    (aircraftSettings.club as any)[immatriculation] === true ||
+    (aircraftSettings.homeBase as any)[immatriculation] === true;
+
+  const FinishAny = Finish as any;
+  return (
+    <FinishAny
+      createMovementFromMovement={createMovementFromMovement}
+      finish={finish}
+      isUpdate={isUpdate}
+      headingType={headingType}
+      email={email}
+      immatriculation={immatriculation}
+      isHomeBase={isHomeBase}
+      itemKey={itemKey}
+      fees={fees}
+      localUser={localUser}
+      enabledPaymentMethods={enabledPaymentMethods}
+      invoiceRecipientNames={invoiceRecipients}
+    />
+  );
+};
 
 const mapStateToProps = (state: RootState, ownProps: any) => {
   const wizardValues = (state.ui.wizard as any).values || {};

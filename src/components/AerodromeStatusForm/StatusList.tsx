@@ -1,42 +1,40 @@
 import PropTypes from 'prop-types';
-import React, {Component} from 'react';
+import React from 'react';
 import StatusShape from './StatusShape';
 import Status from './Status';
 import StatusHeader from './StatusHeader';
 import StatusContent from './StatusContent';
 
-class StatusList extends Component<any, any> {
+const StatusList = (props: any) => {
+  const { items, selected, selectStatus } = props;
 
-  handleStatusClick(key) {
-    this.props.selectStatus(this.props.selected === key ? null : key);
-  }
+  const handleStatusClick = (key: string) => {
+    selectStatus(selected === key ? null : key);
+  };
 
-  render() {
-    const {items, selected} = this.props;
-    return (
-      <div>
-        {items.array.map((item, index) => {
-          const active = index === 0
-          const isSelected = active || selected === item.key;
-          return (
-            <Status
-              key={index}
-              $selected={isSelected}
-            >
-              <StatusHeader
-                item={item}
-                selected={isSelected}
-                active={active}
-                onClick={this.handleStatusClick.bind(this, item.key)}
-              />
-              {isSelected && <StatusContent item={item}/>}
-            </Status>
-          );
-        })}
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      {items.array.map((item: any, index: number) => {
+        const active = index === 0;
+        const isSelected = active || selected === item.key;
+        return (
+          <Status
+            key={index}
+            $selected={isSelected}
+          >
+            <StatusHeader
+              item={item}
+              selected={isSelected}
+              active={active}
+              onClick={() => handleStatusClick(item.key)}
+            />
+            {isSelected && <StatusContent item={item}/>}
+          </Status>
+        );
+      })}
+    </div>
+  );
+};
 
 (StatusList as any).propTypes = {
   items: PropTypes.shape({

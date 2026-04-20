@@ -1,43 +1,41 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { withTranslation } from 'react-i18next';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import LabeledComponent from './StyledLabeledComponent';
 import LabeledBox from '../LabeledBox';
 import DatePicker from '../DatePicker';
 import moment from 'moment';
 
-class LockMovementsForm extends Component<any, any> {
+const LockMovementsForm = (props: any) => {
+  const { t } = useTranslation();
+  const { lockDate } = props;
 
-  componentWillMount() {
-    this.props.loadLockDate();
-  }
+  useEffect(() => {
+    props.loadLockDate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  render() {
-    const { lockDate } = this.props;
-    const { t } = this.props;
+  const datePicker = (
+    <DatePicker
+      value={lockDate.date ? moment(lockDate.date).format('YYYY-MM-DD') : null}
+      onChange={(e: any) => {
+        const ms = e.value ? new Date(e.value).getTime() : null;
+        props.setLockDate(ms);
+      }}
+      clearable={true}
+      dataCy="lock-date"
+    />
+  );
 
-    const datePicker = (
-      <DatePicker
-        value={lockDate.date ? moment(lockDate.date).format('YYYY-MM-DD') : null}
-        onChange={(e) => {
-          const ms = e.value ? new Date(e.value).getTime() : null;
-          this.props.setLockDate(ms);
-        }}
-        clearable={true}
-        dataCy="lock-date"
-      />
-    );
-
-    return (
-      <LabeledBox label={t('lockMovements.heading')} className="LockMovementsForm">
-        <div>
-          <p>{t('lockMovements.description')}</p>
-          <LabeledComponent label={t('lockMovements.lockDate')} component={datePicker}/>
-        </div>
-      </LabeledBox>
-    );
-  }
-}
+  return (
+    <LabeledBox label={t('lockMovements.heading')} className="LockMovementsForm">
+      <div>
+        <p>{t('lockMovements.description')}</p>
+        <LabeledComponent label={t('lockMovements.lockDate')} component={datePicker}/>
+      </div>
+    </LabeledBox>
+  );
+};
 
 (LockMovementsForm as any).propTypes = {
   lockDate: PropTypes.object.isRequired,
@@ -45,4 +43,4 @@ class LockMovementsForm extends Component<any, any> {
   setLockDate: PropTypes.func.isRequired,
 };
 
-export default withTranslation()(LockMovementsForm);
+export default LockMovementsForm;
