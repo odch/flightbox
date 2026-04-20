@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import MaterialIcon from '../MaterialIcon';
 import MovementDetails from './MovementDetails';
 import Action from './Action';
@@ -30,15 +30,20 @@ const ActionContainer = styled.div`
   font-size: 1.2em;
 `;
 
-class AssociatedMovement extends React.PureComponent<any, any> {
+const AssociatedMovement = React.memo((props: any) => {
+  const { t } = useTranslation();
+  const {
+    movementType,
+    movementKey,
+    associatedMovement,
+    associatedMovementData,
+    loadMovement,
+    createMovementFromMovement,
+    isHomeBase,
+    isAdmin,
+  } = props;
 
-  constructor(props) {
-    super(props);
-    this.handleCreateMovement = this.handleCreateMovement.bind(this);
-  }
-
-  componentWillMount() {
-    const {associatedMovement, associatedMovementData, loadMovement} = this.props
+  useEffect(() => {
     if (
       associatedMovement &&
       ['departure', 'arrival'].includes(associatedMovement.type) &&
@@ -46,70 +51,58 @@ class AssociatedMovement extends React.PureComponent<any, any> {
     ) {
       loadMovement(associatedMovement.key, associatedMovement.type);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [associatedMovement, associatedMovementData]);
+
+  const handleCreateMovement = () => {
+    createMovementFromMovement(movementType, movementKey);
+  };
+
+  let label;
+  let text;
+
+  if (movementType === 'departure') {
+    label = t('movement.associated.arrivalLabel');
+    text = associatedMovementData
+      ? t('movement.associated.arrivalFound')
+      : associatedMovementData === null
+        ? t('movement.associated.arrivalNotFound')
+        : null;
+  } else {
+    label = t('movement.associated.departureLabel');
+    text = associatedMovementData
+      ? t('movement.associated.departureFound')
+      : associatedMovementData === null
+        ? t('movement.associated.departureNotFound')
+        : null;
   }
 
-  componentDidUpdate() {
-    const {associatedMovement, associatedMovementData, loadMovement} = this.props
-    if (
-      associatedMovement &&
-      ['departure', 'arrival'].includes(associatedMovement.type) &&
-      associatedMovementData === undefined
-    ) {
-      loadMovement(associatedMovement.key, associatedMovement.type);
-    }
-  }
+  return (
+    <Wrapper>
+      <div>
+        <Label>{label}</Label>
+        {text && <div>{text}</div>}
+        {associatedMovementData
+          ? <StyledDetails data={associatedMovementData} isHomeBase={isHomeBase} isAdmin={isAdmin}/>
+          : associatedMovementData === undefined
+            ? <MaterialIcon icon="sync" rotate="left"/>
+            : (
+              <ActionsContainer>
+                <ActionContainer>
+                  <Action
+                    label={ACTION_LABELS[movementType].label}
+                    icon={ACTION_LABELS[movementType].icon}
+                    onClick={handleCreateMovement}
+                  />
+                </ActionContainer>
+              </ActionsContainer>
+            )}
+      </div>
+    </Wrapper>
+  );
+});
 
-  render() {
-    const {movementType, associatedMovementData, t} = this.props;
-
-    let label;
-    let text;
-
-    if (movementType === 'departure') {
-      label = t('movement.associated.arrivalLabel');
-      text = associatedMovementData
-        ? t('movement.associated.arrivalFound')
-        : associatedMovementData === null
-          ? t('movement.associated.arrivalNotFound')
-          : null;
-    } else {
-      label = t('movement.associated.departureLabel');
-      text = associatedMovementData
-        ? t('movement.associated.departureFound')
-        : associatedMovementData === null
-          ? t('movement.associated.departureNotFound')
-          : null;
-    }
-
-    return (
-      <Wrapper>
-        <div>
-          <Label>{label}</Label>
-          {text && <div>{text}</div>}
-          {associatedMovementData
-            ? <StyledDetails data={associatedMovementData} isHomeBase={this.props.isHomeBase} isAdmin={this.props.isAdmin}/>
-            : associatedMovementData === undefined
-              ? <MaterialIcon icon="sync" rotate="left"/>
-              : (
-                <ActionsContainer>
-                  <ActionContainer>
-                    <Action
-                      label={ACTION_LABELS[movementType].label}
-                      icon={ACTION_LABELS[movementType].icon}
-                      onClick={this.handleCreateMovement}
-                    />
-                  </ActionContainer>
-                </ActionsContainer>
-              )}
-        </div>
-      </Wrapper>
-    )
-  }
-
-  handleCreateMovement() {
-    this.props.createMovementFromMovement(this.props.movementType, this.props.movementKey);
-  }
-}
+(AssociatedMovement as any).displayName = 'AssociatedMovement';
 
 (AssociatedMovement as any).propTypes = {
   movementType: PropTypes.oneOf(['departure', 'arrival']),
@@ -123,4 +116,4 @@ class AssociatedMovement extends React.PureComponent<any, any> {
   createMovementFromMovement: PropTypes.func.isRequired
 };
 
-export default withTranslation()(AssociatedMovement);
+export default AssociatedMovement;
