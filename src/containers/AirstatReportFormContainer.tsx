@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {connect} from 'react-redux';
 import {initReport, setReportDate, setReportParameter, generateReport} from '../modules/reports';
 import AirstatReportForm from '../components/AirstatReportForm';
@@ -9,7 +9,7 @@ interface ReportDate {
   month?: number;
 }
 
-class AirstatReportFormContainer extends React.Component<{
+interface Props {
   initialized: boolean;
   date?: ReportDate;
   internal?: boolean;
@@ -20,26 +20,27 @@ class AirstatReportFormContainer extends React.Component<{
   setInternal: (internal: boolean) => void;
   setDelimiter: (delimiter: string) => void;
   generate: () => void;
-}> {
-  componentWillMount() {
-    this.props.initReport();
-  }
-
-  render() {
-    return (
-      <AirstatReportForm
-        disabled={!this.props.initialized || this.props.generationInProgress}
-        date={this.props.date}
-        internal={this.props.internal}
-        delimiter={this.props.delimiter}
-        setDate={this.props.setDate}
-        setInternal={this.props.setInternal}
-        setDelimiter={this.props.setDelimiter}
-        generate={this.props.generate}
-      />
-    );
-  }
 }
+
+const AirstatReportFormContainer = (props: Props) => {
+  useEffect(() => {
+    props.initReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <AirstatReportForm
+      disabled={!props.initialized || props.generationInProgress}
+      date={props.date}
+      internal={props.internal}
+      delimiter={props.delimiter}
+      setDate={props.setDate}
+      setInternal={props.setInternal}
+      setDelimiter={props.setDelimiter}
+      generate={props.generate}
+    />
+  );
+};
 
 const mapStateToProps = (state: RootState) => {
   let report = (state.reports as any).airstat;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {connect} from 'react-redux';
 import {initImport, selectImportFile, startImport} from '../modules/imports';
 import UserImportForm from '../components/UserImportForm';
@@ -6,7 +6,7 @@ import {RootState} from '../modules';
 
 const IMPORT_NAME = 'users';
 
-class UserImportFormContainer extends React.Component<{
+interface Props {
   initialized: boolean;
   inProgress: boolean;
   importDone: boolean;
@@ -15,26 +15,27 @@ class UserImportFormContainer extends React.Component<{
   initImport: () => void;
   selectFile: (file: File) => void;
   startImport: () => void;
-}> {
-  componentWillMount() {
-    this.props.initImport();
-  }
-
-  render() {
-    return (
-      <UserImportForm
-        disabled={!this.props.initialized}
-        selectedFile={this.props.selectedFile}
-        importInProgress={this.props.inProgress}
-        importDone={this.props.importDone}
-        importFailed={this.props.importFailed}
-        selectFile={this.props.selectFile}
-        startImport={this.props.startImport}
-        closeDoneDialog={this.props.initImport}
-      />
-    );
-  }
 }
+
+const UserImportFormContainer = (props: Props) => {
+  useEffect(() => {
+    props.initImport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <UserImportForm
+      disabled={!props.initialized}
+      selectedFile={props.selectedFile}
+      importInProgress={props.inProgress}
+      importDone={props.importDone}
+      importFailed={props.importFailed}
+      selectFile={props.selectFile}
+      startImport={props.startImport}
+      closeDoneDialog={props.initImport}
+    />
+  );
+};
 
 const mapStateToProps = (state: RootState) => {
   let importObj = (state.imports as any)[IMPORT_NAME];

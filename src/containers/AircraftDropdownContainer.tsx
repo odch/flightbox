@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { useEffect } from 'react';
 import {connect} from 'react-redux';
 import {loadAircrafts} from '../modules/aircrafts';
 import AircraftDropdown from '../components/AircraftDropdown';
@@ -14,29 +14,30 @@ interface OwnProps {
   dataCy?: string;
 }
 
-class AircraftDropdownContainer extends Component<OwnProps & {
+type Props = OwnProps & {
   aircrafts: object;
   loadAircrafts: () => void;
-}> {
-  componentWillMount() {
-    this.props.loadAircrafts();
-  }
+};
 
-  render() {
-    return (
-      <AircraftDropdown
-        aircrafts={this.props.aircrafts}
-        value={this.props.value ?? ''}
-        onChange={this.props.onChange}
-        onFocus={this.props.onFocus}
-        onBlur={this.props.onBlur}
-        readOnly={this.props.readOnly}
-        dataCy={this.props.dataCy}
-        clearable={this.props.clearable}
-      />
-    );
-  }
-}
+const AircraftDropdownContainer = (props: Props) => {
+  useEffect(() => {
+    props.loadAircrafts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <AircraftDropdown
+      aircrafts={props.aircrafts}
+      value={props.value ?? ''}
+      onChange={props.onChange}
+      onFocus={props.onFocus}
+      onBlur={props.onBlur}
+      readOnly={props.readOnly}
+      dataCy={props.dataCy}
+      clearable={props.clearable}
+    />
+  );
+};
 
 const mapStateToProps = (state: RootState, ownProps: OwnProps) => ({
   aircrafts: state.aircrafts,

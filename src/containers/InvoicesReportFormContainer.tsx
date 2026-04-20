@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {connect} from 'react-redux';
 import {generateReport, initReport, setReportDate} from '../modules/reports';
 import ReportForm from '../components/ReportForm';
@@ -9,30 +9,31 @@ interface ReportDate {
   month?: number;
 }
 
-class InvoicesReportFormContainer extends React.Component<{
+interface Props {
   initialized: boolean;
   date?: ReportDate;
   generationInProgress?: boolean;
   initReport: () => void;
   setDate: (date: ReportDate) => void;
   generate: () => void;
-}> {
-  componentWillMount() {
-    this.props.initReport();
-  }
-
-  render() {
-    return (
-      <ReportForm
-        disabled={!this.props.initialized || this.props.generationInProgress}
-        date={this.props.date}
-        setDate={this.props.setDate}
-        generate={this.props.generate}
-        withDelimiter={false}
-      />
-    );
-  }
 }
+
+const InvoicesReportFormContainer = (props: Props) => {
+  useEffect(() => {
+    props.initReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <ReportForm
+      disabled={!props.initialized || props.generationInProgress}
+      date={props.date}
+      setDate={props.setDate}
+      generate={props.generate}
+      withDelimiter={false}
+    />
+  );
+};
 
 const mapStateToProps = (state: RootState) => {
   let report = (state.reports as any).invoices;

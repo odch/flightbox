@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { useEffect } from 'react';
 import {connect} from 'react-redux';
 import {loadUsers} from '../modules/users';
 import UserDropdown from '../components/UserDropdown';
@@ -13,28 +13,29 @@ interface OwnProps {
   dataCy?: string;
 }
 
-class UserDropdownContainer extends Component<OwnProps & {
+type Props = OwnProps & {
   users: object;
   loadUsers: () => void;
-}> {
-  componentWillMount() {
-    this.props.loadUsers();
-  }
+};
 
-  render() {
-    return (
-      <UserDropdown
-        users={this.props.users}
-        value={this.props.value ?? ''}
-        onChange={this.props.onChange}
-        onFocus={this.props.onFocus}
-        onBlur={this.props.onBlur}
-        readOnly={this.props.readOnly}
-        dataCy={this.props.dataCy}
-      />
-    );
-  }
-}
+const UserDropdownContainer = (props: Props) => {
+  useEffect(() => {
+    props.loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <UserDropdown
+      users={props.users}
+      value={props.value ?? ''}
+      onChange={props.onChange}
+      onFocus={props.onFocus}
+      onBlur={props.onBlur}
+      readOnly={props.readOnly}
+      dataCy={props.dataCy}
+    />
+  );
+};
 
 const mapStateToProps = (state: RootState, ownProps: OwnProps) => ({
   users: state.users,
