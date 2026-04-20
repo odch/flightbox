@@ -14,7 +14,7 @@ import { ThemeProvider } from 'styled-components';
   },
 };
 
-const theme = {
+const theme: any = {
   colors: { main: '#003863', background: '#fafafa', danger: '#e00f00' },
 };
 
