@@ -28,7 +28,10 @@ const App = (props: any) => {
     if (props.history.action !== 'POP') {
       window.scrollTo(0, 0);
     }
-  }, [props.location.pathname]);
+    // Keyed on location.key so same-URL pushes and query-only changes
+    // also trigger scroll (matching the previous cWRP behavior), and
+    // unrelated re-renders (auth refresh, showLogin toggle) do not.
+  }, [props.location.key]);
 
   if (props.auth.initialized !== true) {
     return <Centered><MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}</Centered>;
