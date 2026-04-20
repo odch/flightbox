@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import dates from '../../util/dates';
 import MovementHeader from './MovementHeader';
 import MovementDetails from './MovementDetails';
@@ -42,140 +42,121 @@ const Footer = styled.div`
   }
 `;
 
-class Movement extends React.PureComponent<any, any> {
+const Movement = React.memo((props: any) => {
+  const { t } = useTranslation();
+  const { timeWithDate = true } = props;
 
-  constructor(props) {
-    super(props);
-    this.handleClick = this.handleClick.bind(this);
-    this.handleDeleteClick = this.handleDeleteClick.bind(this);
-    this.handleEditClick = this.handleEditClick.bind(this);
-    this.handleCustomsClick = this.handleCustomsClick.bind(this);
-  }
+  const handleClick = () => {
+    const selected = props.selected ? null : props.data.key;
+    props.onSelect(selected);
+  };
 
-  render() {
-    const props = this.props;
-    const { t } = this.props;
+  const handleDeleteClick = () => {
+    props.onDelete(props.data);
+  };
 
-    const isHomeBase = props.aircraftSettings.club[props.data.immatriculation] === true
-      || props.aircraftSettings.homeBase[props.data.immatriculation] === true;
+  const handleEditClick = () => {
+    props.onEdit(props.data.type, props.data.key);
+  };
 
-    return (
-      <Wrapper $selected={props.selected} data-id={props.data.key}>
-        <MovementHeader
-          onClick={this.handleClick}
-          selected={props.selected}
-          data={props.data}
-          timeWithDate={props.timeWithDate}
-          createMovementFromMovement={props.createMovementFromMovement}
-          locked={props.locked}
-          isHomeBase={isHomeBase}
-          isAdmin={props.isAdmin}
-        />
-        {props.selected && (
-          <div>
-            <StyledMovementDetails
-              data={props.data}
-              locked={props.locked}
-              isHomeBase={isHomeBase}
-              isAdmin={props.isAdmin}
-            />
-            {!props.locked && (
-              <Footer>
-                {this.shouldShowCustomsAction() && (
-                  <Action
-                    label={props.data.customsFormId ? t('movement.openCustoms') : t('movement.recordCustoms')}
-                    icon={props.customs.loading ? "sync" :"description"}
-                    rotateIcon={props.customs.loading ? 'left' : undefined}
-                    disabled={props.customs.loading}
-                    onClick={this.handleCustomsClick}
-                  />
-                )}
-                <Action
-                  label={t('movement.edit')}
-                  icon="edit"
-                  onClick={this.handleEditClick}
-                  dataCy="action-edit"
-                />
-                <Action
-                  label={t('movement.delete')}
-                  icon="delete"
-                  onClick={this.handleDeleteClick}
-                  dataCy="action-delete"
-                />
-              </Footer>
-            )}
-            <AssociatedMovement
-              movementType={props.data.type}
-              movementKey={props.data.key}
-              isHomeBase={isHomeBase}
-              associatedMovement={props.data.associatedMovement}
-              createMovementFromMovement={props.createMovementFromMovement}
-              loading={props.loading}
-              isAdmin={props.isAdmin}
-            />
-          </div>
-        )}
-      </Wrapper>
-    );
-  }
+  const handleCustomsClick = () => {
+    props.onStartCustoms(props.data);
+  };
 
-  handleClick() {
-    const selected = this.props.selected ? null : this.props.data.key;
-    this.props.onSelect(selected);
-  }
-
-  handleDeleteClick() {
-    this.props.onDelete(this.props.data);
-  }
-
-  handleEditClick() {
-    this.props.onEdit(this.props.data.type, this.props.data.key);
-  }
-
-  handleCustomsClick() {
-    this.props.onStartCustoms(this.props.data);
-  }
-
-  isForeignFlight() {
-    const { data, aerodromes } = this.props;
-
+  const isForeignFlight = () => {
+    const { data, aerodromes } = props;
     if (!aerodromes || !aerodromes.data) {
       return false;
     }
-
     const aerodrome = aerodromes.data.getByKey(data.location);
-
     if (!aerodrome) {
       return false;
     }
-
     return aerodrome.country !== 'CH';
-  }
+  };
 
-  isFutureFlightTime() {
-    const { data } = this.props;
+  const isFutureFlightTime = () => {
+    const { data } = props;
     const flightTimestamp = dates.localToIsoUtc(data.date, data.time);
     const now = new Date().toISOString();
     return flightTimestamp > now;
-  }
+  };
 
-  shouldShowCustomsAction() {
-    const { data, customs } = this.props;
-
-    // Only show customs actions if the customs declaration app is available (checked via Cloud Functions)
+  const shouldShowCustomsAction = () => {
+    const { data, customs } = props;
     if (customs && customs.available !== true) {
       return false;
     }
-
-    // Show "Zollanmeldung öffnen" if customsFormId exists (regardless of timing)
     if (data.customsFormId) {
       return true;
     }
+    return isForeignFlight() && isFutureFlightTime();
+  };
 
-    // Show "Zollanmeldung erfassen" for foreign flights that are in the future
-    return this.isForeignFlight() && this.isFutureFlightTime();
-  }
-}
+  const isHomeBase = props.aircraftSettings.club[props.data.immatriculation] === true
+    || props.aircraftSettings.homeBase[props.data.immatriculation] === true;
+
+  return (
+    <Wrapper $selected={props.selected} data-id={props.data.key}>
+      <MovementHeader
+        onClick={handleClick}
+        selected={props.selected}
+        data={props.data}
+        timeWithDate={timeWithDate}
+        createMovementFromMovement={props.createMovementFromMovement}
+        locked={props.locked}
+        isHomeBase={isHomeBase}
+        isAdmin={props.isAdmin}
+      />
+      {props.selected && (
+        <div>
+          <StyledMovementDetails
+            data={props.data}
+            locked={props.locked}
+            isHomeBase={isHomeBase}
+            isAdmin={props.isAdmin}
+          />
+          {!props.locked && (
+            <Footer>
+              {shouldShowCustomsAction() && (
+                <Action
+                  label={props.data.customsFormId ? t('movement.openCustoms') : t('movement.recordCustoms')}
+                  icon={props.customs.loading ? "sync" : "description"}
+                  rotateIcon={props.customs.loading ? 'left' : undefined}
+                  disabled={props.customs.loading}
+                  onClick={handleCustomsClick}
+                />
+              )}
+              <Action
+                label={t('movement.edit')}
+                icon="edit"
+                onClick={handleEditClick}
+                dataCy="action-edit"
+              />
+              <Action
+                label={t('movement.delete')}
+                icon="delete"
+                onClick={handleDeleteClick}
+                dataCy="action-delete"
+              />
+            </Footer>
+          )}
+          <AssociatedMovement
+            movementType={props.data.type}
+            movementKey={props.data.key}
+            isHomeBase={isHomeBase}
+            associatedMovement={props.data.associatedMovement}
+            createMovementFromMovement={props.createMovementFromMovement}
+            loading={props.loading}
+            isAdmin={props.isAdmin}
+          />
+        </div>
+      )}
+    </Wrapper>
+  );
+});
+
+(Movement as any).displayName = 'Movement';
 
 (Movement as any).propTypes = {
   data: PropTypes.object.isRequired,
@@ -201,8 +182,4 @@ class Movement extends React.PureComponent<any, any> {
   loading: PropTypes.bool.isRequired
 };
 
-(Movement as any).defaultProps = {
-  timeWithDate: true,
-};
-
-export default withTranslation()(Movement);
+export default Movement;
