@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import React from 'react';
-import { withTranslation } from 'react-i18next';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Predicates from './Predicates';
 import MovementGroup from './MovementGroup';
 import LoadingInfo from './LoadingInfo';
@@ -30,115 +30,115 @@ const olderPredicate = Predicates.and(
  * this month
  * older
  */
-class MovementList extends React.PureComponent<any, any> {
+const MovementList = (props: any) => {
+  const { t } = useTranslation();
 
-  componentWillMount() {
-    this.props.loadAircraftSettings();
-    this.props.loadAerodromes();
-    this.props.checkCustomsAvailability();
-    this.props.onSelect(null);
-    this.props.loadItems(true);
+  useEffect(() => {
+    props.loadAircraftSettings();
+    props.loadAerodromes();
+    props.checkCustomsAvailability();
+    props.onSelect(null);
+    props.loadItems(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (props.lockDate.loading === true
+    || !props.aircraftSettings.club
+    || !props.aircraftSettings.homeBase) {
+    return <LoadingInfo/>;
   }
 
-  render() {
-    const { t } = this.props;
-    if (this.props.lockDate.loading === true
-      || !this.props.aircraftSettings.club
-      || !this.props.aircraftSettings.homeBase) {
-      return <LoadingInfo/>;
-    }
+  const confirmationDialog = props.deleteConfirmation ? (
+    <MovementDeleteConfirmationDialog
+      item={props.deleteConfirmation}
+      confirm={props.deleteItem}
+      hide={props.hideDeleteConfirmationDialog}
+    />
+  ) : null;
 
-    const confirmationDialog = this.props.deleteConfirmation ?
-      (<MovementDeleteConfirmationDialog
-        item={this.props.deleteConfirmation}
-        confirm={this.props.deleteItem}
-        hide={this.props.hideDeleteConfirmationDialog}
-      />) : null;
-
-    return (
-      <div>
-        {this.props.isAdmin === true && <MovementFilter/>}
-        <MovementGroup
-          label={t('movement.groups.tomorrow')}
-          items={this.props.items}
-          selected={this.props.selected}
-          onSelect={this.props.onSelect}
-          predicate={afterTodayPredicate}
-          onEdit={this.props.onEdit}
-          timeWithDate={true}
-          createMovementFromMovement={this.props.createMovementFromMovement}
-          onDelete={this.props.showDeleteConfirmationDialog}
-          lockDate={this.props.lockDate.date}
-          aircraftSettings={this.props.aircraftSettings}
-          loading={this.props.loading}
-          isAdmin={this.props.isAdmin}
-        />
-        <MovementGroup
-          label={t('movement.groups.today')}
-          items={this.props.items}
-          selected={this.props.selected}
-          onSelect={this.props.onSelect}
-          predicate={todayPredicate}
-          onEdit={this.props.onEdit}
-          timeWithDate={false}
-          createMovementFromMovement={this.props.createMovementFromMovement}
-          onDelete={this.props.showDeleteConfirmationDialog}
-          lockDate={this.props.lockDate.date}
-          aircraftSettings={this.props.aircraftSettings}
-          loading={this.props.loading}
-          isAdmin={this.props.isAdmin}
-        />
-        <MovementGroup
-          label={t('movement.groups.yesterday')}
-          items={this.props.items}
-          selected={this.props.selected}
-          onSelect={this.props.onSelect}
-          predicate={yesterdayPredicate}
-          onEdit={this.props.onEdit}
-          timeWithDate={false}
-          createMovementFromMovement={this.props.createMovementFromMovement}
-          onDelete={this.props.showDeleteConfirmationDialog}
-          lockDate={this.props.lockDate.date}
-          aircraftSettings={this.props.aircraftSettings}
-          loading={this.props.loading}
-          isAdmin={this.props.isAdmin}
-        />
-        <MovementGroup
-          label={t('movement.groups.thisMonth')}
-          items={this.props.items}
-          selected={this.props.selected}
-          onSelect={this.props.onSelect}
-          predicate={thisMonthPredicate}
-          onEdit={this.props.onEdit}
-          createMovementFromMovement={this.props.createMovementFromMovement}
-          onDelete={this.props.showDeleteConfirmationDialog}
-          lockDate={this.props.lockDate.date}
-          aircraftSettings={this.props.aircraftSettings}
-          loading={this.props.loading}
-          isAdmin={this.props.isAdmin}
-        />
-        <MovementGroup
-          label={t('movement.groups.older')}
-          items={this.props.items}
-          selected={this.props.selected}
-          onSelect={this.props.onSelect}
-          predicate={olderPredicate}
-          onEdit={this.props.onEdit}
-          createMovementFromMovement={this.props.createMovementFromMovement}
-          onDelete={this.props.showDeleteConfirmationDialog}
-          lockDate={this.props.lockDate.date}
-          aircraftSettings={this.props.aircraftSettings}
-          loading={this.props.loading}
-          isAdmin={this.props.isAdmin}
-        />
-        {this.props.loading && <LoadingInfo/>}
-        {this.props.loadingFailed && <LoadingFailureInfo/>}
-        {!this.props.loading && this.props.items.array.length === 0 && <NoMovementsInfo/>}
-        {confirmationDialog}
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      {props.isAdmin === true && <MovementFilter/>}
+      <MovementGroup
+        label={t('movement.groups.tomorrow')}
+        items={props.items}
+        selected={props.selected}
+        onSelect={props.onSelect}
+        predicate={afterTodayPredicate}
+        onEdit={props.onEdit}
+        timeWithDate={true}
+        createMovementFromMovement={props.createMovementFromMovement}
+        onDelete={props.showDeleteConfirmationDialog}
+        lockDate={props.lockDate.date}
+        aircraftSettings={props.aircraftSettings}
+        loading={props.loading}
+        isAdmin={props.isAdmin}
+      />
+      <MovementGroup
+        label={t('movement.groups.today')}
+        items={props.items}
+        selected={props.selected}
+        onSelect={props.onSelect}
+        predicate={todayPredicate}
+        onEdit={props.onEdit}
+        timeWithDate={false}
+        createMovementFromMovement={props.createMovementFromMovement}
+        onDelete={props.showDeleteConfirmationDialog}
+        lockDate={props.lockDate.date}
+        aircraftSettings={props.aircraftSettings}
+        loading={props.loading}
+        isAdmin={props.isAdmin}
+      />
+      <MovementGroup
+        label={t('movement.groups.yesterday')}
+        items={props.items}
+        selected={props.selected}
+        onSelect={props.onSelect}
+        predicate={yesterdayPredicate}
+        onEdit={props.onEdit}
+        timeWithDate={false}
+        createMovementFromMovement={props.createMovementFromMovement}
+        onDelete={props.showDeleteConfirmationDialog}
+        lockDate={props.lockDate.date}
+        aircraftSettings={props.aircraftSettings}
+        loading={props.loading}
+        isAdmin={props.isAdmin}
+      />
+      <MovementGroup
+        label={t('movement.groups.thisMonth')}
+        items={props.items}
+        selected={props.selected}
+        onSelect={props.onSelect}
+        predicate={thisMonthPredicate}
+        onEdit={props.onEdit}
+        createMovementFromMovement={props.createMovementFromMovement}
+        onDelete={props.showDeleteConfirmationDialog}
+        lockDate={props.lockDate.date}
+        aircraftSettings={props.aircraftSettings}
+        loading={props.loading}
+        isAdmin={props.isAdmin}
+      />
+      <MovementGroup
+        label={t('movement.groups.older')}
+        items={props.items}
+        selected={props.selected}
+        onSelect={props.onSelect}
+        predicate={olderPredicate}
+        onEdit={props.onEdit}
+        createMovementFromMovement={props.createMovementFromMovement}
+        onDelete={props.showDeleteConfirmationDialog}
+        lockDate={props.lockDate.date}
+        aircraftSettings={props.aircraftSettings}
+        loading={props.loading}
+        isAdmin={props.isAdmin}
+      />
+      {props.loading && <LoadingInfo/>}
+      {props.loadingFailed && <LoadingFailureInfo/>}
+      {!props.loading && props.items.array.length === 0 && <NoMovementsInfo/>}
+      {confirmationDialog}
+    </div>
+  );
+};
 
 (MovementList as any).propTypes = {
   loadItems: PropTypes.func.isRequired,
@@ -164,4 +164,4 @@ class MovementList extends React.PureComponent<any, any> {
   isAdmin: PropTypes.bool
 };
 
-export default withTranslation()(AutoLoad(MovementList));
+export default AutoLoad(MovementList);
