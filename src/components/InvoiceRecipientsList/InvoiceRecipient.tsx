@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import React from 'react';
-import { withTranslation } from 'react-i18next';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
 import ItemList from '../ItemList'
@@ -36,79 +36,66 @@ const ButtonContainer = styled.div`
   text-align: right
 `
 
-class InvoiceRecipient extends React.Component<any, any> {
+const InvoiceRecipient = (props: any) => {
+  const { t } = useTranslation();
+  const { recipient, expanded, onRemove, onAddEmail, onRemoveEmail, onExpandedChange } = props;
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      newEmail: '',
-      recipientDeleteDialogOpen: false
+  const [newEmail, setNewEmail] = useState('');
+  const [recipientDeleteDialogOpen, setRecipientDeleteDialogOpen] = useState(false);
+
+  const currentEmails = recipient.emails || [];
+  const prevEmailsLengthRef = useRef(currentEmails.length);
+
+  useEffect(() => {
+    if (prevEmailsLengthRef.current < currentEmails.length) {
+      setNewEmail('');
     }
-  }
+    prevEmailsLengthRef.current = currentEmails.length;
+  }, [currentEmails.length]);
 
-  componentDidUpdate(prevProps) {
-    // Check if a new email was successfully added
-    const prevEmails = prevProps.recipient.emails || []
-    const currentEmails = this.props.recipient.emails || []
-    if (prevEmails.length < currentEmails.length) {
-      this.setState({newEmail: ''});
-    }
-  }
+  const sortedEmails = [...currentEmails].sort((a: string, b: string) =>
+    a.toLowerCase().localeCompare(b.toLowerCase())
+  );
 
-  render() {
-    const { t } = this.props;
-    const {recipient, expanded, onRemove, onAddEmail, onRemoveEmail, onExpandedChange} = this.props
-
-    const sortedEmails = [...(recipient.emails || [])].sort((a, b) =>
-      a.toLowerCase().localeCompare(b.toLowerCase())
-    )
-
-    return (
-      <>
-        <Wrapper>
-          <Header onClick={() => onExpandedChange(!expanded)}>
-            <Name>
-              <MaterialIcon icon={expanded ? "keyboard_arrow_up" : "keyboard_arrow_down"}/>
-              <div>{recipient.name}</div>
-            </Name>
-          </Header>
-          {expanded && (
-            <Details>
-              <ItemList items={sortedEmails}
-                        placeholder={t('invoiceRecipients.authorizedLogin')}
-                        newItem={this.state.newEmail}
-                        newItemInputType="email"
-                        changeNewItem={value => {
-                          this.setState({
-                            newEmail: value
-                          })
-                        }}
-                        addItem={onAddEmail}
-                        removeItem={onRemoveEmail}/>
-              <ButtonContainer>
-                <Button label={t('invoiceRecipients.delete')} icon="delete" danger onClick={() => {
-                  this.setState({
-                    recipientDeleteDialogOpen: true
-                  })
-                }}/>
-              </ButtonContainer>
-            </Details>
-          )}
-        </Wrapper>
-        {this.state.recipientDeleteDialogOpen && (
-          <DeleteDialog
-            question={t('invoiceRecipients.deleteConfirm', {name: recipient.name})}
-            onConfirm={() => onRemove()}
-            onCancel={() => {
-              this.setState({
-                recipientDeleteDialogOpen: false
-              })
-            }}/>
+  return (
+    <>
+      <Wrapper>
+        <Header onClick={() => onExpandedChange(!expanded)}>
+          <Name>
+            <MaterialIcon icon={expanded ? "keyboard_arrow_up" : "keyboard_arrow_down"}/>
+            <div>{recipient.name}</div>
+          </Name>
+        </Header>
+        {expanded && (
+          <Details>
+            <ItemList items={sortedEmails}
+                      placeholder={t('invoiceRecipients.authorizedLogin')}
+                      newItem={newEmail}
+                      newItemInputType="email"
+                      changeNewItem={(value: string) => setNewEmail(value)}
+                      addItem={onAddEmail}
+                      removeItem={onRemoveEmail}/>
+            <ButtonContainer>
+              <Button
+                label={t('invoiceRecipients.delete')}
+                icon="delete"
+                danger
+                onClick={() => setRecipientDeleteDialogOpen(true)}
+              />
+            </ButtonContainer>
+          </Details>
         )}
-      </>
-    )
-  }
-}
+      </Wrapper>
+      {recipientDeleteDialogOpen && (
+        <DeleteDialog
+          question={t('invoiceRecipients.deleteConfirm', {name: recipient.name})}
+          onConfirm={() => onRemove()}
+          onCancel={() => setRecipientDeleteDialogOpen(false)}
+        />
+      )}
+    </>
+  );
+};
 
 (InvoiceRecipient as any).propTypes = {
   recipient: PropTypes.shape({
@@ -121,4 +108,4 @@ class InvoiceRecipient extends React.Component<any, any> {
   onExpandedChange: PropTypes.func,
 };
 
-export default withTranslation()(InvoiceRecipient);
+export default InvoiceRecipient;
