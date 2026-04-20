@@ -10,12 +10,9 @@ const Wrapper = styled.div`
   }
 `;
 
-class Content extends React.PureComponent<any, any> {
-
-  render() {
-    return <Wrapper>{this.props.children}</Wrapper>;
-  }
-}
+const Content = ({ children }: { children: React.ReactNode }) => (
+  <Wrapper>{children}</Wrapper>
+);
 
 (Content as any).propTypes = {
   children: PropTypes.element.isRequired
