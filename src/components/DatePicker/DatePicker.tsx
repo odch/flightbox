@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import React, {Component} from 'react';
-import { withTranslation } from 'react-i18next';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { de } from 'date-fns/locale/de';
 import { enGB } from 'date-fns/locale/en-GB';
 import ModalDialog from '../ModalDialog';
@@ -11,109 +11,83 @@ import DayPicker from './DayPicker';
 import ClearButton from './ClearButton';
 import Value from './Value';
 
-class DatePicker extends Component<any, any> {
+const DatePicker = (props: any) => {
+  const { i18n } = useTranslation();
+  const { clearable = false, readOnly, dataCy, onChange } = props;
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      showPicker: false,
-      value: props.value,
-    };
+  const [showPicker, setShowPicker] = useState(false);
+  const [state, setState] = useState(() => ({
+    value: props.value,
+    prevPropsValue: props.value,
+  }));
 
-    this.handleDayClick = this.handleDayClick.bind(this);
-    this.showPicker = this.showPicker.bind(this);
-    this.hidePicker = this.hidePicker.bind(this);
-    this.handleClear = this.handleClear.bind(this);
+  let currentValue = state.value;
+  if (props.value !== state.prevPropsValue) {
+    currentValue = props.value;
+    setState({ value: props.value, prevPropsValue: props.value });
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      value: nextProps.value,
-    });
-  }
-
-  render() {
-    if (this.props.readOnly === true) {
-      return (
-        <Wrapper readOnly>
-          <Value>
-            {this.state.value ? dates.formatDate(this.state.value) : '\u00a0'}
-          </Value>
-        </Wrapper>
-      );
+  const handleDayClick = (date: Date | null | undefined) => {
+    const dateString = date ? dates.localDate(date as any) : null;
+    setShowPicker(false);
+    setState({ value: dateString, prevPropsValue: props.value });
+    if (typeof onChange === 'function') {
+      onChange({ value: dateString });
     }
+  };
 
-    let dialog;
-    if (this.state.showPicker === true) {
-      const picker = this.renderPicker();
-      dialog = (
-        <ModalDialog content={picker} onBlur={this.hidePicker} fullWidthThreshold={0}/>
-      );
-    }
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation(); // prevent call of outer div onClick handler
+    handleDayClick(null);
+  };
+
+  if (readOnly === true) {
     return (
-      <Wrapper>
-        <Value onClick={this.showPicker} data-cy={this.props.dataCy}>
-          {this.state.value ? this.renderValue() : '\u00a0'}
-          {this.props.clearable === true && this.state.value
-            ? <ClearButton onClick={this.handleClear} type="button">
-                <MaterialIcon icon="clear"/>
-            </ClearButton>
-            : null}
+      <Wrapper readOnly>
+        <Value>
+          {currentValue ? dates.formatDate(currentValue) : '\u00a0'}
         </Value>
-        {dialog}
       </Wrapper>
     );
   }
 
-  renderValue() {
-    return dates.formatDate(this.state.value);
-  }
-
-  renderPicker() {
-    const date = this.state.value ? new Date(this.state.value) : undefined;
-    const locale = this.props.i18n?.language === 'en' ? enGB : de;
+  const renderPicker = () => {
+    const date = currentValue ? new Date(currentValue) : undefined;
+    const locale = i18n?.language === 'en' ? enGB : de;
     return (
       <DayPicker
         mode="single"
         selected={date}
         defaultMonth={date}
-        onSelect={this.handleDayClick}
+        onSelect={handleDayClick}
         locale={locale}
         weekStartsOn={1}
       />
     );
-  }
+  };
 
-  handleDayClick(date) {
-    const dateString = date ? dates.localDate(date) : null;
-    this.setState({
-      showPicker: false,
-      value: dateString,
-    });
-    if (typeof this.props.onChange === 'function') {
-      this.props.onChange({
-        value: dateString,
-      });
-    }
-  }
+  const dialog = showPicker ? (
+    <ModalDialog
+      content={renderPicker()}
+      onBlur={() => setShowPicker(false)}
+      fullWidthThreshold={0}
+    />
+  ) : null;
 
-  handleClear(e) {
-    e.stopPropagation(); // prevent call of outer div onClick handler
-    this.handleDayClick(null);
-  }
-
-  showPicker() {
-    this.setState({
-      showPicker: true,
-    });
-  }
-
-  hidePicker() {
-    this.setState({
-      showPicker: false,
-    });
-  }
-}
+  return (
+    <Wrapper>
+      <Value onClick={() => setShowPicker(true)} data-cy={dataCy}>
+        {currentValue ? dates.formatDate(currentValue) : '\u00a0'}
+        {clearable === true && currentValue
+          ? <ClearButton onClick={handleClear} type="button">
+              <MaterialIcon icon="clear"/>
+          </ClearButton>
+          : null}
+      </Value>
+      {dialog}
+    </Wrapper>
+  );
+};
 
 (DatePicker as any).propTypes = {
   value: PropTypes.string,
@@ -122,8 +96,4 @@ class DatePicker extends Component<any, any> {
   readOnly: PropTypes.bool,
 };
 
-(DatePicker as any).defaultProps = {
-  clearable: false,
-};
-
-export default withTranslation()(DatePicker);
+export default DatePicker;
