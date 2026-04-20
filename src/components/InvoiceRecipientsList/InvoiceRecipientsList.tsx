@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import MaterialIcon from '../MaterialIcon'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import InvoiceRecipient from './InvoiceRecipient'
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 const Form = styled.form`
     margin-bottom: 2em;
@@ -34,83 +34,74 @@ const AddButton = styled.button`
     }
 `;
 
-class InvoiceRecipientsList extends React.Component<any, any> {
+const InvoiceRecipientsList = (props: any) => {
+  const { t } = useTranslation();
+  const {
+    invoiceRecipients,
+    addInvoiceRecipient,
+    addInvoiceRecipientEmail,
+    removeInvoiceRecipient,
+    removeInvoiceRecipientEmail
+  } = props;
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      expandedRecipient: null,
-      newRecipientName: ''
+  const [expandedRecipient, setExpandedRecipient] = useState<string | null>(null);
+  const [newRecipientName, setNewRecipientName] = useState('');
+  const prevLengthRef = useRef(invoiceRecipients.length);
+
+  useEffect(() => {
+    if (prevLengthRef.current < invoiceRecipients.length) {
+      setNewRecipientName('');
     }
-  }
+    prevLengthRef.current = invoiceRecipients.length;
+  }, [invoiceRecipients.length]);
 
-  componentDidUpdate(prevProps) {
-    // Check if a new recipient was successfully added
-    if (prevProps.invoiceRecipients.length < this.props.invoiceRecipients.length) {
-      this.setState({newRecipientName: ''});
-    }
-  }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addInvoiceRecipient(newRecipientName);
+  };
 
-  render() {
-    const { t } = this.props;
-    const {
-      invoiceRecipients,
-      addInvoiceRecipient,
-      addInvoiceRecipientEmail,
-      removeInvoiceRecipient,
-      removeInvoiceRecipientEmail
-    } = this.props
+  const sortedRecipients = [...invoiceRecipients].sort((a: any, b: any) =>
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+  );
 
-    const handleSubmit = e => {
-      e.preventDefault()
-      addInvoiceRecipient(this.state.newRecipientName)
-    }
-
-    const sortedRecipients = [...invoiceRecipients].sort((a, b) =>
-      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-    )
-
-    return (
+  return (
+    <div>
+      <Form onSubmit={handleSubmit}>
+        <InputContainer>
+          <Input
+            type="text"
+            value={newRecipientName}
+            placeholder={t('invoiceRecipients.nameLabel')}
+            onChange={e => setNewRecipientName(e.target.value)}
+          />
+        </InputContainer>
+        <AddButton
+          type="submit"
+          disabled={newRecipientName.length === 0}
+        >
+          <MaterialIcon icon="done"/>&nbsp;{t('invoiceRecipients.add')}
+        </AddButton>
+      </Form>
       <div>
-        <Form onSubmit={handleSubmit}>
-          <InputContainer>
-            <Input
-              type="text"
-              value={this.state.newRecipientName}
-              placeholder={t('invoiceRecipients.nameLabel')}
-              onChange={e => this.setState({
-                newRecipientName: e.target.value
-              })}
+        {sortedRecipients.map((recipient: any) => {
+          return (
+            <InvoiceRecipient
+              key={recipient.name}
+              recipient={recipient}
+              expanded={expandedRecipient === recipient.name}
+              onRemove={() => removeInvoiceRecipient(recipient.name)}
+              onAddEmail={(email: string) => addInvoiceRecipientEmail(recipient.name, email)}
+              onRemoveEmail={(email: string) => removeInvoiceRecipientEmail(recipient.name, email)}
+              onExpandedChange={(expanded: boolean) =>
+                setExpandedRecipient(expanded ? recipient.name : null)
+              }
             />
-          </InputContainer>
-          <AddButton
-            type="submit"
-            disabled={this.state.newRecipientName.length === 0}
-          >
-            <MaterialIcon icon="done"/>&nbsp;{t('invoiceRecipients.add')}
-          </AddButton>
-        </Form>
-        <div>
-          {sortedRecipients.map((recipient) => {
-            return (
-              <InvoiceRecipient
-                key={recipient.name}
-                recipient={recipient}
-                expanded={this.state.expandedRecipient === recipient.name}
-                onRemove={() => removeInvoiceRecipient(recipient.name)}
-                onAddEmail={email => addInvoiceRecipientEmail(recipient.name, email)}
-                onRemoveEmail={email => removeInvoiceRecipientEmail(recipient.name, email)}
-                onExpandedChange={expanded => this.setState({
-                  expandedRecipient: expanded ? recipient.name : null
-                })}
-              />
-            );
-          })}
-        </div>
+          );
+        })}
       </div>
-    )
-  }
-}
+    </div>
+  );
+};
 
 (InvoiceRecipientsList as any).propTypes = {
   invoiceRecipients: PropTypes.arrayOf(PropTypes.shape({
@@ -123,4 +114,4 @@ class InvoiceRecipientsList extends React.Component<any, any> {
   removeInvoiceRecipientEmail: PropTypes.func.isRequired,
 }
 
-export default withTranslation()(InvoiceRecipientsList)
+export default InvoiceRecipientsList;
