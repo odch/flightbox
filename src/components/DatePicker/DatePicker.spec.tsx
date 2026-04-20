@@ -5,8 +5,8 @@ import DatePicker from './DatePicker';
 // Mock the styled DayPicker wrapper (imported as ./DayPicker in DatePicker.tsx)
 jest.mock('./DayPicker', () => {
   const React = require('react');
-  const MockDayPicker = ({ onSelect }) => (
-    <div data-testid="day-picker">
+  const MockDayPicker = ({ onSelect, locale }) => (
+    <div data-testid="day-picker" data-locale={locale && locale.code}>
       <button
         data-testid="day-picker-day"
         type="button"
@@ -154,24 +154,58 @@ describe('DatePicker', () => {
   });
 
   describe('prop updates via componentWillReceiveProps', () => {
-    it('updates displayed value when value prop changes', () => {
-      const { ThemeProvider } = require('styled-components');
-      const { BrowserRouter } = require('react-router-dom');
-      const { render: rtlRender } = require('@testing-library/react');
-      const theme = {
-        colors: { main: '#003863', background: '#fafafa', danger: '#e00f00' },
-      };
-      const wrap = el => (
-        <BrowserRouter>
-          <ThemeProvider theme={theme}>{el}</ThemeProvider>
-        </BrowserRouter>
-      );
+    const { ThemeProvider } = require('styled-components');
+    const { BrowserRouter } = require('react-router-dom');
+    const { render: rtlRender } = require('@testing-library/react');
+    const theme = {
+      colors: { main: '#003863', background: '#fafafa', danger: '#e00f00' },
+    };
+    const wrap = el => (
+      <BrowserRouter>
+        <ThemeProvider theme={theme}>{el}</ThemeProvider>
+      </BrowserRouter>
+    );
 
+    it('updates displayed value when value prop changes', () => {
       const { rerender } = rtlRender(
         wrap(<DatePicker value="2024-01-01" onChange={jest.fn()} />)
       );
       rerender(wrap(<DatePicker value="2024-12-31" onChange={jest.fn()} />));
       expect(screen.getByText(/31/)).toBeInTheDocument();
+    });
+
+    it('clears displayed value when value prop becomes null', () => {
+      const { rerender, container } = rtlRender(
+        wrap(<DatePicker value="2024-06-15" onChange={jest.fn()} />)
+      );
+      rerender(wrap(<DatePicker value={null} onChange={jest.fn()} />));
+      // Non-breaking space placeholder is rendered when no value
+      expect(container.textContent).toMatch(/\u00a0/);
+    });
+
+    it('accepts new value after user selected a different one (prop wins)', () => {
+      const { rerender, container } = rtlRender(
+        wrap(<DatePicker value="2024-01-01" onChange={jest.fn()} />)
+      );
+      const valueDiv = container.firstChild!.firstChild;
+      fireEvent.click(valueDiv!);
+      fireEvent.click(screen.getByTestId('day-picker-day'));
+      // User picked 2024-06-15 and wrote it into state; then parent re-sends
+      // a different value and cWRP must mirror it into state.
+      rerender(wrap(<DatePicker value="2025-03-10" onChange={jest.fn()} />));
+      expect(screen.getByText(/10/)).toBeInTheDocument();
+    });
+  });
+
+  describe('locale (i18n)', () => {
+    it('uses German locale by default', () => {
+      const { container } = renderWithTheme(
+        <DatePicker onChange={jest.fn()} />
+      );
+      const valueDiv = container.firstChild!.firstChild;
+      fireEvent.click(valueDiv!);
+      const picker = screen.getByTestId('day-picker');
+      expect(picker.getAttribute('data-locale')).toBe('de');
     });
   });
 
