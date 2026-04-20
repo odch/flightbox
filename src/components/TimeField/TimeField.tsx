@@ -1,97 +1,79 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { parse, normalize } from '../../util/time';
 import Wrapper from './Wrapper';
 import NumberBlock from './NumberBlock';
 import update from 'immutability-helper';
 
-class TimeField extends Component<any, any> {
+const parseValue = (timeString: unknown) =>
+  parse(timeString) || { hours: 0, minutes: 0 };
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      value: TimeField.parseValue(props.value),
+const formatTwoDigit = (n: number) => ('0' + n).slice(-2);
+
+const formatString = (time: { hours: number; minutes: number }) =>
+  formatTwoDigit(time.hours) + ':' + formatTwoDigit(time.minutes);
+
+const TimeField = (props: any) => {
+  const [state, setState] = useState(() => ({
+    value: parseValue(props.value),
+    prevPropsValue: props.value,
+  }));
+
+  let currentValue = state.value;
+  if (props.value !== state.prevPropsValue) {
+    currentValue = parseValue(props.value);
+    setState({
+      value: currentValue,
       prevPropsValue: props.value,
-    };
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    if (props.value !== state.prevPropsValue) {
-      return {
-        value: TimeField.parseValue(props.value),
-        prevPropsValue: props.value,
-      };
-    }
-    return null;
-  }
-
-  static parseValue(timeString) {
-    return parse(timeString) || { hours: 0, minutes: 0 };
-  }
-
-  render() {
-    if (this.props.readOnly === true) {
-      return (
-        <div>
-          {this.formatString(this.state.value)}
-        </div>
-      );
-    }
-
-    return (
-      <Wrapper>
-        <NumberBlock
-          value={this.state.value.hours}
-          onChange={this.updateHours.bind(this)}
-          dataCy={`${this.props.dataCy}-hours`}
-        />
-        <span>:</span>
-        <NumberBlock
-          value={this.state.value.minutes}
-          onChange={this.updateMinutes.bind(this)}
-          dataCy={`${this.props.dataCy}-minutes`}
-        />
-      </Wrapper>
-    );
-  }
-
-  updateHours(hours) {
-    const newTime = update(this.state.value, {
-      hours: { $set: hours },
     });
-    this.setTime(newTime);
   }
 
-  updateMinutes(minutes) {
-    const newTime = update(this.state.value, {
-      minutes: { $set: minutes },
+  const setTime = (time: { hours: number; minutes: number }) => {
+    const normalized = normalize(time);
+    setState({
+      value: normalized,
+      prevPropsValue: props.value,
     });
-    this.setTime(newTime);
-  }
-
-  setTime(time) {
-    this.setState({
-      value: normalize(time),
-    }, this.fireChangeEvent);
-  }
-
-  fireChangeEvent() {
-    if (typeof this.props.onChange === 'function') {
-      const stringValue = this.formatString(this.state.value);
-      this.props.onChange({
+    if (typeof props.onChange === 'function') {
+      const stringValue = formatString(normalized);
+      props.onChange({
         value: stringValue !== '00:00' ? stringValue : null,
       });
     }
+  };
+
+  const updateHours = (hours: number) => {
+    setTime(update(currentValue, { hours: { $set: hours } }));
+  };
+
+  const updateMinutes = (minutes: number) => {
+    setTime(update(currentValue, { minutes: { $set: minutes } }));
+  };
+
+  if (props.readOnly === true) {
+    return (
+      <div>
+        {formatString(currentValue)}
+      </div>
+    );
   }
 
-  formatString(time) {
-    return this.formatTwoDigit(time.hours) + ':' + this.formatTwoDigit(time.minutes);
-  }
-
-  formatTwoDigit(number) {
-    return ('0' + number).slice(-2);
-  }
-}
+  return (
+    <Wrapper>
+      <NumberBlock
+        value={currentValue.hours}
+        onChange={updateHours}
+        dataCy={`${props.dataCy}-hours`}
+      />
+      <span>:</span>
+      <NumberBlock
+        value={currentValue.minutes}
+        onChange={updateMinutes}
+        dataCy={`${props.dataCy}-minutes`}
+      />
+    </Wrapper>
+  );
+};
 
 (TimeField as any).propTypes = {
   value: PropTypes.string,
