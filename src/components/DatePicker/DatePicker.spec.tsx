@@ -151,6 +151,17 @@ describe('DatePicker', () => {
       fireEvent.click(screen.getByRole('button'));
       expect(onChange).toHaveBeenCalledWith({ value: null });
     });
+
+    it('does not open the picker when the clear button is clicked', () => {
+      renderWithTheme(
+        <DatePicker value="2024-06-15" clearable={true} onChange={jest.fn()} />
+      );
+      // Confirm picker is initially closed
+      expect(screen.queryByTestId('day-picker')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button'));
+      // Click event must not have bubbled to the outer Value div
+      expect(screen.queryByTestId('day-picker')).not.toBeInTheDocument();
+    });
   });
 
   describe('prop updates via componentWillReceiveProps', () => {
