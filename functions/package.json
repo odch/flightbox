@@ -11,7 +11,6 @@
     "firebase-admin": "^12.0.0",
     "firebase-functions": "^4.7.0",
     "moment": "^2.22.2",
-    "node-fetch": "^2.6.7",
     "nodemailer": "^6.9.0",
     "request-promise": "^4.2.6",
     "soap": "^1.6.0"

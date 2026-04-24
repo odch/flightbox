@@ -1,6 +1,5 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const fetch = require('node-fetch');
 
 const AERODROMES_URL = 'https://raw.githubusercontent.com/odch/aerodromes/refs/heads/main/aerodromes.json';
 const SCHEDULE = '0 3 * * 3'; // Every Wednesday at 3 AM
