@@ -37,8 +37,8 @@ jest.mock('firebase-admin', () => ({
   )
 }));
 
-jest.mock('node-fetch');
-const fetch = require('node-fetch');
+const fetch = jest.fn();
+global.fetch = fetch;
 
 require('./updateAerodromes');
 

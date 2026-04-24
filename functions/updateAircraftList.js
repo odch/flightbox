@@ -1,6 +1,5 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const fetch = require('node-fetch');
 
 // Note: this map must be kept in sync with the list in `aircraftCategories.js`.
 const aircraftCategoryMap = {

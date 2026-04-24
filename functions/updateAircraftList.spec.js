@@ -40,8 +40,8 @@ jest.mock('firebase-admin', () => ({
   )
 }));
 
-jest.mock('node-fetch');
-const fetch = require('node-fetch');
+const fetch = jest.fn();
+global.fetch = fetch;
 
 // Load module after mocks are set up - this triggers onRun registration
 require('./updateAircraftList');
