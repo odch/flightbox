@@ -1,4 +1,4 @@
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 
 const AERODROMES_URL = 'https://raw.githubusercontent.com/odch/aerodromes/refs/heads/main/aerodromes.json';

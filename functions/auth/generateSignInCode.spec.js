@@ -32,7 +32,7 @@ describe('functions', () => {
       mockSendSignInEmail = jest.fn().mockResolvedValue('msg123');
 
       jest.mock('firebase-admin', () => mockAdmin);
-      jest.mock('firebase-functions', () => mockFunctions);
+      jest.mock('firebase-functions/v1', () => mockFunctions);
       jest.mock('cors', () => () => mockCors);
       jest.mock('./sendSignInEmail', () => ({ sendSignInEmail: mockSendSignInEmail }));
 

@@ -50,7 +50,7 @@ describe('functions', () => {
       };
 
       jest.mock('firebase-admin', () => mockAdmin);
-      jest.mock('firebase-functions', () => mockFunctions);
+      jest.mock('firebase-functions/v1', () => mockFunctions);
       jest.mock('cors', () => () => mockCors);
 
       require('./verifySignInCode');
