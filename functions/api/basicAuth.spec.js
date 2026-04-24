@@ -18,7 +18,7 @@ describe('functions/api/basicAuth', () => {
 
     beforeEach(() => {
       jest.resetModules();
-      jest.mock('firebase-functions', () => ({
+      jest.mock('firebase-functions/v1', () => ({
         config: jest.fn(() => ({})),
       }));
       basicAuth = require('./basicAuth');
@@ -39,7 +39,7 @@ describe('functions/api/basicAuth', () => {
 
     beforeEach(() => {
       jest.resetModules();
-      jest.mock('firebase-functions', () => ({
+      jest.mock('firebase-functions/v1', () => ({
         config: jest.fn(() => ({ api: { serviceuser: { password: 'pass' } } })),
       }));
       basicAuth = require('./basicAuth');
@@ -59,7 +59,7 @@ describe('functions/api/basicAuth', () => {
 
     beforeEach(() => {
       jest.resetModules();
-      jest.mock('firebase-functions', () => ({
+      jest.mock('firebase-functions/v1', () => ({
         config: jest.fn(() => ({ api: { serviceuser: { username: 'user' } } })),
       }));
       basicAuth = require('./basicAuth');
@@ -79,7 +79,7 @@ describe('functions/api/basicAuth', () => {
 
     beforeEach(() => {
       jest.resetModules();
-      jest.mock('firebase-functions', () => ({
+      jest.mock('firebase-functions/v1', () => ({
         config: jest.fn(() => ({
           api: { serviceuser: { username: 'admin', password: 's3cret' } },
         })),

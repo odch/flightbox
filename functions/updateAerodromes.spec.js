@@ -2,7 +2,7 @@
 
 let capturedOnRun;
 
-jest.mock('firebase-functions', () => {
+jest.mock('firebase-functions/v1', () => {
   const mock = {
     pubsub: {
       schedule: jest.fn(() => ({

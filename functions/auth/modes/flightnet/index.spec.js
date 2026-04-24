@@ -1,6 +1,6 @@
 'use strict';
 
-jest.mock('firebase-functions', () => ({
+jest.mock('firebase-functions/v1', () => ({
   config: jest.fn(() => ({}))
 }));
 
