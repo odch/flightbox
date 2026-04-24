@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -16,17 +15,17 @@ const Type = styled.div<{ $focussed?: boolean }>`
   color: ${props => props.$focussed ? props.theme.colors.main : `#888`};
 `;
 
-const Option = props => (
+interface Props {
+  immatriculation: string;
+  type: string;
+  focussed?: boolean;
+}
+
+const Option = (props: Props) => (
   <Wrapper>
     <Immatriculation $focussed={props.focussed}>{props.immatriculation}</Immatriculation>
     <Type $focussed={props.focussed}>{props.type}</Type>
   </Wrapper>
 );
-
-Option.propTypes = {
-  immatriculation: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
-  focussed: PropTypes.bool
-};
 
 export default Option;
