@@ -4,10 +4,8 @@
       { "max_weight": 1000, "fee": 18.5 },
       { "max_weight": 50000, "fee": 23.13 }
     ],
-    "instruction_homebase": 18.5,
-    "instruction_external": 18.5,
-    "helicopter": [
-      { "max_weight": 50000, "fee": 23.13 }
-    ]
+    "plane_homebase": 7,
+    "aerotow": 8,
+    "balloon": 18.5
   }
 }
