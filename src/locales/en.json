@@ -576,6 +576,7 @@
   },
   "invoicesReport": {
     "onlinePayments": "Online payments",
+    "cashPayments": "Cash payments",
     "noRecipients": "No invoice recipients in the selected period ({{month}})",
     "landingFees": "Landing fees",
     "customsFees": "Customs fees",

@@ -204,10 +204,22 @@ describe('util', () => {
         expect(groups[keys[0]]).toHaveLength(1);
       });
 
-      it('ignores arrivals with unsupported payment method (cash)', () => {
+      it('groups cash arrivals under CASH_RECIPIENT_NAME', () => {
         const report = makeReport(2023, 6);
         const localArrivals = [{
           paymentMethod: {method: 'cash'},
+        }];
+        const groups = report.groupArrivalsByRecipient(localArrivals);
+        const keys = Object.keys(groups);
+        expect(keys).toHaveLength(1);
+        expect(keys[0]).toBe('Bar-Zahlungen');
+        expect(groups[keys[0]]).toHaveLength(1);
+      });
+
+      it('ignores arrivals with unsupported payment method', () => {
+        const report = makeReport(2023, 6);
+        const localArrivals = [{
+          paymentMethod: {method: 'twint_external'},
         }];
         const groups = report.groupArrivalsByRecipient(localArrivals);
         expect(Object.keys(groups)).toHaveLength(0);
@@ -570,6 +582,47 @@ describe('util', () => {
         const content = report.buildContent(arrivalsSnapshot, [], []);
         const firstHeader = content[0];
         expect(firstHeader.text).toContain('Online-Zahlungen');
+      });
+
+      it('places CASH_RECIPIENT_NAME after Online-Zahlungen and before alphabetical recipients', () => {
+        const report = makeReport(2023, 6);
+        const arrivalsSnapshot = makeArrivalsSnapshot([
+          {
+            date: '2023-06-01', time: '10:00',
+            immatriculation: 'HB-AAA', mtow: 750, flightType: 'private',
+            firstname: 'A', lastname: 'A', email: 'a@example.com',
+            feeTotalNet: 10, feeVat: 1, feeRoundingDifference: 0, feeTotalGross: 11,
+            paymentMethod: {method: 'invoice', status: 'paid', invoiceRecipientName: 'AAA Company'},
+          },
+          {
+            date: '2023-06-02', time: '11:00',
+            immatriculation: 'HB-CASH', mtow: 750, flightType: 'private',
+            firstname: 'C', lastname: 'C', email: 'c@example.com',
+            feeTotalNet: 10, feeVat: 1, feeRoundingDifference: 0, feeTotalGross: 11,
+            paymentMethod: {method: 'cash'},
+          },
+        ]);
+        const content = report.buildContent(arrivalsSnapshot, [], []);
+        const headers = content.filter(item => item && item.style === 'header');
+        expect(headers[0].text).toContain('Online-Zahlungen');
+        expect(headers[1].text).toContain('Bar-Zahlungen');
+        expect(headers[2].text).toContain('AAA Company');
+      });
+
+      it('omits Bar-Zahlungen header when there are no cash arrivals', () => {
+        const report = makeReport(2023, 6);
+        const arrivalsSnapshot = makeArrivalsSnapshot([
+          {
+            date: '2023-06-01', time: '10:00',
+            immatriculation: 'HB-AAA', mtow: 750, flightType: 'private',
+            firstname: 'A', lastname: 'A', email: 'a@example.com',
+            feeTotalNet: 10, feeVat: 1, feeRoundingDifference: 0, feeTotalGross: 11,
+            paymentMethod: {method: 'invoice', status: 'paid', invoiceRecipientName: 'AAA Company'},
+          },
+        ]);
+        const content = report.buildContent(arrivalsSnapshot, [], []);
+        const headers = content.filter(item => item && item.style === 'header');
+        expect(headers.some(h => h.text && h.text.toString().includes('Bar-Zahlungen'))).toBe(false);
       });
 
       it('adds pageBreak=before for recipients after the first', () => {
