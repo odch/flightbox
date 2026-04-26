@@ -2,7 +2,7 @@
 
 const mockCapturedHandlers = {};
 
-jest.mock('firebase-functions', () => {
+jest.mock('firebase-functions/v1', () => {
   const makeDbRef = (path) => ({
     onCreate: jest.fn(handler => {
       mockCapturedHandlers[`onCreate:${path}`] = handler;

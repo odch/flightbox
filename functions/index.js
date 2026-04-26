@@ -1,6 +1,6 @@
 'use strict';
 
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 
 const config = functions.config()
@@ -32,6 +32,7 @@ const api = require('./api');
 const webhook = require('./webhook');
 const associatedMovementsTriggers = require('./associatedMovements/setAssociatedMovementsTriggers');
 const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsTrigger');
+const homebasedAircraftTrigger = require('./homebasedAircraft/homebasedAircraftTrigger');
 const updateArrivalPaymentStatus = require('./updateArrivalPaymentStatus');
 const { scheduledAnonymizeMovements } = require('./anonymizeMovements');
 const { scheduledCleanupMessages } = require('./cleanupMessages');
@@ -60,6 +61,7 @@ exports.scheduledAircraftListUpdate = scheduledAircraftListUpdate;
 exports.setAssociatedMovementOnDeletedDeparture = associatedMovementsTriggers.setAssociatedMovementOnDeletedDeparture;
 exports.setAssociatedMovementOnDeletedArrival = associatedMovementsTriggers.setAssociatedMovementOnDeletedArrival;
 exports.updateCustomsInvoiceRecipientsOnUpdate = invoiceRecipientsTrigger.updateCustomsInvoiceRecipientsOnUpdate;
+exports.updateCustomsHomebasedAircraftOnUpdate = homebasedAircraftTrigger.updateCustomsHomebasedAircraftOnUpdate;
 
 exports.enrichDepartureOnCreate = enrichMovements.enrichDepartureOnCreate;
 exports.enrichDepartureOnUpdate = enrichMovements.enrichDepartureOnUpdate;

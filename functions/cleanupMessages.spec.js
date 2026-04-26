@@ -17,7 +17,7 @@ jest.mock('firebase-admin', () => ({
   initializeApp: jest.fn(),
 }));
 
-jest.mock('firebase-functions', () => ({
+jest.mock('firebase-functions/v1', () => ({
   region: jest.fn().mockReturnThis(),
   pubsub: {
     schedule: jest.fn().mockReturnValue({

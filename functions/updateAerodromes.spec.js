@@ -2,7 +2,7 @@
 
 let capturedOnRun;
 
-jest.mock('firebase-functions', () => {
+jest.mock('firebase-functions/v1', () => {
   const mock = {
     pubsub: {
       schedule: jest.fn(() => ({
@@ -37,8 +37,8 @@ jest.mock('firebase-admin', () => ({
   )
 }));
 
-jest.mock('node-fetch');
-const fetch = require('node-fetch');
+const fetch = jest.fn();
+global.fetch = fetch;
 
 require('./updateAerodromes');
 

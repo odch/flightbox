@@ -178,5 +178,107 @@ describe('util', () => {
       );
       expect(() => unmount()).not.toThrow();
     });
+
+    it('does not call loadItems on mount', () => {
+      const AutoLoadList = AutoLoad(SimpleList);
+      render(
+        <Wrapper>
+          <AutoLoadList items={['a']} loadItems={loadItems} />
+        </Wrapper>
+      );
+      expect(loadItems).not.toHaveBeenCalled();
+    });
+
+    it('calls loadItems exactly once per items-growth rerender', () => {
+      const AutoLoadList = AutoLoad(SimpleList);
+      const { rerender } = render(
+        <Wrapper>
+          <AutoLoadList items={['a']} loadItems={loadItems} />
+        </Wrapper>
+      );
+      expect(loadItems).not.toHaveBeenCalled();
+
+      act(() => {
+        rerender(
+          <Wrapper>
+            <AutoLoadList items={['a', 'b']} loadItems={loadItems} />
+          </Wrapper>
+        );
+      });
+      expect(loadItems).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls the latest loadItems on scroll when the prop changes across renders', () => {
+      const AutoLoadList = AutoLoad(SimpleList);
+      const firstLoad = jest.fn();
+      const secondLoad = jest.fn();
+      const { rerender } = render(
+        <Wrapper>
+          <AutoLoadList items={['a']} loadItems={firstLoad} />
+        </Wrapper>
+      );
+      rerender(
+        <Wrapper>
+          <AutoLoadList items={['a']} loadItems={secondLoad} />
+        </Wrapper>
+      );
+
+      const scrollEvent = new Event('scroll');
+      Object.defineProperty(scrollEvent, 'target', { value: document });
+      window.dispatchEvent(scrollEvent);
+
+      expect(firstLoad).not.toHaveBeenCalled();
+      expect(secondLoad).toHaveBeenCalledTimes(1);
+    });
+
+    it('respects autoLoadDisabled changes across renders', () => {
+      const AutoLoadList = AutoLoad(SimpleList);
+      const { rerender } = render(
+        <Wrapper>
+          <AutoLoadList
+            items={['a']}
+            loadItems={loadItems}
+            autoLoadDisabled={false}
+          />
+        </Wrapper>
+      );
+      rerender(
+        <Wrapper>
+          <AutoLoadList
+            items={['a']}
+            loadItems={loadItems}
+            autoLoadDisabled={true}
+          />
+        </Wrapper>
+      );
+
+      const scrollEvent = new Event('scroll');
+      Object.defineProperty(scrollEvent, 'target', { value: document });
+      window.dispatchEvent(scrollEvent);
+
+      expect(loadItems).not.toHaveBeenCalled();
+    });
+
+    it('calls loadItems on scroll of a scrollable ancestor element', () => {
+      const AutoLoadList = AutoLoad(SimpleList);
+      render(
+        <div style={{ overflow: 'auto' }} data-testid="scroll-parent">
+          <Wrapper>
+            <AutoLoadList items={['a']} loadItems={loadItems} />
+          </Wrapper>
+        </div>
+      );
+
+      const scrollParent = document.querySelector(
+        '[data-testid="scroll-parent"]'
+      )!;
+      const scrollEvent = new Event('scroll');
+      Object.defineProperty(scrollEvent, 'target', { value: scrollParent });
+      scrollParent.dispatchEvent(scrollEvent);
+
+      // In jsdom offsetHeight, scrollTop, scrollHeight all default to 0,
+      // so isEndReached on a non-document element returns true (0+0===0).
+      expect(loadItems).toHaveBeenCalledTimes(1);
+    });
   });
 });

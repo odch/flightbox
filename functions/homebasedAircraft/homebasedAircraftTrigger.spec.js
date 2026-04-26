@@ -24,7 +24,7 @@ jest.mock('firebase-admin', () => ({
 
 global.fetch = jest.fn();
 
-describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
+describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
@@ -49,7 +49,7 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
       database: jest.fn(() => ({ ref: mockAdminDbRef })),
     }));
 
-    require('./invoiceRecipientsTrigger');
+    require('./homebasedAircraftTrigger');
   });
 
   const makeChange = (before, after) => ({
@@ -58,7 +58,18 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
   });
 
   it('does nothing when before and after are equal', async () => {
-    const change = makeChange([{ name: 'A', emails: [] }], [{ name: 'A', emails: [] }]);
+    const value = { homeBase: { HBXYZ: true }, club: { HBABC: true } };
+    const change = makeChange(value, value);
+    await capturedHandler(change, {});
+    expect(mockAdminDbRef).not.toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when only an unrelated sibling subtree changed', async () => {
+    const change = makeChange(
+      { homeBase: { HBXYZ: true }, club: { HBABC: true }, other: 1 },
+      { homeBase: { HBXYZ: true }, club: { HBABC: true }, other: 2 }
+    );
     await capturedHandler(change, {});
     expect(mockAdminDbRef).not.toHaveBeenCalled();
     expect(global.fetch).not.toHaveBeenCalled();
@@ -68,7 +79,10 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
     mockAdminDbRef.mockReturnValue({
       once: jest.fn().mockResolvedValue({ val: () => null }),
     });
-    const change = makeChange([{ name: 'A' }], [{ name: 'B' }]);
+    const change = makeChange(
+      { homeBase: { HBXYZ: true } },
+      { homeBase: { HBABC: true } }
+    );
     await capturedHandler(change, {});
     expect(global.fetch).not.toHaveBeenCalled();
   });
@@ -77,12 +91,15 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
     mockAdminDbRef.mockReturnValue({
       once: jest.fn().mockResolvedValue({ val: () => ({ aerodrome: 'LSZT' }) }),
     });
-    const change = makeChange([{ name: 'A' }], [{ name: 'B' }]);
+    const change = makeChange(
+      { homeBase: { HBXYZ: true } },
+      { homeBase: { HBABC: true } }
+    );
     await capturedHandler(change, {});
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it('sends PUT request with recipient data when settings are present', async () => {
+  it('sends PUT with union of homeBase and club registrations', async () => {
     mockAdminDbRef.mockReturnValue({
       once: jest.fn().mockResolvedValue({
         val: () => ({
@@ -95,15 +112,15 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
 
     global.fetch.mockResolvedValue({ ok: true });
 
-    const after = [
-      { name: 'Alice', emails: ['alice@example.com'] },
-      { name: 'Bob', emails: ['bob@example.com', 'bob2@example.com'] },
-    ];
-    const change = makeChange([{ name: 'Old' }], after);
+    const after = {
+      homeBase: { HBXYZ: true, HBABC: true },
+      club: { HBABC: true, HBCLU: true },
+    };
+    const change = makeChange({ homeBase: { HBOLD: true } }, after);
     await capturedHandler(change, {});
 
     expect(global.fetch).toHaveBeenCalledWith(
-      'https://customs.example.com/api/invoice-recipients?ad=LSZT',
+      'https://customs.example.com/api/homebased-aircraft?ad=LSZT',
       expect.objectContaining({
         method: 'PUT',
         headers: expect.objectContaining({
@@ -111,8 +128,39 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
           'Content-Type': 'application/json',
         }),
         body: JSON.stringify([
-          { name: 'Alice', emails: ['alice@example.com'] },
-          { name: 'Bob', emails: ['bob@example.com', 'bob2@example.com'] },
+          { registration: 'HBXYZ' },
+          { registration: 'HBABC' },
+          { registration: 'HBCLU' },
+        ]),
+      })
+    );
+  });
+
+  it('handles missing homeBase or club subkey', async () => {
+    mockAdminDbRef.mockReturnValue({
+      once: jest.fn().mockResolvedValue({
+        val: () => ({
+          baseUrl: 'https://customs.example.com',
+          aerodrome: 'LSZT',
+          accessToken: 'tok123',
+        }),
+      }),
+    });
+
+    global.fetch.mockResolvedValue({ ok: true });
+
+    const change = makeChange(
+      { homeBase: { HBOLD: true }, club: { HBCLU: true } },
+      { club: { HBCLU: true, HBNEW: true } }
+    );
+    await capturedHandler(change, {});
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        body: JSON.stringify([
+          { registration: 'HBCLU' },
+          { registration: 'HBNEW' },
         ]),
       })
     );
@@ -131,7 +179,7 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
 
     global.fetch.mockResolvedValue({ ok: true });
 
-    const change = makeChange([{ name: 'Old' }], null);
+    const change = makeChange({ homeBase: { HBOLD: true } }, null);
     await capturedHandler(change, {});
 
     expect(global.fetch).toHaveBeenCalledWith(
@@ -153,17 +201,47 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
 
     global.fetch.mockResolvedValue({
       ok: false,
-      json: jest.fn().mockResolvedValue({ error: 'Not authorized' }),
+      text: jest.fn().mockResolvedValue('Not authorized'),
     });
 
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    const change = makeChange([{ name: 'A' }], [{ name: 'B' }]);
+    const change = makeChange(
+      { homeBase: { HBOLD: true } },
+      { homeBase: { HBNEW: true } }
+    );
     await capturedHandler(change, {});
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      'Failed to update the invoice recipients of the customs app',
+      'Failed to update the homebased aircraft of the customs app',
       expect.anything()
     );
+    expect(consoleSpy).toHaveBeenCalledWith('Response body', 'Not authorized');
+    consoleSpy.mockRestore();
+  });
+
+  it('tolerates non-text error responses without throwing', async () => {
+    mockAdminDbRef.mockReturnValue({
+      once: jest.fn().mockResolvedValue({
+        val: () => ({
+          baseUrl: 'https://customs.example.com',
+          aerodrome: 'LSZT',
+          accessToken: 'tok123',
+        }),
+      }),
+    });
+
+    global.fetch.mockResolvedValue({
+      ok: false,
+      text: jest.fn().mockRejectedValue(new Error('stream error')),
+    });
+
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const change = makeChange(
+      { homeBase: { HBOLD: true } },
+      { homeBase: { HBNEW: true } }
+    );
+    await expect(capturedHandler(change, {})).resolves.toBeUndefined();
+    expect(consoleSpy).toHaveBeenCalledWith('Response body', '');
     consoleSpy.mockRestore();
   });
 });

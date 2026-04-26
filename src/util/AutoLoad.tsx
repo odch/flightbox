@@ -1,87 +1,77 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { useEffect, useRef } from 'react';
 import isElementInViewport from '../util/isElementInViewport';
 
-const DEFAULT_BOTTOM_THRESHOLD = 50
+const DEFAULT_BOTTOM_THRESHOLD = 50;
 
-export const AutoLoad = (List: any) => class extends Component<any, any> {
+export const AutoLoad = (List: any) => {
+  const AutoLoadWrapper: React.FC<any> = (props) => {
+    const elementRef = useRef<HTMLDivElement | null>(null);
+    const bottomMarkerRef = useRef<HTMLDivElement | null>(null);
+    const prevItemsLengthRef = useRef(props.items.length);
 
-  element: any;
-  bottomMarker: any;
+    const latestPropsRef = useRef(props);
+    latestPropsRef.current = props;
 
-  constructor(props) {
-    super(props);
-    this.handleScroll = this.handleScroll.bind(this);
-  }
+    useEffect(() => {
+      const findScrollableElement = (): EventTarget => {
+        let element: any = elementRef.current;
+        while (element && element !== document) {
+          const style = window.getComputedStyle(element);
+          const overflow = style.getPropertyValue('overflow');
+          if (overflow === 'auto' || overflow === 'scroll') return element;
+          element = element.parentNode;
+        }
+        return window;
+      };
 
-  componentDidMount() {
-    const scrollableElement = this.findScrollableElement();
-    if (scrollableElement) {
-      scrollableElement.addEventListener('scroll', this.handleScroll);
-    }
-  }
+      const getBottomThreshold = () =>
+        typeof latestPropsRef.current.bottomThreshold === 'number'
+          ? latestPropsRef.current.bottomThreshold
+          : DEFAULT_BOTTOM_THRESHOLD;
 
-  componentWillUnmount() {
-    const scrollableElement = this.findScrollableElement();
-    if (scrollableElement) {
-      scrollableElement.removeEventListener('scroll', this.handleScroll);
-    }
-  }
+      const isEndReached = (el: any) => {
+        if (el === document) {
+          const scrollY = window.scrollY || window.pageYOffset;
+          return (
+            window.innerHeight + scrollY + getBottomThreshold() >=
+            document.body.offsetHeight
+          );
+        }
+        return el.offsetHeight + el.scrollTop === el.scrollHeight;
+      };
 
-  componentDidUpdate(prevProps) {
-    if (this.props.items.length > prevProps.items.length
-      && this.bottomMarker && isElementInViewport(this.bottomMarker)) {
-      this.props.loadItems();
-    }
-  }
+      const handleScroll = (e: Event) => {
+        if (
+          isEndReached(e.target) &&
+          !latestPropsRef.current.autoLoadDisabled
+        ) {
+          latestPropsRef.current.loadItems();
+        }
+      };
 
-  findScrollableElement() {
-    let element = this.element;
-    do {
-      const style = window.getComputedStyle(element);
-      const overflow = style.getPropertyValue('overflow');
-      if (overflow === 'auto' || overflow === 'scroll') {
-        return element;
+      const scrollable = findScrollableElement();
+      scrollable.addEventListener('scroll', handleScroll);
+      return () => scrollable.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    useEffect(() => {
+      if (
+        props.items.length > prevItemsLengthRef.current &&
+        bottomMarkerRef.current &&
+        isElementInViewport(bottomMarkerRef.current)
+      ) {
+        props.loadItems();
       }
-      element = element.parentNode;
-    } while (element && element !== document);
-    return window;
-  }
+      prevItemsLengthRef.current = props.items.length;
+    }, [props.items.length]);
 
-  handleScroll(e) {
-    if (this.isEndReached(e.target) && !this.props.autoLoadDisabled) {
-      this.props.loadItems();
-    }
-  }
-
-  isEndReached(element) {
-    if (element === document) {
-      const scrollY = window.scrollY || window.pageYOffset;
-      return (window.innerHeight + scrollY + this.getBottomThreshold()) >= document.body.offsetHeight;
-    }
-    return element.offsetHeight + element.scrollTop === element.scrollHeight;
-  }
-
-  getBottomThreshold() {
-    return typeof this.props.bottomThreshold === 'number'
-      ? this.props.bottomThreshold
-      : DEFAULT_BOTTOM_THRESHOLD
-  }
-
-  render() {
     return (
-      <div className={this.props.className} ref={(element) => this.element = element}>
-        <List {...this.props}/>
-        <div ref={element => this.bottomMarker = element}></div>
+      <div className={props.className} ref={elementRef}>
+        <List {...props} />
+        <div ref={bottomMarkerRef}></div>
       </div>
     );
-  }
-};
+  };
 
-AutoLoad.propTypes = {
-  loadItems: PropTypes.func.isRequired,
-  items: PropTypes.array.isRequired,
-  bottomThreshold: PropTypes.number,
-  className: PropTypes.string,
-  autoLoadDisabled: PropTypes.bool,
+  return AutoLoadWrapper;
 };

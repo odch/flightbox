@@ -21,6 +21,10 @@ class InvoicesReport {
     return t('invoicesReport.onlinePayments');
   }
 
+  get cashRecipientName() {
+    return t('invoicesReport.cashPayments');
+  }
+
 
   year: number;
   month: number;
@@ -119,9 +123,15 @@ class InvoicesReport {
       ...Object.keys(customsRecipients)
     ]))
 
-    // sort names, but this.checkoutRecipientName should always be the first
-    recipientNames = recipientNames.filter(name => name !== this.checkoutRecipientName)
+    // sort names; checkoutRecipientName always first, cashRecipientName second (when present)
+    const hasCash = arrivalRecipients[this.cashRecipientName] !== undefined
+    recipientNames = recipientNames.filter(
+      name => name !== this.checkoutRecipientName && name !== this.cashRecipientName
+    )
     recipientNames.sort()
+    if (hasCash) {
+      recipientNames.unshift(this.cashRecipientName)
+    }
     recipientNames.unshift(this.checkoutRecipientName)
 
     const monthLabel = this.getMonthLabel()
@@ -169,7 +179,9 @@ class InvoicesReport {
         ? arrival.paymentMethod.invoiceRecipientName
         : arrival.paymentMethod.method === 'checkout'
           ? this.checkoutRecipientName
-          : undefined
+          : arrival.paymentMethod.method === 'cash'
+            ? this.cashRecipientName
+            : undefined
 
       if (invoiceRecipientName) {
         if (!recipients[invoiceRecipientName]) {
