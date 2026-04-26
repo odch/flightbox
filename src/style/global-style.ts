@@ -37,6 +37,15 @@ const GlobalStyle = createGlobalStyle`
     color: #000;
     text-decoration: none;
   }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]),
+  textarea,
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+    box-sizing: border-box;
+  }
 `;
 
 export default GlobalStyle
