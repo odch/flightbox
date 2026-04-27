@@ -79,9 +79,9 @@ exports.verifyWebauthnAuthentication = functions.region('europe-west1').https.on
           expectedOrigin: expectedOrigins,
           expectedRPID: rpID,
           requireUserVerification: false,
-          authenticator: {
-            credentialID: credentialId,
-            credentialPublicKey: Buffer.from(stored.publicKey, 'base64url'),
+          credential: {
+            id: credentialId,
+            publicKey: Buffer.from(stored.publicKey, 'base64url'),
             counter: stored.counter || 0,
             transports: Array.isArray(stored.transports) ? stored.transports : undefined,
           },
