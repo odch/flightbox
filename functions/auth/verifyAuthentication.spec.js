@@ -123,6 +123,19 @@ describe('functions', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({ token: 'ct-xyz' });
 
+      // Lock in the credential parameter shape — a mock-only test would
+      // otherwise miss a silent rename of the @simplewebauthn/server contract.
+      expect(mockVerifyAuthenticationResponse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credential: expect.objectContaining({
+            id: credentialId,
+            publicKey: expect.any(Buffer),
+            counter: 5,
+            transports: ['internal'],
+          }),
+        }),
+      );
+
       // Counter update
       expect(mockDbRef.update).toHaveBeenCalledWith(expect.objectContaining({
         counter: 6,
