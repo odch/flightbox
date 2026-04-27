@@ -55,7 +55,7 @@ jobs:
           tools-version: 13
           firebase_token: ${{ secrets.FIREBASE_TOKEN }}
       - run: cd functions && npm ci && cd ..
-      - name: Write functions/.env.${{ vars.FIREBASE_PROJECT }}
+      - name: Resolve RTDB env vars for deploy
         env:
           FIREBASE_RTDB_NAME: ${{ vars.FIREBASE_RTDB_NAME }}
           FIREBASE_RTDB_URL: ${{ vars.FIREBASE_RTDB_URL }}
@@ -67,5 +67,5 @@ jobs:
           {
             echo "RTDB_INSTANCE=${FIREBASE_RTDB_NAME}"
             echo "RTDB_URL=${URL}"
-          } > "functions/.env.${{ vars.FIREBASE_PROJECT }}"
+          } >> "$GITHUB_ENV"
       - run: firebase deploy --only functions
