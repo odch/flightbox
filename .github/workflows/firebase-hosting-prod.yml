@@ -53,17 +53,14 @@ jobs:
           tools-version: 13
           firebase_token: ${{ secrets.FIREBASE_TOKEN }}
       - run: cd functions && npm ci && cd ..
-      - name: Resolve RTDB env vars for deploy
+      - name: Confirm RTDB env vars
         env:
-          FIREBASE_RTDB_NAME: ${{ vars.FIREBASE_RTDB_NAME }}
-          FIREBASE_RTDB_URL: ${{ vars.FIREBASE_RTDB_URL }}
+          RTDB_INSTANCE: ${{ vars.FIREBASE_RTDB_NAME }}
+          RTDB_URL: ${{ vars.FIREBASE_RTDB_URL || format('https://{0}.firebaseio.com', vars.FIREBASE_RTDB_NAME) }}
         run: |
-          URL="${FIREBASE_RTDB_URL}"
-          if [ -z "$URL" ]; then
-            URL="https://${FIREBASE_RTDB_NAME}.firebaseio.com"
-          fi
-          {
-            echo "RTDB_INSTANCE=${FIREBASE_RTDB_NAME}"
-            echo "RTDB_URL=${URL}"
-          } >> "$GITHUB_ENV"
+          echo "RTDB_INSTANCE=[$RTDB_INSTANCE]"
+          echo "RTDB_URL=[$RTDB_URL]"
       - run: firebase deploy --only functions
+        env:
+          RTDB_INSTANCE: ${{ vars.FIREBASE_RTDB_NAME }}
+          RTDB_URL: ${{ vars.FIREBASE_RTDB_URL || format('https://{0}.firebaseio.com', vars.FIREBASE_RTDB_NAME) }}
