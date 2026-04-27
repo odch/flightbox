@@ -174,7 +174,7 @@ const updateOnDelete = async (snap, type) => {
   }
 }
 
-const instance = process.env.RTDB_INSTANCE;
+const instance = functions.config().rtdb.instance;
 
 module.exports.setAssociatedMovementOnCreatedDeparture =
   functions.region('europe-west1').database.instance(instance).ref('/departures/{departureId}')

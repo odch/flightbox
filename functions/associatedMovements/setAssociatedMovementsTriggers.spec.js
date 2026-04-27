@@ -16,6 +16,7 @@ jest.mock('firebase-functions/v1', () => {
   });
 
   const mock = {
+    config: jest.fn(() => ({ rtdb: { instance: 'test-instance' } })),
     logger: {
       info: jest.fn(),
       warn: jest.fn(),

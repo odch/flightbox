@@ -4,6 +4,7 @@ let capturedHandler;
 
 jest.mock('firebase-functions/v1', () => {
   const mock = {
+    config: jest.fn(() => ({ rtdb: { instance: 'test-instance' } })),
     database: {
       instance: jest.fn(() => ({
         ref: jest.fn(() => ({
@@ -31,6 +32,7 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
 
     jest.mock('firebase-functions/v1', () => {
       const mock = {
+        config: jest.fn(() => ({ rtdb: { instance: 'test-instance' } })),
         database: {
           instance: jest.fn(() => ({
             ref: jest.fn(() => ({

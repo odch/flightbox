@@ -53,14 +53,4 @@ jobs:
           tools-version: 13
           firebase_token: ${{ secrets.FIREBASE_TOKEN }}
       - run: cd functions && npm ci && cd ..
-      - name: Confirm RTDB env vars
-        env:
-          RTDB_INSTANCE: ${{ vars.FIREBASE_RTDB_NAME }}
-          RTDB_URL: ${{ vars.FIREBASE_RTDB_URL || format('https://{0}.firebaseio.com', vars.FIREBASE_RTDB_NAME) }}
-        run: |
-          echo "RTDB_INSTANCE=[$RTDB_INSTANCE]"
-          echo "RTDB_URL=[$RTDB_URL]"
       - run: firebase deploy --only functions
-        env:
-          RTDB_INSTANCE: ${{ vars.FIREBASE_RTDB_NAME }}
-          RTDB_URL: ${{ vars.FIREBASE_RTDB_URL || format('https://{0}.firebaseio.com', vars.FIREBASE_RTDB_NAME) }}
