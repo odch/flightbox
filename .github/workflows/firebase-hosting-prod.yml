@@ -54,3 +54,6 @@ jobs:
           firebase_token: ${{ secrets.FIREBASE_TOKEN }}
       - run: cd functions && npm ci && cd ..
       - run: firebase deploy --only functions
+        env:
+          RTDB_INSTANCE: ${{ vars.FIREBASE_RTDB_NAME }}
+          RTDB_URL: ${{ vars.FIREBASE_RTDB_URL }}

@@ -93,7 +93,8 @@ async function enrichOnUpdate(change, movementType) {
   }
 }
 
-const instance = functions.config().rtdb.instance;
+const { RTDB_INSTANCE } = require('./params');
+const instance = RTDB_INSTANCE.value();
 
 const handleUpdate = (change, movementType) => {
   if (!change.before.exists() || !change.after.exists()) {
