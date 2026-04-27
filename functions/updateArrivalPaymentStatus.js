@@ -1,7 +1,8 @@
 const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
+const { RTDB_INSTANCE } = require('./params');
 
-const instance = functions.config().rtdb.instance;
+const instance = RTDB_INSTANCE.value();
 
 const handleUpdate = async (change) => {
   if (!change.before.exists() || !change.after.exists()) {
