@@ -16,7 +16,7 @@
     "soap": "^1.6.0"
   },
   "devDependencies": {
-    "jest": "^24.1.0"
+    "jest": "^30.3.0"
   },
   "private": true,
   "scripts": {
