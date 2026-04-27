@@ -1,7 +1,7 @@
 const functions = require('firebase-functions/v1')
 const admin = require('firebase-admin')
 
-const instance = process.env.RTDB_INSTANCE
+const instance = functions.config().rtdb.instance
 
 function buildBody(snapshot) {
   const homeBase = (snapshot && snapshot.homeBase) || {}

@@ -2,7 +2,7 @@ const functions = require('firebase-functions/v1')
 const admin = require('firebase-admin')
 const request = require('request-promise');
 
-const instance = process.env.RTDB_INSTANCE;
+const instance = functions.config().rtdb.instance;
 
 module.exports = functions.region('europe-west1').database.instance(instance).ref('status/{statusId}').onCreate(async (snap) => {
   const r = await admin.database().ref("settings/webhookUrl").once('value')

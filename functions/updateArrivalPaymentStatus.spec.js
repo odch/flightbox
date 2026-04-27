@@ -12,6 +12,7 @@ describe('functions', () => {
         database: jest.fn()
       };
       mockFunctions = {
+        config: jest.fn().mockReturnValue({ rtdb: { instance: 'test-instance' } }),
         logger: { info: jest.fn(), error: jest.fn() },
         region: jest.fn().mockReturnValue({
           database: {
