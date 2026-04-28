@@ -5,7 +5,7 @@ const flightnet = require('./flightnet');
 const requestHelper = require('../../util/requestHelper');
 
 const parseStaticCredentials = () => {
-  const config = functions.config();
+  const config = process.env.K_CONFIGURATION ? {} : functions.config();
   if (config.auth && config.auth.staticcredentials) {
     return config.auth.staticcredentials.split(',').map(login => {
       const parts = login.split(':');

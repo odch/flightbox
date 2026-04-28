@@ -5,7 +5,7 @@ const requestHelper = require('../../util/requestHelper');
 
 let ips = [];
 
-const config = functions.config();
+const config = process.env.K_CONFIGURATION ? {} : functions.config();
 if (!config.auth || !config.auth.ips) {
   console.info(
     "Set configuration property auth.ips to allow authentication by request IP address " +

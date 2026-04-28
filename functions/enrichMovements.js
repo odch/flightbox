@@ -93,7 +93,8 @@ async function enrichOnUpdate(change, movementType) {
   }
 }
 
-const { rtdb = {} } = functions.config() || {};
+const config = process.env.K_CONFIGURATION ? {} : functions.config();
+const { rtdb = {} } = config;
 const instance = rtdb.instance || process.env.RTDB_INSTANCE;
 
 const handleUpdate = (change, movementType) => {
