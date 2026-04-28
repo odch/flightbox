@@ -3,13 +3,12 @@
 const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 
-const config = functions.config()
-
-const dbUrl = config.rtdb.url
-const dbInstance = config.rtdb.instance;
+const { rtdb = {} } = functions.config() || {};
+const dbUrl = rtdb.url || process.env.RTDB_URL;
+const dbInstance = rtdb.instance || process.env.RTDB_INSTANCE;
 
 admin.initializeApp({
-  databaseURL: dbUrl || `https://${dbInstance}.firebaseio.com`
+  databaseURL: dbUrl || (dbInstance ? `https://${dbInstance}.firebaseio.com` : undefined),
 });
 
 const { scheduledAerodromesUpdate } = require('./updateAerodromes');
