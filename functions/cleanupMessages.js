@@ -1,17 +1,18 @@
 'use strict';
 
-const functions = require('firebase-functions/v1');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 
 const SCHEDULE = '0 2 * * *'; // Every day at 2 AM
 const TIMEZONE = 'Europe/Zurich';
 
-exports.scheduledCleanupMessages = functions
-  .region('europe-west1')
-  .pubsub
-  .schedule(SCHEDULE)
-  .timeZone(TIMEZONE)
-  .onRun(async () => {
+exports.scheduledCleanupMessages = onSchedule(
+  {
+    region: 'europe-west1',
+    schedule: SCHEDULE,
+    timeZone: TIMEZONE,
+  },
+  async () => {
     const db = admin.database();
 
     const retentionSnap = await db.ref('/settings/messageRetentionDays').once('value');
@@ -47,4 +48,5 @@ exports.scheduledCleanupMessages = functions
       await db.ref('/messages').update(updates);
       console.log(`Deleted ${count} messages`);
     }
-  });
+  }
+);
