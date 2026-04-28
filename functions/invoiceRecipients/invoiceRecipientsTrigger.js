@@ -1,7 +1,8 @@
 const functions = require('firebase-functions/v1')
 const admin = require('firebase-admin')
 
-const instance = functions.config().rtdb.instance
+const { rtdb = {} } = functions.config() || {}
+const instance = rtdb.instance || process.env.RTDB_INSTANCE
 
 module.exports.updateCustomsInvoiceRecipientsOnUpdate =
   functions.region('europe-west1').database.instance(instance).ref('/settings/invoiceRecipients')
