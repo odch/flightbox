@@ -53,4 +53,11 @@ jobs:
           tools-version: 13
           firebase_token: ${{ secrets.FIREBASE_TOKEN }}
       - run: cd functions && npm ci && cd ..
+      - name: Write functions/.env.${{ vars.FIREBASE_PROJECT }} from environment vars
+        run: |
+          cat > functions/.env.${{ vars.FIREBASE_PROJECT }} <<EOF
+          RTDB_URL=${{ vars.FIREBASE_RTDB_URL }}
+          RTDB_INSTANCE=${{ vars.FIREBASE_RTDB_NAME }}
+          WEBHOOK_REGION=${{ vars.WEBHOOK_REGION }}
+          EOF
       - run: firebase deploy --only functions
