@@ -1,7 +1,8 @@
 const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 
-const { rtdb = {} } = functions.config() || {};
+const config = process.env.K_CONFIGURATION ? {} : functions.config();
+const { rtdb = {} } = config;
 const instance = rtdb.instance || process.env.RTDB_INSTANCE;
 
 const handleUpdate = async (change) => {

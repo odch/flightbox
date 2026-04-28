@@ -3,7 +3,8 @@
 const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 
-const { rtdb = {} } = functions.config() || {};
+const config = process.env.K_CONFIGURATION ? {} : functions.config();
+const { rtdb = {} } = config;
 const dbUrl = rtdb.url || process.env.RTDB_URL;
 const dbInstance = rtdb.instance || process.env.RTDB_INSTANCE;
 

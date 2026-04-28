@@ -174,7 +174,8 @@ const updateOnDelete = async (snap, type) => {
   }
 }
 
-const { rtdb = {} } = functions.config() || {};
+const config = process.env.K_CONFIGURATION ? {} : functions.config();
+const { rtdb = {} } = config;
 const instance = rtdb.instance || process.env.RTDB_INSTANCE;
 
 module.exports.setAssociatedMovementOnCreatedDeparture =
