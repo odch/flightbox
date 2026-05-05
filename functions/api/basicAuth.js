@@ -1,6 +1,6 @@
 const functions = require('firebase-functions/v1')
 
-const config = functions.config();
+const config = process.env.K_CONFIGURATION ? {} : functions.config();
 
 const basicAuth = (req, res, next) => {
   if (!config.api || !config.api.serviceuser || !config.api.serviceuser.username || !config.api.serviceuser.password) {
