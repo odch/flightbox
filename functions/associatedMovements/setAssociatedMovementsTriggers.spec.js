@@ -213,6 +213,21 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
 
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
     });
+
+    it('returns early for anonymized movements without processing', async () => {
+      const change = {
+        before: { val: () => ({ dateTime: '2024-01-01T10:00:00', immatriculation: 'HBKOF' }) },
+        after: {
+          val: () => ({ dateTime: '2024-01-01T10:00:00', immatriculation: 'HBKOF', anonymized: true }),
+          ref: { key: 'dep-001' }
+        }
+      };
+
+      const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
+      await handler({ data: change });
+
+      expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
+    });
   });
 
   describe('updateOnCreate', () => {
