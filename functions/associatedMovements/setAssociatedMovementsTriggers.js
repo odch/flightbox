@@ -1,6 +1,11 @@
-const functions = require('firebase-functions/v1')
+const { onValueCreated, onValueWritten, onValueDeleted } = require('firebase-functions/v2/database')
+const { logger } = require('firebase-functions/v2')
+const { defineString } = require('firebase-functions/params')
 const admin = require('firebase-admin')
 const utils = require('./utils')
+
+const RTDB_INSTANCE = defineString('RTDB_INSTANCE')
+const REGION = 'europe-west1'
 
 const toValidAssoc = data =>
   data && ['departure', 'arrival'].includes(data.type) ? data : null
@@ -35,7 +40,7 @@ const loadAndUpdateAssociatedMovement = async (
 }
 
 const updateAssociatedMovement = async (movement, aircraftMovements, updatedMovements, isHomeBase) => {
-  functions.logger.log(`Updating associated movement for ${movement.type} ${movement.key}`)
+  logger.log(`Updating associated movement for ${movement.type} ${movement.key}`)
 
   if (updatedMovements[movement.key]) {
     return
@@ -69,11 +74,11 @@ const updateAssociatedMovement = async (movement, aircraftMovements, updatedMove
   updatedMovements[movement.key] = true
 
   if (associatedMovement) {
-    functions.logger.log(
+    logger.log(
       `Updated ${movement.type} ${movement.key} with new associated ${associatedMovement.type} ${associatedMovement.key}`
     )
   } else {
-    functions.logger.log(
+    logger.log(
       `Updated ${movement.type} ${movement.key} with new associated movement missing`
     )
   }
@@ -116,7 +121,7 @@ const isRelevantUpdate = (valuesBefore, valuesAfter) => {
 }
 
 const updateOnCreate = async (snap, type) => {
-  functions.logger.log(`Setting associated movement for new ${type} ${snap.ref.key}`)
+  logger.log(`Setting associated movement for new ${type} ${snap.ref.key}`)
 
   const movement = snap.val()
   movement.key = snap.ref.key
@@ -137,7 +142,7 @@ const updateOnWrite = async (change, type) => {
 
   const snap = change.after
 
-  functions.logger.log(`Setting associated movement for updated ${type} ${snap.ref.key}`)
+  logger.log(`Setting associated movement for updated ${type} ${snap.ref.key}`)
 
   const movement = snap.val()
   movement.key = snap.ref.key
@@ -152,7 +157,7 @@ const updateOnWrite = async (change, type) => {
 }
 
 const updateOnDelete = async (snap, type) => {
-  functions.logger.log(`Setting associated movement for deleted ${type} ${snap.ref.key}`)
+  logger.log(`Setting associated movement for deleted ${type} ${snap.ref.key}`)
 
   const movementKey = snap.ref.key
 
@@ -174,30 +179,34 @@ const updateOnDelete = async (snap, type) => {
   }
 }
 
-const config = process.env.K_CONFIGURATION ? {} : functions.config();
-const { rtdb = {} } = config;
-const instance = rtdb.instance || process.env.RTDB_INSTANCE;
+const instanceOpt = `{{ params.${RTDB_INSTANCE.name} }}`
 
-module.exports.setAssociatedMovementOnCreatedDeparture =
-  functions.region('europe-west1').database.instance(instance).ref('/departures/{departureId}')
-    .onCreate(snap => updateOnCreate(snap, 'departure'))
+module.exports.setAssociatedMovementOnCreatedDeparture = onValueCreated(
+  { region: REGION, instance: instanceOpt, ref: '/departures/{departureId}' },
+  event => updateOnCreate(event.data, 'departure')
+)
 
-module.exports.setAssociatedMovementOnCreatedArrival =
-  functions.region('europe-west1').database.instance(instance).ref('/arrivals/{arrivalId}')
-    .onCreate(snap => updateOnCreate(snap, 'arrival'))
+module.exports.setAssociatedMovementOnCreatedArrival = onValueCreated(
+  { region: REGION, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
+  event => updateOnCreate(event.data, 'arrival')
+)
 
-module.exports.setAssociatedMovementOnUpdatedDeparture =
-  functions.region('europe-west1').database.instance(instance).ref('/departures/{departureId}')
-    .onWrite(change => updateOnWrite(change, 'departure'))
+module.exports.setAssociatedMovementOnUpdatedDeparture = onValueWritten(
+  { region: REGION, instance: instanceOpt, ref: '/departures/{departureId}' },
+  event => updateOnWrite(event.data, 'departure')
+)
 
-module.exports.setAssociatedMovementOnUpdatedArrival =
-  functions.region('europe-west1').database.instance(instance).ref('/arrivals/{arrivalId}')
-    .onWrite(change => updateOnWrite(change, 'arrival'))
+module.exports.setAssociatedMovementOnUpdatedArrival = onValueWritten(
+  { region: REGION, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
+  event => updateOnWrite(event.data, 'arrival')
+)
 
-module.exports.setAssociatedMovementOnDeletedDeparture =
-  functions.region('europe-west1').database.instance(instance).ref('/departures/{departureId}')
-    .onDelete(snap => updateOnDelete(snap, 'departure'))
+module.exports.setAssociatedMovementOnDeletedDeparture = onValueDeleted(
+  { region: REGION, instance: instanceOpt, ref: '/departures/{departureId}' },
+  event => updateOnDelete(event.data, 'departure')
+)
 
-module.exports.setAssociatedMovementOnDeletedArrival =
-  functions.region('europe-west1').database.instance(instance).ref('/arrivals/{arrivalId}')
-    .onDelete(snap => updateOnDelete(snap, 'arrival'))
+module.exports.setAssociatedMovementOnDeletedArrival = onValueDeleted(
+  { region: REGION, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
+  event => updateOnDelete(event.data, 'arrival')
+)
