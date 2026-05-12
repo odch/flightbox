@@ -5,7 +5,7 @@ const admin = require('firebase-admin')
 const utils = require('./utils')
 
 const RTDB_INSTANCE = defineString('RTDB_INSTANCE')
-const REGION = 'europe-west1'
+const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' })
 
 const toValidAssoc = data =>
   data && ['departure', 'arrival'].includes(data.type) ? data : null
@@ -180,33 +180,34 @@ const updateOnDelete = async (snap, type) => {
 }
 
 const instanceOpt = `{{ params.${RTDB_INSTANCE.name} }}`
+const regionOpt = `{{ params.${RTDB_REGION.name} }}`
 
 module.exports.setAssociatedMovementOnCreatedDeparture = onValueCreated(
-  { region: REGION, instance: instanceOpt, ref: '/departures/{departureId}' },
+  { region: regionOpt, instance: instanceOpt, ref: '/departures/{departureId}' },
   event => updateOnCreate(event.data, 'departure')
 )
 
 module.exports.setAssociatedMovementOnCreatedArrival = onValueCreated(
-  { region: REGION, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
+  { region: regionOpt, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
   event => updateOnCreate(event.data, 'arrival')
 )
 
 module.exports.setAssociatedMovementOnUpdatedDeparture = onValueWritten(
-  { region: REGION, instance: instanceOpt, ref: '/departures/{departureId}' },
+  { region: regionOpt, instance: instanceOpt, ref: '/departures/{departureId}' },
   event => updateOnWrite(event.data, 'departure')
 )
 
 module.exports.setAssociatedMovementOnUpdatedArrival = onValueWritten(
-  { region: REGION, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
+  { region: regionOpt, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
   event => updateOnWrite(event.data, 'arrival')
 )
 
 module.exports.setAssociatedMovementOnDeletedDeparture = onValueDeleted(
-  { region: REGION, instance: instanceOpt, ref: '/departures/{departureId}' },
+  { region: regionOpt, instance: instanceOpt, ref: '/departures/{departureId}' },
   event => updateOnDelete(event.data, 'departure')
 )
 
 module.exports.setAssociatedMovementOnDeletedArrival = onValueDeleted(
-  { region: REGION, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
+  { region: regionOpt, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
   event => updateOnDelete(event.data, 'arrival')
 )

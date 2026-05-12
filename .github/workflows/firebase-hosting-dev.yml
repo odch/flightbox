@@ -60,6 +60,6 @@ jobs:
           cat > functions/.env.${{ vars.FIREBASE_PROJECT }} <<EOF
           RTDB_URL=${{ vars.FIREBASE_RTDB_URL }}
           RTDB_INSTANCE=${{ vars.FIREBASE_RTDB_NAME }}
-          WEBHOOK_REGION=${{ vars.WEBHOOK_REGION }}
+          RTDB_REGION=${{ vars.RTDB_REGION }}
           EOF
       - run: firebase deploy --only functions
