@@ -2,36 +2,30 @@
 
 const mockCapturedHandlers = {};
 
-jest.mock('firebase-functions/v1', () => {
-  const makeDbRef = (path) => ({
-    onCreate: jest.fn(handler => {
-      mockCapturedHandlers[`onCreate:${path}`] = handler;
-    }),
-    onWrite: jest.fn(handler => {
-      mockCapturedHandlers[`onWrite:${path}`] = handler;
-    }),
-    onDelete: jest.fn(handler => {
-      mockCapturedHandlers[`onDelete:${path}`] = handler;
-    })
-  });
+jest.mock('firebase-functions/v2/database', () => ({
+  onValueCreated: jest.fn((opts, handler) => {
+    mockCapturedHandlers[`onCreate:${opts.ref}`] = handler;
+  }),
+  onValueWritten: jest.fn((opts, handler) => {
+    mockCapturedHandlers[`onWrite:${opts.ref}`] = handler;
+  }),
+  onValueDeleted: jest.fn((opts, handler) => {
+    mockCapturedHandlers[`onDelete:${opts.ref}`] = handler;
+  })
+}));
 
-  const mock = {
-    config: jest.fn(() => ({ rtdb: { instance: 'test-instance' } })),
-    logger: {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      log: jest.fn()
-    },
-    database: {
-      instance: jest.fn(() => ({
-        ref: makeDbRef
-      }))
-    }
-  };
-  mock.region = jest.fn(() => mock);
-  return mock;
-});
+jest.mock('firebase-functions/v2', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    log: jest.fn()
+  }
+}));
+
+jest.mock('firebase-functions/params', () => ({
+  defineString: jest.fn(name => ({ name }))
+}));
 
 const mockUpdate = jest.fn();
 const mockOnce = jest.fn();
@@ -91,7 +85,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
-      await handler(change);
+      await handler({ data: change });
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
     });
@@ -113,7 +107,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
-      await handler(change);
+      await handler({ data: change });
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
     });
@@ -135,7 +129,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onWrite:/arrivals/{arrivalId}'];
-      await handler(change);
+      await handler({ data: change });
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
     });
@@ -157,7 +151,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
-      await handler(change);
+      await handler({ data: change });
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
     });
@@ -186,7 +180,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
-      await handler(change);
+      await handler({ data: change });
 
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
     });
@@ -203,7 +197,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
-      await handler(change);
+      await handler({ data: change });
 
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
     });
@@ -215,7 +209,22 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
-      await handler(change);
+      await handler({ data: change });
+
+      expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
+    });
+
+    it('returns early for anonymized movements without processing', async () => {
+      const change = {
+        before: { val: () => ({ dateTime: '2024-01-01T10:00:00', immatriculation: 'HBKOF' }) },
+        after: {
+          val: () => ({ dateTime: '2024-01-01T10:00:00', immatriculation: 'HBKOF', anonymized: true }),
+          ref: { key: 'dep-001' }
+        }
+      };
+
+      const handler = mockCapturedHandlers['onWrite:/departures/{departureId}'];
+      await handler({ data: change });
 
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
     });
@@ -236,7 +245,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.loadAircraftMovements).toHaveBeenCalledWith('HBKOF');
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('dep-001', 'departure', null);
@@ -257,7 +266,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onCreate:/arrivals/{arrivalId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.loadAircraftMovements).toHaveBeenCalledWith('HBABC');
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('arr-001', 'arrival', associatedDep);
@@ -278,7 +287,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onCreate:/arrivals/{arrivalId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('arr-001', 'arrival', associatedDep);
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('dep-001', 'departure', { key: 'arr-001', type: 'arrival' });
@@ -295,7 +304,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onDelete:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
     });
@@ -309,7 +318,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onDelete:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
     });
@@ -334,7 +343,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onDelete:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(mockRemove).toHaveBeenCalled();
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
@@ -360,7 +369,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onDelete:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(mockRemove).toHaveBeenCalled();
       expect(utils.setAssociatedMovement).not.toHaveBeenCalled();
@@ -396,7 +405,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onDelete:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
     });
@@ -431,7 +440,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onDelete:/arrivals/{arrivalId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.setAssociatedMovement).toHaveBeenCalled();
     });
@@ -476,7 +485,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onDelete:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.loadAircraftMovements).toHaveBeenCalledWith('HBKOF');
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('arr-001', 'arrival', null);
@@ -520,7 +529,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onDelete:/arrivals/{arrivalId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.loadAircraftMovements).toHaveBeenCalledWith('DEXYZ');
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('dep-001', 'departure', null);
@@ -546,7 +555,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(callCount).toBe(1);
     });
@@ -589,7 +598,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(onceCalls).toBeGreaterThanOrEqual(2);
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('dep-001', 'departure', null);
@@ -647,7 +656,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('dep-001', 'departure', newAssociatedMovement);
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('arr-001', 'arrival', { key: 'dep-001', type: 'departure' });
@@ -686,7 +695,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('dep-001', 'departure', arrMovement);
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('arr-001', 'arrival', { key: 'dep-001', type: 'departure' });
@@ -726,7 +735,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('dep-001', 'departure', null);
       expect(utils.setAssociatedMovement).toHaveBeenCalledTimes(1);
@@ -765,7 +774,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onCreate:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(onceCalls).toBeGreaterThanOrEqual(2);
       expect(utils.setAssociatedMovement).toHaveBeenCalledWith('dep-001', 'departure', null);
@@ -806,7 +815,7 @@ describe('functions/associatedMovements/setAssociatedMovementsTriggers', () => {
       };
 
       const handler = mockCapturedHandlers['onDelete:/departures/{departureId}'];
-      await handler(snap);
+      await handler({ data: snap });
 
       expect(utils.loadAircraftMovements).toHaveBeenCalledWith('HBKOF');
       expect(utils.loadAircraftMovements).not.toHaveBeenCalledWith(undefined);
