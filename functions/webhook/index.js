@@ -5,11 +5,11 @@ const admin = require('firebase-admin');
 const request = require('request-promise');
 
 const RTDB_INSTANCE = defineString('RTDB_INSTANCE');
-const WEBHOOK_REGION = defineString('WEBHOOK_REGION', { default: 'europe-west1' });
+const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' });
 
 module.exports = onValueCreated(
   {
-    region: `{{ params.${WEBHOOK_REGION.name} }}`,
+    region: `{{ params.${RTDB_REGION.name} }}`,
     instance: `{{ params.${RTDB_INSTANCE.name} }}`,
     ref: 'status/{statusId}',
   },
