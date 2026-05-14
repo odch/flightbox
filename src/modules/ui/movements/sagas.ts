@@ -14,7 +14,7 @@ export function* createMovementFromMovement(action: any) {
 }
 
 export function* cancelWizard() {
-  history.goBack();
+  history.back();
 }
 
 export default function* sagas() {

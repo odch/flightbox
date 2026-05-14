@@ -66,7 +66,7 @@ const PrivacyText = styled.p`
 
 const LoginPage = ({privacyPolicyUrl, emailSent}: {privacyPolicyUrl?: string | null, emailSent?: boolean}) => {
   const { t } = useTranslation();
-  const location = useLocation<any>();
+  const location = useLocation();
   const queryToken = getAuthQueryToken(location)
   const guestOnly = getGuestOnly(location)
   return (
