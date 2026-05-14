@@ -12,9 +12,7 @@ exports[`components ImageButton propagates href to OptionalLink 1`] = `
       <div
         class="sc-hKgHXU knmyIG"
       >
-        <img
-          src=""
-        />
+        <img />
       </div>
     </a>
   </div>
@@ -32,9 +30,7 @@ exports[`components ImageButton propagates onClick to OptionalLink 1`] = `
       <div
         class="sc-hKgHXU knmyIG"
       >
-        <img
-          src=""
-        />
+        <img />
       </div>
     </div>
   </div>
