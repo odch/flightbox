@@ -1,34 +1,40 @@
+'use strict';
+
+let mockCapturedHandler = null;
+
+jest.mock('firebase-functions/v2/database', () => ({
+  onValueWritten: jest.fn((opts, handler) => {
+    mockCapturedHandler = handler;
+  })
+}));
+
+const mockLogger = {
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  log: jest.fn()
+};
+
+jest.mock('firebase-functions/v2', () => ({
+  logger: mockLogger
+}));
+
+jest.mock('firebase-functions/params', () => ({
+  defineString: jest.fn(name => ({ name }))
+}));
+
+const mockAdmin = {
+  database: jest.fn()
+};
+
+jest.mock('firebase-admin', () => mockAdmin);
+
+require('./updateArrivalPaymentStatus');
+
 describe('functions', () => {
   describe('updateArrivalPaymentStatus handleUpdate', () => {
-    let mockAdmin;
-    let mockFunctions;
-    let capturedHandler;
-
     beforeEach(() => {
-      jest.resetModules();
-
-      capturedHandler = null;
-      mockAdmin = {
-        database: jest.fn()
-      };
-      mockFunctions = {
-        config: jest.fn().mockReturnValue({ rtdb: { instance: 'test-instance' } }),
-        logger: { info: jest.fn(), error: jest.fn() },
-        region: jest.fn().mockReturnValue({
-          database: {
-            instance: jest.fn().mockReturnValue({
-              ref: jest.fn().mockReturnValue({
-                onWrite: jest.fn().mockImplementation(fn => { capturedHandler = fn; })
-              })
-            })
-          }
-        })
-      };
-
-      jest.mock('firebase-admin', () => mockAdmin);
-      jest.mock('firebase-functions/v1', () => mockFunctions);
-
-      require('./updateArrivalPaymentStatus');
+      jest.clearAllMocks();
     });
 
     const makeChange = (beforeVal, afterVal, afterKey = 'pay1') => ({
@@ -46,13 +52,13 @@ describe('functions', () => {
 
     it('returns null when before does not exist', async () => {
       const change = makeChange(null, { status: 'success', arrivalReference: 'arr1' });
-      const result = await capturedHandler(change);
+      const result = await mockCapturedHandler({ data: change });
       expect(result).toBeNull();
     });
 
     it('returns null when after does not exist', async () => {
       const change = makeChange({ status: 'pending' }, null);
-      const result = await capturedHandler(change);
+      const result = await mockCapturedHandler({ data: change });
       expect(result).toBeNull();
     });
 
@@ -61,7 +67,7 @@ describe('functions', () => {
         { status: 'pending' },
         { status: 'pending', arrivalReference: 'arr1' }
       );
-      const result = await capturedHandler(change);
+      const result = await mockCapturedHandler({ data: change });
       expect(result).toBeUndefined();
       expect(mockAdmin.database).not.toHaveBeenCalled();
     });
@@ -83,8 +89,8 @@ describe('functions', () => {
         { status: 'pending' },
         { status: 'success' }  // no arrivalReference
       );
-      await capturedHandler(change);
-      expect(mockFunctions.logger.info).toHaveBeenCalled();
+      await mockCapturedHandler({ data: change });
+      expect(mockLogger.info).toHaveBeenCalled();
     });
 
     it('updates arrival payment status when status changes to success', async () => {
@@ -106,7 +112,7 @@ describe('functions', () => {
         { status: 'success', arrivalReference: 'arr1' }
       );
 
-      await capturedHandler(change);
+      await mockCapturedHandler({ data: change });
 
       expect(mockRef.update).toHaveBeenCalledWith({
         paymentMethod: { status: 'completed', method: 'card' }
@@ -132,7 +138,7 @@ describe('functions', () => {
         { status: 'success', arrivalReference: 'arr1' }
       );
 
-      await capturedHandler(change);
+      await mockCapturedHandler({ data: change });
 
       expect(mockRef.update).not.toHaveBeenCalled();
     });
@@ -156,8 +162,8 @@ describe('functions', () => {
         { status: 'success', arrivalReference: 'arr1' }
       );
 
-      await expect(capturedHandler(change)).rejects.toThrow('DB error');
-      expect(mockFunctions.logger.error).toHaveBeenCalled();
+      await expect(mockCapturedHandler({ data: change })).rejects.toThrow('DB error');
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 });
