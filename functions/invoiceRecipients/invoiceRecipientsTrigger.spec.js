@@ -1,21 +1,27 @@
 'use strict';
 
-let capturedHandler;
+let mockCapturedHandler = null;
 
-jest.mock('firebase-functions/v1', () => {
-  const mock = {
-    config: jest.fn(() => ({ rtdb: { instance: 'test-instance' } })),
-    database: {
-      instance: jest.fn(() => ({
-        ref: jest.fn(() => ({
-          onWrite: jest.fn(handler => { capturedHandler = handler; }),
-        })),
-      })),
-    },
-  };
-  mock.region = jest.fn(() => mock);
-  return mock;
-});
+jest.mock('firebase-functions/v2/database', () => ({
+  onValueWritten: jest.fn((opts, handler) => {
+    mockCapturedHandler = handler;
+  })
+}));
+
+const mockLogger = {
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  log: jest.fn()
+};
+
+jest.mock('firebase-functions/v2', () => ({
+  logger: mockLogger
+}));
+
+jest.mock('firebase-functions/params', () => ({
+  defineString: jest.fn(name => ({ name }))
+}));
 
 const mockAdminDbRef = jest.fn();
 jest.mock('firebase-admin', () => ({
@@ -24,32 +30,11 @@ jest.mock('firebase-admin', () => ({
 
 global.fetch = jest.fn();
 
+require('./invoiceRecipientsTrigger');
+
 describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
   beforeEach(() => {
-    jest.resetModules();
     jest.clearAllMocks();
-    capturedHandler = null;
-
-    jest.mock('firebase-functions/v1', () => {
-      const mock = {
-        config: jest.fn(() => ({ rtdb: { instance: 'test-instance' } })),
-        database: {
-          instance: jest.fn(() => ({
-            ref: jest.fn(() => ({
-              onWrite: jest.fn(handler => { capturedHandler = handler; }),
-            })),
-          })),
-        },
-      };
-      mock.region = jest.fn(() => mock);
-      return mock;
-    });
-
-    jest.mock('firebase-admin', () => ({
-      database: jest.fn(() => ({ ref: mockAdminDbRef })),
-    }));
-
-    require('./invoiceRecipientsTrigger');
   });
 
   const makeChange = (before, after) => ({
@@ -59,7 +44,7 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
 
   it('does nothing when before and after are equal', async () => {
     const change = makeChange([{ name: 'A', emails: [] }], [{ name: 'A', emails: [] }]);
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
     expect(mockAdminDbRef).not.toHaveBeenCalled();
     expect(global.fetch).not.toHaveBeenCalled();
   });
@@ -69,7 +54,7 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
       once: jest.fn().mockResolvedValue({ val: () => null }),
     });
     const change = makeChange([{ name: 'A' }], [{ name: 'B' }]);
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
@@ -78,7 +63,7 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
       once: jest.fn().mockResolvedValue({ val: () => ({ aerodrome: 'LSZT' }) }),
     });
     const change = makeChange([{ name: 'A' }], [{ name: 'B' }]);
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
@@ -100,7 +85,7 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
       { name: 'Bob', emails: ['bob@example.com', 'bob2@example.com'] },
     ];
     const change = makeChange([{ name: 'Old' }], after);
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
 
     expect(global.fetch).toHaveBeenCalledWith(
       'https://customs.example.com/api/invoice-recipients?ad=LSZT',
@@ -132,7 +117,7 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
     global.fetch.mockResolvedValue({ ok: true });
 
     const change = makeChange([{ name: 'Old' }], null);
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
 
     expect(global.fetch).toHaveBeenCalledWith(
       expect.any(String),
@@ -156,14 +141,12 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
       json: jest.fn().mockResolvedValue({ error: 'Not authorized' }),
     });
 
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const change = makeChange([{ name: 'A' }], [{ name: 'B' }]);
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
 
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(mockLogger.error).toHaveBeenCalledWith(
       'Failed to update the invoice recipients of the customs app',
       expect.anything()
     );
-    consoleSpy.mockRestore();
   });
 });
