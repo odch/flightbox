@@ -1,21 +1,27 @@
 'use strict';
 
-let capturedHandler;
+let mockCapturedHandler = null;
 
-jest.mock('firebase-functions/v1', () => {
-  const mock = {
-    config: jest.fn(() => ({ rtdb: { instance: 'test-instance' } })),
-    database: {
-      instance: jest.fn(() => ({
-        ref: jest.fn(() => ({
-          onWrite: jest.fn(handler => { capturedHandler = handler; }),
-        })),
-      })),
-    },
-  };
-  mock.region = jest.fn(() => mock);
-  return mock;
-});
+jest.mock('firebase-functions/v2/database', () => ({
+  onValueWritten: jest.fn((opts, handler) => {
+    mockCapturedHandler = handler;
+  })
+}));
+
+const mockLogger = {
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  log: jest.fn()
+};
+
+jest.mock('firebase-functions/v2', () => ({
+  logger: mockLogger
+}));
+
+jest.mock('firebase-functions/params', () => ({
+  defineString: jest.fn(name => ({ name }))
+}));
 
 const mockAdminDbRef = jest.fn();
 jest.mock('firebase-admin', () => ({
@@ -24,32 +30,11 @@ jest.mock('firebase-admin', () => ({
 
 global.fetch = jest.fn();
 
+require('./homebasedAircraftTrigger');
+
 describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
   beforeEach(() => {
-    jest.resetModules();
     jest.clearAllMocks();
-    capturedHandler = null;
-
-    jest.mock('firebase-functions/v1', () => {
-      const mock = {
-        config: jest.fn(() => ({ rtdb: { instance: 'test-instance' } })),
-        database: {
-          instance: jest.fn(() => ({
-            ref: jest.fn(() => ({
-              onWrite: jest.fn(handler => { capturedHandler = handler; }),
-            })),
-          })),
-        },
-      };
-      mock.region = jest.fn(() => mock);
-      return mock;
-    });
-
-    jest.mock('firebase-admin', () => ({
-      database: jest.fn(() => ({ ref: mockAdminDbRef })),
-    }));
-
-    require('./homebasedAircraftTrigger');
   });
 
   const makeChange = (before, after) => ({
@@ -60,7 +45,7 @@ describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
   it('does nothing when before and after are equal', async () => {
     const value = { homeBase: { HBXYZ: true }, club: { HBABC: true } };
     const change = makeChange(value, value);
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
     expect(mockAdminDbRef).not.toHaveBeenCalled();
     expect(global.fetch).not.toHaveBeenCalled();
   });
@@ -70,7 +55,7 @@ describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
       { homeBase: { HBXYZ: true }, club: { HBABC: true }, other: 1 },
       { homeBase: { HBXYZ: true }, club: { HBABC: true }, other: 2 }
     );
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
     expect(mockAdminDbRef).not.toHaveBeenCalled();
     expect(global.fetch).not.toHaveBeenCalled();
   });
@@ -83,7 +68,7 @@ describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
       { homeBase: { HBXYZ: true } },
       { homeBase: { HBABC: true } }
     );
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
@@ -95,7 +80,7 @@ describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
       { homeBase: { HBXYZ: true } },
       { homeBase: { HBABC: true } }
     );
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
@@ -117,7 +102,7 @@ describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
       club: { HBABC: true, HBCLU: true },
     };
     const change = makeChange({ homeBase: { HBOLD: true } }, after);
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
 
     expect(global.fetch).toHaveBeenCalledWith(
       'https://customs.example.com/api/homebased-aircraft?ad=LSZT',
@@ -153,7 +138,7 @@ describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
       { homeBase: { HBOLD: true }, club: { HBCLU: true } },
       { club: { HBCLU: true, HBNEW: true } }
     );
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
 
     expect(global.fetch).toHaveBeenCalledWith(
       expect.any(String),
@@ -180,7 +165,7 @@ describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
     global.fetch.mockResolvedValue({ ok: true });
 
     const change = makeChange({ homeBase: { HBOLD: true } }, null);
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
 
     expect(global.fetch).toHaveBeenCalledWith(
       expect.any(String),
@@ -204,19 +189,17 @@ describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
       text: jest.fn().mockResolvedValue('Not authorized'),
     });
 
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const change = makeChange(
       { homeBase: { HBOLD: true } },
       { homeBase: { HBNEW: true } }
     );
-    await capturedHandler(change, {});
+    await mockCapturedHandler({ data: change });
 
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(mockLogger.error).toHaveBeenCalledWith(
       'Failed to update the homebased aircraft of the customs app',
       expect.anything()
     );
-    expect(consoleSpy).toHaveBeenCalledWith('Response body', 'Not authorized');
-    consoleSpy.mockRestore();
+    expect(mockLogger.error).toHaveBeenCalledWith('Response body', 'Not authorized');
   });
 
   it('tolerates non-text error responses without throwing', async () => {
@@ -235,13 +218,11 @@ describe('functions/homebasedAircraft/homebasedAircraftTrigger', () => {
       text: jest.fn().mockRejectedValue(new Error('stream error')),
     });
 
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const change = makeChange(
       { homeBase: { HBOLD: true } },
       { homeBase: { HBNEW: true } }
     );
-    await expect(capturedHandler(change, {})).resolves.toBeUndefined();
-    expect(consoleSpy).toHaveBeenCalledWith('Response body', '');
-    consoleSpy.mockRestore();
+    await expect(mockCapturedHandler({ data: change })).resolves.toBeUndefined();
+    expect(mockLogger.error).toHaveBeenCalledWith('Response body', '');
   });
 });
