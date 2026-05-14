@@ -1,53 +1,58 @@
-const functions = require('firebase-functions/v1')
+const { onValueWritten } = require('firebase-functions/v2/database')
+const { logger } = require('firebase-functions/v2')
+const { defineString } = require('firebase-functions/params')
 const admin = require('firebase-admin')
 
-const config = process.env.K_CONFIGURATION ? {} : functions.config()
-const { rtdb = {} } = config
-const instance = rtdb.instance || process.env.RTDB_INSTANCE
+const RTDB_INSTANCE = defineString('RTDB_INSTANCE')
+const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' })
 
-module.exports.updateCustomsInvoiceRecipientsOnUpdate =
-  functions.region('europe-west1').database.instance(instance).ref('/settings/invoiceRecipients')
-    .onWrite(async (change, context) => {
-      const before = change.before.val()
-      const after = change.after.val()
+const instanceOpt = `{{ params.${RTDB_INSTANCE.name} }}`
+const regionOpt = `{{ params.${RTDB_REGION.name} }}`
 
-      if (JSON.stringify(before) === JSON.stringify(after)) {
-        console.log('No change detected.')
-        return
-      }
+module.exports.updateCustomsInvoiceRecipientsOnUpdate = onValueWritten(
+  { region: regionOpt, instance: instanceOpt, ref: '/settings/invoiceRecipients' },
+  async (event) => {
+    const before = event.data.before.val()
+    const after = event.data.after.val()
 
-      const snapshot = await admin.database().ref('/settings/customsDeclarationApp').once('value')
-      const customsSettings = snapshot.val()
+    if (JSON.stringify(before) === JSON.stringify(after)) {
+      logger.info('No change detected.')
+      return
+    }
 
-      if (!customsSettings || !customsSettings.baseUrl) {
-        console.log('No customs declaration settings in /settings/customsDeclarationApp. Aborting...')
-        return
-      }
+    const snapshot = await admin.database().ref('/settings/customsDeclarationApp').once('value')
+    const customsSettings = snapshot.val()
 
-      const url = `${customsSettings.baseUrl}/api/invoice-recipients?ad=${customsSettings.aerodrome}`
+    if (!customsSettings || !customsSettings.baseUrl) {
+      logger.info('No customs declaration settings in /settings/customsDeclarationApp. Aborting...')
+      return
+    }
 
-      const body = (after || []).map(recipient => ({
-        name: recipient.name,
-        emails: recipient.emails || []
-      }))
+    const url = `${customsSettings.baseUrl}/api/invoice-recipients?ad=${customsSettings.aerodrome}`
 
-      const jsonBody = JSON.stringify(body)
+    const body = (after || []).map(recipient => ({
+      name: recipient.name,
+      emails: recipient.emails || []
+    }))
 
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${customsSettings.accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: jsonBody
-      })
+    const jsonBody = JSON.stringify(body)
 
-      if (response.ok) {
-        console.log('Successfully updated invoice recipients of the customs app')
-      } else {
-        console.log('Failed to update the invoice recipients of the customs app', response)
-
-        const body = await response.json()
-        console.log('Response body', body)
-      }
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${customsSettings.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: jsonBody
     })
+
+    if (response.ok) {
+      logger.info('Successfully updated invoice recipients of the customs app')
+    } else {
+      logger.error('Failed to update the invoice recipients of the customs app', response)
+
+      const body = await response.json()
+      logger.error('Response body', body)
+    }
+  }
+)
