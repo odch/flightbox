@@ -1,9 +1,17 @@
-const functions = require('firebase-functions/v1');
+const { onValueCreated, onValueWritten } = require('firebase-functions/v2/database');
+const { logger } = require('firebase-functions/v2');
+const { defineString } = require('firebase-functions/params');
 const admin = require('firebase-admin');
+
+const RTDB_INSTANCE = defineString('RTDB_INSTANCE');
+const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' });
+
+const instanceOpt = `{{ params.${RTDB_INSTANCE.name} }}`;
+const regionOpt = `{{ params.${RTDB_REGION.name} }}`;
 
 const getEnrichedData = (aerodromeSnapshot, icaoCode) => {
   if (!aerodromeSnapshot.exists()) {
-    functions.logger.warn(`Aerodrome data not found for ICAO code: ${icaoCode}. Clearing enriched data.`);
+    logger.warn(`Aerodrome data not found for ICAO code: ${icaoCode}. Clearing enriched data.`);
     return {
       locationName: null,
       locationCountry: null,
@@ -21,7 +29,7 @@ const getEnrichedData = (aerodromeSnapshot, icaoCode) => {
 
 async function enrichMovementWithAerodromeMetadata(movement, movementType, movementKey) {
   if (!movement?.location) {
-    functions.logger.warn(`No location found for ${movementType} ${movementKey}`);
+    logger.warn(`No location found for ${movementType} ${movementKey}`);
     return;
   }
 
@@ -44,20 +52,20 @@ async function enrichMovementWithAerodromeMetadata(movement, movementType, movem
       const movementRef = admin.database().ref(movementPath).child(movementKey);
       const currentSnapshot = await movementRef.once('value');
       if (!currentSnapshot.exists()) {
-        functions.logger.info(
+        logger.info(
           `${movementType} ${movementKey} no longer exists, skipping enrichment`
         );
         return;
       }
       await movementRef.update(enrichedData);
 
-      functions.logger.info(
+      logger.info(
         `Enriched ${movementType} ${movementKey} with aerodrome metadata for ${icaoCode}: ${enrichedData.locationName}, ${enrichedData.country}`
       );
     }
 
   } catch (error) {
-    functions.logger.error(
+    logger.error(
       `Failed to enrich ${movementType} ${movementKey} with aerodrome metadata:`,
       error
     );
@@ -69,7 +77,7 @@ async function enrichOnCreate(snapshot, movementType) {
   const movementKey = snapshot.ref.key;
   const movement = snapshot.val();
 
-  functions.logger.info(`Enriching new ${movementType} ${movementKey} with aerodrome metadata`);
+  logger.info(`Enriching new ${movementType} ${movementKey} with aerodrome metadata`);
 
   await enrichMovementWithAerodromeMetadata(movement, movementType, movementKey);
 }
@@ -85,17 +93,13 @@ async function enrichOnUpdate(change, movementType) {
                          !afterMovement.locationTimezone;
 
   if (locationChanged || missingMetadata) {
-    functions.logger.info(
+    logger.info(
       `Enriching updated ${movementType} ${movementKey} (location changed: ${locationChanged}, missing metadata: ${missingMetadata})`
     );
 
     await enrichMovementWithAerodromeMetadata(afterMovement, movementType, movementKey);
   }
 }
-
-const config = process.env.K_CONFIGURATION ? {} : functions.config();
-const { rtdb = {} } = config;
-const instance = rtdb.instance || process.env.RTDB_INSTANCE;
 
 const handleUpdate = (change, movementType) => {
   if (!change.before.exists() || !change.after.exists()) {
@@ -108,22 +112,22 @@ const handleUpdate = (change, movementType) => {
   return enrichOnUpdate(change, movementType);
 };
 
-exports.enrichDepartureOnCreate = functions.region('europe-west1').database
-  .instance(instance)
-  .ref('/departures/{departureId}')
-  .onCreate((snapshot) => enrichOnCreate(snapshot, 'departure'));
+exports.enrichDepartureOnCreate = onValueCreated(
+  { region: regionOpt, instance: instanceOpt, ref: '/departures/{departureId}' },
+  event => enrichOnCreate(event.data, 'departure')
+);
 
-exports.enrichDepartureOnUpdate = functions.region('europe-west1').database
-  .instance(instance)
-  .ref('/departures/{departureId}')
-  .onWrite((change) => handleUpdate(change, 'departure'));
+exports.enrichDepartureOnUpdate = onValueWritten(
+  { region: regionOpt, instance: instanceOpt, ref: '/departures/{departureId}' },
+  event => handleUpdate(event.data, 'departure')
+);
 
-exports.enrichArrivalOnCreate = functions.region('europe-west1').database
-  .instance(instance)
-  .ref('/arrivals/{arrivalId}')
-  .onCreate((snapshot) => enrichOnCreate(snapshot, 'arrival'));
+exports.enrichArrivalOnCreate = onValueCreated(
+  { region: regionOpt, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
+  event => enrichOnCreate(event.data, 'arrival')
+);
 
-exports.enrichArrivalOnUpdate = functions.region('europe-west1').database
-  .instance(instance)
-  .ref('/arrivals/{arrivalId}')
-  .onWrite((change) => handleUpdate(change, 'arrival'));
+exports.enrichArrivalOnUpdate = onValueWritten(
+  { region: regionOpt, instance: instanceOpt, ref: '/arrivals/{arrivalId}' },
+  event => handleUpdate(event.data, 'arrival')
+);
