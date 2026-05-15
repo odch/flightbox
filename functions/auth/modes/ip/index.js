@@ -1,20 +1,18 @@
 'use strict';
 
-const functions = require('firebase-functions/v1');
 const requestHelper = require('../../util/requestHelper');
 
 let ips = [];
 
-const config = process.env.K_CONFIGURATION ? {} : functions.config();
-if (!config.auth || !config.auth.ips) {
+if (!process.env.AUTH_IPS) {
   console.info(
-    "Set configuration property auth.ips to allow authentication by request IP address " +
+    "Set AUTH_IPS env var to allow authentication by request IP address " +
     "(comma separated list of IP addresses). Currently no addresses set."
   )
 } else {
-  ips = config.auth.ips.split(',').map(ip => ip.trim());
+  ips = process.env.AUTH_IPS.split(',').map(ip => ip.trim());
   console.info(
-    "The following IP addresses are enabled (config property auth.ips): " + ips
+    "The following IP addresses are enabled (AUTH_IPS env var): " + ips
   )
 }
 
