@@ -1,7 +1,7 @@
 'use strict';
 
-// basicAuth.js captures functions.config() at require time, so each describe
-// block resets modules and requires the module with the relevant config.
+// basicAuth.js captures process.env at require time, so each describe
+// block resets modules and requires the module with the relevant env.
 
 const makeReq = (authHeader) => ({
   headers: { authorization: authHeader || '' },
@@ -13,18 +13,27 @@ const makeRes = () => ({
 });
 
 describe('functions/api/basicAuth', () => {
-  describe('when config is missing', () => {
+  let consoleInfoSpy;
+
+  beforeEach(() => {
+    consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleInfoSpy.mockRestore();
+    delete process.env.API_SERVICEUSER_USERNAME;
+    delete process.env.API_SERVICEUSER_PASSWORD;
+  });
+
+  describe('when env vars are missing', () => {
     let basicAuth;
 
     beforeEach(() => {
       jest.resetModules();
-      jest.mock('firebase-functions/v1', () => ({
-        config: jest.fn(() => ({})),
-      }));
       basicAuth = require('./basicAuth');
     });
 
-    it('returns 401 when api config is absent', () => {
+    it('returns 401 when both env vars are absent', () => {
       const next = jest.fn();
       const res = makeRes();
       basicAuth(makeReq(), res, next);
@@ -34,14 +43,12 @@ describe('functions/api/basicAuth', () => {
     });
   });
 
-  describe('when config is missing username', () => {
+  describe('when username is missing', () => {
     let basicAuth;
 
     beforeEach(() => {
       jest.resetModules();
-      jest.mock('firebase-functions/v1', () => ({
-        config: jest.fn(() => ({ api: { serviceuser: { password: 'pass' } } })),
-      }));
+      process.env.API_SERVICEUSER_PASSWORD = 'pass';
       basicAuth = require('./basicAuth');
     });
 
@@ -54,14 +61,12 @@ describe('functions/api/basicAuth', () => {
     });
   });
 
-  describe('when config is missing password', () => {
+  describe('when password is missing', () => {
     let basicAuth;
 
     beforeEach(() => {
       jest.resetModules();
-      jest.mock('firebase-functions/v1', () => ({
-        config: jest.fn(() => ({ api: { serviceuser: { username: 'user' } } })),
-      }));
+      process.env.API_SERVICEUSER_USERNAME = 'user';
       basicAuth = require('./basicAuth');
     });
 
@@ -74,16 +79,13 @@ describe('functions/api/basicAuth', () => {
     });
   });
 
-  describe('with valid config', () => {
+  describe('with valid env vars', () => {
     let basicAuth;
 
     beforeEach(() => {
       jest.resetModules();
-      jest.mock('firebase-functions/v1', () => ({
-        config: jest.fn(() => ({
-          api: { serviceuser: { username: 'admin', password: 's3cret' } },
-        })),
-      }));
+      process.env.API_SERVICEUSER_USERNAME = 'admin';
+      process.env.API_SERVICEUSER_PASSWORD = 's3cret';
       basicAuth = require('./basicAuth');
     });
 

@@ -61,5 +61,13 @@ jobs:
           RTDB_URL=${{ vars.FIREBASE_RTDB_URL }}
           RTDB_INSTANCE=${{ vars.FIREBASE_RTDB_NAME }}
           RTDB_REGION=${{ vars.RTDB_REGION }}
+          API_SERVICEUSER_USERNAME=${{ vars.API_SERVICEUSER_USERNAME }}
+          API_SERVICEUSER_PASSWORD=${{ secrets.API_SERVICEUSER_PASSWORD }}
+          AUTH_STATIC_CREDENTIALS=${{ secrets.AUTH_STATIC_CREDENTIALS }}
+          AUTH_IPS=${{ vars.AUTH_IPS }}
+          TESTING_ENABLED=${{ vars.TESTING_ENABLED }}
+          WEBAUTHN_RPID=${{ vars.WEBAUTHN_RPID }}
+          WEBAUTHN_RPNAME=${{ vars.WEBAUTHN_RPNAME }}
+          WEBAUTHN_ORIGINS=${{ vars.WEBAUTHN_ORIGINS }}
           EOF
       - run: firebase deploy --only functions

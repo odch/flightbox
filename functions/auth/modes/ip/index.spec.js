@@ -12,15 +12,13 @@ describe('functions/auth/modes/ip', () => {
   });
   afterEach(() => {
     consoleInfoSpy.mockRestore();
+    delete process.env.AUTH_IPS;
   });
 
-  describe('when auth.ips is not configured', () => {
+  describe('when AUTH_IPS is not set', () => {
     let ip;
     beforeEach(() => {
       jest.resetModules();
-      jest.doMock('firebase-functions/v1', () => ({
-        config: jest.fn(() => ({})),
-      }));
       ip = require('.');
     });
 
@@ -29,13 +27,11 @@ describe('functions/auth/modes/ip', () => {
     });
   });
 
-  describe('when auth.ips is configured', () => {
+  describe('when AUTH_IPS is set', () => {
     let ip;
     beforeEach(() => {
       jest.resetModules();
-      jest.doMock('firebase-functions/v1', () => ({
-        config: jest.fn(() => ({ auth: { ips: '10.0.0.1, 10.0.0.2' } })),
-      }));
+      process.env.AUTH_IPS = '10.0.0.1, 10.0.0.2';
       ip = require('.');
     });
 

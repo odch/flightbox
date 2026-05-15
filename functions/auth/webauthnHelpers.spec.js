@@ -1,7 +1,6 @@
 describe('functions', () => {
   describe('auth/webauthnHelpers', () => {
     let mockAdmin;
-    let mockFunctions;
     let mockChallengesRef;
     let mockAuthAdmin;
     let helpers;
@@ -26,20 +25,19 @@ describe('functions', () => {
         auth: jest.fn().mockReturnValue(mockAuthAdmin),
       };
 
-      mockFunctions = {
-        config: jest.fn().mockReturnValue({
-          webauthn: {
-            rpid: 'flightbox.ch',
-            rpname: 'Flightbox',
-            origins: 'https://flightbox.ch,https://www.flightbox.ch',
-          },
-        }),
-      };
-
       jest.mock('firebase-admin', () => mockAdmin);
-      jest.mock('firebase-functions/v1', () => mockFunctions);
+
+      process.env.WEBAUTHN_RPID = 'flightbox.ch';
+      process.env.WEBAUTHN_RPNAME = 'Flightbox';
+      process.env.WEBAUTHN_ORIGINS = 'https://flightbox.ch,https://www.flightbox.ch';
 
       helpers = require('./webauthnHelpers');
+    });
+
+    afterEach(() => {
+      delete process.env.WEBAUTHN_RPID;
+      delete process.env.WEBAUTHN_RPNAME;
+      delete process.env.WEBAUTHN_ORIGINS;
     });
 
     describe('getRpConfig', () => {
@@ -50,22 +48,26 @@ describe('functions', () => {
         expect(cfg.expectedOrigins).toEqual(['https://flightbox.ch', 'https://www.flightbox.ch']);
       });
 
-      it('accepts origins as array', () => {
-        mockFunctions.config.mockReturnValue({
-          webauthn: { rpid: 'flightbox.ch', origins: ['https://a', 'https://b'] },
-        });
+      it('trims whitespace around CSV origins', () => {
+        process.env.WEBAUTHN_ORIGINS = 'https://a , https://b';
         const cfg = helpers.getRpConfig();
         expect(cfg.expectedOrigins).toEqual(['https://a', 'https://b']);
       });
 
-      it('throws if rpid missing', () => {
-        mockFunctions.config.mockReturnValue({ webauthn: { origins: 'https://x' } });
-        expect(() => helpers.getRpConfig()).toThrow(/rpid/);
+      it('defaults rpName to "Flightbox" when unset', () => {
+        delete process.env.WEBAUTHN_RPNAME;
+        const cfg = helpers.getRpConfig();
+        expect(cfg.rpName).toBe('Flightbox');
       });
 
-      it('throws if origins empty', () => {
-        mockFunctions.config.mockReturnValue({ webauthn: { rpid: 'x' } });
-        expect(() => helpers.getRpConfig()).toThrow(/origins/);
+      it('throws if WEBAUTHN_RPID is missing', () => {
+        delete process.env.WEBAUTHN_RPID;
+        expect(() => helpers.getRpConfig()).toThrow(/WEBAUTHN_RPID/);
+      });
+
+      it('throws if WEBAUTHN_ORIGINS is missing', () => {
+        delete process.env.WEBAUTHN_ORIGINS;
+        expect(() => helpers.getRpConfig()).toThrow(/WEBAUTHN_ORIGINS/);
       });
     });
 

@@ -1,9 +1,5 @@
 'use strict';
 
-jest.mock('firebase-functions/v1', () => ({
-  config: jest.fn(() => ({}))
-}));
-
 const flightnet = require('.');
 
 jest.mock('./flightnet', () => ({
@@ -73,15 +69,15 @@ describe('functions', () => {
           beforeEach(() => {
             jest.resetModules();
             mockPasswordCheck = jest.fn();
-            jest.doMock('firebase-functions/v1', () => ({
-              config: jest.fn(() => ({
-                auth: { staticcredentials: 'alice:pw1,bob:pw2' }
-              }))
-            }));
             jest.doMock('./flightnet', () => ({
               passwordCheck: mockPasswordCheck
             }));
+            process.env.AUTH_STATIC_CREDENTIALS = 'alice:pw1,bob:pw2';
             flightnetWithStatic = require('.');
+          });
+
+          afterEach(() => {
+            delete process.env.AUTH_STATIC_CREDENTIALS;
           });
 
           it("returns the username when the first static credential matches", () => {

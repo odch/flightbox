@@ -3,7 +3,6 @@
 const TEST_EMAIL = 'cypress-pilot@example.com';
 
 describe('functions/auth/createTestEmailToken', () => {
-  let mockConfig;
   let mockGetUserByEmail;
   let mockCreateUser;
   let mockCreateCustomToken;
@@ -19,7 +18,6 @@ describe('functions/auth/createTestEmailToken', () => {
   beforeEach(() => {
     jest.resetModules();
 
-    mockConfig = jest.fn();
     mockGetUserByEmail = jest.fn();
     mockCreateUser = jest.fn();
     mockCreateCustomToken = jest.fn();
@@ -28,7 +26,6 @@ describe('functions/auth/createTestEmailToken', () => {
       region: () => ({
         https: { onRequest: fn => fn },
       }),
-      config: mockConfig,
     }));
 
     jest.doMock('firebase-admin', () => ({
@@ -48,19 +45,19 @@ describe('functions/auth/createTestEmailToken', () => {
 
   afterEach(() => {
     consoleErrorSpy.mockRestore();
+    delete process.env.TESTING_ENABLED;
   });
 
   describe('when testing is not enabled', () => {
-    it('returns 403 when testing config key is absent', async () => {
-      mockConfig.mockReturnValue({});
+    it('returns 403 when TESTING_ENABLED is unset', async () => {
       const res = makeRes();
       await handler(makeReq(), res);
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({ error: 'Testing endpoints are not enabled' });
     });
 
-    it('returns 403 when testing.enabled is false', async () => {
-      mockConfig.mockReturnValue({ testing: { enabled: false } });
+    it('returns 403 when TESTING_ENABLED is "false"', async () => {
+      process.env.TESTING_ENABLED = 'false';
       const res = makeRes();
       await handler(makeReq(), res);
       expect(res.status).toHaveBeenCalledWith(403);
@@ -69,7 +66,7 @@ describe('functions/auth/createTestEmailToken', () => {
 
   describe('when testing is enabled', () => {
     beforeEach(() => {
-      mockConfig.mockReturnValue({ testing: { enabled: true } });
+      process.env.TESTING_ENABLED = 'true';
     });
 
     it('returns 405 when method is not POST', async () => {

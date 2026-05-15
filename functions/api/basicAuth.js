@@ -1,11 +1,10 @@
-const functions = require('firebase-functions/v1')
-
-const config = process.env.K_CONFIGURATION ? {} : functions.config();
+const expectedUsername = process.env.API_SERVICEUSER_USERNAME
+const expectedPassword = process.env.API_SERVICEUSER_PASSWORD
 
 const basicAuth = (req, res, next) => {
-  if (!config.api || !config.api.serviceuser || !config.api.serviceuser.username || !config.api.serviceuser.password) {
+  if (!expectedUsername || !expectedPassword) {
     console.info(
-      "Set configuration properties `api.serviceuser.username` and `api.serviceuser.password` for the API auth"
+      "Set API_SERVICEUSER_USERNAME and API_SERVICEUSER_PASSWORD env vars for the API auth"
     )
     res.status(401).send('Unauthorized')
     return
@@ -18,7 +17,7 @@ const basicAuth = (req, res, next) => {
     const decoded = Buffer.from(credentials, 'base64').toString('utf-8')
     const [username, password] = decoded.split(':')
 
-    if (username === config.api.serviceuser.username && password === config.api.serviceuser.password) {
+    if (username === expectedUsername && password === expectedPassword) {
       return next()
     }
   }

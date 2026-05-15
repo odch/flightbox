@@ -1,23 +1,19 @@
 'use strict';
 
-const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const crypto = require('crypto');
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
 
 function getRpConfig() {
-  const cfg = (functions.config() && functions.config().webauthn) || {};
-  const rpID = cfg.rpid || cfg.rp_id;
-  const rpName = cfg.rpname || cfg.rp_name || 'Flightbox';
-  const originsRaw = cfg.origins || cfg.expected_origins || cfg.expectedorigins;
-  const expectedOrigins = Array.isArray(originsRaw)
-    ? originsRaw
-    : typeof originsRaw === 'string'
-      ? originsRaw.split(',').map(s => s.trim()).filter(Boolean)
-      : [];
+  const rpID = process.env.WEBAUTHN_RPID;
+  const rpName = process.env.WEBAUTHN_RPNAME || 'Flightbox';
+  const originsRaw = process.env.WEBAUTHN_ORIGINS;
+  const expectedOrigins = typeof originsRaw === 'string'
+    ? originsRaw.split(',').map(s => s.trim()).filter(Boolean)
+    : [];
   if (!rpID || expectedOrigins.length === 0) {
-    throw new Error('WebAuthn RP config missing: functions.config().webauthn.{rpid,origins} must be set');
+    throw new Error('WebAuthn RP config missing: WEBAUTHN_RPID and WEBAUTHN_ORIGINS env vars must be set');
   }
   return { rpID, rpName, expectedOrigins };
 }
