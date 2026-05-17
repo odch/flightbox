@@ -1,5 +1,6 @@
 import React, {useEffect} from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import CommitFailureDialog from '../CommitFailureDialog';
 import Centered from '../Centered';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
@@ -32,7 +33,6 @@ interface MovementWizardProps {
   pages: WizardPage[];
   finishComponentClass: React.ComponentType<any>;
   wizard: WizardState;
-  match: { params: Record<string, string> };
   auth: { data: { admin: boolean; guest: boolean } };
   newMovementLabel: string;
   updateMovementLabel: string;
@@ -58,21 +58,22 @@ interface MovementWizardProps {
 
 const MovementWizard = (props: MovementWizardProps) => {
   const { t } = useTranslation();
+  const params = useParams<{ key?: string }>();
 
   useEffect(() => {
     props.loadLockDate();
     props.loadAircraftSettings();
     if (typeof props.initMovement === 'function') {
       props.initMovement();
-    } else if (props.match.params.key) {
-      props.editMovement(props.match.params.key);
+    } else if (params.key) {
+      props.editMovement(params.key);
     } else {
       props.initNewMovement();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isUpdate = typeof props.match.params.key === 'string' && props.match.params.key.length > 0;
+  const isUpdate = typeof params.key === 'string' && params.key.length > 0;
 
   const breadcrumbItems = props.pages.map(page => ({
     label: page.label,
@@ -144,7 +145,7 @@ const MovementWizard = (props: MovementWizardProps) => {
   };
 
   const breadcrumbsTitle = isUpdate
-    ? props.updateMovementLabel + ' (' + getFromItemKey(props.match.params.key) + ')'
+    ? props.updateMovementLabel + ' (' + getFromItemKey(params.key as string) + ')'
     : props.newMovementLabel;
 
   return (

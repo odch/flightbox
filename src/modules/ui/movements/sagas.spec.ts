@@ -4,7 +4,7 @@ import {history} from '../../../history';
 jest.mock('../../../history', () => ({
   history: {
     push: jest.fn(),
-    goBack: jest.fn(),
+    back: jest.fn(),
   },
 }));
 
@@ -14,7 +14,7 @@ describe('modules', () => {
       describe('sagas', () => {
         beforeEach(() => {
           (history.push as jest.Mock).mockClear();
-          (history.goBack as jest.Mock).mockClear();
+          (history.back as jest.Mock).mockClear();
         });
 
         describe('showMovementWizard', () => {
@@ -52,11 +52,11 @@ describe('modules', () => {
         });
 
         describe('cancelWizard', () => {
-          it('should call history.goBack and complete', () => {
+          it('should call history.back and complete', () => {
             const generator = sagas.cancelWizard();
 
             expect(generator.next().done).toEqual(true);
-            expect(history.goBack).toHaveBeenCalled();
+            expect(history.back).toHaveBeenCalled();
           });
         });
       });

@@ -1,9 +1,10 @@
-const functions = require('firebase-functions/v1');
+const { onValueWritten } = require('firebase-functions/v2/database');
+const { logger } = require('firebase-functions/v2');
+const { defineString } = require('firebase-functions/params');
 const admin = require('firebase-admin');
 
-const config = process.env.K_CONFIGURATION ? {} : functions.config();
-const { rtdb = {} } = config;
-const instance = rtdb.instance || process.env.RTDB_INSTANCE;
+const RTDB_INSTANCE = defineString('RTDB_INSTANCE');
+const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' });
 
 const handleUpdate = async (change) => {
   if (!change.before.exists() || !change.after.exists()) {
@@ -21,7 +22,7 @@ const handleUpdate = async (change) => {
   }
 
   if (!afterValue.arrivalReference) {
-    functions.logger.info(
+    logger.info(
       `Unable to set arrival payment status for card-payment ${cardPaymentKey}, because arrivalReference is missing`
     );
   }
@@ -35,7 +36,7 @@ const handleUpdate = async (change) => {
     const arrivalValues = arrivalSnapshot.val()
 
     if (arrivalValues.paymentMethod && arrivalValues.paymentMethod.status === 'pending') {
-      functions.logger.info(
+      logger.info(
         `Setting payment status of arrival ${afterValue.arrivalReference} to completed (card payment ${cardPaymentKey})`
       );
 
@@ -50,7 +51,7 @@ const handleUpdate = async (change) => {
         });
     }
   } catch (error) {
-    functions.logger.error(
+    logger.error(
       `Failed to update payment status of arrival ${afterValue.arrivalReference}`,
       error
     );
@@ -58,9 +59,10 @@ const handleUpdate = async (change) => {
   }
 };
 
-exports.updateArrivalPaymentStatusOnCardPaymentUpdate = functions
-  .region('europe-west1')
-  .database
-  .instance(instance)
-  .ref('/card-payments/{paymentId}')
-  .onWrite(handleUpdate);
+const instanceOpt = `{{ params.${RTDB_INSTANCE.name} }}`;
+const regionOpt = `{{ params.${RTDB_REGION.name} }}`;
+
+exports.updateArrivalPaymentStatusOnCardPaymentUpdate = onValueWritten(
+  { region: regionOpt, instance: instanceOpt, ref: '/card-payments/{paymentId}' },
+  event => handleUpdate(event.data)
+);

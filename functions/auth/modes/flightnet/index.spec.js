@@ -1,9 +1,5 @@
 'use strict';
 
-jest.mock('firebase-functions/v1', () => ({
-  config: jest.fn(() => ({}))
-}));
-
 const flightnet = require('.');
 
 jest.mock('./flightnet', () => ({
@@ -64,6 +60,51 @@ describe('functions', () => {
             }
           };
           return expect(flightnet(request)).resolves.toEqual(null);
+        });
+
+        describe('with static credentials configured', () => {
+          let flightnetWithStatic;
+          let mockPasswordCheck;
+
+          beforeEach(() => {
+            jest.resetModules();
+            mockPasswordCheck = jest.fn();
+            jest.doMock('./flightnet', () => ({
+              passwordCheck: mockPasswordCheck
+            }));
+            process.env.AUTH_STATIC_CREDENTIALS = 'alice:pw1,bob:pw2';
+            flightnetWithStatic = require('.');
+          });
+
+          afterEach(() => {
+            delete process.env.AUTH_STATIC_CREDENTIALS;
+          });
+
+          it("returns the username when the first static credential matches", () => {
+            const request = { body: { username: 'alice', password: 'pw1' } };
+            return expect(flightnetWithStatic(request)).resolves.toEqual('alice');
+          });
+
+          it("returns the username when the second static credential matches", () => {
+            const request = { body: { username: 'bob', password: 'pw2' } };
+            return expect(flightnetWithStatic(request)).resolves.toEqual('bob');
+          });
+
+          it('returns null when the password is wrong for a known username', () => {
+            const request = { body: { username: 'alice', password: 'wrong' } };
+            return expect(flightnetWithStatic(request)).resolves.toBeNull();
+          });
+
+          it('returns null when the username is unknown', () => {
+            const request = { body: { username: 'charlie', password: 'pw1' } };
+            return expect(flightnetWithStatic(request)).resolves.toBeNull();
+          });
+
+          it('does not call flightnet.passwordCheck when static credentials are set', async () => {
+            const request = { body: { username: 'alice', password: 'pw1' } };
+            await flightnetWithStatic(request);
+            expect(mockPasswordCheck).not.toHaveBeenCalled();
+          });
         });
       });
     });

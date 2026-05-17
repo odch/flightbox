@@ -1,6 +1,6 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import { Route, Router } from 'react-router-dom';
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ThemeProvider } from 'styled-components';
 
@@ -85,13 +85,9 @@ const renderApp = (auth: AuthProps, initialEntries: string[] = ['/']) => {
   const history = createMemoryHistory({ initialEntries });
   const utils = render(
     <ThemeProvider theme={theme}>
-      <Router history={history}>
-        <Route
-          render={(routeProps: any) => (
-            <App {...routeProps} auth={auth} showLogin={false} />
-          )}
-        />
-      </Router>
+      <HistoryRouter history={history as any}>
+        <App auth={auth} showLogin={false} />
+      </HistoryRouter>
     </ThemeProvider>
   );
   return { history, ...utils };
@@ -138,7 +134,7 @@ describe('<App>', () => {
       });
       scrollToSpy.mockClear();
       act(() => {
-        history.goBack();
+        history.back();
       });
       expect(scrollToSpy).not.toHaveBeenCalled();
     });

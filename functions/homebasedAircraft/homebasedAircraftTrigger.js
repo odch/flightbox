@@ -1,9 +1,13 @@
-const functions = require('firebase-functions/v1')
+const { onValueWritten } = require('firebase-functions/v2/database')
+const { logger } = require('firebase-functions/v2')
+const { defineString } = require('firebase-functions/params')
 const admin = require('firebase-admin')
 
-const config = process.env.K_CONFIGURATION ? {} : functions.config()
-const { rtdb = {} } = config
-const instance = rtdb.instance || process.env.RTDB_INSTANCE
+const RTDB_INSTANCE = defineString('RTDB_INSTANCE')
+const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' })
+
+const instanceOpt = `{{ params.${RTDB_INSTANCE.name} }}`
+const regionOpt = `{{ params.${RTDB_REGION.name} }}`
 
 function buildBody(snapshot) {
   const homeBase = (snapshot && snapshot.homeBase) || {}
@@ -12,43 +16,44 @@ function buildBody(snapshot) {
   return registrations.map(registration => ({ registration }))
 }
 
-module.exports.updateCustomsHomebasedAircraftOnUpdate =
-  functions.region('europe-west1').database.instance(instance).ref('/settings/aircrafts')
-    .onWrite(async (change, context) => {
-      const beforeBody = buildBody(change.before.val())
-      const afterBody = buildBody(change.after.val())
-      const jsonBody = JSON.stringify(afterBody)
+module.exports.updateCustomsHomebasedAircraftOnUpdate = onValueWritten(
+  { region: regionOpt, instance: instanceOpt, ref: '/settings/aircrafts' },
+  async (event) => {
+    const beforeBody = buildBody(event.data.before.val())
+    const afterBody = buildBody(event.data.after.val())
+    const jsonBody = JSON.stringify(afterBody)
 
-      if (JSON.stringify(beforeBody) === jsonBody) {
-        console.log('No change detected.')
-        return
-      }
+    if (JSON.stringify(beforeBody) === jsonBody) {
+      logger.info('No change detected.')
+      return
+    }
 
-      const snapshot = await admin.database().ref('/settings/customsDeclarationApp').once('value')
-      const customsSettings = snapshot.val()
+    const snapshot = await admin.database().ref('/settings/customsDeclarationApp').once('value')
+    const customsSettings = snapshot.val()
 
-      if (!customsSettings || !customsSettings.baseUrl) {
-        console.log('No customs declaration settings in /settings/customsDeclarationApp. Aborting...')
-        return
-      }
+    if (!customsSettings || !customsSettings.baseUrl) {
+      logger.info('No customs declaration settings in /settings/customsDeclarationApp. Aborting...')
+      return
+    }
 
-      const url = `${customsSettings.baseUrl}/api/homebased-aircraft?ad=${customsSettings.aerodrome}`
+    const url = `${customsSettings.baseUrl}/api/homebased-aircraft?ad=${customsSettings.aerodrome}`
 
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${customsSettings.accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: jsonBody
-      })
-
-      if (response.ok) {
-        console.log('Successfully updated homebased aircraft of the customs app')
-      } else {
-        console.log('Failed to update the homebased aircraft of the customs app', response)
-
-        const responseBody = await response.text().catch(() => '')
-        console.log('Response body', responseBody)
-      }
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${customsSettings.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: jsonBody
     })
+
+    if (response.ok) {
+      logger.info('Successfully updated homebased aircraft of the customs app')
+    } else {
+      logger.error('Failed to update the homebased aircraft of the customs app', response)
+
+      const responseBody = await response.text().catch(() => '')
+      logger.error('Response body', responseBody)
+    }
+  }
+)

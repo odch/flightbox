@@ -1,7 +1,13 @@
 import '../reset.css';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import {Route, Router} from 'react-router-dom';
+// Uses unstable_HistoryRouter because the same history singleton is
+// shared with sagas (imperative `history.push(...)`) and with the
+// reducer factory. The stable v7 router exports (BrowserRouter,
+// HashRouter, createXRouter) all own their history internally and
+// don't accept an external instance. The "unstable" label is RR
+// policy — the runtime contract has been stable across v6 and v7.
+import {unstable_HistoryRouter as HistoryRouter} from 'react-router-dom';
 import {Provider} from 'react-redux';
 import {applyMiddleware, compose, createStore} from 'redux';
 import createSagaMiddleware from 'redux-saga';
@@ -55,9 +61,9 @@ createRoot(document.getElementById('app')!).render(
     <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
       <GlobalStyle/>
       <ThemeProvider theme={theme}>
-        <Router history={history}>
-          <Route component={App}/>
-        </Router>
+        <HistoryRouter history={history as any}>
+          <App/>
+        </HistoryRouter>
       </ThemeProvider>
     </Sentry.ErrorBoundary>
   </Provider>

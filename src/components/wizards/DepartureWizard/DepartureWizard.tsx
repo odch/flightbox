@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import MovementWizard from '../MovementWizard';
 import { useTranslation } from 'react-i18next';
 import AircraftPage from '../pages/AircraftPage';
@@ -14,6 +15,7 @@ import {exists as aerodromeExists} from '../../../util/aerodromes';
 
 const DepartureWizard = props => {
   const { t } = useTranslation();
+  const { arrivalKey } = useParams();
   const pages = [
     {
       component: AircraftPage,
@@ -50,8 +52,8 @@ const DepartureWizard = props => {
     <MovementWizard
       {...props}
       initNewMovement={props.initNewMovement.bind(null, 'departure')}
-      initMovement={props.match.params.arrivalKey
-        ? props.initNewMovementFromMovement.bind(null, 'departure', 'arrival', props.match.params.arrivalKey)
+      initMovement={arrivalKey
+        ? props.initNewMovementFromMovement.bind(null, 'departure', 'arrival', arrivalKey)
         : null}
       editMovement={props.editMovement.bind(null, 'departure')}
       pages={pages}
@@ -65,9 +67,6 @@ const DepartureWizard = props => {
 
 DepartureWizard.propTypes = {
   wizard: PropTypes.object.isRequired,
-  match: PropTypes.shape({
-    params: PropTypes.object.isRequired
-  }).isRequired,
   initNewMovement: PropTypes.func.isRequired,
   initNewMovementFromMovement: PropTypes.func.isRequired,
   editMovement: PropTypes.func.isRequired,

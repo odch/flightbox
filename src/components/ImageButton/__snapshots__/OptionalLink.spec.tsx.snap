@@ -4,6 +4,7 @@ exports[`components ImageButton OptionalLink renders Link component if \`href\` 
 <div>
   <a
     class="sc-bdfDLd dHgYhG"
+    data-discover="true"
     href="/some/path"
   />
 </div>

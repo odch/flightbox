@@ -1,21 +1,16 @@
 'use strict';
 
-const functions = require('firebase-functions/v1');
 const flightnet = require('./flightnet');
 const requestHelper = require('../../util/requestHelper');
 
 const parseStaticCredentials = () => {
-  const config = process.env.K_CONFIGURATION ? {} : functions.config();
-  if (config.auth && config.auth.staticcredentials) {
-    return config.auth.staticcredentials.split(',').map(login => {
+  const raw = process.env.AUTH_STATIC_CREDENTIALS;
+  if (raw) {
+    return raw.split(',').map(login => {
       const parts = login.split(':');
-
-      const username = parts[0];
-      const password = parts[1];
-
       return {
-        username: username,
-        password: password
+        username: parts[0],
+        password: parts[1]
       };
     })
   }

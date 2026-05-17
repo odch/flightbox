@@ -2,6 +2,12 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { WizardState } from '../../modules/ui/wizard/reducer';
 
+let mockParams: Record<string, string> = {};
+
+jest.mock('react-router-dom', () => ({
+  useParams: () => mockParams,
+}));
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
@@ -77,7 +83,6 @@ const createProps = (overrides: any = {}) => ({
     commitError: null,
     dialogs: {},
   } as WizardState,
-  match: overrides.match || { params: {} },
   auth: overrides.auth || { data: { admin: false, guest: false } },
   newMovementLabel: overrides.newMovementLabel || 'New Departure',
   updateMovementLabel: overrides.updateMovementLabel || 'Edit Departure',
@@ -101,6 +106,10 @@ const createProps = (overrides: any = {}) => ({
 });
 
 describe('MovementWizard', () => {
+  beforeEach(() => {
+    mockParams = {};
+  });
+
   describe('initialization', () => {
     it('calls loadLockDate and loadAircraftSettings on mount', () => {
       const loadLockDate = jest.fn();
@@ -118,12 +127,10 @@ describe('MovementWizard', () => {
       expect(initNewMovement).toHaveBeenCalled();
     });
 
-    it('calls editMovement with key when match.params.key is set', () => {
+    it('calls editMovement with key when route key param is set', () => {
       const editMovement = jest.fn();
-      render(<MovementWizard {...createProps({
-        editMovement,
-        match: { params: { key: 'abc123' } },
-      })} />);
+      mockParams = { key: 'abc123' };
+      render(<MovementWizard {...createProps({ editMovement })} />);
 
       expect(editMovement).toHaveBeenCalledWith('abc123');
     });
@@ -190,8 +197,8 @@ describe('MovementWizard', () => {
     });
 
     it('shows update movement label with reference when key is set', () => {
+      mockParams = { key: 'dep123' };
       render(<MovementWizard {...createProps({
-        match: { params: { key: 'dep123' } },
         updateMovementLabel: 'Edit Departure',
       })} />);
 
@@ -211,8 +218,8 @@ describe('MovementWizard', () => {
     });
 
     it('renders finish component with UPDATED for existing movement', () => {
+      mockParams = { key: 'dep123' };
       render(<MovementWizard {...createProps({
-        match: { params: { key: 'dep123' } },
         wizard: { initialized: true, page: 1, committed: true, values: {}, commitError: null, dialogs: {} },
       })} />);
 

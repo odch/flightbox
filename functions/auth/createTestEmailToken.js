@@ -9,8 +9,7 @@ const TEST_EMAIL = 'cypress-pilot@example.com';
 exports.createTestEmailToken = functions.region('europe-west1').https.onRequest((req, res) => {
   return cors(req, res, async () => {
     try {
-      const config = functions.config();
-      if (!config.testing || !config.testing.enabled) {
+      if (process.env.TESTING_ENABLED !== 'true') {
         return res.status(403).json({ error: 'Testing endpoints are not enabled' });
       }
 

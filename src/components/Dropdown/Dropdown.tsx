@@ -284,7 +284,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           $focussed={focussed}
           onMouseDown={() => handleOptionClick(option)}
           onMouseEnter={() => handleOptionMouseEnter(option)}
-          ref={comp => optionRefs.current[option.key] = comp}
+          ref={comp => { optionRefs.current[option.key] = comp; }}
           data-cy={dataCy && `${dataCy}-option-${option.key}`}
         >
           {optionRenderer(option, focussed)}

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, {useEffect, useState} from 'react';
-import {useHistory} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import styled from 'styled-components';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import JumpNavigation from '../JumpNavigation';
@@ -67,13 +67,13 @@ const renderSubPage = (activeTab: string) => {
 };
 
 const AdminPage = ({auth, guestAccessToken, kioskAccessToken}: any) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('export');
   const isAdmin = auth.data.admin === true;
 
   useEffect(() => {
     if (!isAdmin) {
-      history.push('/');
+      navigate('/');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
