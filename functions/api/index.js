@@ -1,4 +1,4 @@
-const functions = require('firebase-functions/v1')
+const { onRequest } = require('firebase-functions/v2/https')
 const admin = require('firebase-admin')
 const express = require('express')
 const cors = require('cors')({origin: true, credentials: true})
@@ -100,4 +100,4 @@ api.get('(/api)?/users/me/invoice-recipients', fbAuth, async (req, res) => {
   }
 })
 
-module.exports = functions.region('europe-west1').https.onRequest(api)
+module.exports = onRequest({ region: 'europe-west1' }, api)
