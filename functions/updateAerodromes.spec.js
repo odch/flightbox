@@ -2,28 +2,11 @@
 
 let capturedOnRun;
 
-jest.mock('firebase-functions/v1', () => {
-  const mock = {
-    pubsub: {
-      schedule: jest.fn(() => ({
-        timeZone: jest.fn(() => ({
-          onRun: jest.fn(handler => {
-            capturedOnRun = handler;
-          })
-        }))
-      }))
-    },
-    config: jest.fn(() => ({ rtdb: { instance: 'test-instance' } })),
-    logger: {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      log: jest.fn()
-    }
-  };
-  mock.region = jest.fn(() => mock);
-  return mock;
-});
+jest.mock('firebase-functions/v2/scheduler', () => ({
+  onSchedule: jest.fn((opts, handler) => {
+    capturedOnRun = handler;
+  })
+}));
 
 const mockUpdate = jest.fn();
 const mockRef = jest.fn();

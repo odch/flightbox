@@ -1,15 +1,13 @@
 'use strict';
 
-const functions = require('firebase-functions/v1');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 
 const MAX_ATTEMPTS = 5;
 
-exports.cleanupExpiredSignInCodes = functions
-  .region('europe-west1')
-  .pubsub
-  .schedule('every 60 minutes')
-  .onRun(async () => {
+exports.cleanupExpiredSignInCodes = onSchedule(
+  { region: 'europe-west1', schedule: 'every 60 minutes' },
+  async () => {
     const db = admin.database();
     const codesRef = db.ref('/signInCodes');
     const snapshot = await codesRef.once('value');
@@ -31,4 +29,5 @@ exports.cleanupExpiredSignInCodes = functions
     if (Object.keys(updates).length > 0) {
       await codesRef.update(updates);
     }
-  });
+  }
+);

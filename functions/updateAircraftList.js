@@ -1,4 +1,4 @@
-const functions = require('firebase-functions/v1');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 
 // Note: this map must be kept in sync with the list in `aircraftCategories.js`.
@@ -85,10 +85,9 @@ function getAircraftItemsToRemove(existingRegistrations, importedRegistrations) 
 /**
  * Scheduled Cloud Function to synchronize aircraft data with GitHub repository
  */
-exports.scheduledAircraftListUpdate = functions.region('europe-west1').pubsub
-  .schedule(SCHEDULE)
-  .timeZone(TIMEZONE)
-  .onRun(async () => {
+exports.scheduledAircraftListUpdate = onSchedule(
+  { region: 'europe-west1', schedule: SCHEDULE, timeZone: TIMEZONE },
+  async () => {
     try {
       const db = admin.database();
 
@@ -120,4 +119,5 @@ exports.scheduledAircraftListUpdate = functions.region('europe-west1').pubsub
       console.error('Aircraft list sync failed:', error);
       throw error;
     }
-  });
+  }
+);

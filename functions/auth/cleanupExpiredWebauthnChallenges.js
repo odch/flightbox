@@ -1,13 +1,11 @@
 'use strict';
 
-const functions = require('firebase-functions/v1');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 
-exports.cleanupExpiredWebauthnChallenges = functions
-  .region('europe-west1')
-  .pubsub
-  .schedule('every 60 minutes')
-  .onRun(async () => {
+exports.cleanupExpiredWebauthnChallenges = onSchedule(
+  { region: 'europe-west1', schedule: 'every 60 minutes' },
+  async () => {
     const db = admin.database();
     const ref = db.ref('/webauthnChallenges');
     const snapshot = await ref.once('value');
@@ -29,4 +27,5 @@ exports.cleanupExpiredWebauthnChallenges = functions
     if (Object.keys(updates).length > 0) {
       await ref.update(updates);
     }
-  });
+  }
+);
