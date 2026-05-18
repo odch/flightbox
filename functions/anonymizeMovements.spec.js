@@ -19,15 +19,8 @@ jest.mock('firebase-admin', () => ({
   initializeApp: jest.fn(),
 }));
 
-jest.mock('firebase-functions/v1', () => ({
-  region: jest.fn().mockReturnThis(),
-  pubsub: {
-    schedule: jest.fn().mockReturnValue({
-      timeZone: jest.fn().mockReturnValue({
-        onRun: jest.fn(fn => fn),
-      }),
-    }),
-  },
+jest.mock('firebase-functions/v2/scheduler', () => ({
+  onSchedule: jest.fn((opts, fn) => fn),
 }));
 
 function createSnapshot(data) {
