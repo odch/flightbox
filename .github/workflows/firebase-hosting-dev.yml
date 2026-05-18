@@ -21,13 +21,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - run: npm ci
       - run: npm run build --project=${{ vars.PROJECT }}
       - uses: w9jds/setup-firebase@main
         with:
           project_id: ${{ vars.FIREBASE_PROJECT }}
-          tools-version: 13
+          tools-version: 14
           firebase_token: ${{ secrets.FIREBASE_TOKEN }}
       - run: firebase target:apply database main ${{ vars.FIREBASE_RTDB_NAME }}
       - run: firebase deploy --only hosting,database:main
@@ -48,11 +48,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - uses: w9jds/setup-firebase@main
         with:
           project_id: ${{ vars.FIREBASE_PROJECT }}
-          tools-version: 13
+          tools-version: 14
           firebase_token: ${{ secrets.FIREBASE_TOKEN }}
       - run: cd functions && npm ci && cd ..
       - name: Write functions/.env.${{ vars.FIREBASE_PROJECT }} from environment vars
