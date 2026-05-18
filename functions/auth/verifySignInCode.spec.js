@@ -5,7 +5,6 @@ const hashCode = (code) => crypto.createHash('sha256').update(code).digest('hex'
 describe('functions', () => {
   describe('auth/verifySignInCode', () => {
     let mockAdmin;
-    let mockFunctions;
     let capturedHandler;
     let mockCors;
     let mockCodesRef;
@@ -19,13 +18,6 @@ describe('functions', () => {
       capturedHandler = null;
 
       mockCors = jest.fn().mockImplementation((req, res, cb) => cb());
-
-      mockFunctions = {
-        https: {
-          onRequest: jest.fn().mockImplementation(handler => { capturedHandler = handler; })
-        }
-      };
-      mockFunctions.region = jest.fn(() => mockFunctions);
 
       mockCodesRef = {
         orderByChild: jest.fn().mockReturnThis(),
@@ -50,7 +42,9 @@ describe('functions', () => {
       };
 
       jest.mock('firebase-admin', () => mockAdmin);
-      jest.mock('firebase-functions/v1', () => mockFunctions);
+      jest.mock('firebase-functions/v2/https', () => ({
+        onRequest: (opts, handler) => { capturedHandler = handler; },
+      }));
       jest.mock('cors', () => () => mockCors);
 
       require('./verifySignInCode');

@@ -1,7 +1,6 @@
 describe('functions', () => {
   describe('auth/generateSignInCode', () => {
     let mockAdmin;
-    let mockFunctions;
     let mockSendSignInEmail;
     let capturedHandler;
     let mockCors;
@@ -22,17 +21,12 @@ describe('functions', () => {
 
       mockCors = jest.fn().mockImplementation((req, res, cb) => cb());
 
-      mockFunctions = {
-        https: {
-          onRequest: jest.fn().mockImplementation(handler => { capturedHandler = handler; })
-        }
-      };
-      mockFunctions.region = jest.fn(() => mockFunctions);
-
       mockSendSignInEmail = jest.fn().mockResolvedValue('msg123');
 
       jest.mock('firebase-admin', () => mockAdmin);
-      jest.mock('firebase-functions/v1', () => mockFunctions);
+      jest.mock('firebase-functions/v2/https', () => ({
+        onRequest: (opts, handler) => { capturedHandler = handler; },
+      }));
       jest.mock('cors', () => () => mockCors);
       jest.mock('./sendSignInEmail', () => ({ sendSignInEmail: mockSendSignInEmail }));
 

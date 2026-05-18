@@ -1,7 +1,6 @@
 describe('functions', () => {
   describe('auth/removePasskey', () => {
     let mockAdmin;
-    let mockFunctions;
     let mockCors;
     let capturedHandler;
     let mockDbRef;
@@ -12,11 +11,6 @@ describe('functions', () => {
       capturedHandler = null;
 
       mockCors = jest.fn().mockImplementation((req, res, cb) => cb());
-
-      mockFunctions = {
-        https: { onRequest: jest.fn().mockImplementation(h => { capturedHandler = h; }) },
-      };
-      mockFunctions.region = jest.fn(() => mockFunctions);
 
       mockDbRef = {
         child: jest.fn().mockReturnThis(),
@@ -31,7 +25,9 @@ describe('functions', () => {
       mockVerifyRecentAuth = jest.fn();
 
       jest.mock('firebase-admin', () => mockAdmin);
-      jest.mock('firebase-functions/v1', () => mockFunctions);
+      jest.mock('firebase-functions/v2/https', () => ({
+        onRequest: (opts, handler) => { capturedHandler = handler; },
+      }));
       jest.mock('cors', () => () => mockCors);
       jest.mock('./webauthnHelpers', () => {
         class AuthError extends Error {

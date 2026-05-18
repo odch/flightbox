@@ -1,7 +1,6 @@
 describe('functions', () => {
   describe('auth/generateSignInLink', () => {
     let mockAdmin;
-    let mockFunctions;
     let capturedHandler;
     let mockCors;
 
@@ -17,15 +16,10 @@ describe('functions', () => {
 
       mockCors = jest.fn().mockImplementation((req, res, cb) => cb());
 
-      mockFunctions = {
-        https: {
-          onRequest: jest.fn().mockImplementation(handler => { capturedHandler = handler; })
-        }
-      };
-      mockFunctions.region = jest.fn(() => mockFunctions);
-
       jest.mock('firebase-admin', () => mockAdmin);
-      jest.mock('firebase-functions/v1', () => mockFunctions);
+      jest.mock('firebase-functions/v2/https', () => ({
+        onRequest: (opts, handler) => { capturedHandler = handler; },
+      }));
       jest.mock('cors', () => () => mockCors);
 
       require('./generateSignInLink');
