@@ -1,7 +1,6 @@
 describe('functions', () => {
   describe('auth/verifyAuthentication', () => {
     let mockAdmin;
-    let mockFunctions;
     let mockCors;
     let capturedHandler;
     let mockDbRef;
@@ -18,11 +17,6 @@ describe('functions', () => {
       capturedHandler = null;
 
       mockCors = jest.fn().mockImplementation((req, res, cb) => cb());
-
-      mockFunctions = {
-        https: { onRequest: jest.fn().mockImplementation(h => { capturedHandler = h; }) },
-      };
-      mockFunctions.region = jest.fn(() => mockFunctions);
 
       // Per-ref mocks so we can distinguish calls; all ref paths share one mock for simplicity.
       mockDbRef = {
@@ -49,7 +43,9 @@ describe('functions', () => {
       });
 
       jest.mock('firebase-admin', () => mockAdmin);
-      jest.mock('firebase-functions/v1', () => mockFunctions);
+      jest.mock('firebase-functions/v2/https', () => ({
+        onRequest: (opts, handler) => { capturedHandler = handler; },
+      }));
       jest.mock('cors', () => () => mockCors);
       jest.mock('@simplewebauthn/server', () => ({
         verifyAuthenticationResponse: mockVerifyAuthenticationResponse,

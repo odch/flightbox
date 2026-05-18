@@ -1,6 +1,6 @@
 'use strict';
 
-const functions = require('firebase-functions/v1');
+const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const crypto = require('crypto');
 const cors = require('cors')({origin: true});
@@ -25,7 +25,7 @@ const validateRequest = (method, body) => {
   return null;
 };
 
-exports.verifySignInCode = functions.region('europe-west1').https.onRequest((req, res) => {
+exports.verifySignInCode = onRequest({ region: 'europe-west1' }, (req, res) => {
   return cors(req, res, async () => {
     try {
       const validationError = validateRequest(req.method, req.body);
