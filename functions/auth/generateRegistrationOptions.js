@@ -1,6 +1,6 @@
 'use strict';
 
-const functions = require('firebase-functions/v1');
+const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const cors = require('cors')({ origin: true });
 const { generateRegistrationOptions } = require('@simplewebauthn/server');
@@ -23,7 +23,7 @@ async function loadExistingCredentials(uid) {
   }));
 }
 
-exports.generateWebauthnRegistrationOptions = functions.region('europe-west1').https.onRequest((req, res) => {
+exports.generateWebauthnRegistrationOptions = onRequest({ region: 'europe-west1' }, (req, res) => {
   return cors(req, res, async () => {
     try {
       if (req.method !== 'POST') {

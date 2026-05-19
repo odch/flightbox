@@ -1,6 +1,6 @@
 'use strict';
 
-const functions = require('firebase-functions/v1');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 
 const SCHEDULE = '0 2 * * *'; // Every day at 2 AM
@@ -43,12 +43,9 @@ function getAnonymizationUpdates(snapshot, cutoffIso) {
   return updates;
 }
 
-exports.scheduledAnonymizeMovements = functions
-  .region('europe-west1')
-  .pubsub
-  .schedule(SCHEDULE)
-  .timeZone(TIMEZONE)
-  .onRun(async () => {
+exports.scheduledAnonymizeMovements = onSchedule(
+  { region: 'europe-west1', schedule: SCHEDULE, timeZone: TIMEZONE },
+  async () => {
     const db = admin.database();
 
     const retentionSnap = await db.ref('/settings/movementRetentionDays').once('value');
@@ -96,4 +93,5 @@ exports.scheduledAnonymizeMovements = functions
     if (Object.keys(departureUpdates).length === 0 && Object.keys(arrivalUpdates).length === 0) {
       console.log('No movements to anonymize');
     }
-  });
+  }
+);

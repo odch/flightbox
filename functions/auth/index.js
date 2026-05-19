@@ -1,6 +1,6 @@
 'use strict';
 
-const functions = require('firebase-functions/v1');
+const { onRequest: v2OnRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const cors = require('cors')({
   origin: true,
@@ -27,7 +27,7 @@ const createAndSendToken = (req, res, uid) => {
 };
 
 const onRequest = (allowed, handler) =>
-  functions.region('europe-west1').https.onRequest((req, res) =>
+  v2OnRequest({ region: 'europe-west1' }, (req, res) =>
     cors(req, res, () => {
       if (allowed.includes(req.method)) {
         return handler(req, res);

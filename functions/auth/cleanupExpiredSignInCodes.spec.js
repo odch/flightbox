@@ -1,8 +1,8 @@
 describe('functions', () => {
   describe('auth/cleanupExpiredSignInCodes', () => {
     let mockAdmin;
-    let mockFunctions;
     let capturedHandler;
+    let capturedOptions;
     let mockCodesRef;
 
     const now = Date.now();
@@ -10,6 +10,7 @@ describe('functions', () => {
     beforeEach(() => {
       jest.resetModules();
       capturedHandler = null;
+      capturedOptions = null;
 
       mockCodesRef = {
         once: jest.fn(),
@@ -22,19 +23,13 @@ describe('functions', () => {
         })
       };
 
-      const mockSchedule = {
-        onRun: jest.fn().mockImplementation(handler => { capturedHandler = handler; })
-      };
-
-      mockFunctions = {
-        pubsub: {
-          schedule: jest.fn().mockReturnValue(mockSchedule)
-        }
-      };
-      mockFunctions.region = jest.fn(() => mockFunctions);
-
       jest.mock('firebase-admin', () => mockAdmin);
-      jest.mock('firebase-functions/v1', () => mockFunctions);
+      jest.mock('firebase-functions/v2/scheduler', () => ({
+        onSchedule: jest.fn((opts, handler) => {
+          capturedOptions = opts;
+          capturedHandler = handler;
+        })
+      }));
 
       require('./cleanupExpiredSignInCodes');
     });
@@ -125,7 +120,7 @@ describe('functions', () => {
     });
 
     it('is scheduled to run every 60 minutes', () => {
-      expect(mockFunctions.pubsub.schedule).toHaveBeenCalledWith('every 60 minutes');
+      expect(capturedOptions.schedule).toBe('every 60 minutes');
     });
   });
 });
