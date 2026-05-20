@@ -91,19 +91,36 @@
   "environments": {
     "test": {
       "firebaseProjectId": "mfgt-flights",
-      "firebaseApiKey": "AIzaSyDy63Y8GP6GExoP07KWJ6qneAeQalu9pK8"
+      "firebaseApiKey": "AIzaSyDy63Y8GP6GExoP07KWJ6qneAeQalu9pK8",
+      "passkeysEnabled": true,
+      "disableIpAuthentication": true
     },
     "production": {
       "firebaseProjectId": "project-8979611309653332047",
       "firebaseDatabaseName": "lszt",
-      "firebaseApiKey": "AIzaSyBNL_8OjB26xYYmjWbTCiPcxKgHs73FxGc"
+      "firebaseApiKey": "AIzaSyBNL_8OjB26xYYmjWbTCiPcxKgHs73FxGc",
+      "passkeysEnabled": true,
+      "disableIpAuthentication": true
     }
   },
-  "flightnetCompany": "mfgt",
+  "loginForm": "email",
+  "maskContactInformation": false,
   "theme": "lszt",
   "title": "Flightbox - Flugplatz Lommis",
   "themeColor": "#003863",
   "shortName": "Flightbox LSZT",
-  "paymentMethods": ["cash", "card"],
-  "memberManagement": true
+  "paymentMethods": [
+    {
+      "name": "card",
+      "authCondition": "kiosk"
+    },
+    {
+      "name": "cash",
+      "authCondition": "kiosk"
+    },
+    {
+      "name": "checkout",
+      "authCondition": "notKiosk"
+    }
+  ]
 }
