@@ -113,9 +113,12 @@
       "authCondition": "kiosk"
     },
     {
+      "name": "cash",
+      "authCondition": "kiosk"
+    },
+    {
       "name": "checkout",
       "authCondition": "notKiosk"
-    },
-    "cash"
+    }
   ]
 }
