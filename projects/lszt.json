@@ -117,6 +117,5 @@
       "authCondition": "notKiosk"
     },
     "cash"
-  ],
-  "memberManagement": true
+  ]
 }
