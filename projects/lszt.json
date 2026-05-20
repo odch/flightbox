@@ -91,7 +91,9 @@
   "environments": {
     "test": {
       "firebaseProjectId": "mfgt-flights",
-      "firebaseApiKey": "AIzaSyDy63Y8GP6GExoP07KWJ6qneAeQalu9pK8"
+      "firebaseApiKey": "AIzaSyDy63Y8GP6GExoP07KWJ6qneAeQalu9pK8",
+      "passkeysEnabled": true,
+      "disableIpAuthentication": true
     },
     "production": {
       "firebaseProjectId": "project-8979611309653332047",
@@ -99,7 +101,8 @@
       "firebaseApiKey": "AIzaSyBNL_8OjB26xYYmjWbTCiPcxKgHs73FxGc"
     }
   },
-  "flightnetCompany": "mfgt",
+  "loginForm": "email",
+  "maskContactInformation": false,
   "theme": "lszt",
   "title": "Flightbox - Flugplatz Lommis",
   "themeColor": "#003863",
