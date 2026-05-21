@@ -1,6 +1,6 @@
 describe('util', () => {
   describe('auth', () => {
-    let loadIpToken, loadCredentialsToken, loadGuestToken, loadKioskToken;
+    let loadCredentialsToken, loadGuestToken, loadKioskToken;
 
     beforeEach(() => {
       global.__FIREBASE_PROJECT_ID__ = 'test-project-id';
@@ -12,7 +12,6 @@ describe('util', () => {
 
       jest.resetModules();
       const auth = require('./auth');
-      loadIpToken = auth.loadIpToken;
       loadCredentialsToken = auth.loadCredentialsToken;
       loadGuestToken = auth.loadGuestToken;
       loadKioskToken = auth.loadKioskToken;
@@ -21,11 +20,10 @@ describe('util', () => {
     const getCallBody = () => JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
     const getCallUrl = () => (global.fetch as jest.Mock).mock.calls[0][0];
 
-    it('loadIpToken posts to auth cloud function with ip mode', async () => {
-      await loadIpToken();
+    it('posts to auth cloud function for the configured project', async () => {
+      await loadGuestToken('my-query-token');
       expect(getCallUrl()).toContain('test-project-id');
       expect(getCallUrl()).toContain('auth');
-      expect(getCallBody()).toEqual({mode: 'ip'});
     });
 
     it('loadCredentialsToken posts with flightnet mode and company', async () => {
@@ -55,11 +53,11 @@ describe('util', () => {
       global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
       jest.resetModules();
       const auth = require('./auth');
-      await expect(auth.loadIpToken()).rejects.toThrow('Network error');
+      await expect(auth.loadGuestToken('t')).rejects.toThrow('Network error');
     });
 
     it('uses correct Content-Type header', async () => {
-      await loadIpToken();
+      await loadGuestToken('t');
       const headers = (global.fetch as jest.Mock).mock.calls[0][1].headers;
       // Headers object - check it was set
       expect(global.fetch).toHaveBeenCalledWith(
@@ -69,7 +67,7 @@ describe('util', () => {
     });
 
     it('resolves with token from response', async () => {
-      const token = await loadIpToken();
+      const token = await loadGuestToken('t');
       expect(token).toBe('test-token');
     });
   });

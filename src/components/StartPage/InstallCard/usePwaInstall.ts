@@ -103,7 +103,6 @@ function isDismissed(): boolean {
 function isEligibleUser(authData: AuthData): boolean {
   if (!authData) return false;
   if (authData.guest || authData.kiosk) return false;
-  if (authData.uid === 'ipauth') return false;
   return true;
 }
 

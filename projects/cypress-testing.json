@@ -37,8 +37,7 @@
     "test": {
       "firebaseProjectId": "cypress-testing",
       "firebaseDatabaseUrl": "https://cypress-testing-eu.europe-west1.firebasedatabase.app",
-      "firebaseApiKey": "AIzaSyCqFmRzGWHTsUarhSoqzHvJLMjzq6uZNCw",
-      "disableIpAuthentication": true
+      "firebaseApiKey": "AIzaSyCqFmRzGWHTsUarhSoqzHvJLMjzq6uZNCw"
     }
   },
   "title": "Cypress Testing"

@@ -92,15 +92,13 @@
     "test": {
       "firebaseProjectId": "mfgt-flights",
       "firebaseApiKey": "AIzaSyDy63Y8GP6GExoP07KWJ6qneAeQalu9pK8",
-      "passkeysEnabled": true,
-      "disableIpAuthentication": true
+      "passkeysEnabled": true
     },
     "production": {
       "firebaseProjectId": "project-8979611309653332047",
       "firebaseDatabaseName": "lszt",
       "firebaseApiKey": "AIzaSyBNL_8OjB26xYYmjWbTCiPcxKgHs73FxGc",
-      "passkeysEnabled": true,
-      "disableIpAuthentication": true
+      "passkeysEnabled": true
     }
   },
   "loginForm": "email",
