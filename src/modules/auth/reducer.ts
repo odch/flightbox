@@ -100,7 +100,7 @@ const ACTION_HANDLERS = {
       failure: true,
     });
   },
-  [actions.IP_AUTHENTICATION_FAILURE]: (state: AuthState) => {
+  [actions.AUTHENTICATION_INITIALIZED]: (state: AuthState) => {
     return Object.assign({}, state, {
       initialized: true,
     });

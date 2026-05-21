@@ -15,10 +15,6 @@ const post = (data?: object): Promise<string> =>
   });
 
 
-export const loadIpToken = (): Promise<string> => post({
-  mode: 'ip'
-});
-
 export const loadCredentialsToken = (credentials: object): Promise<string> =>
   post(Object.assign({}, credentials, {
     mode: 'flightnet',

@@ -97,7 +97,7 @@ const SaveProfilePrompt: React.FC<SaveProfilePromptProps> = ({
     return null;
   }
 
-  if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+  if (!auth || auth.guest || auth.kiosk) {
     return null;
   }
 

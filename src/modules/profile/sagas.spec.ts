@@ -131,14 +131,6 @@ describe('modules', () => {
 
           expect(generator.next().done).toEqual(true);
         });
-
-        it('should not save for ipauth users', () => {
-          const auth = { uid: 'ipauth', guest: false, kiosk: false };
-          const profile = {};
-          const generator = sagas.recordPrivacyPolicyAcceptance(auth, profile);
-
-          expect(generator.next().done).toEqual(true);
-        });
       });
 
       describe('saveLanguage', () => {
@@ -171,16 +163,6 @@ describe('modules', () => {
           expect(generator.next().value).toEqual(select(sagas.authSelector));
 
           const auth = { uid: 'kiosk', guest: false, kiosk: true };
-          expect(generator.next(auth).done).toEqual(true);
-        });
-
-        it('should not save for ipauth users', () => {
-          const action = actions.saveLanguage('en');
-          const generator = sagas.saveLanguage(action);
-
-          expect(generator.next().value).toEqual(select(sagas.authSelector));
-
-          const auth = { uid: 'ipauth', guest: false, kiosk: false };
           expect(generator.next(auth).done).toEqual(true);
         });
       });
@@ -217,15 +199,6 @@ describe('modules', () => {
         it('should not call loadProfile when authData is null (logout)', () => {
           const action = {
             payload: { authData: null }
-          };
-          const generator = sagas.onAuthentication(action);
-
-          expect(generator.next().done).toEqual(true);
-        });
-
-        it('should not call loadProfile for ipauth users', () => {
-          const action = {
-            payload: { authData: { local: true } }
           };
           const generator = sagas.onAuthentication(action);
 
@@ -313,19 +286,6 @@ describe('modules', () => {
           expect(generator.next().value).toEqual(select(sagas.authSelector));
 
           const auth = { uid: 'user-789', guest: false, kiosk: true };
-          expect(generator.next(auth).value).toEqual(put(actions.saveProfileFailure()));
-
-          expect(generator.next().done).toEqual(true);
-        });
-
-        it('should put saveProfileFailure when uid is ipauth', () => {
-          const values = { memberNr: 'M123' };
-          const action = actions.saveProfile(values);
-          const generator = sagas.saveProfile(action);
-
-          expect(generator.next().value).toEqual(select(sagas.authSelector));
-
-          const auth = { uid: 'ipauth', guest: false, kiosk: false };
           expect(generator.next(auth).value).toEqual(put(actions.saveProfileFailure()));
 
           expect(generator.next().done).toEqual(true);

@@ -1,7 +1,7 @@
 import {call, put, select} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
-import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
+import {loadCredentialsToken, loadGuestToken, loadKioskToken} from '../../util/auth';
 import {expectDoneWithoutReturn, expectDoneWithReturn} from '../../../test/sagaUtils';
 import firebase, {authenticate as fbAuth, requestSignInCode as fbRequestSignInCode, verifyOtpCode as fbVerifyOtpCode, unauth as fbUnauth, watchAuthState} from '../../util/firebase';
 import {
@@ -27,34 +27,11 @@ jest.mock('../../../theme/lszt', () => ({ colors: { main: '#003863' } }));
 jest.mock('../../../theme/lspv', () => ({ colors: { main: '#003863' } }));
 jest.mock('../../../theme/lszo', () => ({ colors: { main: '#003863' } }));
 jest.mock('../../../theme/lsze', () => ({ colors: { main: '#003863' } }));
-jest.mock('../../../theme/lszk', () => ({ colors: { main: '#003863' } }));
 jest.mock('../../../theme/lszm', () => ({ colors: { main: '#003863' } }));
 
 describe('modules', () => {
   describe('auth', () => {
     describe('sagas', () => {
-      describe('doIpAuthentication', () => {
-        it('should trigger Firebase authentication if successful', () => {
-          const generator = sagas.doIpAuthentication();
-
-          expect(generator.next().value).toEqual(call(loadIpToken));
-
-          expect(generator.next('validtoken').value).toEqual(put(actions.requestFirebaseAuthentication('validtoken')));
-
-          expectDoneWithoutReturn(generator);
-        });
-
-        it('should put failure action if failed', () => {
-          const generator = sagas.doIpAuthentication();
-
-          expect(generator.next().value).toEqual(call(loadIpToken));
-
-          expect(generator.next(null).value).toEqual(put(actions.ipAuthenticationFailure()));
-
-          expectDoneWithoutReturn(generator);
-        });
-      });
-
       describe('doUsernamePasswordAuthentication', () => {
         it('should trigger Firebase authentication if successful', () => {
           const generator = sagas.doUsernamePasswordAuthentication(actions.authenticate('myuser', 'mypassword'));
@@ -129,11 +106,11 @@ describe('modules', () => {
       });
 
       describe('doListenFirebaseAuthentication', () => {
-        it('should request IP authentication if currently logged out', () => {
+        it('should mark authentication initialized if currently logged out', () => {
           const generator = sagas.doListenFirebaseAuthentication(actions.firebaseAuthentication(null));
 
           expect(generator.next().value).toEqual(put(actions.firebaseAuthenticationEvent(null)));
-          expect(generator.next().value).toEqual(put(actions.requestIpAuthentication()));
+          expect(generator.next().value).toEqual(put(actions.markAuthenticationInitialized()));
 
           expectDoneWithoutReturn(generator);
         });
@@ -190,22 +167,6 @@ describe('modules', () => {
             guest: false,
             kiosk: false,
             local: false
-          })));
-
-          expectDoneWithoutReturn(generator);
-        });
-
-        it('should put firebaseAuthenticationEvent without uid for ipauth uid', () => {
-          const generator = sagas.doListenFirebaseAuthentication(actions.firebaseAuthentication({
-            uid: 'ipauth',
-            expires: 1,
-            token: 'validtoken'
-          }));
-
-          expect(generator.next(false).value).toEqual(put(actions.firebaseAuthenticationEvent({
-            expiration: 1000,
-            token: 'validtoken',
-            local: true
           })));
 
           expectDoneWithoutReturn(generator);
@@ -370,13 +331,13 @@ describe('modules', () => {
       });
 
       describe('doListenFirebaseAuthentication', () => {
-        it('should request ip authentication when not authenticated and no kiosk token', () => {
+        it('should mark authentication initialized when not authenticated and no kiosk token', () => {
           const generator = sagas.doListenFirebaseAuthentication(
             actions.firebaseAuthentication(null)
           );
 
           expect(generator.next().value).toEqual(put(actions.firebaseAuthenticationEvent(null)));
-          expect(generator.next().value).toEqual(put(actions.requestIpAuthentication()));
+          expect(generator.next().value).toEqual(put(actions.markAuthenticationInitialized()));
 
           expectDoneWithoutReturn(generator);
         });
@@ -504,37 +465,6 @@ describe('modules', () => {
           );
 
           expectDoneWithoutReturn(generator);
-        });
-      });
-
-      describe('doIpAuthentication (disabled)', () => {
-        it('should put ipAuthenticationFailure when IP authentication is disabled', () => {
-          const origVal = global.__DISABLE_IP_AUTHENTICATION__;
-          global.__DISABLE_IP_AUTHENTICATION__ = true;
-
-          const generator = sagas.doIpAuthentication();
-
-          expect(generator.next().value).toEqual(put(actions.ipAuthenticationFailure()));
-
-          expectDoneWithoutReturn(generator);
-
-          global.__DISABLE_IP_AUTHENTICATION__ = origVal;
-        });
-
-        it('should put ipAuthenticationFailure when loadIpToken throws', () => {
-          const origVal = global.__DISABLE_IP_AUTHENTICATION__;
-          global.__DISABLE_IP_AUTHENTICATION__ = false;
-
-          const generator = sagas.doIpAuthentication();
-
-          expect(generator.next().value).toEqual(call(loadIpToken));
-
-          const error = new Error('network error');
-          expect(generator.throw(error).value).toEqual(put(actions.ipAuthenticationFailure()));
-
-          expectDoneWithoutReturn(generator);
-
-          global.__DISABLE_IP_AUTHENTICATION__ = origVal;
         });
       });
 

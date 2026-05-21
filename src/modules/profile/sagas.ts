@@ -21,7 +21,7 @@ export function* loadProfile() {
     const rawProfile = snapshot.val() || {};
     const { profile, needsMigration } = migrateProfile(rawProfile);
 
-    if (needsMigration && auth.uid !== 'ipauth' && !auth.guest && !auth.kiosk) {
+    if (needsMigration && !auth.guest && !auth.kiosk) {
       try {
         yield call(remote.migrateAircrafts, auth.uid, profile.aircrafts as any[]);
       } catch (migrationError) {
@@ -44,7 +44,7 @@ export function* loadProfile() {
 }
 
 export function* recordPrivacyPolicyAcceptance(auth: any, profile: any) {
-  if (auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+  if (auth.guest || auth.kiosk) {
     return;
   }
   const privacyPolicyUrl = yield select(privacyPolicyUrlSelector);
@@ -64,7 +64,7 @@ export function* saveProfile(action: any) {
 
     const auth = yield select(authSelector);
 
-    if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+    if (!auth || auth.guest || auth.kiosk) {
       throw new Error('Current user not allowed to save profile');
     }
 
@@ -91,7 +91,7 @@ export function* addAircraftSaga(action: any) {
   try {
     const auth = yield select(authSelector);
 
-    if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+    if (!auth || auth.guest || auth.kiosk) {
       throw new Error('Current user not allowed to save profile');
     }
 
@@ -118,7 +118,7 @@ export function* updateAircraftSaga(action: any) {
   try {
     const auth = yield select(authSelector);
 
-    if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+    if (!auth || auth.guest || auth.kiosk) {
       throw new Error('Current user not allowed to save profile');
     }
 
@@ -147,7 +147,7 @@ export function* removeAircraftSaga(action: any) {
   try {
     const auth = yield select(authSelector);
 
-    if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+    if (!auth || auth.guest || auth.kiosk) {
       throw new Error('Current user not allowed to save profile');
     }
 
@@ -167,7 +167,7 @@ export function* removeAircraftSaga(action: any) {
 export function* saveLanguage(action: any) {
   try {
     const auth = yield select(authSelector);
-    if (!auth || auth.guest || auth.kiosk || auth.uid === 'ipauth') {
+    if (!auth || auth.guest || auth.kiosk) {
       return;
     }
     yield call(remote.save, auth.uid, { language: action.payload.language });

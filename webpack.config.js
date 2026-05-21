@@ -23,7 +23,6 @@ const globals = {
   __FIREBASE_DATABASE_NAME__: JSON.stringify(env.firebaseDatabaseName),
   __FIREBASE_DATABASE_URL__: JSON.stringify(env.firebaseDatabaseUrl),
   __FIREBASE_API_KEY__: JSON.stringify(env.firebaseApiKey),
-  __DISABLE_IP_AUTHENTICATION__: env.disableIpAuthentication === true,
   __FLIGHTNET_COMPANY__: JSON.stringify(projectConf.flightnetCompany),
   __LANDING_FEES_STRATEGY__: JSON.stringify(projectConf.aerodrome.landingFeesStrategy),
   __LANDING_FEES__: JSON.stringify(projectConf.aerodrome.landingFees),

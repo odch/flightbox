@@ -2,7 +2,7 @@
 
 Open digital flight operations system for Swiss aerodromes. Manages aircraft movements (departures/arrivals) at multiple aerodromes. Multi-tenant via per-aerodrome config files in `/projects/`.
 
-Supported aerodromes: lszt (default), lspv, lsze, lszk, lszm, lszo.
+Supported aerodromes: lszt (default), lspv, lsze, lszm, lszo.
 
 ## Commands
 

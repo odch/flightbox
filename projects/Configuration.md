@@ -172,7 +172,6 @@ for go arounds.
 
 Description of the environments. Each environment description consists of the following properties:
 * `firebase`: The URL of the firebase instance.
-* `ipAuth`: The URL of the IP authentication service.
 * `credentialsAuth`: The URL of the credentials authentication service.
 
 #### `test`
@@ -239,12 +238,10 @@ Example: `["private", "commercial"]`
   "environments": {
     "test": {
       "firebase": "https://mfgt-flights-redux.firebaseio.com",
-      "ipAuth": "https://mfgt-flights-auth-test.appspot.com/ip",
       "credentialsAuth": "https://mfgt-flights-auth-test.appspot.com/mfgt"
     },
     "production": {
       "firebase": "https://lszt.firebaseio.com",
-      "ipAuth": "https://api.mfgt.ch/api/v1/firebaseauth/ip",
       "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/mfgt"
     }
   },

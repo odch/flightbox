@@ -117,13 +117,13 @@ describe('modules', () => {
         });
       });
 
-      describe('IP_AUTHENTICATION_FAILURE', () => {
+      describe('AUTHENTICATION_INITIALIZED', () => {
         it('should set initialized to true', () => {
           expect(
             reducer({
               ...INITIAL_STATE,
               initialized: false,
-            }, actions.ipAuthenticationFailure())
+            }, actions.markAuthenticationInitialized())
           ).toEqual({
             ...INITIAL_STATE,
             initialized: true,

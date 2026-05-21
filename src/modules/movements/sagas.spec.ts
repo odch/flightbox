@@ -5,7 +5,7 @@ import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
 import {addMovementAssociationListener, removeMovementAssociationListener, removeAllAssociationListeners} from './remote';
-import {LIMIT} from './pagination';
+import {LIMIT, toOrderKey} from './pagination';
 import FakeFirebaseSnapshot from '../../../test/FakeFirebaseSnapshot'
 import {loadRemote} from '../profile'
 import {compareDescending, firebaseToLocal} from '../../util/movements'
@@ -627,6 +627,171 @@ describe('modules', () => {
           expect(generator.next(key).value).toEqual(put(actions.saveMovementSuccess(key, formValues)));
 
           expect(generator.next().done).toEqual(true);
+        });
+
+        it('should preserve original createdBy when another user updates the movement', () => {
+          const generator = sagas.saveMovement();
+
+          expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
+
+          const formValues = {
+            type: 'departure',
+            key: 'existing-departure-key',
+            immatriculation: 'HBABC',
+            date: '2016-10-09',
+            time: '16:00',
+            createdBy: 'pilotA@example.com',
+            createdBy_orderKey: 'pilotA@example.com_8523978399999',
+          };
+
+          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
+
+          const auth = {
+            email: 'admin@example.com',
+            admin: true
+          }
+
+          // privacyPolicyUrlSelector is skipped on update (key is set)
+          const effect = generator.next(auth).value;
+          expect(effect).toEqual(
+            call(remote.saveMovement, '/departures', 'existing-departure-key', {
+              immatriculation: 'HBABC',
+              dateTime: '2016-10-09T14:00:00.000Z',
+              negativeTimestamp: -1476021600000,
+              createdBy: 'pilotA@example.com',
+              createdBy_orderKey: 'pilotA@example.com_8523978399999',
+            })
+          );
+
+          const savedMovement = (effect as any).payload.args[2];
+          expect(savedMovement.createdBy).toBe('pilotA@example.com');
+
+          expect(generator.next('existing-departure-key').value)
+            .toEqual(put(actions.saveMovementSuccess('existing-departure-key', formValues)));
+
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should recompute createdBy_orderKey from original author when the time changes', () => {
+          const generator = sagas.saveMovement();
+
+          expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
+
+          // Editor moved the departure to a different time, so the carried
+          // createdBy_orderKey timestamp is now stale.
+          const formValues = {
+            type: 'departure',
+            key: 'existing-departure-key',
+            immatriculation: 'HBABC',
+            date: '2016-10-09',
+            time: '18:00',
+            createdBy: 'pilotA@example.com',
+            createdBy_orderKey: 'pilotA@example.com_8523978399999',
+          };
+
+          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
+
+          const auth = { email: 'admin@example.com', admin: true }
+
+          const effect = generator.next(auth).value;
+          const savedMovement = (effect as any).payload.args[2];
+          expect(savedMovement.createdBy).toBe('pilotA@example.com');
+          expect(savedMovement.createdBy_orderKey)
+            .toBe(toOrderKey('pilotA@example.com', savedMovement.negativeTimestamp));
+          // recomputed with the new timestamp, not the stale carried value
+          expect(savedMovement.createdBy_orderKey).not.toBe('pilotA@example.com_8523978399999');
+
+          expect(generator.next('existing-departure-key').value)
+            .toEqual(put(actions.saveMovementSuccess('existing-departure-key', formValues)));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should keep createdBy when the original author updates their own movement', () => {
+          const generator = sagas.saveMovement();
+
+          expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
+
+          const formValues = {
+            type: 'departure',
+            key: 'existing-departure-key',
+            immatriculation: 'HBABC',
+            date: '2016-10-09',
+            time: '16:00',
+            createdBy: 'pilotA@example.com',
+            createdBy_orderKey: 'pilotA@example.com_8523978399999',
+          };
+
+          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
+
+          const auth = { email: 'pilotA@example.com' }
+
+          const effect = generator.next(auth).value;
+          const savedMovement = (effect as any).payload.args[2];
+          expect(savedMovement.createdBy).toBe('pilotA@example.com');
+          expect(savedMovement.createdBy_orderKey).toBe('pilotA@example.com_8523978399999');
+
+          expect(generator.next('existing-departure-key').value)
+            .toEqual(put(actions.saveMovementSuccess('existing-departure-key', formValues)));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should preserve original createdBy when another user updates an arrival', () => {
+          const generator = sagas.saveMovement();
+
+          expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
+
+          const formValues = {
+            type: 'arrival',
+            key: 'existing-arrival-key',
+            immatriculation: 'HBABC',
+            date: '2016-10-09',
+            time: '16:00',
+            createdBy: 'pilotA@example.com',
+            createdBy_orderKey: 'pilotA@example.com_8523978399999',
+          };
+
+          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
+
+          const auth = { email: 'admin@example.com', admin: true }
+
+          const effect = generator.next(auth).value;
+          expect(effect).toEqual(
+            call(remote.saveMovement, '/arrivals', 'existing-arrival-key', {
+              immatriculation: 'HBABC',
+              dateTime: '2016-10-09T14:00:00.000Z',
+              negativeTimestamp: -1476021600000,
+              createdBy: 'pilotA@example.com',
+              createdBy_orderKey: 'pilotA@example.com_8523978399999',
+            })
+          );
+
+          expect(generator.next('existing-arrival-key').value)
+            .toEqual(put(actions.saveMovementSuccess('existing-arrival-key', formValues)));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should not set createdBy fields on create without an email (kiosk)', () => {
+          const generator = sagas.saveMovement();
+
+          expect(generator.next().value).toEqual(select(sagas.wizardFormValuesSelector));
+
+          const formValues = {
+            type: 'departure',
+            immatriculation: 'HBABC',
+            date: '2016-10-09',
+            time: '16:00',
+          };
+
+          expect(generator.next(formValues).value).toEqual(select(sagas.authSelector));
+
+          const auth = {}
+
+          expect(generator.next(auth).value).toEqual(select(sagas.privacyPolicyUrlSelector));
+
+          const effect = generator.next(null).value;
+          const savedMovement = (effect as any).payload.args[2];
+          expect(savedMovement.createdBy).toBeUndefined();
+          expect(savedMovement.createdBy_orderKey).toBeUndefined();
         });
       });
 
