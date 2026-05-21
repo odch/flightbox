@@ -27,7 +27,6 @@ jest.mock('../../../theme/lszt', () => ({ colors: { main: '#003863' } }));
 jest.mock('../../../theme/lspv', () => ({ colors: { main: '#003863' } }));
 jest.mock('../../../theme/lszo', () => ({ colors: { main: '#003863' } }));
 jest.mock('../../../theme/lsze', () => ({ colors: { main: '#003863' } }));
-jest.mock('../../../theme/lszk', () => ({ colors: { main: '#003863' } }));
 jest.mock('../../../theme/lszm', () => ({ colors: { main: '#003863' } }));
 
 describe('modules', () => {
