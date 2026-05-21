@@ -2,7 +2,7 @@ import {all, call, fork, put, select, takeEvery} from 'redux-saga/effects'
 import {get, query, orderByChild, equalTo, limitToFirst} from 'firebase/database';
 import * as actions from './actions';
 import {Passkey} from './actions';
-import {loadCredentialsToken, loadGuestToken, loadIpToken, loadKioskToken} from '../../util/auth';
+import {loadCredentialsToken, loadGuestToken, loadKioskToken} from '../../util/auth';
 import createChannel from '../../util/createChannel';
 import firebase, {
   authenticate as fbAuth,
@@ -45,24 +45,6 @@ export function* loadUser(uid: string) {
 export function* getName(uid: string) {
   const user = yield call(loadUser, uid)
   return user ? `${(user as any).firstname} ${(user as any).lastname}` : null
-}
-
-export function* doIpAuthentication() {
-  try {
-    if (__DISABLE_IP_AUTHENTICATION__) {
-      yield put(actions.ipAuthenticationFailure());
-    } else {
-      const ipToken = yield call(loadIpToken);
-      if (ipToken) {
-        yield put(actions.requestFirebaseAuthentication(ipToken));
-      } else {
-        yield put(actions.ipAuthenticationFailure());
-      }
-    }
-  } catch(e) {
-    logError('Failed to execute IP authentication', e);
-    yield put(actions.ipAuthenticationFailure());
-  }
 }
 
 export function* doUsernamePasswordAuthentication(action: any) {
@@ -242,29 +224,21 @@ export function* doListenFirebaseAuthentication(action: any) {
   if (authenticated) {
     const { uid, expires, token, email } = action.payload.authData;
 
-    if (uid === 'ipauth') {
-      authData = {
-        expiration: expires * 1000,
-        token,
-        local: true
-      }
-    } else {
-      const loginData = yield call(getLoginData, uid)
-      const guest = uid === 'guest'
-      const kiosk = uid === 'kiosk'
-      const local = guest || kiosk || window.localStorage.getItem('isLocalSignIn') === 'true'
-      authData = {
-        uid,
-        expiration: expires * 1000,
-        token,
-        admin: loginData && loginData.admin === true,
-        guest,
-        kiosk,
-        local,
-        links: !loginData || loginData.links !== false,
-        name: yield call(getName, uid),
-        email
-      }
+    const loginData = yield call(getLoginData, uid)
+    const guest = uid === 'guest'
+    const kiosk = uid === 'kiosk'
+    const local = guest || kiosk || window.localStorage.getItem('isLocalSignIn') === 'true'
+    authData = {
+      uid,
+      expiration: expires * 1000,
+      token,
+      admin: loginData && loginData.admin === true,
+      guest,
+      kiosk,
+      local,
+      links: !loginData || loginData.links !== false,
+      name: yield call(getName, uid),
+      email
     }
   }
 
@@ -274,7 +248,7 @@ export function* doListenFirebaseAuthentication(action: any) {
     if (isSignInWithKioskAccessToken()) {
       yield put(actions.authenticateAsKiosk(getKioskAuthQueryToken(window.location)!))
     } else {
-      yield put(actions.requestIpAuthentication());
+      yield put(actions.markAuthenticationInitialized());
     }
   }
 }
@@ -309,7 +283,6 @@ export function createFbAuthenticationChannel() {
 
 export default function* sagas() {
   yield all([
-    takeEvery(actions.REQUEST_IP_AUTHENTICATION, doIpAuthentication),
     takeEvery(actions.REQUEST_USERNAME_PASSWORD_AUTHENTICATION, doUsernamePasswordAuthentication),
     takeEvery(actions.REQUEST_GUEST_TOKEN_AUTHENTICATION, doGuestTokenAuthentication),
     takeEvery(actions.REQUEST_KIOSK_TOKEN_AUTHENTICATION, doKioskTokenAuthentication),

@@ -17,7 +17,6 @@ module.exports = {
     '\\.(png|jpg|jpeg|gif|svg|css)$': '<rootDir>/test/fileMock.js'
   },
   globals: {
-    __DISABLE_IP_AUTHENTICATION__: false,
     __LANDING_FEES_STRATEGY__: 'default',
     __LANDING_FEES__: {
       instruction: {

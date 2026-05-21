@@ -7,7 +7,7 @@ const mapStateToProps = (state: RootState) => {
   const auth = state.auth;
   const data: any = auth && auth.data;
   const authenticated = !!(auth && auth.authenticated);
-  const isRealUser = authenticated && data && data.uid && !data.guest && !data.kiosk && data.uid !== 'ipauth';
+  const isRealUser = authenticated && data && data.uid && !data.guest && !data.kiosk;
   const passkeys = (auth && auth.passkeys) || [];
   const show = __CONF__.passkeysEnabled === true && isRealUser && passkeys.length === 0;
 

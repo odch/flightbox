@@ -211,20 +211,6 @@ describe('LoginInfo', () => {
       fireEvent.click(screen.getAllByText('login.kiosk')[0]);
       expect(screen.queryByText('login.profile')).not.toBeInTheDocument();
     });
-
-    it('does not show profile link for ipauth user', () => {
-      renderWithTheme(
-        <LoginInfo
-          {...baseProps}
-          auth={{
-            authenticated: true,
-            data: { uid: 'ipauth', email: 'ip@a.ch', links: true },
-          }}
-        />
-      );
-      fireEvent.click(screen.getAllByText('ip@a.ch')[0]);
-      expect(screen.queryByText('login.profile')).not.toBeInTheDocument();
-    });
   });
 
   describe('click outside', () => {

@@ -1,5 +1,4 @@
-export const REQUEST_IP_AUTHENTICATION = 'REQUEST_IP_AUTHENTICATION' as const;
-export const IP_AUTHENTICATION_FAILURE = 'IP_AUTHENTICATION_FAILURE' as const;
+export const AUTHENTICATION_INITIALIZED = 'AUTHENTICATION_INITIALIZED' as const;
 export const REQUEST_USERNAME_PASSWORD_AUTHENTICATION = 'REQUEST_USERNAME_PASSWORD_AUTHENTICATION' as const;
 export const USERNAME_PASSWORD_AUTHENTICATION_FAILURE = 'USERNAME_PASSWORD_AUTHENTICATION_FAILURE' as const;
 export const REQUEST_GUEST_TOKEN_AUTHENTICATION = 'REQUEST_GUEST_TOKEN_AUTHENTICATION' as const;
@@ -36,8 +35,7 @@ export interface Passkey {
 }
 
 export type AuthAction =
-  | { type: typeof REQUEST_IP_AUTHENTICATION }
-  | { type: typeof IP_AUTHENTICATION_FAILURE }
+  | { type: typeof AUTHENTICATION_INITIALIZED }
   | { type: typeof REQUEST_USERNAME_PASSWORD_AUTHENTICATION; payload: { username: string; password: string } }
   | { type: typeof USERNAME_PASSWORD_AUTHENTICATION_FAILURE }
   | { type: typeof REQUEST_GUEST_TOKEN_AUTHENTICATION; payload: { token: string } }
@@ -65,15 +63,9 @@ export type AuthAction =
   | { type: typeof REMOVE_PASSKEY_SUCCESS; payload: { credentialId: string } }
   | { type: typeof REMOVE_PASSKEY_FAILURE; payload: { credentialId: string; message?: string } };
 
-export function requestIpAuthentication() {
+export function markAuthenticationInitialized() {
   return {
-    type: REQUEST_IP_AUTHENTICATION,
-  };
-}
-
-export function ipAuthenticationFailure() {
-  return {
-    type: IP_AUTHENTICATION_FAILURE,
+    type: AUTHENTICATION_INITIALIZED,
   };
 }
 

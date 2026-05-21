@@ -125,7 +125,7 @@ const LoginInfo = (props: any) => {
     return (
       <StyledMenu ref={menuRef}>
         <StyledMenuUsername>{getUsername(auth, t)}</StyledMenuUsername>
-        {(typeof __CONF__ === 'undefined' || __CONF__.profileEnabled !== false) && auth && auth.guest !== true && auth.kiosk !== true && auth.uid !== 'ipauth' && (
+        {(typeof __CONF__ === 'undefined' || __CONF__.profileEnabled !== false) && auth && auth.guest !== true && auth.kiosk !== true && (
           <StyledMenuLink to="/profile" data-cy="profile">{t('login.profile')}</StyledMenuLink>
         )}
         <StyledMenuButton onClick={props.logout} data-cy="logout">{t('login.logout')}</StyledMenuButton>

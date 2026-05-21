@@ -45,7 +45,6 @@ declare var __FIREBASE_PROJECT_ID__: string;
 declare var __FIREBASE_DATABASE_NAME__: string;
 declare var __FIREBASE_DATABASE_URL__: string;
 declare var __FIREBASE_API_KEY__: string;
-declare var __DISABLE_IP_AUTHENTICATION__: boolean;
 declare var __FLIGHTNET_COMPANY__: string;
 declare var __LANDING_FEES_STRATEGY__: string;
 declare var __LANDING_FEES__: any;

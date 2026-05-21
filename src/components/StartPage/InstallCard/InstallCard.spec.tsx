@@ -11,7 +11,6 @@ import InstallCard from './InstallCard';
 const regularAuthData = { uid: 'user-123' };
 const guestAuthData = { uid: 'guest-uid', guest: true };
 const kioskAuthData = { uid: 'kiosk-uid', kiosk: true };
-const ipauthData = { uid: 'ipauth' };
 
 function setVisitDays(count: number) {
   const days: string[] = [];
@@ -66,13 +65,6 @@ describe('InstallCard', () => {
     setVisitDays(5);
     fireBeforeInstallPrompt();
     renderWithTheme(<InstallCard authData={kioskAuthData} />);
-    expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
-  });
-
-  it('does not render for ipauth users', () => {
-    setVisitDays(5);
-    fireBeforeInstallPrompt();
-    renderWithTheme(<InstallCard authData={ipauthData} />);
     expect(screen.queryByTestId('install-card')).not.toBeInTheDocument();
   });
 
