@@ -514,9 +514,11 @@ export function* saveMovement() {
   delete movement.type;
   delete movement.associatedMovement;
 
-  if (auth.email) {
+  if (!key && auth.email) {
     movement.createdBy = auth.email
-    movement.createdBy_orderKey = toOrderKey(auth.email, movement.negativeTimestamp as number)
+  }
+  if (typeof movement.createdBy === 'string') {
+    movement.createdBy_orderKey = toOrderKey(movement.createdBy, movement.negativeTimestamp as number)
   }
 
   if (!key) {
