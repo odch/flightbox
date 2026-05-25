@@ -81,15 +81,24 @@ describe('modules', () => {
             const auth = {
               admin: true,
               uid: '30004',
-              name: 'Hans Meier'
+              name: 'Hans Meier',
+              email: 'hans@example.ch'
             }
 
-            const saveEffect = generator.next(auth).value
+            expect(generator.next(auth).value).toEqual(select(sagas.profileSelector));
+
+            const profile = { firstname: 'Hans', lastname: 'Meier' };
+
+            const saveEffect = generator.next(profile).value
             const data = (saveEffect as any).payload.args[0]
 
             expect(data.status).toEqual('restricted');
             expect(data.details).toEqual('Eine Landung pro Person pro Tag.');
             expect(data.by).toEqual('Hans Meier');
+            expect(data.uid).toEqual('30004');
+            expect(data.firstname).toEqual('Hans');
+            expect(data.lastname).toEqual('Meier');
+            expect(data.email).toEqual('hans@example.ch');
             expect(data.timestamp).toEqual(now.getTime());
 
             expect(generator.next().value).toEqual(put(actions.saveAerodromeStatusSuccess()));
@@ -97,7 +106,7 @@ describe('modules', () => {
             expect(generator.next().done).toEqual(true);
           });
 
-          it('should use uid as by when name is not set', () => {
+          it('should use uid as by when name is not set and persist null profile fields', () => {
             const action = actions.saveAerodromeStatus({
               status: 'open',
               details: ''
@@ -109,10 +118,16 @@ describe('modules', () => {
             expect(generator.next().value).toEqual(select(sagas.authSelector));
 
             const auth = { admin: true, uid: 'user-123' };
-            const saveEffect = generator.next(auth).value;
+            expect(generator.next(auth).value).toEqual(select(sagas.profileSelector));
+
+            const saveEffect = generator.next({}).value;
             const data = (saveEffect as any).payload.args[0];
 
             expect(data.by).toEqual('user-123');
+            expect(data.uid).toEqual('user-123');
+            expect(data.firstname).toBeNull();
+            expect(data.lastname).toBeNull();
+            expect(data.email).toBeNull();
           });
 
           it('should handle error silently when auth check fails', () => {
@@ -122,8 +137,11 @@ describe('modules', () => {
             expect(generator.next().value).toEqual(put(actions.setAerodromeStatusSaving()));
             expect(generator.next().value).toEqual(select(sagas.authSelector));
 
-            // auth is null -> will throw
-            const result = generator.next(null);
+            // After auth select, saga continues with profile select before the admin check.
+            expect(generator.next(null).value).toEqual(select(sagas.profileSelector));
+
+            // Profile resolved -> admin check throws because auth is null.
+            const result = generator.next({});
             expect(result.done).toEqual(true);
           });
         });
