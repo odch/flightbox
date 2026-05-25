@@ -31,8 +31,6 @@ const associatedMovementsTriggers = require('./associatedMovements/setAssociated
 const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsTrigger');
 const homebasedAircraftTrigger = require('./homebasedAircraft/homebasedAircraftTrigger');
 const updateArrivalPaymentStatus = require('./updateArrivalPaymentStatus');
-const { scheduledAnonymizeMovements } = require('./anonymizeMovements');
-const { scheduledCleanupMessages } = require('./cleanupMessages');
 
 exports.auth = auth;
 exports.generateSignInLink = generateSignInLink;
@@ -67,5 +65,9 @@ exports.enrichArrivalOnUpdate = enrichMovements.enrichArrivalOnUpdate;
 
 exports.updateArrivalPaymentStatusOnCardPaymentUpdate = updateArrivalPaymentStatus.updateArrivalPaymentStatusOnCardPaymentUpdate;
 
-exports.scheduledAnonymizeMovements = scheduledAnonymizeMovements;
-exports.scheduledCleanupMessages = scheduledCleanupMessages;
+if (process.env.PRIVACY_FUNCTIONS_ENABLED === 'true') {
+  const { scheduledAnonymizeMovements } = require('./anonymizeMovements');
+  const { scheduledCleanupMessages } = require('./cleanupMessages');
+  exports.scheduledAnonymizeMovements = scheduledAnonymizeMovements;
+  exports.scheduledCleanupMessages = scheduledCleanupMessages;
+}
