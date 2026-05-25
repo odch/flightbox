@@ -65,7 +65,16 @@ exports.enrichArrivalOnUpdate = enrichMovements.enrichArrivalOnUpdate;
 
 exports.updateArrivalPaymentStatusOnCardPaymentUpdate = updateArrivalPaymentStatus.updateArrivalPaymentStatusOnCardPaymentUpdate;
 
-if (process.env.PRIVACY_FUNCTIONS_ENABLED === 'true') {
+let privacyFunctionsEnabled = false;
+try {
+  privacyFunctionsEnabled = require('./privacy-config.generated.js');
+} catch (e) {
+  // Generated file is written by the deploy workflow; absent in local
+  // dev and unit tests, where the retention jobs should stay disabled.
+  if (e.code !== 'MODULE_NOT_FOUND') throw e;
+}
+
+if (privacyFunctionsEnabled) {
   const { scheduledAnonymizeMovements } = require('./anonymizeMovements');
   const { scheduledCleanupMessages } = require('./cleanupMessages');
   exports.scheduledAnonymizeMovements = scheduledAnonymizeMovements;
