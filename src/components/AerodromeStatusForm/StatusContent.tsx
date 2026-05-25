@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import StatusShape from './StatusShape';
 import newLineToBr from '../../util/newLineToBr';
+import formatUpdatedBy from '../../util/formatUpdatedBy';
 
 const Wrapper = styled.div`
   padding: 1em;
@@ -17,12 +18,15 @@ const Author = styled.div`
   font-style: italic;
 `
 
-const StatusContent = props => (
-  <Wrapper>
-    {props.item.details && <div>{newLineToBr(props.item.details)}</div>}
-    {props.item.by && <Author>von {props.item.by}</Author>}
-  </Wrapper>
-);
+const StatusContent = props => {
+  const author = formatUpdatedBy(props.item);
+  return (
+    <Wrapper>
+      {props.item.details && <div>{newLineToBr(props.item.details)}</div>}
+      {author && <Author>von {author}</Author>}
+    </Wrapper>
+  );
+};
 
 StatusContent.propTypes = {
   item: StatusShape.isRequired

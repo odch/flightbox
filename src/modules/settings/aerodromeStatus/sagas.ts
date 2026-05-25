@@ -7,6 +7,8 @@ import createChannel, {monitor} from '../../../util/createChannel';
 import firebase from '../../../util/firebase';
 
 export const authSelector = (state: any) => state.auth.data;
+export const profileSelector = (state: any) =>
+  (state.profile && state.profile.profile) || {};
 
 export function* loadAerodromeStatus() {
   try {
@@ -49,6 +51,7 @@ export function* saveAerodromeStatus(action: any) {
     yield put(actions.setAerodromeStatusSaving());
 
     const auth = yield select(authSelector);
+    const profile = yield select(profileSelector);
 
     if (!auth || auth.admin !== true) {
       throw new Error('Current user is not authenticated as admin');
@@ -57,7 +60,11 @@ export function* saveAerodromeStatus(action: any) {
     const data = {
       ...action.payload.data,
       timestamp: new Date().getTime(),
-      by: auth.name ? auth.name : auth.uid
+      by: auth.name ? auth.name : auth.uid,
+      uid: auth.uid,
+      firstname: profile.firstname || null,
+      lastname: profile.lastname || null,
+      email: auth.email || null,
     };
 
     yield call(remote.save, data);

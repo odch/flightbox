@@ -380,6 +380,18 @@
         "by": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
+        "uid": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "firstname": {
+          ".validate": "newData.isString()"
+        },
+        "lastname": {
+          ".validate": "newData.isString()"
+        },
+        "email": {
+          ".validate": "newData.isString()"
+        },
         "$other": {
           ".validate": false
         }
