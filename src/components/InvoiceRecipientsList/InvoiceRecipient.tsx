@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
 import ItemList from '../ItemList'
 import Button from '../Button'
-import DeleteDialog from './DeleteDialog'
+import DeleteDialog from '../DeleteDialog'
 
 const Wrapper = styled.div`
   margin-bottom: 1rem;

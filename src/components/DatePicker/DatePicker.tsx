@@ -57,6 +57,7 @@ const DatePicker = (props: any) => {
     return (
       <DayPicker
         mode="single"
+        required={!clearable}
         selected={date}
         defaultMonth={date}
         onSelect={handleDayClick}
