@@ -60,7 +60,7 @@ jest.mock('../ItemList', () => ({
   ),
 }));
 
-jest.mock('./DeleteDialog', () => ({
+jest.mock('../DeleteDialog', () => ({
   __esModule: true,
   default: ({ question, onConfirm, onCancel }: any) => (
     <div data-testid="delete-dialog">
