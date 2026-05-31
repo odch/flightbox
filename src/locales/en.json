@@ -4,6 +4,7 @@
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete '{{name}}'?",
     "edit": "Edit",
     "send": "Send",
     "close": "Close",
