@@ -22,6 +22,8 @@ export const wizardFormValuesSelector = (state: any) => state.ui.wizard.values;
 
 export const authSelector = (state: any) => state.auth.data;
 
+export const canSeeAllMovements = (auth: any) => !!(auth && (auth.admin || auth.allMovements));
+
 export const privacyPolicyUrlSelector = (state: any) => state.settings.privacyPolicyUrl.url;
 
 export function* getProfileDefaultValues() {
@@ -282,7 +284,7 @@ export function* loadLatestDeparturesAndArrivalsPaged(movements: any, clear: boo
     pagination.start,
     pagination.limit,
     undefined,
-    !auth.admin ? auth.email : undefined
+    !canSeeAllMovements(auth) ? auth.email : undefined
   );
 
   const arrivals = yield call(
@@ -291,7 +293,7 @@ export function* loadLatestDeparturesAndArrivalsPaged(movements: any, clear: boo
     pagination.start,
     pagination.limit,
     undefined,
-    !auth.admin ? auth.email : undefined
+    !canSeeAllMovements(auth) ? auth.email : undefined
   );
 
   const loadedMovements: any = {
@@ -308,7 +310,7 @@ export function* loadLatestDeparturesAndArrivalsPaged(movements: any, clear: boo
       pagination.start,
       undefined,
       reloadParams.reloadEnd,
-      !auth.admin ? auth.email : undefined
+      !canSeeAllMovements(auth) ? auth.email : undefined
     )
   }
 
@@ -323,7 +325,7 @@ export function* addMovements(departuresSnapshot: any, arrivalsSnapshot: any, ex
 
   const auth = yield select(authSelector);
 
-  const filteredMovements = auth.admin || !auth.email
+  const filteredMovements = canSeeAllMovements(auth) || !auth.email
     ? movements
     : movements.filter((movement: any) => movement.createdBy === auth.email)
 
@@ -399,7 +401,7 @@ export function* addMovementToState(snapshot: any, movementType: string, current
 
     const auth = yield select(authSelector);
     if (!auth) return;
-    if (!auth.admin && auth.email && movement.createdBy !== auth.email) {
+    if (!canSeeAllMovements(auth) && auth.email && movement.createdBy !== auth.email) {
       return;
     }
 
