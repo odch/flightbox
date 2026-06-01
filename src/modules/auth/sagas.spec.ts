@@ -130,6 +130,7 @@ describe('modules', () => {
           }).value).toEqual(call(sagas.getName, 'myadminuser'));
           expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
             admin: true,
+            allMovements: false,
             links: false,
             expiration: 1000,
             token: 'validtoken',
@@ -158,12 +159,43 @@ describe('modules', () => {
           }).value).toEqual(call(sagas.getName, 'testuser'));
           expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
             admin: false,
+            allMovements: false,
             links: true,
             expiration: 1000,
             token: 'validtoken',
             uid: 'testuser',
             name: 'Hans Muster',
             email: 'testuser@example.com',
+            guest: false,
+            kiosk: false,
+            local: false
+          })));
+
+          expectDoneWithoutReturn(generator);
+        });
+
+        it('should put firebaseAuthenticationEvent with allMovements flag for non-admin allMovements user', () => {
+          const generator = sagas.doListenFirebaseAuthentication(actions.firebaseAuthentication({
+            uid: 'vieweruser',
+            expires: 1,
+            token: 'validtoken',
+            email: 'viewer@example.com'
+          }));
+
+          expect(generator.next().value).toEqual(call(sagas.getLoginData, 'vieweruser'));
+          expect(generator.next({
+            admin: false,
+            allMovements: true
+          }).value).toEqual(call(sagas.getName, 'vieweruser'));
+          expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
+            admin: false,
+            allMovements: true,
+            links: true,
+            expiration: 1000,
+            token: 'validtoken',
+            uid: 'vieweruser',
+            name: 'Hans Muster',
+            email: 'viewer@example.com',
             guest: false,
             kiosk: false,
             local: false

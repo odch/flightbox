@@ -357,6 +357,35 @@ describe('modules', () => {
           expect(next.value).toEqual(expectedResult);
           expect(next.done).toEqual(true);
         });
+
+        it('should not filter by email for non-admin allMovements users', () => {
+          const state = {
+            loading: false,
+            data: new ImmutableItemsArray()
+          };
+
+          const generator = sagas.loadLatestDeparturesAndArrivalsPaged(state, false);
+
+          expect(generator.next().value)
+            .toEqual(select(sagas.authSelector));
+
+          const auth = {
+            admin: false,
+            allMovements: true,
+            email: 'viewer@example.com'
+          }
+
+          expect(generator.next(auth).value)
+            .toEqual(call(remote.loadLimited, '/departures', undefined, LIMIT, undefined, undefined));
+
+          const departuresResult = {
+            snapshot: new FakeFirebaseSnapshot(null, []),
+            ref: { name: 'depRef' }
+          };
+
+          expect(generator.next(departuresResult).value)
+            .toEqual(call(remote.loadLimited, '/arrivals', undefined, LIMIT, undefined, undefined));
+        });
       });
 
       describe('monitorRef', () => {
@@ -1299,6 +1328,44 @@ describe('modules', () => {
 
           expect(generator.next().done).toEqual(true);
         });
+
+        it('should include other users movements for non-admin allMovements users', () => {
+          const channel = { put: jest.fn() };
+
+          const departuresSnapshot = new FakeFirebaseSnapshot(null, [
+            new FakeFirebaseSnapshot('dep1', {
+              immatriculation: 'HBABC',
+              dateTime: '2017-05-03T09:00:00.000Z',
+              negativeTimestamp: -1493802000000,
+              createdBy: 'viewer@example.com'
+            })
+          ]);
+
+          const arrivalsSnapshot = new FakeFirebaseSnapshot(null, [
+            new FakeFirebaseSnapshot('arr1', {
+              immatriculation: 'HBKOF',
+              dateTime: '2017-05-03T10:00:00.000Z',
+              negativeTimestamp: -1493798400000,
+              createdBy: 'other@example.com'
+            })
+          ]);
+
+          const existingMovements = new ImmutableItemsArray();
+          const generator = sagas.addMovements(
+            departuresSnapshot, arrivalsSnapshot, existingMovements, channel
+          );
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { admin: false, allMovements: true, email: 'viewer@example.com' };
+          expect(generator.next(auth).value).toEqual(
+            call(sagas.monitorAssociations, expect.anything(), existingMovements, channel)
+          );
+
+          generator.next();
+          const setMovementsAction = channel.put.mock.calls[0][0];
+          expect(setMovementsAction.payload.movements.array).toHaveLength(2);
+        });
       });
 
       describe('monitorAssociations', () => {
@@ -1488,6 +1555,33 @@ describe('modules', () => {
           const auth = { admin: false, email: 'pilot@example.com' };
           expect(generator.next(auth).done).toEqual(true);
           expect(channel.put).not.toHaveBeenCalled();
+        });
+
+        it('should add other users movement for non-admin allMovements users', () => {
+          const channel = { put: jest.fn() };
+          const existingData = new ImmutableItemsArray([]);
+          const snapshot = new FakeFirebaseSnapshot('dep1', {
+            immatriculation: 'HBABC',
+            dateTime: '2017-05-03T09:00:00.000Z',
+            negativeTimestamp: -1493802000000,
+            createdBy: 'other@example.com'
+          });
+
+          const generator = sagas.addMovementToState(
+            snapshot, 'departure', { data: existingData }, channel
+          );
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { admin: false, allMovements: true, email: 'viewer@example.com' };
+          expect(generator.next(auth).value).toEqual(
+            call(sagas.monitorAssociation, expect.anything(), channel)
+          );
+
+          generator.next();
+          expect(channel.put).toHaveBeenCalledWith(
+            expect.objectContaining({ type: 'SET_MOVEMENTS' })
+          );
         });
 
         it('should call monitorAssociation and set movements when movement is new and not last element', () => {

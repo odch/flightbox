@@ -233,6 +233,7 @@ export function* doListenFirebaseAuthentication(action: any) {
       expiration: expires * 1000,
       token,
       admin: loginData && loginData.admin === true,
+      allMovements: loginData && loginData.allMovements === true,
       guest,
       kiosk,
       local,
