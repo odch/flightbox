@@ -13,6 +13,26 @@ const icons: { [key: string]: string } = {
   closed: 'block',
 };
 
+// The expand/collapse choice is remembered across visits so the banner does not
+// re-expand on its own after a pilot has collapsed it (and vice versa).
+const STORAGE_KEY = 'aerodromeStatusBannerExpanded';
+
+const readStoredExpanded = () => {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) === 'true';
+  } catch (e) {
+    return false;
+  }
+};
+
+const writeStoredExpanded = (value: boolean) => {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, String(value));
+  } catch (e) {
+    // ignore (e.g. storage disabled in private mode)
+  }
+};
+
 // Severity accents kept deliberately muted and used only on the status icon and
 // label, so the banner adopts the project's neutral card background instead of a
 // saturated fill that would clash with the logo or theme color.
@@ -81,8 +101,10 @@ const AerodromeStatusBanner = (props: any) => {
   const theme = useTheme();
   const {status, enabled, watchCurrentAerodromeStatus} = props;
 
-  // null = follow the status severity; a boolean is the user's explicit choice.
-  const [expandedOverride, setExpandedOverride] = useState<boolean | null>(null);
+  // Collapsed by default; the pilot's choice persists across visits. The status
+  // word and colored icon stay visible while collapsed, so nothing important is
+  // hidden -- expanding just reveals the details and timestamp.
+  const [expanded, setExpanded] = useState(readStoredExpanded);
 
   useEffect(() => {
     watchCurrentAerodromeStatus();
@@ -95,11 +117,13 @@ const AerodromeStatusBanner = (props: any) => {
 
   const accent = accentFor(status.status, theme);
 
-  // Expand by default when the aerodrome is not open, so restrictions and
-  // closures are immediately visible; collapse the reassuring "open" state.
-  // Derived from the current status (which loads asynchronously) so the default
-  // is correct even though the banner mounts before the status arrives.
-  const expanded = expandedOverride !== null ? expandedOverride : status.status !== 'open';
+  const toggle = () => {
+    setExpanded(prev => {
+      const next = !prev;
+      writeStoredExpanded(next);
+      return next;
+    });
+  };
 
   return (
     <Wrapper
@@ -108,7 +132,7 @@ const AerodromeStatusBanner = (props: any) => {
     >
       <Summary
         type="button"
-        onClick={() => setExpandedOverride(!expanded)}
+        onClick={toggle}
         aria-expanded={expanded}
       >
         <StatusIcon icon={icons[status.status] || 'info'} $accent={accent}/>

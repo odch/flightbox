@@ -1,10 +1,6 @@
 import React from 'react';
-import {render, fireEvent} from '@testing-library/react';
+import {fireEvent} from '@testing-library/react';
 import {renderWithTheme} from '../../../test/renderWithTheme';
-import {ThemeProvider} from 'styled-components';
-import {BrowserRouter} from 'react-router-dom';
-
-const theme: any = {colors: {main: '#003863', background: '#fafafa', danger: '#e00f00'}};
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({t: (key: string) => key}),
@@ -27,8 +23,14 @@ jest.mock('../MaterialIcon', () => {
 
 import AerodromeStatusBanner from './AerodromeStatusBanner';
 
+const STORAGE_KEY = 'aerodromeStatusBannerExpanded';
+
 describe('components', () => {
   describe('AerodromeStatusBanner', () => {
+    beforeEach(() => {
+      window.localStorage.clear();
+    });
+
     it('dispatches watchCurrentAerodromeStatus on mount', () => {
       const watch = jest.fn();
       renderWithTheme(
@@ -62,25 +64,8 @@ describe('components', () => {
       expect(container.firstChild).toBeNull();
     });
 
-    it('auto-expands a non-open status that loads asynchronously after mount', () => {
-      const wrap = (status: any) => (
-        <BrowserRouter>
-          <ThemeProvider theme={theme}>
-            <AerodromeStatusBanner enabled={true} status={status} watchCurrentAerodromeStatus={jest.fn()}/>
-          </ThemeProvider>
-        </BrowserRouter>
-      );
-      // Mounts before the live status arrives (current === undefined).
-      const {rerender, queryByText, getByText} = render(wrap(undefined));
-      expect(queryByText('Runway works')).toBeNull();
-
-      // Status arrives via the real-time listener -> should be expanded by default.
-      rerender(wrap({status: 'closed', details: 'Runway works', timestamp: 1717500000000}));
-      expect(getByText('Runway works')).toBeTruthy();
-    });
-
-    it('expands a non-open status by default, showing details and timestamp', () => {
-      const {getByText} = renderWithTheme(
+    it('is collapsed by default, showing the label but hiding the details', () => {
+      const {getByText, queryByText} = renderWithTheme(
         <AerodromeStatusBanner
           enabled={true}
           status={{status: 'closed', details: 'Runway works', timestamp: 1717500000000}}
@@ -88,36 +73,50 @@ describe('components', () => {
         />
       );
       expect(getByText('label.closed')).toBeTruthy();
-      expect(getByText('Runway works')).toBeTruthy();
-      expect(getByText('formatted:1717500000000')).toBeTruthy();
-      expect(document.querySelector('[data-icon="block"]')).toBeTruthy();
-    });
-
-    it('collapses the open status by default, hiding the details', () => {
-      const {getByText, queryByText} = renderWithTheme(
-        <AerodromeStatusBanner
-          enabled={true}
-          status={{status: 'open', details: 'All good', timestamp: 1717500000000}}
-          watchCurrentAerodromeStatus={jest.fn()}
-        />
-      );
-      expect(getByText('label.open')).toBeTruthy();
-      expect(queryByText('All good')).toBeNull();
+      expect(queryByText('Runway works')).toBeNull();
       expect(document.querySelector('[data-icon="expand_more"]')).toBeTruthy();
     });
 
-    it('toggles the details when the summary is clicked', () => {
+    it('reveals the details and timestamp when the summary is clicked', () => {
       const {getByText, queryByText, getByRole} = renderWithTheme(
         <AerodromeStatusBanner
           enabled={true}
-          status={{status: 'open', details: 'All good', timestamp: 1717500000000}}
+          status={{status: 'closed', details: 'Runway works', timestamp: 1717500000000}}
           watchCurrentAerodromeStatus={jest.fn()}
         />
       );
-      expect(queryByText('All good')).toBeNull();
+      expect(queryByText('Runway works')).toBeNull();
       fireEvent.click(getByRole('button'));
-      expect(getByText('All good')).toBeTruthy();
+      expect(getByText('Runway works')).toBeTruthy();
+      expect(getByText('formatted:1717500000000')).toBeTruthy();
       expect(document.querySelector('[data-icon="expand_less"]')).toBeTruthy();
+    });
+
+    it('restores the persisted expanded state on mount', () => {
+      window.localStorage.setItem(STORAGE_KEY, 'true');
+      const {getByText} = renderWithTheme(
+        <AerodromeStatusBanner
+          enabled={true}
+          status={{status: 'closed', details: 'Runway works', timestamp: 1717500000000}}
+          watchCurrentAerodromeStatus={jest.fn()}
+        />
+      );
+      // Expanded without any interaction because the choice was remembered.
+      expect(getByText('Runway works')).toBeTruthy();
+    });
+
+    it('persists the expand/collapse choice when toggled', () => {
+      const {getByRole} = renderWithTheme(
+        <AerodromeStatusBanner
+          enabled={true}
+          status={{status: 'closed', details: 'Runway works', timestamp: 1717500000000}}
+          watchCurrentAerodromeStatus={jest.fn()}
+        />
+      );
+      fireEvent.click(getByRole('button'));
+      expect(window.localStorage.getItem(STORAGE_KEY)).toBe('true');
+      fireEvent.click(getByRole('button'));
+      expect(window.localStorage.getItem(STORAGE_KEY)).toBe('false');
     });
 
     it('does not link out to a separate status page', () => {
@@ -153,7 +152,7 @@ describe('components', () => {
       expect(document.querySelector('[data-icon="info"]')).toBeTruthy();
     });
 
-    it('omits the details element when details is empty', () => {
+    it('shows the open status with its icon', () => {
       const {getByText} = renderWithTheme(
         <AerodromeStatusBanner
           enabled={true}
