@@ -310,6 +310,11 @@
         ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
         ".validate": "newData.isNumber() && newData.val() > 0"
       },
+      "aerodromeStatusBannerEnabled": {
+        ".read": true,
+        ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".validate": "newData.isBoolean()"
+      },
       "$other": {
         ".validate": false
       }

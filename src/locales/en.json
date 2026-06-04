@@ -346,7 +346,8 @@
     "restricted": "Restricted",
     "closed": "Closed",
     "unavailable": "Aerodrome status unavailable",
-    "active": "Active"
+    "active": "Active",
+    "showOnStartPage": "Show status bar on the start page"
   },
   "airstatReport": {
     "includeInternal": "Include additional information (for internal use only)",

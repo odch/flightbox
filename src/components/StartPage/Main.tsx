@@ -4,10 +4,11 @@ import styled from 'styled-components';
 import Hints from './Hints';
 import EntryPoints from './EntryPoints';
 import InstallCard from './InstallCard';
+import AerodromeStatusBanner from '../AerodromeStatusBanner';
 import PostLoginPasskeyPrompt from '../../containers/PostLoginPasskeyPromptContainer';
 
 const Wrapper = styled.div`
-  padding-top: 100px;
+  padding-top: 70px;
 `;
 
 const Promotions = styled.div`
@@ -20,6 +21,7 @@ const Promotions = styled.div`
 
 const Main = ({ auth }: any) => (
   <Wrapper>
+    <AerodromeStatusBanner/>
     <Hints guest={auth.data.guest} kiosk={auth.data.kiosk}/>
     <EntryPoints admin={auth.data.admin} guest={auth.data.guest} kiosk={auth.data.kiosk}/>
     <Promotions>
