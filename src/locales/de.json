@@ -346,7 +346,8 @@
     "restricted": "Eingeschränkt",
     "closed": "Geschlossen",
     "unavailable": "Flugplatzstatus nicht verfügbar",
-    "active": "Aktiv"
+    "active": "Aktiv",
+    "showOnStartPage": "Statusleiste auf der Startseite anzeigen"
   },
   "airstatReport": {
     "includeInternal": "Zusätzliche Informationen inkludieren (nur für internen Gebrauch)",

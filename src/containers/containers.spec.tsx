@@ -131,6 +131,8 @@ describe('container mount dispatches', () => {
   let LandingsReportFormContainer: any;
   let AirstatReportFormContainer: any;
   let InvoicesReportFormContainer: any;
+  let AerodromeStatusBannerContainer: any;
+  let AerodromeStatusBannerToggleContainer: any;
 
   beforeAll(() => {
     InvoiceRecipientsListContainer =
@@ -150,6 +152,12 @@ describe('container mount dispatches', () => {
     AirstatReportFormContainer = require('./AirstatReportFormContainer').default;
     InvoicesReportFormContainer = require(
       './InvoicesReportFormContainer'
+    ).default;
+    AerodromeStatusBannerContainer = require(
+      './AerodromeStatusBannerContainer'
+    ).default;
+    AerodromeStatusBannerToggleContainer = require(
+      './AerodromeStatusBannerToggleContainer'
     ).default;
   });
 
@@ -266,6 +274,32 @@ describe('container mount dispatches', () => {
     const inits = store.actions.filter(a => a.type === 'INIT_REPORT');
     expect(inits.length).toBe(1);
     expect(inits[0].payload.name).toBe('invoices');
+  });
+
+  it('AerodromeStatusBannerContainer dispatches WATCH_CURRENT_AERODROME_STATUS exactly once on mount', () => {
+    const store = makeStore({
+      settings: {
+        aerodromeStatus: { current: undefined },
+        aerodromeStatusBannerEnabled: { enabled: false },
+      },
+    });
+    render(wrap(store, <AerodromeStatusBannerContainer />));
+    expect(countOf(store, 'WATCH_CURRENT_AERODROME_STATUS')).toBe(1);
+  });
+
+  it('AerodromeStatusBannerToggleContainer reflects the enabled flag from the store', () => {
+    const store = makeStore({
+      settings: {
+        aerodromeStatusBannerEnabled: { enabled: true, saving: false },
+      },
+    });
+    const { container } = render(
+      wrap(store, <AerodromeStatusBannerToggleContainer />)
+    );
+    expect(
+      (container.querySelector('input[type="checkbox"]') as HTMLInputElement)
+        .checked
+    ).toBe(true);
   });
 
   it('does not re-dispatch init actions when the container re-renders with same props', () => {

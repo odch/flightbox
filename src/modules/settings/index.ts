@@ -2,6 +2,7 @@ import {combineReducers} from 'redux';
 import {all, fork} from 'redux-saga/effects'
 
 import aerodromeStatus, {sagas as aerodromeStatusSagas} from './aerodromeStatus';
+import aerodromeStatusBannerEnabled, {sagas as aerodromeStatusBannerEnabledSagas} from './aerodromeStatusBannerEnabled';
 import aircrafts, {sagas as aircraftsSagas} from './aircrafts';
 import lockDate, {sagas as lockDateSagas} from './lockDate';
 import guestAccessToken, {sagas as guestAccessTokenSagas} from './guestAccessToken';
@@ -13,6 +14,7 @@ import messageRetentionDays, {sagas as messageRetentionDaysSagas} from './messag
 
 const reducer = combineReducers({
   aerodromeStatus,
+  aerodromeStatusBannerEnabled,
   aircrafts,
   lockDate,
   guestAccessToken,
@@ -26,6 +28,7 @@ const reducer = combineReducers({
 export function* sagas() {
   yield all([
     fork(aerodromeStatusSagas),
+    fork(aerodromeStatusBannerEnabledSagas),
     fork(aircraftsSagas),
     fork(lockDateSagas),
     fork(guestAccessTokenSagas),
