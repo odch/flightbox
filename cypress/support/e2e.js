@@ -22,5 +22,18 @@ Cypress.on('window:before:load', (win) => {
   win.localStorage.setItem('flightbox_language', 'de');
 });
 
+// The Cypress suite runs against a shared, persistent Firebase project, so an
+// interrupted run can leave a lock date and/or stray movements behind. A
+// leftover lockDate blocks both writing and deleting movements, which wedges
+// every subsequent run (PERMISSION_DENIED on movement writes, wrong-key
+// associations from stale data). Reset to a clean movement state before each
+// spec so the suite is self-healing and no longer needs manual DB cleanup.
+before(() => {
+  cy.visit('#/');
+  cy.loginAdmin();
+  cy.resetMovementsTestData();
+  cy.logout();
+});
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
