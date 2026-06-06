@@ -22,7 +22,7 @@ const Promotions = styled.div`
 const Main = ({ auth }: any) => (
   <Wrapper>
     <AerodromeStatusBanner/>
-    <Hints guest={auth.data.guest} kiosk={auth.data.kiosk}/>
+    <Hints guest={auth.data.guest} kiosk={auth.data.kiosk} hintsDismissable={auth.data.hintsDismissable}/>
     <EntryPoints admin={auth.data.admin} guest={auth.data.guest} kiosk={auth.data.kiosk}/>
     <Promotions>
       <PostLoginPasskeyPrompt/>

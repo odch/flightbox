@@ -132,11 +132,43 @@ describe('modules', () => {
             admin: true,
             allMovements: false,
             links: false,
+            hintsDismissable: true,
             expiration: 1000,
             token: 'validtoken',
             uid: 'myadminuser',
             name: 'Hans Muster',
             email: 'admin@example.com',
+            guest: false,
+            kiosk: false,
+            local: false
+          })));
+
+          expectDoneWithoutReturn(generator);
+        });
+
+        it('should put firebaseAuthenticationEvent with hintsDismissable false when login disables it', () => {
+          const generator = sagas.doListenFirebaseAuthentication(actions.firebaseAuthentication({
+            uid: 'terminaluser',
+            expires: 1,
+            token: 'validtoken',
+            email: 'terminal@example.com'
+          }));
+
+          expect(generator.next().value).toEqual(call(sagas.getLoginData, 'terminaluser'));
+          expect(generator.next({
+            links: false,
+            hintsDismissable: false
+          }).value).toEqual(call(sagas.getName, 'terminaluser'));
+          expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
+            admin: false,
+            allMovements: false,
+            links: false,
+            hintsDismissable: false,
+            expiration: 1000,
+            token: 'validtoken',
+            uid: 'terminaluser',
+            name: 'Hans Muster',
+            email: 'terminal@example.com',
             guest: false,
             kiosk: false,
             local: false
@@ -161,6 +193,7 @@ describe('modules', () => {
             admin: false,
             allMovements: false,
             links: true,
+            hintsDismissable: true,
             expiration: 1000,
             token: 'validtoken',
             uid: 'testuser',
@@ -191,6 +224,7 @@ describe('modules', () => {
             admin: false,
             allMovements: true,
             links: true,
+            hintsDismissable: true,
             expiration: 1000,
             token: 'validtoken',
             uid: 'vieweruser',
