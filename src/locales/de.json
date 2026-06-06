@@ -68,7 +68,9 @@
     "arrivalAfterLanding_pre": "Bitte erfassen Sie Ihre",
     "associatedMovement_pre": "Möchten Sie eine Ankunft für einen bereits erfassten Abflug erfassen (oder umgekehrt), nutzen Sie den Link",
     "associatedMovement_mid": "(bzw.",
-    "associatedMovement_post": ") bei der bereits"
+    "associatedMovement_post": ") bei der bereits",
+    "dismiss": "Hinweise ausblenden",
+    "show": "Hinweise anzeigen"
   },
   "admin": {
     "title": "Administration",

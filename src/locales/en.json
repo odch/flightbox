@@ -68,7 +68,9 @@
     "arrivalAfterLanding_pre": "Please record your",
     "associatedMovement_pre": "To record an arrival for an already recorded departure (or vice versa), use the link",
     "associatedMovement_mid": "(or",
-    "associatedMovement_post": ") on the already"
+    "associatedMovement_post": ") on the already",
+    "dismiss": "Hide hints",
+    "show": "Show hints"
   },
   "admin": {
     "title": "Administration",
