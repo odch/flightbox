@@ -238,6 +238,7 @@ export function* doListenFirebaseAuthentication(action: any) {
       kiosk,
       local,
       links: !loginData || loginData.links !== false,
+      hintsDismissable: !loginData || loginData.hintsDismissable !== false,
       name: yield call(getName, uid),
       email
     }
