@@ -1,0 +1,66 @@
+{
+  "aerodrome": {
+    "name": "Fricktal-Schupfart",
+    "ICAO": "LSZI",
+    "runways": [
+      {
+        "name": "07",
+        "type": "G"
+      },
+      {
+        "name": "25",
+        "type": "G"
+      }
+    ],
+    "noRunwayIfHelicopter": true,
+    "departureRoutes": [
+      {
+        "name": "W",
+        "label": "West"
+      }
+    ],
+    "arrivalRoutes": [
+      {
+        "name": "N",
+        "label": "Nord"
+      },
+      {
+        "name": "S",
+        "label": "Süd"
+      }
+    ],
+    "landingFeesStrategy": "lszi"
+  },
+  "environments": {
+    "test": {
+      "firebaseProjectId": "lszi-test",
+      "firebaseDatabaseUrl": "https://lszi-test-default-rtdb.europe-west1.firebasedatabase.app",
+      "firebaseApiKey": "AIzaSyCsbQX0aFKnUxGxWw8wfBz3MivdCI4qh4k",
+      "passkeysEnabled": true
+    }
+  },
+  "theme": "lszi",
+  "title": "Flightbox - Flugplatz Fricktal-Schupfart",
+  "themeColor": "#0091CF",
+  "shortName": "Flightbox LSZI",
+  "paymentMethods": [
+    "checkout",
+    "cash",
+    "invoice"
+  ],
+  "homebasePayment": true,
+  "loginForm": "email",
+  "enabledFlightTypes": [
+    "private",
+    "instruction",
+    "aerotow",
+    "glider_private_aerotow",
+    "glider_private_winch",
+    "glider_private_self",
+    "glider_instruction_aerotow",
+    "glider_instruction_winch",
+    "glider_instruction_self"
+  ],
+  "maskContactInformation": false,
+  "privacySettings": true
+}
