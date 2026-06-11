@@ -128,6 +128,9 @@ const EmailLoginForm = props => {
           )}
         </StyledForm>
       )}
+      {!guestOnly && queryToken && (
+        <StyledHint>{t('login.hintEmailLogin')}</StyledHint>
+      )}
       {!guestOnly && passkeysEnabled && isPasskeySupported() && (
         <>
           <StyledOrContainer><StyledOrText>{t('login.or')}</StyledOrText></StyledOrContainer>
@@ -144,7 +147,6 @@ const EmailLoginForm = props => {
           ? <GuestTokenLogin queryToken={queryToken}/>
           : (
             <>
-              <StyledHint>{t('login.hintEmailLogin')}</StyledHint>
               <StyledOrContainer><StyledOrText>{t('login.or')}</StyledOrText></StyledOrContainer>
               <GuestTokenLogin queryToken={queryToken}/>
               <StyledHint>{t('login.hintGuestLogin')}</StyledHint>
