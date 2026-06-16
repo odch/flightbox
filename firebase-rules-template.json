@@ -405,7 +405,7 @@
     "card-payments": {
       "$card_payment_id": {
         ".read": "auth !== null",
-        ".write": "auth !== null && newData.exists()",
+        ".write": "auth !== null && newData.exists() && (root.child('admins/' + auth.uid).exists() || (!data.exists() && newData.child('status').val() === 'pending') || (data.exists() && data.child('status').val() === 'pending' && newData.child('status').val() === 'cancelled'))",
         ".validate": "newData.hasChildren(['amount', 'currency', 'arrivalReference', 'refNr', 'timestamp', 'status'])",
         "currency": {
           ".validate": "newData.isString() && newData.val().length > 0"

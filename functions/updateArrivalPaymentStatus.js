@@ -25,6 +25,7 @@ const handleUpdate = async (change) => {
     logger.info(
       `Unable to set arrival payment status for card-payment ${cardPaymentKey}, because arrivalReference is missing`
     );
+    return
   }
 
   try {
@@ -34,6 +35,13 @@ const handleUpdate = async (change) => {
       .once('value');
 
     const arrivalValues = arrivalSnapshot.val()
+
+    if (!arrivalValues) {
+      logger.info(
+        `Unable to set arrival payment status for card-payment ${cardPaymentKey}, because arrival ${afterValue.arrivalReference} does not exist`
+      );
+      return
+    }
 
     if (arrivalValues.paymentMethod && arrivalValues.paymentMethod.status === 'pending') {
       logger.info(
