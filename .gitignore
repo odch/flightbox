@@ -15,3 +15,4 @@ npm-debug.log
 firebase-debug.log
 .runtimeconfig.json
 functions/privacy-config.generated.js
+functions/test-config.generated.js

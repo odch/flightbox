@@ -18,7 +18,6 @@ const { generateSignInLink } = require('./auth/generateSignInLink');
 const { generateSignInCode } = require('./auth/generateSignInCode');
 const { verifySignInCode } = require('./auth/verifySignInCode');
 const { cleanupExpiredSignInCodes } = require('./auth/cleanupExpiredSignInCodes');
-const { createTestEmailToken } = require('./auth/createTestEmailToken');
 const { generateWebauthnRegistrationOptions } = require('./auth/generateRegistrationOptions');
 const { verifyWebauthnRegistration } = require('./auth/verifyRegistration');
 const { generateWebauthnAuthenticationOptions } = require('./auth/generateAuthenticationOptions');
@@ -37,7 +36,6 @@ exports.generateSignInLink = generateSignInLink;
 exports.generateSignInCode = generateSignInCode;
 exports.verifySignInCode = verifySignInCode;
 exports.cleanupExpiredSignInCodes = cleanupExpiredSignInCodes;
-exports.createTestEmailToken = createTestEmailToken;
 exports.generateWebauthnRegistrationOptions = generateWebauthnRegistrationOptions;
 exports.verifyWebauthnRegistration = verifyWebauthnRegistration;
 exports.generateWebauthnAuthenticationOptions = generateWebauthnAuthenticationOptions;
@@ -79,4 +77,21 @@ if (privacyFunctionsEnabled) {
   const { scheduledCleanupMessages } = require('./cleanupMessages');
   exports.scheduledAnonymizeMovements = scheduledAnonymizeMovements;
   exports.scheduledCleanupMessages = scheduledCleanupMessages;
+}
+
+// The test email-token endpoint mints a custom token for a fixed test
+// user, so it must only ever be deployed to the cypress-testing project.
+// The generated flag is read at module load (during deploy source
+// analysis), unlike process.env which is applied only at runtime; see
+// functions/package.json `deploy:cypress`.
+let testFunctionsEnabled = false;
+try {
+  testFunctionsEnabled = require('./test-config.generated.js');
+} catch (e) {
+  if (e.code !== 'MODULE_NOT_FOUND') throw e;
+}
+
+if (testFunctionsEnabled) {
+  const { createTestEmailToken } = require('./auth/createTestEmailToken');
+  exports.createTestEmailToken = createTestEmailToken;
 }
