@@ -58,6 +58,14 @@ export const addMovementByKey = (state: MovementsState, action: any) => ({
   }
 });
 
+export const movementByKeyUnavailable = (state: MovementsState, action: any) => ({
+  ...state,
+  byKey: {
+    ...state.byKey,
+    [action.payload.key]: null
+  }
+});
+
 export const clearMovementsByKey = (state: MovementsState) => ({
   ...state,
   byKey: {}
@@ -85,6 +93,7 @@ const ACTION_HANDLERS: Record<string, (state: MovementsState, action: any) => Mo
   [actions.LOAD_MOVEMENTS_FAILURE]: setLoadingFailure,
   [actions.SET_MOVEMENTS_FILTER]: setFilter,
   [actions.ADD_MOVEMENT_BY_KEY]: addMovementByKey,
+  [actions.MOVEMENT_BY_KEY_UNAVAILABLE]: movementByKeyUnavailable,
   [actions.CLEAR_MOVEMENTS_BY_KEY]: clearMovementsByKey,
   [actions.SET_ASSOCIATED_MOVEMENT]: setAssociatedMovement,
   [actions.CLEAR_ASSOCIATED_MOVEMENTS]: clearAssociatedMovements,

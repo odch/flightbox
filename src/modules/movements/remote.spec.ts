@@ -16,6 +16,7 @@ jest.mock('firebase/database', () => ({
 import firebase from '../../util/firebase';
 import {get, child, query, orderByChild, startAt, limitToFirst, endAt, onValue, remove, update, push} from 'firebase/database';
 import {loadLimited, loadByKey, removeMovement, saveMovement, addMovementAssociationListener, removeMovementAssociationListener} from './remote';
+import {toOrderKey} from './pagination';
 
 describe('modules', () => {
   describe('movements/remote', () => {
@@ -58,6 +59,19 @@ describe('modules', () => {
       it('uses createdBy ordering when provided', async () => {
         await loadLimited('/departures', null, 5, null, 'user123');
         expect(orderByChild).toHaveBeenCalledWith('createdBy_orderKey');
+      });
+
+      it('bounds createdBy queries to the user prefix (start, end and limit)', async () => {
+        await loadLimited('/departures', null, 5, null, 'user123');
+        expect(startAt).toHaveBeenCalledWith('user123_');
+        expect(endAt).toHaveBeenCalledWith('user123_');
+        expect(limitToFirst).toHaveBeenCalledWith(5);
+      });
+
+      it('aligns numeric createdBy start/end bounds to the order key', async () => {
+        await loadLimited('/departures', -100, null, -50, 'user123');
+        expect(startAt).toHaveBeenCalledWith(toOrderKey('user123', -100));
+        expect(endAt).toHaveBeenCalledWith(toOrderKey('user123', -50));
       });
     });
 

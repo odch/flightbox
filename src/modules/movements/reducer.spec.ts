@@ -85,6 +85,17 @@ describe('modules', () => {
         });
       });
 
+      describe('movementByKeyUnavailable', () => {
+        it('should set the by-key entry to null so the view stops loading', () => {
+          const state = { byKey: { existing: { key: 'existing' } } };
+
+          const newState = reducer(state as any, actions.movementByKeyUnavailable('foreign-key'));
+
+          expect(newState.byKey['foreign-key']).toBeNull();
+          expect(newState.byKey['existing']).toEqual({ key: 'existing' });
+        });
+      });
+
       describe('setLoading', () => {
         it('should set loading to true and loadingFailed to false', () => {
           const state = {
