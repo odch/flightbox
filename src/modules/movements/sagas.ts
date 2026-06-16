@@ -215,6 +215,11 @@ export function* loadDeparturesAndArrivals(movements: any, clear: boolean) {
 }
 
 export function* loadDeparturesAndArrivalsFiltered(movements: any) {
+  const auth = yield select(authSelector);
+  // Non-admins read only their own movements; the bound also satisfies the
+  // read rules, which deny unbounded (non-owner) queries.
+  const createdBy = !canSeeAllMovements(auth) ? auth.email : undefined;
+
   // start and end is the other way round because we're sorting (ascending) by negative timestamp
   const start = dates.negativeTimestampEndOfDay(movements.filter.date.end);
   const end = dates.negativeTimestampStartOfDay(movements.filter.date.start);
@@ -224,7 +229,8 @@ export function* loadDeparturesAndArrivalsFiltered(movements: any) {
     '/departures',
     start,
     null,
-    end
+    end,
+    createdBy
   );
 
   const arrivals = yield call(
@@ -232,7 +238,8 @@ export function* loadDeparturesAndArrivalsFiltered(movements: any) {
     '/arrivals',
     start,
     null,
-    end
+    end,
+    createdBy
   );
 
   return {departures, arrivals};
@@ -443,16 +450,29 @@ export function* loadMovement(action: any) {
   const {key, type} = action.payload;
 
   const path = getPathByMovementType(type);
-  const snapshot = yield call(remote.loadByKey, path, key);
 
-  const val = snapshot.val();
-  if (!val) return;
+  try {
+    const snapshot = yield call(remote.loadByKey, path, key);
 
-  const movement = firebaseToLocal(val);
-  movement.key = snapshot.key;
-  movement.type = type;
+    const val = snapshot.val();
+    if (!val) {
+      yield put(actions.movementByKeyUnavailable(key));
+      return;
+    }
 
-  yield put(actions.addMovementByKey(movement));
+    const movement = firebaseToLocal(val);
+    movement.key = snapshot.key;
+    movement.type = type;
+
+    yield put(actions.addMovementByKey(movement));
+  } catch (e) {
+    // The movement may belong to another pilot (e.g. an associated return
+    // flight on a shared aircraft) and be denied by the read rules, or the read
+    // may fail transiently. Mark it unavailable so the associated-movement view
+    // resolves instead of spinning. Do not rethrow — that would restart the
+    // movements saga.
+    yield put(actions.movementByKeyUnavailable(key));
+  }
 }
 
 export function* deleteMovement(action: any) {
@@ -489,7 +509,15 @@ export function* editMovement(action: any) {
   let movement = yield(select(movementSelector, key));
   if (!movement) {
     const path = getPathByMovementType(movementType);
-    const snapshot = yield(call(remote.loadByKey, path, key));
+    let snapshot;
+    try {
+      snapshot = yield(call(remote.loadByKey, path, key));
+    } catch (e) {
+      // Not readable (another pilot's movement) or a transient failure — send
+      // the user home rather than letting the rejection restart the saga.
+      history.push('/');
+      return;
+    }
     const val = snapshot.val();
     if (!val) {
       history.push('/');

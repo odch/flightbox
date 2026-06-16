@@ -1,7 +1,7 @@
 {
   "rules": {
     "departures": {
-      ".read": "auth !== null",
+      ".read": "{movementListRead}",
       ".indexOn": [
         "dateTime",
         "negativeTimestamp",
@@ -9,6 +9,7 @@
         "createdBy_orderKey"
       ],
       "$departure_id": {
+        ".read": "{movementItemRead}",
         ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)){movementOwnership}",
         ".validate": "newData.hasChildren(['aircraftType', 'dateTime', 'departureRoute', 'duration', 'email', 'firstname', 'flightType', 'immatriculation', 'lastname', 'location', 'mtow', 'aircraftCategory', 'negativeTimestamp'])",
         "aircraftType": {
@@ -101,7 +102,7 @@
       }
     },
     "arrivals": {
-      ".read": "auth !== null",
+      ".read": "{movementListRead}",
       ".indexOn": [
         "dateTime",
         "negativeTimestamp",
@@ -109,6 +110,7 @@
         "createdBy_orderKey"
       ],
       "$arrival_id": {
+        ".read": "{movementItemRead}",
         ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)){movementOwnership}",
         ".validate": "newData.hasChildren(['aircraftType', 'arrivalRoute', 'dateTime', 'email', 'firstname', 'flightType', 'immatriculation', 'landingCount', 'lastname', 'location', 'mtow', 'aircraftCategory', 'negativeTimestamp'])",
         "aircraftType": {

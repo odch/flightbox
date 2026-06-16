@@ -37,6 +37,36 @@ function processMovementOwnership(config) {
   return " && (" + IS_ADMIN + " || " + MOVEMENT_OWNERSHIP + ")";
 }
 
+// Read scoping for movements. On personal-access projects a list/query read is
+// only allowed when bounded to the caller's own createdBy_orderKey prefix
+// (their email), and a single-record read only for the record's owner; admins
+// read everything. Guest/kiosk (no email) read nothing. Shared-access projects
+// keep the permissive rule.
+const readProcessors = {
+  movementListRead: processMovementListRead,
+  movementItemRead: processMovementItemRead,
+};
+
+// Who may read every movement — must mirror the client's canSeeAllMovements
+// (admin || allMovements). `admin` is kept in sync with /admins; `allMovements`
+// is an operator flag stored only under /logins/$uid.
+const CAN_SEE_ALL_MOVEMENTS =
+  IS_ADMIN + " || root.child('logins/' + auth.uid + '/allMovements').val() === true";
+
+function processMovementListRead(config) {
+  if (config.loginForm !== 'email') {
+    return "auth !== null";
+  }
+  return "auth !== null && (" + CAN_SEE_ALL_MOVEMENTS + " || (query.orderByChild === 'createdBy_orderKey' && query.startAt.beginsWith(auth.token.email + '_') && query.endAt.beginsWith(auth.token.email + '_')))";
+}
+
+function processMovementItemRead(config) {
+  if (config.loginForm !== 'email') {
+    return "auth !== null";
+  }
+  return "auth !== null && (" + CAN_SEE_ALL_MOVEMENTS + " || data.child('createdBy').val() === auth.token.email)";
+}
+
 function newValEquals(val) {
   return "newData.val() === '" + val + "'";
 }
@@ -86,6 +116,11 @@ function process(rules, config) {
       processValidationString(rules, config, key, value);
     } else if (key === '.write' && typeof value === 'string' && value.indexOf('{movementOwnership}') !== -1) {
       rules[key] = value.replace('{movementOwnership}', processMovementOwnership(config));
+    } else if (key === '.read' && typeof value === 'string' && /^\{([a-zA-Z]+)}$/.test(value)) {
+      const token = value.slice(1, -1);
+      if (readProcessors[token]) {
+        rules[key] = readProcessors[token](config);
+      }
     } else if (typeof value === 'object') {
       process(value, config);
     }
