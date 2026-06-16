@@ -13,6 +13,7 @@ cypress/screenshots
 node_modules/
 npm-debug.log
 firebase-debug.log
+database-debug.log
 .runtimeconfig.json
 functions/privacy-config.generated.js
 functions/test-config.generated.js
