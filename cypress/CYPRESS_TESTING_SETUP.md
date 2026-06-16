@@ -17,16 +17,26 @@ Auth endpoint: `https://europe-west1-cypress-testing.cloudfunctions.net/auth`
 ## Email user login (for `loginEmail` command)
 
 The `cy.loginEmail()` command authenticates as `cypress-pilot@example.com` via the
-`createTestEmailToken` Cloud Function. This function is gated behind a config flag
-that must be enabled on the `cypress-testing` project:
+`createTestEmailToken` Cloud Function. Because it mints a custom token for a fixed
+user, it is deployed **only** to the `cypress-testing` project, gated twice:
+
+1. **Deploy gate:** `functions/index.js` exports it only when
+   `functions/test-config.generated.js` exists and is truthy. That file is
+   gitignored and is written by the `deploy:cypress` script, so the function is
+   never deployed to any other environment.
+2. **Runtime gate:** the function returns 403 unless `TESTING_ENABLED=true` is
+   set in its environment. This must be present in `functions/.env.cypress-testing`.
+
+Deploy it with:
 
 ```bash
-firebase functions:config:set testing.enabled=true --project cypress-testing
-firebase deploy --only functions --project cypress-testing
+cd functions && npm run deploy:cypress
 ```
 
-The function always creates a token for the hardcoded email `cypress-pilot@example.com`
-and returns 403 on any project where `testing.enabled` is not set.
+This writes `test-config.generated.js` and runs
+`firebase deploy --only functions --project cypress-testing`. Make sure
+`functions/.env.cypress-testing` contains `TESTING_ENABLED=true` first, or the
+deployed function will return 403.
 
 ## Aerodrome settings (already in place)
 

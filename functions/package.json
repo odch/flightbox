@@ -25,6 +25,7 @@
     "shell": "firebase functions:config:get > .runtimeconfig.json && firebase experimental:functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
+    "deploy:cypress": "echo 'module.exports = true;' > test-config.generated.js && firebase deploy --only functions --project cypress-testing",
     "logs": "firebase functions:log"
   }
 }
