@@ -466,12 +466,12 @@ export function* loadMovement(action: any) {
 
     yield put(actions.addMovementByKey(movement));
   } catch (e) {
-    // The movement may belong to another pilot (e.g. an associated return
-    // flight on a shared aircraft) and be denied by the read rules, or the read
-    // may fail transiently. Mark it unavailable so the associated-movement view
-    // resolves instead of spinning. Do not rethrow — that would restart the
-    // movements saga.
-    yield put(actions.movementByKeyUnavailable(key));
+    // The read was rejected — typically the movement belongs to another pilot
+    // (e.g. an associated return flight on a shared aircraft) and is denied by
+    // the read rules. Mark it forbidden so the associated-movement view shows a
+    // "recorded by another person" note rather than offering to create a
+    // duplicate. Do not rethrow — that would restart the movements saga.
+    yield put(actions.movementByKeyForbidden(key));
   }
 }
 

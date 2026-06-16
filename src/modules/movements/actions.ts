@@ -8,6 +8,7 @@ export const MOVEMENT_DELETED = 'MOVEMENT_DELETED' as const;
 export const LOAD_MOVEMENT = 'LOAD_MOVEMENT' as const;
 export const ADD_MOVEMENT_BY_KEY = 'ADD_MOVEMENT_BY_KEY' as const;
 export const MOVEMENT_BY_KEY_UNAVAILABLE = 'MOVEMENT_BY_KEY_UNAVAILABLE' as const;
+export const MOVEMENT_BY_KEY_FORBIDDEN = 'MOVEMENT_BY_KEY_FORBIDDEN' as const;
 export const CLEAR_MOVEMENTS_BY_KEY = 'CLEAR_MOVEMENTS_BY_KEY' as const;
 export const DELETE_MOVEMENT = 'DELETE_MOVEMENT' as const;
 export const INIT_NEW_MOVEMENT = 'INIT_NEW_MOVEMENT' as const;
@@ -34,6 +35,7 @@ export type MovementsAction =
   | { type: typeof LOAD_MOVEMENT; payload: { key: string; type: string } }
   | { type: typeof ADD_MOVEMENT_BY_KEY; payload: { movement: unknown } }
   | { type: typeof MOVEMENT_BY_KEY_UNAVAILABLE; payload: { key: string } }
+  | { type: typeof MOVEMENT_BY_KEY_FORBIDDEN; payload: { key: string } }
   | { type: typeof CLEAR_MOVEMENTS_BY_KEY }
   | { type: typeof DELETE_MOVEMENT; payload: { movementType: string; key: string; successAction: () => unknown } }
   | { type: typeof INIT_NEW_MOVEMENT; payload: { movementType: string } }
@@ -128,13 +130,26 @@ export function addMovementByKey(movement: unknown) {
   };
 }
 
-// Marks a by-key movement as unavailable (not found, or not readable because it
-// belongs to another pilot — e.g. an associated return flight on a shared
-// aircraft). Resolves the associated-movement view to its "not found" state
-// instead of leaving it spinning.
+// Marks a by-key movement as unavailable (not found / deleted). Resolves the
+// associated-movement view to its "not found" state instead of leaving it
+// spinning.
 export function movementByKeyUnavailable(key: string) {
   return {
     type: MOVEMENT_BY_KEY_UNAVAILABLE,
+    payload: {
+      key
+    }
+  };
+}
+
+// Marks a by-key movement as readable-only-by-others: it exists and is
+// associated, but the read rules deny it (e.g. an associated return flight
+// recorded by another pilot on a shared aircraft). The associated-movement
+// view shows a "recorded by another person" note rather than offering to
+// create a duplicate.
+export function movementByKeyForbidden(key: string) {
+  return {
+    type: MOVEMENT_BY_KEY_FORBIDDEN,
     payload: {
       key
     }
