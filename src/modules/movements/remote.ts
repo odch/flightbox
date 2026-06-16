@@ -7,18 +7,34 @@ import {toOrderKey} from './pagination'
 
 const associationListeners = new Map<string, () => void>();
 
+// High code point used as the inclusive upper bound of a createdBy prefix.
+const PREFIX_END = '\uf8ff'
+
 export function loadLimited(path: string, start: any, limit: number | null | undefined, endAt: any, createdBy?: string) {
-  const startAtParam = createdBy ? `${createdBy}_${typeof start === 'number' ? start : ''}`: start
-  const endAtParam = createdBy && endAt ? toOrderKey(createdBy, endAt) : createdBy ? createdBy : endAt
+  if (createdBy) {
+    // Non-admin reads are bounded to the caller's own createdBy_orderKey prefix
+    // so the query satisfies the read rules and cannot return other pilots'
+    // rows. Both bounds are aligned to the orderKey format via toOrderKey.
+    const startAtParam = typeof start === 'number' ? toOrderKey(createdBy, start) : `${createdBy}_`
+    const endAtParam = endAt ? toOrderKey(createdBy, endAt) : `${createdBy}_${PREFIX_END}`
+    const boundedQuery = query(
+      firebase(path),
+      orderByChild('createdBy_orderKey'),
+      startAt(startAtParam),
+      fbEndAt(endAtParam)
+    );
+    const limitedQuery = limit ? query(boundedQuery, limitToFirst(limit)) : boundedQuery;
+    return get(limitedQuery).then(snapshot => ({snapshot, ref: limitedQuery}));
+  }
 
   const baseQuery = query(
     firebase(path),
-    orderByChild(createdBy ? 'createdBy_orderKey' : 'negativeTimestamp'),
-    startAt(startAtParam)
+    orderByChild('negativeTimestamp'),
+    startAt(start)
   );
   const limitedQuery = limit
     ? query(baseQuery, limitToFirst(limit))
-    : query(baseQuery, fbEndAt(endAtParam));
+    : query(baseQuery, fbEndAt(endAt));
 
   return get(limitedQuery).then(snapshot => ({snapshot, ref: limitedQuery}));
 }

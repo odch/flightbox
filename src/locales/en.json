@@ -172,7 +172,9 @@
       "arrivalFound": "The following arrival has been automatically associated with this departure:",
       "departureFound": "The following departure has been automatically associated with this arrival:",
       "arrivalNotFound": "No arrival could be associated.",
-      "departureNotFound": "No departure could be associated."
+      "departureNotFound": "No departure could be associated.",
+      "arrivalNotAccessible": "The associated arrival was recorded by another person and cannot be shown here.",
+      "departureNotAccessible": "The associated departure was recorded by another person and cannot be shown here."
     },
     "homeBase": {
       "yes": "This aircraft is based at {{name}}",

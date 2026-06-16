@@ -72,11 +72,19 @@ describe('functions', () => {
       expect(mockAdmin.database).not.toHaveBeenCalled();
     });
 
-    it('logs info when arrivalReference is missing', async () => {
+    it('logs info and returns early when arrivalReference is missing', async () => {
+      const change = makeChange(
+        { status: 'pending' },
+        { status: 'success' }  // no arrivalReference
+      );
+      await mockCapturedHandler({ data: change });
+      expect(mockLogger.info).toHaveBeenCalled();
+      expect(mockAdmin.database).not.toHaveBeenCalled();
+    });
+
+    it('logs info and returns early when the arrival does not exist', async () => {
       const mockRef = {
-        once: jest.fn().mockResolvedValue({
-          val: () => ({ paymentMethod: { status: 'pending' } })
-        }),
+        once: jest.fn().mockResolvedValue({ val: () => null }),
         update: jest.fn()
       };
       mockAdmin.database.mockReturnValue({
@@ -87,10 +95,11 @@ describe('functions', () => {
 
       const change = makeChange(
         { status: 'pending' },
-        { status: 'success' }  // no arrivalReference
+        { status: 'success', arrivalReference: 'gone' }
       );
       await mockCapturedHandler({ data: change });
       expect(mockLogger.info).toHaveBeenCalled();
+      expect(mockRef.update).not.toHaveBeenCalled();
     });
 
     it('updates arrival payment status when status changes to success', async () => {

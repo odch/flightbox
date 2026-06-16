@@ -9,6 +9,64 @@ const processors = {
   "aircraftCategory": processAircraftCategory
 };
 
+// Personal-access projects (email/passkey + guest/kiosk login,
+// `loginForm === 'email'`) scope movement writes to their owner. Shared-access
+// projects (e.g. lspv) keep the permissive lockDate-only rule. The
+// `{movementOwnership}` token in the movement `.write` rule is replaced with
+// this suffix so the lockDate expression itself stays verbatim in the template.
+const IS_ADMIN = "root.child('admins/' + auth.uid).exists()";
+
+const IS_GUEST_OR_KIOSK = "(auth.uid === 'guest' || auth.uid === 'kiosk')";
+
+// A pilot (email/passkey) may only create/edit/delete movements they own
+// (createdBy === their email). Guest/kiosk sessions have no email; they may
+// create ownerless movements and edit those ownerless movements (e.g. to set a
+// payment method right after creating), but never touch an owned movement.
+const MOVEMENT_OWNERSHIP = [
+  "(!data.exists() && newData.child('createdBy').exists() && newData.child('createdBy').val() === auth.token.email)",
+  "(!data.exists() && " + IS_GUEST_OR_KIOSK + " && !newData.child('createdBy').exists())",
+  "(data.exists() && newData.exists() && data.child('createdBy').exists() && data.child('createdBy').val() === auth.token.email && newData.child('createdBy').val() === auth.token.email)",
+  "(data.exists() && newData.exists() && " + IS_GUEST_OR_KIOSK + " && !data.child('createdBy').exists() && !newData.child('createdBy').exists())",
+  "(data.exists() && !newData.exists() && data.child('createdBy').exists() && data.child('createdBy').val() === auth.token.email)"
+].join(" || ");
+
+function processMovementOwnership(config) {
+  if (config.loginForm !== 'email') {
+    return "";
+  }
+  return " && (" + IS_ADMIN + " || " + MOVEMENT_OWNERSHIP + ")";
+}
+
+// Read scoping for movements. On personal-access projects a list/query read is
+// only allowed when bounded to the caller's own createdBy_orderKey prefix
+// (their email), and a single-record read only for the record's owner; admins
+// read everything. Guest/kiosk (no email) read nothing. Shared-access projects
+// keep the permissive rule.
+const readProcessors = {
+  movementListRead: processMovementListRead,
+  movementItemRead: processMovementItemRead,
+};
+
+// Who may read every movement — must mirror the client's canSeeAllMovements
+// (admin || allMovements). `admin` is kept in sync with /admins; `allMovements`
+// is an operator flag stored only under /logins/$uid.
+const CAN_SEE_ALL_MOVEMENTS =
+  IS_ADMIN + " || root.child('logins/' + auth.uid + '/allMovements').val() === true";
+
+function processMovementListRead(config) {
+  if (config.loginForm !== 'email') {
+    return "auth !== null";
+  }
+  return "auth !== null && (" + CAN_SEE_ALL_MOVEMENTS + " || (query.orderByChild === 'createdBy_orderKey' && query.startAt.beginsWith(auth.token.email + '_') && query.endAt.beginsWith(auth.token.email + '_')))";
+}
+
+function processMovementItemRead(config) {
+  if (config.loginForm !== 'email') {
+    return "auth !== null";
+  }
+  return "auth !== null && (" + CAN_SEE_ALL_MOVEMENTS + " || data.child('createdBy').val() === auth.token.email)";
+}
+
 function newValEquals(val) {
   return "newData.val() === '" + val + "'";
 }
@@ -56,6 +114,13 @@ function process(rules, config) {
 
     if (key === '.validate') {
       processValidationString(rules, config, key, value);
+    } else if (key === '.write' && typeof value === 'string' && value.indexOf('{movementOwnership}') !== -1) {
+      rules[key] = value.replace('{movementOwnership}', processMovementOwnership(config));
+    } else if (key === '.read' && typeof value === 'string' && /^\{([a-zA-Z]+)}$/.test(value)) {
+      const token = value.slice(1, -1);
+      if (readProcessors[token]) {
+        rules[key] = readProcessors[token](config);
+      }
     } else if (typeof value === 'object') {
       process(value, config);
     }
@@ -69,4 +134,21 @@ const stream = through('processFirebaseRules', function(file, config) {
   file.contents = new Buffer(result);
 });
 
+// Build the processed rules object for a given project config, reading the
+// template from disk. Exposed so the rules can be unit-tested in-memory for any
+// config without running the gulp build.
+function buildRules(config) {
+  const path = require('path');
+  const fs = require('fs');
+  const template = fs.readFileSync(
+    path.join(__dirname, '..', 'firebase-rules-template.json'),
+    'utf8'
+  );
+  const obj = JSON.parse(template);
+  process(obj, config);
+  return obj;
+}
+
 module.exports = stream;
+module.exports.process = process;
+module.exports.buildRules = buildRules;

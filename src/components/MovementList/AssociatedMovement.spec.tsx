@@ -46,6 +46,7 @@ jest.mock('./Action', () => ({
 }));
 
 import AssociatedMovement from './AssociatedMovement';
+import {FORBIDDEN_MOVEMENT} from '../../modules/movements/reducer';
 
 const makeProps = (overrides: any = {}) => ({
   movementType: 'departure',
@@ -101,6 +102,21 @@ describe('<AssociatedMovement>', () => {
             {...makeProps({
               loadMovement,
               associatedMovementData: null,
+            })}
+          />
+        )
+      );
+      expect(loadMovement).not.toHaveBeenCalled();
+    });
+
+    it('does NOT dispatch loadMovement when data is forbidden', () => {
+      const loadMovement = jest.fn();
+      render(
+        wrap(
+          <AssociatedMovement
+            {...makeProps({
+              loadMovement,
+              associatedMovementData: FORBIDDEN_MOVEMENT,
             })}
           />
         )
@@ -196,6 +212,22 @@ describe('<AssociatedMovement>', () => {
         )
       );
       expect(getByTestId('movement-details')).toBeTruthy();
+    });
+
+    it('shows a not-accessible note and no create action when data is forbidden', () => {
+      const { queryByTestId, getByText } = render(
+        wrap(
+          <AssociatedMovement
+            {...makeProps({
+              associatedMovementData: FORBIDDEN_MOVEMENT,
+            })}
+          />
+        )
+      );
+      expect(getByText('movement.associated.arrivalNotAccessible')).toBeTruthy();
+      expect(queryByTestId('action')).toBeNull();
+      expect(queryByTestId('movement-details')).toBeNull();
+      expect(queryByTestId('material-icon')).toBeNull();
     });
 
     it('shows create action when data is null', () => {

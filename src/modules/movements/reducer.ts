@@ -58,6 +58,28 @@ export const addMovementByKey = (state: MovementsState, action: any) => ({
   }
 });
 
+export const movementByKeyUnavailable = (state: MovementsState, action: any) => ({
+  ...state,
+  byKey: {
+    ...state.byKey,
+    [action.payload.key]: null
+  }
+});
+
+// Sentinel stored in `byKey` for a movement that exists but is not readable by
+// the current user (read rules deny it). Distinct from `null` (not found) so the
+// associated-movement view can show "recorded by another person" rather than a
+// "create" prompt. Compared by reference.
+export const FORBIDDEN_MOVEMENT = { forbidden: true } as const;
+
+export const movementByKeyForbidden = (state: MovementsState, action: any) => ({
+  ...state,
+  byKey: {
+    ...state.byKey,
+    [action.payload.key]: FORBIDDEN_MOVEMENT
+  }
+});
+
 export const clearMovementsByKey = (state: MovementsState) => ({
   ...state,
   byKey: {}
@@ -85,6 +107,8 @@ const ACTION_HANDLERS: Record<string, (state: MovementsState, action: any) => Mo
   [actions.LOAD_MOVEMENTS_FAILURE]: setLoadingFailure,
   [actions.SET_MOVEMENTS_FILTER]: setFilter,
   [actions.ADD_MOVEMENT_BY_KEY]: addMovementByKey,
+  [actions.MOVEMENT_BY_KEY_UNAVAILABLE]: movementByKeyUnavailable,
+  [actions.MOVEMENT_BY_KEY_FORBIDDEN]: movementByKeyForbidden,
   [actions.CLEAR_MOVEMENTS_BY_KEY]: clearMovementsByKey,
   [actions.SET_ASSOCIATED_MOVEMENT]: setAssociatedMovement,
   [actions.CLEAR_ASSOCIATED_MOVEMENTS]: clearAssociatedMovements,

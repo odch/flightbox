@@ -6,6 +6,7 @@ import MaterialIcon from '../MaterialIcon';
 import MovementDetails from './MovementDetails';
 import Action from './Action';
 import {ACTION_LABELS} from './labels';
+import {FORBIDDEN_MOVEMENT} from '../../modules/movements/reducer';
 
 const Wrapper = styled.div`
   padding: 1em;
@@ -58,23 +59,30 @@ const AssociatedMovement = React.memo((props: any) => {
     createMovementFromMovement(movementType, movementKey);
   };
 
+  const forbidden = associatedMovementData === FORBIDDEN_MOVEMENT;
+  const hasData = !!associatedMovementData && !forbidden;
+
   let label;
   let text;
 
   if (movementType === 'departure') {
     label = t('movement.associated.arrivalLabel');
-    text = associatedMovementData
+    text = hasData
       ? t('movement.associated.arrivalFound')
-      : associatedMovementData === null
-        ? t('movement.associated.arrivalNotFound')
-        : null;
+      : forbidden
+        ? t('movement.associated.arrivalNotAccessible')
+        : associatedMovementData === null
+          ? t('movement.associated.arrivalNotFound')
+          : null;
   } else {
     label = t('movement.associated.departureLabel');
-    text = associatedMovementData
+    text = hasData
       ? t('movement.associated.departureFound')
-      : associatedMovementData === null
-        ? t('movement.associated.departureNotFound')
-        : null;
+      : forbidden
+        ? t('movement.associated.departureNotAccessible')
+        : associatedMovementData === null
+          ? t('movement.associated.departureNotFound')
+          : null;
   }
 
   return (
@@ -82,21 +90,23 @@ const AssociatedMovement = React.memo((props: any) => {
       <div>
         <Label>{label}</Label>
         {text && <div>{text}</div>}
-        {associatedMovementData
+        {hasData
           ? <StyledDetails data={associatedMovementData} isHomeBase={isHomeBase} isAdmin={isAdmin}/>
-          : associatedMovementData === undefined
-            ? <MaterialIcon icon="sync" rotate="left"/>
-            : (
-              <ActionsContainer>
-                <ActionContainer>
-                  <Action
-                    label={ACTION_LABELS[movementType].label}
-                    icon={ACTION_LABELS[movementType].icon}
-                    onClick={handleCreateMovement}
-                  />
-                </ActionContainer>
-              </ActionsContainer>
-            )}
+          : forbidden
+            ? null
+            : associatedMovementData === undefined
+              ? <MaterialIcon icon="sync" rotate="left"/>
+              : (
+                <ActionsContainer>
+                  <ActionContainer>
+                    <Action
+                      label={ACTION_LABELS[movementType].label}
+                      icon={ACTION_LABELS[movementType].icon}
+                      onClick={handleCreateMovement}
+                    />
+                  </ActionContainer>
+                </ActionsContainer>
+              )}
       </div>
     </Wrapper>
   );

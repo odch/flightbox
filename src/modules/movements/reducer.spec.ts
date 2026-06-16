@@ -1,6 +1,6 @@
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
-import reducer from './reducer';
+import reducer, {FORBIDDEN_MOVEMENT} from './reducer';
 
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
@@ -82,6 +82,27 @@ describe('modules', () => {
 
           expect(newState.loading).toEqual(false);
           expect(newState.data).toEqual(newMovements);
+        });
+      });
+
+      describe('movementByKeyUnavailable', () => {
+        it('should set the by-key entry to null so the view stops loading', () => {
+          const state = { byKey: { existing: { key: 'existing' } } };
+
+          const newState = reducer(state as any, actions.movementByKeyUnavailable('foreign-key'));
+
+          expect(newState.byKey['foreign-key']).toBeNull();
+          expect(newState.byKey['existing']).toEqual({ key: 'existing' });
+        });
+      });
+
+      describe('movementByKeyForbidden', () => {
+        it('should set the by-key entry to the forbidden sentinel', () => {
+          const state = { byKey: {} };
+
+          const newState = reducer(state as any, actions.movementByKeyForbidden('foreign-key'));
+
+          expect(newState.byKey['foreign-key']).toBe(FORBIDDEN_MOVEMENT);
         });
       });
 

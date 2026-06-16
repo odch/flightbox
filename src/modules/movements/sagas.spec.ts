@@ -1094,7 +1094,7 @@ describe('modules', () => {
           expect(generator.next().done).toEqual(true);
         });
 
-        it('should return early when movement not found', () => {
+        it('should mark the movement unavailable when not found', () => {
           const action = actions.loadMovement('deleted-key', 'departure');
           const generator = sagas.loadMovement(action);
 
@@ -1104,7 +1104,26 @@ describe('modules', () => {
 
           const snapshot = new FakeFirebaseSnapshot('deleted-key', null);
 
-          expect(generator.next(snapshot).done).toEqual(true);
+          expect(generator.next(snapshot).value).toEqual(
+            put(actions.movementByKeyUnavailable('deleted-key'))
+          );
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('should mark the movement forbidden when the read is rejected', () => {
+          // e.g. an associated return flight owned by another pilot, denied by
+          // the read rules — it exists, it just can't be shown.
+          const action = actions.loadMovement('foreign-key', 'arrival');
+          const generator = sagas.loadMovement(action);
+
+          expect(generator.next().value).toEqual(
+            call(remote.loadByKey, '/arrivals', 'foreign-key')
+          );
+
+          expect(generator.throw(new Error('permission_denied')).value).toEqual(
+            put(actions.movementByKeyForbidden('foreign-key'))
+          );
+          expect(generator.next().done).toEqual(true);
         });
       });
 
@@ -1141,7 +1160,7 @@ describe('modules', () => {
       });
 
       describe('loadDeparturesAndArrivalsFiltered', () => {
-        it('should call remote.loadLimited for departures and arrivals with date range', () => {
+        it('should scope loadLimited to the user for a non-admin', () => {
           const movements = {
             filter: { date: { start: '2017-05-01', end: '2017-05-31' } }
           };
@@ -1151,13 +1170,16 @@ describe('modules', () => {
           const start = dates.negativeTimestampEndOfDay('2017-05-31');
           const end = dates.negativeTimestampStartOfDay('2017-05-01');
 
-          expect(generator.next().value).toEqual(
-            call(remote.loadLimited, '/departures', start, null, end)
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { admin: false, allMovements: false, email: 'pilot@example.com' };
+          expect(generator.next(auth).value).toEqual(
+            call(remote.loadLimited, '/departures', start, null, end, 'pilot@example.com')
           );
 
           const departuresResult = { snapshot: {}, ref: {} };
           expect(generator.next(departuresResult).value).toEqual(
-            call(remote.loadLimited, '/arrivals', start, null, end)
+            call(remote.loadLimited, '/arrivals', start, null, end, 'pilot@example.com')
           );
 
           const arrivalsResult = { snapshot: {}, ref: {} };
@@ -1165,6 +1187,45 @@ describe('modules', () => {
 
           expect(result.value).toEqual({ departures: departuresResult, arrivals: arrivalsResult });
           expect(result.done).toEqual(true);
+        });
+
+        it('should not scope loadLimited for an admin / all-movements user', () => {
+          const movements = {
+            filter: { date: { start: '2017-05-01', end: '2017-05-31' } }
+          };
+
+          const generator = sagas.loadDeparturesAndArrivalsFiltered(movements);
+
+          const start = dates.negativeTimestampEndOfDay('2017-05-31');
+          const end = dates.negativeTimestampStartOfDay('2017-05-01');
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { admin: true, email: 'admin@example.com' };
+          expect(generator.next(auth).value).toEqual(
+            call(remote.loadLimited, '/departures', start, null, end, undefined)
+          );
+        });
+
+        it('should not scope loadLimited for a shared-access user without an email (lspv)', () => {
+          // Static/flightnet logins have no Firebase email, so createdBy is
+          // undefined and the unbounded query is used — shared-access projects
+          // keep showing all movements.
+          const movements = {
+            filter: { date: { start: '2017-05-01', end: '2017-05-31' } }
+          };
+
+          const generator = sagas.loadDeparturesAndArrivalsFiltered(movements);
+
+          const start = dates.negativeTimestampEndOfDay('2017-05-31');
+          const end = dates.negativeTimestampStartOfDay('2017-05-01');
+
+          expect(generator.next().value).toEqual(select(sagas.authSelector));
+
+          const auth = { admin: false, allMovements: false };
+          expect(generator.next(auth).value).toEqual(
+            call(remote.loadLimited, '/departures', start, null, end, undefined)
+          );
         });
       });
 

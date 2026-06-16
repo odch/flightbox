@@ -1,7 +1,7 @@
 {
   "rules": {
     "departures": {
-      ".read": "auth !== null",
+      ".read": "{movementListRead}",
       ".indexOn": [
         "dateTime",
         "negativeTimestamp",
@@ -9,7 +9,8 @@
         "createdBy_orderKey"
       ],
       "$departure_id": {
-        ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24))",
+        ".read": "{movementItemRead}",
+        ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)){movementOwnership}",
         ".validate": "newData.hasChildren(['aircraftType', 'dateTime', 'departureRoute', 'duration', 'email', 'firstname', 'flightType', 'immatriculation', 'lastname', 'location', 'mtow', 'aircraftCategory', 'negativeTimestamp'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -101,7 +102,7 @@
       }
     },
     "arrivals": {
-      ".read": "auth !== null",
+      ".read": "{movementListRead}",
       ".indexOn": [
         "dateTime",
         "negativeTimestamp",
@@ -109,7 +110,8 @@
         "createdBy_orderKey"
       ],
       "$arrival_id": {
-        ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24))",
+        ".read": "{movementItemRead}",
+        ".write": "auth !== null && (!root.child('settings/lockDate').exists() || (!data.exists() && newData.exists() && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && !newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24) || (data.exists() && newData.exists() && data.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24 && newData.child('negativeTimestamp').val() * -1 > root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24)){movementOwnership}",
         ".validate": "newData.hasChildren(['aircraftType', 'arrivalRoute', 'dateTime', 'email', 'firstname', 'flightType', 'immatriculation', 'landingCount', 'lastname', 'location', 'mtow', 'aircraftCategory', 'negativeTimestamp'])",
         "aircraftType": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -405,7 +407,7 @@
     "card-payments": {
       "$card_payment_id": {
         ".read": "auth !== null",
-        ".write": "auth !== null && newData.exists()",
+        ".write": "auth !== null && newData.exists() && (root.child('admins/' + auth.uid).exists() || (!data.exists() && newData.child('status').val() === 'pending') || (data.exists() && data.child('status').val() === 'pending' && newData.child('status').val() === 'cancelled'))",
         ".validate": "newData.hasChildren(['amount', 'currency', 'arrivalReference', 'refNr', 'timestamp', 'status'])",
         "currency": {
           ".validate": "newData.isString() && newData.val().length > 0"
