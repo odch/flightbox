@@ -1,16 +1,16 @@
 # Custom Email Authentication Setup
 
-This document explains how to set up custom email authentication for your Firebase sign-in links to avoid emails going to spam folders using Mailgun SMTP.
+This document explains how to set up custom email authentication for the email sign-in code to avoid emails going to spam folders using Mailgun SMTP.
 
 ## Overview
 
-The solution generates Firebase sign-in links using the Admin SDK without sending emails automatically, then uses Mailgun SMTP via nodemailer to send the links. SMTP settings are stored in Firebase database for easy configuration.
+The email login uses a single-use 6-digit code. A Cloud Function issues the code and sends it via Mailgun SMTP using nodemailer; the client then exchanges the code for a session. SMTP settings are stored in Firebase database for easy configuration.
 
 ## Architecture
 
-1. **Client-side**: `authenticateEmail()` calls a Cloud Function to generate the sign-in link
-2. **Cloud Function**: `generateSignInLink` uses Firebase Admin SDK to create the link
-3. **Email Service**: `sendSignInEmail` reads SMTP settings from `/settings/emailSmtp` and sends email via Mailgun SMTP
+1. **Client-side**: the email login form calls `generateSignInCode`, then `verifySignInCode` with the code the user received
+2. **Cloud Function**: `generateSignInCode` creates a single-use 6-digit code, stores its hash, and triggers the email
+3. **Email Service**: `sendSignInEmail` reads SMTP settings from `/settings/emailSmtp` and emails the code via Mailgun SMTP
 
 ## Firebase Database Structure
 
@@ -89,18 +89,11 @@ In your webpack config or build process, make sure `__FIREBASE_PROJECT_ID__` is 
 
 ## Testing Your Setup
 
-### Test Link Generation
+### Test Code Generation
 ```bash
-curl -X POST https://europe-west1-YOUR-PROJECT-ID.cloudfunctions.net/generateSignInLink \
+curl -X POST https://europe-west1-YOUR-PROJECT-ID.cloudfunctions.net/generateSignInCode \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","continueUrl":"https://yourapp.com"}'
-```
-
-### Test Email Sending
-```bash
-curl -X POST https://europe-west1-YOUR-PROJECT-ID.cloudfunctions.net/sendSignInEmail \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","signInLink":"https://example.com","customMessage":"Test message"}'
+  -d '{"email":"test@example.com"}'
 ```
 
 ## Customizing Email Templates
@@ -118,7 +111,7 @@ The email template is defined in `functions/auth/sendSignInEmail.js`. You can cu
 2. **SMTP Credentials**: Keep your Mailgun SMTP credentials secure
 3. **Domain Verification**: Verify your sending domain with Mailgun for better deliverability
 4. **Rate Limiting**: Consider implementing rate limiting to prevent email abuse
-5. **Link Expiration**: Firebase sign-in links expire after 1 hour by default
+5. **Code Expiration**: sign-in codes are single-use and expire shortly after they are issued
 
 ## Troubleshooting
 
@@ -136,7 +129,7 @@ The email template is defined in `functions/auth/sendSignInEmail.js`. You can cu
 
 2. **Monitor Function Logs**:
    ```bash
-   firebase functions:log --only sendSignInEmail,generateSignInLink
+   firebase functions:log --only sendSignInEmail,generateSignInCode
    ```
 
 3. **Test SMTP Connection**:

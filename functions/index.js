@@ -14,7 +14,6 @@ const { scheduledAircraftListUpdate } = require('./updateAircraftList');
 const enrichMovements = require('./enrichMovements');
 
 const auth = require('./auth');
-const { generateSignInLink } = require('./auth/generateSignInLink');
 const { generateSignInCode } = require('./auth/generateSignInCode');
 const { verifySignInCode } = require('./auth/verifySignInCode');
 const { cleanupExpiredSignInCodes } = require('./auth/cleanupExpiredSignInCodes');
@@ -32,7 +31,6 @@ const homebasedAircraftTrigger = require('./homebasedAircraft/homebasedAircraftT
 const updateArrivalPaymentStatus = require('./updateArrivalPaymentStatus');
 
 exports.auth = auth;
-exports.generateSignInLink = generateSignInLink;
 exports.generateSignInCode = generateSignInCode;
 exports.verifySignInCode = verifySignInCode;
 exports.cleanupExpiredSignInCodes = cleanupExpiredSignInCodes;
