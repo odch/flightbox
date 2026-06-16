@@ -172,7 +172,9 @@
       "arrivalFound": "Die folgende Ankunft wurde diesem Abflug automatisch zugeordnet:",
       "departureFound": "Der folgende Abflug wurde dieser Ankunft automatisch zugeordnet:",
       "arrivalNotFound": "Es konnte keine Ankunft zugeordnet werden.",
-      "departureNotFound": "Es konnte kein Abflug zugeordnet werden."
+      "departureNotFound": "Es konnte kein Abflug zugeordnet werden.",
+      "arrivalNotAccessible": "Die zugeordnete Ankunft wurde von einer anderen Person erfasst und kann hier nicht angezeigt werden.",
+      "departureNotAccessible": "Der zugeordnete Abflug wurde von einer anderen Person erfasst und kann hier nicht angezeigt werden."
     },
     "homeBase": {
       "yes": "Dieses Flugzeug ist in {{name}} stationiert",

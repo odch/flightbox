@@ -1110,9 +1110,9 @@ describe('modules', () => {
           expect(generator.next().done).toEqual(true);
         });
 
-        it('should mark the movement unavailable when the read is rejected', () => {
+        it('should mark the movement forbidden when the read is rejected', () => {
           // e.g. an associated return flight owned by another pilot, denied by
-          // the read rules.
+          // the read rules — it exists, it just can't be shown.
           const action = actions.loadMovement('foreign-key', 'arrival');
           const generator = sagas.loadMovement(action);
 
@@ -1121,7 +1121,7 @@ describe('modules', () => {
           );
 
           expect(generator.throw(new Error('permission_denied')).value).toEqual(
-            put(actions.movementByKeyUnavailable('foreign-key'))
+            put(actions.movementByKeyForbidden('foreign-key'))
           );
           expect(generator.next().done).toEqual(true);
         });
