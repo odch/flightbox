@@ -58,6 +58,7 @@ export function requestSignInCode(email: string, airportName: string, themeColor
         return response.json().catch(() => ({})).then((errorData: any) => {
           const error: any = new Error(errorData.error || 'Failed to send sign-in code');
           error.status = response.status;
+          error.retryAfterSeconds = errorData.retryAfterSeconds;
           throw error;
         });
       }

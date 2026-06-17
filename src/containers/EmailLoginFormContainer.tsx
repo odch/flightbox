@@ -12,6 +12,7 @@ const mapStateToProps = (state: RootState) => {
   let submitting = false;
   let failure = false;
   let tooManyRequests = false;
+  let retryAfterSeconds: number | undefined;
   let otpVerificationFailure = false;
   let passkeyLoginSubmitting = false;
   let passkeyLoginFailure = false;
@@ -20,6 +21,7 @@ const mapStateToProps = (state: RootState) => {
     submitting = state.auth.submitting || false;
     failure = state.auth.failure || false;
     tooManyRequests = state.auth.emailRateLimited || false;
+    retryAfterSeconds = state.auth.emailRetryAfterSeconds;
     otpVerificationFailure = state.auth.otpVerificationFailure || false;
     passkeyLoginSubmitting = (state.auth.passkeyLogin && state.auth.passkeyLogin.submitting) || false;
     passkeyLoginFailure = (state.auth.passkeyLogin && state.auth.passkeyLogin.failure) || false;
@@ -30,6 +32,7 @@ const mapStateToProps = (state: RootState) => {
     submitting,
     failure,
     tooManyRequests,
+    retryAfterSeconds,
     emailSent,
     showCancel,
     otpVerificationFailure,

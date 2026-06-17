@@ -15,7 +15,7 @@ const CODE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 // OTP brute force) is blocked. The hourly cap is the sustained-abuse backstop.
 const COOLDOWN_MS = 55 * 1000;
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const MAX_PER_WINDOW = 5;
+const MAX_PER_WINDOW = 10;
 
 const hashCode = (code) => {
   return crypto.createHash('sha256').update(code).digest('hex');
@@ -77,7 +77,22 @@ exports.generateSignInCode = onRequest({ region: 'europe-west1' }, (req, res) =>
       });
 
       if (!rateLimit.committed) {
-        return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+        // Tell the caller when they can retry so the UI can show a clear
+        // "try again in X" message instead of a generic error. The aborted
+        // transaction's snapshot holds the current limiter state.
+        const current = rateLimit.snapshot && rateLimit.snapshot.val();
+        let retryAfterMs = COOLDOWN_MS;
+        if (current) {
+          retryAfterMs = current.count >= MAX_PER_WINDOW
+            ? current.windowStart + RATE_WINDOW_MS - now
+            : current.lastSentAt + COOLDOWN_MS - now;
+        }
+        const retryAfterSeconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
+        res.set('Retry-After', String(retryAfterSeconds));
+        return res.status(429).json({
+          error: 'Too many requests. Please try again later.',
+          retryAfterSeconds,
+        });
       }
 
       // Keep only one live code per email: remove any existing codes first so a

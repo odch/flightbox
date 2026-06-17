@@ -91,6 +91,11 @@ describe('OtpCodeForm', () => {
       expect(screen.getByText('login.tooManyRequests')).toBeInTheDocument();
     });
 
+    it('shows the minutes message when the retry time is more than a minute', () => {
+      renderWithTheme(<OtpCodeForm {...baseProps} tooManyRequests={true} retryAfterSeconds={15 * 60} onResend={jest.fn()} />);
+      expect(screen.getByText('login.tooManyRequestsMinutes')).toBeInTheDocument();
+    });
+
     it('does not show the too-many-requests message by default', () => {
       renderWithTheme(<OtpCodeForm {...baseProps} onResend={jest.fn()} />);
       expect(screen.queryByText('login.tooManyRequests')).not.toBeInTheDocument();

@@ -12,13 +12,14 @@ const Failure = props => {
   const { t } = useTranslation();
   const messageKey = props.messageKey || 'login.failure';
   return (
-    <Wrapper>{props.failure ? t(messageKey) : '\u00a0'}</Wrapper>
+    <Wrapper>{props.failure ? (t(messageKey, props.messageValues) as string) : '\u00a0'}</Wrapper>
   );
 };
 
 Failure.propTypes = {
   failure: PropTypes.bool.isRequired,
-  messageKey: PropTypes.string
+  messageKey: PropTypes.string,
+  messageValues: PropTypes.object
 };
 
 export default Failure;
