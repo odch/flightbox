@@ -2,6 +2,7 @@ import React, { useRef, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { useTranslation, Trans } from 'react-i18next';
 import Button from '../Button';
+import {rateLimitMessage} from '../../util/rateLimitMessage';
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -113,12 +114,14 @@ interface OtpCodeFormProps {
   email: string;
   submitting: boolean;
   failure: boolean;
+  tooManyRequests?: boolean;
+  retryAfterSeconds?: number;
   onSubmit: (code: string) => void;
   onResend?: () => void;
   onChangeEmail?: () => void;
 }
 
-const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, onSubmit, onResend, onChangeEmail }) => {
+const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, tooManyRequests, retryAfterSeconds, onSubmit, onResend, onChangeEmail }) => {
   const { t } = useTranslation();
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -246,6 +249,10 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, o
         ))}
       </OtpInputsRow>
       {failure && <FailureMessage>{t('login.otpVerificationFailure')}</FailureMessage>}
+      {tooManyRequests && (() => {
+        const rl = rateLimitMessage(retryAfterSeconds);
+        return <FailureMessage>{t(rl.key, rl.values)}</FailureMessage>;
+      })()}
       <Actions>
         <Button
           type="button"

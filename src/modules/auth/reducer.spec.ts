@@ -6,6 +6,7 @@ const INITIAL_STATE = {
   authenticated: false,
   submitting: false,
   failure: false,
+  emailRateLimited: false,
   otpVerificationFailure: false,
   guestAuthentication: {
     submitting: false,
@@ -69,6 +70,21 @@ describe('modules', () => {
             ...INITIAL_STATE,
             submitting: false,
             failure: true,
+          });
+        });
+
+        it('should flag emailRateLimited and store the retry time when rate limited (429)', () => {
+          expect(
+            reducer({
+              ...INITIAL_STATE,
+              submitting: true,
+            }, actions.sendAuthenticationEmailFailure(true, 900))
+          ).toEqual({
+            ...INITIAL_STATE,
+            submitting: false,
+            failure: true,
+            emailRateLimited: true,
+            emailRetryAfterSeconds: 900,
           });
         });
       });

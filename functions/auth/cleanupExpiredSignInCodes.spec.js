@@ -4,8 +4,11 @@ describe('functions', () => {
     let capturedHandler;
     let capturedOptions;
     let mockCodesRef;
+    let mockRateLimitsRef;
 
     const now = Date.now();
+
+    const emptySnapshot = { exists: () => false, forEach: () => {} };
 
     beforeEach(() => {
       jest.resetModules();
@@ -13,13 +16,17 @@ describe('functions', () => {
       capturedOptions = null;
 
       mockCodesRef = {
-        once: jest.fn(),
+        once: jest.fn().mockResolvedValue(emptySnapshot),
+        update: jest.fn().mockResolvedValue(undefined),
+      };
+      mockRateLimitsRef = {
+        once: jest.fn().mockResolvedValue(emptySnapshot),
         update: jest.fn().mockResolvedValue(undefined),
       };
 
       mockAdmin = {
         database: jest.fn().mockReturnValue({
-          ref: jest.fn().mockReturnValue(mockCodesRef)
+          ref: jest.fn(path => path === '/signInRateLimits' ? mockRateLimitsRef : mockCodesRef)
         })
       };
 
@@ -117,6 +124,27 @@ describe('functions', () => {
       await capturedHandler();
 
       expect(mockCodesRef.update).toHaveBeenCalledWith({ k1: null, k2: null });
+    });
+
+    it('deletes rate-limit entries older than the window and keeps recent ones', async () => {
+      mockRateLimitsRef.once.mockResolvedValue(makeSnapshot([
+        { key: 'rl1', val: { windowStart: now - (61 * 60 * 1000) } }, // stale (> 1h)
+        { key: 'rl2', val: { windowStart: now - (10 * 60 * 1000) } }, // recent
+      ]));
+
+      await capturedHandler();
+
+      expect(mockRateLimitsRef.update).toHaveBeenCalledWith({ rl1: null });
+    });
+
+    it('does not touch rate-limit entries that are all recent', async () => {
+      mockRateLimitsRef.once.mockResolvedValue(makeSnapshot([
+        { key: 'rl1', val: { windowStart: now - (5 * 60 * 1000) } },
+      ]));
+
+      await capturedHandler();
+
+      expect(mockRateLimitsRef.update).not.toHaveBeenCalled();
     });
 
     it('is scheduled to run every 60 minutes', () => {

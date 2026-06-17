@@ -40,6 +40,8 @@
     "or": "or",
     "hintGuestLogin": "If you log in as a guest, you can only record your arrival and departure. You will not be able to view the recorded movements afterwards.",
     "failure": "Login failed",
+    "tooManyRequests": "You have requested a code too often. Please wait a moment and try again.",
+    "tooManyRequestsMinutes": "You have requested a code too often. Please try again in about {{minutes}} minutes.",
     "loginAsGuest": "Log in as guest",
     "username": "Username",
     "password": "Password",

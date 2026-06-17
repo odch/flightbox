@@ -40,6 +40,8 @@
     "or": "oder",
     "hintGuestLogin": "Wenn Sie sich als Gast anmelden, können Sie nur Ihre Ankunft und Ihren Abflug erfassen. Die erfassten Bewegungen können Sie anschliessend nicht mehr einsehen.",
     "failure": "Anmeldung fehlgeschlagen",
+    "tooManyRequests": "Sie haben zu oft einen Code angefordert. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+    "tooManyRequestsMinutes": "Sie haben zu oft einen Code angefordert. Bitte versuchen Sie es in etwa {{minutes}} Minuten erneut.",
     "loginAsGuest": "Als Gast anmelden",
     "username": "Benutzername",
     "password": "Passwort",

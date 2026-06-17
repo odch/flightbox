@@ -8,6 +8,7 @@ import Button from '../Button';
 import GuestTokenLogin from '../../containers/GuestTokenLoginContainer'
 import OtpCodeForm from './OtpCodeForm';
 import PasskeyLoginButton from './PasskeyLoginButton';
+import {rateLimitMessage} from '../../util/rateLimitMessage';
 import { isPasskeySupported } from '../../util/webauthn';
 
 const handleSubmit = (authenticate, email, local, e) => {
@@ -68,6 +69,8 @@ const EmailLoginForm = props => {
     email,
     submitting,
     failure,
+    tooManyRequests,
+    retryAfterSeconds,
     emailSent,
     otpVerificationFailure,
     updateEmail,
@@ -84,6 +87,8 @@ const EmailLoginForm = props => {
         email={email}
         submitting={submitting}
         failure={otpVerificationFailure}
+        tooManyRequests={tooManyRequests}
+        retryAfterSeconds={retryAfterSeconds}
         onSubmit={(code) => verifyOtpCode(email, code)}
         onResend={() => sendAuthenticationEmail(email, !!queryToken)}
         onChangeEmail={resetOtp}
@@ -113,7 +118,10 @@ const EmailLoginForm = props => {
           data-cy="login-form"
         >
           <StyledLabeledComponent label={t('login.emailLabel')} component={emailInput}/>
-          {failure && <Failure failure={failure}/>}
+          {failure && (() => {
+            const rl = tooManyRequests ? rateLimitMessage(retryAfterSeconds) : undefined;
+            return <Failure failure={failure} messageKey={rl && rl.key} messageValues={rl && rl.values}/>;
+          })()}
           <SubmitButton
             type="submit"
             label={t('login.loginButton')}

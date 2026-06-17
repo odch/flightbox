@@ -28,6 +28,8 @@ interface AuthState {
   authenticated: boolean;
   submitting: boolean;
   failure: boolean;
+  emailRateLimited?: boolean;
+  emailRetryAfterSeconds?: number;
   otpVerificationFailure?: boolean;
   guestAuthentication: GuestAuthState;
   passkeyRegistration: PasskeyRegistrationState;
@@ -46,6 +48,8 @@ const INITIAL_STATE: AuthState = {
   authenticated: false,
   submitting: false,
   failure: false,
+  emailRateLimited: false,
+  emailRetryAfterSeconds: undefined,
   otpVerificationFailure: false,
   guestAuthentication: {
     submitting: false,
@@ -62,18 +66,24 @@ const ACTION_HANDLERS = {
     return Object.assign({}, state, {
       submitting: true,
       failure: false,
+      emailRateLimited: false,
+      emailRetryAfterSeconds: undefined,
       otpVerificationFailure: false,
     });
   },
   [actions.SEND_AUTHENTICATION_EMAIL_SUCCESS]: (state: AuthState) => {
     return Object.assign({}, state, {
       submitting: false,
+      emailRateLimited: false,
+      emailRetryAfterSeconds: undefined,
     });
   },
-  [actions.SEND_AUTHENTICATION_EMAIL_FAILURE]: (state: AuthState) => {
+  [actions.SEND_AUTHENTICATION_EMAIL_FAILURE]: (state: AuthState, action: any) => {
     return Object.assign({}, state, {
       submitting: false,
       failure: true,
+      emailRateLimited: !!(action.payload && action.payload.rateLimited),
+      emailRetryAfterSeconds: action.payload && action.payload.retryAfterSeconds,
     });
   },
   [actions.REQUEST_GUEST_TOKEN_AUTHENTICATION]: (state: AuthState) => {

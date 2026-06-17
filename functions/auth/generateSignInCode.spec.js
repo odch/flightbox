@@ -5,17 +5,33 @@ describe('functions', () => {
     let capturedHandler;
     let mockCors;
     let mockPush;
-    let mockCrypto;
+    let mockUpdate;
+    let mockOnce;
+    let mockTransaction;
 
     beforeEach(() => {
       jest.resetModules();
       capturedHandler = null;
 
       mockPush = jest.fn().mockResolvedValue({ key: 'code-key-123' });
+      mockUpdate = jest.fn().mockResolvedValue();
+      // default: no existing codes for the email
+      mockOnce = jest.fn().mockResolvedValue({ exists: () => false, forEach: () => {} });
+      // default: rate-limit transaction commits (request allowed)
+      mockTransaction = jest.fn().mockResolvedValue({ committed: true });
+
+      const codesRef = {
+        orderByChild: jest.fn().mockReturnValue({
+          equalTo: jest.fn().mockReturnValue({ once: mockOnce })
+        }),
+        update: mockUpdate,
+        push: mockPush,
+      };
+      const rateLimitRef = { transaction: mockTransaction };
 
       mockAdmin = {
         database: jest.fn().mockReturnValue({
-          ref: jest.fn().mockReturnValue({ push: mockPush })
+          ref: jest.fn(path => path.startsWith('/signInRateLimits') ? rateLimitRef : codesRef)
         })
       };
 
@@ -40,7 +56,8 @@ describe('functions', () => {
     const makeReq = (method, body) => ({ method, body });
     const makeRes = () => ({
       status: jest.fn().mockReturnThis(),
-      json: jest.fn()
+      json: jest.fn(),
+      set: jest.fn().mockReturnThis(),
     });
 
     it('returns 405 for GET request', async () => {
@@ -65,6 +82,65 @@ describe('functions', () => {
       await capturedHandler(req, res);
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({ error: 'Invalid email format' });
+    });
+
+    it('returns 429 with a retry time and sends nothing when rate limited', async () => {
+      const now = Date.now();
+      // hourly cap reached: window started ~20 min ago, so ~40 min remain
+      mockTransaction.mockResolvedValue({
+        committed: false,
+        snapshot: { val: () => ({ windowStart: now - 20 * 60 * 1000, lastSentAt: now - 1000, count: 10 }) },
+      });
+
+      const req = makeReq('POST', { email: 'user@example.com' });
+      const res = makeRes();
+      await capturedHandler(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(429);
+      const body = res.json.mock.calls[0][0];
+      expect(body.error).toBe('Too many requests. Please try again later.');
+      // ~40 minutes remaining (2400s), allow a small margin
+      expect(body.retryAfterSeconds).toBeGreaterThan(2300);
+      expect(body.retryAfterSeconds).toBeLessThanOrEqual(2400);
+      expect(res.set).toHaveBeenCalledWith('Retry-After', String(body.retryAfterSeconds));
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockSendSignInEmail).not.toHaveBeenCalled();
+    });
+
+    it('uses the cooldown remaining for retryAfterSeconds when under the cap', async () => {
+      const now = Date.now();
+      // within cooldown: last send 10s ago, count under cap -> ~45s remain
+      mockTransaction.mockResolvedValue({
+        committed: false,
+        snapshot: { val: () => ({ windowStart: now - 5000, lastSentAt: now - 10000, count: 2 }) },
+      });
+
+      const req = makeReq('POST', { email: 'user@example.com' });
+      const res = makeRes();
+      await capturedHandler(req, res);
+
+      const body = res.json.mock.calls[0][0];
+      expect(body.retryAfterSeconds).toBeGreaterThan(40);
+      expect(body.retryAfterSeconds).toBeLessThanOrEqual(45);
+    });
+
+    it('deletes existing codes for the email before pushing a new one', async () => {
+      mockOnce.mockResolvedValue({
+        exists: () => true,
+        forEach: cb => {
+          cb({ key: 'old-1' });
+          cb({ key: 'old-2' });
+        }
+      });
+
+      const req = makeReq('POST', { email: 'user@example.com' });
+      const res = makeRes();
+      await capturedHandler(req, res);
+
+      expect(mockUpdate).toHaveBeenCalledWith({ 'old-1': null, 'old-2': null });
+      expect(mockPush).toHaveBeenCalled();
+      // deletion happens before the new code is pushed
+      expect(mockUpdate.mock.invocationCallOrder[0]).toBeLessThan(mockPush.mock.invocationCallOrder[0]);
     });
 
     it('stores code hash in database (not plaintext code)', async () => {
