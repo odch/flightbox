@@ -61,6 +61,14 @@ jobs:
             process.stdout.write(({ ...def, ...proj }).privacySettings === true ? 'true' : 'false');
           ")
           echo "module.exports = $PRIVACY_FUNCTIONS_ENABLED;" > functions/privacy-config.generated.js
+      - name: Generate functions/member-management.generated.js from project config
+        run: |
+          MEMBER_MANAGEMENT_ENABLED=$(node -e "
+            const def = require('./projects/default.json');
+            const proj = require('./projects/${{ vars.PROJECT }}.json');
+            process.stdout.write(({ ...def, ...proj }).memberManagement === true ? 'true' : 'false');
+          ")
+          echo "module.exports = $MEMBER_MANAGEMENT_ENABLED;" > functions/member-management.generated.js
       - name: Write functions/.env.${{ vars.FIREBASE_PROJECT }} from environment vars
         run: |
           cat > functions/.env.${{ vars.FIREBASE_PROJECT }} <<EOF
