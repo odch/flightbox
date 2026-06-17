@@ -9,8 +9,22 @@ const { sendSignInEmail } = require('./sendSignInEmail');
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 
+// Per-email rate limiting. The login UI already enforces a 60s resend countdown
+// (OtpCodeForm RESEND_COOLDOWN_SECONDS); the server cooldown sits just under it
+// so a legitimate resend never trips it, while scripted abuse (email bombing /
+// OTP brute force) is blocked. The hourly cap is the sustained-abuse backstop.
+const COOLDOWN_MS = 55 * 1000;
+const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_PER_WINDOW = 5;
+
 const hashCode = (code) => {
   return crypto.createHash('sha256').update(code).digest('hex');
+};
+
+// RTDB keys cannot contain '@' or '.', so the limiter is keyed by a hash of the
+// normalized email.
+const emailKey = (email) => {
+  return crypto.createHash('sha256').update(email).digest('hex');
 };
 
 const validateRequest = (method, body) => {
@@ -41,12 +55,46 @@ exports.generateSignInCode = onRequest({ region: 'europe-west1' }, (req, res) =>
 
       const { email, airportName, themeColor, language } = req.body;
       const normalizedEmail = email.toLowerCase();
+      const db = admin.database();
+      const now = Date.now();
+
+      // Per-email rate limiting: reject if a code was sent very recently
+      // (cooldown) or too many were sent within the rolling window. The limiter
+      // is checked-and-incremented before sending so a forced email failure
+      // cannot be used to bypass it.
+      const rateLimitRef = db.ref('/signInRateLimits/' + emailKey(normalizedEmail));
+      const rateLimit = await rateLimitRef.transaction(current => {
+        if (!current || now - current.windowStart >= RATE_WINDOW_MS) {
+          return { windowStart: now, lastSentAt: now, count: 1 };
+        }
+        if (now - current.lastSentAt < COOLDOWN_MS) {
+          return; // cooldown not elapsed — abort
+        }
+        if (current.count >= MAX_PER_WINDOW) {
+          return; // hourly cap reached — abort
+        }
+        return { windowStart: current.windowStart, lastSentAt: now, count: current.count + 1 };
+      });
+
+      if (!rateLimit.committed) {
+        return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+      }
+
+      // Keep only one live code per email: remove any existing codes first so a
+      // caller cannot accumulate many concurrently-valid codes.
+      const codesRef = db.ref('/signInCodes');
+      const existing = await codesRef.orderByChild('email').equalTo(normalizedEmail).once('value');
+      if (existing.exists()) {
+        const deletions = {};
+        existing.forEach(child => { deletions[child.key] = null; });
+        await codesRef.update(deletions);
+      }
 
       const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
       const codeHash = hashCode(code);
-      const expiry = Date.now() + CODE_EXPIRY_MS;
+      const expiry = now + CODE_EXPIRY_MS;
 
-      await admin.database().ref('/signInCodes').push({
+      await codesRef.push({
         email: normalizedEmail,
         codeHash,
         expiry,
