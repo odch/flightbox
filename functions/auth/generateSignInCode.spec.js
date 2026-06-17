@@ -56,7 +56,8 @@ describe('functions', () => {
     const makeReq = (method, body) => ({ method, body });
     const makeRes = () => ({
       status: jest.fn().mockReturnThis(),
-      json: jest.fn()
+      json: jest.fn(),
+      set: jest.fn().mockReturnThis(),
     });
 
     it('returns 405 for GET request', async () => {
@@ -83,17 +84,44 @@ describe('functions', () => {
       expect(res.json).toHaveBeenCalledWith({ error: 'Invalid email format' });
     });
 
-    it('returns 429 and sends nothing when rate limited (cooldown / cap)', async () => {
-      mockTransaction.mockResolvedValue({ committed: false });
+    it('returns 429 with a retry time and sends nothing when rate limited', async () => {
+      const now = Date.now();
+      // hourly cap reached: window started ~20 min ago, so ~40 min remain
+      mockTransaction.mockResolvedValue({
+        committed: false,
+        snapshot: { val: () => ({ windowStart: now - 20 * 60 * 1000, lastSentAt: now - 1000, count: 10 }) },
+      });
 
       const req = makeReq('POST', { email: 'user@example.com' });
       const res = makeRes();
       await capturedHandler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(429);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Too many requests. Please try again later.' });
+      const body = res.json.mock.calls[0][0];
+      expect(body.error).toBe('Too many requests. Please try again later.');
+      // ~40 minutes remaining (2400s), allow a small margin
+      expect(body.retryAfterSeconds).toBeGreaterThan(2300);
+      expect(body.retryAfterSeconds).toBeLessThanOrEqual(2400);
+      expect(res.set).toHaveBeenCalledWith('Retry-After', String(body.retryAfterSeconds));
       expect(mockPush).not.toHaveBeenCalled();
       expect(mockSendSignInEmail).not.toHaveBeenCalled();
+    });
+
+    it('uses the cooldown remaining for retryAfterSeconds when under the cap', async () => {
+      const now = Date.now();
+      // within cooldown: last send 10s ago, count under cap -> ~45s remain
+      mockTransaction.mockResolvedValue({
+        committed: false,
+        snapshot: { val: () => ({ windowStart: now - 5000, lastSentAt: now - 10000, count: 2 }) },
+      });
+
+      const req = makeReq('POST', { email: 'user@example.com' });
+      const res = makeRes();
+      await capturedHandler(req, res);
+
+      const body = res.json.mock.calls[0][0];
+      expect(body.retryAfterSeconds).toBeGreaterThan(40);
+      expect(body.retryAfterSeconds).toBeLessThanOrEqual(45);
     });
 
     it('deletes existing codes for the email before pushing a new one', async () => {
