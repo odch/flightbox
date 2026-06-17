@@ -470,6 +470,10 @@
       ".write": false,
       ".indexOn": ["email"]
     },
+    "signInRateLimits": {
+      ".read": false,
+      ".write": false
+    },
     "webauthnCredentials": {
       ".write": false,
       "$uid": {

@@ -5,17 +5,33 @@ describe('functions', () => {
     let capturedHandler;
     let mockCors;
     let mockPush;
-    let mockCrypto;
+    let mockUpdate;
+    let mockOnce;
+    let mockTransaction;
 
     beforeEach(() => {
       jest.resetModules();
       capturedHandler = null;
 
       mockPush = jest.fn().mockResolvedValue({ key: 'code-key-123' });
+      mockUpdate = jest.fn().mockResolvedValue();
+      // default: no existing codes for the email
+      mockOnce = jest.fn().mockResolvedValue({ exists: () => false, forEach: () => {} });
+      // default: rate-limit transaction commits (request allowed)
+      mockTransaction = jest.fn().mockResolvedValue({ committed: true });
+
+      const codesRef = {
+        orderByChild: jest.fn().mockReturnValue({
+          equalTo: jest.fn().mockReturnValue({ once: mockOnce })
+        }),
+        update: mockUpdate,
+        push: mockPush,
+      };
+      const rateLimitRef = { transaction: mockTransaction };
 
       mockAdmin = {
         database: jest.fn().mockReturnValue({
-          ref: jest.fn().mockReturnValue({ push: mockPush })
+          ref: jest.fn(path => path.startsWith('/signInRateLimits') ? rateLimitRef : codesRef)
         })
       };
 
@@ -65,6 +81,38 @@ describe('functions', () => {
       await capturedHandler(req, res);
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({ error: 'Invalid email format' });
+    });
+
+    it('returns 429 and sends nothing when rate limited (cooldown / cap)', async () => {
+      mockTransaction.mockResolvedValue({ committed: false });
+
+      const req = makeReq('POST', { email: 'user@example.com' });
+      const res = makeRes();
+      await capturedHandler(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(429);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Too many requests. Please try again later.' });
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockSendSignInEmail).not.toHaveBeenCalled();
+    });
+
+    it('deletes existing codes for the email before pushing a new one', async () => {
+      mockOnce.mockResolvedValue({
+        exists: () => true,
+        forEach: cb => {
+          cb({ key: 'old-1' });
+          cb({ key: 'old-2' });
+        }
+      });
+
+      const req = makeReq('POST', { email: 'user@example.com' });
+      const res = makeRes();
+      await capturedHandler(req, res);
+
+      expect(mockUpdate).toHaveBeenCalledWith({ 'old-1': null, 'old-2': null });
+      expect(mockPush).toHaveBeenCalled();
+      // deletion happens before the new code is pushed
+      expect(mockUpdate.mock.invocationCallOrder[0]).toBeLessThan(mockPush.mock.invocationCallOrder[0]);
     });
 
     it('stores code hash in database (not plaintext code)', async () => {
