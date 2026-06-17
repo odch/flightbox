@@ -86,9 +86,11 @@ export function* sendAuthenticationEmail(action: any) {
 
       yield put(actions.sendAuthenticationEmailSuccess());
     }
-  } catch(e) {
+  } catch(e: any) {
     logError('Failed to send authentication email', e);
-    yield put(actions.sendAuthenticationEmailFailure());
+    // A 429 means the per-email rate limit (cooldown / hourly cap) was hit;
+    // surface a distinct "too many requests" message instead of "Login failed".
+    yield put(actions.sendAuthenticationEmailFailure(e && e.status === 429));
   }
 }
 

@@ -68,6 +68,7 @@ const EmailLoginForm = props => {
     email,
     submitting,
     failure,
+    tooManyRequests,
     emailSent,
     otpVerificationFailure,
     updateEmail,
@@ -84,6 +85,7 @@ const EmailLoginForm = props => {
         email={email}
         submitting={submitting}
         failure={otpVerificationFailure}
+        tooManyRequests={tooManyRequests}
         onSubmit={(code) => verifyOtpCode(email, code)}
         onResend={() => sendAuthenticationEmail(email, !!queryToken)}
         onChangeEmail={resetOtp}
@@ -113,7 +115,7 @@ const EmailLoginForm = props => {
           data-cy="login-form"
         >
           <StyledLabeledComponent label={t('login.emailLabel')} component={emailInput}/>
-          {failure && <Failure failure={failure}/>}
+          {failure && <Failure failure={failure} messageKey={tooManyRequests ? 'login.tooManyRequests' : undefined}/>}
           <SubmitButton
             type="submit"
             label={t('login.loginButton')}
