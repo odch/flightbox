@@ -10,13 +10,15 @@ const Wrapper = styled.div`
 
 const Failure = props => {
   const { t } = useTranslation();
+  const messageKey = props.messageKey || 'login.failure';
   return (
-    <Wrapper>{props.failure ? t('login.failure') : '\u00a0'}</Wrapper>
+    <Wrapper>{props.failure ? t(messageKey) : '\u00a0'}</Wrapper>
   );
 };
 
 Failure.propTypes = {
-  failure: PropTypes.bool.isRequired
+  failure: PropTypes.bool.isRequired,
+  messageKey: PropTypes.string
 };
 
 export default Failure;

@@ -113,12 +113,13 @@ interface OtpCodeFormProps {
   email: string;
   submitting: boolean;
   failure: boolean;
+  tooManyRequests?: boolean;
   onSubmit: (code: string) => void;
   onResend?: () => void;
   onChangeEmail?: () => void;
 }
 
-const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, onSubmit, onResend, onChangeEmail }) => {
+const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, tooManyRequests, onSubmit, onResend, onChangeEmail }) => {
   const { t } = useTranslation();
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -246,6 +247,7 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, o
         ))}
       </OtpInputsRow>
       {failure && <FailureMessage>{t('login.otpVerificationFailure')}</FailureMessage>}
+      {tooManyRequests && <FailureMessage>{t('login.tooManyRequests')}</FailureMessage>}
       <Actions>
         <Button
           type="button"

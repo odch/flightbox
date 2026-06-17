@@ -44,7 +44,7 @@ export type AuthAction =
   | { type: typeof KIOSK_TOKEN_AUTHENTICATION_FAILURE }
   | { type: typeof SEND_AUTHENTICATION_EMAIL; payload: { email: string; local: boolean } }
   | { type: typeof SEND_AUTHENTICATION_EMAIL_SUCCESS }
-  | { type: typeof SEND_AUTHENTICATION_EMAIL_FAILURE }
+  | { type: typeof SEND_AUTHENTICATION_EMAIL_FAILURE; payload: { rateLimited: boolean } }
   | { type: typeof VERIFY_OTP_CODE; payload: { email: string; code: string } }
   | { type: typeof OTP_VERIFICATION_FAILURE }
   | { type: typeof REQUEST_FIREBASE_AUTHENTICATION; payload: { token: string; failureAction?: AuthAction; local?: boolean } }
@@ -141,9 +141,10 @@ export function sendAuthenticationEmailSuccess() {
   };
 }
 
-export function sendAuthenticationEmailFailure() {
+export function sendAuthenticationEmailFailure(rateLimited = false) {
   return {
     type: SEND_AUTHENTICATION_EMAIL_FAILURE,
+    payload: { rateLimited },
   };
 }
 

@@ -86,6 +86,16 @@ describe('OtpCodeForm', () => {
       expect(screen.getByText('login.otpResendIn')).toBeInTheDocument();
     });
 
+    it('shows the too-many-requests message when rate limited', () => {
+      renderWithTheme(<OtpCodeForm {...baseProps} tooManyRequests={true} onResend={jest.fn()} />);
+      expect(screen.getByText('login.tooManyRequests')).toBeInTheDocument();
+    });
+
+    it('does not show the too-many-requests message by default', () => {
+      renderWithTheme(<OtpCodeForm {...baseProps} onResend={jest.fn()} />);
+      expect(screen.queryByText('login.tooManyRequests')).not.toBeInTheDocument();
+    });
+
     it('submit button is disabled when no digits are entered', () => {
       renderWithTheme(<OtpCodeForm {...baseProps} />);
       expect(screen.getByRole('button', { name: /login.loginButton/ })).toBeDisabled();
