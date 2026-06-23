@@ -134,31 +134,14 @@ $ firebase deploy --only functions
 
 Can be called to create a custom authentication token. Has to be called via **`POST`**.
 
-There are two authentication modes implemented: `ip` and `flightnet`.
+The following authentication modes are implemented: `static`, `guest_token` and `kiosk_token`.
 
-#### Mode *ip*
+#### Mode *static*
 
-Returns a token if the request comes from one of the allowed IP addresses. The allowed addresses can be configured
-via the configuration property `auth.ips`. The following example sets the IP addresses `109.205.200.60` and
-`77.59.197.122` as allowed IP addresses.
-
-```
-$ firebase functions:config:set auth.ips="109.205.200.60,77.59.197.122" 
-```
-
-Request example:
-```
-$ curl \
-    -X POST \
-    -H "Content-Type: application/json" \
-    -d '{"mode": "ip"}' \
-    https://europe-west1-<PROJECT_ID>.cloudfunctions.net/auth
-```
-
-#### Mode *flightnet*
-
-Returns a token if the given credentials are valid Flightnet credentials. You have to send the flightnet company,
-the username and the password in the request body.
+Returns a token if the given username and password match one of the configured static credentials. The credentials
+are configured via the `AUTH_STATIC_CREDENTIALS` environment variable as a comma-separated list of `username:password`
+pairs (e.g. `AUTH_STATIC_CREDENTIALS="foo:bar,admin:12345"`). If no credentials are configured, authentication always
+fails.
 
 Request example:
 
@@ -166,27 +149,7 @@ Request example:
 $ curl \
     -X POST \
     -H "Content-Type: application/json" \
-    -d '{"mode": "flightnet", "company": "<FLIGHTNET_COMPANY>", "username": "<FLIGHTNET_USERNAME>", "password": "<FLIGHTNET_PASSWORD>"}' \
-    https://europe-west1-<PROJECT_ID>.cloudfunctions.net/auth
-```
-
-##### Test credentials #####
-
-For testing purposes, test credentials can be set for this mode. If test credentials are set, authentication will
-**never** be delegated to the Flightnet authentication service.
-
-Set the test credentials in the function config:
-```
-$ firebase functions:config:set auth.testcredentials.username="foo"
-$ firebase functions:config:set auth.testcredentials.password="bar"
-```
-
-Request example (`company` not needed in request body):
-```
-curl \
-    -X POST \
-    -H "Content-Type: application/json" \
-    -d '{"mode": "flightnet", "username": "foo", "password": "bar"}' \
+    -d '{"mode": "static", "username": "<USERNAME>", "password": "<PASSWORD>"}' \
     https://europe-west1-<PROJECT_ID>.cloudfunctions.net/auth
 ```
 

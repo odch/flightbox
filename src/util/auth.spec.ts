@@ -4,7 +4,6 @@ describe('util', () => {
 
     beforeEach(() => {
       global.__FIREBASE_PROJECT_ID__ = 'test-project-id';
-      global.__FLIGHTNET_COMPANY__ = 'TEST_COMPANY';
 
       global.fetch = jest.fn().mockResolvedValue({
         json: () => Promise.resolve({token: 'test-token'})
@@ -26,11 +25,10 @@ describe('util', () => {
       expect(getCallUrl()).toContain('auth');
     });
 
-    it('loadCredentialsToken posts with flightnet mode and company', async () => {
+    it('loadCredentialsToken posts with static mode', async () => {
       await loadCredentialsToken({username: 'user', password: 'pass'});
       const body = getCallBody();
-      expect(body.mode).toBe('flightnet');
-      expect(body.company).toBe('TEST_COMPANY');
+      expect(body.mode).toBe('static');
       expect(body.username).toBe('user');
       expect(body.password).toBe('pass');
     });
