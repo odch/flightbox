@@ -17,8 +17,7 @@ const post = (data?: object): Promise<string> =>
 
 export const loadCredentialsToken = (credentials: object): Promise<string> =>
   post(Object.assign({}, credentials, {
-    mode: 'flightnet',
-    company: __FLIGHTNET_COMPANY__
+    mode: 'static'
   }));
 
 export const loadGuestToken = (queryToken: string): Promise<string> =>
