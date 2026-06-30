@@ -1208,7 +1208,7 @@ describe('modules', () => {
         });
 
         it('should not scope loadLimited for a shared-access user without an email (lspv)', () => {
-          // Static/flightnet logins have no Firebase email, so createdBy is
+          // Static logins have no Firebase email, so createdBy is
           // undefined and the unbounded query is used — shared-access projects
           // keep showing all movements.
           const movements = {

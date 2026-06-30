@@ -1,6 +1,5 @@
 'use strict';
 
-const flightnet = require('./flightnet');
 const requestHelper = require('../../util/requestHelper');
 
 const parseStaticCredentials = () => {
@@ -23,13 +22,10 @@ module.exports = req => {
   const username = requestHelper.requireBodyProperty(req, 'username');
   const password = requestHelper.requireBodyProperty(req, 'password');
 
-  if (staticCredentials) {
-    const match = staticCredentials.find(login => login.username === username && login.password === password);
-    const uid = match ? username : null;
-    return Promise.resolve(uid);
-  } else {
-    const company = requestHelper.requireBodyProperty(req, 'company');
-    return flightnet.passwordCheck(company, username, password)
-      .then(success => success ? username : null)
+  if (!staticCredentials) {
+    return Promise.resolve(null);
   }
+
+  const match = staticCredentials.find(login => login.username === username && login.password === password);
+  return Promise.resolve(match ? username : null);
 };
