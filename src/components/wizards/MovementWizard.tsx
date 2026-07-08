@@ -73,6 +73,14 @@ const MovementWizard = (props: MovementWizardProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Wizard steps change a Redux page index without a route change, so the
+  // app-level scroll-to-top (keyed on the location) never fires between
+  // steps. Reset the scroll on every step change so the flight type and
+  // step header at the top of the page stay visible on mobile.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [props.wizard.page]);
+
   const isUpdate = typeof params.key === 'string' && params.key.length > 0;
 
   const breadcrumbItems = props.pages.map(page => ({

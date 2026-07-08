@@ -249,6 +249,41 @@ describe('MovementWizard', () => {
     });
   });
 
+  describe('scroll to top on step change', () => {
+    let scrollToSpy: jest.Mock;
+    let originalScrollTo: typeof window.scrollTo;
+
+    beforeEach(() => {
+      originalScrollTo = window.scrollTo;
+      scrollToSpy = jest.fn();
+      (window as any).scrollTo = scrollToSpy;
+    });
+
+    afterEach(() => {
+      (window as any).scrollTo = originalScrollTo;
+    });
+
+    it('scrolls to the top when the wizard page changes', () => {
+      const props = createProps();
+      const { rerender } = render(<MovementWizard {...props} />);
+      scrollToSpy.mockClear();
+
+      rerender(<MovementWizard {...props} wizard={{ ...props.wizard, page: 2 }} />);
+
+      expect(scrollToSpy).toHaveBeenCalledWith(0, 0);
+    });
+
+    it('does not scroll when the page stays the same', () => {
+      const props = createProps();
+      const { rerender } = render(<MovementWizard {...props} />);
+      scrollToSpy.mockClear();
+
+      rerender(<MovementWizard {...props} locked={true} />);
+
+      expect(scrollToSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('commit error', () => {
     it('renders CommitFailureDialog when commitError is set', () => {
       render(<MovementWizard {...createProps({
