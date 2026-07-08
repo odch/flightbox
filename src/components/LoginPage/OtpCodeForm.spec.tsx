@@ -297,6 +297,42 @@ describe('OtpCodeForm', () => {
     });
   });
 
+  // ─── Autofill ─────────────────────────────────────────────────────────────
+
+  // iOS Security-Code AutoFill drops the whole code into the focused (first)
+  // field in a single change event, rather than one digit per box.
+  describe('autofill', () => {
+    it('spreads the whole code across all inputs when it lands in the first field', () => {
+      renderWithTheme(<OtpCodeForm {...baseProps} />);
+      const inputs = getDigits();
+      fireEvent.change(inputs[0], { target: { value: '123456' } });
+      expect(inputs[0]).toHaveValue('1');
+      expect(inputs[1]).toHaveValue('2');
+      expect(inputs[2]).toHaveValue('3');
+      expect(inputs[3]).toHaveValue('4');
+      expect(inputs[4]).toHaveValue('5');
+      expect(inputs[5]).toHaveValue('6');
+    });
+
+    it('auto-submits when the whole code is autofilled into the first field', () => {
+      const onSubmit = jest.fn();
+      renderWithTheme(<OtpCodeForm {...baseProps} onSubmit={onSubmit} />);
+      const inputs = getDigits();
+      fireEvent.change(inputs[0], { target: { value: '246813' } });
+      act(() => { jest.runAllTimers(); });
+      expect(onSubmit).toHaveBeenCalledWith('246813');
+    });
+
+    it('does not overflow when a multi-digit value lands in a later field', () => {
+      renderWithTheme(<OtpCodeForm {...baseProps} />);
+      const inputs = getDigits();
+      fireEvent.change(inputs[4], { target: { value: '123456' } });
+      // only the two remaining slots (index 4 and 5) are filled
+      expect(inputs[4]).toHaveValue('1');
+      expect(inputs[5]).toHaveValue('2');
+    });
+  });
+
   // ─── Auto-submit ──────────────────────────────────────────────────────────
 
   describe('auto-submit', () => {
