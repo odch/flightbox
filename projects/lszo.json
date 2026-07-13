@@ -45,7 +45,8 @@
     "production": {
       "firebaseProjectId": "lszo-prod",
       "firebaseDatabaseUrl": "https://lszo-prod-default-rtdb.europe-west1.firebasedatabase.app",
-      "firebaseApiKey": "AIzaSyCSNFVN4__gWMYKLYfxyg6Dr7SIvzpdpgE"
+      "firebaseApiKey": "AIzaSyCSNFVN4__gWMYKLYfxyg6Dr7SIvzpdpgE",
+      "passkeysEnabled": true
     }
   },
   "theme": "lszo",
