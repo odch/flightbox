@@ -156,8 +156,36 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, t
     }
   }, [onSubmit, submitting]);
 
+  // Spreads a run of digits across the boxes starting at startIndex, moves
+  // focus to the last filled box and auto-submits once all six are present.
+  // Shared by paste and by autofill (iOS drops the whole code into one field).
+  const fillFrom = useCallback((startIndex: number, digitsStr: string) => {
+    setDigits(prev => {
+      const next = [...prev];
+      for (let i = 0; i < digitsStr.length && startIndex + i < CODE_LENGTH; i++) {
+        next[startIndex + i] = digitsStr[i];
+      }
+
+      const focusIndex = Math.min(startIndex + digitsStr.length, CODE_LENGTH - 1);
+      setTimeout(() => focusInput(focusIndex), 0);
+
+      const code = next.join('');
+      if (code.length === CODE_LENGTH && next.every(d => d !== '')) {
+        setTimeout(() => submitCode(code), 0);
+      }
+      return next;
+    });
+  }, [focusInput, submitCode]);
+
   const handleChange = useCallback((index: number, value: string) => {
-    const digit = value.replace(/\D/g, '').slice(-1);
+    const cleaned = value.replace(/\D/g, '');
+    // Autofill (or a paste landing in a field) delivers the whole code to a
+    // single input; spread it across the boxes instead of keeping one digit.
+    if (cleaned.length > 1) {
+      fillFrom(index, cleaned.slice(0, CODE_LENGTH - index));
+      return;
+    }
+    const digit = cleaned.slice(-1);
     setDigits(prev => {
       const next = [...prev];
       next[index] = digit;
@@ -170,7 +198,7 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, t
       }
       return next;
     });
-  }, [focusInput, submitCode]);
+  }, [fillFrom, focusInput, submitCode]);
 
   const handleKeyDown = useCallback((index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace') {
@@ -200,20 +228,9 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, t
     e.preventDefault();
     const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, CODE_LENGTH);
     if (!pasted) return;
-
-    const next = Array(CODE_LENGTH).fill('');
-    for (let i = 0; i < pasted.length; i++) {
-      next[i] = pasted[i];
-    }
-    setDigits(next);
-
-    const focusIndex = Math.min(pasted.length, CODE_LENGTH - 1);
-    setTimeout(() => focusInput(focusIndex), 0);
-
-    if (pasted.length === CODE_LENGTH) {
-      setTimeout(() => submitCode(pasted), 0);
-    }
-  }, [focusInput, submitCode]);
+    setDigits(Array(CODE_LENGTH).fill(''));
+    fillFrom(0, pasted);
+  }, [fillFrom]);
 
   const code = digits.join('');
   const isComplete = code.length === CODE_LENGTH && digits.every(d => d !== '');
@@ -235,9 +252,8 @@ const OtpCodeForm: React.FC<OtpCodeFormProps> = ({ email, submitting, failure, t
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
-            maxLength={1}
             value={digit}
-            autoComplete={index === 0 ? 'one-time-code' : 'off'}
+            autoComplete="one-time-code"
             autoFocus={index === 0}
             disabled={submitting}
             $filled={digit !== ''}
