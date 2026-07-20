@@ -20,7 +20,7 @@ const baseState = (overrides: any = {}) => ({
     {location: 'LSGG', createdBy: 'pilot@example.com'},
     {location: 'LSZR', createdBy: 'pilot@example.com'},
   ]}},
-  frequentAerodromes: {data: [], loaded: false},
+  frequentAerodromes: {data: [], loaded: false, session: []},
   ...overrides,
 });
 
@@ -33,7 +33,8 @@ const renderWith = (state: any, props: any = {}) => {
       </ThemeProvider>
     </Provider>
   );
-  return {store, ...utils};
+  const chip = (cy: string) => utils.container.querySelector(`[data-cy="${cy}"]`);
+  return {store, chip, ...utils};
 };
 
 describe('AerodromeQuickPicks', () => {
@@ -46,27 +47,27 @@ describe('AerodromeQuickPicks', () => {
   });
 
   it('renders the home chip plus the pilot\'s frequent aerodromes', () => {
-    const {getByTestId} = renderWith(baseState());
-    expect(getByTestId('quickpick-home').textContent).toContain('LSZO');
-    expect(getByTestId('quickpick-LSGG')).toBeTruthy();
-    expect(getByTestId('quickpick-LSZR')).toBeTruthy();
+    const {chip} = renderWith(baseState());
+    expect(chip('quickpick-home')!.textContent).toContain('LSZO');
+    expect(chip('quickpick-LSGG')).toBeTruthy();
+    expect(chip('quickpick-LSZR')).toBeTruthy();
   });
 
   it('calls onSelect with the ICAO when a chip is clicked', () => {
     const onSelect = jest.fn();
-    const {getByTestId} = renderWith(baseState(), {onSelect});
-    fireEvent.click(getByTestId('quickpick-LSGG'));
+    const {chip} = renderWith(baseState(), {onSelect});
+    fireEvent.click(chip('quickpick-LSGG')!);
     expect(onSelect).toHaveBeenCalledWith('LSGG');
-    fireEvent.click(getByTestId('quickpick-home'));
+    fireEvent.click(chip('quickpick-home')!);
     expect(onSelect).toHaveBeenCalledWith('LSZO');
   });
 
   it('shows only the home chip for a guest', () => {
-    const {getByTestId, queryByTestId} = renderWith(baseState({
+    const {chip} = renderWith(baseState({
       auth: {data: {email: null, guest: true, kiosk: false}},
     }));
-    expect(getByTestId('quickpick-home')).toBeTruthy();
-    expect(queryByTestId('quickpick-LSGG')).toBeNull();
+    expect(chip('quickpick-home')).toBeTruthy();
+    expect(chip('quickpick-LSGG')).toBeNull();
   });
 
   it('renders nothing when readOnly', () => {
@@ -80,13 +81,14 @@ describe('AerodromeQuickPicks', () => {
   });
 
   it('fetches once for an admin, whose loaded list is club-wide', () => {
-    const {store, getByTestId} = renderWith(baseState({
+    const {store, chip} = renderWith(baseState({
       auth: {data: {email: 'admin@example.com', admin: true, guest: false, kiosk: false}},
       movements: {data: {array: [{location: 'LFSB', createdBy: 'someone@else.com'}]}},
       frequentAerodromes: {data: ['LSZR'], loaded: false, session: []},
     }));
     expect(store.dispatch).toHaveBeenCalledWith(loadFrequentAerodromes());
     // uses the fetched slice, not the club-wide movement list
-    expect(getByTestId('quickpick-LSZR')).toBeTruthy();
+    expect(chip('quickpick-LSZR')).toBeTruthy();
+    expect(chip('quickpick-LFSB')).toBeNull();
   });
 });
