@@ -7,6 +7,7 @@ import validate from '../../validate';
 import {renderAerodromeDropdown, renderDateField, renderIncrementationField, renderTimeField} from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
+import AerodromeQuickPicks from '../../AerodromeQuickPicks';
 import {getAircraftOrigin, updateFeesTotal, updateGoAroundFees, updateLandingFees} from '../../../../util/landingFees'
 
 const toNumber = value => {
@@ -28,7 +29,7 @@ const DepartureArrivalPage = (props) => {
       validate={validate('arrival', ['location', 'date', 'time', 'landingCount'], hiddenFields)}
       onSubmit={onSubmit}
     >
-      {({handleSubmit, form}) => (
+      {({handleSubmit, form, values}) => (
         <form onSubmit={handleSubmit} className="DepartureArrivalPage">
           <FieldSet>
             <Field
@@ -45,6 +46,13 @@ const DepartureArrivalPage = (props) => {
                   },
                   meta,
                   label: t('movement.details.origin'),
+                  footer: (
+                    <AerodromeQuickPicks
+                      value={values.location}
+                      onSelect={icao => form.change('location', icao)}
+                      readOnly={readOnly}
+                    />
+                  ),
                 })
               }
             </Field>

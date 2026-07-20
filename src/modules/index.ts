@@ -15,6 +15,7 @@ import reports, {sagas as reportsSagas} from './reports';
 import ui, {sagas as uiSagas} from './ui';
 import users, {sagas as usersSagas} from './users';
 import profile, {sagas as profileSagas} from './profile';
+import frequentAerodromes, {sagas as frequentAerodromesSagas} from './frequentAerodromes';
 
 const createRootReducer = () => combineReducers({
   aerodromes,
@@ -29,7 +30,8 @@ const createRootReducer = () => combineReducers({
   reports,
   ui,
   users,
-  profile
+  profile,
+  frequentAerodromes
 });
 
 export type RootState = ReturnType<ReturnType<typeof createRootReducer>>;
@@ -51,6 +53,7 @@ export const sagas = function* rootSaga() {
     uiSagas,
     usersSagas,
     profileSagas,
+    frequentAerodromesSagas,
     customsSagas
   ]))
 };
