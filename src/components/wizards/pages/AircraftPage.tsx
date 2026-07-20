@@ -1,53 +1,15 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import {Field, Form} from 'react-final-form'
 import validate from '../validate';
 import {renderAircraftCategoryDropdown, renderAircraftDropdown, renderInputField} from '../renderField';
 import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
 import MaterialIcon from '../../MaterialIcon';
+import {Chip, FavouritesBar, StarIcon} from '../QuickPickBar';
 import {getAircraftOrigin, updateFeesTotal, updateGoAroundFees, updateLandingFees} from '../../../util/landingFees'
 import type { Aircraft } from '../../../modules/profile/migration';
-
-const FavouritesBar = styled.div`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.6em;
-  padding: 0.4em 1em;
-  margin: 0 1em 1em;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  overflow: hidden;
-`;
-
-const StarIcon = styled.span`
-  color: #e8a735;
-  display: flex;
-  align-items: center;
-  font-size: 1.1em;
-`;
-
-const Chip = styled.button<{ $active?: boolean }>`
-  padding: 0.5em 0.9em;
-  min-height: 44px;
-  border: 1px solid ${props => props.$active ? props.theme.colors.main : '#ddd'};
-  border-radius: 3px;
-  background-color: ${props => props.$active ? props.theme.colors.main : '#fff'};
-  color: ${props => props.$active ? '#fff' : '#555'};
-  font-family: inherit;
-  font-size: 0.9em;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    border-color: ${props => props.theme.colors.main};
-    color: ${props => props.$active ? '#fff' : props.theme.colors.main};
-  }
-`;
 
 function applyAircraft(form: any, aircraft: { key: string; type?: string; mtow?: number; category?: string }, aircraftSettings: any) {
   form.change('immatriculation', aircraft.key);

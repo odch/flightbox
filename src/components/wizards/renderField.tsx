@@ -28,7 +28,7 @@ const StyledLabeledComponent = styled(LabeledComponent)`
 `;
 
 const renderLabeledComponent = (props, component) => {
-  const { name, label, tooltip, hidden, meta: { touched, error } } = props;
+  const { name, label, tooltip, hidden, footer, meta: { touched, error } } = props;
   if (hidden) {
     return null
   }
@@ -39,6 +39,7 @@ const renderLabeledComponent = (props, component) => {
       component={component}
       validationError={touched && error ? error : null}
       tooltip={tooltip}
+      footer={footer}
     />
   );
 };
@@ -115,6 +116,8 @@ export const renderTextArea = (props) => {
 
 export const renderAerodromeDropdown = (props) => {
   const cmp = <AerodromeDropdown {...props.input} readOnly={props.readOnly} dataCy={props.input.name}/>;
+  // `props.footer` (e.g. quick-pick chips) is forwarded to LabeledComponent, which
+  // renders it below the input but outside the input container — see renderLabeledComponent.
   return renderLabeledComponent(props, cmp);
 };
 

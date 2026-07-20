@@ -6,6 +6,7 @@ import validate from '../../validate';
 import {renderAerodromeDropdown, renderDateField, renderDurationField, renderTimeField,} from '../../renderField';
 import FieldSet from '../../FieldSet';
 import WizardNavigation from '../../../WizardNavigation';
+import AerodromeQuickPicks from '../../AerodromeQuickPicks';
 
 const DepartureArrivalPage = (props) => {
   const { t } = useTranslation();
@@ -16,7 +17,7 @@ const DepartureArrivalPage = (props) => {
       validate={validate('departure', ['date', 'time', 'location', 'duration'], hiddenFields)}
       onSubmit={onSubmit}
     >
-      {({handleSubmit, form}) => (
+      {({handleSubmit, form, values}) => (
         <form onSubmit={handleSubmit} className="DepartureArrivalPage">
           <FieldSet>
             <Field
@@ -47,6 +48,13 @@ const DepartureArrivalPage = (props) => {
                   },
                   meta,
                   label: t('movement.details.destination'),
+                  footer: (
+                    <AerodromeQuickPicks
+                      value={values.location}
+                      onSelect={icao => form.change('location', icao)}
+                      readOnly={readOnly}
+                    />
+                  ),
                 })
               }
             </Field>
