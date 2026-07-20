@@ -8,7 +8,19 @@ const optionRenderer = (option, focussed) => (
   <Option code={option.key} name={option.name} focussed={focussed}/>
 );
 
-const aerodromesComparator = (filter?) => (aerodrome1, aerodrome2) => {
+export const aerodromesComparator = (filter?) => (aerodrome1, aerodrome2) => {
+  // Place the home aerodrome first (most common location: circuits/local flights)
+  const homeIcao = typeof __CONF__ !== 'undefined' && __CONF__.aerodrome
+    ? __CONF__.aerodrome.ICAO
+    : undefined;
+  if (homeIcao) {
+    const isHome1 = aerodrome1.key.toUpperCase() === homeIcao;
+    const isHome2 = aerodrome2.key.toUpperCase() === homeIcao;
+
+    if (isHome1 && !isHome2) return -1;
+    if (!isHome1 && isHome2) return 1;
+  }
+
   // Place "LS" aerodromes first
   const isLS1 = aerodrome1.key.toUpperCase().startsWith("LS");
   const isLS2 = aerodrome2.key.toUpperCase().startsWith("LS");

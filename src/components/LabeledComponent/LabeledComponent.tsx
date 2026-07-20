@@ -11,6 +11,10 @@ interface LabeledComponentProps {
   className?: string;
   validationError?: string | null;
   tooltip?: string;
+  // Rendered inside the field wrapper, below the input but outside the input's
+  // ComponentContainer, so it shares the field width without inheriting the input
+  // sizing (e.g. quick-pick chips under a dropdown).
+  footer?: React.ReactNode;
 }
 
 const LabeledComponent: React.FC<LabeledComponentProps> = ({
@@ -19,6 +23,7 @@ const LabeledComponent: React.FC<LabeledComponentProps> = ({
   className,
   validationError,
   tooltip,
+  footer,
 }) => {
   const [tooltipVisible, setTooltipVisible] = useState(false);
 
@@ -27,6 +32,7 @@ const LabeledComponent: React.FC<LabeledComponentProps> = ({
       <Label>{label}</Label>
       {validationError && <ValidationMessage error={validationError}/>}
       <ComponentContainer>{component}</ComponentContainer>
+      {footer}
       {tooltipVisible && tooltip && <Tooltip>{tooltip}</Tooltip>}
     </Wrapper>
   );
