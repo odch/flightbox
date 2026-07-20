@@ -14,7 +14,8 @@ describe('AerodromeDropdown', () => {
       keys.map(key => ({key, name: key})).sort(aerodromesComparator()).map(a => a.key);
 
     it('places the home aerodrome first', () => {
-      expect(sortKeys(['LSGG', 'LSZO', 'LFSB'])).toEqual(['LSZO', 'LFSB', 'LSGG']);
+      // After home (LSZO), Swiss LS aerodromes rank before non-LS ones.
+      expect(sortKeys(['LSGG', 'LSZO', 'LFSB'])).toEqual(['LSZO', 'LSGG', 'LFSB']);
     });
 
     it('keeps the home aerodrome ahead of other LS aerodromes', () => {
