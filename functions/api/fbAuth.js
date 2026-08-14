@@ -22,7 +22,10 @@ const fbAuth = async (req, res, next) => {
   }
 
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    // Pass checkRevoked=true so revoked sessions and disabled accounts are
+    // rejected immediately (matches the WebAuthn path in webauthnHelpers.js),
+    // rather than remaining valid until the ID token expires.
+    const decodedToken = await admin.auth().verifyIdToken(idToken, true);
     const uid = decodedToken.uid;
     console.log('Authenticated user:', uid);
 

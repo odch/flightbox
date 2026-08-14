@@ -49,7 +49,7 @@ describe('functions', () => {
 
         await fbAuth(req, res, next);
 
-        expect(admin.auth().verifyIdToken).toHaveBeenCalledWith('valid-token');
+        expect(admin.auth().verifyIdToken).toHaveBeenCalledWith('valid-token', true);
         expect(req.fbUserId).toBe('user123');
         expect(req.fbUserEmail).toBe('user@test.com');
         expect(next).toHaveBeenCalled();
@@ -61,6 +61,20 @@ describe('functions', () => {
 
         await fbAuth(req, res, next);
 
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.send).toHaveBeenCalledWith('Unauthorized');
+        expect(next).not.toHaveBeenCalled();
+      });
+
+      it('returns 401 when the token has been revoked', async () => {
+        req.headers.authorization = 'Bearer revoked-token';
+        const revokedError = new Error('Token revoked');
+        revokedError.code = 'auth/id-token-revoked';
+        admin.auth().verifyIdToken.mockRejectedValue(revokedError);
+
+        await fbAuth(req, res, next);
+
+        expect(admin.auth().verifyIdToken).toHaveBeenCalledWith('revoked-token', true);
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.send).toHaveBeenCalledWith('Unauthorized');
         expect(next).not.toHaveBeenCalled();
