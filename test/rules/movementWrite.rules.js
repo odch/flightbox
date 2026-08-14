@@ -141,6 +141,8 @@ async function testPersonalAccess() {
   await expect('pilot reads own movement by key', true, get(ref(alice, 'departures/alice_read')));
   await expect('pilot cannot read another movement by key', false, get(ref(alice, 'departures/bob_read')));
   await expect('guest cannot read movements', false, get(ownQuery(guest, 'departures', 'alice@example.com')));
+  await expect('guest cannot read an ownerless movement by key', false, get(ref(guest, 'departures/ownerless_edit')));
+  await expect('guest cannot read an owned movement by key', false, get(ref(guest, 'departures/alice_read')));
   await expect('admin reads all movements (unbounded query)', true, get(unboundedQuery(admin, 'departures')));
   await expect('admin reads any movement by key', true, get(ref(admin, 'departures/bob_read')));
   await expect('allMovements operator reads all (unbounded query)', true, get(unboundedQuery(operator, 'departures')));

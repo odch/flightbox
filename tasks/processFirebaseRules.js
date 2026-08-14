@@ -42,6 +42,12 @@ function processMovementOwnership(config) {
 // (their email), and a single-record read only for the record's owner; admins
 // read everything. Guest/kiosk (no email) read nothing. Shared-access projects
 // keep the permissive rule.
+//
+// The owner comparison must first require a non-null `auth.token.email`:
+// guest/kiosk tokens carry no email claim, and ownerless (guest-created)
+// movements carry no `createdBy`, so without this guard both sides evaluate to
+// null and `null === null` would let any guest/kiosk read every ownerless
+// movement by key.
 const readProcessors = {
   movementListRead: processMovementListRead,
   movementItemRead: processMovementItemRead,
@@ -64,7 +70,7 @@ function processMovementItemRead(config) {
   if (config.loginForm !== 'email') {
     return "auth !== null";
   }
-  return "auth !== null && (" + CAN_SEE_ALL_MOVEMENTS + " || data.child('createdBy').val() === auth.token.email)";
+  return "auth !== null && (" + CAN_SEE_ALL_MOVEMENTS + " || (auth.token.email !== null && data.child('createdBy').val() === auth.token.email))";
 }
 
 function newValEquals(val) {
