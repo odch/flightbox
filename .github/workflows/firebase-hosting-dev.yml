@@ -19,13 +19,13 @@ jobs:
     environment: ${{ matrix.environment }}
     steps:
       - run: echo 'Running deplyoment for project ${{ vars.PROJECT }}'
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
       - run: npm ci
       - run: npm run build --project=${{ vars.PROJECT }}
-      - uses: w9jds/setup-firebase@main
+      - uses: w9jds/setup-firebase@869785322147e6a53d463a55db0a5af1b4ce4ba6 # main (no release tag; pinned)
         with:
           project_id: ${{ vars.FIREBASE_PROJECT }}
           tools-version: 14
@@ -47,11 +47,11 @@ jobs:
     environment: ${{ matrix.environment }}
     steps:
       - run: echo 'Running functions deplyoment for project ${{ vars.PROJECT }}'
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
-      - uses: w9jds/setup-firebase@main
+      - uses: w9jds/setup-firebase@869785322147e6a53d463a55db0a5af1b4ce4ba6 # main (no release tag; pinned)
         with:
           project_id: ${{ vars.FIREBASE_PROJECT }}
           tools-version: 14
