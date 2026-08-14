@@ -14,7 +14,7 @@ const processors = {
 // projects (e.g. lspv) keep the permissive lockDate-only rule. The
 // `{movementOwnership}` token in the movement `.write` rule is replaced with
 // this suffix so the lockDate expression itself stays verbatim in the template.
-const IS_ADMIN = "root.child('admins/' + auth.uid).exists()";
+const IS_ADMIN = "root.child('admins/' + auth.uid).val() === true";
 
 const IS_GUEST_OR_KIOSK = "(auth.uid === 'guest' || auth.uid === 'kiosk')";
 

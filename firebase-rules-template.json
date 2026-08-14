@@ -244,14 +244,14 @@
     },
     "aircrafts": {
       ".read": "auth !== null",
-      ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
+      ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true",
       ".indexOn": [
         "type"
       ]
     },
     "users": {
       ".read": "auth !== null",
-      ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
+      ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true",
       ".indexOn": [
         "memberNr"
       ]
@@ -266,27 +266,27 @@
     "settings": {
       "lockDate": {
         ".read": "auth !== null",
-        ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
+        ".write":  "auth !== null && root.child('admins/' + auth.uid).val() === true"
       },
       "guestAccessToken": {
-        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
         ".write":  false
       },
       "kioskAccessToken": {
-        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
         ".write":  false
       },
       "aircrafts": {
         "homeBase": {
           ".read": "auth !== null",
-          ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
+          ".write":  "auth !== null && root.child('admins/' + auth.uid).val() === true"
         },
         "club": {
           ".read": "auth !== null",
-          ".write":  "auth !== null && root.child('admins/' + auth.uid).exists()"
+          ".write":  "auth !== null && root.child('admins/' + auth.uid).val() === true"
         },
         "custom": {
-          ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+          ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
           ".write": false
         },
         "$other": {
@@ -294,27 +294,27 @@
         }
       },
       "invoiceRecipients": {
-        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
-        ".write": "auth !== null && root.child('admins/' + auth.uid).exists()"
+        ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true"
       },
       "privacyPolicyUrl": {
         ".read": true,
-        ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true",
         ".validate": "newData.isString()"
       },
       "movementRetentionDays": {
-        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
-        ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true",
         ".validate": "newData.isNumber() && newData.val() > 0"
       },
       "messageRetentionDays": {
-        ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
-        ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true",
         ".validate": "newData.isNumber() && newData.val() > 0"
       },
       "aerodromeStatusBannerEnabled": {
         ".read": true,
-        ".write": "auth !== null && root.child('admins/' + auth.uid).exists()",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true",
         ".validate": "newData.isBoolean()"
       },
       "$other": {
@@ -322,7 +322,7 @@
       }
     },
     "messages": {
-      ".read": "auth !== null && root.child('admins/' + auth.uid).exists()",
+      ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
       ".indexOn": [
         "negativeTimestamp"
       ],
@@ -373,7 +373,7 @@
         "timestamp"
       ],
       "$status_id": {
-        ".write": "auth !== null && root.child('admins/' + auth.uid).exists() && !data.exists() && newData.exists()",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true && !data.exists() && newData.exists()",
         ".validate": "newData.hasChildren(['status', 'details', 'timestamp', 'by'])",
         "status": {
           ".validate": "newData.val() === 'open' || newData.val() === 'restricted' || newData.val() === 'closed'"
@@ -407,7 +407,7 @@
     "card-payments": {
       "$card_payment_id": {
         ".read": "auth !== null",
-        ".write": "auth !== null && newData.exists() && (root.child('admins/' + auth.uid).exists() || (!data.exists() && newData.child('status').val() === 'pending') || (data.exists() && data.child('status').val() === 'pending' && newData.child('status').val() === 'cancelled'))",
+        ".write": "auth !== null && newData.exists() && (root.child('admins/' + auth.uid).val() === true || (!data.exists() && newData.child('status').val() === 'pending') || (data.exists() && data.child('status').val() === 'pending' && newData.child('status').val() === 'cancelled'))",
         ".validate": "newData.hasChildren(['amount', 'currency', 'arrivalReference', 'refNr', 'timestamp', 'status'])",
         "currency": {
           ".validate": "newData.isString() && newData.val().length > 0"
