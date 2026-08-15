@@ -6,7 +6,6 @@ import aerodromes, {sagas as aerodromesSagas} from './aerodromes';
 import aircrafts, {sagas as aircraftsSagas} from './aircrafts';
 import auth, {sagas as authSagas} from './auth';
 import customs, {sagas as customsSagas} from './customs';
-import imports, {sagas as importsSagas} from './imports';
 import invoiceRecipients, {sagas as invoiceRecipientsSagas} from './invoiceRecipients';
 import movements, {sagas as movementSagas} from './movements';
 import settings, {sagas as settingsSagas} from './settings';
@@ -22,7 +21,6 @@ const createRootReducer = () => combineReducers({
   aircrafts,
   auth,
   customs,
-  imports,
   invoiceRecipients,
   movements,
   settings,
@@ -44,7 +42,6 @@ export const sagas = function* rootSaga() {
     aerodromesSagas,
     aircraftsSagas,
     authSagas,
-    importsSagas,
     invoiceRecipientsSagas,
     movementSagas,
     settingsSagas,
