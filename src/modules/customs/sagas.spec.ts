@@ -66,6 +66,25 @@ describe('modules', () => {
         });
       });
 
+      describe('openCompletionUrl', () => {
+        it('opens https completion URLs', () => {
+          const openMock = jest.fn();
+          window.open = openMock;
+          sagas.openCompletionUrl('https://customs.example/forms/abc');
+          expect(openMock).toHaveBeenCalledWith('https://customs.example/forms/abc', '_blank', 'noopener,noreferrer');
+        });
+
+        it('refuses non-https and invalid completion URLs', () => {
+          const openMock = jest.fn();
+          window.open = openMock;
+          sagas.openCompletionUrl('javascript:alert(1)');
+          sagas.openCompletionUrl('http://evil.example');
+          sagas.openCompletionUrl('data:text/html,x');
+          sagas.openCompletionUrl('not a url');
+          expect(openMock).not.toHaveBeenCalled();
+        });
+      });
+
       describe('startCustoms', () => {
         it('should open completion URL and return early if customsFormId and customsFormUrl exist', () => {
           const openMock = jest.fn();

@@ -91,7 +91,7 @@
           ".validate": "newData.isString()"
         },
         "customsFormUrl": {
-          ".validate": "newData.isString()"
+          ".validate": "newData.isString() && (!root.child('settings/customsDeclarationApp/baseUrl').exists() || newData.val().beginsWith(root.child('settings/customsDeclarationApp/baseUrl').val()))"
         },
         "privacyPolicyAcceptedAt": {
           ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
@@ -228,7 +228,7 @@
           ".validate": "newData.isString()"
         },
         "customsFormUrl": {
-          ".validate": "newData.isString()"
+          ".validate": "newData.isString() && (!root.child('settings/customsDeclarationApp/baseUrl').exists() || newData.val().beginsWith(root.child('settings/customsDeclarationApp/baseUrl').val()))"
         },
         "privacyPolicyAcceptedAt": {
           ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/)"
