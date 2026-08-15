@@ -113,6 +113,21 @@ export const saveCustomsFormData = async (movementData: any, customsFormId: stri
 }
 
 export const openCompletionUrl = (url: string) => {
+  // Defense in depth: only ever navigate to an https URL. The stored
+  // customsFormUrl is constrained to the customs baseUrl by the database
+  // rules, but this also guards values stored before that rule and blocks
+  // dangerous schemes (javascript:, data:, http:).
+  let parsed
+  try {
+    parsed = new URL(url)
+  } catch (e) {
+    console.warn('Refusing to open invalid completion URL')
+    return
+  }
+  if (parsed.protocol !== 'https:') {
+    console.warn('Refusing to open non-https completion URL')
+    return
+  }
   const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
   if (!newWindow) {
     console.warn('Popup blocked for completion URL:', url)
