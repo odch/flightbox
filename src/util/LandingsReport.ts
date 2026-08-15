@@ -63,7 +63,10 @@ class LandingsReport {
   }
 
   getAircraftsSummary(arrivals) {
-    const map: Record<string, any> = {};
+    // Null-prototype: immatriculation is user-controlled, so a value like
+    // '__proto__' must be an ordinary key rather than mutating the prototype
+    // chain (which would corrupt the summary / crash the report).
+    const map: Record<string, any> = Object.create(null);
 
     arrivals.forEach(record => {
       const arrival = firebaseToLocal(record.val());

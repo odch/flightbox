@@ -73,6 +73,21 @@ describe('util', () => {
       return new InvoicesReport(year, month, options);
     }
 
+    describe('groupArrivalsByRecipient', () => {
+      it('groups a __proto__ invoice recipient without corrupting the report', () => {
+        const report = makeReport();
+        const arrivals = [
+          { paymentMethod: { method: 'invoice', invoiceRecipientName: '__proto__' } },
+          { paymentMethod: { method: 'invoice', invoiceRecipientName: '__proto__' } },
+        ];
+
+        const grouped = report.groupArrivalsByRecipient(arrivals);
+
+        expect(Object.keys(grouped)).toContain('__proto__');
+        expect(grouped['__proto__']).toHaveLength(2);
+      });
+    });
+
     describe('constructor', () => {
       it('pads single-digit month', () => {
         const report = makeReport(2023, 3);

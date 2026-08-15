@@ -172,7 +172,10 @@ class InvoicesReport {
   }
 
   groupArrivalsByRecipient(arrivals) {
-    const recipients = {}
+    // Null-prototype: invoiceRecipientName is user-controlled, so a value like
+    // '__proto__' or 'constructor' must be an ordinary key, not touch the
+    // prototype chain (which would corrupt grouping / crash the report).
+    const recipients = Object.create(null)
 
     arrivals.forEach(arrival => {
       const invoiceRecipientName = arrival.paymentMethod.method === 'invoice'
@@ -196,7 +199,10 @@ class InvoicesReport {
   }
 
   groupCustomsDeclarationsByRecipient(customsDeclarations) {
-    const recipients = {}
+    // Null-prototype: invoiceRecipientName is user-controlled, so a value like
+    // '__proto__' or 'constructor' must be an ordinary key, not touch the
+    // prototype chain (which would corrupt grouping / crash the report).
+    const recipients = Object.create(null)
 
     customsDeclarations.forEach(customsDeclaration => {
       const invoiceRecipientName = customsDeclaration.invoiceRecipientName
