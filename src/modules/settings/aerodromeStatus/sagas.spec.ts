@@ -1,15 +1,14 @@
-import {call, put, select, take} from 'redux-saga/effects';
+import {call, put, select, delay} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
 import FakeFirebaseSnapshot from '../../../../test/FakeFirebaseSnapshot';
 import ImmutableItemsArray from "../../../util/ImmutableItemsArray"
-import firebase from '../../../util/firebase';
-import {onValue} from 'firebase/database';
 
 jest.mock('../../../util/firebase');
 jest.mock('firebase/database', () => ({
-  onValue: jest.fn(),
+  get: jest.fn(),
+  push: jest.fn(),
   query: jest.fn(r => r),
   orderByChild: jest.fn(),
   limitToLast: jest.fn(),
@@ -176,56 +175,65 @@ describe('modules', () => {
           });
         });
 
-        describe('watchCurrentAerodromeStatus', () => {
-          beforeEach(() => {
-            jest.clearAllMocks();
-            (firebase as jest.Mock).mockReturnValue({});
+        describe('mapCurrentStatus', () => {
+          it('maps the API response to the widget shape', () => {
+            expect(sagas.mapCurrentStatus({
+              status: 'restricted',
+              message: 'Eine Landung pro Pilot pro Tag.',
+              last_update_date: '2020-03-17T11:15:00.000Z',
+            })).toEqual({
+              status: 'restricted',
+              details: 'Eine Landung pro Pilot pro Tag.',
+              timestamp: new Date('2020-03-17T11:15:00.000Z').getTime(),
+            });
           });
 
-          it('should wait for WATCH_CURRENT_AERODROME_STATUS and then call onValue', () => {
-            const channel = { put: jest.fn() };
-            const generator = sagas.watchCurrentAerodromeStatus(channel);
-
-            expect(generator.next().value).toEqual(take(actions.WATCH_CURRENT_AERODROME_STATUS));
-            expect(generator.next().done).toEqual(true);
-
-            expect(firebase).toHaveBeenCalledWith('/status');
-            expect(onValue).toHaveBeenCalledWith(expect.anything(), expect.any(Function));
+          it('returns null when there is no current status', () => {
+            expect(sagas.mapCurrentStatus({})).toBeNull();
+            expect(sagas.mapCurrentStatus(null)).toBeNull();
           });
+        });
 
-          it('should call channel.put with status when snapshot has data', () => {
-            const channel = { put: jest.fn() };
-            const generator = sagas.watchCurrentAerodromeStatus(channel);
+        describe('pollCurrentAerodromeStatus', () => {
+          it('fetches the status API, dispatches the mapped status, then delays', () => {
+            const generator = sagas.pollCurrentAerodromeStatus();
 
-            generator.next(); // take
-            generator.next(); // onValue call + done
+            expect(generator.next().value).toEqual(call(remote.fetchCurrentStatus));
 
-            const callback = (onValue as jest.Mock).mock.calls[0][1];
+            const response = {
+              status: 'restricted',
+              message: 'Eine Landung pro Pilot pro Tag.',
+              last_update_date: '2020-03-17T11:15:00.000Z',
+            };
 
-            const statusItem = { status: 'open', details: '' };
-            const snapshot = { val: () => ({ key1: statusItem }) };
-            callback(snapshot);
-
-            expect(channel.put).toHaveBeenCalledWith(
-              actions.setCurrentAerodromeStatus(statusItem)
+            expect(generator.next(response).value).toEqual(
+              put(actions.setCurrentAerodromeStatus({
+                status: 'restricted',
+                details: 'Eine Landung pro Pilot pro Tag.',
+                timestamp: new Date('2020-03-17T11:15:00.000Z').getTime(),
+              }))
             );
+
+            expect(generator.next().value).toEqual(delay(sagas.POLL_INTERVAL_MS));
           });
 
-          it('should call channel.put with null when snapshot is empty', () => {
-            const channel = { put: jest.fn() };
-            const generator = sagas.watchCurrentAerodromeStatus(channel);
+          it('dispatches null when the API returns no current status', () => {
+            const generator = sagas.pollCurrentAerodromeStatus();
 
-            generator.next(); // take
-            generator.next(); // onValue call + done
-
-            const callback = (onValue as jest.Mock).mock.calls[0][1];
-
-            const nullSnapshot = { val: () => null };
-            callback(nullSnapshot);
-
-            expect(channel.put).toHaveBeenCalledWith(
-              actions.setCurrentAerodromeStatus(null)
+            expect(generator.next().value).toEqual(call(remote.fetchCurrentStatus));
+            expect(generator.next({}).value).toEqual(
+              put(actions.setCurrentAerodromeStatus(null))
             );
+            expect(generator.next().value).toEqual(delay(sagas.POLL_INTERVAL_MS));
+          });
+
+          it('keeps polling after a fetch error', () => {
+            const generator = sagas.pollCurrentAerodromeStatus();
+
+            expect(generator.next().value).toEqual(call(remote.fetchCurrentStatus));
+            // The thrown fetch error is caught; the saga still delays and loops.
+            expect(generator.throw(new Error('network')).value)
+              .toEqual(delay(sagas.POLL_INTERVAL_MS));
           });
         });
       });
