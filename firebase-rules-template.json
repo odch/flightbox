@@ -368,7 +368,7 @@
       }
     },
     "status": {
-      ".read": "true",
+      ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
       ".indexOn": [
         "timestamp"
       ],
