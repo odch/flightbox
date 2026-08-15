@@ -90,11 +90,6 @@ jest.mock('../components/ItemList', () => ({
   default: () => <div data-testid="item-list" />,
 }));
 
-jest.mock('../components/UserImportForm', () => ({
-  __esModule: true,
-  default: () => <div data-testid="user-import-form" />,
-}));
-
 jest.mock('../components/YearlySummaryReportForm', () => ({
   __esModule: true,
   default: () => <div data-testid="yearly-summary-report-form" />,
@@ -126,7 +121,6 @@ describe('container mount dispatches', () => {
   let AircraftDropdownContainer: any;
   let AircraftsItemListContainer: any;
   let ArrivalFinishContainer: any;
-  let UserImportFormContainer: any;
   let YearlySummaryReportFormContainer: any;
   let LandingsReportFormContainer: any;
   let AirstatReportFormContainer: any;
@@ -142,7 +136,6 @@ describe('container mount dispatches', () => {
     AircraftsItemListContainer =
       require('./AircraftsItemListContainer').default;
     ArrivalFinishContainer = require('./ArrivalFinishContainer').default;
-    UserImportFormContainer = require('./UserImportFormContainer').default;
     YearlySummaryReportFormContainer = require(
       './YearlySummaryReportFormContainer'
     ).default;
@@ -234,14 +227,6 @@ describe('container mount dispatches', () => {
     );
     expect(countOf(store, 'LOAD_AIRCRAFT_SETTINGS')).toBe(1);
     expect(countOf(store, 'LOAD_USER_INVOICE_RECIPIENTS')).toBe(1);
-  });
-
-  it('UserImportFormContainer dispatches INIT_IMPORT exactly once with name=users', () => {
-    const store = makeStore({ imports: {} });
-    render(wrap(store, <UserImportFormContainer />));
-    const inits = store.actions.filter(a => a.type === 'INIT_IMPORT');
-    expect(inits.length).toBe(1);
-    expect(inits[0].payload.name).toBe('users');
   });
 
   it('YearlySummaryReportFormContainer dispatches INIT_REPORT exactly once with name=yearlySummary', () => {

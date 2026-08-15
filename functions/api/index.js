@@ -3,23 +3,9 @@ const admin = require('firebase-admin')
 const express = require('express')
 const cors = require('cors')({origin: true, credentials: true})
 const fetchAerodromeStatus = require('./fetchAerodromeStatus')
-const basicAuth = require('./basicAuth')
-const syncUsers = require('./syncUsers')
 const fetchUserInvoiceRecipients = require('./fetchUserInvoiceRecipients')
 const {fetchInvoices, fetchCheckouts, postPrepopulatedForm, isCustomsDeclarationAppAvailable} = require('./customs/fetchFromCustoms')
 const {fbAuth, fbAdminAuth} = require('./fbAuth')
-
-// The user-import (member management) endpoint is only relevant to projects with
-// member management enabled (currently lspv). The deploy workflow writes this
-// generated flag from the project's `memberManagement` config; it is absent in
-// local dev / tests, where the endpoint stays disabled. Fail closed: if the
-// flag is missing or false, the route is not registered at all (404).
-let memberManagementEnabled = false
-try {
-  memberManagementEnabled = require('../member-management.generated.js')
-} catch (e) {
-  if (e.code !== 'MODULE_NOT_FOUND') throw e
-}
 
 const api = express()
 
@@ -36,25 +22,6 @@ api.get('(/api)?/aerodrome/status', async (req, res) => {
 
   res.send(status)
 })
-
-if (memberManagementEnabled) {
-  api.post('(/api)?/users/import', basicAuth, async (req, res) => {
-    try {
-      const users = req.body.users
-      if (!Array.isArray(users)) {
-        return res.status(400).send('Invalid users format')
-      }
-
-      const db = admin.database()
-      await syncUsers(db, users)
-
-      res.status(200).send({ message: 'Users imported successfully' })
-    } catch (e) {
-      console.error('Failed to import users', e)
-      res.status(500).send({ error: 'Failed to import users' })
-    }
-  })
-}
 
 api.get('(/api)?/customs/invoices', fbAdminAuth, async (req, res) => {
   try {
@@ -115,5 +82,3 @@ api.get('(/api)?/users/me/invoice-recipients', fbAuth, async (req, res) => {
 })
 
 module.exports = onRequest({ region: 'europe-west1' }, api)
-// Exposed for tests (route registration depends on the member-management flag).
-module.exports.app = api
