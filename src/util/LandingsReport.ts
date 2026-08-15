@@ -5,6 +5,7 @@ import { firebaseToLocal } from './movements';
 import { fetch as fetchAircrafts } from './aircrafts';
 import dates from '../util/dates';
 import moment from 'moment';
+import neutralizeCsvValue from './neutralizeCsvValue';
 
 class LandingsReport {
 
@@ -108,7 +109,7 @@ class LandingsReport {
     };
 
     return LandingsReport.header
-      .map(header => csvRecord[header])
+      .map(header => neutralizeCsvValue(csvRecord[header]))
       .join(this.delimiter);
   }
 }
