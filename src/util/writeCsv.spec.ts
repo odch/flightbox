@@ -56,5 +56,20 @@ describe('util', () => {
         expect(csv).toEqual(expectedCsv);
       });
     });
+
+    it('neutralizes cells that would be interpreted as spreadsheet formulas', () => {
+      const records = [
+        ['header1', 'header2'],
+        ['=1+1', '@SUM(A1)'],
+      ];
+
+      const expectedCsv =
+        'header1,header2\n' +
+        "'=1+1,'@SUM(A1)\n";
+
+      return writeCsv(records).then(csv => {
+        expect(csv).toEqual(expectedCsv);
+      });
+    });
   });
 });
