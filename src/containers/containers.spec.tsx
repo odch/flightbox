@@ -75,11 +75,6 @@ jest.mock('../components/InvoiceRecipientsList', () => ({
   default: () => <div data-testid="invoice-recipients-list" />,
 }));
 
-jest.mock('../components/UserDropdown', () => ({
-  __esModule: true,
-  default: () => <div data-testid="user-dropdown" />,
-}));
-
 jest.mock('../components/AircraftDropdown', () => ({
   __esModule: true,
   default: () => <div data-testid="aircraft-dropdown" />,
@@ -117,7 +112,6 @@ jest.mock('../components/wizards/MovementWizard', () => ({
 
 describe('container mount dispatches', () => {
   let InvoiceRecipientsListContainer: any;
-  let UserDropdownContainer: any;
   let AircraftDropdownContainer: any;
   let AircraftsItemListContainer: any;
   let ArrivalFinishContainer: any;
@@ -131,7 +125,6 @@ describe('container mount dispatches', () => {
   beforeAll(() => {
     InvoiceRecipientsListContainer =
       require('./InvoiceRecipientsListContainer').default;
-    UserDropdownContainer = require('./UserDropdownContainer').default;
     AircraftDropdownContainer = require('./AircraftDropdownContainer').default;
     AircraftsItemListContainer =
       require('./AircraftsItemListContainer').default;
@@ -163,21 +156,6 @@ describe('container mount dispatches', () => {
     });
     render(wrap(store, <InvoiceRecipientsListContainer />));
     expect(countOf(store, 'LOAD_INVOICE_RECIPIENT_SETTINGS')).toBe(1);
-  });
-
-  it('UserDropdownContainer dispatches LOAD_USERS exactly once on mount', () => {
-    const store = makeStore({ users: { data: {} } });
-    render(
-      wrap(
-        store,
-        <UserDropdownContainer
-          onChange={jest.fn()}
-          onFocus={jest.fn()}
-          onBlur={jest.fn()}
-        />
-      )
-    );
-    expect(countOf(store, 'LOAD_USERS')).toBe(1);
   });
 
   it('AircraftDropdownContainer dispatches LOAD_AIRCRAFTS exactly once on mount', () => {

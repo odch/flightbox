@@ -249,13 +249,6 @@
         "type"
       ]
     },
-    "users": {
-      ".read": "auth !== null",
-      ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true",
-      ".indexOn": [
-        "memberNr"
-      ]
-    },
     "aerodromes": {
       ".read": "auth !== null",
       ".write": false,
