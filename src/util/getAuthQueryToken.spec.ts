@@ -27,6 +27,19 @@ describe('util', () => {
       const location = {state: {kioskQueryToken: 'kiosk-val'}, search: ''};
       expect(getAuthQueryToken(location, 'kt', 'kioskQueryToken')).toBe('kiosk-val');
     });
+
+    it('reads the token from a HashRouter fragment query', () => {
+      const uuid = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+      const location = {state: null, search: '', hash: '#/?t=' + uuid} as any;
+      expect(getAuthQueryToken(location)).toBe(uuid);
+    });
+
+    it('prefers the real query string over the fragment', () => {
+      const inSearch = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+      const inHash = 'ffffffff-e5f6-7890-abcd-ef1234567890';
+      const location = {state: null, search: '?t=' + inSearch, hash: '#/?t=' + inHash} as any;
+      expect(getAuthQueryToken(location)).toBe(inSearch);
+    });
   });
 
   describe('getKioskAuthQueryToken', () => {
@@ -44,6 +57,12 @@ describe('util', () => {
     it('returns null when no kiosk token', () => {
       const location = {state: null, search: ''} as any;
       expect(getKioskAuthQueryToken(location)).toBeNull();
+    });
+
+    it('extracts kiosk token from a HashRouter fragment query', () => {
+      const uuid = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+      const location = {state: null, search: '', hash: '#/?kt=' + uuid} as any;
+      expect(getKioskAuthQueryToken(location)).toBe(uuid);
     });
   });
 
@@ -66,6 +85,11 @@ describe('util', () => {
     it('returns false when no guestOnly param', () => {
       const location = {state: null, search: ''} as any;
       expect(getGuestOnly(location)).toBe(false);
+    });
+
+    it('reads guestOnly from a HashRouter fragment query', () => {
+      const location = {state: null, search: '', hash: '#/?t=x&guestOnly=true'} as any;
+      expect(getGuestOnly(location)).toBe(true);
     });
   });
 });

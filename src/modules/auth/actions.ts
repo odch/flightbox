@@ -47,7 +47,7 @@ export type AuthAction =
   | { type: typeof SEND_AUTHENTICATION_EMAIL_FAILURE; payload: { rateLimited: boolean; retryAfterSeconds?: number } }
   | { type: typeof VERIFY_OTP_CODE; payload: { email: string; code: string } }
   | { type: typeof OTP_VERIFICATION_FAILURE }
-  | { type: typeof REQUEST_FIREBASE_AUTHENTICATION; payload: { token: string; failureAction?: AuthAction; local?: boolean } }
+  | { type: typeof REQUEST_FIREBASE_AUTHENTICATION; payload: { token: string; failureAction?: AuthAction; shared?: boolean } }
   | { type: typeof FIREBASE_AUTHENTICATION; payload: { authData: unknown } }
   | { type: typeof LOGOUT }
   | { type: typeof FIREBASE_AUTHENTICATION_EVENT; payload: { authData: unknown } }
@@ -160,13 +160,13 @@ export function usernamePasswordAuthenticationFailure() {
   };
 }
 
-export function requestFirebaseAuthentication(token: string, failureAction?: AuthAction, local?: boolean) {
+export function requestFirebaseAuthentication(token: string, failureAction?: AuthAction, shared = false) {
   return {
     type: REQUEST_FIREBASE_AUTHENTICATION,
     payload: {
       token,
       failureAction,
-      local
+      shared
     },
   };
 }

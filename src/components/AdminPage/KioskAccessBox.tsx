@@ -45,7 +45,9 @@ export default function KioskAccessBox({kioskAccessToken}) {
     return null
   }
 
-  const url = `${window.location.protocol}//${window.location.host}?kt=${kioskAccessToken.token}`
+  // Carry the token in the URL fragment (like the guest link) so it is not sent
+  // to the server or leaked via access logs / the Referer header.
+  const url = `${window.location.protocol}//${window.location.host}/#/?kt=${kioskAccessToken.token}`
 
   return (
     <LabeledBox label={t('kioskAccess.title')}>
