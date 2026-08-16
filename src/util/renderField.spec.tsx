@@ -17,13 +17,6 @@ jest.mock('../containers/AircraftDropdownContainer', () => {
   };
 });
 
-jest.mock('../containers/UserDropdownContainer', () => {
-  const React = require('react');
-  return function UserDropdown(props) {
-    return <div data-testid="user-dropdown" />;
-  };
-});
-
 import {
   renderInputField,
   renderSingleSelect,
@@ -34,7 +27,6 @@ import {
   renderTextArea,
   renderAerodromeDropdown,
   renderAircraftDropdown,
-  renderUserDropdown,
 } from './renderField';
 
 const theme = {
@@ -219,16 +211,5 @@ describe('util', () => {
       });
     });
 
-    describe('renderUserDropdown', () => {
-      it('renders without crashing', () => {
-        const { container } = renderWithTheme(renderUserDropdown(baseProps));
-        expect(container).toBeTruthy();
-      });
-
-      it('renders the label', () => {
-        const { getByText } = renderWithTheme(renderUserDropdown(baseProps));
-        expect(getByText('Test Label')).toBeTruthy();
-      });
-    });
   });
 });

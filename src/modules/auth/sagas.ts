@@ -1,5 +1,5 @@
 import {all, call, fork, put, select, takeEvery} from 'redux-saga/effects'
-import {get, query, orderByChild, equalTo, limitToFirst} from 'firebase/database';
+import {get} from 'firebase/database';
 import * as actions from './actions';
 import {Passkey} from './actions';
 import {loadCredentialsToken, loadGuestToken, loadKioskToken} from '../../util/auth';
@@ -30,22 +30,6 @@ export function getLoginData(uid: string) {
       return null;
     })
     .catch(() => null);
-}
-
-export const findByMemberNr = (dbRef: any, uid: string) =>
-  get(query(dbRef, orderByChild('memberNr'), equalTo(uid), limitToFirst(1)));
-
-export function* loadUser(uid: string) {
-  const usersRef = yield call(firebase, '/users');
-  const snapshot = yield call(findByMemberNr, usersRef, uid)
-  const map = snapshot.val()
-  const arr = map ? Object.values(map) : []
-  return arr.length > 0 ? arr[0] : null
-}
-
-export function* getName(uid: string) {
-  const user = yield call(loadUser, uid)
-  return user ? `${(user as any).firstname} ${(user as any).lastname}` : null
 }
 
 export function* doUsernamePasswordAuthentication(action: any) {
@@ -250,7 +234,6 @@ export function* doListenFirebaseAuthentication(action: any) {
       local,
       links: !loginData || loginData.links !== false,
       hintsDismissable: !loginData || loginData.hintsDismissable !== false,
-      name: yield call(getName, uid),
       email
     }
   }
