@@ -23,6 +23,10 @@ const { generateWebauthnAuthenticationOptions } = require('./auth/generateAuthen
 const { verifyWebauthnAuthentication } = require('./auth/verifyAuthentication');
 const { removeWebauthnCredential } = require('./auth/removePasskey');
 const { cleanupExpiredWebauthnChallenges } = require('./auth/cleanupExpiredWebauthnChallenges');
+const {
+  revokeKioskSessionsOnTokenRotation,
+  revokeGuestSessionsOnTokenRotation,
+} = require('./auth/revokeSharedSessionsOnTokenRotation');
 const api = require('./api');
 const webhook = require('./webhook');
 const associatedMovementsTriggers = require('./associatedMovements/setAssociatedMovementsTriggers');
@@ -40,6 +44,8 @@ exports.generateWebauthnAuthenticationOptions = generateWebauthnAuthenticationOp
 exports.verifyWebauthnAuthentication = verifyWebauthnAuthentication;
 exports.removeWebauthnCredential = removeWebauthnCredential;
 exports.cleanupExpiredWebauthnChallenges = cleanupExpiredWebauthnChallenges;
+exports.revokeKioskSessionsOnTokenRotation = revokeKioskSessionsOnTokenRotation;
+exports.revokeGuestSessionsOnTokenRotation = revokeGuestSessionsOnTokenRotation;
 exports.api = api;
 exports.webhook = webhook;
 exports.setAssociatedMovementOnCreatedDeparture = associatedMovementsTriggers.setAssociatedMovementOnCreatedDeparture;

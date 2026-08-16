@@ -23,6 +23,9 @@ jest.mock('firebase/auth', () => ({
   onAuthStateChanged: jest.fn(),
   signInWithCustomToken: jest.fn(),
   signOut: jest.fn(),
+  setPersistence: jest.fn(() => Promise.resolve()),
+  browserLocalPersistence: 'browserLocalPersistence',
+  browserSessionPersistence: 'browserSessionPersistence',
 }));
 
 import { initializeApp, getApps } from 'firebase/app';
@@ -32,6 +35,7 @@ import {
   onAuthStateChanged,
   signInWithCustomToken,
   signOut,
+  setPersistence,
 } from 'firebase/auth';
 import firebaseDefault, {
   watchAuthState,
@@ -113,6 +117,23 @@ describe('util/firebase', () => {
 
       const result = await authenticate('valid-token');
       expect(result).toBe(mockUser);
+      expect(signInWithCustomToken).toHaveBeenCalledWith(mockAuth, 'valid-token');
+    });
+
+    it('does not change persistence for individual users (default path)', async () => {
+      (signInWithCustomToken as jest.Mock).mockResolvedValue({ uid: 'u' });
+
+      await authenticate('valid-token');
+
+      expect(setPersistence).not.toHaveBeenCalled();
+    });
+
+    it('uses session persistence for shared devices (kiosk / guest)', async () => {
+      (signInWithCustomToken as jest.Mock).mockResolvedValue({ uid: 'kiosk' });
+
+      await authenticate('valid-token', true);
+
+      expect(setPersistence).toHaveBeenCalledWith(mockAuth, 'browserSessionPersistence');
       expect(signInWithCustomToken).toHaveBeenCalledWith(mockAuth, 'valid-token');
     });
 

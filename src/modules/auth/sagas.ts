@@ -18,6 +18,7 @@ import {
 } from '../../util/webauthn';
 import {error as logError} from '../../util/log';
 import {getKioskAuthQueryToken} from '../../util/getAuthQueryToken'
+import {scrubAuthParamsFromUrl} from '../../util/scrubAuthParams'
 import i18n from '../../i18n'
 
 export function getLoginData(uid: string) {
@@ -115,8 +116,11 @@ export function* doGuestTokenAuthentication(action: any) {
     if (guestToken) {
       yield put(actions.requestFirebaseAuthentication(
         guestToken,
-        actions.guestTokenAuthenticationFailure()
+        actions.guestTokenAuthenticationFailure(),
+        true // shared device: use non-persistent session
       ));
+      // Remove the guest access token from the URL now that it has been used.
+      yield call(scrubAuthParamsFromUrl);
     } else {
       yield put(actions.guestTokenAuthenticationFailure());
     }
@@ -133,8 +137,11 @@ export function* doKioskTokenAuthentication(action: any) {
     if (kioskToken) {
       yield put(actions.requestFirebaseAuthentication(
         kioskToken,
-        actions.kioskTokenAuthenticationFailure()
+        actions.kioskTokenAuthenticationFailure(),
+        true // shared device: use non-persistent session
       ));
+      // Remove the kiosk access token from the URL now that it has been used.
+      yield call(scrubAuthParamsFromUrl);
     } else {
       yield put(actions.kioskTokenAuthenticationFailure());
     }
@@ -146,7 +153,7 @@ export function* doKioskTokenAuthentication(action: any) {
 
 export function* doFirebaseAuthentication(action: any) {
   try {
-    yield call(fbAuth, action.payload.token);
+    yield call(fbAuth, action.payload.token, !!action.payload.shared);
   } catch (e) {
     logError('Firebase authentication failed', e);
     yield put(action.payload.failureAction);

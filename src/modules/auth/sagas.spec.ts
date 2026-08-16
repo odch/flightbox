@@ -2,6 +2,7 @@ import {call, put, select} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import {loadCredentialsToken, loadGuestToken, loadKioskToken} from '../../util/auth';
+import {scrubAuthParamsFromUrl} from '../../util/scrubAuthParams';
 import {expectDoneWithoutReturn, expectDoneWithReturn} from '../../../test/sagaUtils';
 import firebase, {authenticate as fbAuth, requestSignInCode as fbRequestSignInCode, verifyOtpCode as fbVerifyOtpCode, unauth as fbUnauth, watchAuthState} from '../../util/firebase';
 import {
@@ -89,7 +90,7 @@ describe('modules', () => {
             actions.usernamePasswordAuthenticationFailure()
           ));
 
-          expect(generator.next().value).toEqual(call(fbAuth, 'token'));
+          expect(generator.next().value).toEqual(call(fbAuth, 'token', false));
 
           expectDoneWithoutReturn(generator);
         });
@@ -300,9 +301,11 @@ describe('modules', () => {
           expect(generator.next(guestToken).value).toEqual(
             put(actions.requestFirebaseAuthentication(
               guestToken,
-              actions.guestTokenAuthenticationFailure()
+              actions.guestTokenAuthenticationFailure(),
+              true
             ))
           );
+          expect(generator.next().value).toEqual(call(scrubAuthParamsFromUrl));
 
           expectDoneWithoutReturn(generator);
         });
@@ -346,9 +349,11 @@ describe('modules', () => {
           expect(generator.next(kioskToken).value).toEqual(
             put(actions.requestFirebaseAuthentication(
               kioskToken,
-              actions.kioskTokenAuthenticationFailure()
+              actions.kioskTokenAuthenticationFailure(),
+              true
             ))
           );
+          expect(generator.next().value).toEqual(call(scrubAuthParamsFromUrl));
 
           expectDoneWithoutReturn(generator);
         });
@@ -387,7 +392,7 @@ describe('modules', () => {
             actions.requestFirebaseAuthentication('token', failureAction)
           );
 
-          expect(generator.next().value).toEqual(call(fbAuth, 'token'));
+          expect(generator.next().value).toEqual(call(fbAuth, 'token', false));
 
           const error = new Error('firebase error');
           expect(generator.throw(error).value).toEqual(put(failureAction));
