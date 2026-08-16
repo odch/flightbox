@@ -5,6 +5,13 @@ const AERODROMES_URL = 'https://raw.githubusercontent.com/odch/aerodromes/refs/h
 const SCHEDULE = '0 3 * * 3'; // Every Wednesday at 3 AM
 const TIMEZONE = 'Europe/Zurich';
 
+// The upstream feed lives in a mutable GitHub branch. A truncated, empty or
+// tampered feed would mark every existing entry for deletion, so never remove
+// more than this fraction of the table in a single run once it holds a
+// meaningful number of entries.
+const MAX_DELETE_FRACTION = 0.1;
+const DELETE_GUARD_MIN_EXISTING = 50;
+
 const EUROPEAN_COUNTRIES = new Set([
   'AL', 'AD', 'AM', 'AT', 'AZ', 'BY', 'BE', 'BA', 'BG', 'HR', 'CY', 'CZ',
   'DK', 'EE', 'FI', 'FR', 'GE', 'DE', 'GR', 'HU', 'IS', 'IE', 'IT', 'KZ',
@@ -36,7 +43,7 @@ function processAerodromeUpdates(aerodromes) {
   const importedIcaoCodes = new Set();
 
   aerodromes
-    .filter(aero => EUROPEAN_COUNTRIES.has(aero.country))
+    .filter(aero => aero && aero.icao && aero.name && EUROPEAN_COUNTRIES.has(aero.country))
     .forEach(aero => {
       importedIcaoCodes.add(aero.icao);
       updates[aero.icao] = {
@@ -61,6 +68,22 @@ function getAerodromesToRemove(existingIcaoCodes, importedIcaoCodes) {
 }
 
 /**
+ * Guards against a truncated or poisoned upstream feed wiping the table.
+ * Small tables (initial seeding, tests) are exempt so legitimate churn is not
+ * blocked; once the table is sizeable, refuse runs that would delete more than
+ * MAX_DELETE_FRACTION of it.
+ * @param {number} existingCount - Number of entries currently in the database
+ * @param {number} removalCount - Number of entries the run would delete
+ * @returns {boolean} true when the removals are within safe bounds
+ */
+function removalsWithinSafeBounds(existingCount, removalCount) {
+  if (existingCount < DELETE_GUARD_MIN_EXISTING) {
+    return true;
+  }
+  return removalCount / existingCount <= MAX_DELETE_FRACTION;
+}
+
+/**
  * Scheduled Cloud Function to synchronize aerodromes data with GitHub repository
  */
 exports.scheduledAerodromesUpdate = onSchedule(
@@ -79,11 +102,31 @@ exports.scheduledAerodromesUpdate = onSchedule(
       const aerodromes = await fetchAerodromes();
 
       const { updates, importedIcaoCodes } = processAerodromeUpdates(aerodromes);
+
+      // A valid feed always contains entries. An empty result means the source
+      // is unreachable, empty or corrupt; applying it would mark every existing
+      // aerodrome for deletion, so skip the sync entirely.
+      if (importedIcaoCodes.size === 0) {
+        console.error('Aerodromes sync skipped: imported feed contained no valid entries');
+        return null;
+      }
+
       const existingAerodromes = (await db.ref('aerodromes').once('value')).val() || {};
+      const existingIcaoCodes = Object.keys(existingAerodromes);
       const aerodromesToRemove = getAerodromesToRemove(
-        new Set(Object.keys(existingAerodromes)),
+        new Set(existingIcaoCodes),
         importedIcaoCodes
       );
+
+      // Refuse a run that would delete a large share of the table; a partial or
+      // poisoned feed is the likely cause, not legitimate churn.
+      if (!removalsWithinSafeBounds(existingIcaoCodes.length, aerodromesToRemove.length)) {
+        console.error(
+          `Aerodromes sync skipped: refusing to remove ${aerodromesToRemove.length} of ` +
+          `${existingIcaoCodes.length} aerodromes (exceeds ${MAX_DELETE_FRACTION * 100}% safety limit)`
+        );
+        return null;
+      }
 
       aerodromesToRemove.forEach(icao => { updates[icao] = null; });
 
