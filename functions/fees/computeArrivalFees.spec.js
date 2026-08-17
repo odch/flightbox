@@ -43,17 +43,40 @@ const makeDb = (data) => {
 // Event whose `after` snapshot carries the arrival and captures write-backs.
 const makeEvent = (arrival, key = 'arr1') => {
   const update = jest.fn().mockResolvedValue();
+  const removed = [];
   return {
     _update: update,
+    _removed: removed,
     data: {
       after: {
         exists: () => arrival !== null,
         val: () => arrival,
-        ref: { key, update }
+        ref: {
+          key,
+          update,
+          child: (path) => ({ remove: () => { removed.push(path); return Promise.resolve(); } })
+        }
       }
     }
   };
 };
+
+// Minimal `after` for exercising authorizeInvoiceRecipient directly.
+const makeAfter = (key = 'arr1') => {
+  const removed = [];
+  return {
+    _removed: removed,
+    ref: {
+      key,
+      child: (path) => ({ remove: () => { removed.push(path); return Promise.resolve(); } })
+    }
+  };
+};
+
+const RECIPIENTS = [
+  { name: 'Club Alpha', emails: ['alpha@example.com'] },
+  { name: 'Club Bravo', emails: ['bravo@example.com', 'shared@example.com'] },
+];
 
 describe('functions/fees/computeArrivalFees', () => {
   beforeEach(() => {
@@ -174,6 +197,79 @@ describe('functions/fees/computeArrivalFees', () => {
     await _test.recomputeArrivalFees(event);
     expect(event._update).not.toHaveBeenCalled();
     expect(mockLogger.error).toHaveBeenCalled();
+  });
+
+  it('clears an unauthorized invoice recipient during recompute (integration)', async () => {
+    mockAdmin.database.mockReturnValue(makeDb({
+      '/settings/landingFeesStrategy': 'lspl',
+      '/settings/invoiceRecipients': RECIPIENTS,
+    }));
+    const event = makeEvent({
+      immatriculation: 'HBUNK', mtow: 1001, flightType: 'private',
+      aircraftCategory: 'Flugzeug', landingCount: 1,
+      createdBy: 'alpha@example.com',
+      paymentMethod: { method: 'invoice', invoiceRecipientName: 'Club Bravo' }, // not theirs
+    });
+    await _test.recomputeArrivalFees(event);
+    expect(event._removed).toContain('paymentMethod/invoiceRecipientName');
+  });
+
+  describe('authorizeInvoiceRecipient', () => {
+    const run = (arrival, data = { '/settings/invoiceRecipients': RECIPIENTS }) => {
+      const db = makeDb(data);
+      const after = makeAfter();
+      return _test.authorizeInvoiceRecipient(after, arrival, db).then(() => after);
+    };
+
+    it('clears a recipient the author is not authorized for', async () => {
+      const after = await run({
+        createdBy: 'alpha@example.com',
+        paymentMethod: { method: 'invoice', invoiceRecipientName: 'Club Bravo' },
+      });
+      expect(after._removed).toContain('paymentMethod/invoiceRecipientName');
+    });
+
+    it('keeps a recipient the author is authorized for', async () => {
+      const after = await run({
+        createdBy: 'alpha@example.com',
+        paymentMethod: { method: 'invoice', invoiceRecipientName: 'Club Alpha' },
+      });
+      expect(after._removed).toHaveLength(0);
+    });
+
+    it('clears any recipient when the arrival has no authenticated author', async () => {
+      const after = await run({
+        paymentMethod: { method: 'invoice', invoiceRecipientName: 'Club Alpha' },
+      });
+      expect(after._removed).toContain('paymentMethod/invoiceRecipientName');
+    });
+
+    it('ignores non-invoice payment methods', async () => {
+      const after = await run({
+        createdBy: 'alpha@example.com',
+        paymentMethod: { method: 'cash' },
+      });
+      expect(after._removed).toHaveLength(0);
+    });
+
+    it('is a no-op when no invoice recipient is set', async () => {
+      const after = await run({
+        createdBy: 'alpha@example.com',
+        paymentMethod: { method: 'invoice' },
+      });
+      expect(after._removed).toHaveLength(0);
+    });
+
+    it('handles recipients stored as an index-keyed object', async () => {
+      const after = await run(
+        {
+          createdBy: 'shared@example.com',
+          paymentMethod: { method: 'invoice', invoiceRecipientName: 'Club Bravo' },
+        },
+        { '/settings/invoiceRecipients': { 0: RECIPIENTS[0], 1: RECIPIENTS[1] } }
+      );
+      expect(after._removed).toHaveLength(0); // shared@ is authorized for Bravo
+    });
   });
 
   describe('normalizeRegistration', () => {

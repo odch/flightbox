@@ -218,7 +218,7 @@
         "paymentMethod": {
           ".validate": "newData.hasChildren(['method'])",
           "method": {
-            ".validate": "newData.isString() && newData.val().length <= 50 && newData.val().length > 0"
+            ".validate": "newData.val() === 'card' || newData.val() === 'checkout' || newData.val() === 'cash' || newData.val() === 'card_external' || newData.val() === 'twint_external' || newData.val() === 'invoice'"
           },
           "invoiceRecipientName": {
             ".validate": "newData.isString() && newData.val().length <= 200"
