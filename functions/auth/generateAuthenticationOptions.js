@@ -36,7 +36,10 @@ async function loadAllowCredentials(uid) {
   }));
 }
 
-exports.generateWebauthnAuthenticationOptions = onRequest({ region: 'europe-west1' }, (req, res) => {
+// Public, unauthenticated endpoint that writes a challenge record on every
+// request. Cap concurrency so a flood cannot scale writes (and cost) without
+// bound — a global throughput ceiling with no per-IP/NAT trade-off.
+exports.generateWebauthnAuthenticationOptions = onRequest({ region: 'europe-west1', maxInstances: 10 }, (req, res) => {
   return cors(req, res, async () => {
     try {
       if (req.method !== 'POST') {

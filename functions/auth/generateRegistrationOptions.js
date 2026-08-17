@@ -23,7 +23,9 @@ async function loadExistingCredentials(uid) {
   }));
 }
 
-exports.generateWebauthnRegistrationOptions = onRequest({ region: 'europe-west1' }, (req, res) => {
+// Writes a challenge record per request; cap concurrency to bound write/cost
+// blast radius (matches generateWebauthnAuthenticationOptions).
+exports.generateWebauthnRegistrationOptions = onRequest({ region: 'europe-west1', maxInstances: 10 }, (req, res) => {
   return cors(req, res, async () => {
     try {
       if (req.method !== 'POST') {
