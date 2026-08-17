@@ -11,7 +11,8 @@ const requireBodyProperty = (req, property)  => {
 };
 
 const getIp = req => {
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  const ip = (req.headers && req.headers['x-forwarded-for']) ||
+    (req.connection && req.connection.remoteAddress);
   if (ip) {
     return ip.split(',')[0].trim();
   }
