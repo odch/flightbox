@@ -8,6 +8,8 @@ const moment = require('moment')
 // is a reference (movementType + movementKey); everything sent onward comes
 // from trusted database data.
 
+const TIMEZONE = 'Europe/Zurich'
+
 const MOVEMENT_PATHS = {
   departure: 'departures',
   arrival: 'arrivals',
@@ -25,28 +27,64 @@ const parseDuration = (duration) => {
   return { hours: parseInt(hours, 10) || 0, minutes: parseInt(minutes, 10) || 0 }
 }
 
-// Mirrors the client's calculateArrivalTime: add the flight duration to the
-// departure time. Plain HH:mm arithmetic, no timezone involved.
+// The movement stores a single ISO-UTC `dateTime`; the client presents it as a
+// local date + time (the aerodrome runs on Europe/Zurich). Reproduce that split
+// server-side so the customs payload matches what the client used to send.
+// Uses Intl (full-ICU, DST-aware) so no timezone dependency is required.
+const toLocalDateTimeParts = (isoUtc) => {
+  const date = new Date(isoUtc)
+  if (isNaN(date.getTime())) {
+    return { localDate: null, localTime: null }
+  }
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date)
+  const get = (type) => {
+    const part = parts.find(p => p.type === type)
+    return part ? part.value : ''
+  }
+  // Some ICU builds render midnight as '24' with hour12:false; normalize it.
+  const hour = get('hour') === '24' ? '00' : get('hour')
+  return {
+    localDate: `${get('year')}-${get('month')}-${get('day')}`,
+    localTime: `${hour}:${get('minute')}`,
+  }
+}
+
+// Swiss-German short date (DD.MM.YYYY), matching the client's dates.formatDate.
+const formatDate = (localDate) => {
+  if (!localDate) {
+    return null
+  }
+  return moment(localDate, 'YYYY-MM-DD', true).locale('de-ch').format('L')
+}
+
+// Add the flight duration to the local departure time. Plain HH:mm arithmetic.
 const calculateArrivalTime = (departureTime, duration) => {
+  if (!departureTime) {
+    return null
+  }
   const { hours, minutes } = parseDuration(duration)
   return moment(departureTime, 'HH:mm').add(hours, 'hours').add(minutes, 'minutes').format('HH:mm')
 }
 
-// Mirrors the client's dates.formatDate(date, 'de'): Swiss-German short date
-// (DD.MM.YYYY). Date-only, so timezone does not affect the result.
-const formatDate = (localDate) => moment(localDate, 'YYYY-MM-DD').locale('de-ch').format('L')
-
-const getDirectionDependingData = (movementType, movement, aerodrome) => {
+const getDirectionDependingData = (movementType, movement, aerodrome, localTime) => {
   if (movementType === 'departure') {
     return {
-      departureTime: movement.time,
+      departureTime: localTime,
       arrivalCountry: aerodrome.country,
       arrivalLocation: aerodrome.name,
-      arrivalTime: calculateArrivalTime(movement.time, movement.duration),
+      arrivalTime: calculateArrivalTime(localTime, movement.duration),
     }
   }
   return {
-    arrivalTime: movement.time,
+    arrivalTime: localTime,
     departureCountry: aerodrome.country,
     departureLocation: aerodrome.name,
   }
@@ -80,18 +118,20 @@ const buildCustomsPayload = async (db, movementType, movementKey) => {
     ? String(customsSettings.aerodrome).toLowerCase()
     : null
 
+  const { localDate, localTime } = toLocalDateTimeParts(movement.dateTime)
+
   return {
     aerodromeId,
     externalId: movementKey,
     data: {
       direction: movementType,
-      date: formatDate(movement.date),
+      date: formatDate(localDate),
       phone: movement.phone,
       email: movement.email,
       registration: movement.immatriculation,
       mtow: movement.mtow,
       aircraftType: getCustomsAircraftType(movement.aircraftCategory),
-      ...getDirectionDependingData(movementType, movement, aerodrome),
+      ...getDirectionDependingData(movementType, movement, aerodrome, localTime),
     },
   }
 }
@@ -102,4 +142,5 @@ module.exports = {
   parseDuration,
   calculateArrivalTime,
   formatDate,
+  toLocalDateTimeParts,
 }
