@@ -33,6 +33,7 @@ const associatedMovementsTriggers = require('./associatedMovements/setAssociated
 const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsTrigger');
 const homebasedAircraftTrigger = require('./homebasedAircraft/homebasedAircraftTrigger');
 const updateArrivalPaymentStatus = require('./updateArrivalPaymentStatus');
+const { computeArrivalFeesOnWrite } = require('./fees/computeArrivalFees');
 
 exports.auth = auth;
 exports.generateSignInCode = generateSignInCode;
@@ -66,6 +67,8 @@ exports.enrichArrivalOnCreate = enrichMovements.enrichArrivalOnCreate;
 exports.enrichArrivalOnUpdate = enrichMovements.enrichArrivalOnUpdate;
 
 exports.updateArrivalPaymentStatusOnCardPaymentUpdate = updateArrivalPaymentStatus.updateArrivalPaymentStatusOnCardPaymentUpdate;
+
+exports.computeArrivalFeesOnWrite = computeArrivalFeesOnWrite;
 
 let privacyFunctionsEnabled = false;
 try {
