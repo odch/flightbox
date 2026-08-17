@@ -34,6 +34,7 @@ const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsT
 const homebasedAircraftTrigger = require('./homebasedAircraft/homebasedAircraftTrigger');
 const updateArrivalPaymentStatus = require('./updateArrivalPaymentStatus');
 const { computeArrivalFeesOnWrite } = require('./fees/computeArrivalFees');
+const { deriveLockDateIsoOnWrite } = require('./deriveLockDateIso');
 
 exports.auth = auth;
 exports.generateSignInCode = generateSignInCode;
@@ -69,6 +70,8 @@ exports.enrichArrivalOnUpdate = enrichMovements.enrichArrivalOnUpdate;
 exports.updateArrivalPaymentStatusOnCardPaymentUpdate = updateArrivalPaymentStatus.updateArrivalPaymentStatusOnCardPaymentUpdate;
 
 exports.computeArrivalFeesOnWrite = computeArrivalFeesOnWrite;
+
+exports.deriveLockDateIsoOnWrite = deriveLockDateIsoOnWrite;
 
 let privacyFunctionsEnabled = false;
 try {
