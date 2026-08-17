@@ -7,6 +7,8 @@ import {Step} from './reducer'
 
 export const cardPaymentIdSelector = (state: any) => state.ui.arrivalPayment.cardPaymentId;
 
+export const authUidSelector = (state: any) => state.auth && state.auth.data && state.auth.data.uid;
+
 export function* createCardPayment(channel: any, action: any) {
   const {
     amount,
@@ -26,6 +28,11 @@ export function* createCardPayment(channel: any, action: any) {
     goAroundFeeTotal
   } = action.payload
 
+  // Stamp the payment with its creator so access can be scoped to the owner
+  // (see the card-payment rules). Owner-scoped projects require owner === the
+  // caller's uid on create; unscoped projects ignore it.
+  const owner = yield select(authUidSelector)
+
   const values: Record<string, unknown> = {
     amount: Math.round(amount * 100),
     currency,
@@ -39,6 +46,9 @@ export function* createCardPayment(channel: any, action: any) {
     arrivalReference: movementKey,
     status: 'pending',
     timestamp: new Date().getTime()
+  }
+  if (owner) {
+    values.owner = owner
   }
   if (landingFeeCode) {
     values.landingFeeCode = landingFeeCode
