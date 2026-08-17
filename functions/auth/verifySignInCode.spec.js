@@ -9,13 +9,28 @@ describe('functions', () => {
     let mockCors;
     let mockCodesRef;
     let mockAuthAdmin;
+    let records; // in-memory /signInCodes store, keyed by code key
+    let transactionCalls;
 
     const now = Date.now();
     const futureExpiry = now + 10 * 60 * 1000;
 
+    // Configure the /signInCodes query result and the backing store for the
+    // per-node transactions. `entries` is [{ key, val }].
+    const setupCodes = (entries) => {
+      records = {};
+      entries.forEach(({ key, val }) => { records[key] = { ...val }; });
+      mockCodesRef.once.mockResolvedValue({
+        exists: () => entries.length > 0,
+        forEach: (cb) => entries.forEach(({ key }) => cb({ key })),
+      });
+    };
+
     beforeEach(() => {
       jest.resetModules();
       capturedHandler = null;
+      records = {};
+      transactionCalls = [];
 
       mockCors = jest.fn().mockImplementation((req, res, cb) => cb());
 
@@ -23,9 +38,23 @@ describe('functions', () => {
         orderByChild: jest.fn().mockReturnThis(),
         equalTo: jest.fn().mockReturnThis(),
         once: jest.fn(),
-        update: jest.fn().mockResolvedValue(undefined),
-        child: jest.fn().mockReturnThis(),
-        remove: jest.fn().mockResolvedValue(undefined),
+        // Atomic per-node transaction, backed by `records`.
+        child: jest.fn((key) => ({
+          transaction: async (updateFn) => {
+            transactionCalls.push(key);
+            const current = key in records ? records[key] : null;
+            const next = updateFn(current);
+            if (next === undefined) {
+              return { committed: false, snapshot: { val: () => current } };
+            }
+            if (next === null) {
+              delete records[key];
+              return { committed: true, snapshot: { val: () => null } };
+            }
+            records[key] = next;
+            return { committed: true, snapshot: { val: () => next } };
+          },
+        })),
       };
 
       mockAuthAdmin = {
@@ -56,14 +85,6 @@ describe('functions', () => {
       json: jest.fn()
     });
 
-    const makeSnapshot = (entries) => {
-      const exists = entries.length > 0;
-      return {
-        exists: () => exists,
-        forEach: (cb) => entries.forEach(({ key, val }) => cb({ key, val: () => val })),
-      };
-    };
-
     it('returns 405 for GET request', async () => {
       const req = makeReq('GET', {});
       const res = makeRes();
@@ -88,7 +109,7 @@ describe('functions', () => {
     });
 
     it('returns 400 when no codes exist for email', async () => {
-      mockCodesRef.once.mockResolvedValue(makeSnapshot([]));
+      setupCodes([]);
 
       const req = makeReq('POST', { email: 'user@example.com', code: '123456' });
       const res = makeRes();
@@ -98,12 +119,11 @@ describe('functions', () => {
       expect(res.json).toHaveBeenCalledWith({ error: 'Invalid or expired code' });
     });
 
-    it('returns 400 for wrong code and increments attempts', async () => {
+    it('returns 400 for wrong code and atomically increments attempts', async () => {
       const correctCode = '111111';
-      const snapshot = makeSnapshot([
+      setupCodes([
         { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(correctCode), expiry: futureExpiry, attempts: 0 } },
       ]);
-      mockCodesRef.once.mockResolvedValue(snapshot);
 
       const req = makeReq('POST', { email: 'user@example.com', code: '999999' });
       const res = makeRes();
@@ -111,53 +131,77 @@ describe('functions', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({ error: 'Invalid or expired code' });
-      expect(mockCodesRef.update).toHaveBeenCalledWith({ 'k1/attempts': 1 });
+      // Increment happened through a transaction on the code node, not a
+      // read-then-write update.
+      expect(transactionCalls).toEqual(['k1']);
+      expect(records.k1.attempts).toBe(1);
     });
 
     it('returns 400 for expired code without incrementing attempts', async () => {
       const code = '123456';
-      const snapshot = makeSnapshot([
+      setupCodes([
         { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(code), expiry: now - 1000, attempts: 0 } },
       ]);
-      mockCodesRef.once.mockResolvedValue(snapshot);
 
       const req = makeReq('POST', { email: 'user@example.com', code });
       const res = makeRes();
       await capturedHandler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(mockCodesRef.update).not.toHaveBeenCalled();
+      expect(records.k1.attempts).toBe(0);
     });
 
-    it('returns 400 for exhausted code (max attempts reached)', async () => {
+    it('returns 400 for exhausted code (max attempts reached) without incrementing', async () => {
       const code = '123456';
-      const snapshot = makeSnapshot([
+      setupCodes([
         { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(code), expiry: futureExpiry, attempts: 5 } },
       ]);
-      mockCodesRef.once.mockResolvedValue(snapshot);
 
       const req = makeReq('POST', { email: 'user@example.com', code });
       const res = makeRes();
       await capturedHandler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(mockCodesRef.update).not.toHaveBeenCalled();
+      // Capped: even the correct code is rejected and attempts is not bumped past the cap.
+      expect(records.k1.attempts).toBe(5);
+      expect(mockAuthAdmin.createCustomToken).not.toHaveBeenCalled();
     });
 
-    it('returns 200 with token on valid code and deletes used code', async () => {
+    it('enforces the attempt cap across repeated wrong guesses', async () => {
+      const correctCode = '111111';
+      setupCodes([
+        { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(correctCode), expiry: futureExpiry, attempts: 0 } },
+      ]);
+
+      // Five wrong guesses each count exactly once (atomic), reaching the cap.
+      for (let i = 1; i <= 5; i++) {
+        const res = makeRes();
+        await capturedHandler(makeReq('POST', { email: 'user@example.com', code: '999999' }), res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(records.k1.attempts).toBe(i);
+      }
+
+      // The correct code is now locked out — brute force is bounded.
+      const res = makeRes();
+      await capturedHandler(makeReq('POST', { email: 'user@example.com', code: correctCode }), res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(records.k1).toBeDefined(); // not consumed
+      expect(mockAuthAdmin.createCustomToken).not.toHaveBeenCalled();
+    });
+
+    it('returns 200 with token on valid code and consumes the code atomically', async () => {
       const code = '123456';
-      const snapshot = makeSnapshot([
+      setupCodes([
         { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(code), expiry: futureExpiry, attempts: 0 } },
       ]);
-      mockCodesRef.once.mockResolvedValue(snapshot);
       mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'user-uid-123' });
 
       const req = makeReq('POST', { email: 'user@example.com', code });
       const res = makeRes();
       await capturedHandler(req, res);
 
-      expect(mockCodesRef.child).toHaveBeenCalledWith('k1');
-      expect(mockCodesRef.remove).toHaveBeenCalled();
+      expect(transactionCalls).toEqual(['k1']);
+      expect(records.k1).toBeUndefined(); // consumed by the transaction
       expect(mockAuthAdmin.createCustomToken).toHaveBeenCalledWith('user-uid-123', { email: 'user@example.com' });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({ token: 'custom-token-xyz' });
@@ -165,10 +209,9 @@ describe('functions', () => {
 
     it('creates new Firebase user if not found', async () => {
       const code = '123456';
-      const snapshot = makeSnapshot([
+      setupCodes([
         { key: 'k1', val: { email: 'new@example.com', codeHash: hashCode(code), expiry: futureExpiry, attempts: 0 } },
       ]);
-      mockCodesRef.once.mockResolvedValue(snapshot);
 
       const authError = Object.assign(new Error('User not found'), { code: 'auth/user-not-found' });
       mockAuthAdmin.getUserByEmail.mockRejectedValue(authError);
@@ -185,10 +228,9 @@ describe('functions', () => {
 
     it('normalizes email to lowercase', async () => {
       const code = '123456';
-      const snapshot = makeSnapshot([
+      setupCodes([
         { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(code), expiry: futureExpiry, attempts: 0 } },
       ]);
-      mockCodesRef.once.mockResolvedValue(snapshot);
       mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'uid-123' });
 
       const req = makeReq('POST', { email: 'USER@EXAMPLE.COM', code });
@@ -198,14 +240,13 @@ describe('functions', () => {
       expect(mockAuthAdmin.getUserByEmail).toHaveBeenCalledWith('user@example.com');
     });
 
-    it('increments attempts for non-matching valid codes when correct code is found', async () => {
+    it('counts a wrong guess against a non-matching code then succeeds on the matching one', async () => {
       const correctCode = '111111';
       const otherCode = '222222';
-      const snapshot = makeSnapshot([
-        { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(correctCode), expiry: futureExpiry, attempts: 0 } },
-        { key: 'k2', val: { email: 'user@example.com', codeHash: hashCode(otherCode), expiry: futureExpiry, attempts: 1 } },
+      setupCodes([
+        { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(otherCode), expiry: futureExpiry, attempts: 1 } },
+        { key: 'k2', val: { email: 'user@example.com', codeHash: hashCode(correctCode), expiry: futureExpiry, attempts: 0 } },
       ]);
-      mockCodesRef.once.mockResolvedValue(snapshot);
       mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'uid-123' });
 
       const req = makeReq('POST', { email: 'user@example.com', code: correctCode });
@@ -213,7 +254,9 @@ describe('functions', () => {
       await capturedHandler(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(mockCodesRef.update).toHaveBeenCalledWith({ 'k2/attempts': 2 });
+      // The non-matching code was counted; the matching code was consumed.
+      expect(records.k1.attempts).toBe(2);
+      expect(records.k2).toBeUndefined();
     });
 
     it('returns 500 without error details on unexpected error', async () => {
@@ -231,10 +274,9 @@ describe('functions', () => {
 
     it('rethrows non-user-not-found auth errors', async () => {
       const code = '123456';
-      const snapshot = makeSnapshot([
+      setupCodes([
         { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(code), expiry: futureExpiry, attempts: 0 } },
       ]);
-      mockCodesRef.once.mockResolvedValue(snapshot);
 
       const authError = Object.assign(new Error('Auth service unavailable'), { code: 'auth/internal-error' });
       mockAuthAdmin.getUserByEmail.mockRejectedValue(authError);
