@@ -5,6 +5,7 @@ describe('functions', () => {
     let capturedOptions;
     let mockCodesRef;
     let mockRateLimitsRef;
+    let mockStaticRateLimitsRef;
 
     const now = Date.now();
 
@@ -23,10 +24,18 @@ describe('functions', () => {
         once: jest.fn().mockResolvedValue(emptySnapshot),
         update: jest.fn().mockResolvedValue(undefined),
       };
+      mockStaticRateLimitsRef = {
+        once: jest.fn().mockResolvedValue(emptySnapshot),
+        update: jest.fn().mockResolvedValue(undefined),
+      };
 
+      const refs = {
+        '/signInRateLimits': mockRateLimitsRef,
+        '/staticAuthRateLimits': mockStaticRateLimitsRef,
+      };
       mockAdmin = {
         database: jest.fn().mockReturnValue({
-          ref: jest.fn(path => path === '/signInRateLimits' ? mockRateLimitsRef : mockCodesRef)
+          ref: jest.fn(path => refs[path] || mockCodesRef)
         })
       };
 
@@ -145,6 +154,17 @@ describe('functions', () => {
       await capturedHandler();
 
       expect(mockRateLimitsRef.update).not.toHaveBeenCalled();
+    });
+
+    it('prunes static-login throttle entries older than the window', async () => {
+      mockStaticRateLimitsRef.once.mockResolvedValue(makeSnapshot([
+        { key: 's1', val: { windowStart: now - (61 * 60 * 1000), count: 10 } }, // stale
+        { key: 's2', val: { windowStart: now - (5 * 60 * 1000), count: 3 } },   // recent
+      ]));
+
+      await capturedHandler();
+
+      expect(mockStaticRateLimitsRef.update).toHaveBeenCalledWith({ s1: null });
     });
 
     it('is scheduled to run every 60 minutes', () => {

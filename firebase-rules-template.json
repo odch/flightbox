@@ -470,6 +470,10 @@
       ".read": false,
       ".write": false
     },
+    "staticAuthRateLimits": {
+      ".read": false,
+      ".write": false
+    },
     "webauthnCredentials": {
       ".write": false,
       "$uid": {

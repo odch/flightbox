@@ -43,5 +43,23 @@ exports.cleanupExpiredSignInCodes = onSchedule(
         await rateLimitsRef.update(updates);
       }
     }
+
+    // Static-login per-IP throttle entries share the same windowed shape; prune
+    // those whose window has passed so the node cannot grow unbounded.
+    const staticRateLimitsRef = db.ref('/staticAuthRateLimits');
+    const staticRateLimitsSnapshot = await staticRateLimitsRef.once('value');
+
+    if (staticRateLimitsSnapshot.exists()) {
+      const updates = {};
+      staticRateLimitsSnapshot.forEach(child => {
+        const val = child.val();
+        if (now - val.windowStart > RATE_WINDOW_MS) {
+          updates[child.key] = null;
+        }
+      });
+      if (Object.keys(updates).length > 0) {
+        await staticRateLimitsRef.update(updates);
+      }
+    }
   }
 );
