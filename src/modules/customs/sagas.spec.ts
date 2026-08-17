@@ -2,54 +2,15 @@ import {call, put} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import {getIdToken} from '../../util/firebase';
-import {get as getAerodrome} from '../../util/aerodromes';
 
 jest.mock('../../util/firebase');
-jest.mock('../../util/aerodromes');
 
 describe('modules', () => {
   describe('customs', () => {
     describe('sagas', () => {
       beforeEach(() => {
         global.__FIREBASE_PROJECT_ID__ = 'test-project';
-        global.__CONF__ = { aerodrome: { ICAO: 'LSZT' } };
         global.fetch = jest.fn();
-      });
-
-      describe('getCustomsAircraftType', () => {
-        it('should return helicopter for Hubschrauber', () => {
-          expect(sagas.getCustomsAircraftType('Hubschrauber')).toEqual('helicopter');
-        });
-
-        it('should return helicopter for Eigenbauhubschrauber', () => {
-          expect(sagas.getCustomsAircraftType('Eigenbauhubschrauber')).toEqual('helicopter');
-        });
-
-        it('should return airplane for other categories', () => {
-          expect(sagas.getCustomsAircraftType('C172')).toEqual('airplane');
-        });
-      });
-
-      describe('parseDuration', () => {
-        it('should parse duration string into hours and minutes', () => {
-          expect(sagas.parseDuration('01:30')).toEqual({ hours: 1, minutes: 30 });
-        });
-      });
-
-      describe('calculateTimeWithDuration', () => {
-        it('should add duration to time', () => {
-          expect(sagas.calculateTimeWithDuration('10:00', '01:30', 'add')).toEqual('11:30');
-        });
-
-        it('should subtract duration from time', () => {
-          expect(sagas.calculateTimeWithDuration('10:00', '01:30', 'subtract')).toEqual('08:30');
-        });
-      });
-
-      describe('calculateArrivalTime', () => {
-        it('should calculate arrival time by adding duration to departure time', () => {
-          expect(sagas.calculateArrivalTime('10:00', '01:30')).toEqual('11:30');
-        });
       });
 
       describe('getPathByMovementType', () => {
@@ -83,12 +44,22 @@ describe('modules', () => {
           sagas.openCompletionUrl('not a url');
           expect(openMock).not.toHaveBeenCalled();
         });
+
+        it('should warn when popup is blocked', () => {
+          const openMock = jest.fn().mockReturnValue(null);
+          window.open = openMock;
+          const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+          sagas.openCompletionUrl('https://example.com/complete');
+
+          expect(warnSpy).toHaveBeenCalled();
+          warnSpy.mockRestore();
+        });
       });
 
       describe('startCustoms', () => {
         it('should open completion URL and return early if customsFormId and customsFormUrl exist', () => {
           const openMock = jest.fn();
-          global.open = openMock;
           window.open = openMock;
 
           const movementData = {
@@ -103,31 +74,26 @@ describe('modules', () => {
           expect(result.value).toEqual(undefined);
         });
 
-        it('should put setStartCustomsLoading and proceed if no customsFormId', () => {
-          const movementData = {
-            type: 'departure',
-            key: 'movement-key'
-          };
+        it('sends only a movement reference to the server (no client-built payload)', () => {
+          const movementData = { type: 'departure', key: 'movement-key' };
           const action = actions.startCustoms(movementData);
           const generator = sagas.startCustoms(action);
 
           expect(generator.next().value).toEqual(put(actions.setStartCustomsLoading()));
-          expect(generator.next().value).toEqual(call(sagas.getCustomsPayload, movementData));
+          expect(generator.next().value).toEqual(
+            call(sagas.postPrepopulatedFormToCustoms, { movementType: 'departure', movementKey: 'movement-key' })
+          );
         });
 
         it('should put setStartCustomsSuccess after posting form', () => {
-          const movementData = {
-            type: 'departure',
-            key: 'movement-key'
-          };
+          const movementData = { type: 'departure', key: 'movement-key' };
           const action = actions.startCustoms(movementData);
           const generator = sagas.startCustoms(action);
 
           expect(generator.next().value).toEqual(put(actions.setStartCustomsLoading()));
-          expect(generator.next().value).toEqual(call(sagas.getCustomsPayload, movementData));
-
-          const payload = { aerodromeId: 'lszt' };
-          expect(generator.next(payload).value).toEqual(call(sagas.postPrepopulatedFormToCustoms, payload));
+          expect(generator.next().value).toEqual(
+            call(sagas.postPrepopulatedFormToCustoms, { movementType: 'departure', movementKey: 'movement-key' })
+          );
 
           const result = { id: 'form-id', completionUrl: 'https://example.com/complete' };
           expect(generator.next(result).value).toEqual(
@@ -139,15 +105,14 @@ describe('modules', () => {
         });
 
         it('should put setStartCustomsFailure on error', () => {
-          const movementData = {
-            type: 'departure',
-            key: 'movement-key'
-          };
+          const movementData = { type: 'departure', key: 'movement-key' };
           const action = actions.startCustoms(movementData);
           const generator = sagas.startCustoms(action);
 
           expect(generator.next().value).toEqual(put(actions.setStartCustomsLoading()));
-          expect(generator.next().value).toEqual(call(sagas.getCustomsPayload, movementData));
+          expect(generator.next().value).toEqual(
+            call(sagas.postPrepopulatedFormToCustoms, { movementType: 'departure', movementKey: 'movement-key' })
+          );
 
           const error = new Error('Network error');
           expect(generator.throw(error).value).toEqual(
@@ -155,85 +120,16 @@ describe('modules', () => {
           );
           expect(generator.next().done).toEqual(true);
         });
-      });
 
-      describe('getDirectionDependingData', () => {
-        it('should return departure data for departure type', async () => {
-          (getAerodrome as jest.Mock).mockResolvedValue({ country: 'CH', name: 'Birrfeld' });
-
-          const movementData = {
-            type: 'departure',
-            location: 'LSZF',
-            time: '10:00',
-            duration: '01:30'
-          };
-
-          const result = await sagas.getDirectionDependingData(movementData);
-
-          expect(result).toMatchObject({
-            departureTime: '10:00',
-            arrivalCountry: 'CH',
-            arrivalLocation: 'Birrfeld',
-            arrivalTime: '11:30'
-          });
-        });
-
-        it('should return arrival data for arrival type', async () => {
-          (getAerodrome as jest.Mock).mockResolvedValue({ country: 'DE', name: 'Friedrichshafen' });
-
-          const movementData = {
-            type: 'arrival',
-            location: 'EDNY',
-            time: '14:00'
-          };
-
-          const result = await sagas.getDirectionDependingData(movementData);
-
-          expect(result).toMatchObject({
-            arrivalTime: '14:00',
-            departureCountry: 'DE',
-            departureLocation: 'Friedrichshafen'
-          });
-        });
-      });
-
-      describe('openCompletionUrl', () => {
-        it('should open a new window with the url', () => {
-          const openMock = jest.fn().mockReturnValue({});
-          window.open = openMock;
-
-          sagas.openCompletionUrl('https://example.com/complete');
-
-          expect(openMock).toHaveBeenCalledWith(
-            'https://example.com/complete',
-            '_blank',
-            'noopener,noreferrer'
-          );
-        });
-
-        it('should warn when popup is blocked', () => {
-          const openMock = jest.fn().mockReturnValue(null);
-          window.open = openMock;
-          const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-          sagas.openCompletionUrl('https://example.com/complete');
-
-          expect(warnSpy).toHaveBeenCalled();
-          warnSpy.mockRestore();
-        });
-      });
-
-      describe('startCustoms with result without completionUrl', () => {
         it('should not open url if result has no completionUrl', () => {
           const movementData = { type: 'departure', key: 'movement-key' };
           const action = actions.startCustoms(movementData);
           const generator = sagas.startCustoms(action);
 
           expect(generator.next().value).toEqual(put(actions.setStartCustomsLoading()));
-          expect(generator.next().value).toEqual(call(sagas.getCustomsPayload, movementData));
-
-          const payload = { aerodromeId: 'lszt' };
-          expect(generator.next(payload).value).toEqual(call(sagas.postPrepopulatedFormToCustoms, payload));
+          expect(generator.next().value).toEqual(
+            call(sagas.postPrepopulatedFormToCustoms, { movementType: 'departure', movementKey: 'movement-key' })
+          );
 
           // result with no id and no completionUrl
           const result = { someOtherField: true };
@@ -250,19 +146,17 @@ describe('modules', () => {
           const generator = sagas.startCustoms(action);
 
           expect(generator.next().value).toEqual(put(actions.setStartCustomsLoading()));
-          expect(generator.next().value).toEqual(call(sagas.getCustomsPayload, movementData));
-
-          const payload = { aerodromeId: 'lszt' };
-          expect(generator.next(payload).value).toEqual(call(sagas.postPrepopulatedFormToCustoms, payload));
+          expect(generator.next().value).toEqual(
+            call(sagas.postPrepopulatedFormToCustoms, { movementType: 'departure', movementKey: 'movement-key' })
+          );
 
           const result = { id: 'form-id', completionUrl: 'https://example.com/complete' };
           expect(generator.next(result).value).toEqual(
             call(sagas.saveCustomsFormData, movementData, result.id, result.completionUrl)
           );
 
-          // The inner try/catch catches the error, logs it, then continues.
-          // After the inner catch, the generator calls openCompletionUrl (sync)
-          // and then yields put(setStartCustomsSuccess())
+          // The inner try/catch catches the error, logs it, then continues to
+          // openCompletionUrl (sync) and yields put(setStartCustomsSuccess()).
           const saveError = new Error('save failed');
           expect(generator.throw(saveError).value).toEqual(put(actions.setStartCustomsSuccess()));
           expect(generator.next().done).toEqual(true);
@@ -270,19 +164,18 @@ describe('modules', () => {
       });
 
       describe('checkAvailability', () => {
+        const availabilityUrl = 'https://europe-west1-test-project.cloudfunctions.net/api/customs/availability';
+
         it('should put setCustomsAvailability(true) when available', () => {
           const generator = sagas.checkAvailability();
 
           expect(generator.next().value).toEqual(call(getIdToken));
 
           const idToken = 'test-token';
-          const url = 'https://europe-west1-test-project.cloudfunctions.net/api/customs/availability';
           expect(generator.next(idToken).value).toEqual(
-            call(fetch, url, {
+            call(fetch, availabilityUrl, {
               method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${idToken}`
-              }
+              headers: { 'Authorization': `Bearer ${idToken}` }
             })
           );
 
@@ -302,13 +195,10 @@ describe('modules', () => {
           expect(generator.next().value).toEqual(call(getIdToken));
 
           const idToken = 'test-token';
-          const url = 'https://europe-west1-test-project.cloudfunctions.net/api/customs/availability';
           expect(generator.next(idToken).value).toEqual(
-            call(fetch, url, {
+            call(fetch, availabilityUrl, {
               method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${idToken}`
-              }
+              headers: { 'Authorization': `Bearer ${idToken}` }
             })
           );
 
@@ -335,19 +225,16 @@ describe('modules', () => {
           expect(generator.next().done).toEqual(true);
         });
 
-        it('should throw error and put setCustomsAvailability(false) when response is not ok', () => {
+        it('should put setCustomsAvailability(false) when response is not ok', () => {
           const generator = sagas.checkAvailability();
 
           expect(generator.next().value).toEqual(call(getIdToken));
 
           const idToken = 'test-token';
-          const url = 'https://europe-west1-test-project.cloudfunctions.net/api/customs/availability';
           expect(generator.next(idToken).value).toEqual(
-            call(fetch, url, {
+            call(fetch, availabilityUrl, {
               method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${idToken}`
-              }
+              headers: { 'Authorization': `Bearer ${idToken}` }
             })
           );
 

@@ -5,7 +5,8 @@ const cors = require('cors')({origin: true, credentials: true})
 const fetchAerodromeStatus = require('./fetchAerodromeStatus')
 const fetchUserInvoiceRecipients = require('./fetchUserInvoiceRecipients')
 const {fetchInvoices, fetchCheckouts, postPrepopulatedForm, isCustomsDeclarationAppAvailable} = require('./customs/fetchFromCustoms')
-const {fbAuth, fbAdminAuth} = require('./fbAuth')
+const {buildCustomsPayload} = require('./customs/buildCustomsPayload')
+const {fbAuth, fbAdminAuth, fbAuthExcludingShared} = require('./fbAuth')
 
 const api = express()
 
@@ -47,11 +48,32 @@ api.get('(/api)?/customs/checkouts', fbAdminAuth, async (req, res) => {
   }
 })
 
-api.post('(/api)?/customs/prepopulated-forms', fbAuth, async (req, res) => {
+api.post('(/api)?/customs/prepopulated-forms', fbAuthExcludingShared, async (req, res) => {
   try {
+    const { movementType, movementKey } = req.body || {}
+
+    // The only accepted input is a reference to an existing movement. The
+    // outbound payload is built server-side from stored data (see
+    // buildCustomsPayload), so the caller cannot inject arbitrary content into
+    // the trusted customs integration.
+    if ((movementType !== 'departure' && movementType !== 'arrival') || typeof movementKey !== 'string' || !movementKey) {
+      return res.status(400).send({ error: 'movementType (departure|arrival) and movementKey are required' })
+    }
+
     const db = admin.database()
-    const formData = req.body
-    const result = await postPrepopulatedForm(db, formData)
+
+    const payload = await buildCustomsPayload(db, movementType, movementKey)
+    if (!payload) {
+      return res.status(404).send({ error: 'Movement not found' })
+    }
+
+    console.info(`Customs prepopulated form requested by ${req.fbUserId} for ${movementType}/${movementKey}`)
+
+    const result = await postPrepopulatedForm(db, payload)
+    if (!result) {
+      return res.status(503).send({ error: 'Customs declaration app not configured' })
+    }
+
     res.status(200).send(result)
   } catch (e) {
     console.error('Failed to post prepopulated form to customs', e)
