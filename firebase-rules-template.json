@@ -475,7 +475,8 @@
     },
     "webauthnChallenges": {
       ".read": false,
-      ".write": false
+      ".write": false,
+      ".indexOn": ["expiry"]
     },
     "webauthnCredentialOwners": {
       ".read": false,

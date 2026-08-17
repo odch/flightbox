@@ -3,6 +3,7 @@ describe('functions', () => {
     let mockAdmin;
     let mockCors;
     let capturedHandler;
+    let capturedOptions;
     let mockCredentialsRef;
     let mockAuthAdmin;
     let mockGenerateAuthenticationOptions;
@@ -45,7 +46,7 @@ describe('functions', () => {
 
       jest.mock('firebase-admin', () => mockAdmin);
       jest.mock('firebase-functions/v2/https', () => ({
-        onRequest: (opts, handler) => { capturedHandler = handler; },
+        onRequest: (opts, handler) => { capturedOptions = opts; capturedHandler = handler; },
       }));
       jest.mock('cors', () => () => mockCors);
       jest.mock('@simplewebauthn/server', () => ({
@@ -62,6 +63,10 @@ describe('functions', () => {
 
     const makeReq = (method, body = {}) => ({ method, body });
     const makeRes = () => ({ status: jest.fn().mockReturnThis(), json: jest.fn() });
+
+    it('caps concurrency with maxInstances to bound the challenge-write flood', () => {
+      expect(capturedOptions.maxInstances).toBe(10);
+    });
 
     it('returns 405 on GET', async () => {
       const res = makeRes();
