@@ -79,5 +79,6 @@
   ],
   "maskContactInformation": false,
   "privacySettings": true,
-  "scopeCardPaymentsToOwner": true
+  "scopeCardPaymentsToOwner": true,
+  "lockOnDateTime": true
 }

@@ -37,6 +37,39 @@ function processMovementOwnership(config) {
   return " && (" + IS_ADMIN + " || " + MOVEMENT_OWNERSHIP + ")";
 }
 
+// Movement lock. A movement is locked when its instant is on/before
+// `settings/lockDate` (plus the existing one-day grace). The default rule tests
+// the client-supplied numeric `negativeTimestamp`, which nothing ties to the ISO
+// `dateTime` reports display — so a direct DB writer can pass the lock with a
+// recent negativeTimestamp while backdating `dateTime` into a frozen period. On
+// projects that opt in (`lockOnDateTime`) the test moves onto `dateTime` itself,
+// compared against a server-derived `settings/lockDateIso` threshold (see
+// functions/deriveLockDateIso.js). Fixed-width ISO-UTC strings sort
+// chronologically, so the comparison is exact. While the derived mirror is
+// briefly absent (the derive is a fast trigger), the rule falls back to the
+// numeric test — never weaker than today, and it can't block writes.
+const LOCK_GRACE = "root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24";
+
+function numericOutsideLock(side) {
+  return side + ".child('negativeTimestamp').val() * -1 > " + LOCK_GRACE;
+}
+
+function isoOutsideLock(side) {
+  return "(root.child('settings/lockDateIso').exists() ? " +
+    side + ".child('dateTime').val() > root.child('settings/lockDateIso').val() : " +
+    numericOutsideLock(side) + ")";
+}
+
+function processMovementLock(config) {
+  const outside = config.lockOnDateTime ? isoOutsideLock : numericOutsideLock;
+  return [
+    "!root.child('settings/lockDate').exists()",
+    "(!data.exists() && newData.exists() && " + outside('newData') + ")",
+    "(data.exists() && !newData.exists() && " + outside('data') + ")",
+    "(data.exists() && newData.exists() && " + outside('data') + " && " + outside('newData') + ")",
+  ].join(" || ");
+}
+
 // Read scoping for movements. On personal-access projects a list/query read is
 // only allowed when bounded to the caller's own createdBy_orderKey prefix
 // (their email), and a single-record read only for the record's owner; admins
@@ -153,8 +186,15 @@ function process(rules, config) {
 
     if (key === '.validate') {
       processValidationString(rules, config, key, value);
-    } else if (key === '.write' && typeof value === 'string' && value.indexOf('{movementOwnership}') !== -1) {
-      rules[key] = value.replace('{movementOwnership}', processMovementOwnership(config));
+    } else if (key === '.write' && typeof value === 'string' && (value.indexOf('{movementLock}') !== -1 || value.indexOf('{movementOwnership}') !== -1)) {
+      let write = value;
+      if (write.indexOf('{movementLock}') !== -1) {
+        write = write.replace('{movementLock}', processMovementLock(config));
+      }
+      if (write.indexOf('{movementOwnership}') !== -1) {
+        write = write.replace('{movementOwnership}', processMovementOwnership(config));
+      }
+      rules[key] = write;
     } else if (key === '.write' && typeof value === 'string' && /^\{([a-zA-Z]+)}$/.test(value)) {
       const token = value.slice(1, -1);
       if (writeProcessors[token]) {
