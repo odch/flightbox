@@ -34,6 +34,37 @@ const normalizeRegistration = (immatriculation) =>
  * the lspl pilot). Only strategies ported into functions/fees are honoured; an
  * unrecognised strategy fails closed (logs, writes nothing).
  */
+/**
+ * A pilot may only bill an invoice recipient they are authorized for — one
+ * whose configured `emails` include the arrival author's authenticated e-mail.
+ * The client only offers authorized recipients, but a direct database writer
+ * could name any recipient and misattribute the bill (SEC-03). On the trusted
+ * write path, clear an invoice recipient the author is not authorized for.
+ *
+ * `settings/invoiceRecipients` is an array of `{ name, emails }`, which the
+ * security rules cannot search — hence this server-side check.
+ */
+async function authorizeInvoiceRecipient(after, arrival, db) {
+  const pm = arrival.paymentMethod;
+  if (!pm || pm.method !== 'invoice' || !pm.invoiceRecipientName) {
+    return;
+  }
+
+  const authEmail = arrival.createdBy;
+  const raw = (await db.ref('/settings/invoiceRecipients').once('value')).val();
+  const recipients = Array.isArray(raw) ? raw : Object.values(raw || {});
+  const authorized = authEmail
+    ? recipients
+        .filter(r => r && Array.isArray(r.emails) && r.emails.includes(authEmail))
+        .map(r => r.name)
+    : [];
+
+  if (!authorized.includes(pm.invoiceRecipientName)) {
+    await after.ref.child('paymentMethod/invoiceRecipientName').remove();
+    logger.warn(`Cleared unauthorized invoiceRecipientName on arrival ${after.ref.key}`);
+  }
+}
+
 async function recomputeArrivalFees(event) {
   const after = event.data.after;
   if (!after.exists()) {
@@ -50,6 +81,10 @@ async function recomputeArrivalFees(event) {
   if (!strategy) {
     return; // project not on server-owned fees
   }
+
+  // Authorize the declared invoice recipient (independent of the fee recompute,
+  // so the fee change-guard below can never skip it).
+  await authorizeInvoiceRecipient(after, arrival, db);
 
   // MTOW / category: authoritative from the registry when the registration is
   // known; otherwise the pilot-submitted values, flagged for admin review. The
@@ -115,4 +150,4 @@ exports.computeArrivalFeesOnWrite = onValueWritten(
   recomputeArrivalFees
 );
 
-exports._test = { recomputeArrivalFees, normalizeRegistration, FEE_FIELDS };
+exports._test = { recomputeArrivalFees, authorizeInvoiceRecipient, normalizeRegistration, FEE_FIELDS };
