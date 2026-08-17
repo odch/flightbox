@@ -51,7 +51,40 @@ function processMovementOwnership(config) {
 const readProcessors = {
   movementListRead: processMovementListRead,
   movementItemRead: processMovementItemRead,
+  cardPaymentRead: processCardPaymentRead,
 };
+
+const writeProcessors = {
+  cardPaymentWrite: processCardPaymentWrite,
+};
+
+// Card-payment access. On projects that opt in (`scopeCardPaymentsToOwner`) a
+// card-payment record is readable and cancellable only by the authenticated
+// user who created it (its `owner`) or an admin, and a new payment must be
+// stamped with the creator's own uid. Projects that do not opt in keep the
+// permissive auth-only rule so their existing client flow is byte-for-byte
+// unchanged. The payment webhook (sibling Go project) writes via the Admin SDK
+// and bypasses these rules either way.
+const CARD_PAYMENT_UNSCOPED_WRITE =
+  "auth !== null && newData.exists() && (" + IS_ADMIN +
+  " || (!data.exists() && newData.child('status').val() === 'pending')" +
+  " || (data.exists() && data.child('status').val() === 'pending' && newData.child('status').val() === 'cancelled'))";
+
+function processCardPaymentRead(config) {
+  if (!config.scopeCardPaymentsToOwner) {
+    return "auth !== null";
+  }
+  return "auth !== null && (" + IS_ADMIN + " || data.child('owner').val() === auth.uid)";
+}
+
+function processCardPaymentWrite(config) {
+  if (!config.scopeCardPaymentsToOwner) {
+    return CARD_PAYMENT_UNSCOPED_WRITE;
+  }
+  return "auth !== null && newData.exists() && (" + IS_ADMIN +
+    " || (!data.exists() && newData.child('status').val() === 'pending' && newData.child('owner').val() === auth.uid)" +
+    " || (data.exists() && data.child('owner').val() === auth.uid && data.child('status').val() === 'pending' && newData.child('status').val() === 'cancelled'))";
+}
 
 // Who may read every movement — must mirror the client's canSeeAllMovements
 // (admin || allMovements). `admin` is kept in sync with /admins; `allMovements`
@@ -122,6 +155,11 @@ function process(rules, config) {
       processValidationString(rules, config, key, value);
     } else if (key === '.write' && typeof value === 'string' && value.indexOf('{movementOwnership}') !== -1) {
       rules[key] = value.replace('{movementOwnership}', processMovementOwnership(config));
+    } else if (key === '.write' && typeof value === 'string' && /^\{([a-zA-Z]+)}$/.test(value)) {
+      const token = value.slice(1, -1);
+      if (writeProcessors[token]) {
+        rules[key] = writeProcessors[token](config);
+      }
     } else if (key === '.read' && typeof value === 'string' && /^\{([a-zA-Z]+)}$/.test(value)) {
       const token = value.slice(1, -1);
       if (readProcessors[token]) {
