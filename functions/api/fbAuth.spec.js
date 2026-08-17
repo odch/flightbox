@@ -10,7 +10,7 @@ jest.mock('firebase-admin', () => ({
 }));
 
 const admin = require('firebase-admin');
-const { fbAuth, fbAdminAuth } = require('./fbAuth');
+const { fbAuth, fbAdminAuth, fbAuthExcludingShared } = require('./fbAuth');
 
 describe('functions', () => {
   describe('api/fbAuth', () => {
@@ -112,6 +112,47 @@ describe('functions', () => {
         await fbAdminAuth(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(500);
+      });
+    });
+
+    describe('fbAuthExcludingShared', () => {
+      it('calls next for a normal authenticated user', async () => {
+        req.headers.authorization = 'Bearer valid-token';
+        admin.auth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
+
+        await fbAuthExcludingShared(req, res, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(res.status).not.toHaveBeenCalledWith(403);
+      });
+
+      it('returns 403 for a guest shared session', async () => {
+        req.headers.authorization = 'Bearer valid-token';
+        admin.auth().verifyIdToken.mockResolvedValue({ uid: 'guest', email: undefined });
+
+        await fbAuthExcludingShared(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(next).not.toHaveBeenCalled();
+      });
+
+      it('returns 403 for a kiosk shared session', async () => {
+        req.headers.authorization = 'Bearer valid-token';
+        admin.auth().verifyIdToken.mockResolvedValue({ uid: 'kiosk', email: undefined });
+
+        await fbAuthExcludingShared(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(next).not.toHaveBeenCalled();
+      });
+
+      it('returns 401 (from fbAuth) when unauthenticated, without reaching the shared check', async () => {
+        req.headers = {};
+
+        await fbAuthExcludingShared(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(next).not.toHaveBeenCalled();
       });
     });
   });

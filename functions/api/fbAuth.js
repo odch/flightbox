@@ -59,7 +59,23 @@ const fbAdminAuth = async (req, res, next) => {
   });
 }
 
+// Shared-access sessions (guest / kiosk) authenticate with a fixed uid. Some
+// routes must stay off-limits to them — e.g. driving the trusted customs
+// integration — even though they are otherwise authenticated.
+const SHARED_SESSION_UIDS = ['guest', 'kiosk']
+
+const fbAuthExcludingShared = async (req, res, next) => {
+  await fbAuth(req, res, () => {
+    if (SHARED_SESSION_UIDS.includes(req.fbUserId)) {
+      console.info(`Shared session '${req.fbUserId}' rejected on restricted route. Returning 403 Forbidden.`)
+      return res.status(403).send('Forbidden: not available to shared sessions')
+    }
+    return next()
+  })
+}
+
 module.exports = {
   fbAuth,
-  fbAdminAuth
+  fbAdminAuth,
+  fbAuthExcludingShared
 }
