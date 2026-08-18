@@ -106,6 +106,10 @@ async function testPersonalAccess() {
     await set(ref(db, 'departures/owned_for_guest'), validDeparture(config, 'alice@example.com'));
     await set(ref(db, 'departures/alice_read'), validDeparture(config, 'alice@example.com'));
     await set(ref(db, 'departures/bob_read'), validDeparture(config, 'bob@example.com'));
+    // A disabled admin recorded as `false` (rather than deleted) must not be
+    // treated as an admin: the admin predicate requires the value === true.
+    await set(ref(db, 'admins/stale-admin-uid'), false);
+    await set(ref(db, 'settings/invoiceRecipients/r1'), { name: 'Acme' });
   });
 
   const alice = env.authenticatedContext('alice-uid', { email: 'alice@example.com' }).database();
@@ -113,6 +117,7 @@ async function testPersonalAccess() {
   const guest = env.authenticatedContext('guest').database();
   const admin = env.authenticatedContext('admin-uid').database();
   const operator = env.authenticatedContext('operator-uid', { email: 'operator@example.com' }).database();
+  const staleAdmin = env.authenticatedContext('stale-admin-uid').database();
   const anon = env.unauthenticatedContext().database();
 
   // pilot
@@ -141,8 +146,17 @@ async function testPersonalAccess() {
   await expect('pilot reads own movement by key', true, get(ref(alice, 'departures/alice_read')));
   await expect('pilot cannot read another movement by key', false, get(ref(alice, 'departures/bob_read')));
   await expect('guest cannot read movements', false, get(ownQuery(guest, 'departures', 'alice@example.com')));
+  await expect('guest cannot read an ownerless movement by key', false, get(ref(guest, 'departures/ownerless_edit')));
+  await expect('guest cannot read an owned movement by key', false, get(ref(guest, 'departures/alice_read')));
   await expect('admin reads all movements (unbounded query)', true, get(unboundedQuery(admin, 'departures')));
   await expect('admin reads any movement by key', true, get(ref(admin, 'departures/bob_read')));
+  // Admin predicate must require value === true, matching the API layer. A
+  // `false` record (e.g. an admin disabled by setting the value instead of
+  // deleting the key) must grant nothing — via the generated see-all rule or a
+  // templated admin-only node rule.
+  await expect('admin reads an admin-only settings node', true, get(ref(admin, 'settings/invoiceRecipients')));
+  await expect('disabled (false) admin cannot read all movements', false, get(unboundedQuery(staleAdmin, 'departures')));
+  await expect('disabled (false) admin cannot read an admin-only settings node', false, get(ref(staleAdmin, 'settings/invoiceRecipients')));
   await expect('allMovements operator reads all (unbounded query)', true, get(unboundedQuery(operator, 'departures')));
   await expect('allMovements operator reads any movement by key', true, get(ref(operator, 'departures/bob_read')));
   await expect('unauthenticated cannot read movements', false, get(ownQuery(anon, 'departures', 'alice@example.com')));

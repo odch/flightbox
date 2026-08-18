@@ -154,6 +154,68 @@ describe('functions/updateAerodromes', () => {
     });
   });
 
+  describe('delete-all / poisoned-feed guard', () => {
+    const makeAerodrome = i => ({
+      icao: `LS${i.toString().padStart(2, '0')}`,
+      name: `Airport ${i}`,
+      country: 'CH',
+      timezone: 'Europe/Zurich'
+    });
+
+    const keysFor = count => {
+      const obj = {};
+      for (let i = 0; i < count; i++) {
+        obj[`LS${i.toString().padStart(2, '0')}`] = {};
+      }
+      return obj;
+    };
+
+    it('skips the sync when the feed is empty but the table is populated', async () => {
+      setupMocks([], { LSZH: {}, LSZT: {} });
+
+      await capturedOnRun();
+
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('refuses to remove more than 10% of a populated table', async () => {
+      // 100 existing, feed only re-supplies 80 → 20 removals (20%) → aborts
+      const imported = Array.from({ length: 80 }, (_, i) => makeAerodrome(i));
+      setupMocks(imported, keysFor(100));
+
+      await capturedOnRun();
+
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('allows removals within the 10% safety limit on a large table', async () => {
+      // 100 existing, feed re-supplies 95 → 5 removals (5%) → proceeds
+      const imported = Array.from({ length: 95 }, (_, i) => makeAerodrome(i));
+      setupMocks(imported, keysFor(100));
+
+      await capturedOnRun();
+
+      expect(mockUpdate).toHaveBeenCalledTimes(1);
+      const updateArg = mockUpdate.mock.calls[0][0];
+      const removed = Object.keys(updateArg).filter(k => updateArg[k] === null);
+      expect(removed).toHaveLength(5);
+    });
+
+    it('ignores malformed entries missing icao or name', async () => {
+      setupMocks([
+        { icao: 'LSZH', name: 'Zurich', country: 'CH', timezone: 'Europe/Zurich' },
+        { icao: 'LSZB', country: 'CH', timezone: 'Europe/Zurich' }, // no name
+        { name: 'No ICAO', country: 'CH', timezone: 'Europe/Zurich' } // no icao
+      ]);
+
+      await capturedOnRun();
+
+      const updateArg = mockUpdate.mock.calls[0][0];
+      expect(updateArg['LSZH']).toBeDefined();
+      expect(updateArg['LSZB']).toBeUndefined();
+    });
+  });
+
   describe('cron job disabled', () => {
     it('returns early when settings flag is false', async () => {
       setupMocks([], {}, false);

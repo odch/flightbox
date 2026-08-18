@@ -1,5 +1,5 @@
 import {all, call, fork, put, select, takeEvery} from 'redux-saga/effects'
-import {get, query, orderByChild, equalTo, limitToFirst} from 'firebase/database';
+import {get} from 'firebase/database';
 import * as actions from './actions';
 import {Passkey} from './actions';
 import {loadCredentialsToken, loadGuestToken, loadKioskToken} from '../../util/auth';
@@ -18,6 +18,7 @@ import {
 } from '../../util/webauthn';
 import {error as logError} from '../../util/log';
 import {getKioskAuthQueryToken} from '../../util/getAuthQueryToken'
+import {scrubAuthParamsFromUrl} from '../../util/scrubAuthParams'
 import i18n from '../../i18n'
 
 export function getLoginData(uid: string) {
@@ -29,22 +30,6 @@ export function getLoginData(uid: string) {
       return null;
     })
     .catch(() => null);
-}
-
-export const findByMemberNr = (dbRef: any, uid: string) =>
-  get(query(dbRef, orderByChild('memberNr'), equalTo(uid), limitToFirst(1)));
-
-export function* loadUser(uid: string) {
-  const usersRef = yield call(firebase, '/users');
-  const snapshot = yield call(findByMemberNr, usersRef, uid)
-  const map = snapshot.val()
-  const arr = map ? Object.values(map) : []
-  return arr.length > 0 ? arr[0] : null
-}
-
-export function* getName(uid: string) {
-  const user = yield call(loadUser, uid)
-  return user ? `${(user as any).firstname} ${(user as any).lastname}` : null
 }
 
 export function* doUsernamePasswordAuthentication(action: any) {
@@ -115,8 +100,11 @@ export function* doGuestTokenAuthentication(action: any) {
     if (guestToken) {
       yield put(actions.requestFirebaseAuthentication(
         guestToken,
-        actions.guestTokenAuthenticationFailure()
+        actions.guestTokenAuthenticationFailure(),
+        true // shared device: use non-persistent session
       ));
+      // Remove the guest access token from the URL now that it has been used.
+      yield call(scrubAuthParamsFromUrl);
     } else {
       yield put(actions.guestTokenAuthenticationFailure());
     }
@@ -133,8 +121,11 @@ export function* doKioskTokenAuthentication(action: any) {
     if (kioskToken) {
       yield put(actions.requestFirebaseAuthentication(
         kioskToken,
-        actions.kioskTokenAuthenticationFailure()
+        actions.kioskTokenAuthenticationFailure(),
+        true // shared device: use non-persistent session
       ));
+      // Remove the kiosk access token from the URL now that it has been used.
+      yield call(scrubAuthParamsFromUrl);
     } else {
       yield put(actions.kioskTokenAuthenticationFailure());
     }
@@ -146,7 +137,7 @@ export function* doKioskTokenAuthentication(action: any) {
 
 export function* doFirebaseAuthentication(action: any) {
   try {
-    yield call(fbAuth, action.payload.token);
+    yield call(fbAuth, action.payload.token, !!action.payload.shared);
   } catch (e) {
     logError('Firebase authentication failed', e);
     yield put(action.payload.failureAction);
@@ -243,7 +234,6 @@ export function* doListenFirebaseAuthentication(action: any) {
       local,
       links: !loginData || loginData.links !== false,
       hintsDismissable: !loginData || loginData.hintsDismissable !== false,
-      name: yield call(getName, uid),
       email
     }
   }

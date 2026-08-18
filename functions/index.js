@@ -23,12 +23,18 @@ const { generateWebauthnAuthenticationOptions } = require('./auth/generateAuthen
 const { verifyWebauthnAuthentication } = require('./auth/verifyAuthentication');
 const { removeWebauthnCredential } = require('./auth/removePasskey');
 const { cleanupExpiredWebauthnChallenges } = require('./auth/cleanupExpiredWebauthnChallenges');
+const {
+  revokeKioskSessionsOnTokenRotation,
+  revokeGuestSessionsOnTokenRotation,
+} = require('./auth/revokeSharedSessionsOnTokenRotation');
 const api = require('./api');
 const webhook = require('./webhook');
 const associatedMovementsTriggers = require('./associatedMovements/setAssociatedMovementsTriggers');
 const invoiceRecipientsTrigger = require('./invoiceRecipients/invoiceRecipientsTrigger');
 const homebasedAircraftTrigger = require('./homebasedAircraft/homebasedAircraftTrigger');
 const updateArrivalPaymentStatus = require('./updateArrivalPaymentStatus');
+const { computeArrivalFeesOnWrite } = require('./fees/computeArrivalFees');
+const { deriveLockDateIsoOnWrite } = require('./deriveLockDateIso');
 
 exports.auth = auth;
 exports.generateSignInCode = generateSignInCode;
@@ -40,6 +46,8 @@ exports.generateWebauthnAuthenticationOptions = generateWebauthnAuthenticationOp
 exports.verifyWebauthnAuthentication = verifyWebauthnAuthentication;
 exports.removeWebauthnCredential = removeWebauthnCredential;
 exports.cleanupExpiredWebauthnChallenges = cleanupExpiredWebauthnChallenges;
+exports.revokeKioskSessionsOnTokenRotation = revokeKioskSessionsOnTokenRotation;
+exports.revokeGuestSessionsOnTokenRotation = revokeGuestSessionsOnTokenRotation;
 exports.api = api;
 exports.webhook = webhook;
 exports.setAssociatedMovementOnCreatedDeparture = associatedMovementsTriggers.setAssociatedMovementOnCreatedDeparture;
@@ -60,6 +68,10 @@ exports.enrichArrivalOnCreate = enrichMovements.enrichArrivalOnCreate;
 exports.enrichArrivalOnUpdate = enrichMovements.enrichArrivalOnUpdate;
 
 exports.updateArrivalPaymentStatusOnCardPaymentUpdate = updateArrivalPaymentStatus.updateArrivalPaymentStatusOnCardPaymentUpdate;
+
+exports.computeArrivalFeesOnWrite = computeArrivalFeesOnWrite;
+
+exports.deriveLockDateIsoOnWrite = deriveLockDateIsoOnWrite;
 
 let privacyFunctionsEnabled = false;
 try {

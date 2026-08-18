@@ -72,6 +72,56 @@ describe('functions', () => {
       expect(result.html).not.toContain('{{themeColor}}');
     });
 
+    it('escapes HTML in airportName to prevent injection', () => {
+      const result = getSignInEmailContent({
+        signInCode: '123456',
+        airportName: '<script>alert(1)</script>',
+        themeColor: '#003863'
+      });
+      expect(result.html).not.toContain('<script>');
+      expect(result.html).toContain('&lt;script&gt;');
+    });
+
+    it('escapes quotes and angle brackets in airportName (no breakout)', () => {
+      const result = getSignInEmailContent({
+        signInCode: '123456',
+        airportName: '"><img src=x onerror=alert(1)>',
+        themeColor: '#003863'
+      });
+      expect(result.html).not.toContain('<img');
+      expect(result.html).toContain('&quot;&gt;&lt;img');
+    });
+
+    it('falls back to a safe themeColor when the value is not a valid colour', () => {
+      const result = getSignInEmailContent({
+        signInCode: '123456',
+        airportName: 'Thun',
+        themeColor: 'red; } </style><script>alert(1)</script>'
+      });
+      expect(result.html).toContain('#000000');
+      expect(result.html).not.toContain('<script>');
+      expect(result.html).not.toContain('</style>');
+    });
+
+    it('allows a valid named colour for themeColor', () => {
+      const result = getSignInEmailContent({
+        signInCode: '123456',
+        airportName: 'Thun',
+        themeColor: 'blue'
+      });
+      expect(result.html).toContain('blue');
+    });
+
+    it('does not HTML-escape airportName in the plain-text output', () => {
+      const result = getSignInEmailContent({
+        signInCode: '123456',
+        airportName: 'A & B',
+        themeColor: '#003863'
+      });
+      expect(result.text).toContain('A & B');
+      expect(result.html).toContain('A &amp; B');
+    });
+
     it('replaces signInCode placeholder in text', () => {
       const result = getSignInEmailContent({
         signInCode: '123456',

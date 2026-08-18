@@ -3,23 +3,10 @@ const admin = require('firebase-admin')
 const express = require('express')
 const cors = require('cors')({origin: true, credentials: true})
 const fetchAerodromeStatus = require('./fetchAerodromeStatus')
-const basicAuth = require('./basicAuth')
-const syncUsers = require('./syncUsers')
 const fetchUserInvoiceRecipients = require('./fetchUserInvoiceRecipients')
 const {fetchInvoices, fetchCheckouts, postPrepopulatedForm, isCustomsDeclarationAppAvailable} = require('./customs/fetchFromCustoms')
-const {fbAuth, fbAdminAuth} = require('./fbAuth')
-
-// The user-import (member management) endpoint is only relevant to projects with
-// member management enabled (currently lspv). The deploy workflow writes this
-// generated flag from the project's `memberManagement` config; it is absent in
-// local dev / tests, where the endpoint stays disabled. Fail closed: if the
-// flag is missing or false, the route is not registered at all (404).
-let memberManagementEnabled = false
-try {
-  memberManagementEnabled = require('../member-management.generated.js')
-} catch (e) {
-  if (e.code !== 'MODULE_NOT_FOUND') throw e
-}
+const {buildCustomsPayload} = require('./customs/buildCustomsPayload')
+const {fbAuth, fbAdminAuth, fbAuthExcludingShared} = require('./fbAuth')
 
 const api = express()
 
@@ -36,25 +23,6 @@ api.get('(/api)?/aerodrome/status', async (req, res) => {
 
   res.send(status)
 })
-
-if (memberManagementEnabled) {
-  api.post('(/api)?/users/import', basicAuth, async (req, res) => {
-    try {
-      const users = req.body.users
-      if (!Array.isArray(users)) {
-        return res.status(400).send('Invalid users format')
-      }
-
-      const db = admin.database()
-      await syncUsers(db, users)
-
-      res.status(200).send({ message: 'Users imported successfully' })
-    } catch (e) {
-      console.error('Failed to import users', e)
-      res.status(500).send({ error: 'Failed to import users' })
-    }
-  })
-}
 
 api.get('(/api)?/customs/invoices', fbAdminAuth, async (req, res) => {
   try {
@@ -80,11 +48,32 @@ api.get('(/api)?/customs/checkouts', fbAdminAuth, async (req, res) => {
   }
 })
 
-api.post('(/api)?/customs/prepopulated-forms', fbAuth, async (req, res) => {
+api.post('(/api)?/customs/prepopulated-forms', fbAuthExcludingShared, async (req, res) => {
   try {
+    const { movementType, movementKey } = req.body || {}
+
+    // The only accepted input is a reference to an existing movement. The
+    // outbound payload is built server-side from stored data (see
+    // buildCustomsPayload), so the caller cannot inject arbitrary content into
+    // the trusted customs integration.
+    if ((movementType !== 'departure' && movementType !== 'arrival') || typeof movementKey !== 'string' || !movementKey) {
+      return res.status(400).send({ error: 'movementType (departure|arrival) and movementKey are required' })
+    }
+
     const db = admin.database()
-    const formData = req.body
-    const result = await postPrepopulatedForm(db, formData)
+
+    const payload = await buildCustomsPayload(db, movementType, movementKey)
+    if (!payload) {
+      return res.status(404).send({ error: 'Movement not found' })
+    }
+
+    console.info(`Customs prepopulated form requested by ${req.fbUserId} for ${movementType}/${movementKey}`)
+
+    const result = await postPrepopulatedForm(db, payload)
+    if (!result) {
+      return res.status(503).send({ error: 'Customs declaration app not configured' })
+    }
+
     res.status(200).send(result)
   } catch (e) {
     console.error('Failed to post prepopulated form to customs', e)
@@ -115,5 +104,3 @@ api.get('(/api)?/users/me/invoice-recipients', fbAuth, async (req, res) => {
 })
 
 module.exports = onRequest({ region: 'europe-west1' }, api)
-// Exposed for tests (route registration depends on the member-management flag).
-module.exports.app = api

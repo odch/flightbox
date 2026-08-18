@@ -564,7 +564,10 @@ export function* saveMovement() {
   } catch(e) {
     if (console && typeof console.error === 'function') {
       console.error('Failed to save movement', e);
-      console.error('movement', movement);
+      // Log only non-identifying context; the movement object holds PII
+      // (name, email, phone, remarks, member number) that must not persist
+      // in the browser console on shared/kiosk devices.
+      console.error('movement path', path, 'key', key);
     }
     yield put(actions.saveMovementFailed(e))
   }

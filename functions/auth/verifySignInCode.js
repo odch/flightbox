@@ -50,31 +50,44 @@ exports.verifySignInCode = onRequest({ region: 'europe-west1' }, (req, res) => {
         return res.status(400).json({ error: 'Invalid or expired code' });
       }
 
-      let validKey = null;
-      const attemptsUpdates = {};
+      const candidateKeys = [];
+      snapshot.forEach(child => { candidateKeys.push(child.key); });
 
-      snapshot.forEach(child => {
-        const data = child.val();
-        if (data.expiry <= now || data.attempts >= MAX_ATTEMPTS) {
-          return;
+      // Check-and-increment each candidate atomically. A non-transactional
+      // read-then-write lets concurrent guesses race: N parallel wrong guesses
+      // all read the same `attempts` and each write `attempts + 1`, so the
+      // per-code cap collapses to a single increment and the code becomes
+      // brute-forceable. A per-node transaction serializes the guesses, so the
+      // MAX_ATTEMPTS cap actually holds and a correct code is consumed exactly
+      // once.
+      let matched = false;
+      for (const key of candidateKeys) {
+        let didMatch = false;
+        const result = await codesRef.child(key).transaction(current => {
+          // RTDB may invoke this with a stale cached value (often null) before
+          // retrying against the server; returning null (not undefined) forces
+          // the refetch instead of aborting.
+          if (current === null || current === undefined) {
+            return null;
+          }
+          if (current.expiry <= now || current.attempts >= MAX_ATTEMPTS) {
+            return current; // expired or capped: leave unchanged
+          }
+          if (current.codeHash === codeHash) {
+            didMatch = true;
+            return null; // correct code: consume it (single use)
+          }
+          return { ...current, attempts: (current.attempts || 0) + 1 }; // wrong: count it
+        });
+        if (didMatch && result.committed) {
+          matched = true;
+          break;
         }
-        if (validKey === null && data.codeHash === codeHash) {
-          validKey = child.key;
-        } else {
-          attemptsUpdates[`${child.key}/attempts`] = (data.attempts || 0) + 1;
-        }
-      });
-
-      if (Object.keys(attemptsUpdates).length > 0) {
-        await codesRef.update(attemptsUpdates);
       }
 
-      if (!validKey) {
+      if (!matched) {
         return res.status(400).json({ error: 'Invalid or expired code' });
       }
-
-      // Consume the code (delete it so it can only be used once)
-      await codesRef.child(validKey).remove();
 
       // Get or create the Firebase Auth user
       let uid;

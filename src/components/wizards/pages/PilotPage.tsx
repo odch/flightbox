@@ -3,7 +3,7 @@ import React from 'react';
 import {Field, Form} from 'react-final-form';
 import { useTranslation } from 'react-i18next';
 import validate from '../validate';
-import {renderInputField, renderPhoneField, renderUserDropdown} from '../renderField';
+import {renderInputField, renderPhoneField} from '../renderField';
 import FieldSet from '../FieldSet';
 import WizardNavigation from '../../WizardNavigation';
 
@@ -19,29 +19,14 @@ const PilotPage = (props) => {
       {({handleSubmit, form}) => (
         <form onSubmit={handleSubmit} className="PilotPage">
           <FieldSet>
-            {__CONF__.memberManagement === true &&!isGuest && (
-              <Field name="memberNr">
-                {({ input, meta }) =>
-                  renderUserDropdown({
-                    input: {
-                      ...input,
-                      onChange: (user) => {
-                        input.onChange(user);
-                        if (user) {
-                          form.change('memberNr', user.memberNr)
-                          form.change('firstname', user.firstname);
-                          form.change('lastname', user.lastname);
-                          form.change('email', user.email);
-                          form.change('phone', user.phone);
-                        }
-                      },
-                    },
-                    meta,
-                    label: t('movement.details.memberNr'),
-                    readOnly: props.readOnly,
-                  })
-                }
-              </Field>
+            {__CONF__.memberManagement === true && !isGuest && (
+              <Field
+                name="memberNr"
+                type="text"
+                label={t('movement.details.memberNr')}
+                component={renderInputField}
+                readOnly={props.readOnly}
+              />
             )}
           </FieldSet>
           <FieldSet>

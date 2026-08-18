@@ -71,6 +71,46 @@ describe('functions', () => {
       });
     });
 
+    describe('generateDecoyCredentials', () => {
+      it('returns a single plausibly-shaped credential', () => {
+        const decoys = helpers.generateDecoyCredentials('a@b.c');
+        expect(Array.isArray(decoys)).toBe(true);
+        expect(decoys).toHaveLength(1);
+        expect(typeof decoys[0].id).toBe('string');
+        expect(decoys[0].id.length).toBeGreaterThan(0);
+        expect(decoys[0].transports).toEqual(['internal']);
+      });
+
+      it('is deterministic for the same email', () => {
+        const a = helpers.generateDecoyCredentials('a@b.c');
+        const b = helpers.generateDecoyCredentials('a@b.c');
+        expect(a[0].id).toBe(b[0].id);
+      });
+
+      it('is case-insensitive on the email', () => {
+        const lower = helpers.generateDecoyCredentials('a@b.c');
+        const upper = helpers.generateDecoyCredentials('A@B.C');
+        expect(lower[0].id).toBe(upper[0].id);
+      });
+
+      it('produces different values for different emails', () => {
+        const a = helpers.generateDecoyCredentials('a@b.c');
+        const b = helpers.generateDecoyCredentials('x@y.z');
+        expect(a[0].id).not.toBe(b[0].id);
+      });
+
+      it('is unpredictable without the secret (keyed by it)', () => {
+        jest.resetModules();
+        process.env.WEBAUTHN_DECOY_SECRET = 'secret-one';
+        const withOne = require('./webauthnHelpers').generateDecoyCredentials('a@b.c');
+        jest.resetModules();
+        process.env.WEBAUTHN_DECOY_SECRET = 'secret-two';
+        const withTwo = require('./webauthnHelpers').generateDecoyCredentials('a@b.c');
+        delete process.env.WEBAUTHN_DECOY_SECRET;
+        expect(withOne[0].id).not.toBe(withTwo[0].id);
+      });
+    });
+
     describe('persistChallenge', () => {
       it('writes record with expiry and returns key', async () => {
         const key = await helpers.persistChallenge({

@@ -43,6 +43,26 @@ const handleUpdate = async (change) => {
       return
     }
 
+    // Reconcile the paid amount against the arrival's recorded fee before
+    // marking it paid, so a payment for an arbitrary (e.g. one cent) amount
+    // cannot settle an arrival that owes more. The card-payment amount is in
+    // cents; the arrival fee (feeTotalGross) is in currency units.
+    // NOTE: the arrival fee is itself client-supplied today — full fee
+    // integrity (server-computed fees) is tracked as separate follow-up work;
+    // this check closes the amount-mismatch settlement path.
+    const paidAmount = afterValue.amount;
+    const expectedFee = arrivalValues.feeTotalGross;
+    const expectedAmount = typeof expectedFee === 'number'
+      ? Math.round(expectedFee * 100)
+      : null;
+
+    if (expectedAmount === null || paidAmount !== expectedAmount) {
+      logger.warn(
+        `Refusing to complete arrival ${afterValue.arrivalReference}: paid amount ${paidAmount} does not match expected fee ${expectedAmount} (card payment ${cardPaymentKey})`
+      );
+      return
+    }
+
     if (arrivalValues.paymentMethod && arrivalValues.paymentMethod.status === 'pending') {
       logger.info(
         `Setting payment status of arrival ${afterValue.arrivalReference} to completed (card payment ${cardPaymentKey})`

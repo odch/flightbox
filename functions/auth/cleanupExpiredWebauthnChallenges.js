@@ -8,20 +8,23 @@ exports.cleanupExpiredWebauthnChallenges = onSchedule(
   async () => {
     const db = admin.database();
     const ref = db.ref('/webauthnChallenges');
-    const snapshot = await ref.once('value');
+    const now = Date.now();
+
+    // Read only the expired records via the `expiry` index, rather than scanning
+    // the whole node. `endAt(now)` returns records ordered up to `now`, which
+    // covers numeric expiries in the past and any missing/null expiry (those
+    // sort first); all of them are stale and should be removed. This keeps the
+    // cleanup cost proportional to the expired set, not the total node size —
+    // important when the (public) options endpoints are being flooded.
+    const snapshot = await ref.orderByChild('expiry').endAt(now).once('value');
 
     if (!snapshot.exists()) {
       return;
     }
 
     const updates = {};
-    const now = Date.now();
-
     snapshot.forEach(child => {
-      const val = child.val() || {};
-      if (typeof val.expiry !== 'number' || val.expiry <= now) {
-        updates[child.key] = null;
-      }
+      updates[child.key] = null;
     });
 
     if (Object.keys(updates).length > 0) {

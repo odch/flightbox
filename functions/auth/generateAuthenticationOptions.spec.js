@@ -3,11 +3,13 @@ describe('functions', () => {
     let mockAdmin;
     let mockCors;
     let capturedHandler;
+    let capturedOptions;
     let mockCredentialsRef;
     let mockAuthAdmin;
     let mockGenerateAuthenticationOptions;
     let mockPersistChallenge;
     let mockGetRpConfig;
+    let mockGenerateDecoyCredentials;
 
     beforeEach(() => {
       jest.resetModules();
@@ -38,10 +40,13 @@ describe('functions', () => {
         rpID: 'flightbox.ch',
         expectedOrigins: ['https://flightbox.ch'],
       });
+      mockGenerateDecoyCredentials = jest.fn().mockReturnValue([
+        { id: 'decoy-cred', transports: ['internal'] },
+      ]);
 
       jest.mock('firebase-admin', () => mockAdmin);
       jest.mock('firebase-functions/v2/https', () => ({
-        onRequest: (opts, handler) => { capturedHandler = handler; },
+        onRequest: (opts, handler) => { capturedOptions = opts; capturedHandler = handler; },
       }));
       jest.mock('cors', () => () => mockCors);
       jest.mock('@simplewebauthn/server', () => ({
@@ -50,6 +55,7 @@ describe('functions', () => {
       jest.mock('./webauthnHelpers', () => ({
         getRpConfig: mockGetRpConfig,
         persistChallenge: mockPersistChallenge,
+        generateDecoyCredentials: mockGenerateDecoyCredentials,
       }));
 
       require('./generateAuthenticationOptions');
@@ -57,6 +63,10 @@ describe('functions', () => {
 
     const makeReq = (method, body = {}) => ({ method, body });
     const makeRes = () => ({ status: jest.fn().mockReturnThis(), json: jest.fn() });
+
+    it('caps concurrency with maxInstances to bound the challenge-write flood', () => {
+      expect(capturedOptions.maxInstances).toBe(10);
+    });
 
     it('returns 405 on GET', async () => {
       const res = makeRes();
@@ -91,7 +101,7 @@ describe('functions', () => {
       });
     });
 
-    it('returns empty allowCredentials for unknown email without disclosing', async () => {
+    it('returns decoy allowCredentials for unknown email (no enrollment disclosure)', async () => {
       const notFound = Object.assign(new Error('no user'), { code: 'auth/user-not-found' });
       mockAuthAdmin.getUserByEmail.mockRejectedValue(notFound);
 
@@ -99,11 +109,28 @@ describe('functions', () => {
       await capturedHandler(makeReq('POST', { email: 'UNKNOWN@Example.com' }), res);
 
       expect(mockAuthAdmin.getUserByEmail).toHaveBeenCalledWith('unknown@example.com');
-      expect(mockGenerateAuthenticationOptions.mock.calls[0][0].allowCredentials).toEqual([]);
+      // Unknown email must not yield an empty list (which would reveal it is not
+      // enrolled); the endpoint substitutes decoy credentials instead.
+      expect(mockGenerateDecoyCredentials).toHaveBeenCalledWith('unknown@example.com');
+      const call = mockGenerateAuthenticationOptions.mock.calls[0][0];
+      expect(call.allowCredentials).toEqual([{ id: 'decoy-cred', transports: ['internal'] }]);
       expect(mockPersistChallenge).toHaveBeenCalledWith(expect.objectContaining({
         uid: null,
         email: 'unknown@example.com',
       }));
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it('returns decoy allowCredentials for a known email with no passkeys', async () => {
+      mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'u1' });
+      mockCredentialsRef.once.mockResolvedValue({ exists: () => false, val: () => null });
+
+      const res = makeRes();
+      await capturedHandler(makeReq('POST', { email: 'a@b.c' }), res);
+
+      expect(mockGenerateDecoyCredentials).toHaveBeenCalledWith('a@b.c');
+      const call = mockGenerateAuthenticationOptions.mock.calls[0][0];
+      expect(call.allowCredentials).toEqual([{ id: 'decoy-cred', transports: ['internal'] }]);
       expect(res.status).toHaveBeenCalledWith(200);
     });
 
@@ -121,7 +148,10 @@ describe('functions', () => {
 
       const call = mockGenerateAuthenticationOptions.mock.calls[0][0];
       expect(call.allowCredentials).toHaveLength(1);
+      expect(call.allowCredentials[0].id).toBe('Y3JlZEE');
       expect(call.allowCredentials[0].transports).toEqual(['internal']);
+      // Real credentials are returned as-is; no decoy substitution.
+      expect(mockGenerateDecoyCredentials).not.toHaveBeenCalled();
 
       expect(mockPersistChallenge).toHaveBeenCalledWith(expect.objectContaining({
         uid: 'u1',

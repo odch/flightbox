@@ -75,11 +75,6 @@ jest.mock('../components/InvoiceRecipientsList', () => ({
   default: () => <div data-testid="invoice-recipients-list" />,
 }));
 
-jest.mock('../components/UserDropdown', () => ({
-  __esModule: true,
-  default: () => <div data-testid="user-dropdown" />,
-}));
-
 jest.mock('../components/AircraftDropdown', () => ({
   __esModule: true,
   default: () => <div data-testid="aircraft-dropdown" />,
@@ -88,11 +83,6 @@ jest.mock('../components/AircraftDropdown', () => ({
 jest.mock('../components/ItemList', () => ({
   __esModule: true,
   default: () => <div data-testid="item-list" />,
-}));
-
-jest.mock('../components/UserImportForm', () => ({
-  __esModule: true,
-  default: () => <div data-testid="user-import-form" />,
 }));
 
 jest.mock('../components/YearlySummaryReportForm', () => ({
@@ -122,11 +112,9 @@ jest.mock('../components/wizards/MovementWizard', () => ({
 
 describe('container mount dispatches', () => {
   let InvoiceRecipientsListContainer: any;
-  let UserDropdownContainer: any;
   let AircraftDropdownContainer: any;
   let AircraftsItemListContainer: any;
   let ArrivalFinishContainer: any;
-  let UserImportFormContainer: any;
   let YearlySummaryReportFormContainer: any;
   let LandingsReportFormContainer: any;
   let AirstatReportFormContainer: any;
@@ -137,12 +125,10 @@ describe('container mount dispatches', () => {
   beforeAll(() => {
     InvoiceRecipientsListContainer =
       require('./InvoiceRecipientsListContainer').default;
-    UserDropdownContainer = require('./UserDropdownContainer').default;
     AircraftDropdownContainer = require('./AircraftDropdownContainer').default;
     AircraftsItemListContainer =
       require('./AircraftsItemListContainer').default;
     ArrivalFinishContainer = require('./ArrivalFinishContainer').default;
-    UserImportFormContainer = require('./UserImportFormContainer').default;
     YearlySummaryReportFormContainer = require(
       './YearlySummaryReportFormContainer'
     ).default;
@@ -170,21 +156,6 @@ describe('container mount dispatches', () => {
     });
     render(wrap(store, <InvoiceRecipientsListContainer />));
     expect(countOf(store, 'LOAD_INVOICE_RECIPIENT_SETTINGS')).toBe(1);
-  });
-
-  it('UserDropdownContainer dispatches LOAD_USERS exactly once on mount', () => {
-    const store = makeStore({ users: { data: {} } });
-    render(
-      wrap(
-        store,
-        <UserDropdownContainer
-          onChange={jest.fn()}
-          onFocus={jest.fn()}
-          onBlur={jest.fn()}
-        />
-      )
-    );
-    expect(countOf(store, 'LOAD_USERS')).toBe(1);
   });
 
   it('AircraftDropdownContainer dispatches LOAD_AIRCRAFTS exactly once on mount', () => {
@@ -234,14 +205,6 @@ describe('container mount dispatches', () => {
     );
     expect(countOf(store, 'LOAD_AIRCRAFT_SETTINGS')).toBe(1);
     expect(countOf(store, 'LOAD_USER_INVOICE_RECIPIENTS')).toBe(1);
-  });
-
-  it('UserImportFormContainer dispatches INIT_IMPORT exactly once with name=users', () => {
-    const store = makeStore({ imports: {} });
-    render(wrap(store, <UserImportFormContainer />));
-    const inits = store.actions.filter(a => a.type === 'INIT_IMPORT');
-    expect(inits.length).toBe(1);
-    expect(inits[0].payload.name).toBe('users');
   });
 
   it('YearlySummaryReportFormContainer dispatches INIT_REPORT exactly once with name=yearlySummary', () => {

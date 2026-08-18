@@ -10,7 +10,6 @@ import TextArea from '../../components/TextArea';
 import AerodromeDropdown from '../../containers/AerodromeDropdownContainer';
 import AircraftDropdown from '../../containers/AircraftDropdownContainer';
 import AircraftCategoryDropdown from '../../components/AircraftCategoryDropdown';
-import UserDropdown from '../../containers/UserDropdownContainer';
 import MaskedInput from '../MaskedInput'
 import PhoneInput from '../PhoneInput'
 
@@ -131,7 +130,3 @@ export const renderAircraftCategoryDropdown = (props) => {
   return renderLabeledComponent(props, cmp);
 };
 
-export const renderUserDropdown = (props) => {
-  const cmp = <UserDropdown {...props.input} readOnly={props.readOnly} dataCy={props.input.name}/>;
-  return renderLabeledComponent(props, cmp);
-};

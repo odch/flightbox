@@ -7,6 +7,7 @@ const { generateAuthenticationOptions } = require('@simplewebauthn/server');
 const {
   getRpConfig,
   persistChallenge,
+  generateDecoyCredentials,
 } = require('./webauthnHelpers');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,7 +36,10 @@ async function loadAllowCredentials(uid) {
   }));
 }
 
-exports.generateWebauthnAuthenticationOptions = onRequest({ region: 'europe-west1' }, (req, res) => {
+// Public, unauthenticated endpoint that writes a challenge record on every
+// request. Cap concurrency so a flood cannot scale writes (and cost) without
+// bound — a global throughput ceiling with no per-IP/NAT trade-off.
+exports.generateWebauthnAuthenticationOptions = onRequest({ region: 'europe-west1', maxInstances: 10 }, (req, res) => {
   return cors(req, res, async () => {
     try {
       if (req.method !== 'POST') {
@@ -59,7 +63,14 @@ exports.generateWebauthnAuthenticationOptions = onRequest({ region: 'europe-west
         if (uid) {
           allowCredentials = await loadAllowCredentials(uid);
         }
-        // Intentionally do not disclose whether the email exists; return plausible options.
+        // Do not disclose whether the email exists or has a passkey. An unknown
+        // email, or a known one without credentials, would otherwise return an
+        // empty allowCredentials while an enrolled one returns a populated list,
+        // letting an attacker enumerate which addresses have passkeys. Return
+        // stable, unpredictable decoy credentials so both responses look alike.
+        if (allowCredentials.length === 0) {
+          allowCredentials = generateDecoyCredentials(email);
+        }
       }
 
       const options = await generateAuthenticationOptions({

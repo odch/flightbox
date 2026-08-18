@@ -56,7 +56,9 @@ describe('modules', () => {
 
             const generator = sagas.createCardPayment(channel, action);
 
-            const callEffect = generator.next().value;
+            expect(generator.next().value).toEqual(select(sagas.authUidSelector));
+
+            const callEffect = generator.next('user-uid-1').value;
             expect(callEffect).toMatchObject({type: 'CALL'});
             expect((callEffect as any).payload.fn).toBe(remote.create);
             expect((callEffect as any).payload.args[0]).toMatchObject({
@@ -70,7 +72,8 @@ describe('modules', () => {
               landingFeeTotal: 25.50,
               refNr: 'REF-001',
               arrivalReference: 'movement-key-1',
-              status: 'pending'
+              status: 'pending',
+              owner: 'user-uid-1'
             });
             expect((callEffect as any).payload.args[0].landingFeeCode).toBeUndefined();
 
@@ -108,13 +111,51 @@ describe('modules', () => {
 
             const generator = sagas.createCardPayment(channel, action);
 
-            const callEffect = generator.next().value;
+            generator.next();
+            const callEffect = generator.next('user-uid-2').value;
             expect((callEffect as any).payload.args[0]).toMatchObject({
               landingFeeCode: 'LAND',
               goArounds: 1,
               goAroundFeeSingle: 10.00,
               goAroundFeeCode: 'GA',
-              goAroundFeeTotal: 10.00
+              goAroundFeeTotal: 10.00,
+              owner: 'user-uid-2'
+            });
+          });
+
+          it('should omit owner when the session has no uid', () => {
+            const channel = {put: jest.fn()};
+            const action = actions.createCardPayment(
+              'movement-key-3',
+              'REF-003',
+              25.50,
+              'CHF',
+              'card',
+              'pilot@example.com',
+              'HB-KOF',
+              1,
+              25.50,
+              null as any,
+              25.50,
+              null as any,
+              null as any,
+              null as any,
+              null as any
+            );
+
+            const generator = sagas.createCardPayment(channel, action);
+
+            expect(generator.next().value).toEqual(select(sagas.authUidSelector));
+
+            const callEffect = generator.next(undefined).value;
+            expect((callEffect as any).payload.args[0]).not.toHaveProperty('owner');
+          });
+
+          describe('authUidSelector', () => {
+            it('selects the authenticated uid from state', () => {
+              expect(sagas.authUidSelector({auth: {data: {uid: 'abc'}}})).toEqual('abc');
+              expect(sagas.authUidSelector({auth: {}})).toBeUndefined();
+              expect(sagas.authUidSelector({})).toBeUndefined();
             });
           });
         });

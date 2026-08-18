@@ -191,6 +191,85 @@ describe('functions/updateAircraftList', () => {
     });
   });
 
+  describe('delete-all / poisoned-feed guard', () => {
+    const runHandlerWithAircraft = async (aircraftList, existingKeys = {}) => {
+      const enabledSnapshot = { val: () => true };
+      const existingSnapshot = { val: () => existingKeys };
+
+      mockRef.mockImplementation(path => {
+        if (path === 'settings/updateAircraftListCronJobEnabled') {
+          return { once: jest.fn().mockResolvedValue(enabledSnapshot) };
+        }
+        if (path === 'aircrafts') {
+          return {
+            once: jest.fn().mockResolvedValue(existingSnapshot),
+            update: mockUpdate.mockResolvedValue()
+          };
+        }
+        return { once: jest.fn(), update: mockUpdate };
+      });
+
+      fetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue({ aircraft: aircraftList })
+      });
+
+      await capturedOnRun();
+    };
+
+    const makeAircraft = i => ({
+      registration: `HB-A${i.toString().padStart(2, '0')}`,
+      aircraft_type: 'Aeroplane',
+      mtom: 500,
+      icao_aircraft_type: 'TEST'
+    });
+
+    const keysFor = count => {
+      const obj = {};
+      for (let i = 0; i < count; i++) {
+        obj[`HBA${i.toString().padStart(2, '0')}`] = { category: 'Flugzeug' };
+      }
+      return obj;
+    };
+
+    it('skips the sync when the feed is empty but the table is populated', async () => {
+      await runHandlerWithAircraft([], { HBKOF: { category: 'Flugzeug' } });
+
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('refuses to remove more than 10% of a populated table', async () => {
+      // 100 existing, feed only re-supplies 80 → 20 removals (20%) → aborts
+      const imported = Array.from({ length: 80 }, (_, i) => makeAircraft(i));
+      await runHandlerWithAircraft(imported, keysFor(100));
+
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('allows removals within the 10% safety limit on a large table', async () => {
+      // 100 existing, feed re-supplies 95 → 5 removals (5%) → proceeds
+      const imported = Array.from({ length: 95 }, (_, i) => makeAircraft(i));
+      await runHandlerWithAircraft(imported, keysFor(100));
+
+      expect(mockUpdate).toHaveBeenCalledTimes(1);
+      const updateArg = mockUpdate.mock.calls[0][0];
+      const removed = Object.keys(updateArg).filter(k => updateArg[k] === null);
+      expect(removed).toHaveLength(5);
+    });
+
+    it('ignores malformed entries missing a registration', async () => {
+      await runHandlerWithAircraft([
+        { registration: 'HB-KOF', aircraft_type: 'Aeroplane', mtom: 750, icao_aircraft_type: 'C172' },
+        { aircraft_type: 'Aeroplane', mtom: 600, icao_aircraft_type: 'C152' } // no registration
+      ]);
+
+      expect(mockUpdate).toHaveBeenCalledTimes(1);
+      const updateArg = mockUpdate.mock.calls[0][0];
+      expect(updateArg['HBKOF']).toBeDefined();
+      expect(Object.keys(updateArg)).toHaveLength(1);
+    });
+  });
+
   describe('getAircraftItemsToRemove (via handler behavior)', () => {
     it('keeps existing aircraft that are still in the imported list', async () => {
       const enabledSnapshot = { val: () => true };

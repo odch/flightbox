@@ -5,6 +5,28 @@ const crypto = require('crypto');
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
 
+// Secret used to derive decoy passkey credentials (see generateDecoyCredentials).
+// Prefer a configured secret so decoys stay stable across instances; fall back
+// to a per-instance random secret so they remain unpredictable even when unset.
+const DECOY_SECRET = process.env.WEBAUTHN_DECOY_SECRET
+  || crypto.randomBytes(32).toString('hex');
+
+// Returns a deterministic, unpredictable decoy allowCredentials list for an
+// email that has no real passkeys. The authentication-options endpoint uses it
+// so its response is indistinguishable between enrolled and non-enrolled
+// addresses, preventing passkey-enrollment enumeration. The value is keyed by a
+// server secret, so an attacker cannot recompute it to tell decoys from real
+// credentials, and it is stable per email so repeated probes do not reveal the
+// difference through changing responses.
+function generateDecoyCredentials(email) {
+  const normalized = typeof email === 'string' ? email.toLowerCase() : '';
+  const id = crypto
+    .createHmac('sha256', DECOY_SECRET)
+    .update(`webauthn-decoy:${normalized}`)
+    .digest('base64url');
+  return [{ id, transports: ['internal'] }];
+}
+
 function getRpConfig() {
   const rpID = process.env.WEBAUTHN_RPID;
   const rpName = process.env.WEBAUTHN_RPNAME || 'Flightbox';
@@ -100,6 +122,7 @@ module.exports = {
   AuthError,
   getRpConfig,
   generateChallengeKey,
+  generateDecoyCredentials,
   persistChallenge,
   consumeChallenge,
   verifyAuthenticatedUser,

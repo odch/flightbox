@@ -24,6 +24,13 @@ const AIRCRAFT_LIST_URL = 'https://raw.githubusercontent.com/odch/aircraft-list/
 const SCHEDULE = '0 4 * * 3'; // Every Wednesday at 4 AM
 const TIMEZONE = 'Europe/Zurich';
 
+// The upstream feed lives in a mutable GitHub branch. A truncated, empty or
+// tampered feed would mark every existing entry for deletion, so never remove
+// more than this fraction of the table in a single run once it holds a
+// meaningful number of entries.
+const MAX_DELETE_FRACTION = 0.1;
+const DELETE_GUARD_MIN_EXISTING = 50;
+
 /**
  * Fetches aircraft data from the GitHub repository
  * @returns {Promise<Array>} Array of aircraft objects
@@ -48,6 +55,10 @@ function processAircraftUpdates(aircraftList) {
 
   aircraftList
     .forEach(aircraft => {
+      if (!aircraft || !aircraft.registration) {
+        return
+      }
+
       const category = aircraftCategoryMap[aircraft.aircraft_type]
 
       if (!category) {
@@ -83,6 +94,22 @@ function getAircraftItemsToRemove(existingRegistrations, importedRegistrations) 
 }
 
 /**
+ * Guards against a truncated or poisoned upstream feed wiping the table.
+ * Small tables (initial seeding, tests) are exempt so legitimate churn is not
+ * blocked; once the table is sizeable, refuse runs that would delete more than
+ * MAX_DELETE_FRACTION of it.
+ * @param {number} existingCount - Number of entries currently in the database
+ * @param {number} removalCount - Number of entries the run would delete
+ * @returns {boolean} true when the removals are within safe bounds
+ */
+function removalsWithinSafeBounds(existingCount, removalCount) {
+  if (existingCount < DELETE_GUARD_MIN_EXISTING) {
+    return true;
+  }
+  return removalCount / existingCount <= MAX_DELETE_FRACTION;
+}
+
+/**
  * Scheduled Cloud Function to synchronize aircraft data with GitHub repository
  */
 exports.scheduledAircraftListUpdate = onSchedule(
@@ -101,11 +128,31 @@ exports.scheduledAircraftListUpdate = onSchedule(
       const aicraftList = await fetchAircraftList();
 
       const { updates, importedRegistrations } = processAircraftUpdates(aicraftList);
+
+      // A valid feed always contains entries. An empty result means the source
+      // is unreachable, empty or corrupt; applying it would mark every existing
+      // aircraft for deletion, so skip the sync entirely.
+      if (importedRegistrations.size === 0) {
+        console.error('Aircraft list sync skipped: imported feed contained no valid entries');
+        return null;
+      }
+
       const existingAircraftList = (await db.ref('aircrafts').once('value')).val() || {};
+      const existingRegistrations = Object.keys(existingAircraftList);
       const aircraftItemsToRemove = getAircraftItemsToRemove(
-        new Set(Object.keys(existingAircraftList)),
+        new Set(existingRegistrations),
         importedRegistrations
       );
+
+      // Refuse a run that would delete a large share of the table; a partial or
+      // poisoned feed is the likely cause, not legitimate churn.
+      if (!removalsWithinSafeBounds(existingRegistrations.length, aircraftItemsToRemove.length)) {
+        console.error(
+          `Aircraft list sync skipped: refusing to remove ${aircraftItemsToRemove.length} of ` +
+          `${existingRegistrations.length} aircraft (exceeds ${MAX_DELETE_FRACTION * 100}% safety limit)`
+        );
+        return null;
+      }
 
       aircraftItemsToRemove.forEach(registration => { updates[registration] = null; });
 

@@ -4,6 +4,8 @@ import {
   onAuthStateChanged,
   signInWithCustomToken,
   signOut,
+  setPersistence,
+  browserSessionPersistence,
 } from 'firebase/auth';
 import {
   getDatabase,
@@ -38,9 +40,19 @@ export function watchAuthState(callback) {
   onAuthStateChanged(getAuth(), callback);
 }
 
-export function authenticate(token) {
+export function authenticate(token, shared = false) {
   initialize();
-  return signInWithCustomToken(getAuth(), token);
+  const auth = getAuth();
+  if (!shared) {
+    // Individual users: keep Firebase's default (local) persistence, unchanged.
+    return signInWithCustomToken(auth, token);
+  }
+  // Shared devices (kiosk / guest): use session persistence so the login does
+  // not outlive the browser session. Fall back to the default if the browser
+  // does not support it, rather than blocking sign-in.
+  return setPersistence(auth, browserSessionPersistence)
+    .catch(() => undefined)
+    .then(() => signInWithCustomToken(auth, token));
 }
 
 export function requestSignInCode(email: string, airportName: string, themeColor: string, language: string) {
@@ -88,7 +100,9 @@ export function verifyOtpCode(email: string, code: string) {
 
 export function unauth() {
   initialize();
-  signOut(getAuth());
+  // Return the promise so callers can await completion before navigating away;
+  // otherwise the redirect can race sign-out and leave the session in place.
+  return signOut(getAuth());
 }
 
 export function loadValue(path) {

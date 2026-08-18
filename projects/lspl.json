@@ -78,5 +78,7 @@
     "glider_instruction_self"
   ],
   "maskContactInformation": false,
-  "privacySettings": true
+  "privacySettings": true,
+  "scopeCardPaymentsToOwner": true,
+  "lockOnDateTime": true
 }

@@ -1,78 +1,12 @@
 import {all, call, put, takeEvery} from 'redux-saga/effects';
-import moment from 'moment-timezone';
 import * as actions from './actions';
-import dates from '../../util/dates'
-import {get as getAerodrome} from '../../util/aerodromes'
 import {getIdToken} from '../../util/firebase'
 import * as remote from '../movements/remote'
 
-export const getCustomsAircraftType = (aircraftCategory: string) => {
-  if (['Hubschrauber', 'Eigenbauhubschrauber'].includes(aircraftCategory)) {
-    return 'helicopter'
-  }
-  return 'airplane'
-}
-
-export const parseDuration = (duration: string) => {
-  const durationParts = duration.split(':');
-  return {
-    hours: parseInt(durationParts[0], 10),
-    minutes: parseInt(durationParts[1], 10)
-  };
-}
-
-export const calculateTimeWithDuration = (time: string, duration: string, operation = 'add') => {
-  const timeMoment = moment(time, 'HH:mm');
-
-  const { hours, minutes } = parseDuration(duration);
-
-  const resultMoment = operation === 'add'
-    ? timeMoment.add(hours, 'hours').add(minutes, 'minutes')
-    : timeMoment.subtract(hours, 'hours').subtract(minutes, 'minutes');
-
-  return resultMoment.format('HH:mm');
-}
-
-export const calculateArrivalTime = (departureTime: string, duration: string) => {
-  return calculateTimeWithDuration(departureTime, duration, 'add');
-}
-
-export const getDirectionDependingData = async (movementData: any) => {
-  const aerodrome = await getAerodrome(movementData.location)
-
-  if (movementData.type === 'departure') {
-    return {
-      departureTime: movementData.time,
-      arrivalCountry: (aerodrome as any).country,
-      arrivalLocation: (aerodrome as any).name,
-      arrivalTime: calculateArrivalTime(movementData.time, movementData.duration),
-    }
-  }
-
-  return {
-    arrivalTime: movementData.time,
-    departureCountry: (aerodrome as any).country,
-    departureLocation: (aerodrome as any).name,
-  }
-}
-
-export const getCustomsPayload = async (movementData: any) => {
-  return {
-    aerodromeId: __CONF__.aerodrome.ICAO.toLowerCase(),
-    externalId: movementData.key,
-    data: {
-      direction: movementData.type,
-      date: dates.formatDate(movementData.date, 'de'),
-      phone: movementData.phone,
-      email: movementData.email,
-      registration: movementData.immatriculation,
-      mtow: movementData.mtow,
-      aircraftType: getCustomsAircraftType(movementData.aircraftCategory),
-      ...await getDirectionDependingData(movementData)
-    }
-  }
-}
-
+// The customs payload is built server-side from the stored movement (see
+// functions/api/customs/buildCustomsPayload). The client only sends a reference
+// to the movement, so it cannot inject arbitrary content into the trusted
+// customs integration.
 export const postPrepopulatedFormToCustoms = async (formData: unknown) => {
   const idToken = await getIdToken()
   const url = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/prepopulated-forms`
@@ -113,6 +47,21 @@ export const saveCustomsFormData = async (movementData: any, customsFormId: stri
 }
 
 export const openCompletionUrl = (url: string) => {
+  // Defense in depth: only ever navigate to an https URL. The stored
+  // customsFormUrl is constrained to the customs baseUrl by the database
+  // rules, but this also guards values stored before that rule and blocks
+  // dangerous schemes (javascript:, data:, http:).
+  let parsed
+  try {
+    parsed = new URL(url)
+  } catch (e) {
+    console.warn('Refusing to open invalid completion URL')
+    return
+  }
+  if (parsed.protocol !== 'https:') {
+    console.warn('Refusing to open non-https completion URL')
+    return
+  }
   const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
   if (!newWindow) {
     console.warn('Popup blocked for completion URL:', url)
@@ -130,8 +79,10 @@ export function* startCustoms(action: any) {
   yield put(actions.setStartCustomsLoading())
 
   try {
-    const payload = yield call(getCustomsPayload, movementData)
-    const result = yield call(postPrepopulatedFormToCustoms, payload)
+    const result = yield call(postPrepopulatedFormToCustoms, {
+      movementType: movementData.type,
+      movementKey: movementData.key,
+    })
 
     if (result && result.id && result.completionUrl) {
       try {

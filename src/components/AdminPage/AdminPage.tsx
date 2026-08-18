@@ -9,7 +9,6 @@ import AdminExportPage from './subpages/AdminExportPage';
 import AdminLockMovementsPage from './subpages/AdminLockMovementsPage';
 import AdminAerodromeStatusPage from './subpages/AdminAerodromeStatusPage';
 import AdminMessagesPage from './subpages/AdminMessagesPage';
-import AdminImportPage from './subpages/AdminImportPage';
 import AdminAircraftPage from './subpages/AdminAircraftPage';
 import AdminInvoiceRecipientsPage from './subpages/AdminInvoiceRecipientsPage';
 import AdminGuestAccessPage from './subpages/AdminGuestAccessPage';
@@ -49,8 +48,6 @@ const renderSubPage = (activeTab: string) => {
       return <AdminAerodromeStatusPage/>;
     case 'messages':
       return <AdminMessagesPage/>;
-    case 'import':
-      return <AdminImportPage/>;
     case 'aircraft':
       return <AdminAircraftPage/>;
     case 'invoice-recipients':
@@ -83,7 +80,6 @@ const AdminPage = ({auth, guestAccessToken, kioskAccessToken}: any) => {
   const invoicePaymentEnabled = objectToArray(__CONF__.paymentMethods).includes('invoice');
   const guestAccessEnabled = guestAccessToken && guestAccessToken.token;
   const kioskAccessEnabled = kioskAccessToken && kioskAccessToken.token;
-  const memberManagementEnabled = __CONF__.memberManagement === true;
 
   if (!invoicePaymentEnabled) {
     hiddenTabs.push('invoice-recipients');
@@ -93,9 +89,6 @@ const AdminPage = ({auth, guestAccessToken, kioskAccessToken}: any) => {
   }
   if (!kioskAccessEnabled) {
     hiddenTabs.push('kiosk-access');
-  }
-  if (!memberManagementEnabled) {
-    hiddenTabs.push('import');
   }
   if (__CONF__.privacySettings !== true) {
     hiddenTabs.push('privacy');

@@ -17,10 +17,7 @@ const sendToken = (res, token) => {
 };
 
 const createAndSendToken = (req, res, uid) => {
-  const additionalClaims = {
-    ip: requestHelper.getIp(req)
-  };
-  return admin.auth().createCustomToken(uid, additionalClaims)
+  return admin.auth().createCustomToken(uid)
     .then(customToken => {
       sendToken(res, customToken)
     });

@@ -2,7 +2,8 @@ import {call, put, select} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import {loadCredentialsToken, loadGuestToken, loadKioskToken} from '../../util/auth';
-import {expectDoneWithoutReturn, expectDoneWithReturn} from '../../../test/sagaUtils';
+import {scrubAuthParamsFromUrl} from '../../util/scrubAuthParams';
+import {expectDoneWithoutReturn} from '../../../test/sagaUtils';
 import firebase, {authenticate as fbAuth, requestSignInCode as fbRequestSignInCode, verifyOtpCode as fbVerifyOtpCode, unauth as fbUnauth, watchAuthState} from '../../util/firebase';
 import {
   registerPasskey as fbRegisterPasskey,
@@ -89,7 +90,7 @@ describe('modules', () => {
             actions.usernamePasswordAuthenticationFailure()
           ));
 
-          expect(generator.next().value).toEqual(call(fbAuth, 'token'));
+          expect(generator.next().value).toEqual(call(fbAuth, 'token', false));
 
           expectDoneWithoutReturn(generator);
         });
@@ -127,8 +128,7 @@ describe('modules', () => {
           expect(generator.next({
             admin: true,
             links: false
-          }).value).toEqual(call(sagas.getName, 'myadminuser'));
-          expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
+          }).value).toEqual(put(actions.firebaseAuthenticationEvent({
             admin: true,
             allMovements: false,
             links: false,
@@ -136,7 +136,6 @@ describe('modules', () => {
             expiration: 1000,
             token: 'validtoken',
             uid: 'myadminuser',
-            name: 'Hans Muster',
             email: 'admin@example.com',
             guest: false,
             kiosk: false,
@@ -158,8 +157,7 @@ describe('modules', () => {
           expect(generator.next({
             links: false,
             hintsDismissable: false
-          }).value).toEqual(call(sagas.getName, 'terminaluser'));
-          expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
+          }).value).toEqual(put(actions.firebaseAuthenticationEvent({
             admin: false,
             allMovements: false,
             links: false,
@@ -167,7 +165,6 @@ describe('modules', () => {
             expiration: 1000,
             token: 'validtoken',
             uid: 'terminaluser',
-            name: 'Hans Muster',
             email: 'terminal@example.com',
             guest: false,
             kiosk: false,
@@ -188,8 +185,7 @@ describe('modules', () => {
           expect(generator.next().value).toEqual(call(sagas.getLoginData, 'testuser'));
           expect(generator.next({
             admin: false
-          }).value).toEqual(call(sagas.getName, 'testuser'));
-          expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
+          }).value).toEqual(put(actions.firebaseAuthenticationEvent({
             admin: false,
             allMovements: false,
             links: true,
@@ -197,7 +193,6 @@ describe('modules', () => {
             expiration: 1000,
             token: 'validtoken',
             uid: 'testuser',
-            name: 'Hans Muster',
             email: 'testuser@example.com',
             guest: false,
             kiosk: false,
@@ -219,8 +214,7 @@ describe('modules', () => {
           expect(generator.next({
             admin: false,
             allMovements: true
-          }).value).toEqual(call(sagas.getName, 'vieweruser'));
-          expect(generator.next('Hans Muster').value).toEqual(put(actions.firebaseAuthenticationEvent({
+          }).value).toEqual(put(actions.firebaseAuthenticationEvent({
             admin: false,
             allMovements: true,
             links: true,
@@ -228,7 +222,6 @@ describe('modules', () => {
             expiration: 1000,
             token: 'validtoken',
             uid: 'vieweruser',
-            name: 'Hans Muster',
             email: 'viewer@example.com',
             guest: false,
             kiosk: false,
@@ -236,55 +229,6 @@ describe('modules', () => {
           })));
 
           expectDoneWithoutReturn(generator);
-        });
-      });
-
-      describe('getName', () => {
-        it('should return the name of the user', () => {
-          const generator = sagas.getName('userid');
-          expect(generator.next().value).toEqual(call(sagas.loadUser, 'userid'));
-          const user = {
-            firstname: 'Hans',
-            lastname: 'Meier'
-          };
-          expectDoneWithReturn(generator, user, 'Hans Meier');
-        })
-
-        it('should return null if user not found', () => {
-          const generator = sagas.getName('userid');
-          expect(generator.next().value).toEqual(call(sagas.loadUser, 'userid'));
-          expectDoneWithReturn(generator, null, null);
-        });
-      });
-
-      describe('loadUser', () => {
-        it('should return the user as object', () => {
-          const generator = sagas.loadUser('userid');
-          expect(generator.next().value).toEqual(call(firebase, '/users'));
-          const usersRef = {};
-          expect(generator.next(usersRef).value).toEqual(call(sagas.findByMemberNr, usersRef, 'userid'));
-          const userObject = {
-            firstname: 'Hans',
-            lastname: 'Meier',
-            memberNr: 'userid'
-          };
-          const snapshot = {
-            val: () => ({
-              'xyz': userObject
-            })
-          };
-          expectDoneWithReturn(generator, snapshot, userObject);
-        })
-
-        it('should return null if user not found', () => {
-          const generator = sagas.loadUser('userid');
-          expect(generator.next().value).toEqual(call(firebase, '/users'));
-          const usersRef = {};
-          expect(generator.next(usersRef).value).toEqual(call(sagas.findByMemberNr, usersRef, 'userid'));
-          const snapshot = {
-            val: () => ({})
-          };
-          expectDoneWithReturn(generator, snapshot, null);
         });
       });
 
@@ -300,9 +244,11 @@ describe('modules', () => {
           expect(generator.next(guestToken).value).toEqual(
             put(actions.requestFirebaseAuthentication(
               guestToken,
-              actions.guestTokenAuthenticationFailure()
+              actions.guestTokenAuthenticationFailure(),
+              true
             ))
           );
+          expect(generator.next().value).toEqual(call(scrubAuthParamsFromUrl));
 
           expectDoneWithoutReturn(generator);
         });
@@ -346,9 +292,11 @@ describe('modules', () => {
           expect(generator.next(kioskToken).value).toEqual(
             put(actions.requestFirebaseAuthentication(
               kioskToken,
-              actions.kioskTokenAuthenticationFailure()
+              actions.kioskTokenAuthenticationFailure(),
+              true
             ))
           );
+          expect(generator.next().value).toEqual(call(scrubAuthParamsFromUrl));
 
           expectDoneWithoutReturn(generator);
         });
@@ -387,7 +335,7 @@ describe('modules', () => {
             actions.requestFirebaseAuthentication('token', failureAction)
           );
 
-          expect(generator.next().value).toEqual(call(fbAuth, 'token'));
+          expect(generator.next().value).toEqual(call(fbAuth, 'token', false));
 
           const error = new Error('firebase error');
           expect(generator.throw(error).value).toEqual(put(failureAction));

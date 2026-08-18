@@ -14,7 +14,7 @@ const processors = {
 // projects (e.g. lspv) keep the permissive lockDate-only rule. The
 // `{movementOwnership}` token in the movement `.write` rule is replaced with
 // this suffix so the lockDate expression itself stays verbatim in the template.
-const IS_ADMIN = "root.child('admins/' + auth.uid).exists()";
+const IS_ADMIN = "root.child('admins/' + auth.uid).val() === true";
 
 const IS_GUEST_OR_KIOSK = "(auth.uid === 'guest' || auth.uid === 'kiosk')";
 
@@ -37,15 +37,87 @@ function processMovementOwnership(config) {
   return " && (" + IS_ADMIN + " || " + MOVEMENT_OWNERSHIP + ")";
 }
 
+// Movement lock. A movement is locked when its instant is on/before
+// `settings/lockDate` (plus the existing one-day grace). The default rule tests
+// the client-supplied numeric `negativeTimestamp`, which nothing ties to the ISO
+// `dateTime` reports display — so a direct DB writer can pass the lock with a
+// recent negativeTimestamp while backdating `dateTime` into a frozen period. On
+// projects that opt in (`lockOnDateTime`) the test moves onto `dateTime` itself,
+// compared against a server-derived `settings/lockDateIso` threshold (see
+// functions/deriveLockDateIso.js). Fixed-width ISO-UTC strings sort
+// chronologically, so the comparison is exact. While the derived mirror is
+// briefly absent (the derive is a fast trigger), the rule falls back to the
+// numeric test — never weaker than today, and it can't block writes.
+const LOCK_GRACE = "root.child('settings/lockDate').val() + 1000 * 60 * 60 * 24";
+
+function numericOutsideLock(side) {
+  return side + ".child('negativeTimestamp').val() * -1 > " + LOCK_GRACE;
+}
+
+function isoOutsideLock(side) {
+  return "(root.child('settings/lockDateIso').exists() ? " +
+    side + ".child('dateTime').val() > root.child('settings/lockDateIso').val() : " +
+    numericOutsideLock(side) + ")";
+}
+
+function processMovementLock(config) {
+  const outside = config.lockOnDateTime ? isoOutsideLock : numericOutsideLock;
+  return [
+    "!root.child('settings/lockDate').exists()",
+    "(!data.exists() && newData.exists() && " + outside('newData') + ")",
+    "(data.exists() && !newData.exists() && " + outside('data') + ")",
+    "(data.exists() && newData.exists() && " + outside('data') + " && " + outside('newData') + ")",
+  ].join(" || ");
+}
+
 // Read scoping for movements. On personal-access projects a list/query read is
 // only allowed when bounded to the caller's own createdBy_orderKey prefix
 // (their email), and a single-record read only for the record's owner; admins
 // read everything. Guest/kiosk (no email) read nothing. Shared-access projects
 // keep the permissive rule.
+//
+// The owner comparison must first require a non-null `auth.token.email`:
+// guest/kiosk tokens carry no email claim, and ownerless (guest-created)
+// movements carry no `createdBy`, so without this guard both sides evaluate to
+// null and `null === null` would let any guest/kiosk read every ownerless
+// movement by key.
 const readProcessors = {
   movementListRead: processMovementListRead,
   movementItemRead: processMovementItemRead,
+  cardPaymentRead: processCardPaymentRead,
 };
+
+const writeProcessors = {
+  cardPaymentWrite: processCardPaymentWrite,
+};
+
+// Card-payment access. On projects that opt in (`scopeCardPaymentsToOwner`) a
+// card-payment record is readable and cancellable only by the authenticated
+// user who created it (its `owner`) or an admin, and a new payment must be
+// stamped with the creator's own uid. Projects that do not opt in keep the
+// permissive auth-only rule so their existing client flow is byte-for-byte
+// unchanged. The payment webhook (sibling Go project) writes via the Admin SDK
+// and bypasses these rules either way.
+const CARD_PAYMENT_UNSCOPED_WRITE =
+  "auth !== null && newData.exists() && (" + IS_ADMIN +
+  " || (!data.exists() && newData.child('status').val() === 'pending')" +
+  " || (data.exists() && data.child('status').val() === 'pending' && newData.child('status').val() === 'cancelled'))";
+
+function processCardPaymentRead(config) {
+  if (!config.scopeCardPaymentsToOwner) {
+    return "auth !== null";
+  }
+  return "auth !== null && (" + IS_ADMIN + " || data.child('owner').val() === auth.uid)";
+}
+
+function processCardPaymentWrite(config) {
+  if (!config.scopeCardPaymentsToOwner) {
+    return CARD_PAYMENT_UNSCOPED_WRITE;
+  }
+  return "auth !== null && newData.exists() && (" + IS_ADMIN +
+    " || (!data.exists() && newData.child('status').val() === 'pending' && newData.child('owner').val() === auth.uid)" +
+    " || (data.exists() && data.child('owner').val() === auth.uid && data.child('status').val() === 'pending' && newData.child('status').val() === 'cancelled'))";
+}
 
 // Who may read every movement — must mirror the client's canSeeAllMovements
 // (admin || allMovements). `admin` is kept in sync with /admins; `allMovements`
@@ -64,7 +136,7 @@ function processMovementItemRead(config) {
   if (config.loginForm !== 'email') {
     return "auth !== null";
   }
-  return "auth !== null && (" + CAN_SEE_ALL_MOVEMENTS + " || data.child('createdBy').val() === auth.token.email)";
+  return "auth !== null && (" + CAN_SEE_ALL_MOVEMENTS + " || (auth.token.email !== null && data.child('createdBy').val() === auth.token.email))";
 }
 
 function newValEquals(val) {
@@ -114,8 +186,20 @@ function process(rules, config) {
 
     if (key === '.validate') {
       processValidationString(rules, config, key, value);
-    } else if (key === '.write' && typeof value === 'string' && value.indexOf('{movementOwnership}') !== -1) {
-      rules[key] = value.replace('{movementOwnership}', processMovementOwnership(config));
+    } else if (key === '.write' && typeof value === 'string' && (value.indexOf('{movementLock}') !== -1 || value.indexOf('{movementOwnership}') !== -1)) {
+      let write = value;
+      if (write.indexOf('{movementLock}') !== -1) {
+        write = write.replace('{movementLock}', processMovementLock(config));
+      }
+      if (write.indexOf('{movementOwnership}') !== -1) {
+        write = write.replace('{movementOwnership}', processMovementOwnership(config));
+      }
+      rules[key] = write;
+    } else if (key === '.write' && typeof value === 'string' && /^\{([a-zA-Z]+)}$/.test(value)) {
+      const token = value.slice(1, -1);
+      if (writeProcessors[token]) {
+        rules[key] = writeProcessors[token](config);
+      }
     } else if (key === '.read' && typeof value === 'string' && /^\{([a-zA-Z]+)}$/.test(value)) {
       const token = value.slice(1, -1);
       if (readProcessors[token]) {

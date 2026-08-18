@@ -108,6 +108,19 @@ describe('util', () => {
         expect(summary[0].landingCount).toBe(5);
       });
 
+      it('handles a __proto__ immatriculation without corrupting the summary', () => {
+        const report = new LandingsReport(2023, 6);
+
+        const arrivals = makeArrivalsSnapshot([
+          {date: '2023-06-01', time: '10:00', immatriculation: '__proto__', mtow: 750, landingCount: 2},
+        ]);
+
+        const summary = report.getAircraftsSummary(arrivals);
+        expect(summary).toHaveLength(1);
+        expect(summary[0].immatriculation).toBe('__proto__');
+        expect(summary[0].landingCount).toBe(2);
+      });
+
       it('marks invalidMtow when mtow differs across records', () => {
         const report = new LandingsReport(2023, 6);
 

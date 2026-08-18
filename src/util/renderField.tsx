@@ -8,7 +8,6 @@ import TimeField from '../components/TimeField';
 import TextArea from '../components/TextArea';
 import AerodromeDropdown from '../containers/AerodromeDropdownContainer';
 import AircraftDropdown from '../containers/AircraftDropdownContainer';
-import UserDropdown from '../containers/UserDropdownContainer';
 
 const renderLabeledComponent = (props, component) => {
   const { name, label, tooltip, meta: { touched, error } } = props;
@@ -79,10 +78,5 @@ export const renderAerodromeDropdown = (props) => {
 
 export const renderAircraftDropdown = (props) => {
   const cmp = <AircraftDropdown {...props.input} readOnly={props.readOnly}/>;
-  return renderLabeledComponent(props, cmp);
-};
-
-export const renderUserDropdown = (props) => {
-  const cmp = <UserDropdown {...props.input} readOnly={props.readOnly}/>;
   return renderLabeledComponent(props, cmp);
 };

@@ -102,10 +102,10 @@ describe('functions', () => {
       expect(mockRef.update).not.toHaveBeenCalled();
     });
 
-    it('updates arrival payment status when status changes to success', async () => {
+    it('updates arrival payment status when status changes to success and amount matches', async () => {
       const mockRef = {
         once: jest.fn().mockResolvedValue({
-          val: () => ({ paymentMethod: { status: 'pending', method: 'card' } })
+          val: () => ({ paymentMethod: { status: 'pending', method: 'card' }, feeTotalGross: 16 })
         }),
         update: jest.fn().mockResolvedValue()
       };
@@ -118,7 +118,7 @@ describe('functions', () => {
 
       const change = makeChange(
         { status: 'pending' },
-        { status: 'success', arrivalReference: 'arr1' }
+        { status: 'success', arrivalReference: 'arr1', amount: 1600 }
       );
 
       await mockCapturedHandler({ data: change });
@@ -128,10 +128,36 @@ describe('functions', () => {
       });
     });
 
-    it('does not update when arrival payment method is not pending', async () => {
+    it('does not complete when the paid amount does not match the arrival fee', async () => {
       const mockRef = {
         once: jest.fn().mockResolvedValue({
-          val: () => ({ paymentMethod: { status: 'completed' } })
+          val: () => ({ paymentMethod: { status: 'pending', method: 'card' }, feeTotalGross: 16 })
+        }),
+        update: jest.fn()
+      };
+
+      mockAdmin.database.mockReturnValue({
+        ref: jest.fn().mockReturnValue({
+          child: jest.fn().mockReturnValue(mockRef)
+        })
+      });
+
+      // 1 cent paid against a 16.00 fee (1600 cents)
+      const change = makeChange(
+        { status: 'pending' },
+        { status: 'success', arrivalReference: 'arr1', amount: 1 }
+      );
+
+      await mockCapturedHandler({ data: change });
+
+      expect(mockRef.update).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalled();
+    });
+
+    it('does not complete when the arrival has no recorded fee', async () => {
+      const mockRef = {
+        once: jest.fn().mockResolvedValue({
+          val: () => ({ paymentMethod: { status: 'pending', method: 'card' } })
         }),
         update: jest.fn()
       };
@@ -144,7 +170,32 @@ describe('functions', () => {
 
       const change = makeChange(
         { status: 'pending' },
-        { status: 'success', arrivalReference: 'arr1' }
+        { status: 'success', arrivalReference: 'arr1', amount: 1600 }
+      );
+
+      await mockCapturedHandler({ data: change });
+
+      expect(mockRef.update).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalled();
+    });
+
+    it('does not update when arrival payment method is not pending', async () => {
+      const mockRef = {
+        once: jest.fn().mockResolvedValue({
+          val: () => ({ paymentMethod: { status: 'completed' }, feeTotalGross: 16 })
+        }),
+        update: jest.fn()
+      };
+
+      mockAdmin.database.mockReturnValue({
+        ref: jest.fn().mockReturnValue({
+          child: jest.fn().mockReturnValue(mockRef)
+        })
+      });
+
+      const change = makeChange(
+        { status: 'pending' },
+        { status: 'success', arrivalReference: 'arr1', amount: 1600 }
       );
 
       await mockCapturedHandler({ data: change });
@@ -155,7 +206,7 @@ describe('functions', () => {
     it('throws and logs error when database update fails', async () => {
       const mockRef = {
         once: jest.fn().mockResolvedValue({
-          val: () => ({ paymentMethod: { status: 'pending' } })
+          val: () => ({ paymentMethod: { status: 'pending' }, feeTotalGross: 16 })
         }),
         update: jest.fn().mockRejectedValue(new Error('DB error'))
       };
@@ -168,7 +219,7 @@ describe('functions', () => {
 
       const change = makeChange(
         { status: 'pending' },
-        { status: 'success', arrivalReference: 'arr1' }
+        { status: 'success', arrivalReference: 'arr1', amount: 1600 }
       );
 
       await expect(mockCapturedHandler({ data: change })).rejects.toThrow('DB error');

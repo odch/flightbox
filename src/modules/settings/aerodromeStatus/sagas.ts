@@ -1,14 +1,16 @@
-import {all, call, fork, put, select, take, takeEvery} from 'redux-saga/effects';
-import {onValue, query, orderByChild, limitToLast} from 'firebase/database';
+import {all, call, put, select, takeEvery, takeLeading, delay} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as remote from './remote';
 import ImmutableItemsArray from "../../../util/ImmutableItemsArray"
-import createChannel, {monitor} from '../../../util/createChannel';
-import firebase from '../../../util/firebase';
 
 export const authSelector = (state: any) => state.auth.data;
 export const profileSelector = (state: any) =>
   (state.profile && state.profile.profile) || {};
+
+// How often the public status page / banner refetch the current status. The
+// former Firebase onValue subscription pushed updates instantly; polling trades
+// that for a small, bounded delay in exchange for not reading the DB directly.
+export const POLL_INTERVAL_MS = 60000;
 
 export function* loadAerodromeStatus() {
   try {
@@ -78,27 +80,43 @@ export function* saveAerodromeStatus(action: any) {
   }
 }
 
-export function* watchCurrentAerodromeStatus(channel: any) {
-  yield take(actions.WATCH_CURRENT_AERODROME_STATUS);
-  const queryRef = query(
-    firebase('/status'),
-    orderByChild('timestamp'),
-    limitToLast(1)
-  );
-  onValue(queryRef, (snapshot) => {
-    const map = snapshot.val();
-    const arr = map ? Object.values(map) : [];
-    const status = arr.length > 0 ? arr[0] : null;
-    channel.put(actions.setCurrentAerodromeStatus(status));
-  });
+// Map the public status API response onto the shape the page/banner render
+// (status code, message text, and a numeric timestamp).
+export function mapCurrentStatus(response: any) {
+  if (!response || !response.status) {
+    return null;
+  }
+  return {
+    status: response.status,
+    details: response.message,
+    timestamp: response.last_update_date
+      ? new Date(response.last_update_date).getTime()
+      : undefined,
+  };
+}
+
+// Poll the public status API instead of subscribing to /status in the database
+// directly, so the raw node can be restricted to admins and the read path is
+// backend-agnostic. Started once (takeLeading) even though both the public
+// status page and the start-page banner dispatch the watch action.
+export function* pollCurrentAerodromeStatus() {
+  while (true) {
+    try {
+      const response = yield call(remote.fetchCurrentStatus);
+      yield put(actions.setCurrentAerodromeStatus(mapCurrentStatus(response)));
+    } catch (e) {
+      if (console && typeof console.error === 'function') {
+        console.error('Failed to load aerodrome status', e);
+      }
+    }
+    yield delay(POLL_INTERVAL_MS);
+  }
 }
 
 export default function* sagas() {
-  const aerodromeStatusChannel = createChannel();
   yield all([
     takeEvery(actions.LOAD_AERODROME_STATUS, loadAerodromeStatus),
     takeEvery(actions.SAVE_AERODROME_STATUS, saveAerodromeStatus),
-    fork(monitor, aerodromeStatusChannel),
-    fork(watchCurrentAerodromeStatus, aerodromeStatusChannel)
+    takeLeading(actions.WATCH_CURRENT_AERODROME_STATUS, pollCurrentAerodromeStatus),
   ])
 }
