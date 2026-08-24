@@ -377,7 +377,7 @@
   "adminExport": {
     "bazlReport": "Download FOCA report (CSV)",
     "landingList": "Download landing list (CSV)",
-    "invoiceReports": "Download invoice reports (PDF)",
+    "invoiceReports": "Download invoice reports",
     "yearlySummary": "Download yearly summary (CSV)"
   },
   "adminAircraft": {
