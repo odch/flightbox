@@ -432,7 +432,8 @@
   "report": {
     "year": "Jahr",
     "month": "Monat",
-    "delimiter": "Trennzeichen"
+    "delimiter": "Trennzeichen",
+    "format": "Format"
   },
   "yearlySummary": {
     "intro": "Die Jahreszusammenfassung enthält für jeden Monat des Jahres eine Zeile mit den folgenden Informationen:",
@@ -602,6 +603,9 @@
     "colEmail": "E-Mail",
     "colDirection": "Einflug / Ausflug",
     "directionArrival": "Einflug",
-    "directionDeparture": "Ausflug"
+    "directionDeparture": "Ausflug",
+    "formatPdf": "PDF",
+    "formatExcel": "Excel",
+    "sheetNameFallback": "Rechnungsempfänger"
   }
 }

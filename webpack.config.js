@@ -38,6 +38,9 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './build'),
     filename: 'bundle.[contenthash].js',
+    // Lazily loaded chunks get their own prefix so the service worker can keep
+    // them out of the precache (see GenerateSW below).
+    chunkFilename: 'chunk.[contenthash].js',
     clean: true,
   },
   resolve: {
@@ -100,7 +103,9 @@ module.exports = {
       new GenerateSW({
         clientsClaim: true,
         skipWaiting: true,
-        exclude: [/\.map$/, /index\.html$/],
+        // Lazily loaded chunks are fetched on demand; precaching them would
+        // make every user download code they may never run.
+        exclude: [/\.map$/, /index\.html$/, /^chunk\./],
         runtimeCaching: [{
           urlPattern: ({request}) => request.mode === 'navigate',
           handler: 'NetworkFirst',

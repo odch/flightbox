@@ -90,10 +90,17 @@ jest.mock('../components/YearlySummaryReportForm', () => ({
   default: () => <div data-testid="yearly-summary-report-form" />,
 }));
 
-jest.mock('../components/ReportForm', () => ({
-  __esModule: true,
-  default: () => <div data-testid="report-form" />,
-}));
+// A jest.fn() wrapper (rather than a plain stub) so the invoices format
+// wiring test below can inspect the props InvoicesReportFormContainer passes
+// down and drive its setFormat callback directly.
+jest.mock('../components/ReportForm', () => {
+  const React = require('react');
+  const mockReportForm = jest.fn((_props: any) => React.createElement('div', {'data-testid': 'report-form'}));
+  return {
+    __esModule: true,
+    default: mockReportForm,
+  };
+});
 
 jest.mock('../components/AirstatReportForm', () => ({
   __esModule: true,
@@ -237,6 +244,42 @@ describe('container mount dispatches', () => {
     const inits = store.actions.filter(a => a.type === 'INIT_REPORT');
     expect(inits.length).toBe(1);
     expect(inits[0].payload.name).toBe('invoices');
+  });
+
+  it('InvoicesReportFormContainer defaults format to pdf when no parameter is set', () => {
+    const store = makeStore({ reports: { invoices: { date: {}, parameters: {} } } });
+    render(wrap(store, <InvoicesReportFormContainer />));
+    const ReportForm = require('../components/ReportForm').default;
+    const lastProps = ReportForm.mock.calls[ReportForm.mock.calls.length - 1][0];
+    expect(lastProps.format).toBe('pdf');
+    expect(lastProps.withFormat).toBe(true);
+  });
+
+  it('InvoicesReportFormContainer passes through a format already in state', () => {
+    const store = makeStore({
+      reports: { invoices: { date: {}, parameters: { format: 'excel' } } },
+    });
+    render(wrap(store, <InvoicesReportFormContainer />));
+    const ReportForm = require('../components/ReportForm').default;
+    const lastProps = ReportForm.mock.calls[ReportForm.mock.calls.length - 1][0];
+    expect(lastProps.format).toBe('excel');
+  });
+
+  it('InvoicesReportFormContainer dispatches SET_REPORT_PARAMETER when the format is changed', () => {
+    const store = makeStore({ reports: { invoices: { date: {}, parameters: {} } } });
+    render(wrap(store, <InvoicesReportFormContainer />));
+    const ReportForm = require('../components/ReportForm').default;
+    const lastProps = ReportForm.mock.calls[ReportForm.mock.calls.length - 1][0];
+
+    lastProps.setFormat('excel');
+
+    const paramActions = store.actions.filter(a => a.type === 'SET_REPORT_PARAMETER');
+    expect(paramActions).toHaveLength(1);
+    expect(paramActions[0].payload).toEqual({
+      report: 'invoices',
+      parameterName: 'format',
+      parameterValue: 'excel',
+    });
   });
 
   it('AerodromeStatusBannerContainer dispatches WATCH_CURRENT_AERODROME_STATUS exactly once on mount', () => {

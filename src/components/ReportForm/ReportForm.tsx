@@ -7,6 +7,7 @@ import Button from '../Button';
 import LabeledComponent from '../LabeledComponent';
 import MonthDropdown from '../MonthDropdown';
 import DelimiterDropdown from './DelimiterDropdown';
+import FormatDropdown from './FormatDropdown';
 
 const StyledLabeledComponent = styled(LabeledComponent)`
   width: 50%;
@@ -52,10 +53,13 @@ const ReportForm = ({
   children,
   date,
   delimiter = ',',
+  format = 'pdf',
   withMonth = true,
   withDelimiter = true,
+  withFormat = false,
   setDate,
   setDelimiter,
+  setFormat,
   generate,
   parameters,
 }: {
@@ -63,10 +67,13 @@ const ReportForm = ({
   children?: React.ReactNode;
   date?: { year?: number | null; month?: number | null };
   delimiter?: string;
+  format?: string;
   withMonth?: boolean;
   withDelimiter?: boolean;
+  withFormat?: boolean;
   setDate: (date: any) => void;
   setDelimiter?: (delimiter: string) => void;
+  setFormat?: (format: string) => void;
   generate: (date: any, parameters: any) => void;
   parameters?: any;
 }) => {
@@ -95,6 +102,13 @@ const ReportForm = ({
     />
   )
 
+  const formatInput = (
+    <FormatDropdown
+      value={format}
+      onChange={setFormat}
+    />
+  )
+
   return (
     <form
       className="ReportForm"
@@ -104,6 +118,7 @@ const ReportForm = ({
         <StyledLabeledComponent label={t('report.year')} component={yearInput}/>
         {withMonth && <StyledLabeledComponent label={t('report.month')} component={monthInput}/>}
         {withDelimiter && <StyledLabeledComponent label={t('report.delimiter')} component={delimiterInput}/>}
+        {withFormat && <StyledLabeledComponent label={t('report.format')} component={formatInput}/>}
         {children}
         <Button
           type="submit"
@@ -124,10 +139,13 @@ ReportForm.propTypes = {
     month: PropTypes.number,
   }),
   delimiter: PropTypes.string,
+  format: PropTypes.string,
   withMonth: PropTypes.bool,
   withDelimiter: PropTypes.bool,
+  withFormat: PropTypes.bool,
   setDate: PropTypes.func.isRequired,
   setDelimiter: PropTypes.func,
+  setFormat: PropTypes.func,
   generate: PropTypes.func.isRequired,
 };
 
