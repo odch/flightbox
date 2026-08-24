@@ -82,6 +82,22 @@ jest.mock('./DelimiterDropdown', () => {
   };
 });
 
+jest.mock('./FormatDropdown', () => {
+  const React = require('react');
+  return function MockFormatDropdown({ value, onChange }) {
+    return (
+      <select
+        data-testid="format-dropdown"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+      >
+        <option value="pdf">pdf</option>
+        <option value="excel">excel</option>
+      </select>
+    );
+  };
+});
+
 import ReportForm from './ReportForm';
 
 const baseProps = {
@@ -122,6 +138,30 @@ describe('ReportForm', () => {
   it('renders delimiter dropdown when withDelimiter is true', () => {
     renderWithTheme(<ReportForm {...baseProps} withDelimiter={true} />);
     expect(screen.getByTestId('delimiter-dropdown')).toBeInTheDocument();
+  });
+
+  it('does not render format dropdown by default', () => {
+    renderWithTheme(<ReportForm {...baseProps} />);
+    expect(screen.queryByTestId('format-dropdown')).not.toBeInTheDocument();
+  });
+
+  it('renders format dropdown when withFormat is true', () => {
+    renderWithTheme(<ReportForm {...baseProps} withFormat={true} setFormat={jest.fn()} />);
+    expect(screen.getByTestId('format-dropdown')).toBeInTheDocument();
+  });
+
+  it('passes the format value through to the dropdown', () => {
+    renderWithTheme(
+      <ReportForm {...baseProps} withFormat={true} format="excel" setFormat={jest.fn()} />
+    );
+    expect(screen.getByTestId('format-dropdown')).toHaveValue('excel');
+  });
+
+  it('calls setFormat when the format dropdown changes', () => {
+    const setFormat = jest.fn();
+    renderWithTheme(<ReportForm {...baseProps} withFormat={true} setFormat={setFormat} />);
+    fireEvent.change(screen.getByTestId('format-dropdown'), { target: { value: 'excel' } });
+    expect(setFormat).toHaveBeenCalledWith('excel');
   });
 
   it('does not render delimiter dropdown when withDelimiter is false', () => {

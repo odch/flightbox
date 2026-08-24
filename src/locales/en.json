@@ -377,7 +377,7 @@
   "adminExport": {
     "bazlReport": "Download FOCA report (CSV)",
     "landingList": "Download landing list (CSV)",
-    "invoiceReports": "Download invoice reports (PDF)",
+    "invoiceReports": "Download invoice reports",
     "yearlySummary": "Download yearly summary (CSV)"
   },
   "adminAircraft": {
@@ -432,7 +432,8 @@
   "report": {
     "year": "Year",
     "month": "Month",
-    "delimiter": "Delimiter"
+    "delimiter": "Delimiter",
+    "format": "Format"
   },
   "yearlySummary": {
     "intro": "The yearly summary contains one row per month with the following information:",
@@ -602,6 +603,9 @@
     "colEmail": "Email",
     "colDirection": "Arrival / Departure",
     "directionArrival": "Arrival",
-    "directionDeparture": "Departure"
+    "directionDeparture": "Departure",
+    "formatPdf": "PDF",
+    "formatExcel": "Excel",
+    "sheetNameFallback": "Invoice recipient"
   }
 }

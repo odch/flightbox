@@ -1,6 +1,4 @@
-import firebase, {getIdToken} from './firebase';
-import {get, query, orderByChild, startAt, endAt} from 'firebase/database';
-import {firebaseToLocal} from './movements';
+import InvoicesReportData from './InvoicesReportData';
 import dates from '../util/dates';
 import {getLabel as getFlightTypeLabel} from '../util/flightTypes';
 import formatMoney from './formatMoney'
@@ -8,45 +6,12 @@ import i18n from '../i18n';
 
 const t = i18n.getFixedT('de');
 
-import moment from 'moment';
-
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 (window as any).pdfFonts = pdfFonts; // actually not necessary, but otherwise `pdfFonts` is unused and would be removed
 
-class InvoicesReport {
-
-  get checkoutRecipientName() {
-    return t('invoicesReport.onlinePayments');
-  }
-
-  get cashRecipientName() {
-    return t('invoicesReport.cashPayments');
-  }
-
-
-  year: number;
-  month: number;
-  startDate: string;
-  endDate: string;
-  creationDate: any;
-  options: any;
-
-  constructor(year, month, options = {}) {
-    const monthStr = (month < 10 ? '0' : '') + month
-    const day = '01';
-
-    this.year = year
-    this.month = month
-
-    this.startDate = year + '-' + monthStr + '-' + day;
-    this.endDate = moment(this.startDate).endOf('month').format('YYYY-MM-DD');
-
-    this.creationDate = moment();
-
-    this.options = options;
-  }
+class InvoicesReport extends InvoicesReportData {
 
   generate(callback) {
     Promise.all([
@@ -56,40 +21,6 @@ class InvoicesReport {
     ]).then(([arrivalsResult, customsInvoices, customsCheckouts]) => {
       this.build(arrivalsResult, customsInvoices, customsCheckouts, callback);
     });
-  }
-
-  readArrivals() {
-    return get(query(
-      firebase('/arrivals'),
-      orderByChild('dateTime'),
-      startAt(dates.isoStartOfDay(this.startDate)),
-      endAt(dates.isoEndOfDay(this.endDate))
-    ));
-  }
-
-  async fetchCustomsData(endpoint) {
-    const idToken = await getIdToken()
-    const url = `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/customs/${endpoint}?year=${this.year}&month=${this.month}`
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${idToken}`
-      }
-    })
-
-    if (!response.ok) {
-      console.log(`Failed to fetch customs ${endpoint}`, response)
-      throw new Error(`Failed to fetch customs ${endpoint}`)
-    }
-
-    return await response.json()
-  }
-
-  async readCustomsDeclarationsInvoices() {
-    return this.fetchCustomsData('invoices')
-  }
-
-  async readCustomsDeclarationsCheckouts() {
-    return this.fetchCustomsData('checkouts')
   }
 
   build(arrivals, customsInvoices, customsCheckouts, callback) {
@@ -112,27 +43,8 @@ class InvoicesReport {
   }
 
   buildContent(arrivals, customsInvoices, customsCheckouts) {
-    const filteredArrivals = this.filterArrivals(arrivals)
-    const arrivalRecipients = this.groupArrivalsByRecipient(filteredArrivals)
-    const customsRecipients = this.groupCustomsDeclarationsByRecipient(customsInvoices)
-
-    customsRecipients[this.checkoutRecipientName] = customsCheckouts
-
-    let recipientNames = Array.from(new Set([
-      ...Object.keys(arrivalRecipients),
-      ...Object.keys(customsRecipients)
-    ]))
-
-    // sort names; checkoutRecipientName always first, cashRecipientName second (when present)
-    const hasCash = arrivalRecipients[this.cashRecipientName] !== undefined
-    recipientNames = recipientNames.filter(
-      name => name !== this.checkoutRecipientName && name !== this.cashRecipientName
-    )
-    recipientNames.sort()
-    if (hasCash) {
-      recipientNames.unshift(this.cashRecipientName)
-    }
-    recipientNames.unshift(this.checkoutRecipientName)
+    const {arrivalRecipients, customsRecipients, recipientNames} =
+      this.groupAll(arrivals, customsInvoices, customsCheckouts)
 
     const monthLabel = this.getMonthLabel()
 
@@ -156,70 +68,6 @@ class InvoicesReport {
     }
 
     return content
-  }
-
-  filterArrivals(arrivals) {
-    const filtered: any[] = []
-
-    arrivals.forEach(record => {
-      const arrival = firebaseToLocal(record.val());
-      if (arrival.paymentMethod && arrival.paymentMethod.status !== 'pending') {
-        filtered.push(arrival)
-      }
-    });
-
-    return filtered
-  }
-
-  groupArrivalsByRecipient(arrivals) {
-    // Null-prototype: invoiceRecipientName is user-controlled, so a value like
-    // '__proto__' or 'constructor' must be an ordinary key, not touch the
-    // prototype chain (which would corrupt grouping / crash the report).
-    const recipients = Object.create(null)
-
-    arrivals.forEach(arrival => {
-      const invoiceRecipientName = arrival.paymentMethod.method === 'invoice'
-        ? arrival.paymentMethod.invoiceRecipientName
-        : arrival.paymentMethod.method === 'checkout'
-          ? this.checkoutRecipientName
-          : arrival.paymentMethod.method === 'cash'
-            ? this.cashRecipientName
-            : undefined
-
-      if (invoiceRecipientName) {
-        if (!recipients[invoiceRecipientName]) {
-          recipients[invoiceRecipientName] = []
-        }
-
-        recipients[invoiceRecipientName].push(arrival)
-      }
-    });
-
-    return recipients
-  }
-
-  groupCustomsDeclarationsByRecipient(customsDeclarations) {
-    // Null-prototype: invoiceRecipientName is user-controlled, so a value like
-    // '__proto__' or 'constructor' must be an ordinary key, not touch the
-    // prototype chain (which would corrupt grouping / crash the report).
-    const recipients = Object.create(null)
-
-    customsDeclarations.forEach(customsDeclaration => {
-      const invoiceRecipientName = customsDeclaration.invoiceRecipientName
-
-      if (!recipients[invoiceRecipientName]) {
-        recipients[invoiceRecipientName] = []
-      }
-
-      recipients[invoiceRecipientName].push(customsDeclaration)
-    });
-
-    return recipients
-  }
-
-  getMonthLabel() {
-    const monthName = t(`months.${this.month - 1}`)
-    return `${monthName} ${this.year}`
   }
 
   addLandingFeesTable(recipientName, arrivals, content) {

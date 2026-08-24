@@ -2,6 +2,7 @@ import MovementReport from './MovementReport';
 import LandingsReport from './LandingsReport';
 import YearlySummaryReport from './YearlySummaryReport';
 import InvoicesReport from './InvoicesReport'
+import InvoicesExcelReport from './InvoicesExcelReport'
 
 export function airstat(year, month, options) {
   return new Promise(resolve => {
@@ -37,4 +38,10 @@ export function invoices(year, month, options) {
         resolve(download);
       });
   });
+}
+
+export function invoicesExcel(year, month, options) {
+  // Unlike the callback-based reports above, this one propagates failures so
+  // the caller can stop showing the report as being generated.
+  return new InvoicesExcelReport(year, month, options).generate();
 }
