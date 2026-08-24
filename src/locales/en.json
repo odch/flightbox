@@ -432,7 +432,8 @@
   "report": {
     "year": "Year",
     "month": "Month",
-    "delimiter": "Delimiter"
+    "delimiter": "Delimiter",
+    "format": "Format"
   },
   "yearlySummary": {
     "intro": "The yearly summary contains one row per month with the following information:",
@@ -602,6 +603,9 @@
     "colEmail": "Email",
     "colDirection": "Arrival / Departure",
     "directionArrival": "Arrival",
-    "directionDeparture": "Departure"
+    "directionDeparture": "Departure",
+    "formatPdf": "PDF",
+    "formatExcel": "Excel",
+    "sheetNameFallback": "Invoice recipient"
   }
 }

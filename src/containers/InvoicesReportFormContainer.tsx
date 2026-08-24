@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import {connect} from 'react-redux';
-import {generateReport, initReport, setReportDate} from '../modules/reports';
+import {generateReport, initReport, setReportDate, setReportParameter} from '../modules/reports';
 import ReportForm from '../components/ReportForm';
 import {RootState} from '../modules';
 
@@ -12,9 +12,11 @@ interface ReportDate {
 interface Props {
   initialized: boolean;
   date?: ReportDate;
+  format?: string;
   generationInProgress?: boolean;
   initReport: () => void;
   setDate: (date: ReportDate) => void;
+  setFormat: (format: string) => void;
   generate: () => void;
 }
 
@@ -28,9 +30,12 @@ const InvoicesReportFormContainer = (props: Props) => {
     <ReportForm
       disabled={!props.initialized || props.generationInProgress}
       date={props.date}
+      format={props.format}
       setDate={props.setDate}
+      setFormat={props.setFormat}
       generate={props.generate}
       withDelimiter={false}
+      withFormat
     />
   );
 };
@@ -47,6 +52,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     initialized,
     date: report.date,
+    format: report.parameters.format || 'pdf',
     generationInProgress: report.generationInProgress === true,
   };
 };
@@ -54,6 +60,8 @@ const mapStateToProps = (state: RootState) => {
 const mapDispatchToProps = (dispatch: any) => ({
   initReport: () => dispatch(initReport('invoices')),
   setDate: (date: any) => dispatch(setReportDate('invoices', date)),
+  setFormat: (format: string) =>
+    dispatch(setReportParameter('invoices', 'format', format)),
   generate: () => dispatch(generateReport('invoices')),
 });
 
