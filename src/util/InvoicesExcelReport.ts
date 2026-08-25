@@ -12,6 +12,17 @@ export const XLSX_MIME_TYPE =
 const MONEY_FORMAT = '#,##0.00';
 const DATE_FORMAT = 'dd.mm.yyyy';
 
+const HEADER_FILL = {type: 'pattern', pattern: 'solid', fgColor: {argb: 'FFD9D9D9'}} as const;
+const THIN_BLACK = {style: 'thin', color: {argb: 'FF000000'}} as const;
+const GRID_BORDER = {top: THIN_BLACK, left: THIN_BLACK, bottom: THIN_BLACK, right: THIN_BLACK};
+// The line above the subheader row: a plain top edge, with a left/right tick
+// at the row's own edges closing off the table's outline from above.
+const subHeaderBorder = (index: number, lastIndex: number) => ({
+  top: THIN_BLACK,
+  ...(index === 0 ? {left: THIN_BLACK} : {}),
+  ...(index === lastIndex ? {right: THIN_BLACK} : {}),
+});
+
 // Excel rejects these characters in worksheet names and caps them at 31 chars.
 const FORBIDDEN_SHEET_NAME_CHARS = /[[\]:*?/\\]/g;
 const MAX_SHEET_NAME_LENGTH = 31;
@@ -158,6 +169,8 @@ class InvoicesExcelReport extends InvoicesReportData {
 
     const monthLabel = this.getMonthLabel();
     const usedSheetNames: string[] = [];
+    const titleFillColumns =
+      Math.max(this.landingFeeColumns().length, this.customsFeeColumns().length);
 
     recipientNames.forEach(recipientName => {
       const sheetName = sanitizeSheetName(recipientName, usedSheetNames);
@@ -167,6 +180,12 @@ class InvoicesExcelReport extends InvoicesReportData {
 
       const titleRow = sheet.addRow([`${recipientName} (${monthLabel})`]);
       titleRow.getCell(1).font = {bold: true, size: 14};
+      // The title text overflows past its own cell, so fill the same span the
+      // widest table uses — otherwise the overflow sits on a plain white
+      // background instead of the banner.
+      for (let column = 1; column <= titleFillColumns; column++) {
+        titleRow.getCell(column).fill = HEADER_FILL;
+      }
 
       this.addLandingFeesTable(sheet, arrivalRecipients[recipientName]);
       this.addCustomsFeesTable(sheet, customsRecipients[recipientName], false);
@@ -312,9 +331,17 @@ class InvoicesExcelReport extends InvoicesReportData {
 
     const subHeaderRow = sheet.addRow([subHeader]);
     subHeaderRow.getCell(1).font = {bold: true, size: 12};
+    columns.forEach((_, index) => {
+      subHeaderRow.getCell(index + 1).fill = HEADER_FILL;
+      subHeaderRow.getCell(index + 1).border = subHeaderBorder(index, columns.length - 1);
+    });
 
     const headerRow = sheet.addRow(columns.map(column => column.header));
     headerRow.font = {bold: true};
+    columns.forEach((_, index) => {
+      headerRow.getCell(index + 1).fill = HEADER_FILL;
+      headerRow.getCell(index + 1).border = GRID_BORDER;
+    });
 
     const firstDataRowNumber = headerRow.number + 1;
 
@@ -324,6 +351,7 @@ class InvoicesExcelReport extends InvoicesReportData {
         if (column.numFmt) {
           row.getCell(index + 1).numFmt = column.numFmt;
         }
+        row.getCell(index + 1).border = GRID_BORDER;
       });
     });
 
@@ -332,11 +360,14 @@ class InvoicesExcelReport extends InvoicesReportData {
     const totalsRow = sheet.addRow([]);
     let totalIndex = 0;
     columns.forEach((column, index) => {
+      const cell = totalsRow.getCell(index + 1);
+      cell.fill = HEADER_FILL;
+      cell.border = GRID_BORDER;
+
       if (!column.total) {
         return;
       }
       const letter = columnLetter(index + 1);
-      const cell = totalsRow.getCell(index + 1);
       // The cached result keeps the total readable by tools that do not
       // evaluate formulas; without it they see an empty cell.
       cell.value = {

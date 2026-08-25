@@ -316,6 +316,79 @@ describe('util', () => {
       });
     });
 
+    describe('styling', () => {
+      const GRAY_FILL = {type: 'pattern', pattern: 'solid', fgColor: {argb: 'FFD9D9D9'}};
+      const NO_FILL = {type: 'pattern', pattern: 'none'};
+      const THIN_BLACK = {style: 'thin', color: {argb: 'FF000000'}};
+
+      it('fills the title row across the widest table\'s full width, regardless of title length', async () => {
+        // A short title still needs the full 12-column span, since the
+        // landing fees table (the widest) may follow it.
+        const report = makeReport(2023, 6);
+        const workbook = await render(report, [''], {'': [arrival()]});
+        const sheet = workbook.getWorksheet('Rechnungsempfänger');
+        for (let column = 1; column <= 12; column++) {
+          expect(sheet.getRow(1).getCell(column).fill).toEqual(GRAY_FILL);
+        }
+        expect(sheet.getRow(1).getCell(13).fill).toBeUndefined();
+      });
+
+      it('fills the subheader row and closes off its top edge with corner ticks', async () => {
+        const report = makeReport();
+        const workbook = await render(report, ['Company A'], {'Company A': [arrival()]});
+        const sheet = workbook.getWorksheet('Company A');
+        const subHeaderRow = sheet.getRow(3);
+
+        expect(subHeaderRow.getCell(1).border).toEqual({top: THIN_BLACK, left: THIN_BLACK});
+        for (let column = 2; column <= 11; column++) {
+          expect(subHeaderRow.getCell(column).border).toEqual({top: THIN_BLACK});
+        }
+        expect(subHeaderRow.getCell(12).border).toEqual({top: THIN_BLACK, right: THIN_BLACK});
+        for (let column = 1; column <= 12; column++) {
+          expect(subHeaderRow.getCell(column).fill).toEqual(GRAY_FILL);
+        }
+      });
+
+      it('fills and borders the header row across every column', async () => {
+        const report = makeReport();
+        const workbook = await render(report, ['Company A'], {'Company A': [arrival()]});
+        const sheet = workbook.getWorksheet('Company A');
+        const headerRow = sheet.getRow(4);
+        for (let column = 1; column <= 12; column++) {
+          expect(headerRow.getCell(column).fill).toEqual(GRAY_FILL);
+          expect(headerRow.getCell(column).border).toEqual({
+            top: THIN_BLACK, left: THIN_BLACK, bottom: THIN_BLACK, right: THIN_BLACK,
+          });
+        }
+      });
+
+      it('borders every data row cell without filling it', async () => {
+        const report = makeReport();
+        const workbook = await render(report, ['Company A'], {'Company A': [arrival()]});
+        const sheet = workbook.getWorksheet('Company A');
+        const dataRow = sheet.getRow(5);
+        for (let column = 1; column <= 12; column++) {
+          expect(dataRow.getCell(column).border).toEqual({
+            top: THIN_BLACK, left: THIN_BLACK, bottom: THIN_BLACK, right: THIN_BLACK,
+          });
+          expect(dataRow.getCell(column).fill).toEqual(NO_FILL);
+        }
+      });
+
+      it('fills and borders the totals row across every column, even non-total ones', async () => {
+        const report = makeReport();
+        const workbook = await render(report, ['Company A'], {'Company A': [arrival()]});
+        const sheet = workbook.getWorksheet('Company A');
+        const totalsRow = sheet.getRow(6);
+        for (let column = 1; column <= 12; column++) {
+          expect(totalsRow.getCell(column).fill).toEqual(GRAY_FILL);
+          expect(totalsRow.getCell(column).border).toEqual({
+            top: THIN_BLACK, left: THIN_BLACK, bottom: THIN_BLACK, right: THIN_BLACK,
+          });
+        }
+      });
+    });
+
     describe('landing fees table', () => {
       it('writes amounts as numbers, not formatted strings', async () => {
         const report = makeReport();
