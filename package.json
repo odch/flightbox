@@ -29,7 +29,7 @@
     "@firebase/rules-unit-testing": "^3.0.4",
     "@sentry/react": "^10.52.0",
     "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
@@ -81,7 +81,7 @@
     "util": "^0.12.5",
     "webpack": "^5.106.2",
     "webpack-cli": "^7.0.2",
-    "webpack-dev-server": "^5.2.3",
+    "webpack-dev-server": "^6.0.0",
     "webpack-stream": "^7.0.0",
     "workbox-webpack-plugin": "^7.4.1"
   },
