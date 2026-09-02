@@ -12,7 +12,7 @@ const api = express()
 
 api.use(cors)
 
-api.get('(/api)?/aerodrome/status', async (req, res) => {
+api.get(['/aerodrome/status', '/api/aerodrome/status'], async (req, res) => {
   const status = await fetchAerodromeStatus(admin.database())
 
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -24,7 +24,7 @@ api.get('(/api)?/aerodrome/status', async (req, res) => {
   res.send(status)
 })
 
-api.get('(/api)?/customs/invoices', fbAdminAuth, async (req, res) => {
+api.get(['/customs/invoices', '/api/customs/invoices'], fbAdminAuth, async (req, res) => {
   try {
     const db = admin.database()
     const {year, month} = req.query
@@ -36,7 +36,7 @@ api.get('(/api)?/customs/invoices', fbAdminAuth, async (req, res) => {
   }
 })
 
-api.get('(/api)?/customs/checkouts', fbAdminAuth, async (req, res) => {
+api.get(['/customs/checkouts', '/api/customs/checkouts'], fbAdminAuth, async (req, res) => {
   try {
     const db = admin.database()
     const {year, month} = req.query
@@ -48,7 +48,7 @@ api.get('(/api)?/customs/checkouts', fbAdminAuth, async (req, res) => {
   }
 })
 
-api.post('(/api)?/customs/prepopulated-forms', fbAuthExcludingShared, async (req, res) => {
+api.post(['/customs/prepopulated-forms', '/api/customs/prepopulated-forms'], fbAuthExcludingShared, async (req, res) => {
   try {
     const { movementType, movementKey } = req.body || {}
 
@@ -81,7 +81,7 @@ api.post('(/api)?/customs/prepopulated-forms', fbAuthExcludingShared, async (req
   }
 })
 
-api.get('(/api)?/customs/availability', fbAuth, async (req, res) => {
+api.get(['/customs/availability', '/api/customs/availability'], fbAuth, async (req, res) => {
   try {
     const db = admin.database()
     const isAvailable = await isCustomsDeclarationAppAvailable(db)
@@ -92,7 +92,7 @@ api.get('(/api)?/customs/availability', fbAuth, async (req, res) => {
   }
 })
 
-api.get('(/api)?/users/me/invoice-recipients', fbAuth, async (req, res) => {
+api.get(['/users/me/invoice-recipients', '/api/users/me/invoice-recipients'], fbAuth, async (req, res) => {
   try {
     const db = admin.database()
     const invoiceRecipients = await fetchUserInvoiceRecipients(db, req.fbUserEmail)
