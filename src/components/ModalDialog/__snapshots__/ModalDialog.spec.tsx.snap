@@ -4,11 +4,11 @@ exports[`components ModalDialog renders given content 1`] = `
 <div>
   <div>
     <div
-      class="sc-bdDsCe khUTuX"
+      class="sc-bdvwhi kZqCDC"
       data-testid="modal-mask"
     />
     <div
-      class="sc-gtcBCx sc-dkXsAU hcrjjJ ekNIgk"
+      class="sc-gsDMPd sc-dkPwfY kfDcMp ecGGnH"
     >
       <div>
         My test content
