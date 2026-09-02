@@ -12,7 +12,6 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^csv-stringify/browser/esm$': 'csv-stringify',
-    '^csv-parse/browser/esm/sync$': 'csv-parse/sync',
     'theme\\/[a-z]+': '<rootDir>/test/themeMock.js',
     '\\.(png|jpg|jpeg|gif|svg|css)$': '<rootDir>/test/fileMock.js'
   },
