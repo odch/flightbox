@@ -78,12 +78,14 @@ describe('modules', () => {
         it('should return departure default values (from existing arrival)', () => {
           const generator = sagas.getDefaultValuesFromArrival('arrival-key');
 
-          expect(generator.next().value).toEqual(call(remote.loadByKey, '/arrivals', 'arrival-key'));
+          expect(generator.next().value).toEqual(call(sagas.loadSourceMovement, 'arrival', 'arrival-key'));
 
-          const snapshot = new FakeFirebaseSnapshot('departure-key', {
+          const arrival = {
+            key: 'arrival-key',
+            type: 'arrival',
             immatriculation: 'HBKOF',
-            dateTime: '2016-10-09T14:00:00.000Z',
-            negativeTimestamp: -1476021600000,
+            date: '2016-10-09',
+            time: '16:00',
             aircraftType: 'DR40',
             mtow: 1000,
             memberNr: '34354',
@@ -93,9 +95,9 @@ describe('modules', () => {
             passengerCount: 2,
             location: 'LSZT',
             flightType: 'private'
-          });
+          };
 
-          expect(generator.next(snapshot).value).toEqual(call(sagas.getDepartureDefaultValues));
+          expect(generator.next(arrival).value).toEqual(call(sagas.getDepartureDefaultValues));
 
           const initialValues = {
             type: 'departure',
@@ -124,18 +126,133 @@ describe('modules', () => {
           expect(next.value).toEqual(expectedDefaultValues);
           expect(next.done).toEqual(true);
         });
+
+        // Guest/kiosk cannot read back the arrival they just recorded, so the
+        // wizard must still open — on plain defaults — rather than throwing and
+        // being bounced to the start page by initMovement's backstop.
+        it('should return plain departure default values when the arrival is not available', () => {
+          const generator = sagas.getDefaultValuesFromArrival('arrival-key');
+
+          expect(generator.next().value).toEqual(call(sagas.loadSourceMovement, 'arrival', 'arrival-key'));
+
+          expect(generator.next(null).value).toEqual(call(sagas.getDepartureDefaultValues));
+
+          const initialValues = {
+            type: 'departure',
+            date: dates.localDate(),
+            time: dates.localTimeRounded(15, 'up'),
+          };
+
+          const next = generator.next(initialValues);
+
+          expect(next.value).toEqual(initialValues);
+          expect(next.done).toEqual(true);
+        });
+      });
+
+      describe('loadSourceMovement', () => {
+        const cached = {
+          key: 'arrival-key',
+          type: 'arrival',
+          immatriculation: 'HBKOF',
+          date: '2016-10-09',
+          time: '16:00'
+        };
+
+        it('should return the last saved movement without reading it back', () => {
+          const generator = sagas.loadSourceMovement('arrival', 'arrival-key');
+
+          expect(generator.next().value).toEqual(select(sagas.lastSavedMovementSelector));
+
+          const next = generator.next(cached);
+
+          expect(next.value).toEqual(cached);
+          expect(next.done).toEqual(true);
+        });
+
+        it('should read the movement remotely when nothing was saved', () => {
+          const generator = sagas.loadSourceMovement('arrival', 'arrival-key');
+
+          expect(generator.next().value).toEqual(select(sagas.lastSavedMovementSelector));
+
+          expect(generator.next(null).value).toEqual(call(remote.loadByKey, '/arrivals', 'arrival-key'));
+
+          const snapshot = new FakeFirebaseSnapshot('arrival-key', {
+            immatriculation: 'HBKOF',
+            dateTime: '2016-10-09T14:00:00.000Z',
+            negativeTimestamp: -1476021600000
+          });
+
+          const next = generator.next(snapshot);
+
+          expect(next.value).toEqual({
+            key: 'arrival-key',
+            type: 'arrival',
+            immatriculation: 'HBKOF',
+            date: '2016-10-09',
+            time: '16:00'
+          });
+          expect(next.done).toEqual(true);
+        });
+
+        it('should read the movement remotely when another movement was saved last', () => {
+          const generator = sagas.loadSourceMovement('arrival', 'arrival-key');
+
+          generator.next();
+
+          expect(generator.next({...cached, key: 'another-key'}).value)
+            .toEqual(call(remote.loadByKey, '/arrivals', 'arrival-key'));
+        });
+
+        it('should read the movement remotely when the saved movement is of another type', () => {
+          const generator = sagas.loadSourceMovement('arrival', 'arrival-key');
+
+          generator.next();
+
+          expect(generator.next({...cached, type: 'departure'}).value)
+            .toEqual(call(remote.loadByKey, '/arrivals', 'arrival-key'));
+        });
+
+        it('should return null when the movement does not exist', () => {
+          const generator = sagas.loadSourceMovement('departure', 'departure-key');
+
+          generator.next();
+          generator.next(null);
+
+          const next = generator.next(new FakeFirebaseSnapshot('departure-key', null));
+
+          expect(next.value).toEqual(null);
+          expect(next.done).toEqual(true);
+        });
+
+        // The root cause of the reported kiosk bug. The movement read rules
+        // reject this read, and that has to resolve to "no source movement" so
+        // the wizard still opens; an escaping rejection would strand the pilot.
+        it('should return null when the read is denied', () => {
+          const generator = sagas.loadSourceMovement('arrival', 'arrival-key');
+
+          generator.next();
+          generator.next(null);
+
+          const next = generator.throw(new Error('Permission denied'));
+
+          expect(next.value).toEqual(null);
+          expect(next.done).toEqual(true);
+        });
       });
 
       describe('getDefaultValuesFromDeparture', () => {
         it('should return arrival default values (from existing departure)', () => {
           const generator = sagas.getDefaultValuesFromDeparture('departure-key');
 
-          expect(generator.next().value).toEqual(call(remote.loadByKey, '/departures', 'departure-key'));
+          expect(generator.next().value).toEqual(call(sagas.loadSourceMovement, 'departure', 'departure-key'));
 
-          const snapshot = new FakeFirebaseSnapshot('departure-key', {
+          const departure = {
+            key: 'departure-key',
+            type: 'departure',
             immatriculation: 'HBKOF',
-            dateTime: '2016-10-09T14:00:00.000Z',
-            negativeTimestamp: -1476021600000,
+            date: '2016-10-09',
+            time: '16:00',
             aircraftType: 'DR40',
             mtow: 1000,
             memberNr: '34354',
@@ -145,9 +262,9 @@ describe('modules', () => {
             passengerCount: 2,
             location: 'LSZT',
             flightType: 'private'
-          });
+          };
 
-          expect(generator.next(snapshot).value).toEqual(call(sagas.getArrivalDefaultValues));
+          expect(generator.next(departure).value).toEqual(call(sagas.getArrivalDefaultValues));
 
           const initialValues = {
             type: 'arrival',
@@ -174,6 +291,25 @@ describe('modules', () => {
           };
 
           expect(next.value).toEqual(expectedDefaultValues);
+          expect(next.done).toEqual(true);
+        });
+
+        it('should return plain arrival default values when the departure is not available', () => {
+          const generator = sagas.getDefaultValuesFromDeparture('departure-key');
+
+          expect(generator.next().value).toEqual(call(sagas.loadSourceMovement, 'departure', 'departure-key'));
+
+          expect(generator.next(null).value).toEqual(call(sagas.getArrivalDefaultValues));
+
+          const initialValues = {
+            type: 'arrival',
+            date: dates.localDate(),
+            time: dates.localTimeRounded(15, 'down'),
+          };
+
+          const next = generator.next(initialValues);
+
+          expect(next.value).toEqual(initialValues);
           expect(next.done).toEqual(true);
         });
       });
@@ -494,6 +630,24 @@ describe('modules', () => {
 
           expect(generator.next().done).toEqual(true);
         });
+
+        // The wizard renders a spinner until `wizardInitialized` arrives, so an
+        // escaping error would strand it there for good. Go home instead.
+        it('should send the user home when the initial values cannot be loaded', () => {
+          const pushSpy = jest.spyOn(history, 'push').mockImplementation(() => {});
+
+          const generator = sagas.initMovement(sagas.getDefaultValuesFromArrival, 'arrival-key');
+
+          generator.next();
+          generator.next();
+
+          const next = generator.throw(new Error('Permission denied'));
+
+          expect(next.done).toEqual(true);
+          expect(pushSpy).toHaveBeenCalledWith('/');
+
+          pushSpy.mockRestore();
+        });
       });
 
       describe('editMovement', () => {
@@ -565,6 +719,28 @@ describe('modules', () => {
 
           const pushSpy = jest.spyOn(history, 'push');
           const result = generator.next(snapshot);
+
+          expect(pushSpy).toHaveBeenCalledWith('/');
+          expect(result.done).toEqual(true);
+          pushSpy.mockRestore();
+        });
+
+        // Same failure class as the prefill: the movement belongs to another
+        // pilot (or the session cannot read it at all), so the read is rejected.
+        // It must be swallowed — an escaping rejection restarts the movements
+        // saga and strands the wizard on its spinner.
+        it('should navigate back when the movement cannot be read', () => {
+          const action = actions.editMovement('departure', 'foreign-key');
+
+          const generator = sagas.editMovement(action);
+
+          generator.next();
+          generator.next();
+
+          expect(generator.next(null).value).toEqual(call(remote.loadByKey, '/departures', 'foreign-key'));
+
+          const pushSpy = jest.spyOn(history, 'push').mockImplementation(() => {});
+          const result = generator.throw(new Error('Permission denied'));
 
           expect(pushSpy).toHaveBeenCalledWith('/');
           expect(result.done).toEqual(true);
@@ -1771,19 +1947,21 @@ describe('modules', () => {
           const generator = sagas.getDefaultValuesFromDeparture('departure-key');
 
           expect(generator.next().value).toEqual(
-            call(remote.loadByKey, '/departures', 'departure-key')
+            call(sagas.loadSourceMovement, 'departure', 'departure-key')
           );
 
-          const snapshot = new FakeFirebaseSnapshot('departure-key', {
+          const departure = {
+            key: 'departure-key',
+            type: 'departure',
             immatriculation: 'HBKOF',
-            dateTime: '2016-10-09T14:00:00.000Z',
-            negativeTimestamp: -1476021600000,
+            date: '2016-10-09',
+            time: '16:00',
             aircraftType: 'DR40',
             mtow: 1000,
             departureRoute: 'circuits'
-          });
+          };
 
-          expect(generator.next(snapshot).value).toEqual(
+          expect(generator.next(departure).value).toEqual(
             call(sagas.getArrivalDefaultValues)
           );
 

@@ -6,7 +6,8 @@
  * Verifies, against the *built* rules:
  *  - personal-access projects (loginForm === 'email'): pilots read/write only
  *    their own movements (reads via email-bounded queries or owner key reads),
- *    guest/kiosk create/edit ownerless ones and read none, admins read/write all;
+ *    guest/kiosk create/edit ownerless ones and read none — including the one
+ *    they just created themselves — admins read/write all;
  *  - shared-access projects (e.g. lspv): any authenticated user reads/writes all.
  */
 'use strict';
@@ -77,6 +78,28 @@ function validDeparture(config, createdBy) {
   return d;
 }
 
+function validArrival(config, createdBy) {
+  const a = {
+    aircraftType: 'C172',
+    arrivalRoute: config.aerodrome.arrivalRoutes[0].name,
+    dateTime: '2026-06-16T12:00:00.000Z',
+    email: 'pilot@example.com',
+    firstname: 'Test',
+    flightType: config.enabledFlightTypes[0],
+    immatriculation: 'HBABC',
+    landingCount: 1,
+    lastname: 'Pilot',
+    // The home ICAO keeps the route rule satisfied even when the first
+    // configured arrival route is a circuits-style one.
+    location: config.aerodrome.ICAO,
+    mtow: 1000,
+    aircraftCategory: aircraftCategories[0].name,
+    negativeTimestamp: -1700000000000,
+  };
+  if (createdBy) a.createdBy = createdBy;
+  return a;
+}
+
 let failures = 0;
 async function expect(label, shouldPass, promise) {
   try {
@@ -115,6 +138,7 @@ async function testPersonalAccess() {
   const alice = env.authenticatedContext('alice-uid', { email: 'alice@example.com' }).database();
   const bob = env.authenticatedContext('bob-uid', { email: 'bob@example.com' }).database();
   const guest = env.authenticatedContext('guest').database();
+  const kiosk = env.authenticatedContext('kiosk').database();
   const admin = env.authenticatedContext('admin-uid').database();
   const operator = env.authenticatedContext('operator-uid', { email: 'operator@example.com' }).database();
   const staleAdmin = env.authenticatedContext('stale-admin-uid').database();
@@ -133,6 +157,7 @@ async function testPersonalAccess() {
   await expect('guest cannot create with a createdBy', false, set(ref(guest, 'departures/new_guest_spoof'), validDeparture(config, 'alice@example.com')));
   await expect('guest edits ownerless (e.g. payment)', true, update(ref(guest, 'departures/ownerless_edit'), { remarks: 'paid' }));
   await expect('guest cannot edit an owned movement', false, update(ref(guest, 'departures/owned_for_guest'), { remarks: 'nope' }));
+  await expect('kiosk creates an ownerless arrival', true, set(ref(kiosk, 'arrivals/kiosk_arrival'), validArrival(config)));
 
   // admin / anon
   await expect('admin creates as anyone', true, set(ref(admin, 'departures/new_admin'), validDeparture(config, 'someone@example.com')));
@@ -148,6 +173,11 @@ async function testPersonalAccess() {
   await expect('guest cannot read movements', false, get(ownQuery(guest, 'departures', 'alice@example.com')));
   await expect('guest cannot read an ownerless movement by key', false, get(ref(guest, 'departures/ownerless_edit')));
   await expect('guest cannot read an owned movement by key', false, get(ref(guest, 'departures/alice_read')));
+  // Pins the assumption behind the client's in-memory prefill: a kiosk cannot
+  // read back the arrival it just recorded, so "record departure" has to prefill
+  // from the last-saved movement held in memory and fall back to plain defaults.
+  // If this ever starts succeeding, that cache is no longer load-bearing.
+  await expect('kiosk cannot read back the ownerless arrival it just created', false, get(ref(kiosk, 'arrivals/kiosk_arrival')));
   await expect('admin reads all movements (unbounded query)', true, get(unboundedQuery(admin, 'departures')));
   await expect('admin reads any movement by key', true, get(ref(admin, 'departures/bob_read')));
   // Admin predicate must require value === true, matching the API layer. A
