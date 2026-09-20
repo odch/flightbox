@@ -3,15 +3,15 @@
 exports[`components LabeledBox is built correctly 1`] = `
 <div>
   <div
-    class="sc-bdDsCe fPWYn my-class"
+    class="sc-bdvwhi gWDQOK my-class"
   >
     <div
-      class="sc-gtcBCx AXcnu"
+      class="sc-gsDMPd cRmFRm"
     >
       My label
     </div>
     <div
-      class="sc-dkXsAU iLSfws"
+      class="sc-dkPwfY bbZUtb"
     >
       <div>
         child1

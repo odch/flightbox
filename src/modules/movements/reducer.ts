@@ -1,5 +1,6 @@
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
+import { WIZARD_FINISH } from '../ui/wizard/actions';
 
 interface MovementsFilter {
   date: {
@@ -19,6 +20,7 @@ interface MovementsState {
   loading: boolean;
   loadingFailed: boolean;
   byKey: Record<string, unknown>;
+  lastSaved: Record<string, any> | null;
   filter: MovementsFilter;
   previousFilter: MovementsFilter | null;
 }
@@ -101,6 +103,37 @@ export const setAssociatedMovement = (state: MovementsState, action: any) => ({
   }
 });
 
+// The movement most recently written, kept so a follow-up wizard — "record
+// departure" straight after an arrival, or the reverse — can prefill from it.
+// Guest/kiosk cannot read their own movements back — they are ownerless and
+// their token carries no email claim, so `movementItemRead` denies it — which
+// makes this the only source for them.
+//
+// Deliberately a single slot rather than a by-key map: a kiosk browser stays
+// open indefinitely and records movements back to back, so a map would grow
+// without bound and keep every pilot's PII resident on a shared device.
+//
+// `values` are the local-form wizard values (date/time, no dateTime), so they
+// must not be passed through firebaseToLocal. `key` is overridden explicitly:
+// it only comes back from the save for a newly created movement.
+export const saveMovementSuccess = (state: MovementsState, action: any) => ({
+  ...state,
+  lastSaved: { ...action.payload.values, key: action.payload.key }
+});
+
+// Dropped when the pilot finishes, so their details do not linger on a shared
+// device any longer than the flow needs them. The "record departure" path does
+// not go through finish(), so this never clears a movement about to be used.
+//
+// Not cleared on START_INITIALIZE_WIZARD: initMovement dispatches that *before*
+// reading the cache, so clearing there would kill the prefill. If a pilot
+// abandons the finish screen without pressing finish, the values survive until
+// the next save or until logout (which reloads the page and drops the store).
+export const clearLastSaved = (state: MovementsState) => ({
+  ...state,
+  lastSaved: null
+});
+
 const ACTION_HANDLERS: Record<string, (state: MovementsState, action: any) => MovementsState> = {
   [actions.SET_MOVEMENTS]: setMovements,
   [actions.SET_MOVEMENTS_LOADING]: setLoading,
@@ -112,6 +145,8 @@ const ACTION_HANDLERS: Record<string, (state: MovementsState, action: any) => Mo
   [actions.CLEAR_MOVEMENTS_BY_KEY]: clearMovementsByKey,
   [actions.SET_ASSOCIATED_MOVEMENT]: setAssociatedMovement,
   [actions.CLEAR_ASSOCIATED_MOVEMENTS]: clearAssociatedMovements,
+  [actions.SAVE_MOVEMENT_SUCCESS]: saveMovementSuccess,
+  [WIZARD_FINISH]: clearLastSaved,
 };
 
 const INITIAL_STATE: MovementsState = {
@@ -123,6 +158,7 @@ const INITIAL_STATE: MovementsState = {
   loading: false,
   loadingFailed: false,
   byKey: {},
+  lastSaved: null,
   filter: {
     date: {
       start: null,

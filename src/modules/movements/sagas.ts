@@ -18,6 +18,8 @@ export const stateSelector = (state: any) => state.movements;
 
 export const movementSelector = (state: any, key: string) => state.movements.data.getByKey(key);
 
+export const lastSavedMovementSelector = (state: any) => state.movements.lastSaved;
+
 export const wizardFormValuesSelector = (state: any) => state.ui.wizard.values;
 
 export const authSelector = (state: any) => state.auth.data;
@@ -86,14 +88,47 @@ export function* getArrivalDefaultValues() {
   };
 }
 
+// Resolves the movement a new wizard prefills from. Serves the just-saved
+// movement out of memory: guest/kiosk sessions cannot read their own movements
+// back — they are ownerless and the token carries no email claim — so the read
+// below is denied for them and the cache is the only source.
+//
+// A denied or empty read is a normal outcome here, not an error: it just means
+// there is no source movement, and the wizard opens on plain defaults. Letting
+// it escape instead would send the user to the start page via initMovement's
+// backstop — a dead end for a kiosk pilot who simply wants to file the
+// departure for the arrival they just recorded.
+export function* loadSourceMovement(movementType: string, key: string) {
+  const lastSaved = yield select(lastSavedMovementSelector);
+  if (lastSaved && lastSaved.key === key && lastSaved.type === movementType) {
+    return lastSaved; // already in local form
+  }
+
+  // Resolved outside the try: an unknown movement type is a programming error
+  // and must surface, not degrade into a silently unprefilled form.
+  const path = getPathByMovementType(movementType);
+
+  try {
+    const snapshot = yield call(remote.loadByKey, path, key);
+    const val = snapshot.val();
+    if (!val) {
+      return null;
+    }
+    const movement = firebaseToLocal(val);
+    movement.key = snapshot.key;
+    movement.type = movementType;
+    return movement;
+  } catch (e) {
+    return null;
+  }
+}
+
 export function* getDefaultValuesFromArrival(arrivalKey: string) {
-  const snapshot = yield call(remote.loadByKey, '/arrivals', arrivalKey);
+  const arrival = yield call(loadSourceMovement, 'arrival', arrivalKey);
 
   const initialValues = yield call(getDepartureDefaultValues);
 
-  const val = snapshot.val();
-  if (val) {
-    const arrival = firebaseToLocal(val);
+  if (arrival) {
     transferValues(arrival, initialValues, [
       'immatriculation',
       'aircraftType',
@@ -114,13 +149,11 @@ export function* getDefaultValuesFromArrival(arrivalKey: string) {
 }
 
 export function* getDefaultValuesFromDeparture(departureKey: string) {
-  const snapshot = yield call(remote.loadByKey, '/departures', departureKey);
+  const departure = yield call(loadSourceMovement, 'departure', departureKey);
 
   const initialValues = yield call(getArrivalDefaultValues);
 
-  const val = snapshot.val();
-  if (val) {
-    const departure = firebaseToLocal(val);
+  if (departure) {
     transferValues(departure, initialValues, [
       'immatriculation',
       'aircraftType',
@@ -499,7 +532,20 @@ export function* initNewMovementFromMovement(action: any) {
 
 export function* initMovement(loadInitialValuesSaga: (...args: any[]) => any, ...loadInitialValuesArgs: unknown[]) {
   yield put(actions.startInitializeWizard());
-  const initialValues = yield call(loadInitialValuesSaga, ...loadInitialValuesArgs);
+  let initialValues;
+  try {
+    initialValues = yield call(loadInitialValuesSaga, ...loadInitialValuesArgs);
+  } catch (e) {
+    // Backstop. The loaders above treat an unreadable source movement as a
+    // normal outcome, so reaching this means something unexpected failed. Left
+    // unhandled it would leave `ui.wizard.initialized` false forever — the
+    // wizard would sit on its spinner with no way to recover, which is how the
+    // kiosk "record departure" hang presented. Send the user home instead, as
+    // editMovement does.
+    error('Failed to initialize movement wizard', e);
+    history.push('/');
+    return;
+  }
   yield put(actions.wizardInitialized(initialValues));
 }
 

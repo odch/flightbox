@@ -3,15 +3,15 @@
 exports[`components LabeledComponent is built correctly 1`] = `
 <div>
   <div
-    class="sc-iCECmn dvKgGR"
+    class="sc-iCfNyT edpbod"
   >
     <label
-      class="sc-bdDsCe PmxJm"
+      class="sc-bdvwhi jjjrUH"
     >
       My label
     </label>
     <div
-      class="sc-gtcBCx kCvNIB"
+      class="sc-gsDMPd PziQl"
     >
       <input
         id="my-input"
