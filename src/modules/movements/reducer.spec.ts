@@ -1,6 +1,7 @@
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
 import reducer, {FORBIDDEN_MOVEMENT} from './reducer';
+import {finish} from '../ui/wizard/actions';
 
 const INITIAL_STATE = {
   data: new ImmutableItemsArray(),
@@ -11,6 +12,7 @@ const INITIAL_STATE = {
   loading: false,
   loadingFailed: false,
   byKey: {},
+  lastSaved: null,
   filter: {
     date: { // "end" is the newer date bound ("start" must come before "end")
       start: null,
@@ -131,6 +133,47 @@ describe('modules', () => {
 
           expect(newState.loadingFailed).toEqual(true);
           expect(newState.loading).toEqual(false);
+        });
+      });
+
+      describe('saveMovementSuccess', () => {
+        const values = {
+          type: 'arrival',
+          immatriculation: 'HBKOF',
+          date: '2016-10-09',
+          time: '16:00'
+        };
+
+        it('should keep the saved movement, stamped with its key', () => {
+          const newState = reducer(
+            {...INITIAL_STATE} as any,
+            actions.saveMovementSuccess('arrival-key', values)
+          );
+
+          expect(newState.lastSaved).toEqual({...values, key: 'arrival-key'});
+        });
+
+        // The kiosk browser stays open indefinitely and records movements back
+        // to back, so this must never accumulate: one slot, always replaced.
+        it('should replace the previously saved movement rather than accumulate', () => {
+          let state = reducer({...INITIAL_STATE} as any, actions.saveMovementSuccess('key-1', values));
+          state = reducer(state, actions.saveMovementSuccess('key-2', values));
+          state = reducer(state, actions.saveMovementSuccess('key-3', values));
+
+          expect(state.lastSaved).toEqual({...values, key: 'key-3'});
+        });
+      });
+
+      describe('clearLastSaved', () => {
+        it('should drop the saved movement when the wizard is finished', () => {
+          const state = {
+            ...INITIAL_STATE,
+            lastSaved: {key: 'arrival-key', type: 'arrival', email: 'pilot@example.com'}
+          };
+
+          const newState = reducer(state as any, finish());
+
+          expect(newState.lastSaved).toEqual(null);
         });
       });
     });
