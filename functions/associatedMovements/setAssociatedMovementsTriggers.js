@@ -1,7 +1,7 @@
 const { onValueCreated, onValueWritten, onValueDeleted } = require('firebase-functions/v2/database')
 const { logger } = require('firebase-functions/v2')
 const { defineString } = require('firebase-functions/params')
-const admin = require('firebase-admin')
+const { getDatabase } = require('firebase-admin/database')
 const utils = require('./utils')
 
 const RTDB_INSTANCE = defineString('RTDB_INSTANCE')
@@ -11,14 +11,14 @@ const toValidAssoc = data =>
   data && ['departure', 'arrival'].includes(data.type) ? data : null
 
 const setAssociatedMovementPending = async (movementKey, movementType) => {
-  await admin.database().ref(utils.path(movementType)).child(movementKey).update({
+  await getDatabase().ref(utils.path(movementType)).child(movementKey).update({
     associatedMovement: null
   })
 }
 
 const loadMovement = async (movementKey, movementType) => {
   const movementsPath = movementType === 'departure' ? '/departures' : '/arrivals'
-  const movementSnapshot = await admin.database()
+  const movementSnapshot = await getDatabase()
     .ref(movementsPath).child(movementKey)
     .once('value')
   if (movementSnapshot.exists()) {
@@ -47,7 +47,7 @@ const updateAssociatedMovement = async (movement, aircraftMovements, updatedMove
   }
 
   // Read old association before any writes so cascade can clean up the previous partner
-  const oldMovAssocSnap = await admin.database()
+  const oldMovAssocSnap = await getDatabase()
     .ref(utils.path(movement.type)).child(movement.key).once('value')
   const oldAssociatedMovementOfMovement = toValidAssoc(oldMovAssocSnap.val())
 
@@ -58,7 +58,7 @@ const updateAssociatedMovement = async (movement, aircraftMovements, updatedMove
   // Read the new partner's current association before overwriting it
   let oldAssociatedMovementOfAssociatedMovement = null
   if (associatedMovement) {
-    const oldAssocOfAssocSnap = await admin.database()
+    const oldAssocOfAssocSnap = await getDatabase()
       .ref(utils.path(associatedMovement.type)).child(associatedMovement.key).once('value')
     oldAssociatedMovementOfAssociatedMovement = toValidAssoc(oldAssocOfAssocSnap.val())
   }
@@ -161,10 +161,10 @@ const updateOnDelete = async (snap, type) => {
 
   const movementKey = snap.ref.key
 
-  const assocSnap = await admin.database().ref(utils.path(type)).child(movementKey).once('value')
+  const assocSnap = await getDatabase().ref(utils.path(type)).child(movementKey).once('value')
   const assocData = toValidAssoc(assocSnap.val())
 
-  await admin.database().ref(utils.path(type)).child(movementKey).remove()
+  await getDatabase().ref(utils.path(type)).child(movementKey).remove()
 
   if (assocData) {
     await setAssociatedMovementPending(assocData.key, assocData.type)

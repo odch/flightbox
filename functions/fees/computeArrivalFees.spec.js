@@ -23,10 +23,10 @@ jest.mock('firebase-functions/params', () => ({
 }));
 
 const mockAdmin = {
-  database: jest.fn()
+  getDatabase: jest.fn()
 };
 
-jest.mock('firebase-admin', () => mockAdmin);
+jest.mock('firebase-admin/database', () => mockAdmin);
 
 const { _test } = require('./computeArrivalFees');
 
@@ -84,28 +84,28 @@ describe('functions/fees/computeArrivalFees', () => {
   });
 
   it('is a no-op when the project has no landing-fee strategy (gate off)', async () => {
-    mockAdmin.database.mockReturnValue(makeDb({})); // no /settings/landingFeesStrategy
+    mockAdmin.getDatabase.mockReturnValue(makeDb({})); // no /settings/landingFeesStrategy
     const event = makeEvent({ immatriculation: 'HBABC', mtow: 1001, flightType: 'private', aircraftCategory: 'Flugzeug', landingCount: 1 });
     await _test.recomputeArrivalFees(event);
     expect(event._update).not.toHaveBeenCalled();
   });
 
   it('is a no-op when the arrival was deleted', async () => {
-    mockAdmin.database.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lspl' }));
+    mockAdmin.getDatabase.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lspl' }));
     const event = makeEvent(null);
     await _test.recomputeArrivalFees(event);
     expect(event._update).not.toHaveBeenCalled();
   });
 
   it('is a no-op for an anonymized arrival', async () => {
-    mockAdmin.database.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lspl' }));
+    mockAdmin.getDatabase.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lspl' }));
     const event = makeEvent({ anonymized: true });
     await _test.recomputeArrivalFees(event);
     expect(event._update).not.toHaveBeenCalled();
   });
 
   it('prices an unknown registration from submitted data and flags it manual', async () => {
-    mockAdmin.database.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lspl' }));
+    mockAdmin.getDatabase.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lspl' }));
     const event = makeEvent({
       immatriculation: 'HBUNK', mtow: 1001, flightType: 'private',
       aircraftCategory: 'Flugzeug', landingCount: 1
@@ -123,7 +123,7 @@ describe('functions/fees/computeArrivalFees', () => {
     // Submitted MTOW (500) would price at 18.50; the registry MTOW (1001)
     // prices at 23.13. The registry must win, and the record's declared
     // mtow/category must be left untouched.
-    mockAdmin.database.mockReturnValue(makeDb({
+    mockAdmin.getDatabase.mockReturnValue(makeDb({
       '/settings/landingFeesStrategy': 'lspl',
       '/aircrafts/HBABC': { mtow: 1001, category: 'Flugzeug' }
     }));
@@ -142,7 +142,7 @@ describe('functions/fees/computeArrivalFees', () => {
   });
 
   it('applies the home-base discount and 0% VAT for a club aircraft', async () => {
-    mockAdmin.database.mockReturnValue(makeDb({
+    mockAdmin.getDatabase.mockReturnValue(makeDb({
       '/settings/landingFeesStrategy': 'lspl',
       '/settings/aircrafts/club': { 'HBCLB': true }
     }));
@@ -160,7 +160,7 @@ describe('functions/fees/computeArrivalFees', () => {
   });
 
   it('does not write when the stored fees already match (loop guard)', async () => {
-    mockAdmin.database.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lspl' }));
+    mockAdmin.getDatabase.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lspl' }));
     // Pre-seed the arrival with exactly what the recompute would produce.
     const event = makeEvent({
       immatriculation: 'HBUNK', mtow: 1001, flightType: 'private',
@@ -175,7 +175,7 @@ describe('functions/fees/computeArrivalFees', () => {
   });
 
   it('clears stale fee fields when the fee-determining inputs are incomplete', async () => {
-    mockAdmin.database.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lspl' }));
+    mockAdmin.getDatabase.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lspl' }));
     // flightType missing -> computeFees returns {} -> every fee field cleared.
     const event = makeEvent({
       immatriculation: 'HBUNK', mtow: 1001, aircraftCategory: 'Flugzeug',
@@ -189,7 +189,7 @@ describe('functions/fees/computeArrivalFees', () => {
   });
 
   it('fails closed (writes nothing) when the strategy is not available server-side', async () => {
-    mockAdmin.database.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lszt' }));
+    mockAdmin.getDatabase.mockReturnValue(makeDb({ '/settings/landingFeesStrategy': 'lszt' }));
     const event = makeEvent({
       immatriculation: 'HBUNK', mtow: 1001, flightType: 'private',
       aircraftCategory: 'Flugzeug', landingCount: 1
@@ -200,7 +200,7 @@ describe('functions/fees/computeArrivalFees', () => {
   });
 
   it('clears an unauthorized invoice recipient during recompute (integration)', async () => {
-    mockAdmin.database.mockReturnValue(makeDb({
+    mockAdmin.getDatabase.mockReturnValue(makeDb({
       '/settings/landingFeesStrategy': 'lspl',
       '/settings/invoiceRecipients': RECIPIENTS,
     }));

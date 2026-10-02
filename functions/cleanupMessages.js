@@ -1,7 +1,7 @@
 'use strict';
 
 const { onSchedule } = require('firebase-functions/v2/scheduler');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 
 const SCHEDULE = '0 2 * * *'; // Every day at 2 AM
 const TIMEZONE = 'Europe/Zurich';
@@ -13,7 +13,7 @@ exports.scheduledCleanupMessages = onSchedule(
     timeZone: TIMEZONE,
   },
   async () => {
-    const db = admin.database();
+    const db = getDatabase();
 
     const retentionSnap = await db.ref('/settings/messageRetentionDays').once('value');
     const retentionDays = retentionSnap.val();

@@ -1,7 +1,8 @@
 'use strict';
 
 const { onRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
+const { getDatabase } = require('firebase-admin/database');
 const cors = require('cors')({ origin: true });
 const { generateAuthenticationOptions } = require('@simplewebauthn/server');
 const {
@@ -14,7 +15,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 async function resolveUidByEmail(email) {
   try {
-    const userRecord = await admin.auth().getUserByEmail(email);
+    const userRecord = await getAuth().getUserByEmail(email);
     return userRecord.uid;
   } catch (e) {
     if (e && e.code === 'auth/user-not-found') {
@@ -25,7 +26,7 @@ async function resolveUidByEmail(email) {
 }
 
 async function loadAllowCredentials(uid) {
-  const snapshot = await admin.database().ref('/webauthnCredentials').child(uid).once('value');
+  const snapshot = await getDatabase().ref('/webauthnCredentials').child(uid).once('value');
   if (!snapshot.exists()) {
     return [];
   }

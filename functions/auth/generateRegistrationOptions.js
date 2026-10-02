@@ -1,7 +1,7 @@
 'use strict';
 
 const { onRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 const cors = require('cors')({ origin: true });
 const { generateRegistrationOptions } = require('@simplewebauthn/server');
 const {
@@ -13,7 +13,7 @@ const {
 } = require('./webauthnHelpers');
 
 async function loadExistingCredentials(uid) {
-  const snapshot = await admin.database().ref('/webauthnCredentials').child(uid).once('value');
+  const snapshot = await getDatabase().ref('/webauthnCredentials').child(uid).once('value');
   if (!snapshot.exists()) {
     return [];
   }

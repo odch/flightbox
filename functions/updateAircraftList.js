@@ -1,5 +1,5 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler');
-const admin = require('firebase-admin');
+const { getDatabase, ServerValue } = require('firebase-admin/database');
 
 // Note: this map must be kept in sync with the list in `aircraftCategories.js`.
 const aircraftCategoryMap = {
@@ -76,7 +76,7 @@ function processAircraftUpdates(aircraftList) {
         category,
         mtow,
         type,
-        lastUpdated: admin.database.ServerValue.TIMESTAMP
+        lastUpdated: ServerValue.TIMESTAMP
       };
     });
 
@@ -116,7 +116,7 @@ exports.scheduledAircraftListUpdate = onSchedule(
   { region: 'europe-west1', schedule: SCHEDULE, timeZone: TIMEZONE },
   async () => {
     try {
-      const db = admin.database();
+      const db = getDatabase();
 
       // Check if the cron job is enabled
       const settings = await db.ref('settings/updateAircraftListCronJobEnabled').once('value');

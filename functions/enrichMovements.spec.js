@@ -30,8 +30,8 @@ const mockUpdate = jest.fn();
 const mockRef = jest.fn();
 const mockChild = jest.fn();
 
-jest.mock('firebase-admin', () => ({
-  database: jest.fn(() => ({
+jest.mock('firebase-admin/database', () => ({
+  getDatabase: jest.fn(() => ({
     ref: mockRef
   }))
 }));
@@ -64,7 +64,7 @@ describe('functions/enrichMovements', () => {
         val: jest.fn(() => aerodromeData)
       };
 
-      // When admin.database().ref('aerodromes').child(icao).once('value') is called
+      // When getDatabase().ref('aerodromes').child(icao).once('value') is called
       mockRef.mockImplementation(path => {
         if (path === 'aerodromes') {
           return {

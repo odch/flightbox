@@ -1,7 +1,7 @@
 const { onValueWritten } = require('firebase-functions/v2/database')
 const { logger } = require('firebase-functions/v2')
 const { defineString } = require('firebase-functions/params')
-const admin = require('firebase-admin')
+const { getDatabase } = require('firebase-admin/database')
 
 const RTDB_INSTANCE = defineString('RTDB_INSTANCE')
 const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' })
@@ -28,7 +28,7 @@ module.exports.updateCustomsHomebasedAircraftOnUpdate = onValueWritten(
       return
     }
 
-    const snapshot = await admin.database().ref('/settings/customsDeclarationApp').once('value')
+    const snapshot = await getDatabase().ref('/settings/customsDeclarationApp').once('value')
     const customsSettings = snapshot.val()
 
     if (!customsSettings || !customsSettings.baseUrl) {

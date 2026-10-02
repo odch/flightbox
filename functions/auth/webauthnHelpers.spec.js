@@ -19,13 +19,14 @@ describe('functions', () => {
       };
 
       mockAdmin = {
-        database: jest.fn().mockReturnValue({
+        getDatabase: jest.fn().mockReturnValue({
           ref: jest.fn().mockReturnValue(mockChallengesRef),
         }),
-        auth: jest.fn().mockReturnValue(mockAuthAdmin),
+        getAuth: jest.fn().mockReturnValue(mockAuthAdmin),
       };
 
-      jest.mock('firebase-admin', () => mockAdmin);
+      jest.mock('firebase-admin/database', () => mockAdmin);
+      jest.mock('firebase-admin/auth', () => mockAdmin);
 
       process.env.WEBAUTHN_RPID = 'flightbox.ch';
       process.env.WEBAUTHN_RPNAME = 'Flightbox';

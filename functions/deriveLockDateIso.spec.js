@@ -23,10 +23,10 @@ jest.mock('firebase-functions/params', () => ({
 }));
 
 const mockAdmin = {
-  database: jest.fn()
+  getDatabase: jest.fn()
 };
 
-jest.mock('firebase-admin', () => mockAdmin);
+jest.mock('firebase-admin/database', () => mockAdmin);
 
 const { _test } = require('./deriveLockDateIso');
 
@@ -58,7 +58,7 @@ describe('functions/deriveLockDateIso', () => {
 
   it('is a no-op when the project has not opted in', async () => {
     const db = makeDb({ '/settings/lockDate': 1700000000000 }); // no lockOnDateTime
-    mockAdmin.database.mockReturnValue(db);
+    mockAdmin.getDatabase.mockReturnValue(db);
     await _test.deriveLockDateIso(makeEvent(1700000000000));
     expect(db._writes).toEqual({});
   });
@@ -66,7 +66,7 @@ describe('functions/deriveLockDateIso', () => {
   it('derives lockDateIso = ISO(lockDate + 1 day) when opted in', async () => {
     const lockDate = Date.UTC(2026, 0, 31, 0, 0, 0); // 2026-01-31T00:00:00Z
     const db = makeDb({ '/settings/lockOnDateTime': true });
-    mockAdmin.database.mockReturnValue(db);
+    mockAdmin.getDatabase.mockReturnValue(db);
 
     await _test.deriveLockDateIso(makeEvent(lockDate));
 
@@ -77,7 +77,7 @@ describe('functions/deriveLockDateIso', () => {
   it('produces a threshold whose ordering matches the numeric rule', async () => {
     const lockDate = Date.UTC(2026, 5, 15, 12, 0, 0);
     const db = makeDb({ '/settings/lockOnDateTime': true });
-    mockAdmin.database.mockReturnValue(db);
+    mockAdmin.getDatabase.mockReturnValue(db);
 
     await _test.deriveLockDateIso(makeEvent(lockDate));
     const iso = db._writes['/settings/lockDateIso'];
@@ -98,7 +98,7 @@ describe('functions/deriveLockDateIso', () => {
       '/settings/lockOnDateTime': true,
       '/settings/lockDateIso': iso
     });
-    mockAdmin.database.mockReturnValue(db);
+    mockAdmin.getDatabase.mockReturnValue(db);
 
     await _test.deriveLockDateIso(makeEvent(lockDate));
     expect(db._writes).toEqual({});
@@ -109,7 +109,7 @@ describe('functions/deriveLockDateIso', () => {
       '/settings/lockOnDateTime': true,
       '/settings/lockDateIso': '2026-02-01T00:00:00.000Z'
     });
-    mockAdmin.database.mockReturnValue(db);
+    mockAdmin.getDatabase.mockReturnValue(db);
 
     await _test.deriveLockDateIso(makeEvent(null));
     expect(db._writes['/settings/lockDateIso']).toBeNull();
@@ -117,7 +117,7 @@ describe('functions/deriveLockDateIso', () => {
 
   it('ignores a non-numeric lockDate', async () => {
     const db = makeDb({ '/settings/lockOnDateTime': true });
-    mockAdmin.database.mockReturnValue(db);
+    mockAdmin.getDatabase.mockReturnValue(db);
 
     await _test.deriveLockDateIso(makeEvent('not-a-number'));
     expect(db._writes).toEqual({});

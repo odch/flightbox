@@ -24,8 +24,8 @@ jest.mock('firebase-functions/params', () => ({
 }));
 
 const mockAdminDbRef = jest.fn();
-jest.mock('firebase-admin', () => ({
-  database: jest.fn(() => ({ ref: mockAdminDbRef })),
+jest.mock('firebase-admin/database', () => ({
+  getDatabase: jest.fn(() => ({ ref: mockAdminDbRef })),
 }));
 
 global.fetch = jest.fn();

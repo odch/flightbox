@@ -24,12 +24,12 @@ describe('functions', () => {
       };
 
       mockAdmin = {
-        database: jest.fn().mockReturnValue({
+        getDatabase: jest.fn().mockReturnValue({
           ref: jest.fn().mockReturnValue(mockChallengesRef)
         })
       };
 
-      jest.mock('firebase-admin', () => mockAdmin);
+      jest.mock('firebase-admin/database', () => mockAdmin);
       jest.mock('firebase-functions/v2/scheduler', () => ({
         onSchedule: jest.fn((opts, handler) => {
           capturedOptions = opts;

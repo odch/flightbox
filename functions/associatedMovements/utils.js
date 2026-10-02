@@ -1,8 +1,8 @@
-const admin = require('firebase-admin')
+const { getDatabase } = require('firebase-admin/database')
 const moment = require('moment')
 
 const loadByImmatriculation = async (path, immatriculation) => {
-  const ref = admin.database().ref(path)
+  const ref = getDatabase().ref(path)
     .orderByChild('immatriculation')
     .equalTo(immatriculation);
   const snapshot = await ref.once('value')
@@ -119,16 +119,16 @@ const setAssociatedMovement = async (movementKey, movementType, associatedMoveme
 
   const basePath = path(movementType)
 
-  await admin.database().ref(basePath).child(movementKey).update(newData)
+  await getDatabase().ref(basePath).child(movementKey).update(newData)
 }
 
 const isHomeBase = async immatriculation => {
-  const clubAircrafts = await admin.database().ref('/settings/aircrafts/club').once('value')
+  const clubAircrafts = await getDatabase().ref('/settings/aircrafts/club').once('value')
   if (clubAircrafts.hasChild(immatriculation)) {
     return true
   }
 
-  const homeBaseAircrafts = await admin.database().ref('/settings/aircrafts/homeBase').once('value')
+  const homeBaseAircrafts = await getDatabase().ref('/settings/aircrafts/homeBase').once('value')
   if (homeBaseAircrafts.hasChild(immatriculation)) {
     return true
   }

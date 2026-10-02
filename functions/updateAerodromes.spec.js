@@ -11,13 +11,9 @@ jest.mock('firebase-functions/v2/scheduler', () => ({
 const mockUpdate = jest.fn();
 const mockRef = jest.fn();
 
-jest.mock('firebase-admin', () => ({
-  database: Object.assign(
-    jest.fn(() => ({ ref: mockRef })),
-    {
-      ServerValue: { TIMESTAMP: 'SERVER_TIMESTAMP' }
-    }
-  )
+jest.mock('firebase-admin/database', () => ({
+  getDatabase: jest.fn(() => ({ ref: mockRef })),
+  ServerValue: { TIMESTAMP: 'SERVER_TIMESTAMP' }
 }));
 
 const fetch = jest.fn();

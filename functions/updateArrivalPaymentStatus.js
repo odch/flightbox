@@ -1,7 +1,7 @@
 const { onValueWritten } = require('firebase-functions/v2/database');
 const { logger } = require('firebase-functions/v2');
 const { defineString } = require('firebase-functions/params');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 
 const RTDB_INSTANCE = defineString('RTDB_INSTANCE');
 const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' });
@@ -29,7 +29,7 @@ const handleUpdate = async (change) => {
   }
 
   try {
-    const arrivalSnapshot = await admin.database()
+    const arrivalSnapshot = await getDatabase()
       .ref('arrivals')
       .child(afterValue.arrivalReference)
       .once('value');
@@ -68,7 +68,7 @@ const handleUpdate = async (change) => {
         `Setting payment status of arrival ${afterValue.arrivalReference} to completed (card payment ${cardPaymentKey})`
       );
 
-      await admin.database()
+      await getDatabase()
         .ref('arrivals')
         .child(afterValue.arrivalReference)
         .update({

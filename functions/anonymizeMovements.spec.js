@@ -14,8 +14,8 @@ const mockRef = jest.fn().mockImplementation(path => {
   return { orderByChild: mockOrderByChild, update: mockUpdate, once: mockOnce };
 });
 
-jest.mock('firebase-admin', () => ({
-  database: jest.fn().mockReturnValue({ ref: mockRef }),
+jest.mock('firebase-admin/database', () => ({
+  getDatabase: jest.fn().mockReturnValue({ ref: mockRef }),
   initializeApp: jest.fn(),
 }));
 

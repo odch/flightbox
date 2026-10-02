@@ -24,10 +24,10 @@ jest.mock('firebase-functions/params', () => ({
 }));
 
 const mockAdmin = {
-  database: jest.fn()
+  getDatabase: jest.fn()
 };
 
-jest.mock('firebase-admin', () => mockAdmin);
+jest.mock('firebase-admin/database', () => mockAdmin);
 
 require('./updateArrivalPaymentStatus');
 
@@ -69,7 +69,7 @@ describe('functions', () => {
       );
       const result = await mockCapturedHandler({ data: change });
       expect(result).toBeUndefined();
-      expect(mockAdmin.database).not.toHaveBeenCalled();
+      expect(mockAdmin.getDatabase).not.toHaveBeenCalled();
     });
 
     it('logs info and returns early when arrivalReference is missing', async () => {
@@ -79,7 +79,7 @@ describe('functions', () => {
       );
       await mockCapturedHandler({ data: change });
       expect(mockLogger.info).toHaveBeenCalled();
-      expect(mockAdmin.database).not.toHaveBeenCalled();
+      expect(mockAdmin.getDatabase).not.toHaveBeenCalled();
     });
 
     it('logs info and returns early when the arrival does not exist', async () => {
@@ -87,7 +87,7 @@ describe('functions', () => {
         once: jest.fn().mockResolvedValue({ val: () => null }),
         update: jest.fn()
       };
-      mockAdmin.database.mockReturnValue({
+      mockAdmin.getDatabase.mockReturnValue({
         ref: jest.fn().mockReturnValue({
           child: jest.fn().mockReturnValue(mockRef)
         })
@@ -110,7 +110,7 @@ describe('functions', () => {
         update: jest.fn().mockResolvedValue()
       };
 
-      mockAdmin.database.mockReturnValue({
+      mockAdmin.getDatabase.mockReturnValue({
         ref: jest.fn().mockReturnValue({
           child: jest.fn().mockReturnValue(mockRef)
         })
@@ -136,7 +136,7 @@ describe('functions', () => {
         update: jest.fn()
       };
 
-      mockAdmin.database.mockReturnValue({
+      mockAdmin.getDatabase.mockReturnValue({
         ref: jest.fn().mockReturnValue({
           child: jest.fn().mockReturnValue(mockRef)
         })
@@ -162,7 +162,7 @@ describe('functions', () => {
         update: jest.fn()
       };
 
-      mockAdmin.database.mockReturnValue({
+      mockAdmin.getDatabase.mockReturnValue({
         ref: jest.fn().mockReturnValue({
           child: jest.fn().mockReturnValue(mockRef)
         })
@@ -187,7 +187,7 @@ describe('functions', () => {
         update: jest.fn()
       };
 
-      mockAdmin.database.mockReturnValue({
+      mockAdmin.getDatabase.mockReturnValue({
         ref: jest.fn().mockReturnValue({
           child: jest.fn().mockReturnValue(mockRef)
         })
@@ -211,7 +211,7 @@ describe('functions', () => {
         update: jest.fn().mockRejectedValue(new Error('DB error'))
       };
 
-      mockAdmin.database.mockReturnValue({
+      mockAdmin.getDatabase.mockReturnValue({
         ref: jest.fn().mockReturnValue({
           child: jest.fn().mockReturnValue(mockRef)
         })

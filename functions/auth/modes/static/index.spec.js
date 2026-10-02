@@ -20,7 +20,7 @@ const mockDatabase = {
 
 const mockLogger = { warn: jest.fn(), info: jest.fn(), error: jest.fn() };
 
-jest.mock('firebase-admin', () => ({ database: () => mockDatabase }));
+jest.mock('firebase-admin/database', () => ({ getDatabase: () => mockDatabase }));
 jest.mock('firebase-functions/v2', () => ({ logger: mockLogger }));
 
 const WINDOW_MS = 15 * 60 * 1000;

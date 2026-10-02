@@ -26,7 +26,7 @@ describe('functions', () => {
       });
 
       mockAdmin = {
-        database: jest.fn().mockReturnValue({
+        getDatabase: jest.fn().mockReturnValue({
           ref: jest.fn().mockReturnValue({ once: mockOnce })
         })
       };
@@ -46,7 +46,7 @@ describe('functions', () => {
         })
       };
 
-      jest.mock('firebase-admin', () => mockAdmin);
+      jest.mock('firebase-admin/database', () => mockAdmin);
       jest.mock('nodemailer', () => mockNodemailer);
       jest.mock('./emailTemplates', () => mockEmailTemplates);
 
@@ -90,7 +90,7 @@ describe('functions', () => {
       });
 
       it('throws when SMTP settings are missing', async () => {
-        mockAdmin.database().ref().once.mockResolvedValue({ val: () => null });
+        mockAdmin.getDatabase().ref().once.mockResolvedValue({ val: () => null });
 
         await expect(sendSignInEmail({
           email: 'user@example.com',
@@ -99,7 +99,7 @@ describe('functions', () => {
       });
 
       it('throws when required SMTP settings are incomplete', async () => {
-        mockAdmin.database().ref().once.mockResolvedValue({
+        mockAdmin.getDatabase().ref().once.mockResolvedValue({
           val: () => ({ host: 'smtp.example.com' })
         });
 
@@ -127,12 +127,12 @@ describe('functions', () => {
       });
 
       it('throws when settings are null', async () => {
-        mockAdmin.database().ref().once.mockResolvedValue({ val: () => null });
+        mockAdmin.getDatabase().ref().once.mockResolvedValue({ val: () => null });
         await expect(loadSmtpSettings()).rejects.toThrow('SMTP settings not found');
       });
 
       it('throws when settings are incomplete', async () => {
-        mockAdmin.database().ref().once.mockResolvedValue({
+        mockAdmin.getDatabase().ref().once.mockResolvedValue({
           val: () => ({ host: 'smtp.example.com' })
         });
         await expect(loadSmtpSettings()).rejects.toThrow('Missing SMTP settings');

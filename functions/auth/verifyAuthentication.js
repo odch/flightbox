@@ -1,7 +1,8 @@
 'use strict';
 
 const { onRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
+const { getDatabase } = require('firebase-admin/database');
 const cors = require('cors')({ origin: true });
 const { verifyAuthenticationResponse } = require('@simplewebauthn/server');
 const {
@@ -13,7 +14,7 @@ async function resolveUidForCredential(credentialId, challengeUid) {
   if (challengeUid) {
     return challengeUid;
   }
-  const snapshot = await admin.database().ref('/webauthnCredentialOwners').child(credentialId).once('value');
+  const snapshot = await getDatabase().ref('/webauthnCredentialOwners').child(credentialId).once('value');
   if (!snapshot.exists()) {
     return null;
   }
@@ -22,7 +23,7 @@ async function resolveUidForCredential(credentialId, challengeUid) {
 }
 
 async function loadCredential(uid, credentialId) {
-  const snapshot = await admin.database().ref('/webauthnCredentials').child(uid).child(credentialId).once('value');
+  const snapshot = await getDatabase().ref('/webauthnCredentials').child(uid).child(credentialId).once('value');
   if (!snapshot.exists()) {
     return null;
   }
@@ -31,7 +32,7 @@ async function loadCredential(uid, credentialId) {
 
 async function resolveUserEmail(uid) {
   try {
-    const record = await admin.auth().getUser(uid);
+    const record = await getAuth().getUser(uid);
     return record.email || null;
   } catch (e) {
     return null;
@@ -104,14 +105,14 @@ exports.verifyWebauthnAuthentication = onRequest({ region: 'europe-west1' }, (re
         }
       }
 
-      await admin.database().ref('/webauthnCredentials').child(uid).child(credentialId).update({
+      await getDatabase().ref('/webauthnCredentials').child(uid).child(credentialId).update({
         counter: newCounter,
         lastUsedAt: Date.now(),
       });
 
       const email = challengeRecord.email || await resolveUserEmail(uid);
 
-      const customToken = await admin.auth().createCustomToken(uid, email ? { email } : {});
+      const customToken = await getAuth().createCustomToken(uid, email ? { email } : {});
       res.status(200).json({ token: customToken });
     } catch (error) {
       console.error('Error verifying passkey authentication:', error);

@@ -14,8 +14,8 @@ jest.mock('cors', () => () => (req, res, cb) => cb());
 
 const mockCreateCustomToken = jest.fn().mockResolvedValue('minted-token');
 
-jest.mock('firebase-admin', () => ({
-  auth: jest.fn(() => ({ createCustomToken: mockCreateCustomToken })),
+jest.mock('firebase-admin/auth', () => ({
+  getAuth: jest.fn(() => ({ createCustomToken: mockCreateCustomToken })),
 }));
 
 const mockKioskMode = jest.fn();

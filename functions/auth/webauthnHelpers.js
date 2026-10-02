@@ -1,6 +1,7 @@
 'use strict';
 
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
+const { getDatabase } = require('firebase-admin/database');
 const crypto = require('crypto');
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
@@ -60,7 +61,7 @@ async function persistChallenge({ type, challenge, uid, email }) {
     email: email || null,
     attempts: 0,
   };
-  await admin.database().ref('/webauthnChallenges').child(key).set(record);
+  await getDatabase().ref('/webauthnChallenges').child(key).set(record);
   return key;
 }
 
@@ -68,7 +69,7 @@ async function consumeChallenge(key, expectedType) {
   if (!key || typeof key !== 'string') {
     throw new Error('Invalid challenge key');
   }
-  const ref = admin.database().ref('/webauthnChallenges').child(key);
+  const ref = getDatabase().ref('/webauthnChallenges').child(key);
   let claimed = null;
   // RTDB transactions call the update function with the locally cached value
   // first (often null). Returning undefined aborts without refetching, so we
@@ -105,7 +106,7 @@ async function verifyAuthenticatedUser(req) {
   const token = match[1].trim();
   let decoded;
   try {
-    decoded = await admin.auth().verifyIdToken(token, true);
+    decoded = await getAuth().verifyIdToken(token, true);
   } catch (e) {
     throw new AuthError('Invalid ID token');
   }
