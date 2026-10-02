@@ -40,6 +40,18 @@ import { shouldReloadOnControllerChange, markReload } from './util/shouldReloadO
 
 Sentry.init({
   dsn: "https://8a606d82aa68850021fbfac2ffda30b5@o4509293310967808.ingest.de.sentry.io/4509293314113617",
+  // Sentry v11 collects user info, cookies and request bodies by default.
+  // Keep the restrictive v10 defaults.
+  dataCollection: {
+    userInfo: false,
+    cookies: false,
+    httpHeaders: {
+      request: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+      response: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+    },
+    httpBodies: [],
+    urlQueryParams: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+  },
 });
 
 const theme = require('../theme/' + __THEME__);
