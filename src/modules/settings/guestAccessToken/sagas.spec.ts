@@ -1,41 +1,17 @@
+import {all, fork} from 'redux-saga/effects';
 import * as actions from './actions';
-import * as sagas from './sagas';
-import firebase from '../../../util/firebase';
-import {onValue} from 'firebase/database';
-import FakeFirebaseSnapshot from '../../../../test/FakeFirebaseSnapshot';
-
-jest.mock('../../../util/firebase');
-jest.mock('firebase/database', () => ({
-  onValue: jest.fn(),
-}));
+import sagas from './sagas';
+import {watchSettingWhileAdmin} from '../watchSettingWhileAdmin';
 
 describe('modules', () => {
   describe('settings', () => {
     describe('guestAccessToken', () => {
       describe('sagas', () => {
-        beforeEach(() => {
-          jest.clearAllMocks();
-          (firebase as jest.Mock).mockReturnValue({});
-        });
-
-        describe('loadGuestAccessToken', () => {
-          it('should register onValue listener', () => {
-            const channel = {put: jest.fn()};
-            sagas.loadGuestAccessToken(channel);
-            expect(onValue).toHaveBeenCalledWith(expect.anything(), expect.any(Function));
-          });
-
-          it('should put guestAccessTokenLoaded when firebase value changes', () => {
-            const channel = {put: jest.fn()};
-            sagas.loadGuestAccessToken(channel);
-
-            const callback = (onValue as jest.Mock).mock.calls[0][1];
-            const token = 'test-token-123';
-            const snapshot = new FakeFirebaseSnapshot('guestAccessToken', token);
-            callback(snapshot);
-
-            expect(channel.put).toHaveBeenCalledWith(actions.guestAccessTokenLoaded(token));
-          });
+        it('should watch the setting while an admin is signed in', () => {
+          const generator = sagas();
+          expect(generator.next().value).toEqual(all([
+            fork(watchSettingWhileAdmin, '/settings/guestAccessToken', actions.guestAccessTokenLoaded),
+          ]));
         });
       });
     });
