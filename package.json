@@ -77,7 +77,7 @@
     "stream-browserify": "^3.0.0",
     "style-loader": "^4.0.0",
     "styled-components": "^6.4.1",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "util": "^0.12.5",
     "webpack": "^5.106.2",
     "webpack-cli": "^7.0.2",
