@@ -54,6 +54,7 @@ describe('functions', () => {
         }
         return {
           AuthError,
+          SUPPORTED_ALGORITHM_IDS: [-8, -7, -257],
           getRpConfig: mockGetRpConfig,
           persistChallenge: mockPersistChallenge,
           verifyAuthenticatedUser: mockVerifyRecentAuth,
@@ -102,6 +103,7 @@ describe('functions', () => {
         rpName: 'Flightbox',
         userName: 'user@example.com',
         attestationType: 'none',
+        supportedAlgorithmIDs: [-8, -7, -257],
         excludeCredentials: [],
         authenticatorSelection: expect.objectContaining({
           residentKey: 'preferred',

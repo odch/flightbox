@@ -6,6 +6,7 @@ const cors = require('cors')({ origin: true });
 const { generateRegistrationOptions } = require('@simplewebauthn/server');
 const {
   AuthError,
+  SUPPORTED_ALGORITHM_IDS,
   getRpConfig,
   persistChallenge,
   verifyAuthenticatedUser,
@@ -54,6 +55,7 @@ exports.generateWebauthnRegistrationOptions = onRequest({ region: 'europe-west1'
         userName: email || uid,
         userDisplayName: email || uid,
         attestationType: 'none',
+        supportedAlgorithmIDs: SUPPORTED_ALGORITHM_IDS,
         excludeCredentials: existing,
         authenticatorSelection: {
           residentKey: 'preferred',

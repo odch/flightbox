@@ -5,6 +5,11 @@ const crypto = require('crypto');
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
 
+// COSE algorithms accepted for new passkeys: EdDSA, ES256, RS256.
+// @simplewebauthn/server v14 would otherwise prefer ML-DSA-44 on runtimes that
+// support it, which on Node 24 relies on an experimental Web Crypto API.
+const SUPPORTED_ALGORITHM_IDS = [-8, -7, -257];
+
 // Secret used to derive decoy passkey credentials (see generateDecoyCredentials).
 // Prefer a configured secret so decoys stay stable across instances; fall back
 // to a per-instance random secret so they remain unpredictable even when unset.
@@ -119,6 +124,7 @@ class AuthError extends Error {
 
 module.exports = {
   CHALLENGE_TTL_MS,
+  SUPPORTED_ALGORITHM_IDS,
   AuthError,
   getRpConfig,
   generateChallengeKey,
