@@ -26,8 +26,8 @@ describe('functions/auth/createTestEmailToken', () => {
       onRequest: (opts, fn) => fn,
     }));
 
-    jest.doMock('firebase-admin', () => ({
-      auth: () => ({
+    jest.doMock('firebase-admin/auth', () => ({
+      getAuth: () => ({
         getUserByEmail: mockGetUserByEmail,
         createUser: mockCreateUser,
         createCustomToken: mockCreateCustomToken,

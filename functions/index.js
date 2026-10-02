@@ -1,11 +1,11 @@
 'use strict';
 
-const admin = require('firebase-admin');
+const { initializeApp } = require('firebase-admin/app');
 
 const dbUrl = process.env.RTDB_URL;
 const dbInstance = process.env.RTDB_INSTANCE;
 
-admin.initializeApp({
+initializeApp({
   databaseURL: dbUrl || (dbInstance ? `https://${dbInstance}.firebaseio.com` : undefined),
 });
 

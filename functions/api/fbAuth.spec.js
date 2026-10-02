@@ -1,15 +1,18 @@
-jest.mock('firebase-admin', () => ({
-  auth: jest.fn().mockReturnValue({
+jest.mock('firebase-admin/auth', () => ({
+  getAuth: jest.fn().mockReturnValue({
     verifyIdToken: jest.fn()
-  }),
-  database: jest.fn().mockReturnValue({
+  })
+}));
+jest.mock('firebase-admin/database', () => ({
+  getDatabase: jest.fn().mockReturnValue({
     ref: jest.fn().mockReturnValue({
       once: jest.fn()
     })
   })
 }));
 
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
+const { getDatabase } = require('firebase-admin/database');
 const { fbAuth, fbAdminAuth, fbAuthExcludingShared } = require('./fbAuth');
 
 describe('functions', () => {
@@ -45,11 +48,11 @@ describe('functions', () => {
 
       it('sets fbUserId and fbUserEmail then calls next on valid token', async () => {
         req.headers.authorization = 'Bearer valid-token';
-        admin.auth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
+        getAuth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
 
         await fbAuth(req, res, next);
 
-        expect(admin.auth().verifyIdToken).toHaveBeenCalledWith('valid-token', true);
+        expect(getAuth().verifyIdToken).toHaveBeenCalledWith('valid-token', true);
         expect(req.fbUserId).toBe('user123');
         expect(req.fbUserEmail).toBe('user@test.com');
         expect(next).toHaveBeenCalled();
@@ -57,7 +60,7 @@ describe('functions', () => {
 
       it('returns 401 when token verification fails', async () => {
         req.headers.authorization = 'Bearer bad-token';
-        admin.auth().verifyIdToken.mockRejectedValue(new Error('Invalid token'));
+        getAuth().verifyIdToken.mockRejectedValue(new Error('Invalid token'));
 
         await fbAuth(req, res, next);
 
@@ -70,11 +73,11 @@ describe('functions', () => {
         req.headers.authorization = 'Bearer revoked-token';
         const revokedError = new Error('Token revoked');
         revokedError.code = 'auth/id-token-revoked';
-        admin.auth().verifyIdToken.mockRejectedValue(revokedError);
+        getAuth().verifyIdToken.mockRejectedValue(revokedError);
 
         await fbAuth(req, res, next);
 
-        expect(admin.auth().verifyIdToken).toHaveBeenCalledWith('revoked-token', true);
+        expect(getAuth().verifyIdToken).toHaveBeenCalledWith('revoked-token', true);
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.send).toHaveBeenCalledWith('Unauthorized');
         expect(next).not.toHaveBeenCalled();
@@ -85,8 +88,8 @@ describe('functions', () => {
       it('returns 403 when user is not admin', async () => {
         req.headers.authorization = 'Bearer valid-token';
         req.fbUserId = 'user123';
-        admin.auth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
-        admin.database().ref().once.mockResolvedValue({ val: () => false });
+        getAuth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
+        getDatabase().ref().once.mockResolvedValue({ val: () => false });
 
         await fbAdminAuth(req, res, next);
 
@@ -96,8 +99,8 @@ describe('functions', () => {
 
       it('calls next when user is admin', async () => {
         req.headers.authorization = 'Bearer valid-token';
-        admin.auth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
-        admin.database().ref().once.mockResolvedValue({ val: () => true });
+        getAuth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
+        getDatabase().ref().once.mockResolvedValue({ val: () => true });
 
         await fbAdminAuth(req, res, next);
 
@@ -106,8 +109,8 @@ describe('functions', () => {
 
       it('returns 500 when database check fails', async () => {
         req.headers.authorization = 'Bearer valid-token';
-        admin.auth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
-        admin.database().ref().once.mockRejectedValue(new Error('DB error'));
+        getAuth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
+        getDatabase().ref().once.mockRejectedValue(new Error('DB error'));
 
         await fbAdminAuth(req, res, next);
 
@@ -118,7 +121,7 @@ describe('functions', () => {
     describe('fbAuthExcludingShared', () => {
       it('calls next for a normal authenticated user', async () => {
         req.headers.authorization = 'Bearer valid-token';
-        admin.auth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
+        getAuth().verifyIdToken.mockResolvedValue({ uid: 'user123', email: 'user@test.com' });
 
         await fbAuthExcludingShared(req, res, next);
 
@@ -128,7 +131,7 @@ describe('functions', () => {
 
       it('returns 403 for a guest shared session', async () => {
         req.headers.authorization = 'Bearer valid-token';
-        admin.auth().verifyIdToken.mockResolvedValue({ uid: 'guest', email: undefined });
+        getAuth().verifyIdToken.mockResolvedValue({ uid: 'guest', email: undefined });
 
         await fbAuthExcludingShared(req, res, next);
 
@@ -138,7 +141,7 @@ describe('functions', () => {
 
       it('returns 403 for a kiosk shared session', async () => {
         req.headers.authorization = 'Bearer valid-token';
-        admin.auth().verifyIdToken.mockResolvedValue({ uid: 'kiosk', email: undefined });
+        getAuth().verifyIdToken.mockResolvedValue({ uid: 'kiosk', email: undefined });
 
         await fbAuthExcludingShared(req, res, next);
 

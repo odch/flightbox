@@ -25,7 +25,7 @@ describe('functions', () => {
       };
 
       mockAdmin = {
-        database: jest.fn().mockReturnValue({ ref: jest.fn().mockReturnValue(mockDbRef) }),
+        getDatabase: jest.fn().mockReturnValue({ ref: jest.fn().mockReturnValue(mockDbRef) }),
       };
 
       mockVerifyRegistrationResponse = jest.fn();
@@ -36,7 +36,7 @@ describe('functions', () => {
         expectedOrigins: ['https://flightbox.ch'],
       });
 
-      jest.mock('firebase-admin', () => mockAdmin);
+      jest.mock('firebase-admin/database', () => mockAdmin);
       jest.mock('firebase-functions/v2/https', () => ({
         onRequest: (opts, handler) => { capturedHandler = handler; },
       }));

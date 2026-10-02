@@ -1,12 +1,12 @@
 'use strict';
 
 const { onSchedule } = require('firebase-functions/v2/scheduler');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 
 exports.cleanupExpiredWebauthnChallenges = onSchedule(
   { region: 'europe-west1', schedule: 'every 60 minutes' },
   async () => {
-    const db = admin.database();
+    const db = getDatabase();
     const ref = db.ref('/webauthnChallenges');
     const now = Date.now();
 

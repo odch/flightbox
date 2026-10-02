@@ -1,5 +1,5 @@
 const { onRequest } = require('firebase-functions/v2/https')
-const admin = require('firebase-admin')
+const { getDatabase } = require('firebase-admin/database')
 const express = require('express')
 const cors = require('cors')({origin: true, credentials: true})
 const fetchAerodromeStatus = require('./fetchAerodromeStatus')
@@ -13,7 +13,7 @@ const api = express()
 api.use(cors)
 
 api.get(['/aerodrome/status', '/api/aerodrome/status'], async (req, res) => {
-  const status = await fetchAerodromeStatus(admin.database())
+  const status = await fetchAerodromeStatus(getDatabase())
 
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
   res.setHeader('Pragma', 'no-cache')
@@ -26,7 +26,7 @@ api.get(['/aerodrome/status', '/api/aerodrome/status'], async (req, res) => {
 
 api.get(['/customs/invoices', '/api/customs/invoices'], fbAdminAuth, async (req, res) => {
   try {
-    const db = admin.database()
+    const db = getDatabase()
     const {year, month} = req.query
     const invoices = await fetchInvoices(db, year, month)
     res.status(200).send(invoices)
@@ -38,7 +38,7 @@ api.get(['/customs/invoices', '/api/customs/invoices'], fbAdminAuth, async (req,
 
 api.get(['/customs/checkouts', '/api/customs/checkouts'], fbAdminAuth, async (req, res) => {
   try {
-    const db = admin.database()
+    const db = getDatabase()
     const {year, month} = req.query
     const invoices = await fetchCheckouts(db, year, month)
     res.status(200).send(invoices)
@@ -60,7 +60,7 @@ api.post(['/customs/prepopulated-forms', '/api/customs/prepopulated-forms'], fbA
       return res.status(400).send({ error: 'movementType (departure|arrival) and movementKey are required' })
     }
 
-    const db = admin.database()
+    const db = getDatabase()
 
     const payload = await buildCustomsPayload(db, movementType, movementKey)
     if (!payload) {
@@ -83,7 +83,7 @@ api.post(['/customs/prepopulated-forms', '/api/customs/prepopulated-forms'], fbA
 
 api.get(['/customs/availability', '/api/customs/availability'], fbAuth, async (req, res) => {
   try {
-    const db = admin.database()
+    const db = getDatabase()
     const isAvailable = await isCustomsDeclarationAppAvailable(db)
     res.status(200).send({ available: isAvailable })
   } catch (e) {
@@ -94,7 +94,7 @@ api.get(['/customs/availability', '/api/customs/availability'], fbAuth, async (r
 
 api.get(['/users/me/invoice-recipients', '/api/users/me/invoice-recipients'], fbAuth, async (req, res) => {
   try {
-    const db = admin.database()
+    const db = getDatabase()
     const invoiceRecipients = await fetchUserInvoiceRecipients(db, req.fbUserEmail)
     res.status(200).send(invoiceRecipients)
   } catch (e) {

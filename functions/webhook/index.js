@@ -1,7 +1,7 @@
 const { onValueCreated } = require('firebase-functions/v2/database');
 const { defineString } = require('firebase-functions/params');
 const { logger } = require('firebase-functions/v2');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 
 const RTDB_INSTANCE = defineString('RTDB_INSTANCE');
 const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' });
@@ -14,7 +14,7 @@ module.exports = onValueCreated(
   },
   async (event) => {
     const snap = event.data;
-    const r = await admin.database().ref('settings/webhookUrl').once('value');
+    const r = await getDatabase().ref('settings/webhookUrl').once('value');
     const webhook_url = r.val();
     if (webhook_url == null || webhook_url === '') {
       logger.log('Webhook disabled', snap.ref);

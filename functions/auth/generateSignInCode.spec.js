@@ -30,7 +30,7 @@ describe('functions', () => {
       const rateLimitRef = { transaction: mockTransaction };
 
       mockAdmin = {
-        database: jest.fn().mockReturnValue({
+        getDatabase: jest.fn().mockReturnValue({
           ref: jest.fn(path => path.startsWith('/signInRateLimits') ? rateLimitRef : codesRef)
         })
       };
@@ -39,7 +39,7 @@ describe('functions', () => {
 
       mockSendSignInEmail = jest.fn().mockResolvedValue('msg123');
 
-      jest.mock('firebase-admin', () => mockAdmin);
+      jest.mock('firebase-admin/database', () => mockAdmin);
       jest.mock('firebase-functions/v2/https', () => ({
         onRequest: (opts, handler) => { capturedHandler = handler; },
       }));

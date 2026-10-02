@@ -31,8 +31,8 @@ const mockUpdate = jest.fn();
 const mockOnce = jest.fn();
 const mockRef = jest.fn();
 
-jest.mock('firebase-admin', () => ({
-  database: jest.fn(() => ({ ref: mockRef }))
+jest.mock('firebase-admin/database', () => ({
+  getDatabase: jest.fn(() => ({ ref: mockRef }))
 }));
 
 jest.mock('./utils', () => ({

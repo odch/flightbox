@@ -1,5 +1,5 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler');
-const admin = require('firebase-admin');
+const { getDatabase, ServerValue } = require('firebase-admin/database');
 
 const AERODROMES_URL = 'https://raw.githubusercontent.com/odch/aerodromes/refs/heads/main/aerodromes.json';
 const SCHEDULE = '0 3 * * 3'; // Every Wednesday at 3 AM
@@ -50,7 +50,7 @@ function processAerodromeUpdates(aerodromes) {
         name: aero.name.toUpperCase(),
         country: aero.country,
         timezone: aero.timezone,
-        lastUpdated: admin.database.ServerValue.TIMESTAMP
+        lastUpdated: ServerValue.TIMESTAMP
       };
     });
 
@@ -90,7 +90,7 @@ exports.scheduledAerodromesUpdate = onSchedule(
   { region: 'europe-west1', schedule: SCHEDULE, timeZone: TIMEZONE },
   async () => {
     try {
-      const db = admin.database();
+      const db = getDatabase();
 
       // Check if the cron job is enabled
       const settings = await db.ref('settings/updateAerodromesCronJobEnabled').once('value');

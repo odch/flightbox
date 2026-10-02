@@ -1,7 +1,7 @@
 'use strict';
 
 const { onRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 const crypto = require('crypto');
 const cors = require('cors')({origin: true});
 const { sendSignInEmail } = require('./sendSignInEmail');
@@ -55,7 +55,7 @@ exports.generateSignInCode = onRequest({ region: 'europe-west1' }, (req, res) =>
 
       const { email, airportName, themeColor, language } = req.body;
       const normalizedEmail = email.toLowerCase();
-      const db = admin.database();
+      const db = getDatabase();
       const now = Date.now();
 
       // Per-email rate limiting: reject if a code was sent very recently

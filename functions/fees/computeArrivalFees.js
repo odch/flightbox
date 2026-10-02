@@ -3,7 +3,7 @@
 const { onValueWritten } = require('firebase-functions/v2/database');
 const { logger } = require('firebase-functions/v2');
 const { defineString } = require('firebase-functions/params');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 const { computeFees, getAircraftOrigin } = require('./index');
 
 const RTDB_INSTANCE = defineString('RTDB_INSTANCE');
@@ -75,7 +75,7 @@ async function recomputeArrivalFees(event) {
     return; // PII stripped by retention job; nothing to price
   }
 
-  const db = admin.database();
+  const db = getDatabase();
 
   const strategy = (await db.ref('/settings/landingFeesStrategy').once('value')).val();
   if (!strategy) {

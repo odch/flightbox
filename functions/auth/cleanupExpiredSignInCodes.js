@@ -1,7 +1,7 @@
 'use strict';
 
 const { onSchedule } = require('firebase-functions/v2/scheduler');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 
 const MAX_ATTEMPTS = 5;
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour — matches generateSignInCode
@@ -9,7 +9,7 @@ const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour — matches generateSignInCode
 exports.cleanupExpiredSignInCodes = onSchedule(
   { region: 'europe-west1', schedule: 'every 60 minutes' },
   async () => {
-    const db = admin.database();
+    const db = getDatabase();
     const now = Date.now();
 
     const codesRef = db.ref('/signInCodes');

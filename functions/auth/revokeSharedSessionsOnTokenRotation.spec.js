@@ -20,8 +20,8 @@ jest.mock('firebase-functions/params', () => ({
 
 const mockRevokeRefreshTokens = jest.fn().mockResolvedValue(undefined);
 
-jest.mock('firebase-admin', () => ({
-  auth: jest.fn(() => ({ revokeRefreshTokens: mockRevokeRefreshTokens })),
+jest.mock('firebase-admin/auth', () => ({
+  getAuth: jest.fn(() => ({ revokeRefreshTokens: mockRevokeRefreshTokens })),
 }));
 
 require('./revokeSharedSessionsOnTokenRotation');

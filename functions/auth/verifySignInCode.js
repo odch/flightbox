@@ -1,7 +1,8 @@
 'use strict';
 
 const { onRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
+const { getDatabase } = require('firebase-admin/database');
 const crypto = require('crypto');
 const cors = require('cors')({origin: true});
 
@@ -38,7 +39,7 @@ exports.verifySignInCode = onRequest({ region: 'europe-west1' }, (req, res) => {
       const codeHash = hashCode(code);
       const now = Date.now();
 
-      const db = admin.database();
+      const db = getDatabase();
       const codesRef = db.ref('/signInCodes');
 
       const snapshot = await codesRef
@@ -92,18 +93,18 @@ exports.verifySignInCode = onRequest({ region: 'europe-west1' }, (req, res) => {
       // Get or create the Firebase Auth user
       let uid;
       try {
-        const userRecord = await admin.auth().getUserByEmail(normalizedEmail);
+        const userRecord = await getAuth().getUserByEmail(normalizedEmail);
         uid = userRecord.uid;
       } catch (e) {
         if (e.code === 'auth/user-not-found') {
-          const newUser = await admin.auth().createUser({ email: normalizedEmail });
+          const newUser = await getAuth().createUser({ email: normalizedEmail });
           uid = newUser.uid;
         } else {
           throw e;
         }
       }
 
-      const customToken = await admin.auth().createCustomToken(uid, { email: normalizedEmail });
+      const customToken = await getAuth().createCustomToken(uid, { email: normalizedEmail });
       res.status(200).json({ token: customToken });
     } catch (error) {
       console.error('Error verifying sign-in code:', error);

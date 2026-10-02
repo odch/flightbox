@@ -1,7 +1,7 @@
 'use strict';
 
 const { onRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
 const cors = require('cors')({origin: true});
 
 const TEST_EMAIL = 'cypress-pilot@example.com';
@@ -19,18 +19,18 @@ exports.createTestEmailToken = onRequest({ region: 'europe-west1' }, (req, res) 
 
       let uid;
       try {
-        const userRecord = await admin.auth().getUserByEmail(TEST_EMAIL);
+        const userRecord = await getAuth().getUserByEmail(TEST_EMAIL);
         uid = userRecord.uid;
       } catch (e) {
         if (e.code === 'auth/user-not-found') {
-          const newUser = await admin.auth().createUser({ email: TEST_EMAIL });
+          const newUser = await getAuth().createUser({ email: TEST_EMAIL });
           uid = newUser.uid;
         } else {
           throw e;
         }
       }
 
-      const customToken = await admin.auth().createCustomToken(uid, { email: TEST_EMAIL });
+      const customToken = await getAuth().createCustomToken(uid, { email: TEST_EMAIL });
       res.status(200).json({ token: customToken });
     } catch (error) {
       console.error('Error creating test email token:', error);

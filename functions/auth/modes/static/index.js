@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 const { logger } = require('firebase-functions/v2');
 const requestHelper = require('../../util/requestHelper');
 
@@ -37,7 +37,7 @@ const ipKey = (ip) => crypto.createHash('sha256').update(ip).digest('hex');
 const authenticate = async (req, username, password) => {
   const ip = requestHelper.getIp(req);
   const limiterRef = ip
-    ? admin.database().ref('/staticAuthRateLimits/' + ipKey(ip))
+    ? getDatabase().ref('/staticAuthRateLimits/' + ipKey(ip))
     : null;
   const now = Date.now();
 

@@ -1,5 +1,5 @@
-jest.mock('firebase-admin', () => ({
-  database: jest.fn()
+jest.mock('firebase-admin/database', () => ({
+  getDatabase: jest.fn()
 }));
 
 const {compareDescending, addWithType, path, getAssociatedMovement} = require('./utils');

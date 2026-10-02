@@ -1,7 +1,7 @@
 const { onValueCreated, onValueWritten } = require('firebase-functions/v2/database');
 const { logger } = require('firebase-functions/v2');
 const { defineString } = require('firebase-functions/params');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 
 const RTDB_INSTANCE = defineString('RTDB_INSTANCE');
 const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' });
@@ -36,7 +36,7 @@ async function enrichMovementWithAerodromeMetadata(movement, movementType, movem
   const icaoCode = movement.location.toUpperCase();
 
   try {
-    const aerodromeSnapshot = await admin.database()
+    const aerodromeSnapshot = await getDatabase()
       .ref('aerodromes')
       .child(icaoCode)
       .once('value');
@@ -49,7 +49,7 @@ async function enrichMovementWithAerodromeMetadata(movement, movementType, movem
 
     if (hasChanges) {
       const movementPath = movementType === 'departure' ? 'departures' : 'arrivals';
-      const movementRef = admin.database().ref(movementPath).child(movementKey);
+      const movementRef = getDatabase().ref(movementPath).child(movementKey);
       const currentSnapshot = await movementRef.once('value');
       if (!currentSnapshot.exists()) {
         logger.info(
