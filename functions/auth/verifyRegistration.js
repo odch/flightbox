@@ -6,6 +6,7 @@ const cors = require('cors')({ origin: true });
 const { verifyRegistrationResponse } = require('@simplewebauthn/server');
 const {
   AuthError,
+  SUPPORTED_ALGORITHM_IDS,
   getRpConfig,
   consumeChallenge,
   verifyAuthenticatedUser,
@@ -76,6 +77,7 @@ exports.verifyWebauthnRegistration = onRequest({ region: 'europe-west1' }, (req,
           expectedOrigin: expectedOrigins,
           expectedRPID: rpID,
           requireUserVerification: false,
+          supportedAlgorithmIDs: SUPPORTED_ALGORITHM_IDS,
         });
       } catch (e) {
         console.warn('Registration verification failed:', e.message);
