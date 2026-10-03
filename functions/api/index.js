@@ -7,6 +7,7 @@ const fetchUserInvoiceRecipients = require('./fetchUserInvoiceRecipients')
 const {fetchInvoices, fetchCheckouts, postPrepopulatedForm, isCustomsDeclarationAppAvailable} = require('./customs/fetchFromCustoms')
 const {buildCustomsPayload} = require('./customs/buildCustomsPayload')
 const {fbAuth, fbAdminAuth, fbAuthExcludingShared} = require('./fbAuth')
+const {loadProjectConfig} = require('../projectConfig')
 
 const api = express()
 
@@ -102,5 +103,13 @@ api.get(['/users/me/invoice-recipients', '/api/users/me/invoice-recipients'], fb
     res.status(500).send({ error: 'Failed to get user invoice recipients' })
   }
 })
+
+// The airstat report is enabled per tenant (reportApiEnabled in
+// projects/<name>.json, see functions/projectConfig.js). For now it is
+// for admins only; API keys for external programs follow.
+const projectConfig = loadProjectConfig()
+if (projectConfig.reportApiEnabled === true) {
+  require('./reports').registerReportRoutes(api, projectConfig, fbAdminAuth)
+}
 
 module.exports = onRequest({ region: 'europe-west1' }, api)

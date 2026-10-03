@@ -125,8 +125,12 @@ functions, which is mentioned at the beginning of this document.
 
 ```
 $ cd functions && npm ci && cd ..
+$ node tasks/generateServerConfig.js {PROJECT} {test|production} functions/project-config.generated.json {FIREBASE PROJECT}
 $ firebase deploy --only functions
 ```
+
+(e.g. `lsze`, `test` and `lsze-test`). Without this file, features that need the tenant config (such as the
+airstat report API) stay disabled.
 
 ## Cloud functions
 
@@ -174,6 +178,23 @@ Returns (example):
 ```
 
 If no status is set, `{}` is returned.
+
+#### Airstat report ####
+
+Returns the airstat (BAZL) report of one month as CSV, the same file as the export in the admin area. Only
+available on projects with `reportApiEnabled` (see `projects/Configuration.md`).
+
+`GET /api/v1/reports/airstat?year=2026&month=9&internal=true&delimiter=semicolon`
+
+* `year`, `month`: required, the Europe/Zurich calendar month.
+* `internal`: `true` adds the additional columns ("Zusätzliche Informationen inkludieren"), default `false`.
+* `delimiter`: `comma` (default) or `semicolon` (`,` and `;` work too).
+
+Requires the Firebase ID token of an admin: `Authorization: Bearer <ID token>`. Without a valid token the
+answer is `401`, for a user who is not an admin `403` (plain text).
+
+The report's own errors are JSON: `400` for invalid parameters, `500` with `error: "invalid_movement_data"` and
+the references of the movements to correct when some movements cannot be reported, otherwise `500`.
 
 #### Import users ####
 
