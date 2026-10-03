@@ -85,6 +85,31 @@ describe('functions', () => {
         expect(res.send).toHaveBeenCalledWith('ARP\nLSZE\n');
       });
 
+      describe('with an API key', () => {
+        const keyReq = (query, scopes) => ({ query, apiKey: { id: 'Ab3dEf6hIj9k', name: 'Programm', scopes } });
+        const REPORT = { csv: 'ARP\n', fileName: 'ARP_LSZE_092026.csv', rowCount: 0, range: {} };
+
+        it('answers 403 for the additional columns without their scope', async () => {
+          await createAirstatHandler(CONFIG)(keyReq({ year: '2026', month: '9', internal: 'true' }, ['reports:airstat']), res);
+
+          expect(generateAirstatReport).not.toHaveBeenCalled();
+          expect(res.status).toHaveBeenCalledWith(403);
+          expect(res.send).toHaveBeenCalledWith({ error: 'insufficient_scope', scope: 'reports:airstat:internal' });
+        });
+
+        it('serves the base report, and the additional columns with their scope', async () => {
+          generateAirstatReport.mockResolvedValue(REPORT);
+
+          await createAirstatHandler(CONFIG)(keyReq({ year: '2026', month: '9' }, ['reports:airstat']), res);
+          await createAirstatHandler(CONFIG)(keyReq({ year: '2026', month: '9', internal: 'true' },
+            ['reports:airstat', 'reports:airstat:internal']), res);
+
+          expect(generateAirstatReport.mock.calls.map(([, , request]) => request.internal)).toEqual([false, true]);
+          expect(res.status).not.toHaveBeenCalledWith(403);
+          expect(logger.info).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ apiKey: 'Ab3dEf6hIj9k' }));
+        });
+      });
+
       it('answers 400 for a bad query without generating anything', async () => {
         await createAirstatHandler(CONFIG)(req({ year: '2026' }), res);
 
