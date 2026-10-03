@@ -4,6 +4,7 @@ import {all, fork} from 'redux-saga/effects';
 
 import aerodromes, {sagas as aerodromesSagas} from './aerodromes';
 import aircrafts, {sagas as aircraftsSagas} from './aircrafts';
+import apiKeys, {sagas as apiKeysSagas} from './apiKeys';
 import auth, {sagas as authSagas} from './auth';
 import customs, {sagas as customsSagas} from './customs';
 import invoiceRecipients, {sagas as invoiceRecipientsSagas} from './invoiceRecipients';
@@ -18,6 +19,7 @@ import frequentAerodromes, {sagas as frequentAerodromesSagas} from './frequentAe
 const createRootReducer = () => combineReducers({
   aerodromes,
   aircrafts,
+  apiKeys,
   auth,
   customs,
   invoiceRecipients,
@@ -39,6 +41,7 @@ export const sagas = function* rootSaga() {
   yield all(forkSagas([
     aerodromesSagas,
     aircraftsSagas,
+    apiKeysSagas,
     authSagas,
     invoiceRecipientsSagas,
     movementSagas,

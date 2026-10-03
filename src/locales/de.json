@@ -85,7 +85,8 @@
     "kioskAccess": "Kiosk-Login",
     "guestAccess": "Gast-Login",
     "import": "Import",
-    "privacy": "Datenschutz"
+    "privacy": "Datenschutz",
+    "apiAccess": "API-Zugriff"
   },
   "movement": {
     "openCustoms": "Zollanmeldung öffnen",
@@ -421,6 +422,68 @@
     "title": "Kiosk-Login",
     "description": "Das Kiosk-Login ist aktiv. Dieser Link kann für öffentlich zugängliche Flightbox-Terminals verwendet werden.",
     "kioskLink": "Kiosk-Link:"
+  },
+  "apiAccess": {
+    "description": "Mit einem API-Schlüssel können externe Programme (z.B. ein Statistikprogramm) Daten direkt aus Flightbox abrufen. Jeder Schlüssel hat einen Namen, bestimmte Berechtigungen und optional ein Ablaufdatum. Erstellen Sie für jedes Programm einen eigenen Schlüssel, damit Sie ihn bei Bedarf einzeln widerrufen können.",
+    "descriptionOnce": "Ein Schlüssel wird nur einmal angezeigt, direkt nach dem Erstellen. Um einen Schlüssel zu erneuern, erstellen Sie einen neuen und widerrufen danach den alten.",
+    "keysTitle": "API-Schlüssel",
+    "loading": "API-Schlüssel werden geladen ...",
+    "loadFailed": "Die API-Schlüssel konnten nicht geladen werden.",
+    "forbidden": "Ihre Anmeldung ist abgelaufen oder Sie haben keine Administratorrechte mehr. Bitte melden Sie sich erneut an.",
+    "retry": "Erneut versuchen",
+    "empty": "Es sind noch keine API-Schlüssel vorhanden.",
+    "name": "Name",
+    "scopes": "Berechtigungen",
+    "created": "Erstellt",
+    "createdBy": "von {{email}}",
+    "expires": "Läuft ab",
+    "lastUsed": "Zuletzt verwendet",
+    "unlimited": "Unbegrenzt",
+    "never": "Nie",
+    "expired": "Abgelaufen",
+    "expiresSoon": "Läuft bald ab",
+    "revoke": "Widerrufen",
+    "revokeConfirm": "Möchten Sie den API-Schlüssel '{{name}}' wirklich widerrufen? Programme, die ihn verwenden, haben danach keinen Zugriff mehr.",
+    "revokeFailed": "Der API-Schlüssel konnte nicht widerrufen werden. Bitte versuchen Sie es erneut.",
+    "scope": {
+      "reportsAirstat": "Airstat-Report (BAZL)",
+      "reportsAirstatInternal": "Airstat-Report mit zusätzlichen Informationen (Namen, E-Mail-Adressen, Bemerkungen, Rechnungsempfänger)"
+    },
+    "create": {
+      "title": "Neuer API-Schlüssel",
+      "name": "Name",
+      "nameHint": "Wofür wird der Schlüssel verwendet? z.B. 'Statistikprogramm'",
+      "nameRequired": "Bitte geben Sie einen Namen ein.",
+      "nameTooLong": "Der Name darf höchstens {{max}} Zeichen lang sein.",
+      "scopes": "Berechtigungen",
+      "scopesRequired": "Bitte wählen Sie mindestens eine Berechtigung aus.",
+      "requiresScope": "Nur zusammen mit '{{scope}}' möglich.",
+      "confirmPersonalData": "Mir ist bewusst, dass dieser Schlüssel Personendaten liefert und sicher aufbewahrt werden muss.",
+      "confirmPersonalDataRequired": "Bitte bestätigen Sie, dass Ihnen dies bewusst ist.",
+      "expiry": "Gültigkeit",
+      "months": "{{count}} Monate",
+      "unlimited": "Unbegrenzt",
+      "submit": "Schlüssel erstellen",
+      "failed": "Der API-Schlüssel konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
+    },
+    "secret": {
+      "title": "Ihr neuer API-Schlüssel",
+      "label": "API-Schlüssel",
+      "warning": "Dieser Schlüssel wird nur jetzt angezeigt und kann später nicht mehr abgerufen werden. Kopieren Sie ihn und bewahren Sie ihn sicher auf, wie ein Passwort.",
+      "close": "Schliessen"
+    },
+    "usage": {
+      "title": "Verwendung",
+      "endpoint": "Endpunkt für den Airstat-Report:",
+      "header": "Der Schlüssel wird im Header 'Authorization' mitgeschickt, nie in der URL.",
+      "parameters": "Parameter:",
+      "year": "Jahr, z.B. 2026",
+      "month": "Monat, 1 bis 12",
+      "internal": "true für den Report mit zusätzlichen Informationen (benötigt die entsprechende Berechtigung), sonst false (Standard)",
+      "delimiter": "Trennzeichen: comma (Standard) oder semicolon",
+      "example": "Beispiel:",
+      "keyPlaceholder": "IHR_API_SCHLUESSEL"
+    }
   },
   "csvImport": {
     "selectFile": "CSV-Datei auswählen",
