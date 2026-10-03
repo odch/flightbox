@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const projects = require('../projects');
 const objectToArray = require('../src/util/objectToArray').default;
-const { buildServerConfig, buildServerConfigFor } = require('./generateServerConfig');
+const os = require('os');
+const { buildServerConfig, buildServerConfigFor, main } = require('./generateServerConfig');
 
 const PROJECTS_DIR = path.resolve(__dirname, '../projects');
 
@@ -237,6 +238,48 @@ describe('tasks/generateServerConfig', () => {
     it('rejects a missing firebaseProjectId', () => {
       expectError(makeConf({}, { test: {} }), 'test', 'firebaseProjectId');
       expectError(makeConf({}, { test: { firebaseProjectId: '' } }), 'test', 'firebaseProjectId');
+    });
+  });
+
+  describe('main', () => {
+    let dir;
+    let consoleError;
+
+    beforeEach(() => {
+      dir = fs.mkdtempSync(path.join(os.tmpdir(), 'server-config-'));
+      consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleError.mockRestore();
+      fs.rmSync(dir, { recursive: true, force: true });
+    });
+
+    it('writes the config of a project and environment as JSON', () => {
+      const out = path.join(dir, 'config.json');
+      expect(main(['lsze', 'production', out])).toBe(0);
+      expect(JSON.parse(fs.readFileSync(out, 'utf8'))).toEqual(buildServerConfigFor('lsze', 'production'));
+    });
+
+    it('fails without writing for an invalid config', () => {
+      const out = path.join(dir, 'config.json');
+      expect(main(['lsze', 'staging', out])).toBe(1);
+      expect(fs.existsSync(out)).toBe(false);
+      expect(consoleError).toHaveBeenCalledWith(expect.stringContaining('env must be one of'));
+    });
+
+    it('checks the Firebase project when one is expected', () => {
+      const out = path.join(dir, 'config.json');
+      expect(main(['lsze', 'test', out, 'lsze-test'])).toBe(0);
+      fs.rmSync(out);
+      expect(main(['lsze', 'test', out, 'lsze-prod'])).toBe(1);
+      expect(fs.existsSync(out)).toBe(false);
+      expect(consoleError).toHaveBeenCalledWith(expect.stringContaining('"lsze-test", not "lsze-prod"'));
+    });
+
+    it('prints the usage for missing arguments', () => {
+      expect(main(['lsze', 'test'])).toBe(1);
+      expect(consoleError).toHaveBeenCalledWith(expect.stringContaining('Usage'));
     });
   });
 });

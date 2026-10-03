@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const projects = require('../projects');
 
 // Builds the tenant config the Cloud Functions need (airstat report) from a
@@ -113,7 +114,39 @@ function buildServerConfigFor(project, env) {
   return buildServerConfig(project, projects.load(project), env);
 }
 
+const USAGE = 'Usage: node tasks/generateServerConfig.js <project> <test|production> <output file>'
+  + ' [<expected Firebase project>]';
+
+// Writes the config of a project/env as JSON for the functions deploy (see
+// .github/workflows and functions/projectConfig.js). Returns the exit code;
+// an invalid config, or one for another Firebase project than the deploy
+// target, fails the deploy instead of shipping a config the functions ignore.
+function main(args) {
+  if (args.length < 3 || args.length > 4) {
+    console.error(USAGE);
+    return 1;
+  }
+  const [project, env, outFile, expectedProjectId] = args;
+  try {
+    const config = buildServerConfigFor(project, env);
+    if (expectedProjectId !== undefined && config.firebaseProjectId !== expectedProjectId) {
+      throw new Error(`Config of project "${project}" (env "${env}") is for Firebase project `
+        + `"${config.firebaseProjectId}", not "${expectedProjectId}"`);
+    }
+    fs.writeFileSync(outFile, JSON.stringify(config, null, 2) + '\n');
+  } catch (e) {
+    console.error(e.message);
+    return 1;
+  }
+  return 0;
+}
+
+if (require.main === module) {
+  process.exitCode = main(process.argv.slice(2));
+}
+
 module.exports = {
   buildServerConfig,
-  buildServerConfigFor
+  buildServerConfigFor,
+  main
 };
