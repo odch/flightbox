@@ -8,7 +8,7 @@ const {fetchInvoices, fetchCheckouts, postPrepopulatedForm, isCustomsDeclaration
 const {buildCustomsPayload} = require('./customs/buildCustomsPayload')
 const {fbAuth, fbAdminAuth, fbAuthExcludingShared} = require('./fbAuth')
 const {loadProjectConfig} = require('../projectConfig')
-const {availableScopes} = require('../apiKeys/scopes')
+const {SCOPES, availableScopes} = require('../apiKeys/scopes')
 
 const api = express()
 
@@ -107,14 +107,15 @@ api.get(['/users/me/invoice-recipients', '/api/users/me/invoice-recipients'], fb
 
 // API features are enabled per tenant (e.g. reportApiEnabled in
 // projects/<name>.json, see functions/projectConfig.js). External programs
-// will call them with API keys that admins manage.
+// call them with API keys that admins manage; admins can call them too.
 const projectConfig = loadProjectConfig()
 const apiKeyScopes = availableScopes(projectConfig)
 if (apiKeyScopes.length > 0) {
   require('./apiKeys').registerApiKeyRoutes(api, {availableScopes: apiKeyScopes, auth: fbAdminAuth})
 }
 if (projectConfig.reportApiEnabled === true) {
-  require('./reports').registerReportRoutes(api, projectConfig, fbAdminAuth)
+  const {apiKeyOrAdminAuth} = require('./apiKeyAuth')
+  require('./reports').registerReportRoutes(api, projectConfig, apiKeyOrAdminAuth(SCOPES.REPORTS_AIRSTAT))
 }
 
 module.exports = onRequest({ region: 'europe-west1' }, api)

@@ -2,6 +2,7 @@
 
 const { getDatabase } = require('firebase-admin/database');
 const logger = require('firebase-functions/logger');
+const { SCOPES } = require('../apiKeys/scopes');
 const {
   generateAirstatReport,
   AirstatRequestError,
@@ -47,7 +48,9 @@ function parseAirstatQuery(query) {
 }
 
 // GET <path>?year=2026&month=9[&internal=true][&delimiter=semicolon]
-// Responds with the airstat CSV of that month, or a JSON error.
+// Responds with the airstat CSV of that month, or a JSON error. The
+// additional columns need their own scope when called with an API key
+// (req.apiKey, see apiKeyAuth.js); admins may always have them.
 function createAirstatHandler(config) {
   return async (req, res) => {
     let request;
@@ -56,12 +59,16 @@ function createAirstatHandler(config) {
     } catch (e) {
       return res.status(400).send({ error: e.code, field: e.field, message: e.message });
     }
+    if (request.internal && req.apiKey && !req.apiKey.scopes.includes(SCOPES.REPORTS_AIRSTAT_INTERNAL)) {
+      return res.status(403).send({ error: 'insufficient_scope', scope: SCOPES.REPORTS_AIRSTAT_INTERNAL });
+    }
+    const caller = req.apiKey ? { apiKey: req.apiKey.id } : { uid: req.fbUserId };
 
     const started = Date.now();
     try {
       const report = await generateAirstatReport(getDatabase(), config, request);
       logger.info('Airstat report generated', {
-        uid: req.fbUserId, ...request, rows: report.rowCount, ms: Date.now() - started,
+        ...caller, ...request, rows: report.rowCount, ms: Date.now() - started,
       });
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename="${report.fileName}"`);
@@ -72,7 +79,7 @@ function createAirstatHandler(config) {
         return res.status(400).send({ error: e.code, field: e.field, message: e.message });
       }
       if (e instanceof AirstatDataError) {
-        logger.warn('Airstat report: invalid movement data', { uid: req.fbUserId, ...request, problems: e.problems });
+        logger.warn('Airstat report: invalid movement data', { ...caller, ...request, problems: e.problems });
         return res.status(500).send({
           error: e.code,
           message: 'Some movements of this month cannot be reported. Correct them and try again.',

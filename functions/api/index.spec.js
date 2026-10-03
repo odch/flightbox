@@ -34,13 +34,18 @@ describe('functions', () => {
       expect(paths.filter(path => path.includes('reports') || path.includes('api-keys'))).toEqual([]);
     });
 
-    it('serves the airstat report to admins when the tenant enables it', () => {
+    it('serves the airstat report to API keys and admins when the tenant enables it', async () => {
       const { api, fbAdminAuth } = loadApi({ reportApiEnabled: true, aerodrome: { ICAO: 'LSZE', runways: [] } });
       const layer = findRoute(api, '/api/v1/reports/airstat');
 
       expect(layer.route.path).toEqual(['/v1/reports/airstat', '/api/v1/reports/airstat']);
       expect(layer.route.methods).toEqual({ get: true });
-      expect(layer.route.stack[0].handle).toBe(fbAdminAuth);
+
+      // A Firebase ID token goes to the admin check.
+      const req = { headers: { authorization: 'Bearer eyJ.id.token' }, query: {} };
+      const next = jest.fn();
+      await layer.route.stack[0].handle(req, {}, next);
+      expect(fbAdminAuth).toHaveBeenCalledWith(req, {}, next);
     });
 
     it('lets admins manage API keys when the tenant has an API feature', () => {
