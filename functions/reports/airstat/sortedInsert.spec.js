@@ -65,6 +65,15 @@ describe('functions', () => {
         expect(items.array[1]).toBe(first);
       });
 
+      it('has() tells whether insert() would skip a key', () => {
+        const items = createItemsArray(byValue);
+        expect(items.has('a')).toBe(false);
+        items.insert({ key: 'a', v: 1 });
+        expect(items.has('a')).toBe(true);
+        expect(items.has('constructor')).toBe(true);
+        expect(items.insert({ key: 'constructor', v: 0 })).toBe(false);
+      });
+
       it('treats a number key and its string as the same key', () => {
         const items = createItemsArray(byValue);
         expect(items.insert({ key: 1, v: 1 })).toBe(true);

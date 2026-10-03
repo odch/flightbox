@@ -48,7 +48,10 @@ function createItemsArray(comparator) {
     return false;
   };
 
-  return { array, insert };
+  // Whether insert() would skip the item, without comparing anything.
+  const has = key => keys[key] !== undefined;
+
+  return { array, insert, has };
 }
 
 module.exports = { binarySearch, createItemsArray };

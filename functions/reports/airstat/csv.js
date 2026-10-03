@@ -78,4 +78,4 @@ function toCsv(rows, delimiter = ',') {
   return csv.toWellFormed();
 }
 
-module.exports = { toCsv };
+module.exports = { DELIMITERS, toCsv };
