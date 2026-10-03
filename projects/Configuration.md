@@ -212,7 +212,9 @@ Example: `["private", "commercial"]`
 
 ### `reportApiEnabled`
 
-Enables the airstat report API (`GET /api/v1/reports/airstat`) in the Cloud Functions. Disabled by default.
+Enables the airstat report API (`GET /api/v1/reports/airstat`) in the Cloud Functions, the API key
+endpoints and the "API-Zugriff" tab in the admin area, where admins create the keys for external programs.
+Disabled by default.
 
 The functions get this flag and the aerodrome data they need from `functions/project-config.generated.json`, which
 the deploy writes with `node tasks/generateServerConfig.js <project> <test|production> <file> [<Firebase project>]`

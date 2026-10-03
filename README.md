@@ -190,11 +190,52 @@ available on projects with `reportApiEnabled` (see `projects/Configuration.md`).
 * `internal`: `true` adds the additional columns ("Zusätzliche Informationen inkludieren"), default `false`.
 * `delimiter`: `comma` (default) or `semicolon` (`,` and `;` work too).
 
-Requires the Firebase ID token of an admin: `Authorization: Bearer <ID token>`. Without a valid token the
-answer is `401`, for a user who is not an admin `403` (plain text).
+Requires an API key with the scope `reports:airstat` (`reports:airstat:internal` too for `internal=true`) or
+the Firebase ID token of an admin, both as `Authorization: Bearer <API key or ID token>`. For an ID token
+that is not valid the answer is `401`, for a user who is not an admin `403` (plain text). For the API key
+errors see [API keys](#api-keys).
 
 The report's own errors are JSON: `400` for invalid parameters, `500` with `error: "invalid_movement_data"` and
 the references of the movements to correct when some movements cannot be reported, otherwise `500`.
+
+Example:
+
+```
+$ curl -H "Authorization: Bearer fbx_..." \
+    "https://europe-west1-<PROJECT_ID>.cloudfunctions.net/api/v1/reports/airstat?year=2026&month=9"
+```
+
+#### API keys ####
+
+External programs authenticate with an API key that an admin creates in the admin area ("API-Zugriff").
+The tab and these endpoints exist on projects with `reportApiEnabled` only.
+
+A key looks like `fbx_<id>_<secret>` and is shown once, when it is created. Only a hash of the secret is
+stored. Each key has a name, one or more scopes and an expiry (3, 6, 12 or 24 months, or none), and can be
+revoked at any time.
+
+Scopes:
+
+* `reports:airstat`: the airstat report.
+* `reports:airstat:internal`: the report with `internal=true`, which contains personal data. Needs
+  `reports:airstat`.
+
+A key allows 100 requests per UTC day. Errors (JSON, `error` field):
+
+* `400 credentials_in_url`: the key (or a parameter such as `key` or `token`) was sent in the URL. The
+  request is rejected, the key stays valid; send it in the `Authorization` header.
+* `401 invalid_api_key`: unknown or revoked key; `401 key_expired`: the key has expired.
+* `403 insufficient_scope`: the key lacks the scope named in `scope`.
+* `429 rate_limited`: the daily limit is used up; `Retry-After` gives the seconds until it resets.
+
+Admin endpoints, with the Firebase ID token of an admin (`Authorization: Bearer <ID token>`):
+
+* `GET /api/v1/api-keys`: `{availableScopes, keys}`, the keys without their secrets, newest first.
+* `POST /api/v1/api-keys` with `{"name", "scopes", "expiresInMonths": 3|6|12|24|null,
+  "confirmPersonalData"}` (`confirmPersonalData: true` is required for `reports:airstat:internal`):
+  `201` with `{key, apiKey}`; `key` is the only copy of the full key. `400 invalid_request` with `field`
+  for an invalid body.
+* `DELETE /api/v1/api-keys/<id>`: revokes the key, `204`.
 
 #### Import users ####
 
