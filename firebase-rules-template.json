@@ -474,6 +474,10 @@
       ".read": false,
       ".write": false
     },
+    "apiKeys": {
+      ".read": false,
+      ".write": false
+    },
     "webauthnCredentials": {
       ".write": false,
       "$uid": {
