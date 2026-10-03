@@ -114,6 +114,8 @@ const creationStamp = (now) => {
 };
 
 module.exports = {
+  MIN_YEAR,
+  MAX_YEAR,
   STORED_DATE_TIME,
   monthRange,
   isoUtcToLocal,
