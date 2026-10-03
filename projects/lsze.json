@@ -45,6 +45,7 @@
   },
   "environments": {
     "test": {
+      "reportApiEnabled": true,
       "firebaseProjectId": "lsze-test",
       "firebaseDatabaseUrl": "https://lsze-test-default-rtdb.europe-west1.firebasedatabase.app",
       "firebaseApiKey": "AIzaSyCKIaIc2zz5Stb9gbBriFaGOsdKz8M-bvo"
