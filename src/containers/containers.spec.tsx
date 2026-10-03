@@ -75,6 +75,11 @@ jest.mock('../components/InvoiceRecipientsList', () => ({
   default: () => <div data-testid="invoice-recipients-list" />,
 }));
 
+jest.mock('../components/ApiAccess', () => ({
+  __esModule: true,
+  default: () => <div data-testid="api-access" />,
+}));
+
 jest.mock('../components/AircraftDropdown', () => ({
   __esModule: true,
   default: () => <div data-testid="aircraft-dropdown" />,
@@ -128,6 +133,7 @@ describe('container mount dispatches', () => {
   let InvoicesReportFormContainer: any;
   let AerodromeStatusBannerContainer: any;
   let AerodromeStatusBannerToggleContainer: any;
+  let ApiAccessContainer: any;
 
   beforeAll(() => {
     InvoiceRecipientsListContainer =
@@ -152,6 +158,7 @@ describe('container mount dispatches', () => {
     AerodromeStatusBannerToggleContainer = require(
       './AerodromeStatusBannerToggleContainer'
     ).default;
+    ApiAccessContainer = require('./ApiAccessContainer').default;
   });
 
   const countOf = (store: MockStore, type: string) =>
@@ -306,6 +313,23 @@ describe('container mount dispatches', () => {
       (container.querySelector('input[type="checkbox"]') as HTMLInputElement)
         .checked
     ).toBe(true);
+  });
+
+  it('ApiAccessContainer dispatches LOAD_API_KEYS exactly once on mount', () => {
+    const store = makeStore({
+      apiKeys: {
+        keys: undefined,
+        availableScopes: [],
+        loadError: null,
+        creating: false,
+        createError: null,
+        revoking: [],
+        revokeError: null,
+      },
+    });
+    const { rerender } = render(wrap(store, <ApiAccessContainer />));
+    rerender(wrap(store, <ApiAccessContainer />));
+    expect(countOf(store, 'LOAD_API_KEYS')).toBe(1);
   });
 
   it('does not re-dispatch init actions when the container re-renders with same props', () => {

@@ -85,7 +85,8 @@
     "kioskAccess": "Kiosk login",
     "guestAccess": "Guest login",
     "import": "Import",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "apiAccess": "API access"
   },
   "movement": {
     "openCustoms": "Open customs declaration",
@@ -421,6 +422,68 @@
     "title": "Kiosk login",
     "description": "Kiosk login is active. This link can be used for publicly accessible Flightbox terminals.",
     "kioskLink": "Kiosk link:"
+  },
+  "apiAccess": {
+    "description": "With an API key, external programs (e.g. a statistics program) can retrieve data directly from Flightbox. Each key has a name, specific permissions and an optional expiry date. Create a separate key for each program so you can revoke it individually if needed.",
+    "descriptionOnce": "A key is shown only once, right after it has been created. To renew a key, create a new one and then revoke the old one.",
+    "keysTitle": "API keys",
+    "loading": "Loading API keys ...",
+    "loadFailed": "The API keys could not be loaded.",
+    "forbidden": "Your login has expired or you no longer have admin rights. Please log in again.",
+    "retry": "Try again",
+    "empty": "There are no API keys yet.",
+    "name": "Name",
+    "scopes": "Permissions",
+    "created": "Created",
+    "createdBy": "by {{email}}",
+    "expires": "Expires",
+    "lastUsed": "Last used",
+    "unlimited": "Unlimited",
+    "never": "Never",
+    "expired": "Expired",
+    "expiresSoon": "Expires soon",
+    "revoke": "Revoke",
+    "revokeConfirm": "Do you really want to revoke the API key '{{name}}'? Programs using it will no longer have access.",
+    "revokeFailed": "The API key could not be revoked. Please try again.",
+    "scope": {
+      "reportsAirstat": "Airstat report (FOCA)",
+      "reportsAirstatInternal": "Airstat report with additional information (names, email addresses, remarks, invoice recipients)"
+    },
+    "create": {
+      "title": "New API key",
+      "name": "Name",
+      "nameHint": "What is the key used for? e.g. 'Statistics program'",
+      "nameRequired": "Please enter a name.",
+      "nameTooLong": "The name must not be longer than {{max}} characters.",
+      "scopes": "Permissions",
+      "scopesRequired": "Please select at least one permission.",
+      "requiresScope": "Only possible together with '{{scope}}'.",
+      "confirmPersonalData": "I am aware that this key provides personal data and must be stored securely.",
+      "confirmPersonalDataRequired": "Please confirm that you are aware of this.",
+      "expiry": "Validity",
+      "months": "{{count}} months",
+      "unlimited": "Unlimited",
+      "submit": "Create key",
+      "failed": "The API key could not be created. Please try again."
+    },
+    "secret": {
+      "title": "Your new API key",
+      "label": "API key",
+      "warning": "This key is shown only now and cannot be retrieved later. Copy it and store it securely, like a password.",
+      "close": "Close"
+    },
+    "usage": {
+      "title": "Usage",
+      "endpoint": "Endpoint for the airstat report:",
+      "header": "The key is sent in the 'Authorization' header, never in the URL.",
+      "parameters": "Parameters:",
+      "year": "Year, e.g. 2026",
+      "month": "Month, 1 to 12",
+      "internal": "true for the report with additional information (requires the corresponding permission), otherwise false (default)",
+      "delimiter": "Delimiter: comma (default) or semicolon",
+      "example": "Example:",
+      "keyPlaceholder": "YOUR_API_KEY"
+    }
   },
   "csvImport": {
     "selectFile": "Select CSV file",
