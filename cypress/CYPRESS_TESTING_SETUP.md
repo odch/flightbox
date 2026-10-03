@@ -33,7 +33,8 @@ Deploy it with:
 cd functions && npm run deploy:cypress
 ```
 
-This writes `test-config.generated.js` and runs
+This writes `project-config.generated.json` (see `projects/Configuration.md`)
+and `test-config.generated.js`, and runs
 `firebase deploy --only functions --project cypress-testing`. Make sure
 `functions/.env.cypress-testing` contains `TESTING_ENABLED=true` first, or the
 deployed function will return 403.
