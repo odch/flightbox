@@ -474,15 +474,29 @@
     },
     "usage": {
       "title": "Usage",
-      "endpoint": "Endpoint for the airstat report:",
-      "header": "The key is sent in the 'Authorization' header, never in the URL.",
+      "intro": "The API is available at this address. The key is sent in the header 'Authorization: Bearer <key>', never in the URL. Each key allows 100 requests per day (UTC); every request with a valid key counts, even a rejected one.",
+      "airstat": {
+        "description": "GET: returns the report of one month as a CSV file, like the export in the admin area. Requires a key with the permission '{{scope}}'."
+      },
       "parameters": "Parameters:",
       "year": "Year, e.g. 2026",
       "month": "Month, 1 to 12",
-      "internal": "true for the report with additional information (requires the corresponding permission), otherwise false (default)",
+      "internal": "true for the report with additional information (also requires the permission '{{scope}}'), otherwise false (default)",
       "delimiter": "Delimiter: comma (default) or semicolon",
       "example": "Example:",
-      "keyPlaceholder": "YOUR_API_KEY"
+      "keyPlaceholder": "YOUR_API_KEY",
+      "status": {
+        "title": "Aerodrome status",
+        "description": "GET: returns the current status of the aerodrome as JSON (status, message, last_update_date, last_update_by and last_update_user with the name and email address of the person who set the status), or {} if no status is set. Public, no key needed."
+      },
+      "errors": {
+        "title": "Errors",
+        "badRequest": "Invalid, unknown or repeated parameters (invalid_request, the parameter is named in field), or the key was sent in the URL (credentials_in_url; the key stays valid).",
+        "unauthorized": "Key unknown, revoked (invalid_api_key) or expired (key_expired). If the header 'Authorization: Bearer <key>' is missing or malformed, the answer is just the text 'Unauthorized'.",
+        "forbidden": "The key lacks the required permission (insufficient_scope).",
+        "rateLimited": "Daily limit reached (rate_limited). The header 'Retry-After' gives the seconds until the next day (UTC).",
+        "serverError": "Some movements of the month cannot be reported (invalid_movement_data, the movements are listed in problems): an administrator must correct them, retrying does not help. Otherwise a server error."
+      }
     }
   },
   "csvImport": {

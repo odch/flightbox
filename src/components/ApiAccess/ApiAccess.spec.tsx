@@ -65,14 +65,11 @@ describe('ApiAccess', () => {
     expect(createApiKey.mock.calls[0][1](PLAINTEXT)).toBe(false);
   });
 
-  it('shows the endpoint on the app domain and a curl example with a placeholder key', () => {
+  it('shows how to use the API', () => {
     renderApiAccess();
-    const url = `${window.location.origin}/api/v1/reports/airstat`;
-    expect(url).toBe('http://localhost/api/v1/reports/airstat');
-    expect(screen.getByTestId('api-endpoint')).toHaveTextContent(url);
-    const curl = screen.getByTestId('api-curl-example').textContent;
-    expect(curl).toContain('-H "Authorization: Bearer IHR_API_SCHLUESSEL"');
-    expect(curl).toContain(`"${url}?year=2026&month=9&internal=false&delimiter=semicolon"`);
+    expect(screen.getByText('Verwendung')).toBeInTheDocument();
+    expect(screen.getByTestId('api-endpoint')).toHaveTextContent(`${window.location.origin}/api/v1/reports/airstat`);
+    expect(screen.getByTestId('api-status-endpoint')).toHaveTextContent(`${window.location.origin}/api/v1/aerodrome/status`);
   });
 
   it('shows the new key once in a dialog and drops it on close', () => {

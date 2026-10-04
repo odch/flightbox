@@ -474,15 +474,29 @@
     },
     "usage": {
       "title": "Verwendung",
-      "endpoint": "Endpunkt für den Airstat-Report:",
-      "header": "Der Schlüssel wird im Header 'Authorization' mitgeschickt, nie in der URL.",
+      "intro": "Die API ist unter dieser Adresse erreichbar. Der Schlüssel wird im Header 'Authorization: Bearer <Schlüssel>' mitgeschickt, nie in der URL. Jeder Schlüssel erlaubt 100 Anfragen pro Tag (UTC); dabei zählt jede Anfrage mit gültigem Schlüssel, auch eine abgelehnte.",
+      "airstat": {
+        "description": "GET: liefert den Report eines Monats als CSV-Datei, wie der Export im Admin-Bereich. Benötigt einen Schlüssel mit der Berechtigung '{{scope}}'."
+      },
       "parameters": "Parameter:",
       "year": "Jahr, z.B. 2026",
       "month": "Monat, 1 bis 12",
-      "internal": "true für den Report mit zusätzlichen Informationen (benötigt die entsprechende Berechtigung), sonst false (Standard)",
+      "internal": "true für den Report mit zusätzlichen Informationen (benötigt zusätzlich die Berechtigung '{{scope}}'), sonst false (Standard)",
       "delimiter": "Trennzeichen: comma (Standard) oder semicolon",
       "example": "Beispiel:",
-      "keyPlaceholder": "IHR_API_SCHLUESSEL"
+      "keyPlaceholder": "IHR_API_SCHLUESSEL",
+      "status": {
+        "title": "Flugplatzstatus",
+        "description": "GET: liefert den aktuellen Status des Flugplatzes als JSON (status, message, last_update_date, last_update_by und last_update_user mit Name und E-Mail-Adresse der Person, die den Status gesetzt hat), oder {}, wenn kein Status gesetzt ist. Öffentlich, ohne Schlüssel."
+      },
+      "errors": {
+        "title": "Fehler",
+        "badRequest": "Ungültige, unbekannte oder doppelte Parameter (invalid_request, der Parameter steht in field), oder der Schlüssel wurde in der URL mitgeschickt (credentials_in_url; der Schlüssel bleibt gültig).",
+        "unauthorized": "Schlüssel unbekannt, widerrufen (invalid_api_key) oder abgelaufen (key_expired). Fehlt der Header 'Authorization: Bearer <Schlüssel>' oder ist er falsch aufgebaut, kommt nur der Text 'Unauthorized'.",
+        "forbidden": "Dem Schlüssel fehlt die nötige Berechtigung (insufficient_scope).",
+        "rateLimited": "Tageslimit erreicht (rate_limited). Der Header 'Retry-After' nennt die Sekunden bis zum nächsten Tag (UTC).",
+        "serverError": "Einige Bewegungen des Monats können nicht gemeldet werden (invalid_movement_data, die Bewegungen stehen in problems): Ein Administrator muss sie korrigieren, eine Wiederholung hilft nicht. Sonst ein Serverfehler."
+      }
     }
   },
   "csvImport": {
