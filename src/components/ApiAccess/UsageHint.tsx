@@ -2,14 +2,20 @@ import React from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import ClipboardCopier from '../ClipboardCopier';
+import {scopeLabel} from './scopes';
 
 // On the app's own domain (e.g. lsze.flightbox.aero), like the guest and
 // kiosk links: Firebase Hosting forwards /api/** to the functions, and
 // external programs should not depend on the function URL.
-const airstatEndpointUrl = () => `${window.location.origin}/api/v1/reports/airstat`;
+const apiBaseUrl = () => `${window.location.origin}/api/v1`;
 
 const Paragraph = styled.p`
   margin: 0 0 0.75em 0;
+`;
+
+const Heading = styled.h3`
+  margin: 1.5em 0 0.5em 0;
+  font-size: 1.1em;
 `;
 
 const CodeRow = styled.div`
@@ -34,7 +40,7 @@ const Code = styled.pre`
   word-break: break-all;
 `;
 
-const ParamList = styled.dl`
+const DefinitionList = styled.dl`
   margin: 0 0 1.25em 0;
   display: grid;
   grid-template-columns: max-content 1fr;
@@ -49,38 +55,67 @@ const ParamList = styled.dl`
   }
 `;
 
+const CopyableCode = ({text, testId}: { text: string, testId: string }) => (
+  <CodeRow>
+    <Code data-testid={testId}>{text}</Code>
+    <ClipboardCopier text={text}/>
+  </CodeRow>
+);
+
 const UsageHint = () => {
   const {t} = useTranslation();
-  const endpoint = airstatEndpointUrl();
-  const curl = [
+  const baseUrl = apiBaseUrl();
+
+  const reportUrl = `${baseUrl}/reports/airstat`;
+  const reportCurl = [
     `curl -H "Authorization: Bearer ${t('apiAccess.usage.keyPlaceholder')}" \\`,
-    `  "${endpoint}?year=2026&month=9&internal=false&delimiter=semicolon"`,
+    `  "${reportUrl}?year=2026&month=9&internal=false&delimiter=semicolon"`,
   ].join('\n');
+
+  const statusUrl = `${baseUrl}/aerodrome/status`;
+  const statusCurl = `curl "${statusUrl}"`;
 
   return (
     <div>
-      <Paragraph>{t('apiAccess.usage.endpoint')}</Paragraph>
-      <CodeRow>
-        <Code data-testid="api-endpoint">{endpoint}</Code>
-        <ClipboardCopier text={endpoint}/>
-      </CodeRow>
-      <Paragraph>{t('apiAccess.usage.header')}</Paragraph>
+      <Paragraph>{t('apiAccess.usage.intro')}</Paragraph>
+      <CopyableCode text={baseUrl} testId="api-base-url"/>
+
+      <Heading>{scopeLabel(t, 'reports:airstat')}</Heading>
+      <Paragraph>{t('apiAccess.usage.airstat.description', {scope: scopeLabel(t, 'reports:airstat')})}</Paragraph>
+      <CopyableCode text={reportUrl} testId="api-endpoint"/>
       <Paragraph>{t('apiAccess.usage.parameters')}</Paragraph>
-      <ParamList>
+      <DefinitionList>
         <dt>year</dt>
         <dd>{t('apiAccess.usage.year')}</dd>
         <dt>month</dt>
         <dd>{t('apiAccess.usage.month')}</dd>
         <dt>internal</dt>
-        <dd>{t('apiAccess.usage.internal')}</dd>
+        <dd>{t('apiAccess.usage.internal', {scope: scopeLabel(t, 'reports:airstat:internal')})}</dd>
         <dt>delimiter</dt>
         <dd>{t('apiAccess.usage.delimiter')}</dd>
-      </ParamList>
+      </DefinitionList>
       <Paragraph>{t('apiAccess.usage.example')}</Paragraph>
-      <CodeRow>
-        <Code data-testid="api-curl-example">{curl}</Code>
-        <ClipboardCopier text={curl}/>
-      </CodeRow>
+      <CopyableCode text={reportCurl} testId="api-curl-example"/>
+
+      <Heading>{t('apiAccess.usage.status.title')}</Heading>
+      <Paragraph>{t('apiAccess.usage.status.description')}</Paragraph>
+      <CopyableCode text={statusUrl} testId="api-status-endpoint"/>
+      <Paragraph>{t('apiAccess.usage.example')}</Paragraph>
+      <CopyableCode text={statusCurl} testId="api-status-curl-example"/>
+
+      <Heading>{t('apiAccess.usage.errors.title')}</Heading>
+      <DefinitionList data-testid="api-errors">
+        <dt>400</dt>
+        <dd>{t('apiAccess.usage.errors.badRequest')}</dd>
+        <dt>401</dt>
+        <dd>{t('apiAccess.usage.errors.unauthorized')}</dd>
+        <dt>403</dt>
+        <dd>{t('apiAccess.usage.errors.forbidden')}</dd>
+        <dt>429</dt>
+        <dd>{t('apiAccess.usage.errors.rateLimited')}</dd>
+        <dt>500</dt>
+        <dd>{t('apiAccess.usage.errors.serverError')}</dd>
+      </DefinitionList>
     </div>
   );
 };
