@@ -14,7 +14,11 @@ const api = express()
 
 api.use(cors)
 
-api.get(['/aerodrome/status', '/api/aerodrome/status'], async (req, res) => {
+// Public. /v1 is the documented path; the unversioned one stays for
+// existing callers.
+const AERODROME_STATUS_PATHS = ['/v1/aerodrome/status', '/api/v1/aerodrome/status', '/aerodrome/status', '/api/aerodrome/status']
+
+api.get(AERODROME_STATUS_PATHS, async (req, res) => {
   const status = await fetchAerodromeStatus(getDatabase())
 
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
