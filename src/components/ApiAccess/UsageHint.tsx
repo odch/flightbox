@@ -3,8 +3,10 @@ import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import ClipboardCopier from '../ClipboardCopier';
 
-const airstatEndpointUrl = () =>
-  `https://europe-west1-${__FIREBASE_PROJECT_ID__}.cloudfunctions.net/api/v1/reports/airstat`;
+// On the app's own domain (e.g. lsze.flightbox.aero), like the guest and
+// kiosk links: Firebase Hosting forwards /api/** to the functions, and
+// external programs should not depend on the function URL.
+const airstatEndpointUrl = () => `${window.location.origin}/api/v1/reports/airstat`;
 
 const Paragraph = styled.p`
   margin: 0 0 0.75em 0;
