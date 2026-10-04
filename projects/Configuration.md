@@ -21,6 +21,7 @@ project.
 * `theme`
 * `title`
 * `enabledFlightTypes`
+* `reportApiEnabled`
 
 ### `aerodrome`
 
@@ -38,9 +39,10 @@ Example: `"LSZT"`
 
 #### `runways`
 
-Array of all runways of the aerodrome.
+Array of all runways of the aerodrome. Each runway is described with `name` and `type` (`A` for asphalt,
+`G` for grass); the type is reported in the airstat report.
 
-Example: `[ "06", "24" ]`
+Example: `[ { "name": "06", "type": "G" }, { "name": "24", "type": "G" } ]`
 
 #### `departureRoutes`
 
@@ -171,8 +173,9 @@ for go arounds.
 ### `environments`
 
 Description of the environments. Each environment description consists of the following properties:
-* `firebase`: The URL of the firebase instance.
-* `credentialsAuth`: The URL of the credentials authentication service.
+* `firebaseProjectId`: The Firebase project. Required: the functions deploy fails without it.
+* `firebaseDatabaseUrl`: The URL of the Realtime Database.
+* `firebaseApiKey`: The Firebase web API key.
 
 #### `test`
 
@@ -181,6 +184,11 @@ Description of the test environment.
 #### `production`
 
 Description of the production environment.
+
+A property set in an environment replaces the top-level property of the same name in the app's configuration
+and in the functions' generated config (`reportApiEnabled`, `memberManagement`, `aerodrome`), e.g.
+`"reportApiEnabled": true` in `test` only. `theme`, the landing and go-around fees and `privacySettings` are
+always read from the top level.
 
 ### `theme`
 
@@ -202,6 +210,18 @@ Enabled by default: `private`, `commercial`, `instruction`.
 
 Example: `["private", "commercial"]`
 
+### `reportApiEnabled`
+
+Enables the airstat report API (`GET /api/v1/reports/airstat`) in the Cloud Functions, the API key
+endpoints and the "API-Zugriff" tab in the admin area, where admins create the keys for external programs.
+Disabled by default.
+
+The functions get this flag and the aerodrome data they need from `functions/project-config.generated.json`, which
+the deploy writes with `node tasks/generateServerConfig.js <project> <test|production> <file> [<Firebase project>]`
+(with the Firebase project given, a config for another project fails instead of being ignored at runtime).
+
+Example: `true`
+
 ## Full example
 
 
@@ -211,8 +231,14 @@ Example: `["private", "commercial"]`
     "name": "Lommis",
     "ICAO": "LSZT",
     "runways": [
-      "06",
-      "24"
+      {
+        "name": "06",
+        "type": "G"
+      },
+      {
+        "name": "24",
+        "type": "G"
+      }
     ],
     "departureRoutes": [
       {
@@ -237,12 +263,14 @@ Example: `["private", "commercial"]`
   },
   "environments": {
     "test": {
-      "firebase": "https://mfgt-flights-redux.firebaseio.com",
-      "credentialsAuth": "https://mfgt-flights-auth-test.appspot.com/mfgt"
+      "firebaseProjectId": "lszt-test",
+      "firebaseDatabaseUrl": "https://lszt-test-default-rtdb.europe-west1.firebasedatabase.app",
+      "firebaseApiKey": "<API key>"
     },
     "production": {
-      "firebase": "https://lszt.firebaseio.com",
-      "credentialsAuth": "https://api.mfgt.ch/api/v1/firebaseauth/mfgt"
+      "firebaseProjectId": "lszt-prod",
+      "firebaseDatabaseUrl": "https://lszt-prod-default-rtdb.europe-west1.firebasedatabase.app",
+      "firebaseApiKey": "<API key>"
     }
   },
   "theme": "lszt",

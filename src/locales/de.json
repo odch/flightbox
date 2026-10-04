@@ -85,7 +85,8 @@
     "kioskAccess": "Kiosk-Login",
     "guestAccess": "Gast-Login",
     "import": "Import",
-    "privacy": "Datenschutz"
+    "privacy": "Datenschutz",
+    "apiAccess": "API-Zugriff"
   },
   "movement": {
     "openCustoms": "Zollanmeldung öffnen",
@@ -421,6 +422,82 @@
     "title": "Kiosk-Login",
     "description": "Das Kiosk-Login ist aktiv. Dieser Link kann für öffentlich zugängliche Flightbox-Terminals verwendet werden.",
     "kioskLink": "Kiosk-Link:"
+  },
+  "apiAccess": {
+    "description": "Mit einem API-Schlüssel können externe Programme (z.B. ein Statistikprogramm) Daten direkt aus Flightbox abrufen. Jeder Schlüssel hat einen Namen, bestimmte Berechtigungen und optional ein Ablaufdatum. Erstellen Sie für jedes Programm einen eigenen Schlüssel, damit Sie ihn bei Bedarf einzeln widerrufen können.",
+    "descriptionOnce": "Ein Schlüssel wird nur einmal angezeigt, direkt nach dem Erstellen. Um einen Schlüssel zu erneuern, erstellen Sie einen neuen und widerrufen danach den alten.",
+    "keysTitle": "API-Schlüssel",
+    "loading": "API-Schlüssel werden geladen ...",
+    "loadFailed": "Die API-Schlüssel konnten nicht geladen werden.",
+    "forbidden": "Ihre Anmeldung ist abgelaufen oder Sie haben keine Administratorrechte mehr. Bitte melden Sie sich erneut an.",
+    "retry": "Erneut versuchen",
+    "empty": "Es sind noch keine API-Schlüssel vorhanden.",
+    "name": "Name",
+    "scopes": "Berechtigungen",
+    "created": "Erstellt",
+    "createdBy": "von {{email}}",
+    "expires": "Läuft ab",
+    "lastUsed": "Zuletzt verwendet",
+    "unlimited": "Unbegrenzt",
+    "never": "Nie",
+    "expired": "Abgelaufen",
+    "expiresSoon": "Läuft bald ab",
+    "revoke": "Widerrufen",
+    "revokeConfirm": "Möchten Sie den API-Schlüssel '{{name}}' wirklich widerrufen? Programme, die ihn verwenden, haben danach keinen Zugriff mehr.",
+    "revokeFailed": "Der API-Schlüssel konnte nicht widerrufen werden. Bitte versuchen Sie es erneut.",
+    "scope": {
+      "reportsAirstat": "Airstat-Report (BAZL)",
+      "reportsAirstatInternal": "Airstat-Report mit zusätzlichen Informationen (Namen, E-Mail-Adressen, Bemerkungen, Rechnungsempfänger)"
+    },
+    "create": {
+      "title": "Neuer API-Schlüssel",
+      "name": "Name",
+      "nameHint": "Wofür wird der Schlüssel verwendet? z.B. 'Statistikprogramm'",
+      "nameRequired": "Bitte geben Sie einen Namen ein.",
+      "nameTooLong": "Der Name darf höchstens {{max}} Zeichen lang sein.",
+      "scopes": "Berechtigungen",
+      "scopesRequired": "Bitte wählen Sie mindestens eine Berechtigung aus.",
+      "requiresScope": "Nur zusammen mit '{{scope}}' möglich.",
+      "confirmPersonalData": "Mir ist bewusst, dass dieser Schlüssel Personendaten liefert und sicher aufbewahrt werden muss.",
+      "confirmPersonalDataRequired": "Bitte bestätigen Sie, dass Ihnen dies bewusst ist.",
+      "expiry": "Gültigkeit",
+      "months": "{{count}} Monate",
+      "unlimited": "Unbegrenzt",
+      "submit": "Schlüssel erstellen",
+      "failed": "Der API-Schlüssel konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
+    },
+    "secret": {
+      "title": "Ihr neuer API-Schlüssel",
+      "label": "API-Schlüssel",
+      "warning": "Dieser Schlüssel wird nur jetzt angezeigt und kann später nicht mehr abgerufen werden. Kopieren Sie ihn und bewahren Sie ihn sicher auf, wie ein Passwort.",
+      "close": "Schliessen"
+    },
+    "usage": {
+      "title": "Verwendung",
+      "intro": "Die API ist unter dieser Adresse erreichbar. Der Schlüssel wird im Header 'Authorization: Bearer <Schlüssel>' mitgeschickt, nie in der URL. Jeder Schlüssel erlaubt 100 Anfragen pro Tag (UTC); dabei zählt jede Anfrage mit gültigem Schlüssel, auch eine abgelehnte.",
+      "airstat": {
+        "description": "GET: liefert den Report eines Monats als CSV-Datei, wie der Export im Admin-Bereich. Benötigt einen Schlüssel mit der Berechtigung '{{scope}}'."
+      },
+      "parameters": "Parameter:",
+      "year": "Jahr, z.B. 2026",
+      "month": "Monat, 1 bis 12",
+      "internal": "true für den Report mit zusätzlichen Informationen (benötigt zusätzlich die Berechtigung '{{scope}}'), sonst false (Standard)",
+      "delimiter": "Trennzeichen: comma (Standard) oder semicolon",
+      "example": "Beispiel:",
+      "keyPlaceholder": "IHR_API_SCHLUESSEL",
+      "status": {
+        "title": "Flugplatzstatus",
+        "description": "GET: liefert den aktuellen Status des Flugplatzes als JSON (status, message, last_update_date, last_update_by und last_update_user mit Name und E-Mail-Adresse der Person, die den Status gesetzt hat), oder {}, wenn kein Status gesetzt ist. Öffentlich, ohne Schlüssel."
+      },
+      "errors": {
+        "title": "Fehler",
+        "badRequest": "Ungültige, unbekannte oder doppelte Parameter (invalid_request, der Parameter steht in field), oder der Schlüssel wurde in der URL mitgeschickt (credentials_in_url; der Schlüssel bleibt gültig).",
+        "unauthorized": "Schlüssel unbekannt, widerrufen (invalid_api_key) oder abgelaufen (key_expired). Fehlt der Header 'Authorization: Bearer <Schlüssel>' oder ist er falsch aufgebaut, kommt nur der Text 'Unauthorized'.",
+        "forbidden": "Dem Schlüssel fehlt die nötige Berechtigung (insufficient_scope).",
+        "rateLimited": "Tageslimit erreicht (rate_limited). Der Header 'Retry-After' nennt die Sekunden bis zum nächsten Tag (UTC).",
+        "serverError": "Einige Bewegungen des Monats können nicht gemeldet werden (invalid_movement_data, die Bewegungen stehen in problems): Ein Administrator muss sie korrigieren, eine Wiederholung hilft nicht. Sonst ein Serverfehler."
+      }
+    }
   },
   "csvImport": {
     "selectFile": "CSV-Datei auswählen",

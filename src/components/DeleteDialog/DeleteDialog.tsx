@@ -15,14 +15,23 @@ const ButtonContainer = styled.div`
   justify-content: space-between;
 `
 
-const DeleteDialog = ({question, onConfirm, onCancel}) => {
+interface DeleteDialogProps {
+  question: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  // Defaults to "Löschen" with a delete icon; e.g. "Widerrufen" for API keys.
+  confirmLabel?: string;
+  confirmIcon?: string;
+}
+
+const DeleteDialog = ({question, onConfirm, onCancel, confirmLabel, confirmIcon = 'delete'}: DeleteDialogProps) => {
   const { t } = useTranslation();
   const content = (
     <div>
       <Question>{question}</Question>
       <ButtonContainer>
         <Button label={t('common.cancel')} onClick={onCancel} neutral/>
-        <Button label={t('common.delete')} icon="delete" danger onClick={onConfirm}/>
+        <Button label={confirmLabel || t('common.delete')} icon={confirmIcon} danger onClick={onConfirm}/>
       </ButtonContainer>
     </div>
   )
@@ -33,7 +42,9 @@ const DeleteDialog = ({question, onConfirm, onCancel}) => {
 DeleteDialog.propTypes = {
   question: PropTypes.string.isRequired,
   onConfirm: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired
+  onCancel: PropTypes.func.isRequired,
+  confirmLabel: PropTypes.string,
+  confirmIcon: PropTypes.string
 }
 
 export default DeleteDialog

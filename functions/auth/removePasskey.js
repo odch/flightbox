@@ -1,7 +1,7 @@
 'use strict';
 
 const { onRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 const cors = require('cors')({ origin: true });
 const {
   AuthError,
@@ -32,14 +32,14 @@ exports.removeWebauthnCredential = onRequest({ region: 'europe-west1' }, (req, r
         return res.status(400).json({ error: 'credentialId is required' });
       }
 
-      const credentialRef = admin.database()
+      const credentialRef = getDatabase()
         .ref('/webauthnCredentials').child(uid).child(credentialId);
       const snapshot = await credentialRef.once('value');
       if (!snapshot.exists()) {
         return res.status(404).json({ error: 'Credential not found' });
       }
 
-      const ownerRef = admin.database().ref('/webauthnCredentialOwners').child(credentialId);
+      const ownerRef = getDatabase().ref('/webauthnCredentialOwners').child(credentialId);
       const ownerSnap = await ownerRef.once('value');
       if (ownerSnap.exists()) {
         const ownerVal = ownerSnap.val() || {};

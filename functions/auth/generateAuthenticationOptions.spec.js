@@ -27,8 +27,8 @@ describe('functions', () => {
       };
 
       mockAdmin = {
-        database: jest.fn().mockReturnValue({ ref: jest.fn().mockReturnValue(mockCredentialsRef) }),
-        auth: jest.fn().mockReturnValue(mockAuthAdmin),
+        getDatabase: jest.fn().mockReturnValue({ ref: jest.fn().mockReturnValue(mockCredentialsRef) }),
+        getAuth: jest.fn().mockReturnValue(mockAuthAdmin),
       };
 
       mockGenerateAuthenticationOptions = jest.fn().mockResolvedValue({
@@ -44,7 +44,8 @@ describe('functions', () => {
         { id: 'decoy-cred', transports: ['internal'] },
       ]);
 
-      jest.mock('firebase-admin', () => mockAdmin);
+      jest.mock('firebase-admin/database', () => mockAdmin);
+      jest.mock('firebase-admin/auth', () => mockAdmin);
       jest.mock('firebase-functions/v2/https', () => ({
         onRequest: (opts, handler) => { capturedOptions = opts; capturedHandler = handler; },
       }));

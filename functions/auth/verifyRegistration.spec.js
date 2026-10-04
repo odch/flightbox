@@ -25,7 +25,7 @@ describe('functions', () => {
       };
 
       mockAdmin = {
-        database: jest.fn().mockReturnValue({ ref: jest.fn().mockReturnValue(mockDbRef) }),
+        getDatabase: jest.fn().mockReturnValue({ ref: jest.fn().mockReturnValue(mockDbRef) }),
       };
 
       mockVerifyRegistrationResponse = jest.fn();
@@ -36,7 +36,7 @@ describe('functions', () => {
         expectedOrigins: ['https://flightbox.ch'],
       });
 
-      jest.mock('firebase-admin', () => mockAdmin);
+      jest.mock('firebase-admin/database', () => mockAdmin);
       jest.mock('firebase-functions/v2/https', () => ({
         onRequest: (opts, handler) => { capturedHandler = handler; },
       }));
@@ -50,6 +50,7 @@ describe('functions', () => {
         }
         return {
           AuthError,
+          SUPPORTED_ALGORITHM_IDS: [-8, -7, -257],
           getRpConfig: mockGetRpConfig,
           consumeChallenge: mockConsumeChallenge,
           verifyAuthenticatedUser: mockVerifyRecentAuth,
@@ -143,6 +144,9 @@ describe('functions', () => {
         userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
       }), res);
 
+      expect(mockVerifyRegistrationResponse).toHaveBeenCalledWith(expect.objectContaining({
+        supportedAlgorithmIDs: [-8, -7, -257],
+      }));
       expect(res.status).toHaveBeenCalledWith(200);
       const responseBody = res.json.mock.calls[0][0];
       expect(responseBody.success).toBe(true);

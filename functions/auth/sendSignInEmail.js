@@ -1,13 +1,13 @@
 'use strict';
 
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 const nodemailer = require('nodemailer');
 const { getSignInEmailContent } = require('./emailTemplates');
 
 const REQUIRED_SMTP_SETTINGS = ['host', 'port', 'user', 'password', 'fromEmail', 'fromName'];
 
 const loadSmtpSettings = async () => {
-  const snapshot = await admin.database().ref('/settings/emailSmtp').once('value');
+  const snapshot = await getDatabase().ref('/settings/emailSmtp').once('value');
   const settings = snapshot.val();
 
   if (!settings) {

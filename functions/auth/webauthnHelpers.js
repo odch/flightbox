@@ -1,9 +1,15 @@
 'use strict';
 
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
+const { getDatabase } = require('firebase-admin/database');
 const crypto = require('crypto');
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
+
+// COSE algorithms accepted for new passkeys: EdDSA, ES256, RS256.
+// @simplewebauthn/server v14 would otherwise prefer ML-DSA-44 on runtimes that
+// support it, which on Node 24 relies on an experimental Web Crypto API.
+const SUPPORTED_ALGORITHM_IDS = [-8, -7, -257];
 
 // Secret used to derive decoy passkey credentials (see generateDecoyCredentials).
 // Prefer a configured secret so decoys stay stable across instances; fall back
@@ -55,7 +61,7 @@ async function persistChallenge({ type, challenge, uid, email }) {
     email: email || null,
     attempts: 0,
   };
-  await admin.database().ref('/webauthnChallenges').child(key).set(record);
+  await getDatabase().ref('/webauthnChallenges').child(key).set(record);
   return key;
 }
 
@@ -63,7 +69,7 @@ async function consumeChallenge(key, expectedType) {
   if (!key || typeof key !== 'string') {
     throw new Error('Invalid challenge key');
   }
-  const ref = admin.database().ref('/webauthnChallenges').child(key);
+  const ref = getDatabase().ref('/webauthnChallenges').child(key);
   let claimed = null;
   // RTDB transactions call the update function with the locally cached value
   // first (often null). Returning undefined aborts without refetching, so we
@@ -100,7 +106,7 @@ async function verifyAuthenticatedUser(req) {
   const token = match[1].trim();
   let decoded;
   try {
-    decoded = await admin.auth().verifyIdToken(token, true);
+    decoded = await getAuth().verifyIdToken(token, true);
   } catch (e) {
     throw new AuthError('Invalid ID token');
   }
@@ -119,6 +125,7 @@ class AuthError extends Error {
 
 module.exports = {
   CHALLENGE_TTL_MS,
+  SUPPORTED_ALGORITHM_IDS,
   AuthError,
   getRpConfig,
   generateChallengeKey,

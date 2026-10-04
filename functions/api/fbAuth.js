@@ -1,4 +1,5 @@
-const admin = require('firebase-admin')
+const { getAuth } = require('firebase-admin/auth')
+const { getDatabase } = require('firebase-admin/database')
 
 const fbAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization
@@ -25,7 +26,7 @@ const fbAuth = async (req, res, next) => {
     // Pass checkRevoked=true so revoked sessions and disabled accounts are
     // rejected immediately (matches the WebAuthn path in webauthnHelpers.js),
     // rather than remaining valid until the ID token expires.
-    const decodedToken = await admin.auth().verifyIdToken(idToken, true);
+    const decodedToken = await getAuth().verifyIdToken(idToken, true);
     const uid = decodedToken.uid;
     console.log('Authenticated user:', uid);
 
@@ -43,7 +44,7 @@ const fbAdminAuth = async (req, res, next) => {
   await fbAuth(req, res, async () => {
     const uid = req.fbUserId;
     try {
-      const snapshot = await admin.database().ref(`/admins/${uid}`).once('value');
+      const snapshot = await getDatabase().ref(`/admins/${uid}`).once('value');
       const isAdmin = snapshot.val() === true;
 
       if (!isAdmin) {

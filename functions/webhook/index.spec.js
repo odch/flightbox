@@ -15,9 +15,9 @@ jest.mock('firebase-functions/v2', () => ({ logger: mockLogger }));
 
 const mockOnce = jest.fn();
 const mockAdmin = {
-  database: jest.fn(() => ({ ref: jest.fn(() => ({ once: mockOnce })) })),
+  getDatabase: jest.fn(() => ({ ref: jest.fn(() => ({ once: mockOnce })) })),
 };
-jest.mock('firebase-admin', () => mockAdmin);
+jest.mock('firebase-admin/database', () => mockAdmin);
 
 require('./index');
 

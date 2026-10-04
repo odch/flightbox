@@ -40,6 +40,21 @@ import { shouldReloadOnControllerChange, markReload } from './util/shouldReloadO
 
 Sentry.init({
   dsn: "https://8a606d82aa68850021fbfac2ffda30b5@o4509293310967808.ingest.de.sentry.io/4509293314113617",
+  // Our DPA rules out personal data in Sentry. Sentry v11 collects user
+  // info (incl. IP address), cookies, headers and bodies by default, so
+  // switch every data collection category off explicitly.
+  dataCollection: {
+    userInfo: false,
+    cookies: false,
+    httpHeaders: false,
+    httpBodies: [],
+    urlQueryParams: false,
+    graphQL: { document: false, variables: false },
+    genAI: { inputs: false, outputs: false },
+    databaseQueryData: false,
+    queues: false,
+    stackFrameVariables: false,
+  },
 });
 
 const theme = require('../theme/' + __THEME__);

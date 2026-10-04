@@ -34,12 +34,12 @@ describe('functions', () => {
         '/staticAuthRateLimits': mockStaticRateLimitsRef,
       };
       mockAdmin = {
-        database: jest.fn().mockReturnValue({
+        getDatabase: jest.fn().mockReturnValue({
           ref: jest.fn(path => refs[path] || mockCodesRef)
         })
       };
 
-      jest.mock('firebase-admin', () => mockAdmin);
+      jest.mock('firebase-admin/database', () => mockAdmin);
       jest.mock('firebase-functions/v2/scheduler', () => ({
         onSchedule: jest.fn((opts, handler) => {
           capturedOptions = opts;

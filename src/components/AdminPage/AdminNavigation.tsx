@@ -117,6 +117,7 @@ const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange }) => {
     { key: 'kiosk-access', label: t('admin.kioskAccess'), icon: 'person_add' },
     { key: 'guest-access', label: t('admin.guestAccess'), icon: 'person_add' },
     { key: 'privacy', label: t('admin.privacy'), icon: 'security' },
+    { key: 'api-access', label: t('admin.apiAccess'), icon: 'vpn_key' },
   ].filter(item => !hiddenTabs.includes(item.key));
 
   return (

@@ -3,7 +3,7 @@
 const { onValueWritten } = require('firebase-functions/v2/database');
 const { logger } = require('firebase-functions/v2');
 const { defineString } = require('firebase-functions/params');
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
 
 const RTDB_INSTANCE = defineString('RTDB_INSTANCE');
 const RTDB_REGION = defineString('RTDB_REGION', { default: 'europe-west1' });
@@ -27,7 +27,7 @@ async function revokeIfTokenChanged(event, uid) {
     return;
   }
 
-  await admin.auth().revokeRefreshTokens(uid);
+  await getAuth().revokeRefreshTokens(uid);
   logger.info(`Access token for '${uid}' rotated; revoked existing refresh tokens.`);
 }
 

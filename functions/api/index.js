@@ -1,5 +1,5 @@
 const { onRequest } = require('firebase-functions/v2/https')
-const admin = require('firebase-admin')
+const { getDatabase } = require('firebase-admin/database')
 const express = require('express')
 const cors = require('cors')({origin: true, credentials: true})
 const fetchAerodromeStatus = require('./fetchAerodromeStatus')
@@ -7,13 +7,19 @@ const fetchUserInvoiceRecipients = require('./fetchUserInvoiceRecipients')
 const {fetchInvoices, fetchCheckouts, postPrepopulatedForm, isCustomsDeclarationAppAvailable} = require('./customs/fetchFromCustoms')
 const {buildCustomsPayload} = require('./customs/buildCustomsPayload')
 const {fbAuth, fbAdminAuth, fbAuthExcludingShared} = require('./fbAuth')
+const {loadProjectConfig} = require('../projectConfig')
+const {SCOPES, availableScopes} = require('../apiKeys/scopes')
 
 const api = express()
 
 api.use(cors)
 
-api.get(['/aerodrome/status', '/api/aerodrome/status'], async (req, res) => {
-  const status = await fetchAerodromeStatus(admin.database())
+// Public. /v1 is the documented path; the unversioned one stays for
+// existing callers.
+const AERODROME_STATUS_PATHS = ['/v1/aerodrome/status', '/api/v1/aerodrome/status', '/aerodrome/status', '/api/aerodrome/status']
+
+api.get(AERODROME_STATUS_PATHS, async (req, res) => {
+  const status = await fetchAerodromeStatus(getDatabase())
 
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
   res.setHeader('Pragma', 'no-cache')
@@ -26,7 +32,7 @@ api.get(['/aerodrome/status', '/api/aerodrome/status'], async (req, res) => {
 
 api.get(['/customs/invoices', '/api/customs/invoices'], fbAdminAuth, async (req, res) => {
   try {
-    const db = admin.database()
+    const db = getDatabase()
     const {year, month} = req.query
     const invoices = await fetchInvoices(db, year, month)
     res.status(200).send(invoices)
@@ -38,7 +44,7 @@ api.get(['/customs/invoices', '/api/customs/invoices'], fbAdminAuth, async (req,
 
 api.get(['/customs/checkouts', '/api/customs/checkouts'], fbAdminAuth, async (req, res) => {
   try {
-    const db = admin.database()
+    const db = getDatabase()
     const {year, month} = req.query
     const invoices = await fetchCheckouts(db, year, month)
     res.status(200).send(invoices)
@@ -60,7 +66,7 @@ api.post(['/customs/prepopulated-forms', '/api/customs/prepopulated-forms'], fbA
       return res.status(400).send({ error: 'movementType (departure|arrival) and movementKey are required' })
     }
 
-    const db = admin.database()
+    const db = getDatabase()
 
     const payload = await buildCustomsPayload(db, movementType, movementKey)
     if (!payload) {
@@ -83,7 +89,7 @@ api.post(['/customs/prepopulated-forms', '/api/customs/prepopulated-forms'], fbA
 
 api.get(['/customs/availability', '/api/customs/availability'], fbAuth, async (req, res) => {
   try {
-    const db = admin.database()
+    const db = getDatabase()
     const isAvailable = await isCustomsDeclarationAppAvailable(db)
     res.status(200).send({ available: isAvailable })
   } catch (e) {
@@ -94,7 +100,7 @@ api.get(['/customs/availability', '/api/customs/availability'], fbAuth, async (r
 
 api.get(['/users/me/invoice-recipients', '/api/users/me/invoice-recipients'], fbAuth, async (req, res) => {
   try {
-    const db = admin.database()
+    const db = getDatabase()
     const invoiceRecipients = await fetchUserInvoiceRecipients(db, req.fbUserEmail)
     res.status(200).send(invoiceRecipients)
   } catch (e) {
@@ -102,5 +108,18 @@ api.get(['/users/me/invoice-recipients', '/api/users/me/invoice-recipients'], fb
     res.status(500).send({ error: 'Failed to get user invoice recipients' })
   }
 })
+
+// API features are enabled per tenant (e.g. reportApiEnabled in
+// projects/<name>.json, see functions/projectConfig.js). External programs
+// call them with API keys that admins manage; admins can call them too.
+const projectConfig = loadProjectConfig()
+const apiKeyScopes = availableScopes(projectConfig)
+if (apiKeyScopes.length > 0) {
+  require('./apiKeys').registerApiKeyRoutes(api, {availableScopes: apiKeyScopes, auth: fbAdminAuth})
+}
+if (projectConfig.reportApiEnabled === true) {
+  const {apiKeyOrAdminAuth} = require('./apiKeyAuth')
+  require('./reports').registerReportRoutes(api, projectConfig, apiKeyOrAdminAuth(SCOPES.REPORTS_AIRSTAT))
+}
 
 module.exports = onRequest({ region: 'europe-west1' }, api)

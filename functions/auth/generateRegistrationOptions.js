@@ -1,18 +1,19 @@
 'use strict';
 
 const { onRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 const cors = require('cors')({ origin: true });
 const { generateRegistrationOptions } = require('@simplewebauthn/server');
 const {
   AuthError,
+  SUPPORTED_ALGORITHM_IDS,
   getRpConfig,
   persistChallenge,
   verifyAuthenticatedUser,
 } = require('./webauthnHelpers');
 
 async function loadExistingCredentials(uid) {
-  const snapshot = await admin.database().ref('/webauthnCredentials').child(uid).once('value');
+  const snapshot = await getDatabase().ref('/webauthnCredentials').child(uid).once('value');
   if (!snapshot.exists()) {
     return [];
   }
@@ -54,6 +55,7 @@ exports.generateWebauthnRegistrationOptions = onRequest({ region: 'europe-west1'
         userName: email || uid,
         userDisplayName: email || uid,
         attestationType: 'none',
+        supportedAlgorithmIDs: SUPPORTED_ALGORITHM_IDS,
         excludeCredentials: existing,
         authenticatorSelection: {
           residentKey: 'preferred',

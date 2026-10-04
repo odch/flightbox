@@ -14,6 +14,7 @@ import AdminInvoiceRecipientsPage from './subpages/AdminInvoiceRecipientsPage';
 import AdminGuestAccessPage from './subpages/AdminGuestAccessPage';
 import AdminKioskAccessPage from './subpages/AdminKioskAccessPage';
 import AdminPrivacySettingsPage from './subpages/AdminPrivacySettingsPage';
+import AdminApiAccessPage from './subpages/AdminApiAccessPage';
 import Content from './Content';
 import objectToArray from '../../util/objectToArray';
 
@@ -58,6 +59,8 @@ const renderSubPage = (activeTab: string) => {
       return <AdminKioskAccessPage/>;
     case 'privacy':
       return <AdminPrivacySettingsPage/>;
+    case 'api-access':
+      return <AdminApiAccessPage/>;
     default:
       return <AdminExportPage/>;
   }
@@ -92,6 +95,12 @@ const AdminPage = ({auth, guestAccessToken, kioskAccessToken}: any) => {
   }
   if (__CONF__.privacySettings !== true) {
     hiddenTabs.push('privacy');
+  }
+  // API keys are only of use with a feature they give access to. OR further
+  // API features in here.
+  const apiAccessEnabled = __CONF__.reportApiEnabled === true;
+  if (!apiAccessEnabled) {
+    hiddenTabs.push('api-access');
   }
 
   return (

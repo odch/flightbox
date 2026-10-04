@@ -4,7 +4,7 @@ import i18n from '../i18n';
 
 const enabledTypes = objectToArray(__CONF__.enabledFlightTypes);
 
-const flightTypes = [
+export const flightTypes = [
   {
     value: 'private',
     airstatType: {

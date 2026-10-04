@@ -1,11 +1,12 @@
 'use strict';
 
 const { onRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { getDatabase } = require('firebase-admin/database');
 const cors = require('cors')({ origin: true });
 const { verifyRegistrationResponse } = require('@simplewebauthn/server');
 const {
   AuthError,
+  SUPPORTED_ALGORITHM_IDS,
   getRpConfig,
   consumeChallenge,
   verifyAuthenticatedUser,
@@ -76,6 +77,7 @@ exports.verifyWebauthnRegistration = onRequest({ region: 'europe-west1' }, (req,
           expectedOrigin: expectedOrigins,
           expectedRPID: rpID,
           requireUserVerification: false,
+          supportedAlgorithmIDs: SUPPORTED_ALGORITHM_IDS,
         });
       } catch (e) {
         console.warn('Registration verification failed:', e.message);
@@ -121,8 +123,8 @@ exports.verifyWebauthnRegistration = onRequest({ region: 'europe-west1' }, (req,
         backupState: info.credentialDeviceType === 'multiDevice' || credential.backupState === true || false,
       };
 
-      await admin.database().ref('/webauthnCredentials').child(uid).child(credentialID).set(record);
-      await admin.database().ref('/webauthnCredentialOwners').child(credentialID).set({ uid });
+      await getDatabase().ref('/webauthnCredentials').child(uid).child(credentialID).set(record);
+      await getDatabase().ref('/webauthnCredentialOwners').child(credentialID).set({ uid });
 
       res.status(200).json({
         success: true,

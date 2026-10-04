@@ -1,7 +1,7 @@
 'use strict';
 
 const { onRequest: v2OnRequest } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
 const cors = require('cors')({
   origin: true,
 });
@@ -17,7 +17,7 @@ const sendToken = (res, token) => {
 };
 
 const createAndSendToken = (req, res, uid) => {
-  return admin.auth().createCustomToken(uid)
+  return getAuth().createCustomToken(uid)
     .then(customToken => {
       sendToken(res, customToken)
     });

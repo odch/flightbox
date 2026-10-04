@@ -1,12 +1,12 @@
-import {call, put} from 'redux-saga/effects';
+import {all, call, fork, put, takeEvery} from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
+import {watchSettingWhileAdmin} from '../watchSettingWhileAdmin';
 import firebase from '../../../util/firebase';
-import {onValue, set} from 'firebase/database';
+import {set} from 'firebase/database';
 
 jest.mock('../../../util/firebase');
 jest.mock('firebase/database', () => ({
-  onValue: jest.fn(),
   set: jest.fn(),
 }));
 
@@ -19,11 +19,13 @@ describe('modules', () => {
           (firebase as jest.Mock).mockReturnValue({});
         });
 
-        describe('loadMessageRetentionDays', () => {
-          it('should register onValue listener', () => {
-            const channel = {put: jest.fn()};
-            sagas.loadMessageRetentionDays(channel);
-            expect(onValue).toHaveBeenCalledWith(expect.anything(), expect.any(Function));
+        describe('default', () => {
+          it('should watch the setting while an admin is signed in and handle saves', () => {
+            const generator = sagas.default();
+            expect(generator.next().value).toEqual(all([
+              fork(watchSettingWhileAdmin, '/settings/messageRetentionDays', actions.messageRetentionDaysLoaded),
+              takeEvery(actions.SET_MESSAGE_RETENTION_DAYS, sagas.setMessageRetentionDays),
+            ]));
           });
         });
 
