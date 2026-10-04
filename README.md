@@ -159,7 +159,10 @@ $ curl \
 
 ### API
 
-URL: `https://europe-west1-<PROJECT_ID>.cloudfunctions.net/api`
+The paths below are on the app's own domain, e.g. `https://lsze.flightbox.aero/api/aerodrome/status` (production)
+or `https://lsze-test.web.app/api/aerodrome/status` (test): Firebase Hosting forwards `/api/**` to the `api`
+function, with a timeout of 60 seconds. Give external programs this URL. The function also answers on
+`https://europe-west1-<PROJECT_ID>.cloudfunctions.net` with the same paths, which the app itself uses.
 
 #### Aerodrome status ####
 
@@ -202,7 +205,7 @@ Example:
 
 ```
 $ curl -H "Authorization: Bearer fbx_..." \
-    "https://europe-west1-<PROJECT_ID>.cloudfunctions.net/api/v1/reports/airstat?year=2026&month=9"
+    "https://lsze-test.web.app/api/v1/reports/airstat?year=2026&month=9"
 ```
 
 #### API keys ####

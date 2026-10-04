@@ -25,10 +25,6 @@ const renderApiAccess = (props: Partial<ApiAccessProps> = {}) => {
 };
 
 describe('ApiAccess', () => {
-  beforeEach(() => {
-    (global as any).__FIREBASE_PROJECT_ID__ = 'lsze-test';
-  });
-
   it('explains API keys and that a key is shown only once', () => {
     renderApiAccess();
     expect(screen.getByText(/Mit einem API-Schlüssel können externe Programme/)).toBeInTheDocument();
@@ -69,9 +65,10 @@ describe('ApiAccess', () => {
     expect(createApiKey.mock.calls[0][1](PLAINTEXT)).toBe(false);
   });
 
-  it('shows the endpoint of this project and a curl example with a placeholder key', () => {
+  it('shows the endpoint on the app domain and a curl example with a placeholder key', () => {
     renderApiAccess();
-    const url = 'https://europe-west1-lsze-test.cloudfunctions.net/api/v1/reports/airstat';
+    const url = `${window.location.origin}/api/v1/reports/airstat`;
+    expect(url).toBe('http://localhost/api/v1/reports/airstat');
     expect(screen.getByTestId('api-endpoint')).toHaveTextContent(url);
     const curl = screen.getByTestId('api-curl-example').textContent;
     expect(curl).toContain('-H "Authorization: Bearer IHR_API_SCHLUESSEL"');
