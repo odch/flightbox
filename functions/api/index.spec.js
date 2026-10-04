@@ -17,7 +17,11 @@ function loadApi(projectConfig) {
   let loaded;
   jest.isolateModules(() => {
     require('../projectConfig').loadProjectConfig.mockReturnValue(projectConfig);
-    loaded = { api: require('./index'), fbAdminAuth: require('./fbAuth').fbAdminAuth };
+    loaded = {
+      api: require('./index'),
+      fbAdminAuth: require('./fbAuth').fbAdminAuth,
+      getDatabase: require('firebase-admin/database').getDatabase,
+    };
   });
   return loaded;
 }
@@ -26,6 +30,27 @@ const findRoute = (api, path) => routeLayers(api).find(layer => layer.route.path
 
 describe('functions', () => {
   describe('api', () => {
+    it('serves the public aerodrome status on the v1 and the unversioned paths', async () => {
+      const { api, getDatabase } = loadApi({ reportApiEnabled: false });
+      const layer = findRoute(api, '/api/v1/aerodrome/status');
+
+      expect(layer.route.path).toEqual(expect.arrayContaining([
+        '/v1/aerodrome/status', '/api/v1/aerodrome/status', '/aerodrome/status', '/api/aerodrome/status',
+      ]));
+      expect(layer.route.methods).toEqual({ get: true });
+      expect(layer.route.stack).toHaveLength(1);
+
+      const statuses = { s1: { status: 'open', timestamp: Date.UTC(2026, 9, 4, 7), by: 'Hans Meier', details: 'Offen' } };
+      const query = { orderByChild: () => query, limitToLast: () => query, once: async () => ({ val: () => statuses }) };
+      getDatabase.mockReturnValue({ ref: () => query });
+      const res = { setHeader: jest.fn(), send: jest.fn() };
+      await layer.route.stack[0].handle({}, res);
+
+      expect(res.send).toHaveBeenCalledWith({
+        status: 'open', last_update_date: '2026-10-04T07:00:00.000Z', last_update_by: 'Hans Meier', message: 'Offen',
+      });
+    });
+
     it('has no report or API key routes for tenants without an API feature', () => {
       const { api } = loadApi({ reportApiEnabled: false });
       const paths = routeLayers(api).map(layer => layer.route.path).flat();
