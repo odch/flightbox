@@ -159,28 +159,64 @@ $ curl \
 
 ### API
 
-The paths below are on the app's own domain, e.g. `https://lsze.flightbox.aero/api/aerodrome/status` (production)
-or `https://lsze-test.web.app/api/aerodrome/status` (test): Firebase Hosting forwards `/api/**` to the `api`
-function, with a timeout of 60 seconds. Give external programs this URL. The function also answers on
-`https://europe-west1-<PROJECT_ID>.cloudfunctions.net` with the same paths, which the app itself uses.
+The paths below are on the app's own domain, e.g. `https://lsze.flightbox.aero/api/v1/aerodrome/status`
+(production) or `https://lsze-test.web.app/api/v1/aerodrome/status` (test): Firebase Hosting forwards `/api/**`
+to the `api` function, with a timeout of 60 seconds. Give external programs this URL. The function also answers
+on `https://europe-west1-<PROJECT_ID>.cloudfunctions.net` with the same paths, which the app itself uses.
+
+The `/v1` paths stay compatible; an incompatible change would get a new version. `/api/aerodrome/status` stays
+as an alias of `/api/v1/aerodrome/status` for existing callers. The other paths serve the app itself and change
+with it. All routes answer CORS requests from any origin.
+
+| Method | Path | Caller | Returns |
+|--------|------|--------|---------|
+| `GET` | `/api/v1/aerodrome/status` | anyone | [Aerodrome status](#aerodrome-status) |
+| `GET` | `/api/v1/reports/airstat` | API key or admin | [Airstat report](#airstat-report) (CSV) |
+| `GET`, `POST` | `/api/v1/api-keys` | admin | List and create [API keys](#api-keys) |
+| `DELETE` | `/api/v1/api-keys/<id>` | admin | Revoke an [API key](#api-keys) |
+| `GET` | `/api/customs/invoices` | admin | [Customs](#customs) invoices of a month |
+| `GET` | `/api/customs/checkouts` | admin | [Customs](#customs) checkouts of a month |
+| `POST` | `/api/customs/prepopulated-forms` | user, not guest or kiosk | [Customs](#customs) form for a movement |
+| `GET` | `/api/customs/availability` | user | Whether [customs](#customs) is configured |
+| `GET` | `/api/users/me/invoice-recipients` | user | [Invoice recipients](#invoice-recipients) of the user |
+
+*Anyone* needs no authentication, *user* the Firebase ID token of a logged-in user, *admin* that of an admin
+(see [Authentication](#authentication)). The airstat report and the API keys exist only on projects with
+`reportApiEnabled` (see `projects/Configuration.md`).
+
+#### Authentication ####
+
+* **API key** (external programs): `Authorization: Bearer fbx_...`, see [API keys](#api-keys).
+* **Firebase ID token** (the app): `Authorization: Bearer <ID token>` of a logged-in user. Without a valid,
+  unrevoked token the answer is `401 Unauthorized`. Routes for admins answer `403 Forbidden: Admins only` to
+  other users, and the customs form answers `403 Forbidden: not available to shared sessions` to guest and kiosk
+  logins. These answers are not JSON: the body is just that text (sent as `text/html`).
 
 #### Aerodrome status ####
 
-Returns the current aerodrome status.
+Returns the current aerodrome status, without authentication.
 
-`GET /api/aerodrome/status`
+`GET /api/v1/aerodrome/status` (also `/api/aerodrome/status`, the path from before `/v1`)
 
 Returns (example):
 ```
 {
-  status: "closed",
-  last_update_by: "Hans Meier",
-  last_update_date: "2020-04-12T22:29:01.565Z",
-  message: "Flugplatz geschlossen. Kinderspielplatz und Restaurant geschlossen."
+  "status": "closed",
+  "last_update_by": "Hans Meier",
+  "last_update_date": "2020-04-12T22:29:01.565Z",
+  "message": "Flugplatz geschlossen. Kinderspielplatz und Restaurant geschlossen.",
+  "last_update_user": {
+    "uid": "...",
+    "firstname": "Hans",
+    "lastname": "Meier",
+    "email": "hans.meier@example.com"
+  }
 }
 ```
 
-If no status is set, `{}` is returned.
+`last_update_user` holds those of its fields that are stored with the status and is left out when there are
+none. If no status is set, `{}` is returned. The answer is never cached (`Cache-Control: no-cache, no-store,
+must-revalidate`).
 
 #### Airstat report ####
 
@@ -195,7 +231,7 @@ available on projects with `reportApiEnabled` (see `projects/Configuration.md`).
 
 Requires an API key with the scope `reports:airstat` (`reports:airstat:internal` too for `internal=true`) or
 the Firebase ID token of an admin, both as `Authorization: Bearer <API key or ID token>`. For an ID token
-that is not valid the answer is `401`, for a user who is not an admin `403` (plain text). For the API key
+that is not valid the answer is `401`, for a user who is not an admin `403` (text, not JSON). For the API key
 errors see [API keys](#api-keys).
 
 The report's own errors are JSON: `400` for invalid parameters, `500` with `error: "invalid_movement_data"` and
@@ -240,41 +276,25 @@ Admin endpoints, with the Firebase ID token of an admin (`Authorization: Bearer 
   for an invalid body.
 * `DELETE /api/v1/api-keys/<id>`: revokes the key, `204`.
 
-#### Import users ####
+#### Customs ####
 
-##### Request #####
+The integration with the customs declaration app configured in the admin area (`/settings/customsDeclarationApp`).
+Errors are JSON with an `error` message.
 
-POST an array of users to this endpoint to sync the users list.
+* `GET /api/customs/invoices?year=2026&month=9` (admin): the customs app's invoices of that month as a JSON
+  array, `[]` when no customs app is set up (`/settings/customsDeclarationApp` missing). `500` when the customs
+  app fails or its settings are incomplete.
+* `GET /api/customs/checkouts?year=2026&month=9` (admin): the checkouts of that month, like the invoices.
+* `POST /api/customs/prepopulated-forms` (user, not guest or kiosk) with
+  `{"movementType": "departure" | "arrival", "movementKey": "<key>"}`: builds the customs form from the stored
+  movement and posts it to the customs app; returns the customs app's answer. `400` for an invalid body, `404`
+  for an unknown movement, `503` when no customs app is set up, `500` when it fails or its settings are
+  incomplete.
+* `GET /api/customs/availability` (user): `{"available": true}` when the customs settings are complete (access
+  token, base URL and aerodrome), else `false`.
 
-New users are added, existing ones are updated, and those which are saved in the database, but not present in the given
-users array are removed from the database.
+#### Invoice recipients ####
 
-Example payload:
-```
-POST /api/users/import
-
-{
-  "users": [
-    {
-      "memberNr": "48434",
-      "firstname": "John",
-      "lastname": "Doe",
-      "phone": "+41791234567",
-      "email": "john.doe@example.com"
-    },
-    {
-      "memberNr": "30443",
-      "firstname": "Jane",
-      "lastname": "Smith",
-      "phone": "+41791234568",
-      "email": "jane.smith@example.com"
-    },
-    ...
-  ]
-}
-```
-
-##### Auth #####
-
-This endpoint requires a Basic Auth header (username and password to use set in the function config:
-`api.serviceuser.username` and `api.serviceuser.password`).
+`GET /api/users/me/invoice-recipients` (user): the names of the invoice recipients (`/settings/invoiceRecipients`)
+whose e-mail addresses include the user's, as a JSON array, e.g. `["Motorfluggruppe"]`; `[]` for a login without
+e-mail address, such as guest and kiosk. `500` with an `error` message when the lookup fails.
