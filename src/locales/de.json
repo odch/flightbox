@@ -86,7 +86,8 @@
     "guestAccess": "Gast-Login",
     "import": "Import",
     "privacy": "Datenschutz",
-    "apiAccess": "API-Zugriff"
+    "apiAccess": "API-Zugriff",
+    "customsSelfDeclaration": "Zoll-Selbstdeklaration"
   },
   "movement": {
     "openCustoms": "Zollanmeldung öffnen",
@@ -411,6 +412,20 @@
     "deleteConfirm": "Möchten Sie den Rechnungsempfänger '{{name}}' wirklich löschen?",
     "nameLabel": "Name des Rechnungsempfängers (z.B. 'Flugschule XYZ')",
     "add": "Hinzufügen"
+  },
+  "adminCustomsSelfDeclaration": {
+    "title": "Zoll-Selbstdeklaration",
+    "description": "Hier werden die Personen erfasst, deren Zollanmeldungen ohne Prüfung durch den Flugplatz direkt an die Zollbehörden übermittelt werden (Selbstdeklaration). Erfasst wird die E-Mail-Adresse, mit der sich die Person in der Zollanmeldungs-App anmeldet. Dies gilt nur für neue Anmeldungen, die eingeloggt erfasst werden. Änderungen und Annullierungen werden weiterhin durch den Flugplatz geprüft und weitergeleitet.",
+    "emailPlaceholder": "Login der Zollanmeldungs-App (E-Mail)",
+    "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+    "duplicateEmail": "Diese E-Mail-Adresse ist bereits erfasst.",
+    "saveFailed": "Die Änderung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "empty": "Es sind noch keine Personen erfasst."
+  },
+  "customsSyncStatus": {
+    "ok": "Zuletzt mit der Zollanmeldungs-App synchronisiert: {{dateTime}}",
+    "error": "Synchronisation mit der Zollanmeldungs-App fehlgeschlagen ({{dateTime}}). Bitte später erneut versuchen oder den Support kontaktieren.",
+    "rejected": "Folgende Einträge wurden von der Zollanmeldungs-App abgelehnt:"
   },
   "guestAccess": {
     "title": "Gast-Login",

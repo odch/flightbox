@@ -5,13 +5,22 @@ import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
 import DeleteDialog from '../DeleteDialog';
 
+// At least 130px wide (aligns short entries such as registrations), wider
+// for long entries such as e-mail addresses.
 const Wrapper = styled.div`
-  width: 130px;
+  min-width: 130px;
+  width: fit-content;
+  max-width: 100%;
+  gap: 0.5em;
   font-size: 1.3em;
   margin-bottom: 0.5em;
   display: flex;
   justify-content: space-between;
   align-items: center;
+`;
+
+const Name = styled.span`
+  overflow-wrap: anywhere;
 `;
 
 const RemoveButton = styled.button`
@@ -21,6 +30,7 @@ const RemoveButton = styled.button`
   padding: 0;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 
   &:hover {
     color: ${props => props.theme.colors.main};
@@ -33,7 +43,7 @@ const Item = props => {
   return (
     <>
       <Wrapper>
-        <span>{props.name}</span>
+        <Name>{props.name}</Name>
         <RemoveButton onClick={() => setConfirmOpen(true)}>
           <MaterialIcon icon="delete"/>
         </RemoveButton>

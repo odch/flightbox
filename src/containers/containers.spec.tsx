@@ -75,6 +75,32 @@ jest.mock('../components/InvoiceRecipientsList', () => ({
   default: () => <div data-testid="invoice-recipients-list" />,
 }));
 
+// jest.fn() wrappers so the customs tests below can inspect the props the
+// containers pass down.
+jest.mock('../components/CustomsSelfDeclarationEmailList', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: jest.fn((_props: any) => React.createElement('div', {'data-testid': 'self-declaration-email-list'})),
+  };
+});
+
+jest.mock('../components/CustomsSyncStatus', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: jest.fn((_props: any) => React.createElement('div', {'data-testid': 'customs-sync-status'})),
+  };
+});
+
+jest.mock('../components/AdminPage', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: jest.fn((_props: any) => React.createElement('div', {'data-testid': 'admin-page'})),
+  };
+});
+
 jest.mock('../components/ApiAccess', () => ({
   __esModule: true,
   default: () => <div data-testid="api-access" />,
@@ -341,5 +367,83 @@ describe('container mount dispatches', () => {
     expect(initialInitCount).toBe(1);
     rerender(wrap(store, <LandingsReportFormContainer />));
     expect(countOf(store, 'INIT_REPORT')).toBe(initialInitCount);
+  });
+});
+
+describe('customs containers', () => {
+  const lastPropsOf = (mockComponent: jest.Mock) =>
+    mockComponent.mock.calls[mockComponent.mock.calls.length - 1][0];
+
+  it('CustomsSelfDeclarationEmailListContainer passes the list state and dispatches changes', () => {
+    const Container = require('./CustomsSelfDeclarationEmailListContainer').default;
+    const Component = require('../components/CustomsSelfDeclarationEmailList').default;
+    const store = makeStore({
+      settings: {
+        customsSelfDeclaration: {
+          loaded: true,
+          emails: ['a@example.ch'],
+          saving: false,
+          saveFailed: true,
+        },
+      },
+    });
+    render(wrap(store, <Container />));
+
+    const props = lastPropsOf(Component);
+    expect(props.emails).toEqual(['a@example.ch']);
+    expect(props.loaded).toBe(true);
+    expect(props.saveFailed).toBe(true);
+
+    props.addEmail('b@example.ch');
+    props.removeEmail('a@example.ch');
+    expect(store.actions).toEqual([
+      { type: 'ADD_CUSTOMS_SELF_DECLARATION_EMAIL', payload: { email: 'b@example.ch' } },
+      { type: 'REMOVE_CUSTOMS_SELF_DECLARATION_EMAIL', payload: { email: 'a@example.ch' } },
+    ]);
+  });
+
+  it('CustomsSyncStatusContainer passes the status of its key', () => {
+    const Container = require('./CustomsSyncStatusContainer').default;
+    const Component = require('../components/CustomsSyncStatus').default;
+    const invoiceStatus = { status: 'error', timestamp: '2026-10-05T12:00:00.000Z', httpStatus: 500 };
+    const store = makeStore({
+      settings: {
+        customsSyncStatus: {
+          statuses: {
+            selfDeclarationEmails: { status: 'ok', timestamp: '2026-10-05T13:00:00.000Z' },
+            invoiceRecipients: invoiceStatus,
+          },
+        },
+      },
+    });
+    render(wrap(store, <Container statusKey="invoiceRecipients" />));
+
+    expect(lastPropsOf(Component).status).toBe(invoiceStatus);
+  });
+
+  it('CustomsSyncStatusContainer passes no status before the first sync', () => {
+    const Container = require('./CustomsSyncStatusContainer').default;
+    const Component = require('../components/CustomsSyncStatus').default;
+    const store = makeStore({ settings: { customsSyncStatus: { statuses: {} } } });
+    render(wrap(store, <Container statusKey="selfDeclarationEmails" />));
+
+    expect(lastPropsOf(Component).status).toBeUndefined();
+  });
+
+  it('AdminPageContainer passes the customs availability and can check it', () => {
+    const Container = require('./AdminPageContainer').default;
+    const Component = require('../components/AdminPage').default;
+    const store = makeStore({
+      auth: { data: { admin: true } },
+      settings: { guestAccessToken: { token: null }, kioskAccessToken: { token: null } },
+      customs: { available: true },
+    });
+    render(wrap(store, <Container />));
+
+    const props = lastPropsOf(Component);
+    expect(props.customsAvailable).toBe(true);
+
+    props.checkCustomsAvailability();
+    expect(store.actions).toEqual([{ type: 'CHECK_CUSTOMS_AVAILABILITY' }]);
   });
 });

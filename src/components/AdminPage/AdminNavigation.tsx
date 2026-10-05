@@ -114,6 +114,7 @@ const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange }) => {
     { key: 'messages', label: t('admin.messages'), icon: 'message' },
     { key: 'aircraft', label: t('admin.aircraft'), icon: 'flight' },
     { key: 'invoice-recipients', label: t('admin.invoiceRecipients'), icon: 'receipt' },
+    { key: 'customs-self-declaration', label: t('admin.customsSelfDeclaration'), icon: 'verified_user' },
     { key: 'kiosk-access', label: t('admin.kioskAccess'), icon: 'person_add' },
     { key: 'guest-access', label: t('admin.guestAccess'), icon: 'person_add' },
     { key: 'privacy', label: t('admin.privacy'), icon: 'security' },

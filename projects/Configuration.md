@@ -22,6 +22,7 @@ project.
 * `title`
 * `enabledFlightTypes`
 * `reportApiEnabled`
+* `customsSelfDeclarationEnabled`
 
 ### `aerodrome`
 
@@ -219,6 +220,14 @@ Disabled by default.
 The functions get this flag and the aerodrome data they need from `functions/project-config.generated.json`, which
 the deploy writes with `node tasks/generateServerConfig.js <project> <test|production> <file> [<Firebase project>]`
 (with the Firebase project given, a config for another project fails instead of being ignored at runtime).
+
+Example: `true`
+
+### `customsSelfDeclarationEnabled`
+
+Enables the "Zoll-Selbstdeklaration" tab in the admin area, where admins list the logins (e-mail addresses) whose
+declarations the customs declaration app forwards to the authorities without review by the aerodrome. The tab is
+only shown when the customs integration is configured (`/settings/customsDeclarationApp`). Disabled by default.
 
 Example: `true`
 
