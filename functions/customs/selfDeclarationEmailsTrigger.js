@@ -23,7 +23,7 @@ function buildBody(value) {
 // Every write pushes the full current list (an idempotent PUT), so a list
 // that failed to sync is pushed again with the next change.
 module.exports.updateCustomsSelfDeclarationEmailsOnUpdate = onValueWritten(
-  { region: regionOpt, instance: instanceOpt, ref: SELF_DECLARATION_EMAILS_PATH, retry: true },
+  { region: regionOpt, instance: instanceOpt, ref: SELF_DECLARATION_EMAILS_PATH },
   async () => {
     await syncToCustoms({
       sourcePath: SELF_DECLARATION_EMAILS_PATH,

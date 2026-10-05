@@ -304,8 +304,8 @@ full list each time):
 * `/settings/aircrafts` → `/api/homebased-aircraft`
 
 For the first two, the outcome is stored in `/settings/customsSyncStatus/<invoiceRecipients|selfDeclarationEmails>`
-(`status` `ok` or `error`, `timestamp`, `rejected` entries, `httpStatus`) and shown on their admin tabs. A `5xx`
-answer or a network error fails the function so that it is retried; the retry pushes the list as it is then.
+(`status` `ok` or `error`, `timestamp`, `rejected` entries, `httpStatus`) and shown on their admin tabs. A failed
+push is not retried automatically; the next change of the list pushes the whole list again.
 
 #### Invoice recipients ####
 

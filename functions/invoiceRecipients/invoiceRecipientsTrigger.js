@@ -21,7 +21,7 @@ function buildBody(value) {
 }
 
 module.exports.updateCustomsInvoiceRecipientsOnUpdate = onValueWritten(
-  { region: regionOpt, instance: instanceOpt, ref: INVOICE_RECIPIENTS_PATH, retry: true },
+  { region: regionOpt, instance: instanceOpt, ref: INVOICE_RECIPIENTS_PATH },
   async (event) => {
     const before = event.data.before.val()
     const after = event.data.after.val()

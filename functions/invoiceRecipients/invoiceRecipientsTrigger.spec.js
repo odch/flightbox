@@ -71,12 +71,12 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
     after: { val: () => after },
   });
 
-  it('listens on the invoice recipients with retries enabled', () => {
+  // no failure policy: deploying one requires --force, which CI doesn't pass
+  it('listens on the invoice recipients without retries', () => {
     expect(mockCapturedOptions).toEqual({
       region: '{{ params.RTDB_REGION }}',
       instance: '{{ params.RTDB_INSTANCE }}',
       ref: '/settings/invoiceRecipients',
-      retry: true,
     });
   });
 
@@ -186,7 +186,7 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
     });
   });
 
-  it('throws on a server error so the event is retried', async () => {
+  it('throws on a server error so the execution fails', async () => {
     global.fetch.mockResolvedValue({
       ok: false,
       status: 503,

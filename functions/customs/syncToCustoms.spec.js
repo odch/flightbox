@@ -196,7 +196,7 @@ describe('functions/customs/syncToCustoms', () => {
     );
   });
 
-  it('writes an error status and throws on HTTP 5xx so the event is retried', async () => {
+  it('writes an error status and throws on HTTP 5xx', async () => {
     global.fetch.mockResolvedValue(jsonResponse(500, { message: 'boom' }));
 
     await expect(syncToCustoms(OPTIONS)).rejects.toThrow('The customs app responded with HTTP 500');
