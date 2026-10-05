@@ -3,7 +3,7 @@ import '../../i18n';
 import {renderWithTheme, screen, fireEvent} from '../../../test/renderWithTheme';
 import CustomsSelfDeclarationEmailList from './CustomsSelfDeclarationEmailList';
 
-const PLACEHOLDER = 'Login der Zollanmeldungs-App (E-Mail)';
+const PLACEHOLDER = 'Berechtigtes Login (E-Mail)';
 
 const renderList = (props: any = {}) => {
   const addEmail = jest.fn();
