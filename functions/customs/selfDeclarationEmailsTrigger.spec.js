@@ -77,12 +77,12 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
     json: jest.fn().mockResolvedValue(body),
   });
 
-  it('listens on the self-declaration e-mails with retries enabled', () => {
+  // no failure policy: deploying one requires --force, which CI doesn't pass
+  it('listens on the self-declaration e-mails without retries', () => {
     expect(mockCapturedOptions).toEqual({
       region: '{{ params.RTDB_REGION }}',
       instance: '{{ params.RTDB_INSTANCE }}',
       ref: '/settings/customsSelfDeclarationEmails',
-      retry: true,
     });
   });
 
@@ -172,7 +172,7 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
     });
   });
 
-  it('throws on a server error so the event is retried', async () => {
+  it('throws on a server error so the execution fails', async () => {
     global.fetch.mockResolvedValue({
       ok: false,
       status: 500,
@@ -189,7 +189,7 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
     });
   });
 
-  it('throws on a network error so the event is retried', async () => {
+  it('throws on a network error so the execution fails', async () => {
     global.fetch.mockRejectedValue(new TypeError('fetch failed'));
     currentEmails = ['a@example.com'];
 

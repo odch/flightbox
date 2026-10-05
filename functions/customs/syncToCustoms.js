@@ -26,7 +26,7 @@ async function readJson(response) {
 }
 
 // The status is informational (shown to admins), so failing to write it must
-// neither mask the sync result nor trigger a retry on its own.
+// neither mask the sync result nor fail the function on its own.
 async function writeStatus(db, statusKey, status) {
   try {
     await db.ref(`${SYNC_STATUS_PATH}/${statusKey}`).set({
@@ -44,11 +44,12 @@ async function writeStatus(db, statusKey, status) {
  * /settings/customsSyncStatus/<statusKey>.
  *
  * The value is read anew rather than taken from the triggering event, so a
- * retried (possibly older) event never pushes stale data.
+ * delayed (possibly older) event never pushes stale data.
  *
- * Retries: a 2xx or 4xx response resolves (a 4xx would fail again on
- * retry). A 5xx response or a network error rejects, so that a trigger
- * deployed with `retry: true` is retried.
+ * A 2xx or 4xx response resolves. A 5xx response or a network error rejects,
+ * so the execution shows up as failed. The triggers are not retried (a
+ * deploy with a failure policy needs `--force`): the error status tells the
+ * admin, and the next change pushes the whole list again.
  *
  * @param {object} options
  * @param {string} options.sourcePath RTDB path whose value is pushed
