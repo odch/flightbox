@@ -64,6 +64,7 @@ The `--project=<name>` flag sets `npm_config_project` which webpack picks up via
 
 Do not add `Co-Authored-By` or any AI attribution lines to commit messages.
 Subject and body lines max 72 characters.
+Never create or push release tags (`v*`) and never push to `master` (deploys to production); releases are done by the maintainer.
 
 ## Testing
 
