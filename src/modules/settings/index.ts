@@ -11,6 +11,8 @@ import invoiceRecipients, {sagas as invoiceRecipientsSagas} from './invoiceRecip
 import privacyPolicyUrl, {sagas as privacyPolicyUrlSagas} from './privacyPolicyUrl';
 import movementRetentionDays, {sagas as movementRetentionDaysSagas} from './movementRetentionDays';
 import messageRetentionDays, {sagas as messageRetentionDaysSagas} from './messageRetentionDays';
+import customsSelfDeclaration, {sagas as customsSelfDeclarationSagas} from './customsSelfDeclaration';
+import customsSyncStatus, {sagas as customsSyncStatusSagas} from './customsSyncStatus';
 
 const reducer = combineReducers({
   aerodromeStatus,
@@ -23,6 +25,8 @@ const reducer = combineReducers({
   privacyPolicyUrl,
   movementRetentionDays,
   messageRetentionDays,
+  customsSelfDeclaration,
+  customsSyncStatus,
 });
 
 export function* sagas() {
@@ -37,6 +41,8 @@ export function* sagas() {
     fork(privacyPolicyUrlSagas),
     fork(movementRetentionDaysSagas),
     fork(messageRetentionDaysSagas),
+    fork(customsSelfDeclarationSagas),
+    fork(customsSyncStatusSagas),
   ])
 }
 

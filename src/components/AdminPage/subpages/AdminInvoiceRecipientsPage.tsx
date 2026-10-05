@@ -1,6 +1,7 @@
 import React from 'react';
 import LabeledBox from '../../LabeledBox';
 import InvoiceRecipientsList from '../../../containers/InvoiceRecipientsListContainer';
+import CustomsSyncStatus from '../../../containers/CustomsSyncStatusContainer';
 import objectToArray from '../../../util/objectToArray';
 import { useTranslation } from 'react-i18next';
 
@@ -16,6 +17,7 @@ const AdminInvoiceRecipientsPage = () => {
 
   return (
     <LabeledBox label={t('adminInvoiceRecipients.title')}>
+      <CustomsSyncStatus statusKey="invoiceRecipients"/>
       <InvoiceRecipientsList/>
     </LabeledBox>
   );

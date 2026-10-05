@@ -290,6 +290,18 @@
         ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
         ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true"
       },
+      "customsSelfDeclarationEmails": {
+        ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
+        ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true",
+        ".validate": "newData.hasChildren()",
+        "$index": {
+          ".validate": "newData.isString() && newData.val().length <= 254 && newData.val() === newData.val().toLowerCase() && newData.val().contains('@') && !newData.val().contains(' ')"
+        }
+      },
+      "customsSyncStatus": {
+        ".read": "auth !== null && root.child('admins/' + auth.uid).val() === true",
+        ".write": false
+      },
       "privacyPolicyUrl": {
         ".read": true,
         ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true",
