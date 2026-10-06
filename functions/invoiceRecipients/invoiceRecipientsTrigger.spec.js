@@ -1,9 +1,11 @@
 'use strict';
 
+let mockCapturedOptions = null;
 let mockCapturedHandler = null;
 
 jest.mock('firebase-functions/v2/database', () => ({
   onValueWritten: jest.fn((opts, handler) => {
+    mockCapturedOptions = opts;
     mockCapturedHandler = handler;
   })
 }));
@@ -30,16 +32,52 @@ jest.mock('firebase-admin/database', () => ({
 
 global.fetch = jest.fn();
 
-require('./invoiceRecipientsTrigger');
+const { buildBody } = require('./invoiceRecipientsTrigger');
+
+const CUSTOMS_SETTINGS = {
+  baseUrl: 'https://customs.example.com',
+  aerodrome: 'LSZT',
+  accessToken: 'tok123',
+};
 
 describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
+  let customsSettings;
+  let currentRecipients;
+  let statusSet;
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    customsSettings = CUSTOMS_SETTINGS;
+    currentRecipients = null;
+    statusSet = jest.fn().mockResolvedValue(undefined);
+
+    mockAdminDbRef.mockImplementation(path => {
+      if (path === '/settings/customsDeclarationApp') {
+        return { once: jest.fn().mockResolvedValue({ val: () => customsSettings }) };
+      }
+      if (path === '/settings/invoiceRecipients') {
+        return { once: jest.fn().mockResolvedValue({ val: () => currentRecipients }) };
+      }
+      if (path === '/settings/customsSyncStatus/invoiceRecipients') {
+        return { set: statusSet };
+      }
+      throw new Error(`Unexpected ref ${path}`);
+    });
   });
 
   const makeChange = (before, after) => ({
     before: { val: () => before },
     after: { val: () => after },
+  });
+
+  // no failure policy: deploying one requires --force, which CI doesn't pass
+  it('listens on the invoice recipients without retries', () => {
+    expect(mockCapturedOptions).toEqual({
+      region: '{{ params.RTDB_REGION }}',
+      instance: '{{ params.RTDB_INSTANCE }}',
+      ref: '/settings/invoiceRecipients',
+    });
   });
 
   it('does nothing when before and after are equal', async () => {
@@ -50,41 +88,29 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
   });
 
   it('does nothing when no customs declaration settings exist', async () => {
-    mockAdminDbRef.mockReturnValue({
-      once: jest.fn().mockResolvedValue({ val: () => null }),
-    });
+    customsSettings = null;
     const change = makeChange([{ name: 'A' }], [{ name: 'B' }]);
     await mockCapturedHandler({ data: change });
     expect(global.fetch).not.toHaveBeenCalled();
+    expect(statusSet).not.toHaveBeenCalled();
   });
 
   it('does nothing when customs settings have no baseUrl', async () => {
-    mockAdminDbRef.mockReturnValue({
-      once: jest.fn().mockResolvedValue({ val: () => ({ aerodrome: 'LSZT' }) }),
-    });
+    customsSettings = { aerodrome: 'LSZT' };
     const change = makeChange([{ name: 'A' }], [{ name: 'B' }]);
     await mockCapturedHandler({ data: change });
     expect(global.fetch).not.toHaveBeenCalled();
+    expect(statusSet).not.toHaveBeenCalled();
   });
 
-  it('sends PUT request with recipient data when settings are present', async () => {
-    mockAdminDbRef.mockReturnValue({
-      once: jest.fn().mockResolvedValue({
-        val: () => ({
-          baseUrl: 'https://customs.example.com',
-          aerodrome: 'LSZT',
-          accessToken: 'tok123',
-        }),
-      }),
-    });
+  it('sends PUT request with the current recipient data when settings are present', async () => {
+    global.fetch.mockResolvedValue({ ok: true, status: 200, json: jest.fn().mockResolvedValue({}) });
 
-    global.fetch.mockResolvedValue({ ok: true });
-
-    const after = [
+    currentRecipients = [
       { name: 'Alice', emails: ['alice@example.com'] },
       { name: 'Bob', emails: ['bob@example.com', 'bob2@example.com'] },
     ];
-    const change = makeChange([{ name: 'Old' }], after);
+    const change = makeChange([{ name: 'Old' }], currentRecipients);
     await mockCapturedHandler({ data: change });
 
     expect(global.fetch).toHaveBeenCalledWith(
@@ -103,18 +129,23 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
     );
   });
 
-  it('handles null after value by sending empty array', async () => {
-    mockAdminDbRef.mockReturnValue({
-      once: jest.fn().mockResolvedValue({
-        val: () => ({
-          baseUrl: 'https://customs.example.com',
-          aerodrome: 'LSZT',
-          accessToken: 'tok123',
-        }),
-      }),
-    });
+  it('pushes the value currently stored rather than the event data', async () => {
+    global.fetch.mockResolvedValue({ ok: true, status: 200, json: jest.fn().mockResolvedValue({}) });
 
-    global.fetch.mockResolvedValue({ ok: true });
+    currentRecipients = [{ name: 'Newest', emails: ['n@example.com'] }];
+    const change = makeChange([{ name: 'Old' }], [{ name: 'Stale', emails: [] }]);
+    await mockCapturedHandler({ data: change });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        body: JSON.stringify([{ name: 'Newest', emails: ['n@example.com'] }]),
+      })
+    );
+  });
+
+  it('sends an empty array when the recipients were deleted', async () => {
+    global.fetch.mockResolvedValue({ ok: true, status: 200, json: jest.fn().mockResolvedValue({}) });
 
     const change = makeChange([{ name: 'Old' }], null);
     await mockCapturedHandler({ data: change });
@@ -125,28 +156,74 @@ describe('functions/invoiceRecipients/invoiceRecipientsTrigger', () => {
     );
   });
 
-  it('logs error when fetch response is not ok', async () => {
-    mockAdminDbRef.mockReturnValue({
-      once: jest.fn().mockResolvedValue({
-        val: () => ({
-          baseUrl: 'https://customs.example.com',
-          aerodrome: 'LSZT',
-          accessToken: 'tok123',
-        }),
-      }),
-    });
+  it('records a successful sync', async () => {
+    global.fetch.mockResolvedValue({ ok: true, status: 200, json: jest.fn().mockResolvedValue({}) });
 
+    currentRecipients = [{ name: 'B' }];
+    await mockCapturedHandler({ data: makeChange([{ name: 'A' }], currentRecipients) });
+
+    expect(statusSet).toHaveBeenCalledWith({ status: 'ok', timestamp: expect.any(String) });
+  });
+
+  it('logs and records an error without throwing when the customs app rejects the request', async () => {
     global.fetch.mockResolvedValue({
       ok: false,
+      status: 401,
       json: jest.fn().mockResolvedValue({ error: 'Not authorized' }),
     });
 
     const change = makeChange([{ name: 'A' }], [{ name: 'B' }]);
-    await mockCapturedHandler({ data: change });
+    await expect(mockCapturedHandler({ data: change })).resolves.toBeUndefined();
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       'Failed to update the invoice recipients of the customs app',
       expect.anything()
     );
+    expect(statusSet).toHaveBeenCalledWith({
+      status: 'error',
+      httpStatus: 401,
+      timestamp: expect.any(String),
+    });
+  });
+
+  it('throws on a server error so the execution fails', async () => {
+    global.fetch.mockResolvedValue({
+      ok: false,
+      status: 503,
+      json: jest.fn().mockRejectedValue(new SyntaxError('Unexpected token <')),
+    });
+
+    const change = makeChange([{ name: 'A' }], [{ name: 'B' }]);
+    await expect(mockCapturedHandler({ data: change })).rejects.toThrow('HTTP 503');
+
+    expect(statusSet).toHaveBeenCalledWith({
+      status: 'error',
+      httpStatus: 503,
+      timestamp: expect.any(String),
+    });
+  });
+
+  describe('buildBody', () => {
+    it('maps recipients to name and emails', () => {
+      expect(buildBody([
+        { name: 'Alice', emails: ['alice@example.com'] },
+        { name: 'Bob' },
+      ])).toEqual([
+        { name: 'Alice', emails: ['alice@example.com'] },
+        { name: 'Bob', emails: [] },
+      ]);
+    });
+
+    it('returns an empty array for null', () => {
+      expect(buildBody(null)).toEqual([]);
+    });
+
+    it('skips empty entries of a sparse list', () => {
+      expect(buildBody({ 0: { name: 'A' }, 2: { name: 'C' } })).toEqual([
+        { name: 'A', emails: [] },
+        { name: 'C', emails: [] },
+      ]);
+      expect(buildBody([{ name: 'A' }, null])).toEqual([{ name: 'A', emails: [] }]);
+    });
   });
 });

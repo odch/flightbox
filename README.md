@@ -293,6 +293,20 @@ Errors are JSON with an `error` message.
 * `GET /api/customs/availability` (user): `{"available": true}` when the customs settings are complete (access
   token, base URL and aerodrome), else `false`.
 
+Cloud Functions push lists maintained in the admin area to the customs app whenever they are written (`PUT`, the
+full list each time):
+
+* `/settings/invoiceRecipients` → `/api/invoice-recipients`
+* `/settings/customsSelfDeclarationEmails` (tab "Zoll-Selbstdeklaration", shown when the project enables
+  `customsSelfDeclarationEnabled` and customs is available) →
+  `/api/self-declaration-emails`: the logins whose declarations the customs app forwards without review by
+  the aerodrome.
+* `/settings/aircrafts` → `/api/homebased-aircraft`
+
+For the first two, the outcome is stored in `/settings/customsSyncStatus/<invoiceRecipients|selfDeclarationEmails>`
+(`status` `ok` or `error`, `timestamp`, `rejected` entries, `httpStatus`) and shown on their admin tabs. A failed
+push is not retried automatically; the next change of the list pushes the whole list again.
+
 #### Invoice recipients ####
 
 `GET /api/users/me/invoice-recipients` (user): the names of the invoice recipients (`/settings/invoiceRecipients`)

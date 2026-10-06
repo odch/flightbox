@@ -9,6 +9,9 @@
  *    guest/kiosk create/edit ownerless ones and read none — including the one
  *    they just created themselves — admins read/write all;
  *  - shared-access projects (e.g. lspv): any authenticated user reads/writes all.
+ *
+ * Also covers the admin-only customs settings (self-declaration e-mails and
+ * the sync status written by Cloud Functions).
  */
 'use strict';
 
@@ -222,14 +225,70 @@ async function testSharedAccess() {
   await env.cleanup();
 }
 
+async function testCustomsSettings() {
+  console.log('customs settings (lszm)');
+  const env = await initializeTestEnvironment({
+    projectId: 'demo-customs-settings',
+    database: { rules: rulesFor('lszm') },
+  });
+
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    const db = ctx.database();
+    await set(ref(db, 'admins/admin-uid'), true);
+    await set(ref(db, 'admins/stale-admin-uid'), false);
+    await set(ref(db, 'settings/customsSelfDeclarationEmails'), ['pilot@example.com']);
+    await set(ref(db, 'settings/customsSyncStatus/selfDeclarationEmails'), {
+      status: 'ok',
+      timestamp: '2026-10-05T12:00:00.000Z',
+    });
+  });
+
+  const admin = env.authenticatedContext('admin-uid').database();
+  const staleAdmin = env.authenticatedContext('stale-admin-uid').database();
+  const alice = env.authenticatedContext('alice-uid', { email: 'alice@example.com' }).database();
+  const anon = env.unauthenticatedContext().database();
+
+  const EMAILS = 'settings/customsSelfDeclarationEmails';
+  const STATUS = 'settings/customsSyncStatus';
+
+  // self-declaration e-mails: admin-only, validated entries
+  await expect('admin reads the self-declaration e-mails', true, get(ref(admin, EMAILS)));
+  await expect('pilot cannot read the self-declaration e-mails', false, get(ref(alice, EMAILS)));
+  await expect('disabled (false) admin cannot read the self-declaration e-mails', false, get(ref(staleAdmin, EMAILS)));
+  await expect('unauthenticated cannot read the self-declaration e-mails', false, get(ref(anon, EMAILS)));
+  await expect('admin writes a valid list', true, set(ref(admin, EMAILS), ['a@example.com', 'b.c@example.ch']));
+  await expect('admin clears the list', true, set(ref(admin, EMAILS), null));
+  await expect('pilot cannot add themselves', false, set(ref(alice, EMAILS), ['alice@example.com']));
+  await expect('disabled (false) admin cannot write the list', false, set(ref(staleAdmin, EMAILS), ['a@example.com']));
+  await expect('unauthenticated cannot write the list', false, set(ref(anon, EMAILS), ['a@example.com']));
+  await expect('admin cannot store an upper-case e-mail', false, set(ref(admin, EMAILS), ['Alice@example.com']));
+  await expect('admin cannot store an entry without @', false, set(ref(admin, EMAILS), ['alice.example.com']));
+  await expect('admin cannot store an entry with a space', false, set(ref(admin, EMAILS), ['alice @example.com']));
+  await expect('admin cannot store an entry longer than 254 characters', false, set(ref(admin, EMAILS), ['a'.repeat(243) + '@example.com']));
+  await expect('admin stores an entry of 254 characters', true, set(ref(admin, EMAILS), ['a'.repeat(242) + '@example.com']));
+  await expect('admin cannot store a non-string entry', false, set(ref(admin, EMAILS), [42]));
+  await expect('admin cannot store a nested entry', false, set(ref(admin, EMAILS), [{ email: 'a@example.com' }]));
+  await expect('admin cannot store a single string instead of a list', false, set(ref(admin, EMAILS), 'a@example.com'));
+
+  // sync status: read by admins, written only by Cloud Functions (admin SDK)
+  await expect('admin reads the customs sync status', true, get(ref(admin, STATUS)));
+  await expect('pilot cannot read the customs sync status', false, get(ref(alice, STATUS)));
+  await expect('disabled (false) admin cannot read the customs sync status', false, get(ref(staleAdmin, STATUS)));
+  await expect('admin cannot write the customs sync status', false, set(ref(admin, `${STATUS}/selfDeclarationEmails`), { status: 'ok', timestamp: '2026-10-05T13:00:00.000Z' }));
+  await expect('pilot cannot write the customs sync status', false, set(ref(alice, `${STATUS}/invoiceRecipients`), { status: 'ok' }));
+
+  await env.cleanup();
+}
+
 (async () => {
   await testPersonalAccess();
   await testSharedAccess();
+  await testCustomsSettings();
   if (failures > 0) {
     console.error(`\n${failures} rule assertion(s) failed`);
     process.exit(1);
   }
-  console.log('\nAll movement read/write rule assertions passed');
+  console.log('\nAll movement read/write and settings rule assertions passed');
 })().catch((e) => {
   console.error(e);
   process.exit(1);

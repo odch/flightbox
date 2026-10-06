@@ -11,6 +11,7 @@ import AdminAerodromeStatusPage from './subpages/AdminAerodromeStatusPage';
 import AdminMessagesPage from './subpages/AdminMessagesPage';
 import AdminAircraftPage from './subpages/AdminAircraftPage';
 import AdminInvoiceRecipientsPage from './subpages/AdminInvoiceRecipientsPage';
+import AdminCustomsSelfDeclarationPage from './subpages/AdminCustomsSelfDeclarationPage';
 import AdminGuestAccessPage from './subpages/AdminGuestAccessPage';
 import AdminKioskAccessPage from './subpages/AdminKioskAccessPage';
 import AdminPrivacySettingsPage from './subpages/AdminPrivacySettingsPage';
@@ -53,6 +54,8 @@ const renderSubPage = (activeTab: string) => {
       return <AdminAircraftPage/>;
     case 'invoice-recipients':
       return <AdminInvoiceRecipientsPage/>;
+    case 'customs-self-declaration':
+      return <AdminCustomsSelfDeclarationPage/>;
     case 'guest-access':
       return <AdminGuestAccessPage/>;
     case 'kiosk-access':
@@ -66,14 +69,22 @@ const renderSubPage = (activeTab: string) => {
   }
 };
 
-const AdminPage = ({auth, guestAccessToken, kioskAccessToken}: any) => {
+const AdminPage = ({auth, guestAccessToken, kioskAccessToken, customsAvailable, checkCustomsAvailability}: any) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('export');
   const isAdmin = auth.data.admin === true;
+  const customsSelfDeclarationEnabled = __CONF__.customsSelfDeclarationEnabled === true;
 
   useEffect(() => {
     if (!isAdmin) {
       navigate('/');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (isAdmin && customsSelfDeclarationEnabled) {
+      checkCustomsAvailability();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -86,6 +97,13 @@ const AdminPage = ({auth, guestAccessToken, kioskAccessToken}: any) => {
 
   if (!invoicePaymentEnabled) {
     hiddenTabs.push('invoice-recipients');
+  }
+  // Self-declarations are enabled per project. They are a feature of the
+  // customs declaration app, so the tab is also only of use when the
+  // integration is configured (checked by the same API call that enables the
+  // customs actions in the movement list).
+  if (!customsSelfDeclarationEnabled || customsAvailable !== true) {
+    hiddenTabs.push('customs-self-declaration');
   }
   if (!guestAccessEnabled) {
     hiddenTabs.push('guest-access');
@@ -131,7 +149,9 @@ const AdminPage = ({auth, guestAccessToken, kioskAccessToken}: any) => {
   }),
   kioskAccessToken: PropTypes.shape({
     token: PropTypes.string
-  })
+  }),
+  customsAvailable: PropTypes.bool,
+  checkCustomsAvailability: PropTypes.func.isRequired,
 };
 
 export default AdminPage;
