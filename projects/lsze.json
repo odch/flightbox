@@ -55,7 +55,8 @@
       "reportApiEnabled": true,
       "firebaseProjectId": "lsze-prod",
       "firebaseDatabaseUrl": "https://lsze-prod-default-rtdb.europe-west1.firebasedatabase.app",
-      "firebaseApiKey": "AIzaSyDDDRIldRwtze0dVOYfWjYN7FxtC0gyONE"
+      "firebaseApiKey": "AIzaSyDDDRIldRwtze0dVOYfWjYN7FxtC0gyONE",
+      "passkeysEnabled": true
     }
   },
   "theme": "lsze",
