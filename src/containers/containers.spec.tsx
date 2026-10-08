@@ -377,11 +377,12 @@ describe('customs containers', () => {
   it('CustomsSelfDeclarationEmailListContainer passes the list state and dispatches changes', () => {
     const Container = require('./CustomsSelfDeclarationEmailListContainer').default;
     const Component = require('../components/CustomsSelfDeclarationEmailList').default;
+    const selfDeclarants = [{ email: 'a@example.ch', registrations: ['HBKLA'] }];
     const store = makeStore({
       settings: {
         customsSelfDeclaration: {
           loaded: true,
-          emails: ['a@example.ch'],
+          selfDeclarants,
           saving: false,
           saveFailed: true,
         },
@@ -390,15 +391,19 @@ describe('customs containers', () => {
     render(wrap(store, <Container />));
 
     const props = lastPropsOf(Component);
-    expect(props.emails).toEqual(['a@example.ch']);
+    expect(props.selfDeclarants).toEqual(selfDeclarants);
     expect(props.loaded).toBe(true);
     expect(props.saveFailed).toBe(true);
 
-    props.addEmail('b@example.ch');
-    props.removeEmail('a@example.ch');
+    props.addSelfDeclarant('b@example.ch');
+    props.removeSelfDeclarant('a@example.ch');
+    props.addAircraft('a@example.ch', 'HBKLB');
+    props.removeAircraft('a@example.ch', 'HBKLA');
     expect(store.actions).toEqual([
-      { type: 'ADD_CUSTOMS_SELF_DECLARATION_EMAIL', payload: { email: 'b@example.ch' } },
-      { type: 'REMOVE_CUSTOMS_SELF_DECLARATION_EMAIL', payload: { email: 'a@example.ch' } },
+      { type: 'ADD_CUSTOMS_SELF_DECLARANT', payload: { email: 'b@example.ch' } },
+      { type: 'REMOVE_CUSTOMS_SELF_DECLARANT', payload: { email: 'a@example.ch' } },
+      { type: 'ADD_CUSTOMS_SELF_DECLARANT_AIRCRAFT', payload: { email: 'a@example.ch', registration: 'HBKLB' } },
+      { type: 'REMOVE_CUSTOMS_SELF_DECLARANT_AIRCRAFT', payload: { email: 'a@example.ch', registration: 'HBKLA' } },
     ]);
   });
 

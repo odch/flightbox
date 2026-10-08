@@ -415,12 +415,19 @@
   },
   "adminCustomsSelfDeclaration": {
     "title": "Zoll-Selbstdeklaration",
-    "description": "Hier werden die Personen erfasst, deren Zollanmeldungen ohne Prüfung durch den Flugplatz direkt an die Zollbehörden übermittelt werden (Selbstdeklaration). Erfasst wird die E-Mail-Adresse, mit der sich die Person in der Zollanmeldungs-App anmeldet. Dies gilt nur für neue Anmeldungen, die eingeloggt erfasst werden. Änderungen und Annullierungen werden weiterhin durch den Flugplatz geprüft und weitergeleitet.",
+    "description": "Hier werden die Personen erfasst, deren Zollanmeldungen ohne Prüfung durch den Flugplatz direkt an die Zollbehörden übermittelt werden (Selbstdeklaration). Erfasst werden die E-Mail-Adresse, mit der sich die Person in der Zollanmeldungs-App anmeldet, und die Luftfahrzeuge, für welche die Selbstdeklaration gilt. Direkt übermittelt wird eine Anmeldung nur, wenn ihre Immatrikulation einem der Luftfahrzeuge der Person entspricht. Alle anderen Anmeldungen, auch jene von Personen ohne erfasstes Luftfahrzeug, werden durch den Flugplatz geprüft. Dies gilt nur für neue Anmeldungen, die eingeloggt erfasst werden. Änderungen und Annullierungen werden weiterhin durch den Flugplatz geprüft und weitergeleitet.",
     "emailPlaceholder": "Berechtigtes Login (E-Mail)",
     "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
     "duplicateEmail": "Diese E-Mail-Adresse ist bereits erfasst.",
     "saveFailed": "Die Änderung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
-    "empty": "Es sind noch keine Personen erfasst."
+    "empty": "Es sind noch keine Personen erfasst.",
+    "aircraft": "Luftfahrzeuge (Immatrikulation)",
+    "noAircraft": "Noch kein Luftfahrzeug erfasst: Die Zollanmeldungen dieser Person werden nicht direkt übermittelt, sondern durch den Flugplatz geprüft, bis Sie mindestens ein Luftfahrzeug hinzufügen.",
+    "addAircraft": "Luftfahrzeug hinzufügen",
+    "invalidRegistration": "Bitte geben Sie eine gültige Immatrikulation ein (1 bis 10 Buchstaben oder Ziffern).",
+    "duplicateRegistration": "Dieses Luftfahrzeug ist bei dieser Person bereits erfasst.",
+    "removePerson": "Person entfernen",
+    "removePersonConfirm": "Möchten Sie '{{email}}' mit allen erfassten Luftfahrzeugen wirklich löschen?"
   },
   "customsSyncStatus": {
     "ok": "Zuletzt mit der Zollanmeldungs-App synchronisiert: {{dateTime}}",
