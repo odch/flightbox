@@ -226,8 +226,10 @@ Example: `true`
 ### `customsSelfDeclarationEnabled`
 
 Enables the "Zoll-Selbstdeklaration" tab in the admin area, where admins list the logins (e-mail addresses) whose
-declarations the customs declaration app forwards to the authorities without review by the aerodrome. The tab is
-only shown when the customs integration is configured (`/settings/customsDeclarationApp`). Disabled by default.
+declarations the customs declaration app forwards to the authorities without review by the aerodrome, each with
+the aircraft (registrations) this applies to. Only declarations for one of the login's aircraft are forwarded
+directly; a login without aircraft is always reviewed. The tab is only shown when the customs integration is
+configured (`/settings/customsDeclarationApp`). Disabled by default.
 
 Example: `true`
 

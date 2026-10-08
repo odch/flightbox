@@ -14,11 +14,12 @@ jest.mock('../../../containers/CustomsSelfDeclarationEmailListContainer', () => 
 import AdminCustomsSelfDeclarationPage from './AdminCustomsSelfDeclarationPage';
 
 describe('AdminCustomsSelfDeclarationPage', () => {
-  it('describes the self-declaration and shows the sync status and the list', () => {
+  it('describes the self-declaration and its aircraft condition and shows the sync status and the list', () => {
     renderWithTheme(<AdminCustomsSelfDeclarationPage/>);
 
     expect(screen.getByText('Zoll-Selbstdeklaration')).toBeInTheDocument();
     expect(screen.getByText(/direkt an die Zollbehörden übermittelt werden \(Selbstdeklaration\)/)).toBeInTheDocument();
+    expect(screen.getByText(/nur, wenn ihre Immatrikulation einem der Luftfahrzeuge der Person entspricht/)).toBeInTheDocument();
     expect(screen.getByTestId('customs-sync-status')).toHaveTextContent('selfDeclarationEmails');
     expect(screen.getByTestId('self-declaration-email-list')).toBeInTheDocument();
   });
