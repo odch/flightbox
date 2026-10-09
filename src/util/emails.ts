@@ -14,6 +14,12 @@ export function isValidEmail(value: string): boolean {
   return value.length <= MAX_EMAIL_LENGTH && EMAIL_PATTERN.test(value);
 }
 
+// An entry is an e-mail, or an `{email, registrations}` object written by an
+// earlier version (with aircraft per person); its aircraft no longer matter.
+function entryEmail(entry: unknown): unknown {
+  return entry && typeof entry === 'object' ? (entry as {email?: unknown}).email : entry;
+}
+
 // Turns a stored list (an array, or an object when Firebase returns a sparse
 // array) into normalised, unique e-mail strings.
 export function normalizeEmailList(value: unknown): string[] {
@@ -25,7 +31,8 @@ export function normalizeEmailList(value: unknown): string[] {
   }
 
   const emails = entries
-    .filter((entry): entry is string => typeof entry === 'string')
+    .map(entryEmail)
+    .filter((email): email is string => typeof email === 'string')
     .map(normalizeEmail)
     .filter(email => email.length > 0);
 

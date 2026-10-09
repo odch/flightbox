@@ -54,7 +54,15 @@ describe('util', () => {
       });
 
       it('drops entries that are not non-empty strings', () => {
-        expect(normalizeEmailList(['a@example.ch', 42, null, {}, '  '])).toEqual(['a@example.ch']);
+        expect(normalizeEmailList(['a@example.ch', 42, null, {}, {email: 42}, '  '])).toEqual(['a@example.ch']);
+      });
+
+      it('takes the e-mail of entries with aircraft of an earlier version', () => {
+        expect(normalizeEmailList([
+          {email: ' A@Example.ch', registrations: ['HBKLA']},
+          'b@example.ch',
+          'a@example.ch',
+        ])).toEqual(['a@example.ch', 'b@example.ch']);
       });
 
       it('accepts a sparse list stored as an object', () => {
