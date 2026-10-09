@@ -295,19 +295,7 @@
         ".write": "auth !== null && root.child('admins/' + auth.uid).val() === true",
         ".validate": "newData.hasChildren()",
         "$index": {
-          ".validate": "newData.hasChildren(['email'])",
-          "email": {
-            ".validate": "newData.isString() && newData.val().length <= 254 && newData.val() === newData.val().toLowerCase() && newData.val().contains('@') && !newData.val().contains(' ')"
-          },
-          "registrations": {
-            ".validate": "newData.hasChildren()",
-            "$registration": {
-              ".validate": "newData.isString() && newData.val().matches(/^[A-Z0-9]{1,10}$/)"
-            }
-          },
-          "$other": {
-            ".validate": false
-          }
+          ".validate": "newData.isString() && newData.val().length <= 254 && newData.val() === newData.val().toLowerCase() && newData.val().contains('@') && !newData.val().contains(' ')"
         }
       },
       "customsSyncStatus": {

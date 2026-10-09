@@ -42,14 +42,14 @@ const CUSTOMS_SETTINGS = {
 
 describe('functions/customs/selfDeclarationEmailsTrigger', () => {
   let customsSettings;
-  let currentSelfDeclarants;
+  let currentEmails;
   let statusSet;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     customsSettings = CUSTOMS_SETTINGS;
-    currentSelfDeclarants = null;
+    currentEmails = null;
     statusSet = jest.fn().mockResolvedValue(undefined);
 
     mockAdminDbRef.mockImplementation(path => {
@@ -57,7 +57,7 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
         return { once: jest.fn().mockResolvedValue({ val: () => customsSettings }) };
       }
       if (path === '/settings/customsSelfDeclarationEmails') {
-        return { once: jest.fn().mockResolvedValue({ val: () => currentSelfDeclarants }) };
+        return { once: jest.fn().mockResolvedValue({ val: () => currentEmails }) };
       }
       if (path === '/settings/customsSyncStatus/selfDeclarationEmails') {
         return { set: statusSet };
@@ -88,26 +88,23 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
 
   it('does nothing when no customs declaration settings exist', async () => {
     customsSettings = null;
-    await mockCapturedHandler({ data: makeChange(null, [{ email: 'a@example.com' }]) });
+    await mockCapturedHandler({ data: makeChange(null, ['a@example.com']) });
     expect(global.fetch).not.toHaveBeenCalled();
     expect(statusSet).not.toHaveBeenCalled();
   });
 
   it('does nothing when customs settings have no baseUrl', async () => {
     customsSettings = { aerodrome: 'LSZT', accessToken: 'tok123' };
-    await mockCapturedHandler({ data: makeChange(null, [{ email: 'a@example.com' }]) });
+    await mockCapturedHandler({ data: makeChange(null, ['a@example.com']) });
     expect(global.fetch).not.toHaveBeenCalled();
     expect(statusSet).not.toHaveBeenCalled();
   });
 
   it('PUTs the current list to the customs app', async () => {
     global.fetch.mockResolvedValue(okResponse({ accepted: 2, rejected: [] }));
-    currentSelfDeclarants = [
-      { email: 'alice@example.com', registrations: ['HBKLA', 'HBKLB'] },
-      { email: 'bob@example.com' },
-    ];
+    currentEmails = ['alice@example.com', 'bob@example.com'];
 
-    await mockCapturedHandler({ data: makeChange(null, currentSelfDeclarants) });
+    await mockCapturedHandler({ data: makeChange(null, currentEmails) });
 
     expect(global.fetch).toHaveBeenCalledWith(
       'https://customs.example.com/api/self-declaration-emails?ad=LSZT',
@@ -117,37 +114,27 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
           Authorization: 'Bearer tok123',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify([
-          { email: 'alice@example.com', registrations: ['HBKLA', 'HBKLB'] },
-          { email: 'bob@example.com', registrations: [] },
-        ]),
+        body: JSON.stringify(['alice@example.com', 'bob@example.com']),
       }
     );
   });
 
   it('pushes the value currently stored rather than the event data', async () => {
     global.fetch.mockResolvedValue(okResponse());
-    currentSelfDeclarants = [{ email: 'newest@example.com', registrations: ['HBKLA'] }];
+    currentEmails = ['newest@example.com'];
 
-    await mockCapturedHandler({
-      data: makeChange(
-        [{ email: 'old@example.com', registrations: ['HBKLA'] }],
-        [{ email: 'stale@example.com', registrations: ['HBKLA'] }]
-      ),
-    });
+    await mockCapturedHandler({ data: makeChange(['old@example.com'], ['stale@example.com']) });
 
     expect(global.fetch).toHaveBeenCalledWith(
       expect.any(String),
-      expect.objectContaining({
-        body: JSON.stringify([{ email: 'newest@example.com', registrations: ['HBKLA'] }]),
-      })
+      expect.objectContaining({ body: JSON.stringify(['newest@example.com']) })
     );
   });
 
   it('sends an empty array when the list was deleted', async () => {
     global.fetch.mockResolvedValue(okResponse());
 
-    await mockCapturedHandler({ data: makeChange([{ email: 'a@example.com' }], null) });
+    await mockCapturedHandler({ data: makeChange(['a@example.com'], null) });
 
     expect(global.fetch).toHaveBeenCalledWith(
       expect.any(String),
@@ -157,12 +144,9 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
 
   it('records a successful sync including the rejected entries', async () => {
     global.fetch.mockResolvedValue(okResponse({ accepted: 1, rejected: ['bad@'] }));
-    currentSelfDeclarants = [
-      { email: 'good@example.com', registrations: ['HBKLA'] },
-      { email: 'bad@', registrations: ['HBKLB'] },
-    ];
+    currentEmails = ['good@example.com', 'bad@'];
 
-    await mockCapturedHandler({ data: makeChange(null, currentSelfDeclarants) });
+    await mockCapturedHandler({ data: makeChange(null, currentEmails) });
 
     expect(statusSet).toHaveBeenCalledWith({
       status: 'ok',
@@ -177,9 +161,9 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
       status: 404,
       json: jest.fn().mockResolvedValue({ message: 'Unknown aerodrome' }),
     });
-    currentSelfDeclarants = [{ email: 'a@example.com', registrations: ['HBKLA'] }];
+    currentEmails = ['a@example.com'];
 
-    await expect(mockCapturedHandler({ data: makeChange(null, currentSelfDeclarants) })).resolves.toBeUndefined();
+    await expect(mockCapturedHandler({ data: makeChange(null, currentEmails) })).resolves.toBeUndefined();
 
     expect(statusSet).toHaveBeenCalledWith({
       status: 'error',
@@ -194,9 +178,9 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
       status: 500,
       json: jest.fn().mockResolvedValue({ message: 'Internal error' }),
     });
-    currentSelfDeclarants = [{ email: 'a@example.com', registrations: ['HBKLA'] }];
+    currentEmails = ['a@example.com'];
 
-    await expect(mockCapturedHandler({ data: makeChange(null, currentSelfDeclarants) })).rejects.toThrow('HTTP 500');
+    await expect(mockCapturedHandler({ data: makeChange(null, currentEmails) })).rejects.toThrow('HTTP 500');
 
     expect(statusSet).toHaveBeenCalledWith({
       status: 'error',
@@ -207,9 +191,9 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
 
   it('throws on a network error so the execution fails', async () => {
     global.fetch.mockRejectedValue(new TypeError('fetch failed'));
-    currentSelfDeclarants = [{ email: 'a@example.com', registrations: ['HBKLA'] }];
+    currentEmails = ['a@example.com'];
 
-    await expect(mockCapturedHandler({ data: makeChange(null, currentSelfDeclarants) })).rejects.toThrow('fetch failed');
+    await expect(mockCapturedHandler({ data: makeChange(null, currentEmails) })).rejects.toThrow('fetch failed');
 
     expect(statusSet).toHaveBeenCalledWith({
       status: 'error',
@@ -218,76 +202,23 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
   });
 
   describe('buildBody', () => {
-    it('sends each person with their registrations', () => {
-      expect(buildBody([
-        { email: 'alice@example.com', registrations: ['HBKLA', 'HBKLB'] },
-        { email: 'bob@example.com', registrations: ['DEABC'] },
-      ])).toEqual([
-        { email: 'alice@example.com', registrations: ['HBKLA', 'HBKLB'] },
-        { email: 'bob@example.com', registrations: ['DEABC'] },
-      ]);
-    });
-
     it('trims and lower-cases the e-mails', () => {
-      expect(buildBody([{ email: ' Alice@Example.COM ', registrations: ['HBKLA'] }])).toEqual([
-        { email: 'alice@example.com', registrations: ['HBKLA'] },
-      ]);
-    });
-
-    it('normalises the registrations and drops duplicate, empty, too long and non-string ones', () => {
-      expect(buildBody([
-        { email: 'a@example.com', registrations: ['hb-kla', 'HB KLA', 'HBKLB', '--', 'ABCDEFGHIJK', 'ABCDEFGHIJ', 42, null] },
-      ])).toEqual([
-        { email: 'a@example.com', registrations: ['HBKLA', 'HBKLB', 'ABCDEFGHIJ'] },
-      ]);
-    });
-
-    it('sends a person without registrations with an empty list', () => {
-      expect(buildBody([{ email: 'a@example.com' }, { email: 'b@example.com', registrations: 'HBKLA' }])).toEqual([
-        { email: 'a@example.com', registrations: [] },
-        { email: 'b@example.com', registrations: [] },
-      ]);
-    });
-
-    it('sends legacy plain e-mail entries as persons without registrations', () => {
       expect(buildBody([' Alice@Example.COM ', 'bob@example.com'])).toEqual([
-        { email: 'alice@example.com', registrations: [] },
-        { email: 'bob@example.com', registrations: [] },
+        'alice@example.com',
+        'bob@example.com',
       ]);
     });
 
-    it('merges duplicate e-mails, keeping the registrations of both', () => {
-      expect(buildBody([
-        { email: 'a@example.com', registrations: ['HBKLA'] },
-        'A@example.com',
-        { email: 'a@example.com ', registrations: ['HBKLB', 'hb-kla'] },
-      ])).toEqual([
-        { email: 'a@example.com', registrations: ['HBKLA', 'HBKLB'] },
+    it('drops non-string, empty and duplicate entries', () => {
+      expect(buildBody(['a@example.com', 42, null, { email: 'x' }, '  ', 'A@example.com'])).toEqual([
+        'a@example.com',
       ]);
     });
 
-    it('drops entries without a non-empty e-mail', () => {
-      expect(buildBody([
-        { email: 'a@example.com' },
-        42,
-        null,
-        {},
-        { email: 42, registrations: ['HBKLA'] },
-        { registrations: ['HBKLA'] },
-        '  ',
-        { email: ' ', registrations: ['HBKLA'] },
-      ])).toEqual([
-        { email: 'a@example.com', registrations: [] },
-      ]);
-    });
-
-    it('accepts sparse lists stored as objects', () => {
-      expect(buildBody({
-        0: { email: 'a@example.com', registrations: { 1: 'HBKLA' } },
-        2: 'c@example.com',
-      })).toEqual([
-        { email: 'a@example.com', registrations: ['HBKLA'] },
-        { email: 'c@example.com', registrations: [] },
+    it('accepts a sparse list stored as an object', () => {
+      expect(buildBody({ 0: 'a@example.com', 2: 'c@example.com' })).toEqual([
+        'a@example.com',
+        'c@example.com',
       ]);
     });
 

@@ -415,19 +415,12 @@
   },
   "adminCustomsSelfDeclaration": {
     "title": "Customs self-declaration",
-    "description": "This is where you record the persons whose customs declarations are forwarded directly to the customs authorities without being reviewed by the aerodrome (self-declaration). Record the email address the person uses to log in to the customs declaration app and the aircraft the self-declaration applies to. A declaration is only forwarded directly if its registration matches one of the person's aircraft. All other declarations, including those of persons without any aircraft, are reviewed by the aerodrome. This only applies to new declarations submitted while logged in. Changes and cancellations are still reviewed and forwarded by the aerodrome.",
+    "description": "This is where you record the persons whose customs declarations are forwarded directly to the customs authorities without being reviewed by the aerodrome (self-declaration). Record the email address the person uses to log in to the customs declaration app. This only applies to new declarations submitted while logged in. Changes and cancellations are still reviewed and forwarded by the aerodrome.",
     "emailPlaceholder": "Authorised login (email)",
     "invalidEmail": "Please enter a valid email address.",
     "duplicateEmail": "This email address has already been added.",
     "saveFailed": "The change could not be saved. Please try again.",
-    "empty": "No persons have been added yet.",
-    "aircraft": "Aircraft (registration)",
-    "noAircraft": "No aircraft added yet: this person's customs declarations are not forwarded directly but reviewed by the aerodrome until you add at least one aircraft.",
-    "addAircraft": "Add aircraft",
-    "invalidRegistration": "Please enter a valid registration (1 to 10 letters or digits).",
-    "duplicateRegistration": "This aircraft has already been added for this person.",
-    "removePerson": "Remove person",
-    "removePersonConfirm": "Are you sure you want to delete '{{email}}' including all aircraft added?"
+    "empty": "No persons have been added yet."
   },
   "customsSyncStatus": {
     "ok": "Last synchronised with the customs declaration app: {{dateTime}}",

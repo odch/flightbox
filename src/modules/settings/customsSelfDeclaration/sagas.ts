@@ -4,106 +4,59 @@ import * as actions from './actions';
 import {watchSettingWhileAdmin} from '../watchSettingWhileAdmin';
 import firebase from '../../../util/firebase';
 import {error} from '../../../util/log';
-import {isValidEmail, normalizeEmail} from '../../../util/emails';
-import {
-  isValidRegistration,
-  normalizeRegistration,
-  normalizeSelfDeclarants,
-  SelfDeclarant,
-} from '../../../util/selfDeclarants';
+import {isValidEmail, normalizeEmail, normalizeEmailList} from '../../../util/emails';
 
-// The path keeps its original name (from when it held plain e-mails), as the
-// Cloud Function pushing it to the customs app listens on it.
-export const SELF_DECLARANTS_PATH = '/settings/customsSelfDeclarationEmails';
+export const SELF_DECLARATION_EMAILS_PATH = '/settings/customsSelfDeclarationEmails';
 
-type SelfDeclarantsChange = (selfDeclarants: SelfDeclarant[], email: string, registration?: string) => SelfDeclarant[];
+type EmailListChange = (emails: string[], email: string) => string[];
 
-export const withSelfDeclarant: SelfDeclarantsChange = (selfDeclarants, email) =>
-  selfDeclarants.some(selfDeclarant => selfDeclarant.email === email)
-    ? selfDeclarants
-    : [...selfDeclarants, {email, registrations: []}];
+export const withEmail: EmailListChange = (emails, email) =>
+  emails.includes(email) ? emails : [...emails, email];
 
-export const withoutSelfDeclarant: SelfDeclarantsChange = (selfDeclarants, email) =>
-  selfDeclarants.filter(selfDeclarant => selfDeclarant.email !== email);
-
-// A person removed in the meantime (e.g. by another admin) is not added back.
-export const withAircraft: SelfDeclarantsChange = (selfDeclarants, email, registration) =>
-  selfDeclarants.map(selfDeclarant =>
-    selfDeclarant.email === email && registration !== undefined && !selfDeclarant.registrations.includes(registration)
-      ? {...selfDeclarant, registrations: [...selfDeclarant.registrations, registration]}
-      : selfDeclarant
-  );
-
-export const withoutAircraft: SelfDeclarantsChange = (selfDeclarants, email, registration) =>
-  selfDeclarants.map(selfDeclarant =>
-    selfDeclarant.email === email
-      ? {...selfDeclarant, registrations: selfDeclarant.registrations.filter(existing => existing !== registration)}
-      : selfDeclarant
-  );
+export const withoutEmail: EmailListChange = (emails, email) =>
+  emails.filter(existing => existing !== email);
 
 // The list is written as a whole, but within a transaction on the value in
 // the database rather than on the Redux state. So a change can never
 // overwrite the list with a stale or not yet loaded state (e.g. right after
 // signing in, or with two admins editing at the same time). The change always
 // returns a list (never undefined, which would abort the transaction on the
-// first, possibly empty, local guess). Normalising the stored value also
-// converts entries of the first version (plain e-mail strings) to persons
-// without aircraft.
-export function saveSelfDeclarantsChange(change: SelfDeclarantsChange, email: string, registration?: string) {
+// first, possibly empty, local guess).
+export function saveEmailListChange(change: EmailListChange, email: string) {
   return runTransaction(
-    firebase(SELF_DECLARANTS_PATH),
-    current => change(normalizeSelfDeclarants(current), email, registration)
+    firebase(SELF_DECLARATION_EMAILS_PATH),
+    current => change(normalizeEmailList(current), email)
   );
 }
 
-export function* changeSelfDeclarants(change: SelfDeclarantsChange, email: string, registration?: string) {
-  yield put(actions.saveCustomsSelfDeclarantsSaving());
+export function* changeEmailList(change: EmailListChange, email: string) {
+  yield put(actions.saveCustomsSelfDeclarationEmailsSaving());
   try {
-    yield call(saveSelfDeclarantsChange, change, email, registration);
-    yield put(actions.saveCustomsSelfDeclarantsSuccess());
+    yield call(saveEmailListChange, change, email);
+    yield put(actions.saveCustomsSelfDeclarationEmailsSuccess());
   } catch (e) {
-    error('Failed to save the customs self-declarants', e);
-    yield put(actions.saveCustomsSelfDeclarantsFailure());
+    error('Failed to save the customs self-declaration e-mails', e);
+    yield put(actions.saveCustomsSelfDeclarationEmailsFailure());
   }
 }
 
-export function* addSelfDeclarant(action: ReturnType<typeof actions.addCustomsSelfDeclarant>) {
+export function* addEmail(action: ReturnType<typeof actions.addCustomsSelfDeclarationEmail>) {
   const email = normalizeEmail(action.payload.email);
   if (!isValidEmail(email)) {
     // The form validates before dispatching; never store an invalid entry.
     return;
   }
-  yield call(changeSelfDeclarants, withSelfDeclarant, email);
+  yield call(changeEmailList, withEmail, email);
 }
 
-export function* removeSelfDeclarant(action: ReturnType<typeof actions.removeCustomsSelfDeclarant>) {
-  yield call(changeSelfDeclarants, withoutSelfDeclarant, normalizeEmail(action.payload.email));
-}
-
-export function* addAircraft(action: ReturnType<typeof actions.addCustomsSelfDeclarantAircraft>) {
-  const registration = normalizeRegistration(action.payload.registration);
-  if (!isValidRegistration(registration)) {
-    // The form validates before dispatching; never store an invalid entry.
-    return;
-  }
-  yield call(changeSelfDeclarants, withAircraft, normalizeEmail(action.payload.email), registration);
-}
-
-export function* removeAircraft(action: ReturnType<typeof actions.removeCustomsSelfDeclarantAircraft>) {
-  yield call(
-    changeSelfDeclarants,
-    withoutAircraft,
-    normalizeEmail(action.payload.email),
-    normalizeRegistration(action.payload.registration)
-  );
+export function* removeEmail(action: ReturnType<typeof actions.removeCustomsSelfDeclarationEmail>) {
+  yield call(changeEmailList, withoutEmail, normalizeEmail(action.payload.email));
 }
 
 export default function* sagas() {
   yield all([
-    fork(watchSettingWhileAdmin, SELF_DECLARANTS_PATH, actions.customsSelfDeclarantsLoaded),
-    takeEvery(actions.ADD_CUSTOMS_SELF_DECLARANT, addSelfDeclarant),
-    takeEvery(actions.REMOVE_CUSTOMS_SELF_DECLARANT, removeSelfDeclarant),
-    takeEvery(actions.ADD_CUSTOMS_SELF_DECLARANT_AIRCRAFT, addAircraft),
-    takeEvery(actions.REMOVE_CUSTOMS_SELF_DECLARANT_AIRCRAFT, removeAircraft),
+    fork(watchSettingWhileAdmin, SELF_DECLARATION_EMAILS_PATH, actions.customsSelfDeclarationEmailsLoaded),
+    takeEvery(actions.ADD_CUSTOMS_SELF_DECLARATION_EMAIL, addEmail),
+    takeEvery(actions.REMOVE_CUSTOMS_SELF_DECLARATION_EMAIL, removeEmail),
   ])
 }

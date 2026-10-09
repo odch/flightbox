@@ -299,12 +299,8 @@ full list each time):
 * `/settings/invoiceRecipients` → `/api/invoice-recipients`
 * `/settings/customsSelfDeclarationEmails` (tab "Zoll-Selbstdeklaration", shown when the project enables
   `customsSelfDeclarationEnabled` and customs is available) →
-  `/api/self-declaration-emails`: the self-declarants, as a list of
-  `{"email": "pilot@example.com", "registrations": ["HBKLA"]}` (e-mail trimmed and lower-cased, registrations
-  normalised to upper case letters and digits). The customs app forwards a new declaration of such a login
-  without review by the aerodrome only if its registration is one of the login's registrations; a login without
-  registrations is never forwarded directly. Entries of the first version (plain e-mail strings) are read and
-  pushed as logins without registrations, and converted on the next change of the list.
+  `/api/self-declaration-emails`: the logins whose declarations the customs app forwards without review by
+  the aerodrome.
 * `/settings/aircrafts` → `/api/homebased-aircraft`
 
 For the first two, the outcome is stored in `/settings/customsSyncStatus/<invoiceRecipients|selfDeclarationEmails>`
