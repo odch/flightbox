@@ -1,22 +1,22 @@
 import * as actions from './actions';
 import { CustomsSelfDeclarationAction } from './actions';
 import reducer from '../../../util/reducer';
-import { normalizeSelfDeclarants, SelfDeclarant } from '../../../util/selfDeclarants';
+import { normalizeEmailList } from '../../../util/emails';
 
 interface CustomsSelfDeclarationState {
   // false until the first value arrived from the database, so the list is
   // never shown (or changed) on the basis of an empty initial state
   loaded: boolean;
-  selfDeclarants: SelfDeclarant[];
+  emails: string[];
   saving: boolean;
   saveFailed: boolean;
 }
 
-function selfDeclarantsLoaded(state: CustomsSelfDeclarationState, action: CustomsSelfDeclarationAction & { type: typeof actions.CUSTOMS_SELF_DECLARANTS_LOADED }) {
+function emailsLoaded(state: CustomsSelfDeclarationState, action: CustomsSelfDeclarationAction & { type: typeof actions.CUSTOMS_SELF_DECLARATION_EMAILS_LOADED }) {
   return {
     ...state,
     loaded: true,
-    selfDeclarants: normalizeSelfDeclarants(action.payload.value),
+    emails: normalizeEmailList(action.payload.emails),
   };
 }
 
@@ -44,15 +44,15 @@ function saveFailure(state: CustomsSelfDeclarationState) {
 }
 
 const ACTION_HANDLERS = {
-  [actions.CUSTOMS_SELF_DECLARANTS_LOADED]: selfDeclarantsLoaded,
-  [actions.SAVE_CUSTOMS_SELF_DECLARANTS_SAVING]: saving,
-  [actions.SAVE_CUSTOMS_SELF_DECLARANTS_SUCCESS]: saveSuccess,
-  [actions.SAVE_CUSTOMS_SELF_DECLARANTS_FAILURE]: saveFailure,
+  [actions.CUSTOMS_SELF_DECLARATION_EMAILS_LOADED]: emailsLoaded,
+  [actions.SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SAVING]: saving,
+  [actions.SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SUCCESS]: saveSuccess,
+  [actions.SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_FAILURE]: saveFailure,
 };
 
 const INITIAL_STATE: CustomsSelfDeclarationState = {
   loaded: false,
-  selfDeclarants: [],
+  emails: [],
   saving: false,
   saveFailed: false,
 };

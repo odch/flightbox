@@ -10,8 +10,8 @@
  *    they just created themselves — admins read/write all;
  *  - shared-access projects (e.g. lspv): any authenticated user reads/writes all.
  *
- * Also covers the admin-only customs settings (self-declarants with their
- * aircraft, and the sync status written by Cloud Functions).
+ * Also covers the admin-only customs settings (self-declaration e-mails and
+ * the sync status written by Cloud Functions).
  */
 'use strict';
 
@@ -236,7 +236,7 @@ async function testCustomsSettings() {
     const db = ctx.database();
     await set(ref(db, 'admins/admin-uid'), true);
     await set(ref(db, 'admins/stale-admin-uid'), false);
-    await set(ref(db, 'settings/customsSelfDeclarationEmails'), [{ email: 'pilot@example.com', registrations: ['HBKLA'] }]);
+    await set(ref(db, 'settings/customsSelfDeclarationEmails'), ['pilot@example.com']);
     await set(ref(db, 'settings/customsSyncStatus/selfDeclarationEmails'), {
       status: 'ok',
       timestamp: '2026-10-05T12:00:00.000Z',
@@ -251,37 +251,23 @@ async function testCustomsSettings() {
   const EMAILS = 'settings/customsSelfDeclarationEmails';
   const STATUS = 'settings/customsSyncStatus';
 
-  // self-declarants (e-mail and aircraft): admin-only, validated entries
-  const entry = (email, registrations) => (registrations === undefined ? { email } : { email, registrations });
-  await expect('admin reads the self-declarants', true, get(ref(admin, EMAILS)));
-  await expect('pilot cannot read the self-declarants', false, get(ref(alice, EMAILS)));
-  await expect('disabled (false) admin cannot read the self-declarants', false, get(ref(staleAdmin, EMAILS)));
-  await expect('unauthenticated cannot read the self-declarants', false, get(ref(anon, EMAILS)));
-  await expect('admin writes a valid list', true, set(ref(admin, EMAILS), [entry('a@example.com', ['HBKLA', 'D1234']), entry('b.c@example.ch', ['N12345'])]));
-  await expect('admin writes a person without aircraft', true, set(ref(admin, EMAILS), [entry('a@example.com')]));
-  await expect('admin writes a person with an empty aircraft list (stored without it)', true, set(ref(admin, EMAILS), [entry('a@example.com', [])]));
-  await expect('admin adds an aircraft to a person', true, set(ref(admin, `${EMAILS}/0/registrations/0`), 'HBKLB'));
+  // self-declaration e-mails: admin-only, validated entries
+  await expect('admin reads the self-declaration e-mails', true, get(ref(admin, EMAILS)));
+  await expect('pilot cannot read the self-declaration e-mails', false, get(ref(alice, EMAILS)));
+  await expect('disabled (false) admin cannot read the self-declaration e-mails', false, get(ref(staleAdmin, EMAILS)));
+  await expect('unauthenticated cannot read the self-declaration e-mails', false, get(ref(anon, EMAILS)));
+  await expect('admin writes a valid list', true, set(ref(admin, EMAILS), ['a@example.com', 'b.c@example.ch']));
   await expect('admin clears the list', true, set(ref(admin, EMAILS), null));
-  await expect('pilot cannot add themselves', false, set(ref(alice, EMAILS), [entry('alice@example.com', ['HBKLA'])]));
-  await expect('pilot cannot add an aircraft to an existing entry', false, set(ref(alice, `${EMAILS}/0/registrations/1`), 'HBKLB'));
-  await expect('disabled (false) admin cannot write the list', false, set(ref(staleAdmin, EMAILS), [entry('a@example.com', ['HBKLA'])]));
-  await expect('unauthenticated cannot write the list', false, set(ref(anon, EMAILS), [entry('a@example.com', ['HBKLA'])]));
-  await expect('admin cannot store an upper-case e-mail', false, set(ref(admin, EMAILS), [entry('Alice@example.com')]));
-  await expect('admin cannot store an e-mail without @', false, set(ref(admin, EMAILS), [entry('alice.example.com')]));
-  await expect('admin cannot store an e-mail with a space', false, set(ref(admin, EMAILS), [entry('alice @example.com')]));
-  await expect('admin cannot store an e-mail longer than 254 characters', false, set(ref(admin, EMAILS), [entry('a'.repeat(243) + '@example.com')]));
-  await expect('admin stores an e-mail of 254 characters', true, set(ref(admin, EMAILS), [entry('a'.repeat(242) + '@example.com')]));
-  await expect('admin cannot store a non-string e-mail', false, set(ref(admin, EMAILS), [{ email: 42 }]));
-  await expect('admin cannot store an entry without e-mail', false, set(ref(admin, EMAILS), [{ registrations: ['HBKLA'] }]));
-  await expect('admin cannot store an entry with other properties', false, set(ref(admin, EMAILS), [{ email: 'a@example.com', name: 'Alice' }]));
-  await expect('admin cannot store a legacy plain e-mail entry', false, set(ref(admin, EMAILS), ['a@example.com']));
-  await expect('admin cannot store a non-normalised registration', false, set(ref(admin, EMAILS), [entry('a@example.com', ['HB-KLA'])]));
-  await expect('admin cannot store a lower-case registration', false, set(ref(admin, EMAILS), [entry('a@example.com', ['hbkla'])]));
-  await expect('admin cannot store a registration longer than 10 characters', false, set(ref(admin, EMAILS), [entry('a@example.com', ['ABCDEFGHIJK'])]));
-  await expect('admin stores a registration of 10 characters', true, set(ref(admin, EMAILS), [entry('a@example.com', ['ABCDEFGHIJ'])]));
-  await expect('admin cannot store an empty registration', false, set(ref(admin, EMAILS), [entry('a@example.com', [''])]));
-  await expect('admin cannot store a non-string registration', false, set(ref(admin, EMAILS), [entry('a@example.com', [42])]));
-  await expect('admin cannot store the registrations as a single string', false, set(ref(admin, EMAILS), [entry('a@example.com', 'HBKLA')]));
+  await expect('pilot cannot add themselves', false, set(ref(alice, EMAILS), ['alice@example.com']));
+  await expect('disabled (false) admin cannot write the list', false, set(ref(staleAdmin, EMAILS), ['a@example.com']));
+  await expect('unauthenticated cannot write the list', false, set(ref(anon, EMAILS), ['a@example.com']));
+  await expect('admin cannot store an upper-case e-mail', false, set(ref(admin, EMAILS), ['Alice@example.com']));
+  await expect('admin cannot store an entry without @', false, set(ref(admin, EMAILS), ['alice.example.com']));
+  await expect('admin cannot store an entry with a space', false, set(ref(admin, EMAILS), ['alice @example.com']));
+  await expect('admin cannot store an entry longer than 254 characters', false, set(ref(admin, EMAILS), ['a'.repeat(243) + '@example.com']));
+  await expect('admin stores an entry of 254 characters', true, set(ref(admin, EMAILS), ['a'.repeat(242) + '@example.com']));
+  await expect('admin cannot store a non-string entry', false, set(ref(admin, EMAILS), [42]));
+  await expect('admin cannot store a nested entry', false, set(ref(admin, EMAILS), [{ email: 'a@example.com' }]));
   await expect('admin cannot store a single string instead of a list', false, set(ref(admin, EMAILS), 'a@example.com'));
 
   // sync status: read by admins, written only by Cloud Functions (admin SDK)

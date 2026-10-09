@@ -1,24 +1,20 @@
 import {connect} from 'react-redux';
 import {
-  addCustomsSelfDeclarant,
-  removeCustomsSelfDeclarant,
-  addCustomsSelfDeclarantAircraft,
-  removeCustomsSelfDeclarantAircraft,
+  addCustomsSelfDeclarationEmail,
+  removeCustomsSelfDeclarationEmail,
 } from '../modules/settings/customsSelfDeclaration';
 import CustomsSelfDeclarationEmailList from '../components/CustomsSelfDeclarationEmailList';
 import {RootState} from '../modules';
 
 const mapStateToProps = (state: RootState) => ({
-  selfDeclarants: state.settings.customsSelfDeclaration.selfDeclarants,
+  emails: state.settings.customsSelfDeclaration.emails,
   loaded: state.settings.customsSelfDeclaration.loaded,
   saveFailed: state.settings.customsSelfDeclaration.saveFailed,
 });
 
 const mapActionCreators = {
-  addSelfDeclarant: addCustomsSelfDeclarant,
-  removeSelfDeclarant: removeCustomsSelfDeclarant,
-  addAircraft: addCustomsSelfDeclarantAircraft,
-  removeAircraft: removeCustomsSelfDeclarantAircraft,
+  addEmail: addCustomsSelfDeclarationEmail,
+  removeEmail: removeCustomsSelfDeclarationEmail,
 };
 
 export default connect(mapStateToProps, mapActionCreators)(CustomsSelfDeclarationEmailList);

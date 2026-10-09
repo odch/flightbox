@@ -1,4 +1,4 @@
-import {isValidEmail, MAX_EMAIL_LENGTH, normalizeEmail} from './emails';
+import {isValidEmail, MAX_EMAIL_LENGTH, normalizeEmail, normalizeEmailList} from './emails';
 
 describe('util', () => {
   describe('emails', () => {
@@ -36,6 +36,32 @@ describe('util', () => {
         const longest = 'a'.repeat(MAX_EMAIL_LENGTH - domain.length) + domain;
         expect(isValidEmail(longest)).toBe(true);
         expect(isValidEmail('a' + longest)).toBe(false);
+      });
+    });
+
+    describe('normalizeEmailList', () => {
+      it('returns an empty list for missing values', () => {
+        expect(normalizeEmailList(null)).toEqual([]);
+        expect(normalizeEmailList(undefined)).toEqual([]);
+        expect(normalizeEmailList('a@example.ch')).toEqual([]);
+      });
+
+      it('normalises the entries and removes duplicates', () => {
+        expect(normalizeEmailList(['a@example.ch', ' B@Example.ch', 'A@example.ch'])).toEqual([
+          'a@example.ch',
+          'b@example.ch',
+        ]);
+      });
+
+      it('drops entries that are not non-empty strings', () => {
+        expect(normalizeEmailList(['a@example.ch', 42, null, {}, '  '])).toEqual(['a@example.ch']);
+      });
+
+      it('accepts a sparse list stored as an object', () => {
+        expect(normalizeEmailList({0: 'a@example.ch', 3: 'b@example.ch'})).toEqual([
+          'a@example.ch',
+          'b@example.ch',
+        ]);
       });
     });
   });

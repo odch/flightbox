@@ -2,10 +2,8 @@ import reducer from './reducer';
 import sagas from './sagas';
 
 export {
-  addCustomsSelfDeclarant,
-  removeCustomsSelfDeclarant,
-  addCustomsSelfDeclarantAircraft,
-  removeCustomsSelfDeclarantAircraft,
+  addCustomsSelfDeclarationEmail,
+  removeCustomsSelfDeclarationEmail,
 } from './actions';
 
 export { sagas };

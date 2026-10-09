@@ -3,7 +3,7 @@ import * as actions from './actions';
 
 const INITIAL_STATE = {
   loaded: false,
-  selfDeclarants: [],
+  emails: [],
   saving: false,
   saveFailed: false,
 };
@@ -18,20 +18,14 @@ describe('modules', () => {
           ).toEqual(INITIAL_STATE);
         });
 
-        describe('CUSTOMS_SELF_DECLARANTS_LOADED', () => {
-          it('should set loaded and store the self-declarants', () => {
+        describe('CUSTOMS_SELF_DECLARATION_EMAILS_LOADED', () => {
+          it('should set loaded and store the e-mails', () => {
             expect(
-              reducer(INITIAL_STATE, actions.customsSelfDeclarantsLoaded([
-                {email: 'a@example.ch', registrations: ['HBKLA']},
-                {email: 'b@example.ch'},
-              ]))
+              reducer(INITIAL_STATE, actions.customsSelfDeclarationEmailsLoaded(['a@example.ch', 'b@example.ch']))
             ).toEqual({
               ...INITIAL_STATE,
               loaded: true,
-              selfDeclarants: [
-                {email: 'a@example.ch', registrations: ['HBKLA']},
-                {email: 'b@example.ch', registrations: []},
-              ],
+              emails: ['a@example.ch', 'b@example.ch'],
             });
           });
 
@@ -40,39 +34,22 @@ describe('modules', () => {
               reducer({
                 ...INITIAL_STATE,
                 loaded: true,
-                selfDeclarants: [{email: 'a@example.ch', registrations: []}],
-              }, actions.customsSelfDeclarantsLoaded(null))
+                emails: ['a@example.ch'],
+              }, actions.customsSelfDeclarationEmailsLoaded(null))
             ).toEqual({
               ...INITIAL_STATE,
               loaded: true,
-              selfDeclarants: [],
+              emails: [],
             });
           });
 
           it('should normalise the stored value', () => {
             expect(
-              reducer(INITIAL_STATE, actions.customsSelfDeclarantsLoaded({
-                0: {email: ' A@Example.ch', registrations: ['hb-kla']},
-                2: {email: 'a@example.ch', registrations: ['HB KLB', 'HBKLA']},
-                3: 42,
-              }))
+              reducer(INITIAL_STATE, actions.customsSelfDeclarationEmailsLoaded({0: ' A@Example.ch', 2: 'a@example.ch', 3: 42}))
             ).toEqual({
               ...INITIAL_STATE,
               loaded: true,
-              selfDeclarants: [{email: 'a@example.ch', registrations: ['HBKLA', 'HBKLB']}],
-            });
-          });
-
-          it('should read legacy plain e-mail entries as persons without aircraft', () => {
-            expect(
-              reducer(INITIAL_STATE, actions.customsSelfDeclarantsLoaded(['a@example.ch', 'B@example.ch']))
-            ).toEqual({
-              ...INITIAL_STATE,
-              loaded: true,
-              selfDeclarants: [
-                {email: 'a@example.ch', registrations: []},
-                {email: 'b@example.ch', registrations: []},
-              ],
+              emails: ['a@example.ch'],
             });
           });
 
@@ -81,23 +58,23 @@ describe('modules', () => {
               reducer({
                 ...INITIAL_STATE,
                 saving: true,
-              }, actions.customsSelfDeclarantsLoaded([{email: 'a@example.ch', registrations: ['HBKLA']}]))
+              }, actions.customsSelfDeclarationEmailsLoaded(['a@example.ch']))
             ).toEqual({
               loaded: true,
-              selfDeclarants: [{email: 'a@example.ch', registrations: ['HBKLA']}],
+              emails: ['a@example.ch'],
               saving: true,
               saveFailed: false,
             });
           });
         });
 
-        describe('SAVE_CUSTOMS_SELF_DECLARANTS_SAVING', () => {
+        describe('SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SAVING', () => {
           it('should set saving and reset a previous failure', () => {
             expect(
               reducer({
                 ...INITIAL_STATE,
                 saveFailed: true,
-              }, actions.saveCustomsSelfDeclarantsSaving())
+              }, actions.saveCustomsSelfDeclarationEmailsSaving())
             ).toEqual({
               ...INITIAL_STATE,
               saving: true,
@@ -106,24 +83,24 @@ describe('modules', () => {
           });
         });
 
-        describe('SAVE_CUSTOMS_SELF_DECLARANTS_SUCCESS', () => {
+        describe('SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SUCCESS', () => {
           it('should reset saving', () => {
             expect(
               reducer({
                 ...INITIAL_STATE,
                 saving: true,
-              }, actions.saveCustomsSelfDeclarantsSuccess())
+              }, actions.saveCustomsSelfDeclarationEmailsSuccess())
             ).toEqual(INITIAL_STATE);
           });
         });
 
-        describe('SAVE_CUSTOMS_SELF_DECLARANTS_FAILURE', () => {
+        describe('SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_FAILURE', () => {
           it('should reset saving and flag the failure', () => {
             expect(
               reducer({
                 ...INITIAL_STATE,
                 saving: true,
-              }, actions.saveCustomsSelfDeclarantsFailure())
+              }, actions.saveCustomsSelfDeclarationEmailsFailure())
             ).toEqual({
               ...INITIAL_STATE,
               saving: false,

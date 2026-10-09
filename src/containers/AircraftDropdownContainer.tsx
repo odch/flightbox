@@ -4,18 +4,11 @@ import {loadAircrafts} from '../modules/aircrafts';
 import AircraftDropdown from '../components/AircraftDropdown';
 import {RootState} from '../modules';
 
-// The dropdown passes the selected aircraft, or `{key}` with the typed
-// (normalised) registration when it matches none of the options.
-export interface AircraftDropdownValue {
-  key: string;
-  [property: string]: unknown;
-}
-
 interface OwnProps {
   value?: string;
-  onChange: (aircraft: AircraftDropdownValue) => void;
+  onChange: (value: string) => void;
   onFocus: () => void;
-  onBlur: (aircraft: AircraftDropdownValue) => void;
+  onBlur: () => void;
   readOnly?: boolean;
   clearable?: boolean;
   dataCy?: string;

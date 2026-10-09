@@ -1,85 +1,61 @@
-export const CUSTOMS_SELF_DECLARANTS_LOADED = 'CUSTOMS_SELF_DECLARANTS_LOADED' as const;
-export const ADD_CUSTOMS_SELF_DECLARANT = 'ADD_CUSTOMS_SELF_DECLARANT' as const;
-export const REMOVE_CUSTOMS_SELF_DECLARANT = 'REMOVE_CUSTOMS_SELF_DECLARANT' as const;
-export const ADD_CUSTOMS_SELF_DECLARANT_AIRCRAFT = 'ADD_CUSTOMS_SELF_DECLARANT_AIRCRAFT' as const;
-export const REMOVE_CUSTOMS_SELF_DECLARANT_AIRCRAFT = 'REMOVE_CUSTOMS_SELF_DECLARANT_AIRCRAFT' as const;
-export const SAVE_CUSTOMS_SELF_DECLARANTS_SAVING = 'SAVE_CUSTOMS_SELF_DECLARANTS_SAVING' as const;
-export const SAVE_CUSTOMS_SELF_DECLARANTS_SUCCESS = 'SAVE_CUSTOMS_SELF_DECLARANTS_SUCCESS' as const;
-export const SAVE_CUSTOMS_SELF_DECLARANTS_FAILURE = 'SAVE_CUSTOMS_SELF_DECLARANTS_FAILURE' as const;
+export const CUSTOMS_SELF_DECLARATION_EMAILS_LOADED = 'CUSTOMS_SELF_DECLARATION_EMAILS_LOADED' as const;
+export const ADD_CUSTOMS_SELF_DECLARATION_EMAIL = 'ADD_CUSTOMS_SELF_DECLARATION_EMAIL' as const;
+export const REMOVE_CUSTOMS_SELF_DECLARATION_EMAIL = 'REMOVE_CUSTOMS_SELF_DECLARATION_EMAIL' as const;
+export const SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SAVING = 'SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SAVING' as const;
+export const SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SUCCESS = 'SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SUCCESS' as const;
+export const SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_FAILURE = 'SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_FAILURE' as const;
 
 export type CustomsSelfDeclarationAction =
-  | { type: typeof CUSTOMS_SELF_DECLARANTS_LOADED; payload: { value: unknown } }
-  | { type: typeof ADD_CUSTOMS_SELF_DECLARANT; payload: { email: string } }
-  | { type: typeof REMOVE_CUSTOMS_SELF_DECLARANT; payload: { email: string } }
-  | { type: typeof ADD_CUSTOMS_SELF_DECLARANT_AIRCRAFT; payload: { email: string; registration: string } }
-  | { type: typeof REMOVE_CUSTOMS_SELF_DECLARANT_AIRCRAFT; payload: { email: string; registration: string } }
-  | { type: typeof SAVE_CUSTOMS_SELF_DECLARANTS_SAVING }
-  | { type: typeof SAVE_CUSTOMS_SELF_DECLARANTS_SUCCESS }
-  | { type: typeof SAVE_CUSTOMS_SELF_DECLARANTS_FAILURE };
+  | { type: typeof CUSTOMS_SELF_DECLARATION_EMAILS_LOADED; payload: { emails: unknown } }
+  | { type: typeof ADD_CUSTOMS_SELF_DECLARATION_EMAIL; payload: { email: string } }
+  | { type: typeof REMOVE_CUSTOMS_SELF_DECLARATION_EMAIL; payload: { email: string } }
+  | { type: typeof SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SAVING }
+  | { type: typeof SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SUCCESS }
+  | { type: typeof SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_FAILURE };
 
 // Receives the raw database value (or null when it does not exist or the
 // admin signed out); the reducer normalises it.
-export function customsSelfDeclarantsLoaded(value: unknown) {
+export function customsSelfDeclarationEmailsLoaded(emails: unknown) {
   return {
-    type: CUSTOMS_SELF_DECLARANTS_LOADED,
+    type: CUSTOMS_SELF_DECLARATION_EMAILS_LOADED,
     payload: {
-      value,
+      emails,
     },
   };
 }
 
-export function addCustomsSelfDeclarant(email: string) {
+export function addCustomsSelfDeclarationEmail(email: string) {
   return {
-    type: ADD_CUSTOMS_SELF_DECLARANT,
-    payload: {
-      email,
-    },
-  };
-}
-
-export function removeCustomsSelfDeclarant(email: string) {
-  return {
-    type: REMOVE_CUSTOMS_SELF_DECLARANT,
+    type: ADD_CUSTOMS_SELF_DECLARATION_EMAIL,
     payload: {
       email,
     },
   };
 }
 
-export function addCustomsSelfDeclarantAircraft(email: string, registration: string) {
+export function removeCustomsSelfDeclarationEmail(email: string) {
   return {
-    type: ADD_CUSTOMS_SELF_DECLARANT_AIRCRAFT,
+    type: REMOVE_CUSTOMS_SELF_DECLARATION_EMAIL,
     payload: {
       email,
-      registration,
     },
   };
 }
 
-export function removeCustomsSelfDeclarantAircraft(email: string, registration: string) {
+export function saveCustomsSelfDeclarationEmailsSaving() {
   return {
-    type: REMOVE_CUSTOMS_SELF_DECLARANT_AIRCRAFT,
-    payload: {
-      email,
-      registration,
-    },
+    type: SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SAVING,
   };
 }
 
-export function saveCustomsSelfDeclarantsSaving() {
+export function saveCustomsSelfDeclarationEmailsSuccess() {
   return {
-    type: SAVE_CUSTOMS_SELF_DECLARANTS_SAVING,
+    type: SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_SUCCESS,
   };
 }
 
-export function saveCustomsSelfDeclarantsSuccess() {
+export function saveCustomsSelfDeclarationEmailsFailure() {
   return {
-    type: SAVE_CUSTOMS_SELF_DECLARANTS_SUCCESS,
-  };
-}
-
-export function saveCustomsSelfDeclarantsFailure() {
-  return {
-    type: SAVE_CUSTOMS_SELF_DECLARANTS_FAILURE,
+    type: SAVE_CUSTOMS_SELF_DECLARATION_EMAILS_FAILURE,
   };
 }
