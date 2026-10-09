@@ -415,7 +415,7 @@
   },
   "adminCustomsSelfDeclaration": {
     "title": "Zoll-Selbstdeklaration",
-    "description": "Hier werden die Personen erfasst, deren Zollanmeldungen ohne Prüfung durch den Flugplatz direkt an die Zollbehörden übermittelt werden (Selbstdeklaration). Erfasst wird die E-Mail-Adresse, mit der sich die Person in der Zollanmeldungs-App anmeldet. Dies gilt nur für neue Anmeldungen, die eingeloggt erfasst werden. Änderungen und Annullierungen werden weiterhin durch den Flugplatz geprüft und weitergeleitet.",
+    "description": "Hier werden die Personen erfasst, deren Zollanmeldungen ohne Prüfung durch den Flugplatz direkt an die Zollbehörden übermittelt werden (Selbstdeklaration). Erfasst wird die E-Mail-Adresse, mit der sich die Person in der Zollanmeldungs-App anmeldet. Dies gilt nur für neue Anmeldungen, die eingeloggt erfasst werden, und nur für Flugzeuge mit einem MTOW unter 2250 kg. Anmeldungen für schwerere Luftfahrzeuge und Helikopter werden immer durch den Flugplatz geprüft. Änderungen und Annullierungen werden weiterhin durch den Flugplatz geprüft und weitergeleitet.",
     "emailPlaceholder": "Berechtigtes Login (E-Mail)",
     "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
     "duplicateEmail": "Diese E-Mail-Adresse ist bereits erfasst.",

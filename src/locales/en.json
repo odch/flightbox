@@ -415,7 +415,7 @@
   },
   "adminCustomsSelfDeclaration": {
     "title": "Customs self-declaration",
-    "description": "This is where you record the persons whose customs declarations are forwarded directly to the customs authorities without being reviewed by the aerodrome (self-declaration). Record the email address the person uses to log in to the customs declaration app. This only applies to new declarations submitted while logged in. Changes and cancellations are still reviewed and forwarded by the aerodrome.",
+    "description": "This is where you record the persons whose customs declarations are forwarded directly to the customs authorities without being reviewed by the aerodrome (self-declaration). Record the email address the person uses to log in to the customs declaration app. This only applies to new declarations submitted while logged in, and only to aeroplanes with an MTOW below 2250 kg. Declarations for heavier aircraft and helicopters are always reviewed by the aerodrome. Changes and cancellations are still reviewed and forwarded by the aerodrome.",
     "emailPlaceholder": "Authorised login (email)",
     "invalidEmail": "Please enter a valid email address.",
     "duplicateEmail": "This email address has already been added.",
