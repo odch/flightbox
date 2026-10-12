@@ -300,7 +300,7 @@ full list each time):
 * `/settings/customsSelfDeclarationEmails` (tab "Zoll-Selbstdeklaration", shown when the project enables
   `customsSelfDeclarationEnabled` and customs is available) →
   `/api/self-declaration-emails`: the logins whose declarations the customs app forwards without review by
-  the aerodrome.
+  the aerodrome (only for aeroplanes below 2250 kg MTOW; the customs app decides this per declaration).
 * `/settings/aircrafts` → `/api/homebased-aircraft`
 
 For the first two, the outcome is stored in `/settings/customsSyncStatus/<invoiceRecipients|selfDeclarationEmails>`

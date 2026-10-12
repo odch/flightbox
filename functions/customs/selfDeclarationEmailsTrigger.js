@@ -12,8 +12,13 @@ const SELF_DECLARATION_EMAILS_PATH = '/settings/customsSelfDeclarationEmails'
 
 // The customs app validates each entry itself and reports the rejected ones,
 // so only the shape is normalised here.
+// An entry is an e-mail, or an {email, registrations} object written by an
+// earlier version (with aircraft per person); its aircraft no longer matter.
+const entryEmail = entry => (entry && typeof entry === 'object' ? entry.email : entry)
+
 function buildBody(value) {
   const emails = toArray(value)
+    .map(entryEmail)
     .filter(email => typeof email === 'string')
     .map(email => email.trim().toLowerCase())
     .filter(email => email.length > 0)

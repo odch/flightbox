@@ -210,9 +210,15 @@ describe('functions/customs/selfDeclarationEmailsTrigger', () => {
     });
 
     it('drops non-string, empty and duplicate entries', () => {
-      expect(buildBody(['a@example.com', 42, null, { email: 'x' }, '  ', 'A@example.com'])).toEqual([
+      expect(buildBody(['a@example.com', 42, null, { email: 42 }, {}, '  ', 'A@example.com'])).toEqual([
         'a@example.com',
       ]);
+    });
+
+    it('takes the e-mail of entries with aircraft of an earlier version', () => {
+      expect(
+        buildBody([{ email: ' Alice@Example.com', registrations: ['HBKLA'] }, 'bob@example.com'])
+      ).toEqual(['alice@example.com', 'bob@example.com']);
     });
 
     it('accepts a sparse list stored as an object', () => {
