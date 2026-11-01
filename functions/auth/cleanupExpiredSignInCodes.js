@@ -5,6 +5,7 @@ const { getDatabase } = require('firebase-admin/database');
 
 const MAX_ATTEMPTS = 5;
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour — matches generateSignInCode
+const DAY_WINDOW_MS = 24 * 60 * 60 * 1000; // matches generateSignInCode
 
 exports.cleanupExpiredSignInCodes = onSchedule(
   { region: 'europe-west1', schedule: 'every 60 minutes' },
@@ -35,7 +36,10 @@ exports.cleanupExpiredSignInCodes = onSchedule(
       const updates = {};
       rateLimitsSnapshot.forEach(child => {
         const val = child.val();
-        if (now - val.windowStart > RATE_WINDOW_MS) {
+        // Keep an entry until its daily window has passed too, or pruning it
+        // would reset the daily cap every hour.
+        const dayWindowOver = !val.dayWindowStart || now - val.dayWindowStart > DAY_WINDOW_MS;
+        if (now - val.windowStart > RATE_WINDOW_MS && dayWindowOver) {
           updates[child.key] = null;
         }
       });

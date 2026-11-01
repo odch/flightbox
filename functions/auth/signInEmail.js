@@ -25,6 +25,27 @@ const normalizeEmail = (email) => {
   return normalized;
 };
 
+const GMAIL_DOMAINS = ['gmail.com', 'googlemail.com'];
+
+/**
+ * The mailbox a normalized address delivers to, for rate limiting only:
+ * 'pilot+1@x.ch' and 'p.ilot@gmail.com' would otherwise each get their own
+ * limit while landing in the same inbox. Dropping a '+tag' on a provider
+ * without subaddressing merely makes the limit stricter. Codes and the
+ * Firebase user stay keyed by the exact address.
+ */
+const mailboxKey = (email) => {
+  const at = email.lastIndexOf('@');
+  let local = email.slice(0, at).split('+')[0];
+  let domain = email.slice(at + 1);
+  if (GMAIL_DOMAINS.includes(domain)) {
+    local = local.replace(/\./g, '');
+    domain = 'gmail.com';
+  }
+  return `${local}@${domain}`;
+};
+
 module.exports = {
+  mailboxKey,
   normalizeEmail,
 };
