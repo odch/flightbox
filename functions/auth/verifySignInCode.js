@@ -14,6 +14,47 @@ const hashCode = (code) => {
   return crypto.createHash('sha256').update(code).digest('hex');
 };
 
+/**
+ * Returns the Firebase Auth user for an email whose ownership was just proven
+ * with a sign-in code, creating it if needed.
+ */
+const getOrCreateVerifiedUser = async (auth, email) => {
+  let user;
+  try {
+    user = await auth.getUserByEmail(email);
+  } catch (e) {
+    if (e.code !== 'auth/user-not-found') {
+      throw e;
+    }
+    try {
+      return await auth.createUser({ email, emailVerified: true });
+    } catch (createError) {
+      // Lost a race against a concurrent sign-in creating the same user.
+      if (createError.code !== 'auth/email-already-exists') {
+        throw createError;
+      }
+      user = await auth.getUserByEmail(email);
+    }
+  }
+
+  if (!user.emailVerified) {
+    // Nobody had proven ownership of this address before, so the account
+    // may have been registered with a password through the public API key
+    // (and the password possibly unlinked again). The code proves ownership
+    // now: replace the password and end existing sessions so whoever
+    // pre-registered the address cannot keep using it. Accounts created by
+    // earlier code sign-ins are unverified too; their owner is signed out on
+    // other devices once.
+    user = await auth.updateUser(user.uid, {
+      emailVerified: true,
+      password: crypto.randomBytes(32).toString('base64url'),
+    });
+    await auth.revokeRefreshTokens(user.uid);
+  }
+
+  return user;
+};
+
 const validateRequest = (method, body) => {
   if (method !== 'POST') {
     return { error: 'Method not allowed', status: 405 };
@@ -103,21 +144,8 @@ exports.verifySignInCode = onRequest({ region: 'europe-west1' }, (req, res) => {
         return res.status(400).json({ error: 'Invalid or expired code' });
       }
 
-      // Get or create the Firebase Auth user
-      let uid;
-      try {
-        const userRecord = await getAuth().getUserByEmail(normalizedEmail);
-        uid = userRecord.uid;
-      } catch (e) {
-        if (e.code === 'auth/user-not-found') {
-          const newUser = await getAuth().createUser({ email: normalizedEmail });
-          uid = newUser.uid;
-        } else {
-          throw e;
-        }
-      }
-
-      const customToken = await getAuth().createCustomToken(uid, { email: normalizedEmail });
+      const user = await getOrCreateVerifiedUser(getAuth(), normalizedEmail);
+      const customToken = await getAuth().createCustomToken(user.uid, { email: normalizedEmail });
       res.status(200).json({ token: customToken });
     } catch (error) {
       console.error('Error verifying sign-in code:', error);

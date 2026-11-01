@@ -60,6 +60,8 @@ describe('functions', () => {
       mockAuthAdmin = {
         getUserByEmail: jest.fn(),
         createUser: jest.fn(),
+        updateUser: jest.fn(async (uid, props) => ({ uid, ...props })),
+        revokeRefreshTokens: jest.fn().mockResolvedValue(),
         createCustomToken: jest.fn().mockResolvedValue('custom-token-xyz'),
       };
 
@@ -219,7 +221,7 @@ describe('functions', () => {
       setupCodes([
         { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(code), expiry: futureExpiry, attempts: 0 } },
       ]);
-      mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'user-uid-123' });
+      mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'user-uid-123', emailVerified: true });
 
       const req = makeReq('POST', { email: 'user@example.com', code });
       const res = makeRes();
@@ -240,15 +242,90 @@ describe('functions', () => {
 
       const authError = Object.assign(new Error('User not found'), { code: 'auth/user-not-found' });
       mockAuthAdmin.getUserByEmail.mockRejectedValue(authError);
-      mockAuthAdmin.createUser.mockResolvedValue({ uid: 'new-uid-456' });
+      mockAuthAdmin.createUser.mockResolvedValue({ uid: 'new-uid-456', emailVerified: true });
 
       const req = makeReq('POST', { email: 'new@example.com', code });
       const res = makeRes();
       await capturedHandler(req, res);
 
-      expect(mockAuthAdmin.createUser).toHaveBeenCalledWith({ email: 'new@example.com' });
+      expect(mockAuthAdmin.createUser).toHaveBeenCalledWith({ email: 'new@example.com', emailVerified: true });
+      expect(mockAuthAdmin.updateUser).not.toHaveBeenCalled();
       expect(mockAuthAdmin.createCustomToken).toHaveBeenCalledWith('new-uid-456', { email: 'new@example.com' });
       expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    describe('user verification', () => {
+      const code = '123456';
+
+      beforeEach(() => {
+        setupCodes([
+          { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(code), expiry: futureExpiry, attempts: 0 } },
+        ]);
+      });
+
+      const signIn = async () => {
+        const res = makeRes();
+        await capturedHandler(makeReq('POST', { email: 'user@example.com', code }), res);
+        return res;
+      };
+
+      it('leaves a verified user as it is', async () => {
+        mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'uid-1', emailVerified: true, providerData: [{ providerId: 'password' }] });
+
+        const res = await signIn();
+
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(mockAuthAdmin.updateUser).not.toHaveBeenCalled();
+        expect(mockAuthAdmin.revokeRefreshTokens).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['registered with a password', [{ providerId: 'password' }]],
+        // e.g. created by an earlier code sign-in, or a password unlinked again
+        ['without a password', []],
+      ])('takes over an unverified account %s', async (_, providerData) => {
+        mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'uid-1', emailVerified: false, providerData });
+
+        const res = await signIn();
+
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(mockAuthAdmin.updateUser).toHaveBeenCalledWith('uid-1', {
+          emailVerified: true,
+          password: expect.any(String),
+        });
+        const { password } = mockAuthAdmin.updateUser.mock.calls[0][1];
+        expect(password.length).toBeGreaterThanOrEqual(40);
+        expect(mockAuthAdmin.revokeRefreshTokens).toHaveBeenCalledWith('uid-1');
+        // Sessions are ended before the new token is handed out.
+        expect(mockAuthAdmin.revokeRefreshTokens.mock.invocationCallOrder[0])
+          .toBeLessThan(mockAuthAdmin.createCustomToken.mock.invocationCallOrder[0]);
+        expect(mockAuthAdmin.createCustomToken).toHaveBeenCalledWith('uid-1', { email: 'user@example.com' });
+      });
+
+      it('uses the user created by a concurrent sign-in when creation races', async () => {
+        const notFound = Object.assign(new Error('User not found'), { code: 'auth/user-not-found' });
+        const exists = Object.assign(new Error('Email exists'), { code: 'auth/email-already-exists' });
+        mockAuthAdmin.getUserByEmail
+          .mockRejectedValueOnce(notFound)
+          .mockResolvedValueOnce({ uid: 'uid-race', emailVerified: true, providerData: [] });
+        mockAuthAdmin.createUser.mockRejectedValue(exists);
+
+        const res = await signIn();
+
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(mockAuthAdmin.createCustomToken).toHaveBeenCalledWith('uid-race', { email: 'user@example.com' });
+      });
+
+      it('fails on other user creation errors', async () => {
+        const notFound = Object.assign(new Error('User not found'), { code: 'auth/user-not-found' });
+        mockAuthAdmin.getUserByEmail.mockRejectedValue(notFound);
+        mockAuthAdmin.createUser.mockRejectedValue(Object.assign(new Error('boom'), { code: 'auth/internal-error' }));
+
+        const res = await signIn();
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(mockAuthAdmin.createCustomToken).not.toHaveBeenCalled();
+      });
     });
 
     it('normalizes email to lowercase', async () => {
@@ -256,7 +333,7 @@ describe('functions', () => {
       setupCodes([
         { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(code), expiry: futureExpiry, attempts: 0 } },
       ]);
-      mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'uid-123' });
+      mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'uid-123', emailVerified: true });
 
       const req = makeReq('POST', { email: 'USER@EXAMPLE.COM', code });
       const res = makeRes();
@@ -272,7 +349,7 @@ describe('functions', () => {
         { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(otherCode), expiry: futureExpiry, attempts: 1 } },
         { key: 'k2', val: { email: 'user@example.com', codeHash: hashCode(correctCode), expiry: futureExpiry, attempts: 0 } },
       ]);
-      mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'uid-123' });
+      mockAuthAdmin.getUserByEmail.mockResolvedValue({ uid: 'uid-123', emailVerified: true });
 
       const req = makeReq('POST', { email: 'user@example.com', code: correctCode });
       const res = makeRes();
