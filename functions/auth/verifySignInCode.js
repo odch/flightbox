@@ -5,8 +5,10 @@ const { getAuth } = require('firebase-admin/auth');
 const { getDatabase } = require('firebase-admin/database');
 const crypto = require('crypto');
 const cors = require('cors')({origin: true});
+const { normalizeEmail } = require('./signInEmail');
 
 const MAX_ATTEMPTS = 5;
+const CODE_PATTERN = /^\d{6}$/;
 
 const hashCode = (code) => {
   return crypto.createHash('sha256').update(code).digest('hex');
@@ -23,6 +25,12 @@ const validateRequest = (method, body) => {
     return { error: 'Email and code are required', status: 400 };
   }
 
+  // A malformed code can never match, so reject it without counting it as an
+  // attempt.
+  if (!normalizeEmail(email) || typeof code !== 'string' || !CODE_PATTERN.test(code)) {
+    return { error: 'Invalid or expired code', status: 400 };
+  }
+
   return null;
 };
 
@@ -35,7 +43,7 @@ exports.verifySignInCode = onRequest({ region: 'europe-west1' }, (req, res) => {
       }
 
       const { email, code } = req.body;
-      const normalizedEmail = email.toLowerCase();
+      const normalizedEmail = normalizeEmail(email);
       const codeHash = hashCode(code);
       const now = Date.now();
 

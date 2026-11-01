@@ -109,6 +109,30 @@ describe('functions', () => {
       expect(res.json).toHaveBeenCalledWith({ error: 'Email and code are required' });
     });
 
+    it.each([
+      [{ email: 42, code: '123456' }],
+      [{ email: ['user@example.com'], code: '123456' }],
+      [{ email: 'not-an-email', code: '123456' }],
+      [{ email: 'user@example.com', code: 123456 }],
+      [{ email: 'user@example.com', code: ['123456'] }],
+      [{ email: 'user@example.com', code: '12345' }],
+      [{ email: 'user@example.com', code: '1234567' }],
+      [{ email: 'user@example.com', code: '12345a' }],
+    ])('returns 400 without counting an attempt for the malformed request %p', async (body) => {
+      setupCodes([
+        { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode('123456'), expiry: futureExpiry, attempts: 0 } },
+      ]);
+
+      const req = makeReq('POST', body);
+      const res = makeRes();
+      await capturedHandler(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid or expired code' });
+      expect(transactionCalls).toEqual([]);
+      expect(records.k1.attempts).toBe(0);
+    });
+
     it('returns 400 when no codes exist for email', async () => {
       setupCodes([]);
 

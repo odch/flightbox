@@ -84,6 +84,23 @@ describe('functions', () => {
       expect(res.json).toHaveBeenCalledWith({ error: 'Invalid email format' });
     });
 
+    it.each([
+      [42],
+      [['user@example.com']],
+      [{ email: 'user@example.com' }],
+      ['a1,victim@example.com'],
+      ['"x",victim@example.com'],
+      [`${'a'.repeat(250)}@example.com`],
+    ])('returns 400 and sends nothing for the email %p', async (email) => {
+      const req = makeReq('POST', { email });
+      const res = makeRes();
+      await capturedHandler(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid email format' });
+      expect(mockTransaction).not.toHaveBeenCalled();
+      expect(mockSendSignInEmail).not.toHaveBeenCalled();
+    });
+
     it('returns 429 with a retry time and sends nothing when rate limited', async () => {
       const now = Date.now();
       // hourly cap reached: window started ~20 min ago, so ~40 min remain
@@ -173,6 +190,15 @@ describe('functions', () => {
 
       const pushedData = mockPush.mock.calls[0][0];
       expect(pushedData.email).toBe('user@example.com');
+    });
+
+    it('trims the email before storing and sending', async () => {
+      const req = makeReq('POST', { email: '  User@Example.com ' });
+      const res = makeRes();
+      await capturedHandler(req, res);
+
+      expect(mockPush.mock.calls[0][0].email).toBe('user@example.com');
+      expect(mockSendSignInEmail.mock.calls[0][0].email).toBe('user@example.com');
     });
 
     it('sends email server-side with correct parameters', async () => {
