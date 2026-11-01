@@ -5,8 +5,8 @@ const { getDatabase } = require('firebase-admin/database');
 const crypto = require('crypto');
 const cors = require('cors')({origin: true});
 const { sendSignInEmail } = require('./sendSignInEmail');
+const { normalizeEmail } = require('./signInEmail');
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 
 // Per-email rate limiting. The login UI already enforces a 60s resend countdown
@@ -38,7 +38,7 @@ const validateRequest = (method, body) => {
     return { error: 'Email is required', status: 400 };
   }
 
-  if (!EMAIL_REGEX.test(email)) {
+  if (!normalizeEmail(email)) {
     return { error: 'Invalid email format', status: 400 };
   }
 
@@ -54,7 +54,7 @@ exports.generateSignInCode = onRequest({ region: 'europe-west1' }, (req, res) =>
       }
 
       const { email, airportName, themeColor, language } = req.body;
-      const normalizedEmail = email.toLowerCase();
+      const normalizedEmail = normalizeEmail(email);
       const db = getDatabase();
       const now = Date.now();
 
