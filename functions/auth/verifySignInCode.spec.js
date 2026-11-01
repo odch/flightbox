@@ -260,6 +260,33 @@ describe('functions', () => {
       expect(records.k2).toBeUndefined();
     });
 
+    it('rejects a code that was consumed while the transaction retried', async () => {
+      const code = '123456';
+      setupCodes([
+        { key: 'k1', val: { email: 'user@example.com', codeHash: hashCode(code), expiry: futureExpiry, attempts: 0 } },
+      ]);
+      // RTDB runs the update function against a cached value first and again
+      // against the server's value when they differ. Here the cache still holds
+      // the code, but a concurrent sign-in has already consumed it.
+      mockCodesRef.child.mockImplementation((key) => ({
+        transaction: async (updateFn) => {
+          transactionCalls.push(key);
+          updateFn(records[key]);
+          delete records[key];
+          const next = updateFn(null);
+          return { committed: true, snapshot: { val: () => next } };
+        },
+      }));
+
+      const req = makeReq('POST', { email: 'user@example.com', code });
+      const res = makeRes();
+      await capturedHandler(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid or expired code' });
+      expect(mockAuthAdmin.createCustomToken).not.toHaveBeenCalled();
+    });
+
     it('returns 500 without error details on unexpected error', async () => {
       mockCodesRef.once.mockRejectedValue(new Error('internal db secret error'));
 
