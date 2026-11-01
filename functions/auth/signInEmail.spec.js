@@ -1,7 +1,20 @@
-const { normalizeEmail } = require('./signInEmail');
+const { mailboxKey, normalizeEmail } = require('./signInEmail');
 
 describe('functions', () => {
   describe('auth/signInEmail', () => {
+    describe('mailboxKey', () => {
+      it.each([
+        ['pilot@example.ch', 'pilot@example.ch'],
+        ['pilot+flightbox@example.ch', 'pilot@example.ch'],
+        ['pilot+a+b@example.ch', 'pilot@example.ch'],
+        ['p.ilot@example.ch', 'p.ilot@example.ch'],
+        ['p.i.lot+x@gmail.com', 'pilot@gmail.com'],
+        ['P.ilot@googlemail.com'.toLowerCase(), 'pilot@gmail.com'],
+      ])('maps %p to %p', (email, expected) => {
+        expect(mailboxKey(email)).toBe(expected);
+      });
+    });
+
     describe('normalizeEmail', () => {
       it('trims and lower-cases a valid address', () => {
         expect(normalizeEmail('  Pilot.One+Tag@Example.CH ')).toBe('pilot.one+tag@example.ch');
