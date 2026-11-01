@@ -65,6 +65,11 @@ exports.verifySignInCode = onRequest({ region: 'europe-west1' }, (req, res) => {
       for (const key of candidateKeys) {
         let didMatch = false;
         const result = await codesRef.child(key).transaction(current => {
+          // The update function runs again on every retry, so the match must
+          // reflect the final run only. Otherwise a match seen against a stale
+          // value would survive a retry against the server's state, letting a
+          // code that was consumed, capped or replaced meanwhile be redeemed.
+          didMatch = false;
           // RTDB may invoke this with a stale cached value (often null) before
           // retrying against the server; returning null (not undefined) forces
           // the refetch instead of aborting.
