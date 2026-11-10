@@ -5,11 +5,54 @@ const { getAuth } = require('firebase-admin/auth');
 const { getDatabase } = require('firebase-admin/database');
 const crypto = require('crypto');
 const cors = require('cors')({origin: true});
+const { normalizeEmail } = require('./signInEmail');
 
 const MAX_ATTEMPTS = 5;
+const CODE_PATTERN = /^\d{6}$/;
 
 const hashCode = (code) => {
   return crypto.createHash('sha256').update(code).digest('hex');
+};
+
+/**
+ * Returns the Firebase Auth user for an email whose ownership was just proven
+ * with a sign-in code, creating it if needed.
+ */
+const getOrCreateVerifiedUser = async (auth, email) => {
+  let user;
+  try {
+    user = await auth.getUserByEmail(email);
+  } catch (e) {
+    if (e.code !== 'auth/user-not-found') {
+      throw e;
+    }
+    try {
+      return await auth.createUser({ email, emailVerified: true });
+    } catch (createError) {
+      // Lost a race against a concurrent sign-in creating the same user.
+      if (createError.code !== 'auth/email-already-exists') {
+        throw createError;
+      }
+      user = await auth.getUserByEmail(email);
+    }
+  }
+
+  if (!user.emailVerified) {
+    // Nobody had proven ownership of this address before, so the account
+    // may have been registered with a password through the public API key
+    // (and the password possibly unlinked again). The code proves ownership
+    // now: replace the password and end existing sessions so whoever
+    // pre-registered the address cannot keep using it. Accounts created by
+    // earlier code sign-ins are unverified too; their owner is signed out on
+    // other devices once.
+    user = await auth.updateUser(user.uid, {
+      emailVerified: true,
+      password: crypto.randomBytes(32).toString('base64url'),
+    });
+    await auth.revokeRefreshTokens(user.uid);
+  }
+
+  return user;
 };
 
 const validateRequest = (method, body) => {
@@ -21,6 +64,12 @@ const validateRequest = (method, body) => {
 
   if (!email || !code) {
     return { error: 'Email and code are required', status: 400 };
+  }
+
+  // A malformed code can never match, so reject it without counting it as an
+  // attempt.
+  if (!normalizeEmail(email) || typeof code !== 'string' || !CODE_PATTERN.test(code)) {
+    return { error: 'Invalid or expired code', status: 400 };
   }
 
   return null;
@@ -35,7 +84,7 @@ exports.verifySignInCode = onRequest({ region: 'europe-west1' }, (req, res) => {
       }
 
       const { email, code } = req.body;
-      const normalizedEmail = email.toLowerCase();
+      const normalizedEmail = normalizeEmail(email);
       const codeHash = hashCode(code);
       const now = Date.now();
 
@@ -65,6 +114,11 @@ exports.verifySignInCode = onRequest({ region: 'europe-west1' }, (req, res) => {
       for (const key of candidateKeys) {
         let didMatch = false;
         const result = await codesRef.child(key).transaction(current => {
+          // The update function runs again on every retry, so the match must
+          // reflect the final run only. Otherwise a match seen against a stale
+          // value would survive a retry against the server's state, letting a
+          // code that was consumed, capped or replaced meanwhile be redeemed.
+          didMatch = false;
           // RTDB may invoke this with a stale cached value (often null) before
           // retrying against the server; returning null (not undefined) forces
           // the refetch instead of aborting.
@@ -90,21 +144,8 @@ exports.verifySignInCode = onRequest({ region: 'europe-west1' }, (req, res) => {
         return res.status(400).json({ error: 'Invalid or expired code' });
       }
 
-      // Get or create the Firebase Auth user
-      let uid;
-      try {
-        const userRecord = await getAuth().getUserByEmail(normalizedEmail);
-        uid = userRecord.uid;
-      } catch (e) {
-        if (e.code === 'auth/user-not-found') {
-          const newUser = await getAuth().createUser({ email: normalizedEmail });
-          uid = newUser.uid;
-        } else {
-          throw e;
-        }
-      }
-
-      const customToken = await getAuth().createCustomToken(uid, { email: normalizedEmail });
+      const user = await getOrCreateVerifiedUser(getAuth(), normalizedEmail);
+      const customToken = await getAuth().createCustomToken(user.uid, { email: normalizedEmail });
       res.status(200).json({ token: customToken });
     } catch (error) {
       console.error('Error verifying sign-in code:', error);

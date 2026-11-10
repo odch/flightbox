@@ -146,6 +146,20 @@ describe('functions', () => {
       expect(mockRateLimitsRef.update).toHaveBeenCalledWith({ rl1: null });
     });
 
+    it('keeps rate-limit entries until their daily window has passed', async () => {
+      const hour = 60 * 60 * 1000;
+      mockRateLimitsRef.once.mockResolvedValue(makeSnapshot([
+        // hourly window over, daily window still running: keep the daily cap
+        { key: 'rl1', val: { windowStart: now - 2 * hour, dayWindowStart: now - 5 * hour, dayCount: 20 } },
+        // both windows over
+        { key: 'rl2', val: { windowStart: now - 2 * hour, dayWindowStart: now - 25 * hour, dayCount: 20 } },
+      ]));
+
+      await capturedHandler();
+
+      expect(mockRateLimitsRef.update).toHaveBeenCalledWith({ rl2: null });
+    });
+
     it('does not touch rate-limit entries that are all recent', async () => {
       mockRateLimitsRef.once.mockResolvedValue(makeSnapshot([
         { key: 'rl1', val: { windowStart: now - (5 * 60 * 1000) } },
