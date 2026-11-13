@@ -52,7 +52,8 @@
       "firebaseProjectId": "lspl-test",
       "firebaseDatabaseUrl": "https://lspl-test-default-rtdb.europe-west1.firebasedatabase.app",
       "firebaseApiKey": "AIzaSyAMrXeJqssO1Wixyf25T-_UBJFyR8emcdk",
-      "passkeysEnabled": true
+      "passkeysEnabled": true,
+      "ppr": true
     },
     "production": {
       "firebaseProjectId": "lspl-prod",
