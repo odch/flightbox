@@ -3,8 +3,7 @@
 const {
   normalizeAdminEmail,
   normalizeRetentionDays,
-  retentionDaysOrDefault,
-  DEFAULT_RETENTION_DAYS,
+  isValidRetentionDays,
   MAX_RETENTION_DAYS
 } = require('./pprSettings')
 
@@ -34,7 +33,7 @@ describe('pprSettings', () => {
       expect(normalizeRetentionDays(days)).toBe(days)
     })
 
-    it.each([undefined, null, ''])('goes back to the default for %p', value => {
+    it.each([undefined, null, ''])('removes the retention for %p', value => {
       expect(normalizeRetentionDays(value)).toBeNull()
     })
 
@@ -43,13 +42,13 @@ describe('pprSettings', () => {
     })
   })
 
-  describe('retentionDaysOrDefault', () => {
-    it('uses a valid stored value', () => {
-      expect(retentionDaysOrDefault(90)).toBe(90)
+  describe('isValidRetentionDays', () => {
+    it.each([1, 90, MAX_RETENTION_DAYS])('accepts %p', days => {
+      expect(isValidRetentionDays(days)).toBe(true)
     })
 
-    it.each([null, 999999999, '30'])('falls back to the default for %p', stored => {
-      expect(retentionDaysOrDefault(stored)).toBe(DEFAULT_RETENTION_DAYS)
+    it.each([null, undefined, 0, 999999999, 7.5, '30'])('rejects %p', stored => {
+      expect(isValidRetentionDays(stored)).toBe(false)
     })
   })
 })

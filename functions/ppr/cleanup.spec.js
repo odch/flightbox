@@ -34,6 +34,16 @@ describe('PPR cleanup', () => {
     })
   })
 
+  it('prunes expired rate-limit entries also without a retention', async () => {
+    const log = jest.spyOn(console, 'log').mockImplementation(() => undefined)
+    mockRef.mockImplementation(() => ({ once: jest.fn().mockResolvedValue({ val: () => null }) }))
+
+    await scheduledHandler()
+
+    expect(mockPruneExpired).toHaveBeenCalledTimes(1)
+    log.mockRestore()
+  })
+
   it('also prunes expired rate-limit entries when it runs', async () => {
     mockRef.mockImplementation(path => {
       if (path === '/settings/ppr/retentionDays') {
@@ -128,49 +138,49 @@ describe('PPR cleanup', () => {
       expect(mockUpdate).not.toHaveBeenCalled()
     })
 
-    it('uses default retention when setting is missing', async () => {
-      mockRef.mockImplementation(path => {
-        if (path === '/settings/ppr/retentionDays') {
-          return { once: jest.fn().mockResolvedValue({ val: () => null }) }
-        }
-        if (path === '/pprRequests') {
-          return {
-            once: jest.fn().mockResolvedValue({ exists: () => false })
-          }
-        }
-        return { once: mockOnce }
-      })
-
-      const count = await cleanupExpiredPprRequests()
-      expect(count).toBe(0)
-    })
-
-    it.each([999999999, 500000, 1e12, 3651, 7.5, -3, '30'])(
-      'ignores the invalid retention %p and keeps future and recent requests', async retentionDays => {
-        const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
-        const children = [
+    // Mocks a stored retention and requests from the past and the future
+    const mockStore = retentionDays => {
+      const requestsOnce = jest.fn().mockResolvedValue({
+        exists: () => true,
+        forEach: (cb) => [
           { key: 'past', val: () => ({ plannedDate: '2020-01-01' }) },
           { key: 'future', val: () => ({ plannedDate: '2099-12-31' }) }
-        ]
-        mockRef.mockImplementation(path => {
-          if (path === '/settings/ppr/retentionDays') {
-            return { once: jest.fn().mockResolvedValue({ val: () => retentionDays }) }
-          }
-          return {
-            once: jest.fn().mockResolvedValue({
-              exists: () => true,
-              forEach: (cb) => children.forEach(cb)
-            }),
-            update: mockUpdate
-          }
-        })
+        ].forEach(cb)
+      })
+      mockRef.mockImplementation(path => {
+        if (path === '/settings/ppr/retentionDays') {
+          return { once: jest.fn().mockResolvedValue({ val: () => retentionDays }) }
+        }
+        return { once: requestsOnce, update: mockUpdate }
+      })
+      return requestsOnce
+    }
+
+    it('deletes nothing when no retention is set, as for movements and messages', async () => {
+      const log = jest.spyOn(console, 'log').mockImplementation(() => undefined)
+      const requestsOnce = mockStore(null)
+
+      const count = await cleanupExpiredPprRequests()
+
+      expect(count).toBe(0)
+      expect(requestsOnce).not.toHaveBeenCalled()
+      expect(mockUpdate).not.toHaveBeenCalled()
+      log.mockRestore()
+    })
+
+    it.each([999999999, 500000, 1e12, 3651, 0, 7.5, -3, '30'])(
+      'ignores the invalid retention %p and deletes nothing', async retentionDays => {
+        const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+        const log = jest.spyOn(console, 'log').mockImplementation(() => undefined)
+        mockStore(retentionDays)
 
         const count = await cleanupExpiredPprRequests()
 
-        expect(count).toBe(1)
-        expect(mockUpdate).toHaveBeenCalledWith({ past: null })
+        expect(count).toBe(0)
+        expect(mockUpdate).not.toHaveBeenCalled()
         expect(warn).toHaveBeenCalled()
         warn.mockRestore()
+        log.mockRestore()
       }
     )
 

@@ -673,7 +673,7 @@
     "messageRetentionDays": "Message retention period (days)",
     "messageRetentionDaysHelp": "After expiry, messages are deleted.",
     "pprRetentionDays": "PPR request retention period (days)",
-    "pprRetentionDaysHelp": "PPR requests are deleted this many days after their planned date. 30 days if empty.",
+    "pprRetentionDaysHelp": "After expiry, PPR requests are deleted. Counted from their planned date.",
     "pprRetentionDaysInvalid": "Enter a whole number from 1 to 3650.",
     "pprRetentionDaysSaveFailed": "The retention period of PPR requests could not be saved.",
     "save": "Save",

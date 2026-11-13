@@ -14,7 +14,7 @@
  * @property {function(): Promise<*>} getRetentionDays
  *   The stored retention in days as it is (null if none set).
  * @property {function(number|null): Promise<void>} setRetentionDays
- *   Set the retention, or remove it with null (the default applies).
+ *   Set the retention, or remove it with null (nothing is deleted).
  */
 
 module.exports = {}

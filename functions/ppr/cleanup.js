@@ -5,18 +5,24 @@ const { getDatabase } = require('firebase-admin/database')
 const { zurichDate, addDays } = require('./domain/pprRequest')
 const rateLimiter = require('./adapters/firebaseRateLimiter')
 const settings = require('./adapters/firebasePprSettings')
-const { DEFAULT_RETENTION_DAYS, isValidRetentionDays, retentionDaysOrDefault } = require('./domain/pprSettings')
+const { isValidRetentionDays } = require('./domain/pprSettings')
 
 const SCHEDULE = '0 2 * * *' // Daily at 2 AM
 const TIMEZONE = 'Europe/Zurich'
-// Admins set it in the privacy tab; an invalid stored value (e.g. one set in
-// the console) falls back to the default instead of deleting everything.
+
+// Admins set it in the privacy tab. Without a value nothing is deleted, as
+// for movements and messages; an invalid stored value (e.g. one set in the
+// console) is ignored the same way instead of deleting everything.
 async function getRetentionDays() {
   const stored = await settings.getRetentionDays()
-  if (stored !== null && !isValidRetentionDays(stored)) {
-    console.warn(`Ignoring invalid /settings/ppr/retentionDays (${JSON.stringify(stored)}), using ${DEFAULT_RETENTION_DAYS}`)
+  if (stored === null || stored === undefined) {
+    return null
   }
-  return retentionDaysOrDefault(stored)
+  if (!isValidRetentionDays(stored)) {
+    console.warn(`Ignoring invalid /settings/ppr/retentionDays (${JSON.stringify(stored)})`)
+    return null
+  }
+  return stored
 }
 
 // The aerodrome's (Zurich) date `retentionDays` days ago, as 'YYYY-MM-DD'
@@ -26,6 +32,10 @@ function getCutoffDate(retentionDays, now = Date.now()) {
 
 async function cleanupExpiredPprRequests() {
   const retentionDays = await getRetentionDays()
+  if (retentionDays === null) {
+    console.log('No PPR retention configured, skipping')
+    return 0
+  }
   const cutoffDate = getCutoffDate(retentionDays)
 
   const snapshot = await getDatabase().ref('/pprRequests').once('value')

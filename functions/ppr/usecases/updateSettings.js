@@ -7,7 +7,7 @@ const getSettings = require('./getSettings')
  * Update the given PPR settings, leaving the others as they are:
  * - adminEmail: the address new requests are sent to (empty removes it)
  * - retentionDays: days after the planned date until requests are deleted
- *   (empty goes back to the default)
+ *   (empty removes it, so nothing is deleted)
  * Everything is validated before anything is written.
  *
  * @param {Object} deps - { settings }

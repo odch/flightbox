@@ -673,7 +673,7 @@
     "messageRetentionDays": "Aufbewahrungsdauer Nachrichten (Tage)",
     "messageRetentionDaysHelp": "Nach Ablauf werden Nachrichten gelöscht.",
     "pprRetentionDays": "Aufbewahrungsdauer PPR-Anfragen (Tage)",
-    "pprRetentionDaysHelp": "So viele Tage nach dem geplanten Datum werden PPR-Anfragen gelöscht. Ohne Angabe 30 Tage.",
+    "pprRetentionDaysHelp": "Nach Ablauf werden PPR-Anfragen gelöscht. Gezählt wird ab dem geplanten Datum.",
     "pprRetentionDaysInvalid": "Geben Sie eine ganze Zahl von 1 bis 3650 ein.",
     "pprRetentionDaysSaveFailed": "Die Aufbewahrungsdauer der PPR-Anfragen konnte nicht gespeichert werden.",
     "save": "Speichern",

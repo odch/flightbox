@@ -26,7 +26,7 @@ async function getRetentionDays() {
   return snapshot.val()
 }
 
-// null removes it, so the default applies
+// null removes it, so the cleanup deletes nothing
 async function setRetentionDays(days) {
   await retentionDaysRef().set(days || null)
 }
