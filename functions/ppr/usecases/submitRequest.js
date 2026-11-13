@@ -22,6 +22,9 @@ async function submitRequest({ repository, notifier }, input, adminEmail, now) {
     } catch (e) {
       console.error('Failed to send PPR notification for request', key)
     }
+  } else {
+    // Admins set the address in the PPR admin tab
+    console.warn('No PPR notification address is set, request not announced:', key)
   }
 
   return { key }

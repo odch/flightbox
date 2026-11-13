@@ -16,6 +16,17 @@ export const PPR_FORM_INITIALIZED = 'PPR_FORM_INITIALIZED' as const;
 export const PPR_LOAD_FAILED = 'PPR_LOAD_FAILED' as const;
 export const RESET_PPR_FORM = 'RESET_PPR_FORM' as const;
 export const CONFIRM_PPR_SUBMIT_SUCCESS = 'CONFIRM_PPR_SUBMIT_SUCCESS' as const;
+export const LOAD_PPR_SETTINGS = 'LOAD_PPR_SETTINGS' as const;
+export const PPR_SETTINGS_LOADED = 'PPR_SETTINGS_LOADED' as const;
+export const PPR_SETTINGS_LOAD_FAILED = 'PPR_SETTINGS_LOAD_FAILED' as const;
+export const SAVE_PPR_SETTINGS = 'SAVE_PPR_SETTINGS' as const;
+export const SAVE_PPR_SETTINGS_SUCCESS = 'SAVE_PPR_SETTINGS_SUCCESS' as const;
+export const SAVE_PPR_SETTINGS_FAILURE = 'SAVE_PPR_SETTINGS_FAILURE' as const;
+
+export interface PprSettings {
+  adminEmail: string | null;
+  retentionDays: number | null;
+}
 
 export type PprListScope = 'own' | 'all';
 
@@ -37,7 +48,13 @@ export type PprAction =
   | { type: typeof PPR_FORM_INITIALIZED; payload: { initialValues: Record<string, any> } }
   | { type: typeof PPR_LOAD_FAILED }
   | { type: typeof RESET_PPR_FORM }
-  | { type: typeof CONFIRM_PPR_SUBMIT_SUCCESS };
+  | { type: typeof CONFIRM_PPR_SUBMIT_SUCCESS }
+  | { type: typeof LOAD_PPR_SETTINGS }
+  | { type: typeof PPR_SETTINGS_LOADED; payload: { settings: PprSettings } }
+  | { type: typeof PPR_SETTINGS_LOAD_FAILED }
+  | { type: typeof SAVE_PPR_SETTINGS; payload: { settings: Partial<PprSettings> } }
+  | { type: typeof SAVE_PPR_SETTINGS_SUCCESS; payload: { settings: PprSettings } }
+  | { type: typeof SAVE_PPR_SETTINGS_FAILURE };
 
 export function loadPprRequests(scope: PprListScope = 'own') {
   return { type: LOAD_PPR_REQUESTS, payload: { scope } };
@@ -109,4 +126,29 @@ export function resetPprForm() {
 
 export function confirmPprSubmitSuccess() {
   return { type: CONFIRM_PPR_SUBMIT_SUCCESS };
+}
+
+export function loadPprSettings() {
+  return { type: LOAD_PPR_SETTINGS };
+}
+
+export function pprSettingsLoaded(settings: PprSettings) {
+  return { type: PPR_SETTINGS_LOADED, payload: { settings } };
+}
+
+export function pprSettingsLoadFailed() {
+  return { type: PPR_SETTINGS_LOAD_FAILED };
+}
+
+// Saves only the given settings
+export function savePprSettings(settings: Partial<PprSettings>) {
+  return { type: SAVE_PPR_SETTINGS, payload: { settings } };
+}
+
+export function savePprSettingsSuccess(settings: PprSettings) {
+  return { type: SAVE_PPR_SETTINGS_SUCCESS, payload: { settings } };
+}
+
+export function savePprSettingsFailure() {
+  return { type: SAVE_PPR_SETTINGS_FAILURE };
 }

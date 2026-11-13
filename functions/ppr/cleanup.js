@@ -4,28 +4,19 @@ const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { getDatabase } = require('firebase-admin/database')
 const { zurichDate, addDays } = require('./domain/pprRequest')
 const rateLimiter = require('./adapters/firebaseRateLimiter')
+const settings = require('./adapters/firebasePprSettings')
+const { DEFAULT_RETENTION_DAYS, isValidRetentionDays, retentionDaysOrDefault } = require('./domain/pprSettings')
 
 const SCHEDULE = '0 2 * * *' // Daily at 2 AM
 const TIMEZONE = 'Europe/Zurich'
-const DEFAULT_RETENTION_DAYS = 30
-// Larger values would push the cutoff out of the 'YYYY-MM-DD' range that the
-// string comparison below relies on (and then delete everything).
-const MAX_RETENTION_DAYS = 3650
-
-function isValidRetention(value) {
-  return Number.isInteger(value) && value > 0 && value <= MAX_RETENTION_DAYS
-}
-
+// Admins set it in the privacy tab; an invalid stored value (e.g. one set in
+// the console) falls back to the default instead of deleting everything.
 async function getRetentionDays() {
-  const snapshot = await getDatabase().ref('/settings/ppr/retentionDays').once('value')
-  const value = snapshot.val()
-  if (isValidRetention(value)) {
-    return value
+  const stored = await settings.getRetentionDays()
+  if (stored !== null && !isValidRetentionDays(stored)) {
+    console.warn(`Ignoring invalid /settings/ppr/retentionDays (${JSON.stringify(stored)}), using ${DEFAULT_RETENTION_DAYS}`)
   }
-  if (value !== null) {
-    console.warn(`Ignoring invalid /settings/ppr/retentionDays (${JSON.stringify(value)}), using ${DEFAULT_RETENTION_DAYS}`)
-  }
-  return DEFAULT_RETENTION_DAYS
+  return retentionDaysOrDefault(stored)
 }
 
 // The aerodrome's (Zurich) date `retentionDays` days ago, as 'YYYY-MM-DD'

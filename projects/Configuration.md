@@ -245,9 +245,11 @@ to `functions/ppr-config.generated.js`, and the functions ignore it in any other
 in unit tests) PPR is off in the functions; for local work on PPR, create it for the project you run the emulator with:
 `echo "module.exports = { enabled: true, firebaseProjectId: '<project>' };" > functions/ppr-config.generated.js`.
 
-In the Realtime Database, `/settings/ppr/adminEmail` is the address new requests are sent to, and
-`/settings/ppr/retentionDays` (a whole number from 1 to 3650, default 30) the number of days after the planned date
-when requests are deleted.
+Admins set the address new requests are sent to in the "PPR-Anfragen" tab (stored at `/settings/ppr/adminEmail`);
+while none is set, requests are accepted but not sent to anyone, and the tab shows a warning.
+In the privacy tab ("Datenschutz"), which is shown when `privacySettings` or `ppr` is on, admins set how many days
+after the planned date requests are deleted (a whole number from 1 to 3650, default 30; stored at
+`/settings/ppr/retentionDays`).
 
 Example: `true`
 

@@ -80,6 +80,32 @@ export function* deletePprRequest(action: any) {
   }
 }
 
+export function* loadPprSettings() {
+  try {
+    const idToken = yield call(getIdToken);
+    const settings = yield call(remote.loadSettings, idToken);
+    yield put(actions.pprSettingsLoaded(settings));
+  } catch (e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to load PPR settings', e);
+    }
+    yield put(actions.pprSettingsLoadFailed());
+  }
+}
+
+export function* savePprSettings(action: any) {
+  try {
+    const idToken = yield call(getIdToken);
+    const settings = yield call(remote.saveSettings, action.payload.settings, idToken);
+    yield put(actions.savePprSettingsSuccess(settings));
+  } catch (e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to save PPR settings', e);
+    }
+    yield put(actions.savePprSettingsFailure());
+  }
+}
+
 export function* confirmPprSubmitSuccess() {
   history.push('/');
   yield put(actions.resetPprForm());
@@ -94,5 +120,7 @@ export default function* sagas() {
     takeEvery(actions.REVIEW_PPR_REQUEST, reviewPprRequest),
     takeEvery(actions.DELETE_PPR_REQUEST, deletePprRequest),
     takeEvery(actions.CONFIRM_PPR_SUBMIT_SUCCESS, confirmPprSubmitSuccess),
+    takeEvery(actions.LOAD_PPR_SETTINGS, loadPprSettings),
+    takeLeading(actions.SAVE_PPR_SETTINGS, savePprSettings),
   ]);
 }

@@ -672,6 +672,10 @@
     "movementRetentionDaysHelp": "Nach Ablauf werden personenbezogene Daten anonymisiert. Statistische Daten bleiben erhalten.",
     "messageRetentionDays": "Aufbewahrungsdauer Nachrichten (Tage)",
     "messageRetentionDaysHelp": "Nach Ablauf werden Nachrichten gelöscht.",
+    "pprRetentionDays": "Aufbewahrungsdauer PPR-Anfragen (Tage)",
+    "pprRetentionDaysHelp": "So viele Tage nach dem geplanten Datum werden PPR-Anfragen gelöscht. Ohne Angabe 30 Tage.",
+    "pprRetentionDaysInvalid": "Geben Sie eine ganze Zahl von 1 bis 3650 ein.",
+    "pprRetentionDaysSaveFailed": "Die Aufbewahrungsdauer der PPR-Anfragen konnte nicht gespeichert werden.",
     "save": "Speichern",
     "saved": "Gespeichert"
   },
@@ -697,7 +701,16 @@
     "deleteFailed": "PPR-Anfrage konnte nicht gelöscht werden.",
     "reviewFailed": "PPR-Anfrage konnte nicht bearbeitet werden.",
     "deleteConfirm": "Möchten Sie diese PPR-Anfrage wirklich löschen?",
-    "deleted": "PPR-Anfrage wurde gelöscht."
+    "deleted": "PPR-Anfrage wurde gelöscht.",
+    "settings": {
+      "title": "Benachrichtigung",
+      "adminEmail": "E-Mail-Adresse für neue Anfragen",
+      "adminEmailHelp": "Jede neue PPR-Anfrage wird an diese Adresse gemeldet.",
+      "noAdminEmail": "Es ist keine Adresse gesetzt: Neue Anfragen werden niemandem gemeldet.",
+      "invalidEmail": "Geben Sie eine gültige E-Mail-Adresse ein.",
+      "loadFailed": "Die Einstellungen konnten nicht geladen werden.",
+      "saveFailed": "Die Adresse konnte nicht gespeichert werden."
+    }
   },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."

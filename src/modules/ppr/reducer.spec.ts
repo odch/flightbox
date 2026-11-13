@@ -13,6 +13,40 @@ describe('modules', () => {
           selected: null,
           initialValues: {},
           form: { submitting: false, submitted: false, commitFailed: false, reviewFailed: false, deleteFailed: false },
+          settings: { adminEmail: null, retentionDays: null, loaded: false, loadFailed: false, saving: false, saved: false, saveFailed: false },
+        });
+      });
+
+      describe('settings', () => {
+        it('stores the loaded settings', () => {
+          const state = reducer(initialState, actions.pprSettingsLoaded({ adminEmail: 'ppr@aerodrome.ch', retentionDays: 60 }));
+          expect(state.settings).toEqual(expect.objectContaining({ adminEmail: 'ppr@aerodrome.ch', retentionDays: 60, loaded: true, loadFailed: false }));
+        });
+
+        it('drops old save results when loading again', () => {
+          const failed = { ...initialState, settings: { ...initialState.settings, saved: true, saveFailed: true } };
+          const state = reducer(failed, actions.pprSettingsLoaded({ adminEmail: null, retentionDays: null }));
+          expect(state.settings).toEqual(expect.objectContaining({ saved: false, saveFailed: false }));
+        });
+
+        it('marks a failed load', () => {
+          const state = reducer(initialState, actions.pprSettingsLoadFailed());
+          expect(state.settings.loadFailed).toBe(true);
+        });
+
+        it('tracks saving and a successful save', () => {
+          const saving = reducer(initialState, actions.savePprSettings({ adminEmail: 'ppr@aerodrome.ch' }));
+          expect(saving.settings).toEqual(expect.objectContaining({ saving: true, saved: false, saveFailed: false }));
+
+          const saved = reducer(saving, actions.savePprSettingsSuccess({ adminEmail: 'ppr@aerodrome.ch', retentionDays: null }));
+          expect(saved.settings).toEqual(expect.objectContaining({ adminEmail: 'ppr@aerodrome.ch', saving: false, saved: true }));
+        });
+
+        it('keeps the old address when saving fails', () => {
+          const loaded = reducer(initialState, actions.pprSettingsLoaded({ adminEmail: 'old@aerodrome.ch', retentionDays: null }));
+          const saving = reducer(loaded, actions.savePprSettings({ adminEmail: 'new@aerodrome.ch' }));
+          const failed = reducer(saving, actions.savePprSettingsFailure());
+          expect(failed.settings).toEqual(expect.objectContaining({ adminEmail: 'old@aerodrome.ch', saving: false, saveFailed: true }));
         });
       });
 
