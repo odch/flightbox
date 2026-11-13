@@ -685,8 +685,13 @@
     "myRequests": "Meine PPR-Anfragen",
     "submit": "Anfrage senden",
     "plannedDate": "Geplantes Datum",
-    "plannedTime": "Geplante Zeit",
+    "plannedTime": "Geplante Zeit (Lokalzeit)",
     "remarks": "Zweck / Bemerkungen",
+    "validation": {
+      "plannedTime": "Geben Sie hier die geplante Zeit in Stunden und Minuten ein (Lokalzeit).",
+      "plannedDatePast": "Das geplante Datum darf nicht in der Vergangenheit liegen.",
+      "plannedDateTooFar": "Das geplante Datum darf höchstens ein Jahr in der Zukunft liegen."
+    },
     "status": {
       "pending": "Ausstehend",
       "approved": "Genehmigt",

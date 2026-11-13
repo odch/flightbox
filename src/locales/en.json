@@ -685,8 +685,13 @@
     "myRequests": "My PPR requests",
     "submit": "Send request",
     "plannedDate": "Planned date",
-    "plannedTime": "Planned time",
+    "plannedTime": "Planned time (local time)",
     "remarks": "Purpose / remarks",
+    "validation": {
+      "plannedTime": "Enter the planned time in hours and minutes (local time).",
+      "plannedDatePast": "The planned date must not be in the past.",
+      "plannedDateTooFar": "The planned date must be within one year."
+    },
     "status": {
       "pending": "Pending",
       "approved": "Approved",
