@@ -10,8 +10,8 @@ const movementsImagePath = require('./ic_list_black_48dp_2x.png');
 const messageImagePath = require('./ic_message_black_48dp_2x.png');
 const helpImagePath = require('./ic_help_outline_black_48dp_2x.png');
 const adminImagePath = require('./ic_settings_black_48dp_2x.png');
-const pprImagePath = require('./ic_message_black_48dp_2x.png');
-const pprListImagePath = require('./ic_list_black_48dp_2x.png');
+const pprImagePath = require('./ic_assignment_black_48dp_2x.png');
+const pprListImagePath = require('./ic_assignment_ind_black_48dp_2x.png');
 
 const Wrapper = styled.div`
   display: flex;
