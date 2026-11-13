@@ -4,6 +4,7 @@ const express = require('express')
 const { fbAuthExcludingShared, fbAdminAuth } = require('../api/fbAuth')
 const submitRequest = require('./usecases/submitRequest')
 const reviewRequest = require('./usecases/reviewRequest')
+const revokeApproval = require('./usecases/revokeApproval')
 const listRequests = require('./usecases/listRequests')
 const deleteRequest = require('./usecases/deleteRequest')
 const getSettings = require('./usecases/getSettings')
@@ -12,9 +13,10 @@ const repository = require('./adapters/firebasePprRepository')
 const notifier = require('./adapters/emailNotifier')
 const rateLimiter = require('./adapters/firebaseRateLimiter')
 const settings = require('./adapters/firebasePprSettings')
+const aerodromeStatus = require('./adapters/firebaseAerodromeStatus')
 
 const router = express.Router()
-const deps = { repository, notifier, settings }
+const deps = { repository, notifier, settings, aerodromeStatus }
 
 const FIREBASE_KEY_REGEX = /^[-\w]{1,128}$/
 
@@ -46,15 +48,15 @@ router.post('/requests', fbAuthExcludingShared, requireEmail, async (req, res) =
     if (!slotReserved) {
       return res.status(429).json({ error: 'Too many requests' })
     }
-    const adminEmail = await settings.getAdminEmail()
     const { firstname, lastname, phone, immatriculation,
       aircraftType, mtow, plannedDate, plannedTime, flightType,
       remarks, language } = req.body
+    // { key, status, reviewRemarks? }: requests can be answered right away
     const result = await submitRequest(deps, {
       firstname, lastname, phone, immatriculation,
       aircraftType, mtow, plannedDate, plannedTime, flightType,
       remarks, language, email: req.fbUserEmail, createdBy: req.fbUserEmail
-    }, adminEmail)
+    })
     res.status(201).json(result)
   } catch (e) {
     if (slotReserved) {
@@ -117,6 +119,30 @@ router.post('/requests/:key/review', fbAdminAuth, validateKey, async (req, res) 
   }
 })
 
+// POST /requests/:key/revoke — admin revokes an approval, with a reason
+router.post('/requests/:key/revoke', fbAdminAuth, validateKey, async (req, res) => {
+  try {
+    await revokeApproval(deps, req.params.key, {
+      reviewedBy: req.fbUserEmail || req.fbUserId,
+      reviewedAt: Date.now(),
+      reviewRemarks: req.body.remarks
+    })
+    res.json({ success: true })
+  } catch (e) {
+    if (e.code === 'NOT_FOUND') {
+      return res.status(404).json({ error: 'Request not found' })
+    }
+    if (e.code === 'INVALID_INPUT') {
+      return res.status(400).json({ error: e.message })
+    }
+    if (e.code === 'NOT_APPROVED') {
+      return res.status(409).json({ error: e.message })
+    }
+    console.error('Failed to revoke PPR approval')
+    res.status(500).json({ error: 'Failed to revoke approval' })
+  }
+})
+
 // DELETE /requests/:key — pilot deletes own request
 router.delete('/requests/:key', fbAuthExcludingShared, requireEmail, validateKey, async (req, res) => {
   try {
@@ -147,8 +173,9 @@ router.get('/settings', fbAdminAuth, async (req, res) => {
   }
 })
 
-// PATCH /settings — admins change the given settings (notification address
-// in the PPR tab, retention in the privacy tab)
+// PATCH /settings — admins change the given settings (notification address,
+// answer mode, information for pilots and closures in the PPR tab, retention
+// in the privacy tab)
 router.patch('/settings', fbAdminAuth, async (req, res) => {
   try {
     res.json(await updateSettings(deps, req.body || {}))

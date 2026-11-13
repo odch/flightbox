@@ -4,6 +4,7 @@ const {
   getPprSubmittedEmail,
   getPprApprovedEmail,
   getPprRejectedEmail,
+  getPprRevokedEmail,
   escapeHtml
 } = require('./emailTemplates')
 
@@ -123,6 +124,81 @@ describe('PPR emailTemplates', () => {
       expect(result.text).not.toContain('Bemerkung')
       expect(result.html).not.toMatch(/\{\{\w+\}\}/)
       expect(result.text).not.toMatch(/\{\{\w+\}\}/)
+    })
+  })
+
+  describe('answer in the aerodrome\'s email', () => {
+    it('asks the admins to answer a pending request', () => {
+      const result = getPprSubmittedEmail({ ...basePprRequest, status: 'pending' })
+      expect(result.text).toContain('Antwort: Offen, bitte im Admin-Bereich genehmigen oder ablehnen')
+    })
+
+    it('tells about an automatic approval', () => {
+      const result = getPprSubmittedEmail({ ...basePprRequest, status: 'approved', reviewedBy: 'automatic' })
+      expect(result.text).toContain('Antwort: Automatisch genehmigt')
+      expect(result.html).toContain('Automatisch genehmigt')
+    })
+
+    it('tells about an automatic rejection with its reason, escaped', () => {
+      const result = getPprSubmittedEmail({
+        ...basePprRequest, status: 'rejected', reviewedBy: 'automatic', reviewRemarks: 'Runway <works>'
+      })
+      expect(result.text).toContain('Antwort: Automatisch abgelehnt: Runway <works>')
+      expect(result.html).toContain('Automatisch abgelehnt: Runway &lt;works&gt;')
+    })
+  })
+
+  describe('automatic approval', () => {
+    const automatic = { ...basePprRequest, status: 'approved', reviewedBy: 'automatic' }
+
+    it('carries the information for pilots with its line breaks and a note', () => {
+      const result = getPprApprovedEmail({ ...automatic, reviewRemarks: 'Runway 05/23\nLanding fee CHF 20' })
+      expect(result.html).toContain('Hinweise für Piloten:')
+      expect(result.html).toContain('white-space: pre-line;">Runway 05/23\nLanding fee CHF 20</p>')
+      expect(result.html).toContain('Diese Anfrage wurde automatisch genehmigt.')
+      expect(result.text).toContain('Hinweise für Piloten:\nRunway 05/23\nLanding fee CHF 20')
+      expect(result.text).toContain('Bitte prüfen Sie vor dem Flug den aktuellen Flugplatzstatus und die NOTAM.')
+    })
+
+    it('has the note also without information for pilots', () => {
+      const result = getPprApprovedEmail(automatic)
+      expect(result.text).not.toContain('Hinweise für Piloten')
+      expect(result.text).toContain('Diese Anfrage wurde automatisch genehmigt.')
+      expect(result.text).not.toMatch(/\{\{\w+\}\}/)
+    })
+
+    it('is in English for English requests', () => {
+      const result = getPprApprovedEmail({ ...automatic, language: 'en', reviewRemarks: 'Runway 05/23' })
+      expect(result.text).toContain('Information for pilots:\nRunway 05/23')
+      expect(result.text).toContain('This request was approved automatically.')
+    })
+
+    it('keeps the admin\'s remarks label for an approval by an admin', () => {
+      const result = getPprApprovedEmail({ ...basePprRequest, reviewedBy: 'admin@aero.ch', reviewRemarks: 'RWY 26 only' })
+      expect(result.text).toContain('Bemerkung: RWY 26 only')
+      expect(result.text).not.toContain('automatisch')
+    })
+  })
+
+  describe('getPprRevokedEmail', () => {
+    const revoked = { ...basePprRequest, status: 'revoked', reviewRemarks: 'Closed: runway <works>' }
+
+    it('tells the pilot that the approval was revoked, with the reason', () => {
+      const result = getPprRevokedEmail(revoked)
+      expect(result.subject).toBe('PPR widerrufen: HB-ABC am 2026-04-15')
+      expect(result.text).toContain('Ihre PPR-Genehmigung wurde leider widerrufen.')
+      expect(result.text).toContain('Grund: Closed: runway <works>')
+      expect(result.html).toContain('Closed: runway &lt;works&gt;')
+      expect(result.text).not.toMatch(/\{\{\w+\}\}/)
+      expect(result.html).not.toMatch(/\{\{\w+\}\}/)
+    })
+
+    it('is in English for English requests', () => {
+      const result = getPprRevokedEmail({ ...revoked, language: 'en' })
+      expect(result.subject).toBe('PPR revoked: HB-ABC on 2026-04-15')
+      expect(result.html).toContain('<html lang="en">')
+      expect(result.text).toContain('Unfortunately, your PPR approval has been revoked.')
+      expect(result.text).toContain('Reason: Closed: runway <works>')
     })
   })
 

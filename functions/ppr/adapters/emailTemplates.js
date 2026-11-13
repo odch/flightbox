@@ -3,6 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const { flightTypeLabel } = require('./flightTypeLabels')
+const { AUTOMATIC_REVIEWER } = require('../domain/pprRequest')
 
 const PLACEHOLDER_REGEX = /\{\{(\w+)\}\}/g
 
@@ -36,14 +37,34 @@ function localizedTemplate(templateName, pprRequest, format) {
   return readTemplate(isEnglish(pprRequest) ? `${templateName}_en` : templateName, format)
 }
 
+function isAutomatic(pprRequest) {
+  return pprRequest.reviewedBy === AUTOMATIC_REVIEWER
+}
+
+// How the request was answered, for the aerodrome
+function answerLine(pprRequest) {
+  if (pprRequest.status === 'approved') {
+    return 'Automatisch genehmigt'
+  }
+  if (pprRequest.status === 'rejected') {
+    return pprRequest.reviewRemarks
+      ? `Automatisch abgelehnt: ${pprRequest.reviewRemarks}`
+      : 'Automatisch abgelehnt'
+  }
+  return 'Offen, bitte im Admin-Bereich genehmigen oder ablehnen'
+}
+
 // Goes to the aerodrome's PPR address, whose language is not known: German.
 function getPprSubmittedEmail(pprRequest) {
+  const answer = answerLine(pprRequest)
+
   const replacements = {
     pilotName: escapeHtml(`${pprRequest.firstname} ${pprRequest.lastname}`),
     immatriculation: escapeHtml(pprRequest.immatriculation),
     plannedDate: escapeHtml(pprRequest.plannedDate),
     plannedTime: escapeHtml(pprRequest.plannedTime),
-    flightType: escapeHtml(flightTypeLabel(pprRequest.flightType))
+    flightType: escapeHtml(flightTypeLabel(pprRequest.flightType)),
+    answer: escapeHtml(answer)
   }
 
   const plainReplacements = {
@@ -51,7 +72,8 @@ function getPprSubmittedEmail(pprRequest) {
     immatriculation: pprRequest.immatriculation,
     plannedDate: pprRequest.plannedDate,
     plannedTime: pprRequest.plannedTime,
-    flightType: flightTypeLabel(pprRequest.flightType)
+    flightType: flightTypeLabel(pprRequest.flightType),
+    answer
   }
 
   return {
@@ -62,20 +84,34 @@ function getPprSubmittedEmail(pprRequest) {
 }
 
 // Remarks are optional on approval (e.g. conditions), so the block only
-// appears when there are some.
+// appears when there are some. Automatic approvals carry the information for
+// pilots and a note that current conditions still apply.
 function approvalRemarks(pprRequest) {
+  const english = isEnglish(pprRequest)
+  const automatic = isAutomatic(pprRequest)
   const remarks = pprRequest.reviewRemarks
-  if (!remarks) {
-    return { html: '', text: '' }
-  }
-  const label = isEnglish(pprRequest) ? 'Remarks:' : 'Bemerkung:'
-  return {
-    html: '\n      <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #28a745; border-radius: 4px;">' +
+  const result = { html: '', text: '' }
+
+  if (remarks) {
+    const label = automatic
+      ? (english ? 'Information for pilots:' : 'Hinweise für Piloten:')
+      : (english ? 'Remarks:' : 'Bemerkung:')
+    result.html += '\n      <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #28a745; border-radius: 4px;">' +
       `\n        <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">${label}</p>` +
-      `\n        <p style="margin: 0; font-size: 15px;">${escapeHtml(remarks)}</p>` +
-      '\n      </div>',
-    text: `\n\n${label} ${remarks}`
+      `\n        <p style="margin: 0; font-size: 15px; white-space: pre-line;">${escapeHtml(remarks)}</p>` +
+      '\n      </div>'
+    result.text += automatic ? `\n\n${label}\n${remarks}` : `\n\n${label} ${remarks}`
   }
+
+  if (automatic) {
+    const note = english
+      ? 'This request was approved automatically. Please check the current aerodrome status and the NOTAMs before the flight.'
+      : 'Diese Anfrage wurde automatisch genehmigt. Bitte prüfen Sie vor dem Flug den aktuellen Flugplatzstatus und die NOTAM.'
+    result.html += `\n      <p style="margin: 20px 0 0 0; font-size: 14px; color: #666;">${note}</p>`
+    result.text += `\n\n${note}`
+  }
+
+  return result
 }
 
 function getPprApprovedEmail(pprRequest) {
@@ -130,9 +166,36 @@ function getPprRejectedEmail(pprRequest) {
   }
 }
 
+function getPprRevokedEmail(pprRequest) {
+  const remarks = pprRequest.reviewRemarks || '-'
+
+  const replacements = {
+    immatriculation: escapeHtml(pprRequest.immatriculation),
+    plannedDate: escapeHtml(pprRequest.plannedDate),
+    plannedTime: escapeHtml(pprRequest.plannedTime),
+    reviewRemarks: escapeHtml(remarks)
+  }
+
+  const plainReplacements = {
+    immatriculation: pprRequest.immatriculation,
+    plannedDate: pprRequest.plannedDate,
+    plannedTime: pprRequest.plannedTime,
+    reviewRemarks: remarks
+  }
+
+  return {
+    subject: isEnglish(pprRequest)
+      ? `PPR revoked: ${pprRequest.immatriculation} on ${pprRequest.plannedDate}`
+      : `PPR widerrufen: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`,
+    html: replacePlaceholders(localizedTemplate('ppr-revoked', pprRequest, 'html'), replacements),
+    text: replacePlaceholders(localizedTemplate('ppr-revoked', pprRequest, 'txt'), plainReplacements)
+  }
+}
+
 module.exports = {
   getPprSubmittedEmail,
   getPprApprovedEmail,
   getPprRejectedEmail,
+  getPprRevokedEmail,
   escapeHtml
 }

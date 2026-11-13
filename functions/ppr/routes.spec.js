@@ -15,8 +15,10 @@ const mockSubmitRequest = jest.fn()
 const mockReviewRequest = jest.fn()
 const mockListRequests = jest.fn()
 const mockDeleteRequest = jest.fn()
+const mockRevokeApproval = jest.fn()
 
 jest.mock('./usecases/submitRequest', () => mockSubmitRequest)
+jest.mock('./usecases/revokeApproval', () => mockRevokeApproval)
 jest.mock('./usecases/reviewRequest', () => mockReviewRequest)
 jest.mock('./usecases/listRequests', () => mockListRequests)
 jest.mock('./usecases/deleteRequest', () => mockDeleteRequest)
@@ -26,6 +28,7 @@ jest.mock('./usecases/getSettings', () => mockGetSettings)
 jest.mock('./usecases/updateSettings', () => mockUpdateSettings)
 jest.mock('./adapters/firebasePprRepository', () => ({}))
 jest.mock('./adapters/emailNotifier', () => ({}))
+jest.mock('./adapters/firebaseAerodromeStatus', () => ({ getCurrent: jest.fn() }))
 const mockAcquire = jest.fn()
 const mockRelease = jest.fn()
 jest.mock('./adapters/firebaseRateLimiter', () => ({ acquire: mockAcquire, release: mockRelease }))
@@ -134,7 +137,7 @@ describe('PPR routes', () => {
     it('calls submitRequest and returns 201', async () => {
       authenticateAs('uid-1', 'pilot@example.com')
       setupAdminDbRef(null, 'admin@aero.ch')
-      mockSubmitRequest.mockResolvedValue({ key: 'req-123' })
+      mockSubmitRequest.mockResolvedValue({ key: 'req-123', status: 'pending' })
 
       const req = mockReq({
         headers: { authorization: 'Bearer valid-token' },
@@ -145,7 +148,24 @@ describe('PPR routes', () => {
       await runMiddlewareChain(handlers, req, res)
 
       expect(res.statusCode).toBe(201)
-      expect(res.body).toEqual({ key: 'req-123' })
+      expect(res.body).toEqual({ key: 'req-123', status: 'pending' })
+    })
+
+    it('returns an automatic answer to the pilot right away', async () => {
+      authenticateAs('uid-1', 'pilot@example.com')
+      setupAdminDbRef(null, 'admin@aero.ch')
+      mockSubmitRequest.mockResolvedValue({ key: 'req-123', status: 'approved', reviewRemarks: 'Runway 05/23' })
+
+      const req = mockReq({ headers: { authorization: 'Bearer valid-token' }, body: { firstname: 'Max' } })
+      const res = mockRes()
+
+      await runMiddlewareChain(handlers, req, res)
+
+      expect(res.statusCode).toBe(201)
+      expect(res.body).toEqual({ key: 'req-123', status: 'approved', reviewRemarks: 'Runway 05/23' })
+      // the use case reads the settings and the aerodrome status itself
+      expect(Object.keys(mockSubmitRequest.mock.calls[0][0]).sort())
+        .toEqual(['aerodromeStatus', 'notifier', 'repository', 'settings'])
     })
 
     it('sets createdBy from auth', async () => {
@@ -460,6 +480,72 @@ describe('PPR routes', () => {
       expect(mockGetSettings).not.toHaveBeenCalled()
       expect(mockUpdateSettings).not.toHaveBeenCalled()
     })
+  })
+
+  describe('POST /requests/:key/revoke handler', () => {
+    const revokeReq = (params, body) => mockReq({
+      method: 'POST', headers: { authorization: 'Bearer valid-token' }, params, body
+    })
+
+    it('is registered', () => {
+      expect(findHandler('post', '/requests/:key/revoke')).not.toBeNull()
+    })
+
+    it('revokes an approval for admins, with the reason', async () => {
+      authenticateAs('uid-admin', 'admin@aero.ch')
+      setupAdminDbRef('uid-admin')
+      mockRevokeApproval.mockResolvedValue()
+      const res = mockRes()
+
+      await runMiddlewareChain(findHandler('post', '/requests/:key/revoke'),
+        revokeReq({ key: 'req-123' }, { remarks: 'Runway works' }), res)
+
+      expect(res.statusCode).toBe(200)
+      expect(mockRevokeApproval).toHaveBeenCalledWith(expect.any(Object), 'req-123', {
+        reviewedBy: 'admin@aero.ch',
+        reviewedAt: expect.any(Number),
+        reviewRemarks: 'Runway works'
+      })
+    })
+
+    it('refuses non-admins', async () => {
+      authenticateAs('uid-1', 'pilot@example.com')
+      setupAdminDbRef('uid-admin')
+      const res = mockRes()
+
+      await runMiddlewareChain(findHandler('post', '/requests/:key/revoke'),
+        revokeReq({ key: 'req-123' }, { remarks: 'x' }), res)
+
+      expect(res.statusCode).toBe(403)
+      expect(mockRevokeApproval).not.toHaveBeenCalled()
+    })
+
+    it('answers 400 for an invalid key', async () => {
+      authenticateAs('uid-admin', 'admin@aero.ch')
+      setupAdminDbRef('uid-admin')
+      const res = mockRes()
+
+      await runMiddlewareChain(findHandler('post', '/requests/:key/revoke'),
+        revokeReq({ key: '../../etc' }, { remarks: 'x' }), res)
+
+      expect(res.statusCode).toBe(400)
+    })
+
+    it.each([['INVALID_INPUT', 400], ['NOT_APPROVED', 409], ['NOT_FOUND', 404]])(
+      'maps %s to %i', async (code, status) => {
+        authenticateAs('uid-admin', 'admin@aero.ch')
+        setupAdminDbRef('uid-admin')
+        const err = new Error('revoke failed')
+        err.code = code
+        mockRevokeApproval.mockRejectedValue(err)
+        const res = mockRes()
+
+        await runMiddlewareChain(findHandler('post', '/requests/:key/revoke'),
+          revokeReq({ key: 'req-123' }, { remarks: 'x' }), res)
+
+        expect(res.statusCode).toBe(status)
+      }
+    )
   })
 
   describe('review errors', () => {

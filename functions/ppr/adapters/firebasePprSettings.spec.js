@@ -54,4 +54,51 @@ describe('firebasePprSettings', () => {
 
     expect(mockSet.mock.calls).toEqual([[90], [null]])
   })
+
+  describe('answer settings', () => {
+    it('reads answer mode, information for pilots and closures with one read of /settings/ppr', async () => {
+      const closures = [{ from: '2026-11-19', to: '2026-11-21', reason: 'Runway works' }]
+      mockOnce.mockResolvedValue({
+        val: () => ({ adminEmail: 'ppr@aerodrome.ch', answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures })
+      })
+
+      expect(await settings.getAnswerSettings()).toEqual({ answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures })
+      expect(mockRef).toHaveBeenCalledTimes(1)
+      expect(mockRef).toHaveBeenCalledWith('/settings/ppr')
+    })
+
+    it('reads nulls when nothing is set', async () => {
+      mockOnce.mockResolvedValue({ val: () => null })
+
+      expect(await settings.getAnswerSettings()).toEqual({ answerMode: null, pilotInfo: null, closures: null })
+    })
+
+    it('stores automatic answers, and manual (the default) as nothing', async () => {
+      await settings.setAnswerMode('automatic')
+      expect(mockRef).toHaveBeenLastCalledWith('/settings/ppr/answerMode')
+      expect(mockSet).toHaveBeenLastCalledWith('automatic')
+
+      await settings.setAnswerMode('manual')
+      expect(mockSet).toHaveBeenLastCalledWith(null)
+    })
+
+    it('writes and removes the information for pilots', async () => {
+      await settings.setPilotInfo('Runway 05/23')
+      expect(mockRef).toHaveBeenLastCalledWith('/settings/ppr/pilotInfo')
+      expect(mockSet).toHaveBeenLastCalledWith('Runway 05/23')
+
+      await settings.setPilotInfo(null)
+      expect(mockSet).toHaveBeenLastCalledWith(null)
+    })
+
+    it('writes the closures, and removes them with an empty list', async () => {
+      const closures = [{ from: '2026-11-19', to: '2026-11-21', reason: 'Runway works' }]
+      await settings.setClosures(closures)
+      expect(mockRef).toHaveBeenLastCalledWith('/settings/ppr/closures')
+      expect(mockSet).toHaveBeenLastCalledWith(closures)
+
+      await settings.setClosures([])
+      expect(mockSet).toHaveBeenLastCalledWith(null)
+    })
+  })
 })

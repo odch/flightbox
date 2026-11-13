@@ -80,5 +80,20 @@ describe('emailNotifier', () => {
       expect(mailArgs.subject).toContain('abgelehnt')
       expect(mailArgs.html).toContain('Bad weather')
     })
+
+    it('sends the revocation of an approval to the pilot', async () => {
+      await notifyRequestReviewed({ ...basePprRequest, status: 'revoked', reviewRemarks: 'Runway works' })
+
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.to).toBe('max@example.com')
+      expect(mailArgs.subject).toBe('PPR widerrufen: HB-ABC am 2026-04-15')
+      expect(mailArgs.text).toContain('Grund: Runway works')
+    })
+
+    it('sends nothing for a pending request', async () => {
+      await expect(notifyRequestReviewed({ ...basePprRequest, status: 'pending' }))
+        .rejects.toThrow('No email for PPR status pending')
+      expect(mockSendMail).not.toHaveBeenCalled()
+    })
   })
 })
