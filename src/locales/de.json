@@ -688,6 +688,7 @@
     "plannedDate": "Geplantes Datum",
     "plannedTime": "Geplante Zeit (Lokalzeit)",
     "remarks": "Zweck / Bemerkungen",
+    "chooseCategoryFirst": "Wählen Sie zuerst die Kategorie des Luftfahrzeugs.",
     "validation": {
       "plannedTime": "Geben Sie hier die geplante Zeit in Stunden und Minuten ein (Lokalzeit).",
       "plannedDatePast": "Das geplante Datum darf nicht in der Vergangenheit liegen.",

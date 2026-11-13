@@ -7,6 +7,7 @@ const valid = {
   firstname: 'Max',
   lastname: 'Muster',
   immatriculation: 'HB-ABC',
+  aircraftCategory: 'Flugzeug',
   plannedDate: '2026-11-20',
   plannedTime: '10:30',
   flightType: 'private',
@@ -20,6 +21,7 @@ describe('components', () => {
         expect(Object.keys(errors)).toContain('firstname');
         expect(Object.keys(errors)).toContain('lastname');
         expect(Object.keys(errors)).toContain('immatriculation');
+        expect(Object.keys(errors)).toContain('aircraftCategory');
         expect(Object.keys(errors)).toContain('plannedDate');
         expect(Object.keys(errors)).toContain('plannedTime');
         expect(Object.keys(errors)).toContain('flightType');
@@ -42,6 +44,11 @@ describe('components', () => {
         Object.values(errors).forEach(msg => {
           expect(typeof msg).toBe('string');
         });
+      });
+
+      it('refuses an unknown aircraft category', () => {
+        expect(validate({ ...valid, aircraftCategory: 'Rakete' }, TODAY).aircraftCategory)
+          .toBe(i18n.t('validate.aircraftCategory'));
       });
 
       it.each([TODAY, '2027-11-13'])('accepts the planned date %s (today up to a year ahead)', plannedDate => {
