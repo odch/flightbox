@@ -23,21 +23,21 @@ import objectToArray from '../../util/objectToArray';
 import type { Aircraft } from '../../modules/profile/migration';
 import validate from './validate';
 
-// Aligned with the fields: the wizard's FieldSet has a margin of 1em at the
-// base font size, which is 1/1.2em at this font size
+// The page has the same padding as the message and profile pages, so the
+// fields, section titles, shortcuts and buttons all start at its edge
+// (FieldSet without gutter, as in the profile form).
 const SectionTitle = styled.h2`
   font-size: 1.2em;
   color: #333;
-  margin: ${1 / 1.2}em ${1 / 1.2}em 0;
+  margin: 0.5em 0 1em;
 `;
 
 const QuickPicks = styled(FavouritesBar)`
-  margin-top: 1em;
+  margin: 0 0 1.5em;
 `;
 
-// Same spacing as the wizard's navigation bar
 const Actions = styled.div`
-  padding: 10px 20px;
+  padding: 10px 0;
   overflow: hidden;
 `;
 
@@ -124,7 +124,7 @@ const PprRequestForm = (props: PprRequestFormProps) => {
           <H1>{t('ppr.newRequest')}</H1>
 
           <SectionTitle>{t('movement.details.pilot')}</SectionTitle>
-          <FieldSet>
+          <FieldSet gutter={false}>
             <Field
               name="lastname"
               type="text"
@@ -164,7 +164,7 @@ const PprRequestForm = (props: PprRequestFormProps) => {
               ))}
             </QuickPicks>
           )}
-          <FieldSet>
+          <FieldSet gutter={false}>
             <Field name="immatriculation">
               {({ input, meta }) =>
                 renderAircraftDropdown({
@@ -202,7 +202,7 @@ const PprRequestForm = (props: PprRequestFormProps) => {
           </FieldSet>
 
           <SectionTitle>{t('movement.details.flight')}</SectionTitle>
-          <FieldSet>
+          <FieldSet gutter={false}>
             <Field
               name="plannedDate"
               component={renderDateField}
