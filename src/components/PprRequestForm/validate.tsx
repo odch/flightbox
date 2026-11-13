@@ -1,5 +1,6 @@
 import validateUtil from '../../util/validate';
 import dates from '../../util/dates';
+import { categories as aircraftCategories } from '../../util/aircraftCategories';
 import i18n from '../../i18n';
 
 // The date range the server accepts (functions/ppr/domain/pprRequest.js)
@@ -29,6 +30,14 @@ const getConfig = () => ({
       required: true,
     },
     message: i18n.t('validate.immatriculation'),
+  },
+  // As when recording the movement; it decides which flight types fit
+  aircraftCategory: {
+    types: {
+      required: true,
+      values: aircraftCategories,
+    },
+    message: i18n.t('validate.aircraftCategory'),
   },
   plannedDate: {
     types: {

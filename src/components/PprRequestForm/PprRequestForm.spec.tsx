@@ -27,7 +27,7 @@ jest.mock('../../containers/AircraftDropdownContainer', () => {
     return (
       <div>
         <span data-cy="immatriculation">{value}</span>
-        <button type="button" onClick={() => onChange({ key: 'HBKOF', type: 'DR40', mtow: 1000 })}>
+        <button type="button" onClick={() => onChange({ key: 'HBKOF', type: 'DR40', mtow: 1000, category: 'Flugzeug' })}>
           pick HBKOF
         </button>
         <button type="button" onClick={() => onChange({ key: 'HBXYZ' })}>type HBXYZ</button>
@@ -36,8 +36,35 @@ jest.mock('../../containers/AircraftDropdownContainer', () => {
   };
 });
 
+jest.mock('../AircraftCategoryDropdown', () => {
+  const React = require('react');
+  return function MockAircraftCategoryDropdown({ value, onChange }) {
+    return (
+      <select data-cy="aircraftCategory" value={value || ''} onChange={e => onChange(e.target.value)}>
+        <option value="">-</option>
+        <option value="Flugzeug">Flugzeug</option>
+        <option value="Segelflugzeug">Segelflugzeug</option>
+        <option value="Hubschrauber">Hubschrauber</option>
+      </select>
+    );
+  };
+});
+
 import i18n from '../../i18n';
-import PprRequestForm from './PprRequestForm';
+
+// The flight types are read from __CONF__ when util/flightTypes is loaded, so
+// it is set before the form is. Arrays in __CONF__ arrive as index-keyed
+// objects (packinize in projects/index.js).
+(global as any).__CONF__ = {
+  enabledFlightTypes: {
+    0: 'private',
+    1: 'instruction',
+    2: 'aerotow',
+    3: 'glider_private_aerotow',
+    4: 'glider_private_winch',
+  },
+};
+const PprRequestForm = require('./PprRequestForm').default;
 
 const inDays = (days: number) => new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
 
@@ -59,20 +86,60 @@ const renderForm = (props = {}) => {
 const field = (container: HTMLElement, name: string) =>
   container.querySelector(`[data-cy="${name}"]`) as HTMLInputElement;
 
+const offeredFlightTypes = (container: HTMLElement) =>
+  Array.from(container.querySelectorAll('[data-cy^="flightType-"]'))
+    .map(el => el.getAttribute('data-cy')!.replace('flightType-', ''))
+    .filter(type => type !== 'categoryFirst');
+
 describe('PprRequestForm', () => {
-  beforeEach(() => {
-    // Arrays in __CONF__ arrive as index-keyed objects (projects packinize)
-    (global as any).__CONF__ = { enabledFlightTypes: { 0: 'private', 1: 'instruction' } };
-  });
-
-  afterEach(() => {
-    delete (global as any).__CONF__;
-  });
-
-  it('offers the enabled flight types from the compiled config as a single select', () => {
+  it('asks for the aircraft category before offering flight types', () => {
     const { container } = renderForm();
-    expect(field(container, 'flightType-private').textContent).toContain('flightTypes.private');
-    expect(field(container, 'flightType-instruction').textContent).toContain('flightTypes.instruction');
+    expect(offeredFlightTypes(container)).toEqual([]);
+    expect(field(container, 'flightType-categoryFirst').textContent).toBe('ppr.chooseCategoryFirst');
+  });
+
+  it('offers the enabled flight types that fit the category, as the arrival wizard does', () => {
+    const { container } = renderForm({ initialValues: { aircraftCategory: 'Flugzeug' } });
+    expect(offeredFlightTypes(container)).toEqual(['private', 'instruction', 'aerotow']);
+    expect(field(container, 'flightType-categoryFirst')).toBeNull();
+  });
+
+  it('offers the glider flight types for a glider', () => {
+    const { container } = renderForm({ initialValues: { aircraftCategory: 'Segelflugzeug' } });
+    expect(offeredFlightTypes(container)).toEqual(['glider_private_aerotow', 'glider_private_winch']);
+  });
+
+  it('clears a chosen flight type that does not fit a new category', () => {
+    const { container, props } = renderForm({
+      initialValues: {
+        lastname: 'Muster', firstname: 'Max', immatriculation: 'HBKOF', aircraftCategory: 'Flugzeug',
+        plannedDate: inDays(10), plannedTime: '10:30',
+      },
+    });
+    fireEvent.click(field(container, 'flightType-private'));
+
+    fireEvent.change(field(container, 'aircraftCategory'), { target: { value: 'Segelflugzeug' } });
+    fireEvent.click(screen.getByText('ppr.submit'));
+
+    expect(props.onSubmit).not.toHaveBeenCalled();
+    expect(offeredFlightTypes(container)).toEqual(['glider_private_aerotow', 'glider_private_winch']);
+  });
+
+  it('keeps a chosen flight type that also fits the new category', () => {
+    const { container, props } = renderForm({
+      initialValues: {
+        lastname: 'Muster', firstname: 'Max', immatriculation: 'HBZZZ', aircraftCategory: 'Flugzeug',
+        plannedDate: inDays(10), plannedTime: '10:30',
+      },
+    });
+    fireEvent.click(field(container, 'flightType-private'));
+
+    fireEvent.change(field(container, 'aircraftCategory'), { target: { value: 'Hubschrauber' } });
+    expect(offeredFlightTypes(container)).toEqual(['private', 'instruction']);
+
+    fireEvent.click(screen.getByText('ppr.submit'));
+    expect(props.onSubmit).toHaveBeenCalledTimes(1);
+    expect(props.onSubmit.mock.calls[0][0]).toMatchObject({ aircraftCategory: 'Hubschrauber', flightType: 'private' });
   });
 
   it('uses the date and time fields of the movement wizards', () => {
@@ -92,33 +159,39 @@ describe('PprRequestForm', () => {
     expect(field(container, 'phone').getAttribute('type')).toBe('tel');
   });
 
-  it('fills in type and MTOW from the selected aircraft', () => {
+  it('fills in type, MTOW and category from the selected aircraft', () => {
     const { container } = renderForm();
 
     fireEvent.click(screen.getByText('pick HBKOF'));
     expect(field(container, 'immatriculation').textContent).toBe('HBKOF');
     expect(field(container, 'aircraftType').value).toBe('DR40');
     expect(field(container, 'mtow').value).toBe('1000');
+    expect(field(container, 'aircraftCategory').value).toBe('Flugzeug');
+    expect(offeredFlightTypes(container)).toEqual(['private', 'instruction', 'aerotow']);
 
     // an aircraft that is not in the list clears them again
     fireEvent.click(screen.getByText('type HBXYZ'));
     expect(field(container, 'immatriculation').textContent).toBe('HBXYZ');
     expect(field(container, 'aircraftType').value).toBe('');
     expect(field(container, 'mtow').value).toBe('');
+    expect(field(container, 'aircraftCategory').value).toBe('');
+    expect(offeredFlightTypes(container)).toEqual([]);
   });
 
   it('offers the profile aircraft as shortcuts when there are several', () => {
     const profileAircrafts = [
       { immatriculation: 'HBKOF', aircraftType: 'DR40', mtow: 1000, aircraftCategory: 'Flugzeug' },
-      { immatriculation: 'HBPOS', aircraftType: 'PA28', mtow: 1100, aircraftCategory: 'Flugzeug' },
+      { immatriculation: 'HB1234', aircraftType: 'ASK 21', mtow: 600, aircraftCategory: 'Segelflugzeug' },
     ];
     const { container } = renderForm({ profileAircrafts });
 
-    fireEvent.click(screen.getByRole('button', { name: 'HBPOS' }));
+    fireEvent.click(screen.getByRole('button', { name: 'HB1234' }));
 
-    expect(field(container, 'immatriculation').textContent).toBe('HBPOS');
-    expect(field(container, 'aircraftType').value).toBe('PA28');
-    expect(field(container, 'mtow').value).toBe('1100');
+    expect(field(container, 'immatriculation').textContent).toBe('HB1234');
+    expect(field(container, 'aircraftType').value).toBe('ASK 21');
+    expect(field(container, 'mtow').value).toBe('600');
+    expect(field(container, 'aircraftCategory').value).toBe('Segelflugzeug');
+    expect(offeredFlightTypes(container)).toEqual(['glider_private_aerotow', 'glider_private_winch']);
   });
 
   it('shows no shortcuts for a single profile aircraft', () => {
@@ -153,6 +226,7 @@ describe('PprRequestForm', () => {
       immatriculation: 'HBKOF',
       aircraftType: 'DR40',
       mtow: 1000,
+      aircraftCategory: 'Flugzeug',
       plannedDate,
       plannedTime: '10:30',
       flightType: 'private',
@@ -161,7 +235,10 @@ describe('PprRequestForm', () => {
 
   it('does not submit a planned date in the past', () => {
     const { container, props } = renderForm({
-      initialValues: { lastname: 'Muster', firstname: 'Max', immatriculation: 'HBKOF', plannedDate: inDays(-2), plannedTime: '10:30', flightType: 'private' },
+      initialValues: {
+        lastname: 'Muster', firstname: 'Max', immatriculation: 'HBKOF', aircraftCategory: 'Flugzeug',
+        plannedDate: inDays(-2), plannedTime: '10:30', flightType: 'private',
+      },
     });
 
     fireEvent.click(screen.getByText('ppr.submit'));

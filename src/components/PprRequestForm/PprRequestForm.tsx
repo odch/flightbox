@@ -11,6 +11,7 @@ import FieldSet from '../wizards/FieldSet';
 import { CancelButton, NextButton } from '../WizardNavigation/WizardNavigation';
 import { Chip, FavouritesBar, StarIcon } from '../wizards/QuickPickBar';
 import {
+  renderAircraftCategoryDropdown,
   renderAircraftDropdown,
   renderDateField,
   renderInputField,
@@ -19,7 +20,7 @@ import {
   renderTextArea,
   renderTimeField,
 } from '../wizards/renderField';
-import objectToArray from '../../util/objectToArray';
+import { getEnabledFlightTypes } from '../../util/flightTypes';
 import type { Aircraft } from '../../modules/profile/migration';
 import validate from './validate';
 
@@ -58,13 +59,29 @@ const DialogButton = styled(Button)`
   float: right;
 `;
 
-// Arrays in __CONF__ are compiled to index-keyed objects (packinize in
-// projects/index.js), so they are read through objectToArray.
-const getFlightTypeItems = (t: (key: string) => string) =>
-  (objectToArray(__CONF__.enabledFlightTypes || {}) as string[]).map(value => ({
-    value,
-    label: t(`flightTypes.${value}`),
-  }));
+// Like the help texts of the settings forms. The field container enlarges
+// its direct children, so this needs the higher specificity of &&.
+const CategoryFirst = styled.p`
+  && {
+    font-size: 0.9em;
+  }
+  color: #666;
+  margin: 0.5em 0 0;
+`;
+
+// The flight types the arrival can later be recorded with: those of the
+// aerodrome that fit the aircraft category, as in the arrival wizard
+const getFlightTypeItems = (aircraftCategory?: string | null) =>
+  aircraftCategory ? getEnabledFlightTypes(aircraftCategory) : [];
+
+// A chosen flight type that doesn't fit the new category is cleared
+const changeCategory = (form: any, aircraftCategory?: string | null) => {
+  form.change('aircraftCategory', aircraftCategory || undefined);
+  const { flightType } = form.getState().values;
+  if (flightType && !getFlightTypeItems(aircraftCategory).some(item => item.value === flightType)) {
+    form.change('flightType', undefined);
+  }
+};
 
 const parseMtow = (input: unknown) => {
   if (typeof input === 'number') {
@@ -76,12 +93,16 @@ const parseMtow = (input: unknown) => {
   return null;
 };
 
-// The aircraft dropdown and the profile shortcuts fill in type and MTOW, as
-// in the movement wizards and the profile
-const applyAircraft = (form: any, aircraft: { key: string; type?: string | null; mtow?: number | null }) => {
+// The aircraft dropdown and the profile shortcuts fill in type, MTOW and
+// category, as in the movement wizards and the profile
+const applyAircraft = (
+  form: any,
+  aircraft: { key: string; type?: string | null; mtow?: number | null; category?: string | null }
+) => {
   form.change('immatriculation', aircraft.key);
   form.change('aircraftType', aircraft.type ?? undefined);
   form.change('mtow', aircraft.mtow ?? undefined);
+  changeCategory(form, aircraft.category);
 };
 
 interface PprRequestFormProps {
@@ -157,6 +178,7 @@ const PprRequestForm = (props: PprRequestFormProps) => {
                     key: aircraft.immatriculation!,
                     type: aircraft.aircraftType,
                     mtow: aircraft.mtow,
+                    category: aircraft.aircraftCategory,
                   })}
                 >
                   {aircraft.immatriculation}
@@ -199,6 +221,18 @@ const PprRequestForm = (props: PprRequestFormProps) => {
                 })
               }
             </Field>
+            <Field name="aircraftCategory">
+              {({ input, meta }) =>
+                renderAircraftCategoryDropdown({
+                  input: {
+                    ...input,
+                    onChange: (aircraftCategory: string) => changeCategory(form, aircraftCategory),
+                  },
+                  meta,
+                  label: t('movement.details.category'),
+                })
+              }
+            </Field>
           </FieldSet>
 
           <SectionTitle>{t('movement.details.flight')}</SectionTitle>
@@ -218,9 +252,12 @@ const PprRequestForm = (props: PprRequestFormProps) => {
             <Field
               name="flightType"
               component={renderSingleSelect}
-              items={getFlightTypeItems(t)}
+              items={getFlightTypeItems(values.aircraftCategory)}
               orientation="vertical"
               label={t('movement.details.flightType')}
+              hint={!values.aircraftCategory && (
+                <CategoryFirst data-cy="flightType-categoryFirst">{t('ppr.chooseCategoryFirst')}</CategoryFirst>
+              )}
             />
             <Field
               name="remarks"

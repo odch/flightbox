@@ -688,6 +688,7 @@
     "plannedDate": "Planned date",
     "plannedTime": "Planned time (local time)",
     "remarks": "Purpose / remarks",
+    "chooseCategoryFirst": "Select the aircraft category first.",
     "validation": {
       "plannedTime": "Enter the planned time in hours and minutes (local time).",
       "plannedDatePast": "The planned date must not be in the past.",
