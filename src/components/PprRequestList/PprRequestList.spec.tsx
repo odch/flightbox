@@ -137,6 +137,22 @@ describe('PprRequestList (admin)', () => {
     expect(defaultProps.reviewPprRequest).toHaveBeenCalledWith('req-3', 'rejected', undefined);
   });
 
+  it('shows the planned date in the date format of the app', () => {
+    renderWithTheme(<PprRequestList {...defaultProps} data={[pendingRequest]} />);
+    expect(screen.getByText('15.04.2026 10:30')).toBeTruthy();
+  });
+
+  it('opens a request with a button, so it also works with the keyboard', () => {
+    renderWithTheme(<PprRequestList {...defaultProps} data={[pendingRequest]} />);
+    const toggle = screen.getByRole('button', { name: /HB-ABC/ });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+
+    fireEvent.click(toggle);
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByText('max@example.com').closest('a')!.getAttribute('href')).toBe('mailto:max@example.com');
+  });
+
   it('shows review failed error', () => {
     renderWithTheme(
       <PprRequestList {...defaultProps} reviewFailed={true} />
