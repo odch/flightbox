@@ -1,22 +1,35 @@
 'use strict'
 
-const { isValidRetentionDays } = require('../domain/pprSettings')
+const {
+  isValidRetentionDays,
+  answerModeFromStore,
+  pilotInfoFromStore,
+  closuresFromStore
+} = require('../domain/pprSettings')
 
 /**
- * The PPR settings, for the admin area. A stored retention that isn't valid
- * is reported as null, since the cleanup ignores it too.
+ * The PPR settings, for the admin area. Stored values that aren't valid are
+ * reported the way they are used: an invalid retention as null (the cleanup
+ * ignores it), anything but 'automatic' as manual answers, invalid closures
+ * not at all.
  *
  * @param {Object} deps - { settings }
- * @returns {Promise<{adminEmail: string|null, retentionDays: number|null}>}
+ * @returns {Promise<{adminEmail: string|null, retentionDays: number|null,
+ *   answerMode: string, pilotInfo: string|null,
+ *   closures: Array<{from: string, to: string, reason: string}>}>}
  */
 async function getSettings({ settings }) {
-  const [adminEmail, retentionDays] = await Promise.all([
+  const [adminEmail, retentionDays, answerSettings] = await Promise.all([
     settings.getAdminEmail(),
-    settings.getRetentionDays()
+    settings.getRetentionDays(),
+    settings.getAnswerSettings()
   ])
   return {
     adminEmail,
-    retentionDays: isValidRetentionDays(retentionDays) ? retentionDays : null
+    retentionDays: isValidRetentionDays(retentionDays) ? retentionDays : null,
+    answerMode: answerModeFromStore(answerSettings.answerMode),
+    pilotInfo: pilotInfoFromStore(answerSettings.pilotInfo),
+    closures: closuresFromStore(answerSettings.closures)
   }
 }
 

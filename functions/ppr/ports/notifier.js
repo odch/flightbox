@@ -11,7 +11,8 @@
  *   Notify admin that a new PPR request was submitted.
  *   Args: (pprRequest, adminEmail)
  * @property {function(Object): Promise<void>} notifyRequestReviewed
- *   Notify pilot that their PPR request was approved or rejected.
+ *   Notify pilot that their PPR request was approved or rejected (by an
+ *   admin or automatically) or that an approval was revoked.
  *   Args: (pprRequest) — must include status, email, and review metadata.
  */
 

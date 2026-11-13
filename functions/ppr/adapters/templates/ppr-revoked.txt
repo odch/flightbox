@@ -1,0 +1,12 @@
+PPR-Genehmigung widerrufen
+
+Ihre PPR-Genehmigung wurde leider widerrufen.
+
+Luftfahrzeug: {{immatriculation}}
+Datum: {{plannedDate}}
+Zeit: {{plannedTime}}
+
+Grund: {{reviewRemarks}}
+
+---
+Diese E-Mail wurde von der open digital Flightbox gesendet

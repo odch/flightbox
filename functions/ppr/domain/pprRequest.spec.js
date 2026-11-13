@@ -7,7 +7,9 @@ const {
   sanitizeReviewRemarks,
   validateReviewStatus,
   canBeReviewed,
+  canBeRevoked,
   canBeDeletedBy,
+  isValidDate,
   sanitizeString,
   zurichDate,
   addDays,
@@ -331,6 +333,26 @@ describe('pprRequest', () => {
       expect(canBeReviewed({ status: Status.PENDING })).toBe(true)
       expect(canBeReviewed({ status: Status.APPROVED })).toBe(false)
       expect(canBeReviewed({ status: Status.REJECTED })).toBe(false)
+      expect(canBeReviewed({ status: Status.REVOKED })).toBe(false)
+    })
+  })
+
+  describe('canBeRevoked', () => {
+    it('allows approved requests only: a rejection is final', () => {
+      expect(canBeRevoked({ status: Status.APPROVED })).toBe(true)
+      expect(canBeRevoked({ status: Status.PENDING })).toBe(false)
+      expect(canBeRevoked({ status: Status.REJECTED })).toBe(false)
+      expect(canBeRevoked({ status: Status.REVOKED })).toBe(false)
+    })
+  })
+
+  describe('isValidDate', () => {
+    it.each(['2026-11-13', '2028-02-29'])('accepts %p', value => {
+      expect(isValidDate(value)).toBe(true)
+    })
+
+    it.each(['2026-02-30', '2026-13-01', '13.11.2026', '', null, 20261113])('rejects %p', value => {
+      expect(isValidDate(value)).toBe(false)
     })
   })
 

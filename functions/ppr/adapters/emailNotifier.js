@@ -4,8 +4,15 @@ const { loadSmtpSettings, createTransporter } = require('../../email/smtp')
 const {
   getPprSubmittedEmail,
   getPprApprovedEmail,
-  getPprRejectedEmail
+  getPprRejectedEmail,
+  getPprRevokedEmail
 } = require('./emailTemplates')
+
+const REVIEW_EMAILS = {
+  approved: getPprApprovedEmail,
+  rejected: getPprRejectedEmail,
+  revoked: getPprRevokedEmail
+}
 
 async function sendEmail(to, emailContent) {
   const smtpSettings = await loadSmtpSettings()
@@ -25,11 +32,13 @@ async function notifyRequestSubmitted(pprRequest, adminEmail) {
   await sendEmail(adminEmail, emailContent)
 }
 
+// The answer to the pilot: approved, rejected or a revoked approval
 async function notifyRequestReviewed(pprRequest) {
-  const emailContent = pprRequest.status === 'approved'
-    ? getPprApprovedEmail(pprRequest)
-    : getPprRejectedEmail(pprRequest)
-  await sendEmail(pprRequest.email, emailContent)
+  const getEmail = REVIEW_EMAILS[pprRequest.status]
+  if (!getEmail) {
+    throw new Error(`No email for PPR status ${pprRequest.status}`)
+  }
+  await sendEmail(pprRequest.email, getEmail(pprRequest))
 }
 
 module.exports = {

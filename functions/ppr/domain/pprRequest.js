@@ -3,8 +3,13 @@
 const Status = {
   PENDING: 'pending',
   APPROVED: 'approved',
-  REJECTED: 'rejected'
+  REJECTED: 'rejected',
+  // an approval an admin took back, e.g. after a closure came up
+  REVOKED: 'revoked'
 }
+
+// reviewedBy of the requests answered on submission (see pprAnswer.js)
+const AUTOMATIC_REVIEWER = 'automatic'
 
 const MAX_LENGTHS = {
   firstname: 100,
@@ -85,6 +90,11 @@ function isCalendarDate(dateStr) {
   return date.getUTCFullYear() === year &&
     date.getUTCMonth() === month - 1 &&
     date.getUTCDate() === day
+}
+
+// A real calendar date as 'YYYY-MM-DD'
+function isValidDate(value) {
+  return typeof value === 'string' && DATE_REGEX.test(value) && isCalendarDate(value)
 }
 
 // Free text is stored as entered, only trimmed and length-limited: every
@@ -219,10 +229,15 @@ function validateReviewStatus(newStatus) {
   }
 }
 
-// Decisions are final: only pending requests can be reviewed, and pilots
-// can only delete their own pending requests.
+// Only pending requests can be reviewed, and pilots can only delete their
+// own pending requests. An approval can still be revoked by an admin; a
+// rejection is final.
 function canBeReviewed(request) {
   return request.status === Status.PENDING
+}
+
+function canBeRevoked(request) {
+  return request.status === Status.APPROVED
 }
 
 function canBeDeletedBy(request, email) {
@@ -231,6 +246,7 @@ function canBeDeletedBy(request, email) {
 
 module.exports = {
   Status,
+  AUTOMATIC_REVIEWER,
   MAX_LENGTHS,
   MAX_DAYS_AHEAD,
   REQUIRED_FIELDS,
@@ -240,10 +256,12 @@ module.exports = {
   sanitizeReviewRemarks,
   validateReviewStatus,
   canBeReviewed,
+  canBeRevoked,
   canBeDeletedBy,
   sanitizeString,
   zurichDate,
   addDays,
   invalid,
-  isValidEmail
+  isValidEmail,
+  isValidDate
 }
