@@ -196,8 +196,8 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Write tests: `PprRequestList/PprRequestList.spec.tsx`
 
 ### Phase 7: GDPR/DSGVO Compliance
-- [x] Create `functions/ppr/cleanup.js` — scheduled function, deletes requests 30 days past plannedDate
-  - Admins set it in the privacy tab, which shows when `ppr` or `privacySettings` is on (`/settings/ppr/retentionDays`; whole days, 1–3650; default: 30)
+- [x] Create `functions/ppr/cleanup.js` — scheduled function, deletes requests a set number of days past plannedDate
+  - Admins set it in the privacy tab, which shows when `ppr` or `privacySettings` is on (`/settings/ppr/retentionDays`; whole days, 1–3650; without a value nothing is deleted, as for movements and messages)
 - [x] Register cleanup in `functions/index.js` as pubsub.schedule trigger
 - [x] Ensure delete endpoint validates ownership server-side (done in Phase 2f)
 - [x] Audit all Cloud Function handlers: no PII in logs (keys + status only)

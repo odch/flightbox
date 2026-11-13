@@ -248,8 +248,8 @@ in unit tests) PPR is off in the functions; for local work on PPR, create it for
 Admins set the address new requests are sent to in the "PPR-Anfragen" tab (stored at `/settings/ppr/adminEmail`);
 while none is set, requests are accepted but not sent to anyone, and the tab shows a warning.
 In the privacy tab ("Datenschutz"), which is shown when `privacySettings` or `ppr` is on, admins set how many days
-after the planned date requests are deleted (a whole number from 1 to 3650, default 30; stored at
-`/settings/ppr/retentionDays`).
+after the planned date requests are deleted (a whole number from 1 to 3650, stored at `/settings/ppr/retentionDays`).
+As for movements and messages, nothing is deleted while no value is set.
 
 Example: `true`
 
