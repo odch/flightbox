@@ -22,6 +22,7 @@ import {
 } from '../wizards/renderField';
 import { getEnabledFlightTypes } from '../../util/flightTypes';
 import type { Aircraft } from '../../modules/profile/migration';
+import type { PprSubmitResult } from '../../modules/ppr/actions';
 import validate from './validate';
 
 // The page has the same padding as the message and profile pages, so the
@@ -57,6 +58,25 @@ const DialogMessage = styled.div`
 
 const DialogButton = styled(Button)`
   float: right;
+`;
+
+// Information for pilots or the reason of a rejection, as the pilot's
+// requests list shows them
+const AnswerRemarks = styled.div<{ $approved: boolean }>`
+  margin-bottom: 1em;
+  padding: 0.5em 0.75em;
+  background-color: #f8f9fa;
+  border-left: 3px solid ${props => props.$approved ? '#28a745' : '#dc3545'};
+  text-align: left;
+  line-height: 1.4;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+`;
+
+const AnswerLabel = styled.div`
+  margin-bottom: 0.25em;
+  color: #666;
+  font-size: 0.9em;
 `;
 
 // Like the help texts of the settings forms. The field container enlarges
@@ -110,6 +130,8 @@ interface PprRequestFormProps {
   profileAircrafts?: Aircraft[];
   submitting: boolean;
   submitted: boolean;
+  // The answer, when the request was answered right away
+  result?: PprSubmitResult | null;
   commitFailed: boolean;
   initPprForm: () => void;
   resetPprForm: () => void;
@@ -137,6 +159,34 @@ const PprRequestForm = (props: PprRequestFormProps) => {
 
   // As in the movement wizards: shortcuts for pilots with several aircraft
   const showQuickPicks = !!profileAircrafts && profileAircrafts.length >= 2;
+
+  // Requests can be answered on submission: automatically, or rejected for a
+  // closure
+  const renderSubmitResult = () => {
+    const result = props.result;
+    if (result && (result.status === 'approved' || result.status === 'rejected')) {
+      const approved = result.status === 'approved';
+      return (
+        <>
+          <DialogHeading>{t(approved ? 'ppr.submitApproved' : 'ppr.submitRejected')}</DialogHeading>
+          {result.reviewRemarks && (
+            <AnswerRemarks $approved={approved} data-cy="ppr-submit-remarks">
+              <AnswerLabel>{t(approved ? 'ppr.pilotInfo' : 'ppr.reason')}</AnswerLabel>
+              {result.reviewRemarks}
+            </AnswerRemarks>
+          )}
+          {approved && <DialogMessage>{t('ppr.checkBeforeFlight')}</DialogMessage>}
+          <DialogMessage>{t('ppr.answerByEmail')}</DialogMessage>
+        </>
+      );
+    }
+    return (
+      <>
+        <DialogHeading>{t('ppr.submitSuccess')}</DialogHeading>
+        <DialogMessage>{t('ppr.submitPending')}</DialogMessage>
+      </>
+    );
+  };
 
   return (
     <Form validate={validate} onSubmit={handleFormSubmit} initialValues={props.initialValues} keepDirtyOnReinitialize>
@@ -285,8 +335,8 @@ const PprRequestForm = (props: PprRequestFormProps) => {
 
           {props.submitted && (
             <ModalDialog content={
-              <DialogContent>
-                <DialogHeading>{t('ppr.submitSuccess')}</DialogHeading>
+              <DialogContent data-cy="ppr-submit-result">
+                {renderSubmitResult()}
                 <DialogButton
                   type="button"
                   icon="close"

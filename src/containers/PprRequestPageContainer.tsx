@@ -7,6 +7,7 @@ import type { Aircraft } from '../modules/profile/migration';
 const mapStateToProps = (state: RootState) => ({
   submitting: state.ppr.form.submitting,
   submitted: state.ppr.form.submitted,
+  result: state.ppr.form.result,
   commitFailed: state.ppr.form.commitFailed,
   initialValues: state.ppr.initialValues,
   // the aircraft shortcuts, as in the movement wizards

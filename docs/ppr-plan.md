@@ -4,6 +4,8 @@
 
 Aerodromes lszm, lsze, lspv (and soon lspl) are PPR — pilots must get permission before flying in. Currently they just publish a phone number. This feature digitizes that: pilots submit PPR requests, admins approve/reject, pilots get notified via email.
 
+Often nobody answers that phone and a recorded message gives the information for pilots. For such aerodromes, requests can also be answered automatically: approved right away with that information, and rejected on the days the aerodrome is closed (see Phase 10).
+
 **Key constraints:**
 - Firebase will eventually be replaced (likely Postgres). Hexagonal architecture — Firebase is a swappable repository adapter.
 - All reads and writes go through backend Cloud Functions (HTTP endpoints). The frontend never talks to Firebase directly for PPR. No new Firebase database rules.
@@ -39,15 +41,20 @@ Express app (functions/api/index.js)   ← add PPR routes here
 functions/ppr/
   domain/
     pprRequest.js          # entity factory + validation + status constants
+    pprSettings.js         # validation of the admin settings
+    pprAnswer.js           # the answer on submission: closures, automatic answers
   usecases/
-    submitRequest.js       # create request, notify admin
+    submitRequest.js       # create request, answer it if decided, notify
     reviewRequest.js       # approve/reject, notify pilot
+    revokeApproval.js      # revoke an approval, notify pilot
     listRequests.js        # query: all (admin) or by user
   ports/
     pprRepository.js       # repository interface (JSDoc)
     notifier.js            # notification interface (JSDoc)
+    aerodromeStatus.js     # current aerodrome status (JSDoc)
   adapters/
     firebasePprRepository.js   # Firebase RTDB implementation
+    firebaseAerodromeStatus.js # latest entry of /status
     emailNotifier.js           # nodemailer/SMTP implementation
     emailTemplates.js          # email HTML templates
   routes.js                # Express router mounted in api/index.js
@@ -86,7 +93,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
   - Validate formats: email, date (YYYY-MM-DD), time (HH:MM)
   - plannedDate must be a real calendar date from today (Zurich time) up to 365 days ahead
   - Validation errors carry `code: 'INVALID_INPUT'` (400); routes map error codes, not messages
-  - Status constants: PENDING, APPROVED, REJECTED
+  - Status constants: PENDING, APPROVED, REJECTED, REVOKED (an approval taken back)
 - [x] Write tests: `functions/ppr/domain/pprRequest.spec.js`
 
 #### 2b. Ports
@@ -98,12 +105,15 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
   - `removeIf(key, predicate) → { applied, request }` — atomic (RTDB transaction)
 - [x] Create `functions/ppr/ports/notifier.js` — JSDoc interface
   - `notifyRequestSubmitted(pprRequest, adminEmail)`
-  - `notifyRequestReviewed(pprRequest)`
+  - `notifyRequestReviewed(pprRequest)` — approved, rejected or revoked
+- [x] Create `functions/ppr/ports/aerodromeStatus.js` — JSDoc interface
+  - `getCurrent() → { status, details } | null`
 
 #### 2c. Use cases
 - [x] Create `functions/ppr/usecases/submitRequest.js`
-  - Receives `{ repository, notifier }`, input, adminEmail
-  - Creates entity, saves, notifies admin
+  - Receives `{ repository, notifier, settings, aerodromeStatus }`, input
+  - Creates entity, decides the answer (Phase 10), saves it with the answer, notifies admin and, when answered, the pilot
+  - Returns `{ key, status, reviewRemarks? }`, so the form shows the answer
 - [x] Create `functions/ppr/usecases/reviewRequest.js`
   - Receives `{ repository, notifier }`, key, review
   - Validates the target status (approved/rejected)
@@ -138,6 +148,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
   - `GET /requests/all` — all requests for the admin list (fbAdminAuth)
   - `GET /settings`, `PATCH /settings` — the notification address (PPR tab) and the retention (privacy tab), for admins (fbAdminAuth)
   - `POST /requests/:key/review` — admin approves/rejects (fbAdminAuth)
+  - `POST /requests/:key/revoke` — admin revokes an approval, with a reason (fbAdminAuth; 409 unless approved)
   - `DELETE /requests/:key` — pilot deletes own (fbAuthExcludingShared, server-side ownership check)
   - Rate limiting: 10 requests/hour/user on submit
   - Validate `:key` format before querying
@@ -211,6 +222,21 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 ### Phase 9: Cypress E2E
 - [ ] `cypress/e2e/ppr-request-flow.cy.ts` — pilot submits, checks status
 - [ ] `cypress/e2e/ppr-admin-flow.cy.ts` — admin approves/rejects
+
+### Phase 10: Automatic Answers
+- [x] Settings in the PPR admin tab ("Einstellungen"), stored at `/settings/ppr` like the address
+  - `answerMode`: `manual` (default) or `automatic`
+  - `pilotInfo`: the information automatic approvals carry (runway, circuit, landing fee, phone; at most 1000 characters)
+  - `closures`: `[{ from, to, reason }]`, at most 50; the form shows those that have not ended, so the next save removes the others
+- [x] `functions/ppr/domain/pprAnswer.js` decides on submission, in this order:
+  - planned date within a closure → rejected with its reason (also with manual answers)
+  - planned date today while the aerodrome status (`/status`, the admin tab "Flugplatz-Status") is closed → rejected with its details (the status tells about today only)
+  - automatic answers → approved with the information for pilots
+  - otherwise pending, for an admin
+- [x] Answered requests are saved with their answer (`reviewedBy: 'automatic'`), never pending in between; the pilot gets the answer by email right away, the admin email shows it ("Automatisch genehmigt"); with automatic answers no notification address is needed
+- [x] Automatic approval emails ask the pilot to check the aerodrome status and the NOTAMs before the flight
+- [x] The form shows the answer after sending; the admin list marks automatic answers
+- [x] Admins revoke an approval with a reason (e.g. a closure that came up later); the pilot gets it by email (`ppr-revoked` templates)
 
 ### Final Verification
 - [ ] `npm test` — all Jest tests pass

@@ -148,6 +148,15 @@ describe('PprStatusList', () => {
     expect(screen.getByText('RWY 26 only, call TWR 15 min before')).toBeTruthy();
   });
 
+  it('shows a revoked approval with its reason, and it cannot be deleted', () => {
+    const revoked = { ...approvedRequest, status: 'revoked', reviewRemarks: 'Runway works' };
+    renderWithTheme(<PprStatusList {...defaultProps} data={[revoked]}/>);
+
+    expect(screen.getByText('ppr.status.revoked')).toBeTruthy();
+    expect(screen.getByText('Runway works')).toBeTruthy();
+    expect(screen.queryByText('common.delete')).toBeNull();
+  });
+
   it('shows delete failed error', () => {
     renderWithTheme(
       <PprStatusList {...defaultProps} deleteFailed={true} />

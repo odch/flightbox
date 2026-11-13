@@ -43,6 +43,7 @@ const StatusBadge = styled.span<{ $status: string }>`
     switch (props.$status) {
       case 'approved': return '#28a745';
       case 'rejected': return '#dc3545';
+      case 'revoked': return '#6c757d';
       default: return '#ffc107';
     }
   }};
@@ -63,6 +64,8 @@ const ReviewRemarks = styled.div<{ $status: string }>`
   background-color: #f8f9fa;
   border-left: 3px solid ${props => props.$status === 'approved' ? '#28a745' : '#dc3545'};
   font-size: 0.9em;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 `;
 
 const Actions = styled.div`

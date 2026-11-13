@@ -13,20 +13,36 @@ describe('modules', () => {
           loading: false,
           selected: null,
           initialValues: {},
-          form: { submitting: false, submitted: false, commitFailed: false, reviewFailed: false, deleteFailed: false },
-          settings: { adminEmail: null, retentionDays: null, loaded: false, loadFailed: false, saving: false, saved: false, saveFailed: false },
+          form: { submitting: false, submitted: false, result: null, commitFailed: false, reviewFailed: false, revokeFailed: false, deleteFailed: false },
+          settings: {
+            adminEmail: null, retentionDays: null, answerMode: 'manual', pilotInfo: null, closures: [],
+            loaded: false, loadFailed: false, saving: false, saved: false, saveFailed: false,
+          },
         });
       });
 
       describe('settings', () => {
+        const noAnswers = { answerMode: 'manual' as const, pilotInfo: null, closures: [] };
+
         it('stores the loaded settings', () => {
-          const state = reducer(initialState, actions.pprSettingsLoaded({ adminEmail: 'ppr@aerodrome.ch', retentionDays: 60 }));
-          expect(state.settings).toEqual(expect.objectContaining({ adminEmail: 'ppr@aerodrome.ch', retentionDays: 60, loaded: true, loadFailed: false }));
+          const closures = [{ from: '2026-11-19', to: '2026-11-21', reason: 'Runway works' }];
+          const state = reducer(initialState, actions.pprSettingsLoaded({
+            adminEmail: 'ppr@aerodrome.ch', retentionDays: 60, answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures,
+          }));
+          expect(state.settings).toEqual(expect.objectContaining({
+            adminEmail: 'ppr@aerodrome.ch', retentionDays: 60, answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures,
+            loaded: true, loadFailed: false,
+          }));
+        });
+
+        it('uses the defaults for answer settings an older server does not send', () => {
+          const state = reducer(initialState, actions.pprSettingsLoaded({ adminEmail: null, retentionDays: null } as any));
+          expect(state.settings).toEqual(expect.objectContaining(noAnswers));
         });
 
         it('drops old save results when loading again', () => {
           const failed = { ...initialState, settings: { ...initialState.settings, saved: true, saveFailed: true } };
-          const state = reducer(failed, actions.pprSettingsLoaded({ adminEmail: null, retentionDays: null }));
+          const state = reducer(failed, actions.pprSettingsLoaded({ adminEmail: null, retentionDays: null, ...noAnswers }));
           expect(state.settings).toEqual(expect.objectContaining({ saved: false, saveFailed: false }));
         });
 
@@ -39,12 +55,12 @@ describe('modules', () => {
           const saving = reducer(initialState, actions.savePprSettings({ adminEmail: 'ppr@aerodrome.ch' }));
           expect(saving.settings).toEqual(expect.objectContaining({ saving: true, saved: false, saveFailed: false }));
 
-          const saved = reducer(saving, actions.savePprSettingsSuccess({ adminEmail: 'ppr@aerodrome.ch', retentionDays: null }));
+          const saved = reducer(saving, actions.savePprSettingsSuccess({ adminEmail: 'ppr@aerodrome.ch', retentionDays: null, ...noAnswers }));
           expect(saved.settings).toEqual(expect.objectContaining({ adminEmail: 'ppr@aerodrome.ch', saving: false, saved: true }));
         });
 
         it('keeps the old address when saving fails', () => {
-          const loaded = reducer(initialState, actions.pprSettingsLoaded({ adminEmail: 'old@aerodrome.ch', retentionDays: null }));
+          const loaded = reducer(initialState, actions.pprSettingsLoaded({ adminEmail: 'old@aerodrome.ch', retentionDays: null, ...noAnswers }));
           const saving = reducer(loaded, actions.savePprSettings({ adminEmail: 'new@aerodrome.ch' }));
           const failed = reducer(saving, actions.savePprSettingsFailure());
           expect(failed.settings).toEqual(expect.objectContaining({ adminEmail: 'old@aerodrome.ch', saving: false, saveFailed: true }));
@@ -129,10 +145,26 @@ describe('modules', () => {
         expect(state.form.commitFailed).toBe(false);
       });
 
+      it('stores the answer to the submission', () => {
+        const result = { key: 'req-1', status: 'approved', reviewRemarks: 'Runway 05/23' };
+        const state = reducer(initialState, actions.submitPprRequestSuccess(result));
+        expect(state.form.result).toEqual(result);
+
+        expect(reducer(state, actions.resetPprForm()).form.result).toBeNull();
+      });
+
+      it('tracks a failed and a successful revocation', () => {
+        const failed = reducer(initialState, actions.revokePprApprovalFailure());
+        expect(failed.form.revokeFailed).toBe(true);
+
+        expect(reducer(failed, actions.revokePprApprovalSuccess()).form.revokeFailed).toBe(false);
+        expect(reducer(failed, actions.pprRequestsLoaded([], 'all')).form.revokeFailed).toBe(false);
+      });
+
       it('should preserve other form flags on submit success', () => {
         const stateWithFlags = {
           ...initialState,
-          form: { submitting: false, submitted: false, commitFailed: false, reviewFailed: true, deleteFailed: true },
+          form: { submitting: false, submitted: false, result: null, commitFailed: false, reviewFailed: true, revokeFailed: false, deleteFailed: true },
         };
         const state = reducer(stateWithFlags, actions.submitPprRequestSuccess());
         expect(state.form.reviewFailed).toBe(true);
@@ -150,7 +182,7 @@ describe('modules', () => {
       it('should preserve other form flags on submit failure', () => {
         const stateWithFlags = {
           ...initialState,
-          form: { submitting: false, submitted: false, commitFailed: false, reviewFailed: true, deleteFailed: true },
+          form: { submitting: false, submitted: false, result: null, commitFailed: false, reviewFailed: true, revokeFailed: false, deleteFailed: true },
         };
         const state = reducer(stateWithFlags, actions.submitPprRequestFailure());
         expect(state.form.reviewFailed).toBe(true);
@@ -214,8 +246,10 @@ describe('modules', () => {
         const dirtyForm = {
           submitting: true,
           submitted: true,
+          result: { key: 'req-1', status: 'pending' },
           commitFailed: true,
           reviewFailed: true,
+          revokeFailed: true,
           deleteFailed: true,
         };
         const state = reducer(
@@ -225,8 +259,10 @@ describe('modules', () => {
         expect(state.form).toEqual({
           submitting: false,
           submitted: false,
+          result: null,
           commitFailed: false,
           reviewFailed: false,
+          revokeFailed: false,
           deleteFailed: false,
         });
       });

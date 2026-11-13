@@ -261,4 +261,51 @@ describe('PprRequestForm', () => {
     const { container } = renderForm({ submitting: true });
     expect(field(container, 'ppr-submit').hasAttribute('disabled')).toBe(true);
   });
+
+  describe('after sending', () => {
+    it('says the request waits for an answer', () => {
+      renderForm({ submitted: true, result: { key: 'req-1', status: 'pending' } });
+
+      expect(screen.getByText('ppr.submitSuccess')).toBeTruthy();
+      expect(screen.getByText('ppr.submitPending')).toBeTruthy();
+    });
+
+    it('shows an automatic approval with the information for pilots', () => {
+      const { container } = renderForm({
+        submitted: true,
+        result: { key: 'req-1', status: 'approved', reviewRemarks: 'Runway 05/23, landing fee CHF 20' },
+      });
+
+      expect(screen.getByText('ppr.submitApproved')).toBeTruthy();
+      expect(field(container, 'ppr-submit-remarks').textContent).toBe('ppr.pilotInfoRunway 05/23, landing fee CHF 20');
+      expect(screen.getByText('ppr.checkBeforeFlight')).toBeTruthy();
+      expect(screen.queryByText('ppr.submitPending')).toBeNull();
+    });
+
+    it('shows a rejection with its reason', () => {
+      const { container } = renderForm({
+        submitted: true,
+        result: { key: 'req-1', status: 'rejected', reviewRemarks: 'Runway works' },
+      });
+
+      expect(screen.getByText('ppr.submitRejected')).toBeTruthy();
+      expect(field(container, 'ppr-submit-remarks').textContent).toBe('ppr.reasonRunway works');
+      expect(screen.queryByText('ppr.checkBeforeFlight')).toBeNull();
+    });
+
+    it('shows an approval without remarks', () => {
+      const { container } = renderForm({ submitted: true, result: { key: 'req-1', status: 'approved' } });
+
+      expect(screen.getByText('ppr.submitApproved')).toBeTruthy();
+      expect(field(container, 'ppr-submit-remarks')).toBeNull();
+    });
+
+    it('goes back to the start page when the dialog is closed', () => {
+      const { props } = renderForm({ submitted: true, result: { key: 'req-1', status: 'approved' } });
+
+      fireEvent.click(screen.getByText('common.close'));
+
+      expect(props.confirmPprSubmitSuccess).toHaveBeenCalledTimes(1);
+    });
+  });
 });

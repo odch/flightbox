@@ -37,6 +37,9 @@ export async function loadRequests(token: string, scope: PprListScope = 'own') {
 export interface PprSettings {
   adminEmail: string | null;
   retentionDays: number | null;
+  answerMode: 'manual' | 'automatic';
+  pilotInfo: string | null;
+  closures: { from: string; to: string; reason: string }[];
 }
 
 export async function loadSettings(token: string): Promise<PprSettings> {
@@ -76,6 +79,23 @@ export async function reviewRequest(key: string, status: string, remarks: string
       'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify({ status, remarks }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Request failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+// Admins revoke an approval with a reason; the pilot is told by email
+export async function revokeApproval(key: string, remarks: string, token: string) {
+  const res = await fetch(`${baseUrl()}/ppr/requests/${encodeURIComponent(key)}/revoke`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ remarks }),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

@@ -38,8 +38,9 @@ export function* submitPprRequest(action: any) {
   try {
     const idToken = yield call(getIdToken);
     // The language decides which language the pilot's emails are sent in
-    yield call(remote.submitRequest, {...values, language: i18n.language}, idToken);
-    yield put(actions.submitPprRequestSuccess());
+    const result = yield call(remote.submitRequest, {...values, language: i18n.language}, idToken);
+    // Requests can be answered right away (closed aerodrome, automatic answers)
+    yield put(actions.submitPprRequestSuccess(result || null));
   } catch (e) {
     if (console && typeof console.error === 'function') {
       console.error('Failed to submit PPR request', e);
@@ -66,6 +67,27 @@ export function* reviewPprRequest(action: any) {
     yield call(loadPprRequests, actions.loadPprRequests('all'));
   } catch (e) {
     // Reload failure is non-fatal — review already succeeded
+  }
+}
+
+export function* revokePprApproval(action: any) {
+  const { key, remarks } = action.payload;
+  try {
+    const idToken = yield call(getIdToken);
+    yield call(remote.revokeApproval, key, remarks, idToken);
+    yield put(actions.revokePprApprovalSuccess());
+  } catch (e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to revoke PPR approval', e);
+    }
+    yield put(actions.revokePprApprovalFailure());
+    return;
+  }
+  try {
+    // Revocations happen in the admin list, which shows all requests
+    yield call(loadPprRequests, actions.loadPprRequests('all'));
+  } catch (e) {
+    // Reload failure is non-fatal — the revocation already succeeded
   }
 }
 
@@ -121,6 +143,7 @@ export default function* sagas() {
     // Ignores further submits while one is being sent (double clicks)
     takeLeading(actions.SUBMIT_PPR_REQUEST, submitPprRequest),
     takeEvery(actions.REVIEW_PPR_REQUEST, reviewPprRequest),
+    takeEvery(actions.REVOKE_PPR_APPROVAL, revokePprApproval),
     takeEvery(actions.DELETE_PPR_REQUEST, deletePprRequest),
     takeEvery(actions.CONFIRM_PPR_SUBMIT_SUCCESS, confirmPprSubmitSuccess),
     takeEvery(actions.LOAD_PPR_SETTINGS, loadPprSettings),

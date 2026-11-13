@@ -246,7 +246,15 @@ in unit tests) PPR is off in the functions; for local work on PPR, create it for
 `echo "module.exports = { enabled: true, firebaseProjectId: '<project>' };" > functions/ppr-config.generated.js`.
 
 Admins set the address new requests are sent to in the "PPR-Anfragen" tab (stored at `/settings/ppr/adminEmail`);
-while none is set, requests are accepted but not sent to anyone, and the tab shows a warning.
+while none is set, requests are accepted but not sent to anyone, and the tab shows a warning when requests are
+answered manually.
+
+In the same tab admins choose how requests are answered (`/settings/ppr/answerMode`): manually by an admin (the
+default) or automatically, i.e. approved right away with the information for pilots set there
+(`/settings/ppr/pilotInfo`, e.g. runway, circuit, landing fee, phone number). Either way, requests for a day within a
+closure entered in the tab (`/settings/ppr/closures`) are rejected with its reason, and requests for today are
+rejected while the aerodrome status is "closed". Admins can revoke an approval with a reason; the pilot gets it by
+e-mail.
 In the privacy tab ("Datenschutz"), which is shown when `privacySettings` or `ppr` is on, admins set how many days
 after the planned date requests are deleted (a whole number from 1 to 3650, stored at `/settings/ppr/retentionDays`).
 As for movements and messages, nothing is deleted while no value is set.
