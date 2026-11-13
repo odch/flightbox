@@ -72,7 +72,8 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Add `"ppr": false` to `projects/default.json`
 - [x] Deploy the PPR endpoints and cleanup job only where `ppr` is true (`functions/ppr-config.generated.js`, written by the deploy workflows)
 - [ ] Set `"ppr": true` in `projects/<name>.json` for each PPR aerodrome
-- [ ] Set up `/settings/ppr/adminEmail` in Firebase for each aerodrome
+- [x] Admins set the notification address (`/settings/ppr/adminEmail`) in the PPR admin tab
+- [ ] Set the notification address at each PPR aerodrome
 
 ### Phase 2: Hexagonal Backend (`functions/ppr/`)
 
@@ -135,6 +136,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
   - `POST /requests` — pilot submits (fbAuthExcludingShared, requireEmail; at most 10 accepted submissions per user and hour, counted in `/pprRateLimits`)
   - `GET /requests` — the caller's own requests, admins included (fbAuthExcludingShared, requireEmail)
   - `GET /requests/all` — all requests for the admin list (fbAdminAuth)
+  - `GET /settings`, `PATCH /settings` — the notification address (PPR tab) and the retention (privacy tab), for admins (fbAdminAuth)
   - `POST /requests/:key/review` — admin approves/rejects (fbAdminAuth)
   - `DELETE /requests/:key` — pilot deletes own (fbAuthExcludingShared, server-side ownership check)
   - Rate limiting: 10 requests/hour/user on submit
@@ -195,7 +197,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 
 ### Phase 7: GDPR/DSGVO Compliance
 - [x] Create `functions/ppr/cleanup.js` — scheduled function, deletes requests 30 days past plannedDate
-  - Configurable via `/settings/ppr/retentionDays` (whole days, 1–3650; default: 30)
+  - Admins set it in the privacy tab, which shows when `ppr` or `privacySettings` is on (`/settings/ppr/retentionDays`; whole days, 1–3650; default: 30)
 - [x] Register cleanup in `functions/index.js` as pubsub.schedule trigger
 - [x] Ensure delete endpoint validates ownership server-side (done in Phase 2f)
 - [x] Audit all Cloud Function handlers: no PII in logs (keys + status only)

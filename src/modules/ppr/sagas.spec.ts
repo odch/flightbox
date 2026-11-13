@@ -137,6 +137,45 @@ describe('modules', () => {
         });
       });
 
+      describe('loadPprSettings', () => {
+        it('loads the settings', () => {
+          const generator = sagas.loadPprSettings();
+
+          expect(generator.next().value).toEqual(call(getIdToken));
+          expect(generator.next('token-123').value).toEqual(call(remote.loadSettings, 'token-123'));
+          const settings = { adminEmail: 'ppr@aerodrome.ch', retentionDays: null };
+          expect(generator.next(settings).value).toEqual(put(actions.pprSettingsLoaded(settings)));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('reports a failed load', () => {
+          const generator = sagas.loadPprSettings();
+          generator.next(); // getIdToken
+
+          expect(generator.throw(new Error('network error')).value).toEqual(put(actions.pprSettingsLoadFailed()));
+        });
+      });
+
+      describe('savePprSettings', () => {
+        it('saves the given settings and stores all of them', () => {
+          const changed = { retentionDays: 90 };
+          const generator = sagas.savePprSettings(actions.savePprSettings(changed));
+
+          expect(generator.next().value).toEqual(call(getIdToken));
+          expect(generator.next('token-123').value).toEqual(call(remote.saveSettings, changed, 'token-123'));
+          const all = { adminEmail: 'ppr@aerodrome.ch', retentionDays: 90 };
+          expect(generator.next(all).value).toEqual(put(actions.savePprSettingsSuccess(all)));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('reports a failed save', () => {
+          const generator = sagas.savePprSettings(actions.savePprSettings({ adminEmail: 'x@y.ch' }));
+          generator.next(); // getIdToken
+
+          expect(generator.throw(new Error('400')).value).toEqual(put(actions.savePprSettingsFailure()));
+        });
+      });
+
       describe('confirmPprSubmitSuccess', () => {
         it('should redirect to root and reset form', () => {
           (history.push as jest.Mock).mockClear();

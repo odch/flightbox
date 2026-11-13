@@ -113,8 +113,12 @@ function validateRequired(input) {
   }
 }
 
+function isValidEmail(email) {
+  return EMAIL_REGEX.test(email)
+}
+
 function validateEmail(email) {
-  if (!EMAIL_REGEX.test(email)) {
+  if (!isValidEmail(email)) {
     throw invalid('Invalid email format')
   }
 }
@@ -239,5 +243,7 @@ module.exports = {
   canBeDeletedBy,
   sanitizeString,
   zurichDate,
-  addDays
+  addDays,
+  invalid,
+  isValidEmail
 }

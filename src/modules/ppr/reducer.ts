@@ -10,12 +10,23 @@ interface PprFormState {
   deleteFailed: boolean;
 }
 
+interface PprSettingsState {
+  adminEmail: string | null;
+  retentionDays: number | null;
+  loaded: boolean;
+  loadFailed: boolean;
+  saving: boolean;
+  saved: boolean;
+  saveFailed: boolean;
+}
+
 interface PprState {
   data: unknown[];
   loading: boolean;
   selected: string | null;
   initialValues: Record<string, any>;
   form: PprFormState;
+  settings: PprSettingsState;
 }
 
 const INITIAL_STATE: PprState = {
@@ -29,6 +40,15 @@ const INITIAL_STATE: PprState = {
     commitFailed: false,
     reviewFailed: false,
     deleteFailed: false,
+  },
+  settings: {
+    adminEmail: null,
+    retentionDays: null,
+    loaded: false,
+    loadFailed: false,
+    saving: false,
+    saved: false,
+    saveFailed: false,
   },
 };
 
@@ -113,6 +133,51 @@ function resetForm(state: PprState) {
   });
 }
 
+function settingsLoaded(state: PprState, action: PprAction & { type: typeof actions.PPR_SETTINGS_LOADED }) {
+  return Object.assign({}, state, {
+    settings: Object.assign({}, state.settings, {
+      adminEmail: action.payload.settings.adminEmail,
+      retentionDays: action.payload.settings.retentionDays,
+      loaded: true,
+      loadFailed: false,
+      // a fresh load starts without old save results (the PPR and privacy
+      // tabs share this state)
+      saved: false,
+      saveFailed: false,
+    }),
+  });
+}
+
+function settingsLoadFailed(state: PprState) {
+  return Object.assign({}, state, {
+    settings: Object.assign({}, state.settings, { loadFailed: true }),
+  });
+}
+
+function settingsSaving(state: PprState) {
+  return Object.assign({}, state, {
+    settings: Object.assign({}, state.settings, { saving: true, saved: false, saveFailed: false }),
+  });
+}
+
+function settingsSaved(state: PprState, action: PprAction & { type: typeof actions.SAVE_PPR_SETTINGS_SUCCESS }) {
+  return Object.assign({}, state, {
+    settings: Object.assign({}, state.settings, {
+      adminEmail: action.payload.settings.adminEmail,
+      retentionDays: action.payload.settings.retentionDays,
+      loaded: true,
+      saving: false,
+      saved: true,
+    }),
+  });
+}
+
+function settingsSaveFailed(state: PprState) {
+  return Object.assign({}, state, {
+    settings: Object.assign({}, state.settings, { saving: false, saveFailed: true }),
+  });
+}
+
 const ACTION_HANDLERS = {
   [actions.PPR_FORM_INITIALIZED]: formInitialized,
   [actions.SET_PPR_LOADING]: setLoading,
@@ -127,6 +192,11 @@ const ACTION_HANDLERS = {
   [actions.DELETE_PPR_REQUEST_FAILURE]: deleteFailure,
   [actions.SELECT_PPR_REQUEST]: selectRequest,
   [actions.RESET_PPR_FORM]: resetForm,
+  [actions.PPR_SETTINGS_LOADED]: settingsLoaded,
+  [actions.PPR_SETTINGS_LOAD_FAILED]: settingsLoadFailed,
+  [actions.SAVE_PPR_SETTINGS]: settingsSaving,
+  [actions.SAVE_PPR_SETTINGS_SUCCESS]: settingsSaved,
+  [actions.SAVE_PPR_SETTINGS_FAILURE]: settingsSaveFailed,
 };
 
 export type { PprState };

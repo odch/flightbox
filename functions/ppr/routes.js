@@ -1,25 +1,22 @@
 'use strict'
 
 const express = require('express')
-const { getDatabase } = require('firebase-admin/database')
 const { fbAuthExcludingShared, fbAdminAuth } = require('../api/fbAuth')
 const submitRequest = require('./usecases/submitRequest')
 const reviewRequest = require('./usecases/reviewRequest')
 const listRequests = require('./usecases/listRequests')
 const deleteRequest = require('./usecases/deleteRequest')
+const getSettings = require('./usecases/getSettings')
+const updateSettings = require('./usecases/updateSettings')
 const repository = require('./adapters/firebasePprRepository')
 const notifier = require('./adapters/emailNotifier')
 const rateLimiter = require('./adapters/firebaseRateLimiter')
+const settings = require('./adapters/firebasePprSettings')
 
 const router = express.Router()
-const deps = { repository, notifier }
+const deps = { repository, notifier, settings }
 
 const FIREBASE_KEY_REGEX = /^[-\w]{1,128}$/
-
-async function loadPprAdminEmail() {
-  const snapshot = await getDatabase().ref('/settings/ppr/adminEmail').once('value')
-  return snapshot.val()
-}
 
 function validateKey(req, res, next) {
   if (!FIREBASE_KEY_REGEX.test(req.params.key)) {
@@ -49,7 +46,7 @@ router.post('/requests', fbAuthExcludingShared, requireEmail, async (req, res) =
     if (!slotReserved) {
       return res.status(429).json({ error: 'Too many requests' })
     }
-    const adminEmail = await loadPprAdminEmail()
+    const adminEmail = await settings.getAdminEmail()
     const { firstname, lastname, phone, immatriculation,
       aircraftType, mtow, plannedDate, plannedTime, flightType,
       remarks, language } = req.body
@@ -137,6 +134,30 @@ router.delete('/requests/:key', fbAuthExcludingShared, requireEmail, validateKey
     }
     console.error('Failed to delete PPR request')
     res.status(500).json({ error: 'Failed to delete request' })
+  }
+})
+
+// GET /settings — the PPR settings, for the admin area
+router.get('/settings', fbAdminAuth, async (req, res) => {
+  try {
+    res.json(await getSettings(deps))
+  } catch (e) {
+    console.error('Failed to load PPR settings')
+    res.status(500).json({ error: 'Failed to load settings' })
+  }
+})
+
+// PATCH /settings — admins change the given settings (notification address
+// in the PPR tab, retention in the privacy tab)
+router.patch('/settings', fbAdminAuth, async (req, res) => {
+  try {
+    res.json(await updateSettings(deps, req.body || {}))
+  } catch (e) {
+    if (e.code === 'INVALID_INPUT') {
+      return res.status(400).json({ error: e.message })
+    }
+    console.error('Failed to save PPR settings')
+    res.status(500).json({ error: 'Failed to save settings' })
   }
 })
 

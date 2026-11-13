@@ -48,6 +48,21 @@ describe('AdminPage', () => {
     expect(screen.getByRole('button', {name: /Export/})).toBeInTheDocument();
   });
 
+  it.each([
+    ['privacySettings', {privacySettings: true}],
+    ['ppr (for the PPR retention)', {ppr: true}],
+  ])('shows the privacy tab when %s is on', (_, conf) => {
+    (global as any).__CONF__ = {paymentMethods: {}, ...conf};
+    renderAdminPage();
+    expect(screen.getByRole('button', {name: /Datenschutz/})).toBeInTheDocument();
+  });
+
+  it('hides the privacy tab when neither privacySettings nor ppr is on', () => {
+    (global as any).__CONF__ = {paymentMethods: {}};
+    renderAdminPage();
+    expect(screen.queryByRole('button', {name: /Datenschutz/})).toBeNull();
+  });
+
   it('shows the API access tab and page when reportApiEnabled is true', () => {
     (global as any).__CONF__ = {paymentMethods: {}, reportApiEnabled: true};
     renderAdminPage();

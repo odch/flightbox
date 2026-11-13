@@ -52,11 +52,23 @@ describe('submitRequest', () => {
     expect(adminEmail).toBe('admin@aero.ch')
   })
 
+  it('warns when no notification address is set', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const deps = createMockDeps()
+
+    await submitRequest(deps, validInput, null, NOW)
+
+    expect(warn).toHaveBeenCalledWith('No PPR notification address is set, request not announced:', expect.any(String))
+    warn.mockRestore()
+  })
+
   it('skips notification when adminEmail is not provided', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     const deps = createMockDeps()
     await submitRequest(deps, validInput, null, NOW)
 
     expect(deps.notifier.notifyRequestSubmitted).not.toHaveBeenCalled()
+    warn.mockRestore()
   })
 
   it('propagates validation errors from domain', async () => {

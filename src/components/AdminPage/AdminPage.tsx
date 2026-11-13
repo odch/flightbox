@@ -114,7 +114,8 @@ const AdminPage = ({auth, guestAccessToken, kioskAccessToken, customsAvailable, 
   if (!kioskAccessEnabled) {
     hiddenTabs.push('kiosk-access');
   }
-  if (__CONF__.privacySettings !== true) {
+  // The privacy tab holds the privacy settings and the PPR retention
+  if (__CONF__.privacySettings !== true && __CONF__.ppr !== true) {
     hiddenTabs.push('privacy');
   }
   // API keys are only of use with a feature they give access to. OR further

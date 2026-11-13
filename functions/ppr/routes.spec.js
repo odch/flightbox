@@ -20,6 +20,10 @@ jest.mock('./usecases/submitRequest', () => mockSubmitRequest)
 jest.mock('./usecases/reviewRequest', () => mockReviewRequest)
 jest.mock('./usecases/listRequests', () => mockListRequests)
 jest.mock('./usecases/deleteRequest', () => mockDeleteRequest)
+const mockGetSettings = jest.fn()
+const mockUpdateSettings = jest.fn()
+jest.mock('./usecases/getSettings', () => mockGetSettings)
+jest.mock('./usecases/updateSettings', () => mockUpdateSettings)
 jest.mock('./adapters/firebasePprRepository', () => ({}))
 jest.mock('./adapters/emailNotifier', () => ({}))
 const mockAcquire = jest.fn()
@@ -112,6 +116,11 @@ describe('PPR routes', () => {
 
     it('registers GET /requests/all', () => {
       expect(findHandler('get', '/requests/all')).toBeTruthy()
+    })
+
+    it('registers GET and PATCH /settings', () => {
+      expect(findHandler('get', '/settings')).toBeTruthy()
+      expect(findHandler('patch', '/settings')).toBeTruthy()
     })
   })
 
@@ -383,6 +392,73 @@ describe('PPR routes', () => {
 
       expect(res.statusCode).toBe(400)
       expect(res.body.error).toBe('Invalid request key')
+    })
+  })
+
+  describe('settings', () => {
+    const adminReq = (method, body) => mockReq({ method, headers: { authorization: 'Bearer valid-token' }, body })
+
+    it('returns the settings to admins', async () => {
+      authenticateAs('uid-admin', 'admin@aero.ch')
+      setupAdminDbRef('uid-admin')
+      mockGetSettings.mockResolvedValue({ adminEmail: 'ppr@aerodrome.ch' })
+      const res = mockRes()
+
+      await runMiddlewareChain(findHandler('get', '/settings'), adminReq('GET'), res)
+
+      expect(res.statusCode).toBe(200)
+      expect(res.body).toEqual({ adminEmail: 'ppr@aerodrome.ch' })
+    })
+
+    it('saves the admin email for admins', async () => {
+      authenticateAs('uid-admin', 'admin@aero.ch')
+      setupAdminDbRef('uid-admin')
+      mockUpdateSettings.mockResolvedValue({ adminEmail: 'ppr@aerodrome.ch' })
+      const res = mockRes()
+
+      await runMiddlewareChain(findHandler('patch', '/settings'), adminReq('PATCH', { adminEmail: 'ppr@aerodrome.ch' }), res)
+
+      expect(res.statusCode).toBe(200)
+      expect(mockUpdateSettings.mock.calls[0][1]).toEqual({ adminEmail: 'ppr@aerodrome.ch' })
+    })
+
+    it('passes only the given settings on, e.g. the retention', async () => {
+      authenticateAs('uid-admin', 'admin@aero.ch')
+      setupAdminDbRef('uid-admin')
+      mockUpdateSettings.mockResolvedValue({ adminEmail: 'ppr@aerodrome.ch', retentionDays: 90 })
+      const res = mockRes()
+
+      await runMiddlewareChain(findHandler('patch', '/settings'), adminReq('PATCH', { retentionDays: 90 }), res)
+
+      expect(res.statusCode).toBe(200)
+      expect(mockUpdateSettings.mock.calls[0][1]).toEqual({ retentionDays: 90 })
+      expect(res.body).toEqual({ adminEmail: 'ppr@aerodrome.ch', retentionDays: 90 })
+    })
+
+    it('answers 400 for an invalid address', async () => {
+      authenticateAs('uid-admin', 'admin@aero.ch')
+      setupAdminDbRef('uid-admin')
+      const err = new Error('Invalid email format')
+      err.code = 'INVALID_INPUT'
+      mockUpdateSettings.mockRejectedValue(err)
+      const res = mockRes()
+
+      await runMiddlewareChain(findHandler('patch', '/settings'), adminReq('PATCH', { adminEmail: 'nope' }), res)
+
+      expect(res.statusCode).toBe(400)
+      expect(res.body).toEqual({ error: 'Invalid email format' })
+    })
+
+    it.each([['get', 'GET'], ['patch', 'PATCH']])('refuses %s /settings to non-admins', async (method, httpMethod) => {
+      authenticateAs('uid-1', 'pilot@example.com')
+      setupAdminDbRef('uid-other')
+      const res = mockRes()
+
+      await runMiddlewareChain(findHandler(method, '/settings'), adminReq(httpMethod, { adminEmail: 'x@y.ch' }), res)
+
+      expect(res.statusCode).toBe(403)
+      expect(mockGetSettings).not.toHaveBeenCalled()
+      expect(mockUpdateSettings).not.toHaveBeenCalled()
     })
   })
 

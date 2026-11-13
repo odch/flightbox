@@ -34,6 +34,40 @@ export async function loadRequests(token: string, scope: PprListScope = 'own') {
   return res.json();
 }
 
+export interface PprSettings {
+  adminEmail: string | null;
+  retentionDays: number | null;
+}
+
+export async function loadSettings(token: string): Promise<PprSettings> {
+  const res = await fetch(`${baseUrl()}/ppr/settings`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load PPR settings: ${res.status}`);
+  }
+  return res.json();
+}
+
+// Saves only the given settings; returns all of them
+export async function saveSettings(settings: Partial<PprSettings>, token: string): Promise<PprSettings> {
+  const res = await fetch(`${baseUrl()}/ppr/settings`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(settings),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Request failed: ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function reviewRequest(key: string, status: string, remarks: string | undefined, token: string) {
   const res = await fetch(`${baseUrl()}/ppr/requests/${encodeURIComponent(key)}/review`, {
     method: 'POST',
