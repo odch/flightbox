@@ -102,6 +102,11 @@ describe('PprStatusList', () => {
     expect(screen.getByText('ppr.status.approved')).toBeTruthy();
   });
 
+  it('shows the planned date in the date format of the app', () => {
+    renderWithTheme(<PprStatusList {...defaultProps} data={[pendingRequest]} />);
+    expect(screen.getByText('15.04.2026')).toBeTruthy();
+  });
+
   it('shows delete button only for pending requests', () => {
     renderWithTheme(
       <PprStatusList {...defaultProps} data={[pendingRequest, approvedRequest]} />

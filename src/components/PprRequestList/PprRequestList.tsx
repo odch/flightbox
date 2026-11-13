@@ -3,19 +3,48 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
 import Button from '../Button';
+import dates from '../../util/dates';
 
-const RequestCard = styled.div`
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 1em;
-  margin-bottom: 0.5em;
+// Rows like the other admin lists (messages): the box has no padding, rows
+// are separated by lines and highlighted when hovered or opened.
+const Row = styled.div<{ $expanded?: boolean }>`
+  border-top: 1px solid #eee;
+
+  &:first-child {
+    border-top: none;
+  }
+
+  ${props => props.$expanded && `background-color: ${props.theme.colors.background};`}
 `;
 
-const RequestHeader = styled.div`
+const RowHeader = styled.button`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 0.5em 1em;
+  width: 100%;
+  padding: 1em;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
+
+  &:hover {
+    background-color: ${props => props.theme.colors.background};
+  }
+`;
+
+const Summary = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const Title = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.75em;
 `;
 
 const Aircraft = styled.span`
@@ -23,13 +52,25 @@ const Aircraft = styled.span`
   font-size: 1.1em;
 `;
 
+const When = styled.span`
+  color: #666;
+`;
+
+const Pilot = styled.div`
+  margin-top: 0.25em;
+  color: #666;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+`;
+
 const StatusBadge = styled.span<{ $status: string }>`
-  display: inline-block;
+  flex-shrink: 0;
   padding: 0.2em 0.8em;
   border-radius: 12px;
   font-size: 0.85em;
   font-weight: 600;
-  color: white;
+  white-space: nowrap;
+  color: ${props => props.$status === 'pending' ? '#333' : 'white'};
   background-color: ${props => {
     switch (props.$status) {
       case 'approved': return '#28a745';
@@ -37,49 +78,48 @@ const StatusBadge = styled.span<{ $status: string }>`
       default: return '#ffc107';
     }
   }};
-  ${props => props.$status === 'pending' && 'color: #333;'}
 `;
 
-const HeaderInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1em;
+const Details = styled.div`
+  padding: 0 1em 1em;
 `;
 
-const DateInfo = styled.span`
-  color: #666;
+const DetailList = styled.dl`
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.4em 1.5em;
+  margin: 0;
   font-size: 0.9em;
-`;
 
-const DetailSection = styled.div`
-  margin-top: 1em;
-  padding-top: 1em;
-  border-top: 1px solid #eee;
-`;
+  dt {
+    color: #666;
+  }
 
-const DetailRow = styled.div`
-  display: flex;
-  gap: 2em;
-  margin-bottom: 0.3em;
-  font-size: 0.9em;
-`;
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
 
-const DetailLabel = styled.span`
-  color: #666;
-  min-width: 120px;
-`;
+  @media (max-width: 768px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
 
-const DetailValue = styled.span`
-  font-weight: 500;
+    dd {
+      margin-bottom: 0.6em;
+    }
+  }
 `;
 
 const ReviewSection = styled.div`
   margin-top: 1em;
   padding-top: 1em;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #ddd;
 `;
 
 const RemarksInput = styled.textarea`
+  display: block;
+  box-sizing: border-box;
   width: 100%;
   min-height: 60px;
   padding: 0.5em;
@@ -93,18 +133,28 @@ const RemarksInput = styled.textarea`
 
 const ReviewButtons = styled.div`
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 0.5em;
+
+  @media (max-width: 768px) {
+    > * {
+      flex: 1 1 auto;
+    }
+  }
 `;
 
-const EmptyMessage = styled.div`
-  color: #666;
-  font-style: italic;
+const Message = styled.div`
   padding: 1em;
 `;
 
-const ErrorMessage = styled.div`
+const EmptyMessage = styled(Message)`
+  color: #666;
+  font-style: italic;
+`;
+
+const ErrorMessage = styled(Message)`
   color: #dc3545;
-  margin-bottom: 1em;
 `;
 
 const PprRequestList = (props: any) => {
@@ -114,6 +164,7 @@ const PprRequestList = (props: any) => {
 
   useEffect(() => {
     props.loadPprRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleExpanded = (key: string) => {
@@ -130,9 +181,9 @@ const PprRequestList = (props: any) => {
 
   if (props.loading) {
     return (
-      <div>
+      <Message>
         <MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}
-      </div>
+      </Message>
     );
   }
 
@@ -148,88 +199,87 @@ const PprRequestList = (props: any) => {
         <EmptyMessage>{t('ppr.noRequests')}</EmptyMessage>
       )}
 
-      {requests.map((req: any) => (
-        <RequestCard key={req.key} data-cy={`ppr-admin-${req.key}`}>
-          <RequestHeader onClick={() => toggleExpanded(req.key)}>
-            <HeaderInfo>
-              <Aircraft>{req.immatriculation}</Aircraft>
-              <DateInfo>{req.plannedDate} {req.plannedTime}</DateInfo>
-              <span>{req.firstname} {req.lastname}</span>
-            </HeaderInfo>
-            <StatusBadge $status={req.status}>
-              {t(`ppr.status.${req.status}`)}
-            </StatusBadge>
-          </RequestHeader>
+      {requests.map((req: any) => {
+        const expanded = expandedKey === req.key;
+        return (
+          <Row key={req.key} $expanded={expanded} data-cy={`ppr-admin-${req.key}`}>
+            <RowHeader
+              type="button"
+              onClick={() => toggleExpanded(req.key)}
+              aria-expanded={expanded}
+              data-cy="ppr-admin-toggle"
+            >
+              <Summary>
+                <Title>
+                  <Aircraft>{req.immatriculation}</Aircraft>
+                  <When>{dates.formatDate(req.plannedDate)} {req.plannedTime}</When>
+                </Title>
+                <Pilot>
+                  {req.firstname} {req.lastname} · {t(`flightTypes.${req.flightType}`)}
+                </Pilot>
+              </Summary>
+              <StatusBadge $status={req.status}>
+                {t(`ppr.status.${req.status}`)}
+              </StatusBadge>
+            </RowHeader>
 
-          {expandedKey === req.key && (
-            <DetailSection>
-              <DetailRow>
-                <DetailLabel>{t('movement.details.email')}</DetailLabel>
-                <DetailValue>{req.email}</DetailValue>
-              </DetailRow>
-              {req.phone && (
-                <DetailRow>
-                  <DetailLabel>{t('movement.details.phone')}</DetailLabel>
-                  <DetailValue>{req.phone}</DetailValue>
-                </DetailRow>
-              )}
-              <DetailRow>
-                <DetailLabel>{t('movement.details.aircraftType')}</DetailLabel>
-                <DetailValue>{req.aircraftType || '-'}</DetailValue>
-              </DetailRow>
-              <DetailRow>
-                <DetailLabel>{t('movement.details.mtow')}</DetailLabel>
-                <DetailValue>{req.mtow || '-'}</DetailValue>
-              </DetailRow>
-              <DetailRow>
-                <DetailLabel>{t('movement.details.flightType')}</DetailLabel>
-                <DetailValue>{t(`flightTypes.${req.flightType}`)}</DetailValue>
-              </DetailRow>
-              {req.remarks && (
-                <DetailRow>
-                  <DetailLabel>{t('common.remarks')}</DetailLabel>
-                  <DetailValue>{req.remarks}</DetailValue>
-                </DetailRow>
-              )}
-              {req.reviewRemarks && (
-                <DetailRow>
-                  <DetailLabel>{t('ppr.adminRemarks')}</DetailLabel>
-                  <DetailValue>{req.reviewRemarks}</DetailValue>
-                </DetailRow>
-              )}
+            {expanded && (
+              <Details>
+                <DetailList>
+                  <dt>{t('movement.details.email')}</dt>
+                  <dd><a href={`mailto:${req.email}`}>{req.email}</a></dd>
+                  {req.phone && (<>
+                    <dt>{t('movement.details.phone')}</dt>
+                    <dd><a href={`tel:${req.phone}`}>{req.phone}</a></dd>
+                  </>)}
+                  <dt>{t('movement.details.aircraftType')}</dt>
+                  <dd>{req.aircraftType || '-'}</dd>
+                  <dt>{t('movement.details.mtow')}</dt>
+                  <dd>{req.mtow ? `${req.mtow} kg` : '-'}</dd>
+                  {req.remarks && (<>
+                    <dt>{t('common.remarks')}</dt>
+                    <dd>{req.remarks}</dd>
+                  </>)}
+                  {req.reviewRemarks && (<>
+                    <dt>{t('ppr.adminRemarks')}</dt>
+                    <dd>{req.reviewRemarks}</dd>
+                  </>)}
+                </DetailList>
 
-              {req.status === 'pending' && (
-                <ReviewSection>
-                  <RemarksInput
-                    placeholder={t('ppr.adminRemarks')}
-                    value={reviewRemarks}
-                    onChange={e => setReviewRemarks(e.target.value)}
-                    data-cy="ppr-review-remarks"
-                  />
-                  <ReviewButtons>
-                    <Button
-                      type="button"
-                      icon="check"
-                      label={t('ppr.approve')}
-                      onClick={() => handleReview(req.key, 'approved')}
-                      primary
-                      dataCy="ppr-approve"
+                {req.status === 'pending' && (
+                  <ReviewSection>
+                    <RemarksInput
+                      placeholder={t('ppr.adminRemarks')}
+                      aria-label={t('ppr.adminRemarks')}
+                      value={reviewRemarks}
+                      onChange={e => setReviewRemarks(e.target.value)}
+                      data-cy="ppr-review-remarks"
                     />
-                    <Button
-                      type="button"
-                      icon="close"
-                      label={t('ppr.reject')}
-                      onClick={() => handleReview(req.key, 'rejected')}
-                      danger
-                      dataCy="ppr-reject"
-                    />
-                  </ReviewButtons>
-                </ReviewSection>
-              )}
-            </DetailSection>
-          )}
-        </RequestCard>
-      ))}
+                    <ReviewButtons>
+                      <Button
+                        type="button"
+                        icon="close"
+                        label={t('ppr.reject')}
+                        onClick={() => handleReview(req.key, 'rejected')}
+                        danger
+                        dataCy="ppr-reject"
+                      />
+                      <Button
+                        type="button"
+                        icon="check"
+                        label={t('ppr.approve')}
+                        onClick={() => handleReview(req.key, 'approved')}
+                        primary
+                        dataCy="ppr-approve"
+                      />
+                    </ReviewButtons>
+                  </ReviewSection>
+                )}
+              </Details>
+            )}
+          </Row>
+        );
+      })}
     </div>
   );
 };

@@ -7,6 +7,7 @@ import MaterialIcon from '../MaterialIcon';
 import ModalDialog from '../ModalDialog';
 import H1 from '../H1';
 import Button from '../Button';
+import dates from '../../util/dates';
 
 const Content = styled.div`
   padding: 2em;
@@ -141,7 +142,7 @@ const PprStatusList = (props: any) => {
               </StatusBadge>
             </RequestHeader>
             <DetailRow>
-              <span>{req.plannedDate}</span>
+              <span>{dates.formatDate(req.plannedDate)}</span>
               <span>{req.plannedTime}</span>
               <span>{t(`flightTypes.${req.flightType}`)}</span>
             </DetailRow>
