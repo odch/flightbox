@@ -21,7 +21,7 @@ export function* loadPprRequests(action: any) {
   try {
     const idToken = yield call(getIdToken);
     const data = yield call(remote.loadRequests, idToken, scope);
-    yield put(actions.pprRequestsLoaded(data));
+    yield put(actions.pprRequestsLoaded(data, scope));
   } catch (e) {
     if (console && typeof console.error === 'function') {
       console.error('Failed to load PPR requests', e);

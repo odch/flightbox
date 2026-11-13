@@ -49,6 +49,7 @@ const Menu = styled.nav`
 `;
 
 const MenuItem = styled.button<{ $active?: boolean }>`
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
@@ -96,6 +97,32 @@ const IconWrapper = styled.span`
   }
 `;
 
+// Number of open items (e.g. PPR requests): at the end of the item, on
+// small screens at the icon
+const Count = styled.span<{ $active?: boolean }>`
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  min-width: 1.6em;
+  padding: 0 0.45em;
+  border-radius: 0.8em;
+  box-sizing: border-box;
+  font-size: 0.8em;
+  font-weight: bold;
+  line-height: 1.6em;
+  text-align: center;
+  color: ${props => props.$active ? props.theme.colors.main : 'white'};
+  background-color: ${props => props.$active ? 'white' : props.theme.colors.main};
+
+  @media (max-width: 768px) {
+    top: 0.4rem;
+    right: auto;
+    left: calc(50% + 0.5rem);
+    transform: none;
+  }
+`;
+
 const Label = styled.span`
   font-weight: 400;
   line-height: 1.2;
@@ -105,7 +132,7 @@ const Label = styled.span`
   }
 `;
 
-const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange }) => {
+const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange, counts = {} }: any) => {
   const { t } = useTranslation();
   const navigationItems = [
     { key: 'export', label: t('admin.export'), icon: 'file_download' },
@@ -128,19 +155,32 @@ const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange }) => {
         <Title>{t('admin.title')}</Title>
       </Header>
       <Menu>
-        {navigationItems.map(item => (
-          <MenuItem
-            key={item.key}
-            $active={activeTab === item.key}
-            onClick={() => onTabChange(item.key)}
-            data-cy={item.key}
-          >
-            <IconWrapper>
-              <MaterialIcon icon={item.icon} />
-            </IconWrapper>
-            <Label>{item.label}</Label>
-          </MenuItem>
-        ))}
+        {navigationItems.map(item => {
+          const count = counts[item.key];
+          return (
+            <MenuItem
+              key={item.key}
+              $active={activeTab === item.key}
+              onClick={() => onTabChange(item.key)}
+              data-cy={item.key}
+            >
+              <IconWrapper>
+                <MaterialIcon icon={item.icon} />
+              </IconWrapper>
+              <Label>{item.label}</Label>
+              {count > 0 && (
+                <Count
+                  $active={activeTab === item.key}
+                  title={t('admin.openCount', {count})}
+                  aria-label={t('admin.openCount', {count})}
+                  data-cy={`${item.key}-count`}
+                >
+                  {count}
+                </Count>
+              )}
+            </MenuItem>
+          );
+        })}
       </Menu>
     </Wrapper>
   );
@@ -150,6 +190,7 @@ AdminNavigation.propTypes = {
   activeTab: PropTypes.string.isRequired,
   hiddenTabs: PropTypes.arrayOf(PropTypes.string).isRequired,
   onTabChange: PropTypes.func.isRequired,
+  counts: PropTypes.objectOf(PropTypes.number),
 };
 
 export default AdminNavigation;

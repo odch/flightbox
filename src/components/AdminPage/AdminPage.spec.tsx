@@ -57,6 +57,26 @@ describe('AdminPage', () => {
     expect(screen.getByRole('button', {name: /Datenschutz/})).toBeInTheDocument();
   });
 
+  describe('PPR', () => {
+    it('loads all requests for the number of open ones when ppr is on', () => {
+      (global as any).__CONF__ = {paymentMethods: {}, ppr: true};
+      const loadPprRequests = jest.fn();
+      renderAdminPage({loadPprRequests, pprPendingCount: 2});
+
+      expect(loadPprRequests).toHaveBeenCalledWith('all');
+      expect(screen.getByRole('button', {name: /PPR-Anfragen/})).toHaveTextContent('2');
+    });
+
+    it('loads no requests when ppr is off', () => {
+      (global as any).__CONF__ = {paymentMethods: {}};
+      const loadPprRequests = jest.fn();
+      renderAdminPage({loadPprRequests});
+
+      expect(loadPprRequests).not.toHaveBeenCalled();
+      expect(screen.queryByRole('button', {name: /PPR-Anfragen/})).toBeNull();
+    });
+  });
+
   it('hides the privacy tab when neither privacySettings nor ppr is on', () => {
     (global as any).__CONF__ = {paymentMethods: {}};
     renderAdminPage();

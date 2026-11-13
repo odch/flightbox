@@ -31,6 +31,21 @@ describe('AdminNavigation', () => {
     expect(screen.queryByRole('button', {name: /Zoll-Selbstdeklaration/})).toBeNull();
   });
 
+  it('shows the number of open items on a tab', () => {
+    renderWithTheme(<AdminNavigation activeTab="export" hiddenTabs={[]} onTabChange={jest.fn()} counts={{ppr: 3}}/>);
+
+    const count = screen.getByTitle('Offene Anfragen: 3');
+    expect(count).toHaveTextContent('3');
+    expect(screen.getByRole('button', {name: /PPR-Anfragen/})).toContainElement(count);
+  });
+
+  it.each([0, null, undefined])('shows no number for %p open items', count => {
+    const {container} = renderWithTheme(
+      <AdminNavigation activeTab="export" hiddenTabs={[]} onTabChange={jest.fn()} counts={{ppr: count}}/>
+    );
+    expect(container.querySelector('[data-cy="ppr-count"]')).toBeNull();
+  });
+
   it('hides the API access tab', () => {
     renderWithTheme(<AdminNavigation activeTab="export" hiddenTabs={['api-access']} onTabChange={jest.fn()}/>);
     expect(screen.queryByRole('button', {name: /API-Zugriff/})).toBeNull();

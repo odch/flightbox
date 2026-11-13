@@ -33,7 +33,7 @@ export type PprListScope = 'own' | 'all';
 export type PprAction =
   | { type: typeof LOAD_PPR_REQUESTS; payload: { scope: PprListScope } }
   | { type: typeof SET_PPR_LOADING }
-  | { type: typeof PPR_REQUESTS_LOADED; payload: { data: unknown[] } }
+  | { type: typeof PPR_REQUESTS_LOADED; payload: { data: unknown[]; scope: PprListScope } }
   | { type: typeof SUBMIT_PPR_REQUEST; payload: { values: unknown } }
   | { type: typeof SUBMIT_PPR_REQUEST_SUCCESS }
   | { type: typeof SUBMIT_PPR_REQUEST_FAILURE }
@@ -64,8 +64,8 @@ export function setPprLoading() {
   return { type: SET_PPR_LOADING };
 }
 
-export function pprRequestsLoaded(data: unknown[]) {
-  return { type: PPR_REQUESTS_LOADED, payload: { data } };
+export function pprRequestsLoaded(data: unknown[], scope: PprListScope = 'own') {
+  return { type: PPR_REQUESTS_LOADED, payload: { data, scope } };
 }
 
 export function submitPprRequest(values: unknown) {

@@ -31,6 +31,9 @@ describe('modules', () => {
           generator.next(); // setPprLoading
           generator.next(); // getIdToken
           expect(generator.next('token-123').value).toEqual(call(remote.loadRequests, 'token-123', 'all'));
+
+          const data = [{ key: 'req-1' }];
+          expect(generator.next(data).value).toEqual(put(actions.pprRequestsLoaded(data, 'all')));
         });
 
         it('should dispatch loadFailed on error without clearing data', () => {
