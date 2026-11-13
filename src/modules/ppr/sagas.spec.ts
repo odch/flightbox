@@ -3,6 +3,8 @@ import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
 import { getIdToken } from '../../util/firebase';
+import { getProfileDefaultValues } from '../movements/sagas';
+import { getDefaultPlannedDateTime } from './plannedDefaults';
 
 jest.mock('../../history', () => ({ history: { push: jest.fn() } }));
 jest.mock('../../i18n', () => ({ language: 'en' }));
@@ -12,6 +14,32 @@ import { history } from '../../history';
 describe('modules', () => {
   describe('ppr', () => {
     describe('sagas', () => {
+      describe('initPprForm', () => {
+        const planned = { plannedDate: '2026-11-13', plannedTime: '16:30' };
+
+        it('starts with the profile values and a planned date and time', () => {
+          const generator = sagas.initPprForm();
+
+          expect(generator.next().value).toEqual(call(getDefaultPlannedDateTime));
+          expect(generator.next(planned).value).toEqual(call(getProfileDefaultValues));
+
+          const profile = { firstname: 'Max', lastname: 'Muster', immatriculation: 'HBKOF' };
+          expect(generator.next(profile).value).toEqual(put(actions.pprFormInitialized({ ...profile, ...planned })));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('still sets the planned date and time when the profile cannot be loaded', () => {
+          const generator = sagas.initPprForm();
+
+          generator.next(); // getDefaultPlannedDateTime
+          generator.next(planned); // getProfileDefaultValues
+
+          expect(generator.throw(new Error('profile failed')).value)
+            .toEqual(put(actions.pprFormInitialized(planned)));
+          expect(generator.next().done).toEqual(true);
+        });
+      });
+
       describe('loadPprRequests', () => {
         it('should load the user\'s own requests by default', () => {
           const generator = sagas.loadPprRequests(actions.loadPprRequests());

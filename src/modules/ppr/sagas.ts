@@ -5,13 +5,16 @@ import i18n from '../../i18n'
 import {getProfileDefaultValues} from '../movements/sagas'
 import * as actions from './actions';
 import * as remote from './remote';
+import {getDefaultPlannedDateTime} from './plannedDefaults';
 
 export function* initPprForm() {
+  // Today, about two hours ahead (the pilot adjusts it)
+  const planned = yield call(getDefaultPlannedDateTime);
   try {
     const profileValues = yield call(getProfileDefaultValues);
-    yield put(actions.pprFormInitialized(profileValues));
+    yield put(actions.pprFormInitialized({...profileValues, ...planned}));
   } catch (e) {
-    yield put(actions.pprFormInitialized({}));
+    yield put(actions.pprFormInitialized({...planned}));
   }
 }
 
