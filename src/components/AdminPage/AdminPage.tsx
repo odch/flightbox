@@ -72,7 +72,15 @@ const renderSubPage = (activeTab: string) => {
   }
 };
 
-const AdminPage = ({auth, guestAccessToken, kioskAccessToken, customsAvailable, checkCustomsAvailability}: any) => {
+const AdminPage = ({
+  auth,
+  guestAccessToken,
+  kioskAccessToken,
+  customsAvailable,
+  checkCustomsAvailability,
+  pprPendingCount,
+  loadPprRequests,
+}: any) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('export');
   const isAdmin = auth.data.admin === true;
@@ -88,6 +96,14 @@ const AdminPage = ({auth, guestAccessToken, kioskAccessToken, customsAvailable, 
   useEffect(() => {
     if (isAdmin && customsSelfDeclarationEnabled) {
       checkCustomsAvailability();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // For the number of open requests on the PPR tab
+  useEffect(() => {
+    if (isAdmin && __CONF__.ppr === true && loadPprRequests) {
+      loadPprRequests('all');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -138,6 +154,7 @@ const AdminPage = ({auth, guestAccessToken, kioskAccessToken, customsAvailable, 
               activeTab={activeTab}
               hiddenTabs={hiddenTabs}
               onTabChange={setActiveTab}
+              counts={{ppr: pprPendingCount}}
             />
             <AdminContent>
               {renderSubPage(activeTab)}
@@ -159,6 +176,8 @@ const AdminPage = ({auth, guestAccessToken, kioskAccessToken, customsAvailable, 
   }),
   customsAvailable: PropTypes.bool,
   checkCustomsAvailability: PropTypes.func.isRequired,
+  pprPendingCount: PropTypes.number,
+  loadPprRequests: PropTypes.func,
 };
 
 export default AdminPage;

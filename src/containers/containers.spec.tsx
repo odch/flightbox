@@ -437,6 +437,7 @@ describe('customs containers', () => {
       auth: { data: { admin: true } },
       settings: { guestAccessToken: { token: null }, kioskAccessToken: { token: null } },
       customs: { available: true },
+      ppr: { data: [], scope: null },
     });
     render(wrap(store, <Container />));
 
@@ -445,5 +446,23 @@ describe('customs containers', () => {
 
     props.checkCustomsAvailability();
     expect(store.actions).toEqual([{ type: 'CHECK_CUSTOMS_AVAILABILITY' }]);
+  });
+
+  it('AdminPageContainer passes the number of open PPR requests and can load them', () => {
+    const Container = require('./AdminPageContainer').default;
+    const Component = require('../components/AdminPage').default;
+    const store = makeStore({
+      auth: { data: { admin: true } },
+      settings: { guestAccessToken: { token: null }, kioskAccessToken: { token: null } },
+      customs: { available: null },
+      ppr: { data: [{ key: 'r1', status: 'pending' }, { key: 'r2', status: 'approved' }], scope: 'all' },
+    });
+    render(wrap(store, <Container />));
+
+    const props = lastPropsOf(Component);
+    expect(props.pprPendingCount).toBe(1);
+
+    props.loadPprRequests('all');
+    expect(store.actions).toEqual([{ type: 'LOAD_PPR_REQUESTS', payload: { scope: 'all' } }]);
   });
 });

@@ -90,7 +90,8 @@
     "privacy": "Datenschutz",
     "apiAccess": "API-Zugriff",
     "customsSelfDeclaration": "Zoll-Selbstdeklaration",
-    "ppr": "PPR-Anfragen"
+    "ppr": "PPR-Anfragen",
+    "openCount": "Offene Anfragen: {{count}}"
   },
   "movement": {
     "openCustoms": "Zollanmeldung öffnen",

@@ -90,7 +90,8 @@
     "privacy": "Privacy",
     "apiAccess": "API access",
     "customsSelfDeclaration": "Customs self-declaration",
-    "ppr": "PPR requests"
+    "ppr": "PPR requests",
+    "openCount": "Open requests: {{count}}"
   },
   "movement": {
     "openCustoms": "Open customs declaration",

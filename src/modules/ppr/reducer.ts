@@ -1,5 +1,5 @@
 import * as actions from './actions';
-import { PprAction } from './actions';
+import { PprAction, PprListScope } from './actions';
 import reducer from '../../util/reducer';
 
 interface PprFormState {
@@ -22,6 +22,8 @@ interface PprSettingsState {
 
 interface PprState {
   data: unknown[];
+  // Whose requests data holds: the pilot's own or all (admin list)
+  scope: PprListScope | null;
   loading: boolean;
   selected: string | null;
   initialValues: Record<string, any>;
@@ -31,6 +33,7 @@ interface PprState {
 
 const INITIAL_STATE: PprState = {
   data: [],
+  scope: null,
   loading: false,
   selected: null,
   initialValues: {},
@@ -61,6 +64,7 @@ function setLoading(state: PprState) {
 function pprRequestsLoaded(state: PprState, action: PprAction & { type: typeof actions.PPR_REQUESTS_LOADED }) {
   return Object.assign({}, state, {
     data: action.payload.data,
+    scope: action.payload.scope,
     loading: false,
     form: Object.assign({}, state.form, { deleteFailed: false, reviewFailed: false }),
   });
@@ -198,6 +202,15 @@ const ACTION_HANDLERS = {
   [actions.SAVE_PPR_SETTINGS_SUCCESS]: settingsSaved,
   [actions.SAVE_PPR_SETTINGS_FAILURE]: settingsSaveFailed,
 };
+
+// The pending requests of the admin list (shown on its admin tab); null
+// while the list of all requests isn't loaded
+export function getPendingPprCount(state: PprState): number | null {
+  if (state.scope !== 'all') {
+    return null;
+  }
+  return (state.data as any[]).filter(request => request && request.status === 'pending').length;
+}
 
 export type { PprState };
 export default reducer<PprState, PprAction>(INITIAL_STATE, ACTION_HANDLERS);

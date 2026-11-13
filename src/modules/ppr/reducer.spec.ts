@@ -1,4 +1,4 @@
-import reducer from './reducer';
+import reducer, { getPendingPprCount } from './reducer';
 import * as actions from './actions';
 
 describe('modules', () => {
@@ -9,6 +9,7 @@ describe('modules', () => {
       it('should return initial state', () => {
         expect(initialState).toEqual({
           data: [],
+          scope: null,
           loading: false,
           selected: null,
           initialValues: {},
@@ -69,6 +70,37 @@ describe('modules', () => {
         );
         expect(state.data).toEqual(data);
         expect(state.loading).toBe(false);
+      });
+
+      it('should remember whose requests were loaded', () => {
+        expect(initialState.scope).toBeNull();
+        expect(reducer(initialState, actions.pprRequestsLoaded([], 'all')).scope).toBe('all');
+        expect(reducer(initialState, actions.pprRequestsLoaded([], 'own')).scope).toBe('own');
+      });
+
+      describe('getPendingPprCount', () => {
+        const data = [
+          { key: 'req-1', status: 'pending' },
+          { key: 'req-2', status: 'approved' },
+          { key: 'req-3', status: 'pending' },
+          { key: 'req-4', status: 'rejected' },
+        ];
+
+        it('counts the pending requests of the admin list', () => {
+          expect(getPendingPprCount(reducer(initialState, actions.pprRequestsLoaded(data, 'all')))).toBe(2);
+        });
+
+        it('is 0 when no request of the admin list is pending', () => {
+          expect(getPendingPprCount(reducer(initialState, actions.pprRequestsLoaded([data[1]], 'all')))).toBe(0);
+        });
+
+        it('is null before the admin list is loaded', () => {
+          expect(getPendingPprCount(initialState)).toBeNull();
+        });
+
+        it('does not count the pilot\'s own requests', () => {
+          expect(getPendingPprCount(reducer(initialState, actions.pprRequestsLoaded(data, 'own')))).toBeNull();
+        });
       });
 
       it('should stop loading on load failure without clearing data', () => {
