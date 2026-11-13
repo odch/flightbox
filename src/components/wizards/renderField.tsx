@@ -109,7 +109,15 @@ export const renderDurationField = (props) => {
 };
 
 export const renderTextArea = (props) => {
-  const cmp = <TextArea {...props.input} readOnly={props.readOnly} data-cy={props.input.name}/>;
+  const cmp = (
+    <TextArea
+      {...props.input}
+      rows={props.rows}
+      maxLength={props.maxLength}
+      readOnly={props.readOnly}
+      data-cy={props.input.name}
+    />
+  );
   return renderLabeledComponent(props, cmp);
 };
 

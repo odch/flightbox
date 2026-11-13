@@ -44,8 +44,10 @@ describe('PprRequestList (admin)', () => {
     data: [],
     loading: false,
     reviewFailed: false,
+    revokeFailed: false,
     loadPprRequests: jest.fn(),
     reviewPprRequest: jest.fn(),
+    revokePprApproval: jest.fn(),
   };
 
   beforeEach(() => {
@@ -158,5 +160,74 @@ describe('PprRequestList (admin)', () => {
       <PprRequestList {...defaultProps} reviewFailed={true} />
     );
     expect(screen.getByText('ppr.reviewFailed')).toBeTruthy();
+  });
+
+  describe('automatic answers', () => {
+    const automaticApproval = {
+      ...approvedRequest,
+      reviewedBy: 'automatic',
+      reviewRemarks: 'Runway 05/23, landing fee CHF 20',
+    };
+
+    it('shows that a request was answered automatically, with the information for pilots', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[automaticApproval]}/>);
+      fireEvent.click(screen.getByText('HB-XYZ'));
+
+      expect(screen.getByText('ppr.answeredAutomatically')).toBeTruthy();
+      expect(screen.getByText('ppr.pilotInfo')).toBeTruthy();
+      expect(screen.getByText('Runway 05/23, landing fee CHF 20')).toBeTruthy();
+    });
+
+    it('does not label requests answered by an admin', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[{ ...approvedRequest, reviewRemarks: 'Welcome' }]}/>);
+      fireEvent.click(screen.getByText('HB-XYZ'));
+
+      expect(screen.queryByText('ppr.answeredAutomatically')).toBeNull();
+      expect(screen.getByText('ppr.adminRemarks')).toBeTruthy();
+    });
+  });
+
+  describe('revoking an approval', () => {
+    it('needs a reason', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[approvedRequest]}/>);
+      fireEvent.click(screen.getByText('HB-XYZ'));
+
+      const revoke = screen.getByText('ppr.revoke').closest('button')!;
+      expect(revoke.hasAttribute('disabled')).toBe(true);
+
+      fireEvent.change(screen.getByPlaceholderText('ppr.revokeReason'), { target: { value: '   ' } });
+      expect(revoke.hasAttribute('disabled')).toBe(true);
+    });
+
+    it('revokes with the trimmed reason', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[approvedRequest]}/>);
+      fireEvent.click(screen.getByText('HB-XYZ'));
+
+      fireEvent.change(screen.getByPlaceholderText('ppr.revokeReason'), { target: { value: ' Runway works ' } });
+      fireEvent.click(screen.getByText('ppr.revoke'));
+
+      expect(defaultProps.revokePprApproval).toHaveBeenCalledWith('req-2', 'Runway works');
+    });
+
+    it.each(['pending', 'rejected', 'revoked'])('cannot revoke a %s request', status => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[{ ...approvedRequest, status }]}/>);
+      fireEvent.click(screen.getByText('HB-XYZ'));
+
+      expect(screen.queryByText('ppr.revoke')).toBeNull();
+    });
+
+    it('shows a revoked request with its reason', () => {
+      const revoked = { ...approvedRequest, status: 'revoked', reviewRemarks: 'Runway works' };
+      renderWithTheme(<PprRequestList {...defaultProps} data={[revoked]}/>);
+      expect(screen.getByText('ppr.status.revoked')).toBeTruthy();
+
+      fireEvent.click(screen.getByText('HB-XYZ'));
+      expect(screen.getByText('Runway works')).toBeTruthy();
+    });
+
+    it('shows a failed revocation', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} revokeFailed={true}/>);
+      expect(screen.getByText('ppr.revokeFailed')).toBeTruthy();
+    });
   });
 });

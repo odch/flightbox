@@ -75,6 +75,7 @@ const StatusBadge = styled.span<{ $status: string }>`
     switch (props.$status) {
       case 'approved': return '#28a745';
       case 'rejected': return '#dc3545';
+      case 'revoked': return '#6c757d';
       default: return '#ffc107';
     }
   }};
@@ -179,6 +180,14 @@ const PprRequestList = (props: any) => {
     setExpandedKey(null);
   };
 
+  // E.g. when a closure comes up after the approval; the pilot gets the
+  // reason by email
+  const handleRevoke = (key: string) => {
+    props.revokePprApproval(key, reviewRemarks.trim());
+    setReviewRemarks('');
+    setExpandedKey(null);
+  };
+
   if (props.loading) {
     return (
       <Message>
@@ -195,12 +204,17 @@ const PprRequestList = (props: any) => {
         <ErrorMessage>{t('ppr.reviewFailed')}</ErrorMessage>
       )}
 
+      {props.revokeFailed && (
+        <ErrorMessage>{t('ppr.revokeFailed')}</ErrorMessage>
+      )}
+
       {requests.length === 0 && (
         <EmptyMessage>{t('ppr.noRequests')}</EmptyMessage>
       )}
 
       {requests.map((req: any) => {
         const expanded = expandedKey === req.key;
+        const automatic = req.reviewedBy === 'automatic';
         return (
           <Row key={req.key} $expanded={expanded} data-cy={`ppr-admin-${req.key}`}>
             <RowHeader
@@ -240,8 +254,12 @@ const PprRequestList = (props: any) => {
                     <dt>{t('common.remarks')}</dt>
                     <dd>{req.remarks}</dd>
                   </>)}
+                  {automatic && (<>
+                    <dt>{t('ppr.answered')}</dt>
+                    <dd data-cy="ppr-answered-automatically">{t('ppr.answeredAutomatically')}</dd>
+                  </>)}
                   {req.reviewRemarks && (<>
-                    <dt>{t('ppr.adminRemarks')}</dt>
+                    <dt>{t(automatic && req.status === 'approved' ? 'ppr.pilotInfo' : 'ppr.adminRemarks')}</dt>
                     <dd>{req.reviewRemarks}</dd>
                   </>)}
                 </DetailList>
@@ -271,6 +289,29 @@ const PprRequestList = (props: any) => {
                         onClick={() => handleReview(req.key, 'approved')}
                         primary
                         dataCy="ppr-approve"
+                      />
+                    </ReviewButtons>
+                  </ReviewSection>
+                )}
+
+                {req.status === 'approved' && (
+                  <ReviewSection>
+                    <RemarksInput
+                      placeholder={t('ppr.revokeReason')}
+                      aria-label={t('ppr.revokeReason')}
+                      value={reviewRemarks}
+                      onChange={e => setReviewRemarks(e.target.value)}
+                      data-cy="ppr-revoke-reason"
+                    />
+                    <ReviewButtons>
+                      <Button
+                        type="button"
+                        icon="block"
+                        label={t('ppr.revoke')}
+                        onClick={() => handleRevoke(req.key)}
+                        disabled={!reviewRemarks.trim()}
+                        danger
+                        dataCy="ppr-revoke"
                       />
                     </ReviewButtons>
                   </ReviewSection>

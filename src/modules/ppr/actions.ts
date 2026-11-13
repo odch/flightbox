@@ -22,10 +22,32 @@ export const PPR_SETTINGS_LOAD_FAILED = 'PPR_SETTINGS_LOAD_FAILED' as const;
 export const SAVE_PPR_SETTINGS = 'SAVE_PPR_SETTINGS' as const;
 export const SAVE_PPR_SETTINGS_SUCCESS = 'SAVE_PPR_SETTINGS_SUCCESS' as const;
 export const SAVE_PPR_SETTINGS_FAILURE = 'SAVE_PPR_SETTINGS_FAILURE' as const;
+export const REVOKE_PPR_APPROVAL = 'REVOKE_PPR_APPROVAL' as const;
+export const REVOKE_PPR_APPROVAL_SUCCESS = 'REVOKE_PPR_APPROVAL_SUCCESS' as const;
+export const REVOKE_PPR_APPROVAL_FAILURE = 'REVOKE_PPR_APPROVAL_FAILURE' as const;
+
+// Days requests are rejected for automatically, with the reason
+export interface PprClosure {
+  from: string;
+  to: string;
+  reason: string;
+}
+
+export type PprAnswerMode = 'manual' | 'automatic';
 
 export interface PprSettings {
   adminEmail: string | null;
   retentionDays: number | null;
+  answerMode: PprAnswerMode;
+  pilotInfo: string | null;
+  closures: PprClosure[];
+}
+
+// What the server answers to a submission: requests can be answered right away
+export interface PprSubmitResult {
+  key: string;
+  status: string;
+  reviewRemarks?: string;
 }
 
 export type PprListScope = 'own' | 'all';
@@ -35,7 +57,7 @@ export type PprAction =
   | { type: typeof SET_PPR_LOADING }
   | { type: typeof PPR_REQUESTS_LOADED; payload: { data: unknown[]; scope: PprListScope } }
   | { type: typeof SUBMIT_PPR_REQUEST; payload: { values: unknown } }
-  | { type: typeof SUBMIT_PPR_REQUEST_SUCCESS }
+  | { type: typeof SUBMIT_PPR_REQUEST_SUCCESS; payload: { result: PprSubmitResult | null } }
   | { type: typeof SUBMIT_PPR_REQUEST_FAILURE }
   | { type: typeof REVIEW_PPR_REQUEST; payload: { key: string; status: string; remarks?: string } }
   | { type: typeof REVIEW_PPR_REQUEST_SUCCESS }
@@ -54,7 +76,10 @@ export type PprAction =
   | { type: typeof PPR_SETTINGS_LOAD_FAILED }
   | { type: typeof SAVE_PPR_SETTINGS; payload: { settings: Partial<PprSettings> } }
   | { type: typeof SAVE_PPR_SETTINGS_SUCCESS; payload: { settings: PprSettings } }
-  | { type: typeof SAVE_PPR_SETTINGS_FAILURE };
+  | { type: typeof SAVE_PPR_SETTINGS_FAILURE }
+  | { type: typeof REVOKE_PPR_APPROVAL; payload: { key: string; remarks: string } }
+  | { type: typeof REVOKE_PPR_APPROVAL_SUCCESS }
+  | { type: typeof REVOKE_PPR_APPROVAL_FAILURE };
 
 export function loadPprRequests(scope: PprListScope = 'own') {
   return { type: LOAD_PPR_REQUESTS, payload: { scope } };
@@ -72,8 +97,8 @@ export function submitPprRequest(values: unknown) {
   return { type: SUBMIT_PPR_REQUEST, payload: { values } };
 }
 
-export function submitPprRequestSuccess() {
-  return { type: SUBMIT_PPR_REQUEST_SUCCESS };
+export function submitPprRequestSuccess(result: PprSubmitResult | null = null) {
+  return { type: SUBMIT_PPR_REQUEST_SUCCESS, payload: { result } };
 }
 
 export function submitPprRequestFailure() {
@@ -151,4 +176,16 @@ export function savePprSettingsSuccess(settings: PprSettings) {
 
 export function savePprSettingsFailure() {
   return { type: SAVE_PPR_SETTINGS_FAILURE };
+}
+
+export function revokePprApproval(key: string, remarks: string) {
+  return { type: REVOKE_PPR_APPROVAL, payload: { key, remarks } };
+}
+
+export function revokePprApprovalSuccess() {
+  return { type: REVOKE_PPR_APPROVAL_SUCCESS };
+}
+
+export function revokePprApprovalFailure() {
+  return { type: REVOKE_PPR_APPROVAL_FAILURE };
 }

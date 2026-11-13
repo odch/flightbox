@@ -6,6 +6,7 @@ export {
   loadPprRequests,
   submitPprRequest,
   reviewPprRequest,
+  revokePprApproval,
   deletePprRequest,
   selectPprRequest,
   resetPprForm,

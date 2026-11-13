@@ -1,18 +1,24 @@
 import * as actions from './actions';
-import { PprAction, PprListScope } from './actions';
+import { PprAction, PprListScope, PprAnswerMode, PprClosure, PprSubmitResult } from './actions';
 import reducer from '../../util/reducer';
 
 interface PprFormState {
   submitting: boolean;
   submitted: boolean;
+  // the answer to the submission (pending, or answered right away)
+  result: PprSubmitResult | null;
   commitFailed: boolean;
   reviewFailed: boolean;
+  revokeFailed: boolean;
   deleteFailed: boolean;
 }
 
 interface PprSettingsState {
   adminEmail: string | null;
   retentionDays: number | null;
+  answerMode: PprAnswerMode;
+  pilotInfo: string | null;
+  closures: PprClosure[];
   loaded: boolean;
   loadFailed: boolean;
   saving: boolean;
@@ -40,13 +46,18 @@ const INITIAL_STATE: PprState = {
   form: {
     submitting: false,
     submitted: false,
+    result: null,
     commitFailed: false,
     reviewFailed: false,
+    revokeFailed: false,
     deleteFailed: false,
   },
   settings: {
     adminEmail: null,
     retentionDays: null,
+    answerMode: 'manual',
+    pilotInfo: null,
+    closures: [],
     loaded: false,
     loadFailed: false,
     saving: false,
@@ -66,7 +77,7 @@ function pprRequestsLoaded(state: PprState, action: PprAction & { type: typeof a
     data: action.payload.data,
     scope: action.payload.scope,
     loading: false,
-    form: Object.assign({}, state.form, { deleteFailed: false, reviewFailed: false }),
+    form: Object.assign({}, state.form, { deleteFailed: false, reviewFailed: false, revokeFailed: false }),
   });
 }
 
@@ -88,9 +99,14 @@ function submitStarted(state: PprState) {
   });
 }
 
-function submitSuccess(state: PprState) {
+function submitSuccess(state: PprState, action: PprAction & { type: typeof actions.SUBMIT_PPR_REQUEST_SUCCESS }) {
   return Object.assign({}, state, {
-    form: Object.assign({}, state.form, { submitting: false, submitted: true, commitFailed: false }),
+    form: Object.assign({}, state.form, {
+      submitting: false,
+      submitted: true,
+      result: action.payload ? action.payload.result : null,
+      commitFailed: false,
+    }),
   });
 }
 
@@ -109,6 +125,18 @@ function reviewSuccess(state: PprState) {
 function reviewFailure(state: PprState) {
   return Object.assign({}, state, {
     form: Object.assign({}, state.form, { reviewFailed: true }),
+  });
+}
+
+function revokeSuccess(state: PprState) {
+  return Object.assign({}, state, {
+    form: Object.assign({}, state.form, { revokeFailed: false }),
+  });
+}
+
+function revokeFailure(state: PprState) {
+  return Object.assign({}, state, {
+    form: Object.assign({}, state.form, { revokeFailed: true }),
   });
 }
 
@@ -137,9 +165,19 @@ function resetForm(state: PprState) {
   });
 }
 
+// The answer settings as the server returns them, with the defaults for an
+// older server that doesn't know them
+function answerSettings(settings: Partial<PprSettingsState>) {
+  return {
+    answerMode: settings.answerMode === 'automatic' ? 'automatic' : 'manual',
+    pilotInfo: settings.pilotInfo || null,
+    closures: Array.isArray(settings.closures) ? settings.closures : [],
+  };
+}
+
 function settingsLoaded(state: PprState, action: PprAction & { type: typeof actions.PPR_SETTINGS_LOADED }) {
   return Object.assign({}, state, {
-    settings: Object.assign({}, state.settings, {
+    settings: Object.assign({}, state.settings, answerSettings(action.payload.settings), {
       adminEmail: action.payload.settings.adminEmail,
       retentionDays: action.payload.settings.retentionDays,
       loaded: true,
@@ -166,7 +204,7 @@ function settingsSaving(state: PprState) {
 
 function settingsSaved(state: PprState, action: PprAction & { type: typeof actions.SAVE_PPR_SETTINGS_SUCCESS }) {
   return Object.assign({}, state, {
-    settings: Object.assign({}, state.settings, {
+    settings: Object.assign({}, state.settings, answerSettings(action.payload.settings), {
       adminEmail: action.payload.settings.adminEmail,
       retentionDays: action.payload.settings.retentionDays,
       loaded: true,
@@ -192,6 +230,8 @@ const ACTION_HANDLERS = {
   [actions.SUBMIT_PPR_REQUEST_FAILURE]: submitFailure,
   [actions.REVIEW_PPR_REQUEST_SUCCESS]: reviewSuccess,
   [actions.REVIEW_PPR_REQUEST_FAILURE]: reviewFailure,
+  [actions.REVOKE_PPR_APPROVAL_SUCCESS]: revokeSuccess,
+  [actions.REVOKE_PPR_APPROVAL_FAILURE]: revokeFailure,
   [actions.DELETE_PPR_REQUEST_SUCCESS]: deleteSuccess,
   [actions.DELETE_PPR_REQUEST_FAILURE]: deleteFailure,
   [actions.SELECT_PPR_REQUEST]: selectRequest,

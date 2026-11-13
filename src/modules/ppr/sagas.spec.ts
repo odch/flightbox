@@ -86,8 +86,18 @@ describe('modules', () => {
           expect(generator.next('token-123').value).toEqual(
             call(remote.submitRequest, { firstname: 'Max', language: 'en' }, 'token-123')
           );
-          expect(generator.next().value).toEqual(put(actions.submitPprRequestSuccess()));
+          const result = { key: 'req-1', status: 'pending' as const };
+          expect(generator.next(result).value).toEqual(put(actions.submitPprRequestSuccess(result)));
           expect(generator.next().done).toEqual(true);
+        });
+
+        it('passes on an automatic answer', () => {
+          const generator = sagas.submitPprRequest(actions.submitPprRequest({}));
+          generator.next(); // getIdToken
+          generator.next('token-123'); // submitRequest
+
+          const result = { key: 'req-1', status: 'approved' as const, reviewRemarks: 'Runway 05/23' };
+          expect(generator.next(result).value).toEqual(put(actions.submitPprRequestSuccess(result)));
         });
 
         it('should put failure on error', () => {
@@ -143,6 +153,40 @@ describe('modules', () => {
         });
       });
 
+      describe('revokePprApproval', () => {
+        it('revokes the approval with the reason and reloads', () => {
+          const generator = sagas.revokePprApproval(actions.revokePprApproval('req-1', 'Runway works'));
+
+          expect(generator.next().value).toEqual(call(getIdToken));
+          expect(generator.next('token-123').value).toEqual(
+            call(remote.revokeApproval, 'req-1', 'Runway works', 'token-123')
+          );
+          expect(generator.next().value).toEqual(put(actions.revokePprApprovalSuccess()));
+          expect(generator.next().value).toEqual(call(sagas.loadPprRequests, actions.loadPprRequests('all')));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('reports a failed revocation and does not reload', () => {
+          const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+          const generator = sagas.revokePprApproval(actions.revokePprApproval('req-1', 'Runway works'));
+          generator.next(); // getIdToken
+
+          expect(generator.throw(new Error('409')).value).toEqual(put(actions.revokePprApprovalFailure()));
+          expect(generator.next().done).toEqual(true);
+          error.mockRestore();
+        });
+
+        it('ignores a failed reload after the revocation', () => {
+          const generator = sagas.revokePprApproval(actions.revokePprApproval('req-1', 'Runway works'));
+          generator.next(); // getIdToken
+          generator.next('token-123'); // revokeApproval
+          generator.next(); // success
+          generator.next(); // reload
+
+          expect(generator.throw(new Error('reload failed')).done).toEqual(true);
+        });
+      });
+
       describe('deletePprRequest', () => {
         it('should delete request successfully', () => {
           const action = actions.deletePprRequest('req-1');
@@ -174,7 +218,9 @@ describe('modules', () => {
 
           expect(generator.next().value).toEqual(call(getIdToken));
           expect(generator.next('token-123').value).toEqual(call(remote.loadSettings, 'token-123'));
-          const settings = { adminEmail: 'ppr@aerodrome.ch', retentionDays: null };
+          const settings = {
+            adminEmail: 'ppr@aerodrome.ch', retentionDays: null, answerMode: 'manual' as const, pilotInfo: null, closures: [],
+          };
           expect(generator.next(settings).value).toEqual(put(actions.pprSettingsLoaded(settings)));
           expect(generator.next().done).toEqual(true);
         });
@@ -194,7 +240,9 @@ describe('modules', () => {
 
           expect(generator.next().value).toEqual(call(getIdToken));
           expect(generator.next('token-123').value).toEqual(call(remote.saveSettings, changed, 'token-123'));
-          const all = { adminEmail: 'ppr@aerodrome.ch', retentionDays: 90 };
+          const all = {
+            adminEmail: 'ppr@aerodrome.ch', retentionDays: 90, answerMode: 'automatic' as const, pilotInfo: null, closures: [],
+          };
           expect(generator.next(all).value).toEqual(put(actions.savePprSettingsSuccess(all)));
           expect(generator.next().done).toEqual(true);
         });

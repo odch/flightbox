@@ -15,6 +15,7 @@ const PprRequestPage = props => (
       <PprRequestForm
         submitting={props.submitting}
         submitted={props.submitted}
+        result={props.result}
         commitFailed={props.commitFailed}
         initialValues={props.initialValues}
         profileAircrafts={props.profileAircrafts}
