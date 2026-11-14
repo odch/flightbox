@@ -749,7 +749,7 @@
       "closureFrom": "From",
       "closureTo": "To",
       "closureReason": "Reason (included in the rejection)",
-      "addClosure": "Block days",
+      "addClosure": "Add blocked days",
       "removeClosure": "Remove block",
       "closureDatesRequired": "Enter the first and the last blocked day.",
       "closureOrder": "The last day must not be before the first.",
