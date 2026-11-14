@@ -38,7 +38,7 @@ describe('PPR emailTemplates', () => {
   describe('getPprSubmittedEmail', () => {
     it('returns subject with immatriculation and date', () => {
       const result = getPprSubmittedEmail(basePprRequest)
-      expect(result.subject).toBe('PPR-Anfrage: HB-ABC am 2026-04-15')
+      expect(result.subject).toBe('PPR-Anfrage: HB-ABC am 15.04.2026')
     })
 
     it('includes pilot name in HTML', () => {
@@ -54,7 +54,7 @@ describe('PPR emailTemplates', () => {
     it('includes aircraft and flight details', () => {
       const result = getPprSubmittedEmail(basePprRequest)
       expect(result.html).toContain('HB-ABC')
-      expect(result.html).toContain('2026-04-15')
+      expect(result.html).toContain('15.04.2026')
       expect(result.html).toContain('10:30')
     })
 
@@ -91,13 +91,13 @@ describe('PPR emailTemplates', () => {
   describe('getPprApprovedEmail', () => {
     it('returns subject with approved status', () => {
       const result = getPprApprovedEmail(basePprRequest)
-      expect(result.subject).toBe('PPR genehmigt: HB-ABC am 2026-04-15')
+      expect(result.subject).toBe('PPR genehmigt: HB-ABC am 15.04.2026')
     })
 
     it('includes aircraft and date in HTML', () => {
       const result = getPprApprovedEmail(basePprRequest)
       expect(result.html).toContain('HB-ABC')
-      expect(result.html).toContain('2026-04-15')
+      expect(result.html).toContain('15.04.2026')
       expect(result.html).toContain('10:30')
     })
 
@@ -186,7 +186,7 @@ describe('PPR emailTemplates', () => {
 
     it('tells the pilot that the approval was revoked, with the reason', () => {
       const result = getPprRevokedEmail(revoked)
-      expect(result.subject).toBe('PPR widerrufen: HB-ABC am 2026-04-15')
+      expect(result.subject).toBe('PPR widerrufen: HB-ABC am 15.04.2026')
       expect(result.text).toContain('Ihre PPR-Genehmigung wurde leider widerrufen.')
       expect(result.text).toContain('Grund: Closed: runway <works>')
       expect(result.html).toContain('Closed: runway &lt;works&gt;')
@@ -196,7 +196,7 @@ describe('PPR emailTemplates', () => {
 
     it('is in English for English requests', () => {
       const result = getPprRevokedEmail({ ...revoked, language: 'en' })
-      expect(result.subject).toBe('PPR revoked: HB-ABC on 2026-04-15')
+      expect(result.subject).toBe('PPR revoked: HB-ABC on 15.04.2026')
       expect(result.html).toContain('<html lang="en">')
       expect(result.text).toContain('Unfortunately, your PPR approval has been revoked.')
       expect(result.text).toContain('Reason: Closed: runway <works>')
@@ -206,7 +206,7 @@ describe('PPR emailTemplates', () => {
   describe('getPprRejectedEmail', () => {
     it('returns subject with rejected status', () => {
       const result = getPprRejectedEmail(basePprRequest)
-      expect(result.subject).toBe('PPR abgelehnt: HB-ABC am 2026-04-15')
+      expect(result.subject).toBe('PPR abgelehnt: HB-ABC am 15.04.2026')
     })
 
     it('includes review remarks in HTML', () => {
@@ -245,7 +245,7 @@ describe('PPR emailTemplates', () => {
 
     it('sends the approval in English when the pilot used English', () => {
       const result = getPprApprovedEmail(english)
-      expect(result.subject).toBe('PPR approved: HB-ABC on 2026-04-15')
+      expect(result.subject).toBe('PPR approved: HB-ABC on 15.04.2026')
       expect(result.html).toContain('<html lang="en">')
       expect(result.html).toContain('Your PPR request has been approved.')
       expect(result.text).toContain('Your PPR request has been approved.')
@@ -254,7 +254,7 @@ describe('PPR emailTemplates', () => {
 
     it('sends the rejection in English when the pilot used English', () => {
       const result = getPprRejectedEmail({ ...english, reviewRemarks: 'Runway closed' })
-      expect(result.subject).toBe('PPR rejected: HB-ABC on 2026-04-15')
+      expect(result.subject).toBe('PPR rejected: HB-ABC on 15.04.2026')
       expect(result.html).toContain('<html lang="en">')
       expect(result.html).toContain('Runway closed')
       expect(result.text).toContain('Remarks: Runway closed')
@@ -262,13 +262,13 @@ describe('PPR emailTemplates', () => {
 
     it.each([undefined, 'de', 'fr'])('sends German pilot emails for language %p', language => {
       const request = { ...basePprRequest, language }
-      expect(getPprApprovedEmail(request).subject).toBe('PPR genehmigt: HB-ABC am 2026-04-15')
+      expect(getPprApprovedEmail(request).subject).toBe('PPR genehmigt: HB-ABC am 15.04.2026')
       expect(getPprRejectedEmail(request).html).toContain('<html lang="de">')
     })
 
     it('keeps the admin notification in German', () => {
       const result = getPprSubmittedEmail(english)
-      expect(result.subject).toBe('PPR-Anfrage: HB-ABC am 2026-04-15')
+      expect(result.subject).toBe('PPR-Anfrage: HB-ABC am 15.04.2026')
       expect(result.html).toContain('<html lang="de">')
     })
 
@@ -362,12 +362,12 @@ describe('PPR emailTemplates', () => {
     })
 
     it.each([
-      ['approved', getPprApprovedEmail, basePprRequest, 'PPR genehmigt: HB-ABC am 2026-04-15'],
-      ['approved (en)', getPprApprovedEmail, english, 'PPR approved: HB-ABC on 2026-04-15'],
-      ['rejected', getPprRejectedEmail, basePprRequest, 'PPR abgelehnt: HB-ABC am 2026-04-15'],
-      ['rejected (en)', getPprRejectedEmail, english, 'PPR rejected: HB-ABC on 2026-04-15'],
-      ['revoked', getPprRevokedEmail, basePprRequest, 'PPR widerrufen: HB-ABC am 2026-04-15'],
-      ['revoked (en)', getPprRevokedEmail, english, 'PPR revoked: HB-ABC on 2026-04-15']
+      ['approved', getPprApprovedEmail, basePprRequest, 'PPR genehmigt: HB-ABC am 15.04.2026'],
+      ['approved (en)', getPprApprovedEmail, english, 'PPR approved: HB-ABC on 15.04.2026'],
+      ['rejected', getPprRejectedEmail, basePprRequest, 'PPR abgelehnt: HB-ABC am 15.04.2026'],
+      ['rejected (en)', getPprRejectedEmail, english, 'PPR rejected: HB-ABC on 15.04.2026'],
+      ['revoked', getPprRevokedEmail, basePprRequest, 'PPR widerrufen: HB-ABC am 15.04.2026'],
+      ['revoked (en)', getPprRevokedEmail, english, 'PPR revoked: HB-ABC on 15.04.2026']
     ])('ends the pilot subject (%s) with the aerodrome name when it is known', (name, getEmail, request, subject) => {
       expect(getEmail(request, BRANDING).subject).toBe(`${subject} – Langenthal`)
       expect(getEmail(request, { aerodromeName: 'A & <B>' }).subject).toBe(`${subject} – A & <B>`)
@@ -376,7 +376,7 @@ describe('PPR emailTemplates', () => {
     })
 
     it('keeps the subject of the admin email as it is', () => {
-      expect(getPprSubmittedEmail(basePprRequest, BRANDING).subject).toBe('PPR-Anfrage: HB-ABC am 2026-04-15')
+      expect(getPprSubmittedEmail(basePprRequest, BRANDING).subject).toBe('PPR-Anfrage: HB-ABC am 15.04.2026')
     })
   })
 
@@ -469,6 +469,29 @@ describe('PPR emailTemplates', () => {
       const linkLines = text.split(/\r\n|[\n\r\u0085\u2028\u2029]/)
         .filter(line => line.startsWith('PPR-Anfrage beantworten:'))
       expect(linkLines).toEqual([`PPR-Anfrage beantworten: ${reviewUrl}`])
+    })
+  })
+
+  describe('dates', () => {
+    const english = { ...basePprRequest, language: 'en', reviewRemarks: 'Runway works' }
+
+    it.each([
+      ['submitted', getPprSubmittedEmail, basePprRequest, 'Datum: 15.04.2026'],
+      ['approved', getPprApprovedEmail, basePprRequest, 'Datum: 15.04.2026'],
+      ['approved (en)', getPprApprovedEmail, english, 'Date: 15.04.2026'],
+      ['rejected (en)', getPprRejectedEmail, english, 'Date: 15.04.2026'],
+      ['revoked', getPprRevokedEmail, { ...basePprRequest, reviewRemarks: 'Runway works' }, 'Datum: 15.04.2026']
+    ])('shows the planned date as in the app in the %s email', (name, build, request, line) => {
+      const { html, text } = build(request)
+      expect(text).toContain(line)
+      expect(html).toContain('15.04.2026')
+      expect(html).not.toContain('2026-04-15')
+    })
+
+    it('leaves a date in another format as it is', () => {
+      const { subject, text } = getPprApprovedEmail({ ...basePprRequest, plannedDate: '15.4.26' })
+      expect(subject).toBe('PPR genehmigt: HB-ABC am 15.4.26')
+      expect(text).toContain('Datum: 15.4.26')
     })
   })
 })

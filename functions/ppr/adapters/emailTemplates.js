@@ -38,6 +38,13 @@ function localizedTemplate(templateName, pprRequest, format) {
   return readTemplate(isEnglish(pprRequest) ? `${templateName}_en` : templateName, format)
 }
 
+// Dates as the app shows them (dates.formatDate in src/util/dates.ts), in
+// both languages: '2026-11-20' becomes '20.11.2026'
+function displayDate(value) {
+  const match = typeof value === 'string' ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(value) : null
+  return match ? `${match[3]}.${match[2]}.${match[1]}` : value
+}
+
 function isAutomatic(pprRequest) {
   return pprRequest.reviewedBy === AUTOMATIC_REVIEWER
 }
@@ -118,7 +125,7 @@ function getPprSubmittedEmail(pprRequest, context = {}) {
     ...header.html,
     pilotName: escapeHtml(`${pprRequest.firstname} ${pprRequest.lastname}`),
     immatriculation: escapeHtml(pprRequest.immatriculation),
-    plannedDate: escapeHtml(pprRequest.plannedDate),
+    plannedDate: escapeHtml(displayDate(pprRequest.plannedDate)),
     plannedTime: escapeHtml(pprRequest.plannedTime),
     flightType: escapeHtml(flightTypeLabel(pprRequest.flightType)),
     answer: escapeHtml(answer),
@@ -129,7 +136,7 @@ function getPprSubmittedEmail(pprRequest, context = {}) {
     ...header.text,
     pilotName: `${pprRequest.firstname} ${pprRequest.lastname}`,
     immatriculation: pprRequest.immatriculation,
-    plannedDate: pprRequest.plannedDate,
+    plannedDate: displayDate(pprRequest.plannedDate),
     plannedTime: pprRequest.plannedTime,
     flightType: flightTypeLabel(pprRequest.flightType),
     answer,
@@ -137,7 +144,7 @@ function getPprSubmittedEmail(pprRequest, context = {}) {
   }
 
   return {
-    subject: `PPR-Anfrage: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`,
+    subject: `PPR-Anfrage: ${pprRequest.immatriculation} am ${displayDate(pprRequest.plannedDate)}`,
     html: replacePlaceholders(readTemplate('ppr-submitted', 'html'), replacements),
     text: replacePlaceholders(readTemplate('ppr-submitted', 'txt'), plainReplacements)
   }
@@ -182,7 +189,7 @@ function getPprApprovedEmail(pprRequest, context = {}) {
   const replacements = {
     ...header.html,
     immatriculation: escapeHtml(pprRequest.immatriculation),
-    plannedDate: escapeHtml(pprRequest.plannedDate),
+    plannedDate: escapeHtml(displayDate(pprRequest.plannedDate)),
     plannedTime: escapeHtml(pprRequest.plannedTime),
     remarksHtml: remarks.html
   }
@@ -190,14 +197,14 @@ function getPprApprovedEmail(pprRequest, context = {}) {
   const plainReplacements = {
     ...header.text,
     immatriculation: pprRequest.immatriculation,
-    plannedDate: pprRequest.plannedDate,
+    plannedDate: displayDate(pprRequest.plannedDate),
     plannedTime: pprRequest.plannedTime,
     remarksText: remarks.text
   }
 
   const subject = isEnglish(pprRequest)
-    ? `PPR approved: ${pprRequest.immatriculation} on ${pprRequest.plannedDate}`
-    : `PPR genehmigt: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`
+    ? `PPR approved: ${pprRequest.immatriculation} on ${displayDate(pprRequest.plannedDate)}`
+    : `PPR genehmigt: ${pprRequest.immatriculation} am ${displayDate(pprRequest.plannedDate)}`
 
   return {
     subject: pilotSubject(subject, brand),
@@ -214,7 +221,7 @@ function getPprRejectedEmail(pprRequest, context = {}) {
   const replacements = {
     ...header.html,
     immatriculation: escapeHtml(pprRequest.immatriculation),
-    plannedDate: escapeHtml(pprRequest.plannedDate),
+    plannedDate: escapeHtml(displayDate(pprRequest.plannedDate)),
     plannedTime: escapeHtml(pprRequest.plannedTime),
     reviewRemarks: escapeHtml(remarks)
   }
@@ -222,14 +229,14 @@ function getPprRejectedEmail(pprRequest, context = {}) {
   const plainReplacements = {
     ...header.text,
     immatriculation: pprRequest.immatriculation,
-    plannedDate: pprRequest.plannedDate,
+    plannedDate: displayDate(pprRequest.plannedDate),
     plannedTime: pprRequest.plannedTime,
     reviewRemarks: remarks
   }
 
   const subject = isEnglish(pprRequest)
-    ? `PPR rejected: ${pprRequest.immatriculation} on ${pprRequest.plannedDate}`
-    : `PPR abgelehnt: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`
+    ? `PPR rejected: ${pprRequest.immatriculation} on ${displayDate(pprRequest.plannedDate)}`
+    : `PPR abgelehnt: ${pprRequest.immatriculation} am ${displayDate(pprRequest.plannedDate)}`
 
   return {
     subject: pilotSubject(subject, brand),
@@ -246,7 +253,7 @@ function getPprRevokedEmail(pprRequest, context = {}) {
   const replacements = {
     ...header.html,
     immatriculation: escapeHtml(pprRequest.immatriculation),
-    plannedDate: escapeHtml(pprRequest.plannedDate),
+    plannedDate: escapeHtml(displayDate(pprRequest.plannedDate)),
     plannedTime: escapeHtml(pprRequest.plannedTime),
     reviewRemarks: escapeHtml(remarks)
   }
@@ -254,14 +261,14 @@ function getPprRevokedEmail(pprRequest, context = {}) {
   const plainReplacements = {
     ...header.text,
     immatriculation: pprRequest.immatriculation,
-    plannedDate: pprRequest.plannedDate,
+    plannedDate: displayDate(pprRequest.plannedDate),
     plannedTime: pprRequest.plannedTime,
     reviewRemarks: remarks
   }
 
   const subject = isEnglish(pprRequest)
-    ? `PPR revoked: ${pprRequest.immatriculation} on ${pprRequest.plannedDate}`
-    : `PPR widerrufen: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`
+    ? `PPR revoked: ${pprRequest.immatriculation} on ${displayDate(pprRequest.plannedDate)}`
+    : `PPR widerrufen: ${pprRequest.immatriculation} am ${displayDate(pprRequest.plannedDate)}`
 
   return {
     subject: pilotSubject(subject, brand),
