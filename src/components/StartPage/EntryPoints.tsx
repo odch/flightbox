@@ -91,6 +91,8 @@ const PrimaryEntry = styled(Card)`
   }
 `;
 
+// On phones two side by side, like the cards above: the PPR entries
+// belong together
 const Secondary = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -99,7 +101,8 @@ const Secondary = styled.div`
   margin-top: 1.5em;
 
   ${PHONE} {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5em;
     margin-top: 0.75em;
   }
@@ -113,8 +116,18 @@ const SecondaryEntry = styled(Card)`
   font-size: 1.3em;
 
   ${PHONE} {
-    padding: 0.75em 1em;
-    font-size: 1.1em;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.25em;
+    padding: 0.6em 0.5em;
+    font-size: 1em;
+    text-align: center;
+
+    /* One left alone at the end (the administration after the PPR
+       entries) takes the whole row */
+    &:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
   }
 `;
 
