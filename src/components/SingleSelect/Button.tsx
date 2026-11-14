@@ -1,6 +1,13 @@
 import styled from 'styled-components';
 
-const Button = styled.button<{ $selected?: boolean; $widthPercentage?: number; $orientation?: string }>`
+interface ButtonProps {
+  $selected?: boolean;
+  $widthPercentage?: number;
+  $orientation?: string;
+  $alignStart?: boolean;
+}
+
+const Button = styled.button<ButtonProps>`
   margin: 0;
   background-color: #fff;
   border: solid #eee;
@@ -17,7 +24,15 @@ const Button = styled.button<{ $selected?: boolean; $widthPercentage?: number; $
     font-family: 'Material Icons';
     content: '\\e876';
     color: #eee;
-    float: left;
+    ${props => props.$alignStart
+      ? `
+        /* A column of its own, level with the first line of the label */
+        flex: none;
+        width: 1em;
+        margin-right: 0.5em;
+        line-height: 1em;
+      `
+      : `float: left;`}
 
     ${props => props.$selected && `color: ${props.theme.colors.main};`}
   }
@@ -60,6 +75,14 @@ const Button = styled.button<{ $selected?: boolean; $widthPercentage?: number; $
         border-bottom-left-radius: 2px;
         border-bottom-right-radius: 2px;
       }
+  `}
+
+  ${props => props.$alignStart && `
+    /* The tick and the texts side by side, the texts at the start, in
+       either orientation */
+    display: flex;
+    align-items: flex-start;
+    text-align: left;
   `}
 `;
 
