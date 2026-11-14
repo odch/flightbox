@@ -63,13 +63,13 @@
     "useEmailCodeInstead": "Use email code instead"
   },
   "hints": {
-    "departureBeforeStart_text": "Always record departure before takeoff",
-    "arrivalAfterLanding_text": "Always record arrival after landing",
+    "departureBeforeStart_text": "departure before takeoff",
+    "arrivalAfterLanding_text": "arrival after landing",
     "recordArrival": "Record arrival",
     "recordDeparture": "Record departure",
     "recordedMovement": "recorded movement",
-    "departureBeforeStart_pre": "Please record your",
-    "arrivalAfterLanding_pre": "Please record your",
+    "departureBeforeStart_pre": "Please always record your",
+    "arrivalAfterLanding_pre": "Please always record your",
     "associatedMovement_pre": "To record an arrival for an already recorded departure (or vice versa), use the link",
     "associatedMovement_mid": "(or",
     "associatedMovement_post": ") on the already",
