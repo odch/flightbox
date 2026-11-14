@@ -130,6 +130,9 @@ const Tertiary = styled.div`
   }
 `;
 
+// Underlined when hovered, without the icon beside it
+const TertiaryLabel = styled.span``;
+
 const TertiaryEntry = styled(Link)`
   display: inline-flex;
   align-items: center;
@@ -141,6 +144,9 @@ const TertiaryEntry = styled(Link)`
 
   &:hover {
     color: #333;
+  }
+
+  &:hover ${TertiaryLabel} {
     text-decoration: underline;
   }
 `;
@@ -203,11 +209,11 @@ const EntryPoints = ({ admin, guest, kiosk, email }: any) => {
       <Tertiary data-cy="entry-points-tertiary">
         {!limited && (
           <TertiaryEntry to="/message" data-cy="message">
-            <EntryIcon icon="chat_bubble_outline" size={20}/>{t('nav.message')}
+            <EntryIcon icon="chat_bubble_outline" size={20}/><TertiaryLabel>{t('nav.message')}</TertiaryLabel>
           </TertiaryEntry>
         )}
         <TertiaryEntry to="/help" data-cy="help">
-          <EntryIcon icon="help_outline" size={20}/>{t('nav.help')}
+          <EntryIcon icon="help_outline" size={20}/><TertiaryLabel>{t('nav.help')}</TertiaryLabel>
         </TertiaryEntry>
       </Tertiary>
     </Wrapper>
