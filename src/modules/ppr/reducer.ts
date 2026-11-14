@@ -31,6 +31,9 @@ interface PprState {
   // Whose requests data holds: the pilot's own or all (admin list)
   scope: PprListScope | null;
   loading: boolean;
+  // The last load of the requests failed: data still holds those of an
+  // earlier load, if any
+  loadFailed: boolean;
   selected: string | null;
   initialValues: Record<string, any>;
   form: PprFormState;
@@ -41,6 +44,7 @@ const INITIAL_STATE: PprState = {
   data: [],
   scope: null,
   loading: false,
+  loadFailed: false,
   selected: null,
   initialValues: {},
   form: {
@@ -69,6 +73,7 @@ const INITIAL_STATE: PprState = {
 function setLoading(state: PprState) {
   return Object.assign({}, state, {
     loading: true,
+    loadFailed: false,
   });
 }
 
@@ -77,6 +82,8 @@ function pprRequestsLoaded(state: PprState, action: PprAction & { type: typeof a
     data: action.payload.data,
     scope: action.payload.scope,
     loading: false,
+    // also after a load that failed while this one was running
+    loadFailed: false,
     form: Object.assign({}, state.form, { deleteFailed: false, reviewFailed: false, revokeFailed: false }),
   });
 }
@@ -90,6 +97,7 @@ function formInitialized(state: PprState, action: PprAction & { type: typeof act
 function loadFailed(state: PprState) {
   return Object.assign({}, state, {
     loading: false,
+    loadFailed: true,
   });
 }
 

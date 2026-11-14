@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
@@ -158,15 +158,101 @@ const ErrorMessage = styled(Message)`
   color: #dc3545;
 `;
 
+// Tells what became of the request of a link in the notification email
+const LinkNotice = styled.div`
+  padding: 0.75em 1em;
+  border-left: 3px solid ${props => props.theme.colors.main};
+`;
+
+const MissingNotice = styled(LinkNotice)`
+  margin: 1em;
+  background-color: ${props => props.theme.colors.background};
+`;
+
+// In the details, on the background of the opened row
+const AnsweredNotice = styled(LinkNotice)`
+  margin-bottom: 1em;
+  background-color: #fff;
+`;
+
+// What the link found, captured when it was handled: the admin's own
+// answer afterwards doesn't make the request "already answered"
+interface LinkResult {
+  key: string;
+  missing: boolean;
+  answered: boolean;
+}
+
 const PprRequestList = (props: any) => {
   const { t } = useTranslation();
+  const { linkedKey, loading, loaded, loadFailed, settingsReady, data } = props;
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [reviewRemarks, setReviewRemarks] = useState('');
+  const [linkResult, setLinkResult] = useState<LinkResult | null>(null);
+  // Whether a load has started since the list was opened: until one has
+  // succeeded, the store can hold the requests of an earlier visit
+  const loadStarted = useRef(false);
+  const handledKey = useRef<string | null>(null);
+  const linkedRow = useRef<HTMLDivElement>(null);
+  const linkedToggle = useRef<HTMLButtonElement>(null);
+  const missingNotice = useRef<HTMLDivElement>(null);
+  const answeredNoticeId = useId();
 
   useEffect(() => {
     props.loadPprRequests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Opens the request of a link in the notification email
+  // (#/admin?tab=ppr&request=<key>), ready to be answered: the link itself
+  // never answers it. Once per key, after a successful load since the list
+  // was opened (a failed one leaves the requests of an earlier visit, and
+  // the link to the next load), with all requests and the settings above
+  // the list (they would push the row away after the scroll). The key stays
+  // in the URL: a replace navigation would scroll the app to the top.
+  useEffect(() => {
+    if (loading) {
+      loadStarted.current = true;
+      return;
+    }
+    if (!linkedKey || handledKey.current === linkedKey
+      || !loadStarted.current || loadFailed || !loaded || !settingsReady) {
+      return;
+    }
+    handledKey.current = linkedKey;
+    const request = (data || []).find((req: any) => req && req.key === linkedKey);
+    if (request) {
+      setExpandedKey(request.key);
+      // Remarks belong to the request they were typed for
+      setReviewRemarks('');
+    }
+    setLinkResult({
+      key: linkedKey,
+      // Deleted by the pilot, or after the retention period
+      missing: !request,
+      answered: !!request && request.status !== 'pending',
+    });
+  }, [linkedKey, loading, loaded, loadFailed, settingsReady, data]);
+
+  // Scrolls to the opened request, or to the notice that it is missing,
+  // once it is shown. The focus goes there too, so keyboard and screen
+  // reader users go on from there (the notices are shown with their text,
+  // which live regions don't announce), unless it was moved elsewhere in
+  // the meantime.
+  useEffect(() => {
+    if (!linkResult) {
+      return;
+    }
+    const target = linkResult.missing ? missingNotice.current : linkedRow.current;
+    // Not in every environment (e.g. jsdom)
+    if (target && typeof target.scrollIntoView === 'function') {
+      target.scrollIntoView({ block: 'start' });
+    }
+    const focusTarget = linkResult.missing ? missingNotice.current : linkedToggle.current;
+    if (!document.activeElement || document.activeElement === document.body) {
+      focusTarget?.focus({ preventScroll: true });
+    }
+  }, [linkResult]);
 
   const toggleExpanded = (key: string) => {
     setExpandedKey(expandedKey === key ? null : key);
@@ -188,7 +274,7 @@ const PprRequestList = (props: any) => {
     setExpandedKey(null);
   };
 
-  if (props.loading) {
+  if (loading) {
     return (
       <Message>
         <MaterialIcon icon="sync" rotate="left"/> {t('common.loading')}
@@ -196,10 +282,20 @@ const PprRequestList = (props: any) => {
     );
   }
 
-  const requests = props.data || [];
+  const requests = data || [];
 
   return (
     <div>
+      {loadFailed && (
+        <ErrorMessage role="alert" data-cy="ppr-load-failed">{t('ppr.loadFailed')}</ErrorMessage>
+      )}
+
+      {linkResult && linkResult.missing && (
+        <MissingNotice ref={missingNotice} role="status" tabIndex={-1} data-cy="ppr-linked-request-missing">
+          {t('ppr.linkedRequestMissing')}
+        </MissingNotice>
+      )}
+
       {props.reviewFailed && (
         <ErrorMessage>{t('ppr.reviewFailed')}</ErrorMessage>
       )}
@@ -208,19 +304,28 @@ const PprRequestList = (props: any) => {
         <ErrorMessage>{t('ppr.revokeFailed')}</ErrorMessage>
       )}
 
-      {requests.length === 0 && (
+      {requests.length === 0 && !loadFailed && (
         <EmptyMessage>{t('ppr.noRequests')}</EmptyMessage>
       )}
 
       {requests.map((req: any) => {
         const expanded = expandedKey === req.key;
         const automatic = req.reviewedBy === 'automatic';
+        const linked = linkResult && linkResult.key === req.key ? linkResult : null;
+        const answeredNotice = !!linked && linked.answered && expanded;
         return (
-          <Row key={req.key} $expanded={expanded} data-cy={`ppr-admin-${req.key}`}>
+          <Row
+            key={req.key}
+            ref={linked ? linkedRow : undefined}
+            $expanded={expanded}
+            data-cy={`ppr-admin-${req.key}`}
+          >
             <RowHeader
+              ref={linked ? linkedToggle : undefined}
               type="button"
               onClick={() => toggleExpanded(req.key)}
               aria-expanded={expanded}
+              aria-describedby={answeredNotice ? answeredNoticeId : undefined}
               data-cy="ppr-admin-toggle"
             >
               <Summary>
@@ -239,6 +344,11 @@ const PprRequestList = (props: any) => {
 
             {expanded && (
               <Details>
+                {answeredNotice && (
+                  <AnsweredNotice id={answeredNoticeId} role="status" data-cy="ppr-linked-request-answered">
+                    {t('ppr.linkedRequestAnswered')}
+                  </AnsweredNotice>
+                )}
                 <DetailList>
                   <dt>{t('movement.details.email')}</dt>
                   <dd><a href={`mailto:${req.email}`}>{req.email}</a></dd>

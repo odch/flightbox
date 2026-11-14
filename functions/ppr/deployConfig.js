@@ -2,6 +2,7 @@
 
 const { runtimeProjectId } = require('../projectConfig')
 const { sanitizeThemeColor } = require('../email/themeColor')
+const { httpsOrigin } = require('./httpsOrigin')
 
 const loadGeneratedConfig = () => require('../ppr-config.generated.js')
 
@@ -41,7 +42,27 @@ function pprBranding(loadConfig, env) {
   }
 }
 
+let invalidAppUrlLogged = false
+
+// The app's address, the base of the links in the PPR emails: checked again
+// like the deploy does (an https origin only) and returned as the origin, or
+// null without a usable value. An invalid value is logged once (without the
+// value, which could hold credentials); a missing one is not.
+function pprAppOrigin(loadConfig, env) {
+  const config = loadPprConfig(loadConfig, env)
+  if (!config || config.appUrl === undefined || config.appUrl === null) {
+    return null
+  }
+  const origin = httpsOrigin(config.appUrl)
+  if (origin === null && !invalidAppUrlLogged) {
+    invalidAppUrlLogged = true
+    console.error('The PPR app URL is not an https origin; the PPR emails are sent without links to the app')
+  }
+  return origin
+}
+
 module.exports = {
   loadPprConfig,
-  pprBranding
+  pprBranding,
+  pprAppOrigin
 }

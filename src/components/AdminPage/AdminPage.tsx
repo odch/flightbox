@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import React, {useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import React, {useEffect} from 'react';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import styled from 'styled-components';
 import VerticalHeaderLayout from '../VerticalHeaderLayout';
 import JumpNavigation from '../JumpNavigation';
@@ -41,36 +41,24 @@ const AdminContent = styled.div`
   }
 `;
 
-const renderSubPage = (activeTab: string) => {
-  switch (activeTab) {
-    case 'export':
-      return <AdminExportPage/>;
-    case 'lock-movements':
-      return <AdminLockMovementsPage/>;
-    case 'aerodrome-status':
-      return <AdminAerodromeStatusPage/>;
-    case 'messages':
-      return <AdminMessagesPage/>;
-    case 'aircraft':
-      return <AdminAircraftPage/>;
-    case 'invoice-recipients':
-      return <AdminInvoiceRecipientsPage/>;
-    case 'customs-self-declaration':
-      return <AdminCustomsSelfDeclarationPage/>;
-    case 'guest-access':
-      return <AdminGuestAccessPage/>;
-    case 'kiosk-access':
-      return <AdminKioskAccessPage/>;
-    case 'privacy':
-      return <AdminPrivacySettingsPage/>;
-    case 'api-access':
-      return <AdminApiAccessPage/>;
-    case 'ppr':
-      return <AdminPprPage/>;
-    default:
-      return <AdminExportPage/>;
-  }
+// The subpage of each tab. The tab from the URL is looked up among the own
+// keys only, so e.g. ?tab=constructor does not resolve.
+const SUBPAGES: Record<string, React.ComponentType> = {
+  'export': AdminExportPage,
+  'lock-movements': AdminLockMovementsPage,
+  'aerodrome-status': AdminAerodromeStatusPage,
+  'messages': AdminMessagesPage,
+  'aircraft': AdminAircraftPage,
+  'invoice-recipients': AdminInvoiceRecipientsPage,
+  'customs-self-declaration': AdminCustomsSelfDeclarationPage,
+  'guest-access': AdminGuestAccessPage,
+  'kiosk-access': AdminKioskAccessPage,
+  'privacy': AdminPrivacySettingsPage,
+  'api-access': AdminApiAccessPage,
+  'ppr': AdminPprPage,
 };
+
+const DEFAULT_TAB = 'export';
 
 const AdminPage = ({
   auth,
@@ -82,7 +70,7 @@ const AdminPage = ({
   loadPprRequests,
 }: any) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('export');
+  const [searchParams, setSearchParams] = useSearchParams();
   const isAdmin = auth.data.admin === true;
   const customsSelfDeclarationEnabled = __CONF__.customsSelfDeclarationEnabled === true;
 
@@ -144,6 +132,24 @@ const AdminPage = ({
     hiddenTabs.push('ppr');
   }
 
+  // The tab is kept in the URL (#/admin?tab=ppr), so the PPR notification
+  // email can link to a request on the PPR tab and a reload stays on the
+  // tab. Unknown tabs and tabs hidden here show the export.
+  const requestedTab = searchParams.get('tab');
+  const activeTab = requestedTab !== null
+    && Object.prototype.hasOwnProperty.call(SUBPAGES, requestedTab)
+    && !hiddenTabs.includes(requestedTab)
+    ? requestedTab
+    : DEFAULT_TAB;
+  const SubPage = SUBPAGES[activeTab];
+
+  // Starts the URL over with the new tab: the parameters of the previous
+  // one (e.g. the request of a PPR link) don't belong to it. The tab shown
+  // already replaces its entry in the history, so Back still leaves it.
+  const handleTabChange = (tab: string) => {
+    setSearchParams({tab}, {replace: tab === activeTab});
+  };
+
   return (
     <VerticalHeaderLayout>
       {isAdmin &&
@@ -153,11 +159,11 @@ const AdminPage = ({
             <AdminNavigation
               activeTab={activeTab}
               hiddenTabs={hiddenTabs}
-              onTabChange={setActiveTab}
+              onTabChange={handleTabChange}
               counts={{ppr: pprPendingCount}}
             />
             <AdminContent>
-              {renderSubPage(activeTab)}
+              <SubPage/>
             </AdminContent>
           </AdminLayout>
         </Content>

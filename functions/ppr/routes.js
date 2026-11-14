@@ -14,14 +14,13 @@ const notifier = require('./adapters/emailNotifier')
 const rateLimiter = require('./adapters/firebaseRateLimiter')
 const settings = require('./adapters/firebasePprSettings')
 const aerodromeStatus = require('./adapters/firebaseAerodromeStatus')
+const { REQUEST_KEY_PATTERN } = require('./domain/pprRequest')
 
 const router = express.Router()
 const deps = { repository, notifier, settings, aerodromeStatus }
 
-const FIREBASE_KEY_REGEX = /^[-\w]{1,128}$/
-
 function validateKey(req, res, next) {
-  if (!FIREBASE_KEY_REGEX.test(req.params.key)) {
+  if (!REQUEST_KEY_PATTERN.test(req.params.key)) {
     return res.status(400).json({ error: 'Invalid request key' })
   }
   next()

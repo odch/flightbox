@@ -3,7 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const { flightTypeLabel } = require('./flightTypeLabels')
-const { AUTOMATIC_REVIEWER } = require('../domain/pprRequest')
+const { AUTOMATIC_REVIEWER, Status } = require('../domain/pprRequest')
 const { sanitizeThemeColor } = require('../../email/themeColor')
 
 const PLACEHOLDER_REGEX = /\{\{(\w+)\}\}/g
@@ -88,9 +88,30 @@ function answerLine(pprRequest) {
   return 'Offen, bitte im Admin-Bereich genehmigen oder ablehnen'
 }
 
+// A pending request gets a link that opens it in the app's admin area, where
+// an admin answers it (context.reviewUrl, an https URL from adminLinks.js).
+// Answered requests, and emails without the app's address, get none.
+function reviewLink(pprRequest, reviewUrl, themeColor) {
+  if (pprRequest.status !== Status.PENDING || typeof reviewUrl !== 'string' || !reviewUrl.startsWith('https://')) {
+    return { html: '', text: '' }
+  }
+  const style = `display: inline-block; padding: 12px 24px; background-color: ${themeColor}; ` +
+    'color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600;'
+  return {
+    html: '\n      <p style="margin: 30px 0 10px 0; text-align: center;">' +
+      `\n        <a href="${escapeHtml(reviewUrl)}" style="${style}">PPR-Anfrage beantworten</a>` +
+      '\n      </p>',
+    text: `\n\nPPR-Anfrage beantworten: ${reviewUrl}`
+  }
+}
+
 // Goes to the aerodrome's PPR address, whose language is not known: German.
+// The context has the branding and, for the link, reviewUrl.
 function getPprSubmittedEmail(pprRequest, context = {}) {
-  const header = headerReplacements(branding(context))
+  const brand = branding(context)
+  const header = headerReplacements(brand)
+  const { reviewUrl } = context || {}
+  const link = reviewLink(pprRequest, reviewUrl, brand.themeColor)
   const answer = answerLine(pprRequest)
 
   const replacements = {
@@ -100,7 +121,8 @@ function getPprSubmittedEmail(pprRequest, context = {}) {
     plannedDate: escapeHtml(pprRequest.plannedDate),
     plannedTime: escapeHtml(pprRequest.plannedTime),
     flightType: escapeHtml(flightTypeLabel(pprRequest.flightType)),
-    answer: escapeHtml(answer)
+    answer: escapeHtml(answer),
+    reviewLinkHtml: link.html
   }
 
   const plainReplacements = {
@@ -110,7 +132,8 @@ function getPprSubmittedEmail(pprRequest, context = {}) {
     plannedDate: pprRequest.plannedDate,
     plannedTime: pprRequest.plannedTime,
     flightType: flightTypeLabel(pprRequest.flightType),
-    answer
+    answer,
+    reviewLinkText: link.text
   }
 
   return {

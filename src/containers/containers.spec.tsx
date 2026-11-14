@@ -44,6 +44,9 @@ const wrap = (store: MockStore, el: React.ReactElement) => (
   </Provider>
 );
 
+const lastPropsOf = (mockComponent: jest.Mock) =>
+  mockComponent.mock.calls[mockComponent.mock.calls.length - 1][0];
+
 // Mock the reports module to skip sagas (which pull in pdfmake → TextEncoder).
 jest.mock('../modules/reports', () => {
   const actions = jest.requireActual('../modules/reports/actions');
@@ -98,6 +101,14 @@ jest.mock('../components/AdminPage', () => {
   return {
     __esModule: true,
     default: jest.fn((_props: any) => React.createElement('div', {'data-testid': 'admin-page'})),
+  };
+});
+
+jest.mock('../components/PprRequestList', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: jest.fn((_props: any) => React.createElement('div', {'data-testid': 'ppr-request-list'})),
   };
 });
 
@@ -371,9 +382,6 @@ describe('container mount dispatches', () => {
 });
 
 describe('customs containers', () => {
-  const lastPropsOf = (mockComponent: jest.Mock) =>
-    mockComponent.mock.calls[mockComponent.mock.calls.length - 1][0];
-
   it('CustomsSelfDeclarationEmailListContainer passes the list state and dispatches changes', () => {
     const Container = require('./CustomsSelfDeclarationEmailListContainer').default;
     const Component = require('../components/CustomsSelfDeclarationEmailList').default;
@@ -463,6 +471,55 @@ describe('customs containers', () => {
     expect(props.pprPendingCount).toBe(1);
 
     props.loadPprRequests('all');
+    expect(store.actions).toEqual([{ type: 'LOAD_PPR_REQUESTS', payload: { scope: 'all' } }]);
+  });
+});
+
+describe('PprRequestListContainer', () => {
+  const pprState = (fields: any = {}) => ({
+    data: [{ key: 'r1', status: 'pending' }],
+    loading: false,
+    loadFailed: false,
+    scope: 'all',
+    settings: { loaded: true, loadFailed: false },
+    form: { reviewFailed: false, revokeFailed: false },
+    ...fields,
+  });
+
+  // The mock store doesn't notify its subscribers: one render per state
+  const propsFor = (ppr: any, ownProps: any = {}) => {
+    const Container = require('./PprRequestListContainer').default;
+    const Component = require('../components/PprRequestList').default;
+    const store = makeStore({ ppr });
+    render(wrap(store, <Container {...ownProps} />));
+    return { props: lastPropsOf(Component), store };
+  };
+
+  it('passes the requests, and whether they are all requests (not the pilot\'s own)', () => {
+    const { props } = propsFor(pprState());
+    expect(props.data).toEqual([{ key: 'r1', status: 'pending' }]);
+    expect(props.loaded).toBe(true);
+    expect(propsFor(pprState({ scope: 'own' })).props.loaded).toBe(false);
+    expect(propsFor(pprState({ scope: null })).props.loaded).toBe(false);
+  });
+
+  it('passes whether the last load failed', () => {
+    expect(propsFor(pprState()).props.loadFailed).toBe(false);
+    expect(propsFor(pprState({ loadFailed: true })).props.loadFailed).toBe(true);
+  });
+
+  it('passes the settings above the list as ready once loaded, or once their load failed', () => {
+    const ready = (settings: any) => propsFor(pprState({ settings })).props.settingsReady;
+    expect(ready({ loaded: false, loadFailed: false })).toBe(false);
+    expect(ready({ loaded: true, loadFailed: false })).toBe(true);
+    expect(ready({ loaded: false, loadFailed: true })).toBe(true);
+  });
+
+  it('passes the key of a link through, and loads all requests', () => {
+    const { props, store } = propsFor(pprState(), { linkedKey: '-Nabc' });
+    expect(props.linkedKey).toBe('-Nabc');
+
+    props.loadPprRequests();
     expect(store.actions).toEqual([{ type: 'LOAD_PPR_REQUESTS', payload: { scope: 'all' } }]);
   });
 });

@@ -7,6 +7,7 @@ const {
   getPprRevokedEmail,
   escapeHtml
 } = require('./emailTemplates')
+const { createPprRequest } = require('../domain/pprRequest')
 
 const basePprRequest = {
   firstname: 'Max',
@@ -376,6 +377,98 @@ describe('PPR emailTemplates', () => {
 
     it('keeps the subject of the admin email as it is', () => {
       expect(getPprSubmittedEmail(basePprRequest, BRANDING).subject).toBe('PPR-Anfrage: HB-ABC am 2026-04-15')
+    })
+  })
+
+  describe('link to answer a pending request', () => {
+    const pending = { ...basePprRequest, status: 'pending' }
+    const reviewUrl = 'https://lspl-test.web.app/#/admin?tab=ppr&request=-NxAbC_12'
+    const context = { aerodromeName: 'Langenthal', themeColor: '#027ABB', reviewUrl }
+
+    const button = (href, color) =>
+      '</table>\n      <p style="margin: 30px 0 10px 0; text-align: center;">\n' +
+      `        <a href="${href}" style="display: inline-block; padding: 12px 24px; background-color: ${color}; ` +
+      'color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600;">PPR-Anfrage beantworten</a>\n' +
+      '      </p>\n    </div>'
+
+    it('is a button in the theme colour below the details', () => {
+      const { html } = getPprSubmittedEmail(pending, context)
+      expect(html).toContain(button('https://lspl-test.web.app/#/admin?tab=ppr&amp;request=-NxAbC_12', '#027ABB'))
+    })
+
+    it('has the default colour without a valid theme colour', () => {
+      const { html } = getPprSubmittedEmail(pending, { reviewUrl, themeColor: 'red; }' })
+      expect(html).toContain(button('https://lspl-test.web.app/#/admin?tab=ppr&amp;request=-NxAbC_12', '#000000'))
+    })
+
+    it('is a line of its own after the answer in text', () => {
+      const { text } = getPprSubmittedEmail(pending, context)
+      expect(text).toContain('Antwort: Offen, bitte im Admin-Bereich genehmigen oder ablehnen\n\n' +
+        `PPR-Anfrage beantworten: ${reviewUrl}\n\n---`)
+    })
+
+    it('keeps the answer row', () => {
+      const { html } = getPprSubmittedEmail(pending, context)
+      expect(html).toContain('>Antwort</td>')
+      expect(html).toContain('>Offen, bitte im Admin-Bereich genehmigen oder ablehnen</td>')
+    })
+
+    it('escapes the URL in the HTML attribute only', () => {
+      const url = 'https://flightbox.example/?a="><script>alert(1)</script>&b=\'c\''
+      const { html, text } = getPprSubmittedEmail(pending, { reviewUrl: url })
+      expect(html).toContain('href="https://flightbox.example/?a=&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;&amp;b=\'c\'"')
+      expect(html).not.toContain('<script>')
+      expect(text).toContain(`PPR-Anfrage beantworten: ${url}\n`)
+    })
+
+    it.each([
+      ['approved', { status: 'approved', reviewedBy: 'automatic' }],
+      ['rejected', { status: 'rejected', reviewedBy: 'automatic', reviewRemarks: 'Runway closed' }],
+      ['without status', {}]
+    ])('is left out for a request that is %s', (name, fields) => {
+      const { html, text } = getPprSubmittedEmail({ ...basePprRequest, ...fields }, context)
+      expect(html).toContain('</table>\n    </div>')
+      expect(html).not.toContain('beantworten')
+      expect(text).not.toContain('beantworten')
+      expect(html).not.toMatch(/\{\{\w+\}\}/)
+      expect(text).not.toMatch(/\{\{\w+\}\}/)
+    })
+
+    it.each([
+      undefined,
+      null,
+      '',
+      42,
+      'http://lspl-test.web.app/#/admin?tab=ppr&request=-NxAbC_12',
+      'javascript:alert(1)'
+    ])('is left out for the URL %p', url => {
+      const { html, text } = getPprSubmittedEmail(pending, { ...context, reviewUrl: url })
+      expect(html).toContain('</table>\n    </div>')
+      expect(html).not.toContain('beantworten')
+      expect(text).toContain('Antwort: Offen, bitte im Admin-Bereich genehmigen oder ablehnen\n\n---')
+      expect(html).not.toMatch(/\{\{\w+\}\}/)
+      expect(text).not.toMatch(/\{\{\w+\}\}/)
+    })
+
+    it('is left out without a context', () => {
+      expect(getPprSubmittedEmail(pending).text).not.toContain('beantworten')
+      expect(getPprSubmittedEmail(pending, null).text).not.toContain('beantworten')
+    })
+
+    it('cannot be imitated by a line in the pilot\'s input', () => {
+      const fake = 'PPR-Anfrage beantworten: https://evil.example/#/admin?tab=ppr&request=-Nx'
+      const submitted = createPprRequest({
+        ...basePprRequest,
+        lastname: `Muster\n\n${fake}`,
+        flightType: `private\r\n${fake}`,
+        createdBy: 'max@example.com'
+      }, new Date('2026-04-01T12:00:00Z').getTime())
+
+      const { text } = getPprSubmittedEmail(submitted, context)
+
+      const linkLines = text.split(/\r\n|[\n\r\u0085\u2028\u2029]/)
+        .filter(line => line.startsWith('PPR-Anfrage beantworten:'))
+      expect(linkLines).toEqual([`PPR-Anfrage beantworten: ${reviewUrl}`])
     })
   })
 })

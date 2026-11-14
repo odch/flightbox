@@ -9,7 +9,7 @@ Luftfahrzeug: {{immatriculation}}
 Datum: {{plannedDate}}
 Zeit: {{plannedTime}}
 Flugart: {{flightType}}
-Antwort: {{answer}}
+Antwort: {{answer}}{{reviewLinkText}}
 
 ---
 Diese E-Mail wurde von der open digital Flightbox gesendet

@@ -96,4 +96,80 @@ describe('PPR deployConfig', () => {
       expect(pprBranding(() => ({ ...CONFIG, aerodromeName: ' Langenthal ' }), ENV).aerodromeName).toBe('Langenthal')
     })
   })
+
+  describe('pprAppOrigin', () => {
+    let consoleError
+
+    // pprAppOrigin logs an invalid value once per module instance
+    function loadPprAppOrigin() {
+      let pprAppOrigin
+      jest.isolateModules(() => {
+        pprAppOrigin = require('./deployConfig').pprAppOrigin
+      })
+      return pprAppOrigin
+    }
+
+    const withAppUrl = appUrl => () => ({ ...CONFIG, appUrl })
+
+    beforeEach(() => {
+      consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      consoleError.mockRestore()
+    })
+
+    it('returns the origin of the app URL', () => {
+      const pprAppOrigin = loadPprAppOrigin()
+      expect(pprAppOrigin(withAppUrl('https://lspl-test.web.app'), ENV)).toBe('https://lspl-test.web.app')
+      expect(pprAppOrigin(withAppUrl('https://LSPL-test.web.app/'), ENV)).toBe('https://lspl-test.web.app')
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    it('is null without an app URL, and logs nothing', () => {
+      const pprAppOrigin = loadPprAppOrigin()
+      expect(pprAppOrigin(() => CONFIG, ENV)).toBeNull()
+      expect(pprAppOrigin(withAppUrl(null), ENV)).toBeNull()
+      expect(pprAppOrigin(missingFile, ENV)).toBeNull()
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    it('is null for the config of another project', () => {
+      const pprAppOrigin = loadPprAppOrigin()
+      expect(pprAppOrigin(withAppUrl('https://lspl-test.web.app'), { GCLOUD_PROJECT: 'lspl-prod' })).toBeNull()
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      ['http', 'http://lspl-test.web.app'],
+      ['a path', 'https://lspl-test.web.app/app'],
+      ['a query', 'https://lspl-test.web.app/?tab=ppr'],
+      ['a fragment', 'https://lspl-test.web.app/#/admin'],
+      ['credentials', 'https://admin:secret@lspl-test.web.app'],
+      ['an empty string', ''],
+      ['no string', 42]
+    ])('is null for an app URL with %s, and logs that links are left out', (name, appUrl) => {
+      const pprAppOrigin = loadPprAppOrigin()
+      expect(pprAppOrigin(withAppUrl(appUrl), ENV)).toBeNull()
+      expect(consoleError).toHaveBeenCalledTimes(1)
+      expect(consoleError.mock.calls[0][0]).toContain('without links to the app')
+      expect(consoleError.mock.calls[0].join(' ')).not.toContain('secret')
+    })
+
+    it('logs an invalid app URL only once', () => {
+      const pprAppOrigin = loadPprAppOrigin()
+      for (let i = 0; i < 3; i++) {
+        expect(pprAppOrigin(withAppUrl('http://lspl-test.web.app'), ENV)).toBeNull()
+      }
+      expect(consoleError).toHaveBeenCalledTimes(1)
+    })
+
+    it('reads functions/ppr-config.generated.js by default', () => {
+      jest.isolateModules(() => {
+        jest.doMock('../ppr-config.generated.js', withAppUrl('https://lspl-test.web.app'), { virtual: true })
+        const { pprAppOrigin } = require('./deployConfig')
+        expect(pprAppOrigin(undefined, ENV)).toBe('https://lspl-test.web.app')
+      })
+    })
+  })
 })
