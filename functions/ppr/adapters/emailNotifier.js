@@ -1,6 +1,9 @@
 'use strict'
 
 const { loadSmtpSettings, createTransporter } = require('../../email/smtp')
+// The aerodrome's name and theme colour for every email, read when an email
+// is built rather than at module load
+const { pprBranding } = require('../deployConfig')
 const {
   getPprSubmittedEmail,
   getPprApprovedEmail,
@@ -28,7 +31,7 @@ async function sendEmail(to, emailContent) {
 }
 
 async function notifyRequestSubmitted(pprRequest, adminEmail) {
-  const emailContent = getPprSubmittedEmail(pprRequest)
+  const emailContent = getPprSubmittedEmail(pprRequest, pprBranding())
   await sendEmail(adminEmail, emailContent)
 }
 
@@ -38,7 +41,7 @@ async function notifyRequestReviewed(pprRequest) {
   if (!getEmail) {
     throw new Error(`No email for PPR status ${pprRequest.status}`)
   }
-  await sendEmail(pprRequest.email, getEmail(pprRequest))
+  await sendEmail(pprRequest.email, getEmail(pprRequest, pprBranding()))
 }
 
 module.exports = {

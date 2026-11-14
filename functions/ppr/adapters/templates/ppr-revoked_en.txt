@@ -1,3 +1,5 @@
+{{headerText}}
+
 PPR approval revoked
 
 Unfortunately, your PPR approval has been revoked.

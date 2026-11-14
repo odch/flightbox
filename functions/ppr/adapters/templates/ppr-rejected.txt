@@ -1,3 +1,5 @@
+{{headerText}}
+
 PPR-Anfrage abgelehnt
 
 Ihre PPR-Anfrage wurde leider abgelehnt.
