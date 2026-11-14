@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
 import Button from '../Button';
+import PprStatusBadge from '../PprStatusBadge';
 import dates from '../../util/dates';
 
 // Rows like the other admin lists (messages): the box has no padding, rows
@@ -61,24 +62,6 @@ const Pilot = styled.div`
   color: #666;
   font-size: 0.9em;
   overflow-wrap: anywhere;
-`;
-
-const StatusBadge = styled.span<{ $status: string }>`
-  flex-shrink: 0;
-  padding: 0.2em 0.8em;
-  border-radius: 12px;
-  font-size: 0.85em;
-  font-weight: 600;
-  white-space: nowrap;
-  color: ${props => props.$status === 'pending' ? '#333' : 'white'};
-  background-color: ${props => {
-    switch (props.$status) {
-      case 'approved': return '#28a745';
-      case 'rejected': return '#dc3545';
-      case 'revoked': return '#6c757d';
-      default: return '#ffc107';
-    }
-  }};
 `;
 
 const Details = styled.div`
@@ -347,9 +330,7 @@ const PprRequestList = (props: any) => {
                   {req.firstname} {req.lastname} · {t(`flightTypes.${req.flightType}`)}
                 </Pilot>
               </Summary>
-              <StatusBadge $status={req.status}>
-                {t(`ppr.status.${req.status}`)}
-              </StatusBadge>
+              <PprStatusBadge status={req.status}/>
             </RowHeader>
 
             {expanded && (
