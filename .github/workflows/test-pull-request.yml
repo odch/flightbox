@@ -4,6 +4,12 @@ jobs:
   build:
     if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
     runs-on: ubuntu-latest
+    # The Cypress tests of all PRs share the cypress-testing Firebase
+    # project, and each spec starts by deleting its movements: a run
+    # waits for the one in progress instead of running alongside it
+    concurrency:
+      group: cypress-testing
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
