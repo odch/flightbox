@@ -739,6 +739,7 @@
       "closures": "Gesperrte Tage",
       "closuresHelp": "Sperren Sie Tage, an denen Sie keine PPR-Anfragen genehmigen, z. B. wegen Pistenarbeiten, eines Anlasses oder weil niemand vor Ort ist. Neue Anfragen für diese Tage werden mit dem Grund abgelehnt, auch bei manueller Beantwortung. Gesperrte Tage ändern den Flugplatz-Status nicht. Solange er «Geschlossen» ist, werden auch Anfragen für heute abgelehnt. Bereits gestellte Anfragen bleiben, wie sie sind: Ausstehende lehnen Sie unten in der Liste «PPR-Anfragen» ab, Genehmigungen widerrufen Sie dort.",
       "noClosures": "Keine Tage gesperrt.",
+      "moreClosures": "und {{count}} weitere",
       "closureFrom": "Von",
       "closureTo": "Bis",
       "closureReason": "Grund (steht in der Ablehnung)",

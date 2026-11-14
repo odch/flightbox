@@ -246,6 +246,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Automatic approval emails ask the pilot to check the aerodrome status and the NOTAMs before the flight
 - [x] The form shows the answer after sending; the admin list marks automatic answers
 - [x] Admins revoke an approval with a reason (e.g. a day blocked later); the pilot gets it by email (`ppr-revoked` templates)
+- [x] The settings box shows a summary (answer mode, up to three upcoming blocked periods, the address or the missing-address warning) until "Bearbeiten"; "Abbrechen" discards the changes; a successful save closes the form and shows "Gespeichert!" (the shared SuccessMessage) for 5 s, announced by a live region that stays on the page while the summary and the form take turns; a failed save keeps the form open with the error; the second click of a double click does nothing to what moves under the pointer: the options of the form opening on "Bearbeiten", and the request list moving up when the form closes (no request is answered or closed)
 - [x] With `ppr` on, the "Flugplatz-Status" tab notes that the status «Geschlossen» rejects PPR requests for today
 - [ ] Later: scheduled aerodrome statuses on the "Flugplatz-Status" tab, shown by the banner, the status page and the API, and rejected by PPR too, so a planned closure of the whole aerodrome is entered once; to decide: a manual status during a planned period, times of day, the API fields
 

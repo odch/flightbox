@@ -175,6 +175,16 @@ const AnsweredNotice = styled(LinkNotice)`
   background-color: #fff;
 `;
 
+// Only the first click of a double click counts: the settings above the
+// list close on "Abbrechen" (or after a save) and move the list up under
+// the pointer, where the second click would answer a request or close one
+// with the remarks typed for it. Keys click with detail 0.
+const firstClickOnly = (action: () => void) => (event: React.MouseEvent) => {
+  if (event.detail <= 1) {
+    action();
+  }
+};
+
 // What the link found, captured when it was handled: the admin's own
 // answer afterwards doesn't make the request "already answered"
 interface LinkResult {
@@ -323,7 +333,7 @@ const PprRequestList = (props: any) => {
             <RowHeader
               ref={linked ? linkedToggle : undefined}
               type="button"
-              onClick={() => toggleExpanded(req.key)}
+              onClick={firstClickOnly(() => toggleExpanded(req.key))}
               aria-expanded={expanded}
               aria-describedby={answeredNotice ? answeredNoticeId : undefined}
               data-cy="ppr-admin-toggle"
@@ -388,7 +398,7 @@ const PprRequestList = (props: any) => {
                         type="button"
                         icon="close"
                         label={t('ppr.reject')}
-                        onClick={() => handleReview(req.key, 'rejected')}
+                        onClick={firstClickOnly(() => handleReview(req.key, 'rejected'))}
                         danger
                         dataCy="ppr-reject"
                       />
@@ -396,7 +406,7 @@ const PprRequestList = (props: any) => {
                         type="button"
                         icon="check"
                         label={t('ppr.approve')}
-                        onClick={() => handleReview(req.key, 'approved')}
+                        onClick={firstClickOnly(() => handleReview(req.key, 'approved'))}
                         primary
                         dataCy="ppr-approve"
                       />
@@ -418,7 +428,7 @@ const PprRequestList = (props: any) => {
                         type="button"
                         icon="block"
                         label={t('ppr.revoke')}
-                        onClick={() => handleRevoke(req.key)}
+                        onClick={firstClickOnly(() => handleRevoke(req.key))}
                         disabled={!reviewRemarks.trim()}
                         danger
                         dataCy="ppr-revoke"

@@ -727,7 +727,7 @@
     "deleted": "The PPR request has been deleted.",
     "settings": {
       "title": "Settings",
-      "answer": "Answers",
+      "answer": "Answering",
       "answerMode": "Answer requests",
       "answerManual": "Manually",
       "answerManualHelp": "An admin approves or rejects each request.",
@@ -739,6 +739,7 @@
       "closures": "Blocked days",
       "closuresHelp": "Block the days on which you do not approve PPR requests, e.g. for runway works, an event or when nobody is on site. New requests for these days are rejected with the reason, also when answering manually. Blocked days do not change the aerodrome status. While it is «Closed», requests for today are rejected as well. Requests already made stay as they are: reject pending ones in the «PPR requests» list below, and revoke approvals there.",
       "noClosures": "No days blocked.",
+      "moreClosures": "and {{count}} more",
       "closureFrom": "From",
       "closureTo": "To",
       "closureReason": "Reason (included in the rejection)",

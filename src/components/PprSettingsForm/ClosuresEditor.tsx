@@ -103,6 +103,17 @@ interface ClosuresEditorProps {
 
 export const emptyClosure = (): ClosureValue => ({ from: null, to: null, reason: '' });
 
+/**
+ * The closures that have not ended by `today` (YYYY-MM-DD, local date);
+ * the others reject nothing any more. In the given order: the server
+ * returns them sorted by their first day.
+ */
+export const upcomingClosures = <T extends Pick<ClosureValue, 'to'>>(
+  closures: T[] | null | undefined,
+  today: string
+): (T & { to: string })[] =>
+  (closures || []).filter((closure): closure is T & { to: string } => !!closure.to && closure.to >= today);
+
 const ClosuresEditor = ({ value, onChange, errors = [], showAllErrors }: ClosuresEditorProps) => {
   const { t } = useTranslation();
   const closures = value || [];
@@ -155,7 +166,13 @@ const ClosuresEditor = ({ value, onChange, errors = [], showAllErrors }: Closure
             </Cell>
             <RemoveButton
               type="button"
-              onClick={() => onChange(closures.filter((_, i) => i !== index))}
+              // Not the second click of a double click: the next closure
+              // has moved up under the pointer
+              onClick={event => {
+                if (event.detail <= 1) {
+                  onChange(closures.filter((_, i) => i !== index));
+                }
+              }}
               title={t('ppr.settings.removeClosure')}
               aria-label={t('ppr.settings.removeClosure')}
               data-cy={`ppr-closure-${index}-remove`}
