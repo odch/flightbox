@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
 import Button from '../Button';
 import PprStatusBadge from '../PprStatusBadge';
+import PprRequestGroups from '../PprRequestGroups';
 import dates from '../../util/dates';
 
 // Rows like the other admin lists (messages): the box has no padding, rows
@@ -301,127 +302,133 @@ const PprRequestList = (props: any) => {
         <EmptyMessage>{t('ppr.noRequests')}</EmptyMessage>
       )}
 
-      {requests.map((req: any) => {
-        const expanded = expandedKey === req.key;
-        const automatic = req.reviewedBy === 'automatic';
-        const linked = linkResult && linkResult.key === req.key ? linkResult : null;
-        const answeredNotice = !!linked && linked.answered && expanded;
-        return (
-          <Row
-            key={req.key}
-            ref={linked ? linkedRow : undefined}
-            $expanded={expanded}
-            data-cy={`ppr-admin-${req.key}`}
-          >
-            <RowHeader
-              ref={linked ? linkedToggle : undefined}
-              type="button"
-              onClick={firstClickOnly(() => toggleExpanded(req.key))}
-              aria-expanded={expanded}
-              aria-describedby={answeredNotice ? answeredNoticeId : undefined}
-              data-cy="ppr-admin-toggle"
+      <PprRequestGroups
+        requests={requests}
+        // Also when it is among the older past requests
+        revealKey={linkResult ? linkResult.key : null}
+        inset
+        renderRequest={(req: any) => {
+          const expanded = expandedKey === req.key;
+          const automatic = req.reviewedBy === 'automatic';
+          const linked = linkResult && linkResult.key === req.key ? linkResult : null;
+          const answeredNotice = !!linked && linked.answered && expanded;
+          return (
+            <Row
+              key={req.key}
+              ref={linked ? linkedRow : undefined}
+              $expanded={expanded}
+              data-cy={`ppr-admin-${req.key}`}
             >
-              <Summary>
-                <Title>
-                  <Aircraft>{req.immatriculation}</Aircraft>
-                  <When>{dates.formatDate(req.plannedDate)} {req.plannedTime}</When>
-                </Title>
-                <Pilot>
-                  {req.firstname} {req.lastname} · {t(`flightTypes.${req.flightType}`)}
-                </Pilot>
-              </Summary>
-              <PprStatusBadge status={req.status}/>
-            </RowHeader>
+              <RowHeader
+                ref={linked ? linkedToggle : undefined}
+                type="button"
+                onClick={firstClickOnly(() => toggleExpanded(req.key))}
+                aria-expanded={expanded}
+                aria-describedby={answeredNotice ? answeredNoticeId : undefined}
+                data-cy="ppr-admin-toggle"
+              >
+                <Summary>
+                  <Title>
+                    <Aircraft>{req.immatriculation}</Aircraft>
+                    <When>{dates.formatDate(req.plannedDate)} {req.plannedTime}</When>
+                  </Title>
+                  <Pilot>
+                    {req.firstname} {req.lastname} · {t(`flightTypes.${req.flightType}`)}
+                  </Pilot>
+                </Summary>
+                <PprStatusBadge status={req.status}/>
+              </RowHeader>
 
-            {expanded && (
-              <Details>
-                {answeredNotice && (
-                  <AnsweredNotice id={answeredNoticeId} role="status" data-cy="ppr-linked-request-answered">
-                    {t('ppr.linkedRequestAnswered')}
-                  </AnsweredNotice>
-                )}
-                <DetailList>
-                  <dt>{t('movement.details.email')}</dt>
-                  <dd><a href={`mailto:${req.email}`}>{req.email}</a></dd>
-                  {req.phone && (<>
-                    <dt>{t('movement.details.phone')}</dt>
-                    <dd><a href={`tel:${req.phone}`}>{req.phone}</a></dd>
-                  </>)}
-                  <dt>{t('movement.details.aircraftType')}</dt>
-                  <dd>{req.aircraftType || '-'}</dd>
-                  <dt>{t('movement.details.mtow')}</dt>
-                  <dd>{req.mtow ? `${req.mtow} kg` : '-'}</dd>
-                  {req.remarks && (<>
-                    <dt>{t('common.remarks')}</dt>
-                    <dd>{req.remarks}</dd>
-                  </>)}
-                  {automatic && (<>
-                    <dt>{t('ppr.answered')}</dt>
-                    <dd data-cy="ppr-answered-automatically">{t('ppr.answeredAutomatically')}</dd>
-                  </>)}
-                  {req.reviewRemarks && (<>
-                    <dt>{t(automatic && req.status === 'approved' ? 'ppr.pilotInfo' : 'ppr.adminRemarks')}</dt>
-                    <dd>{req.reviewRemarks}</dd>
-                  </>)}
-                </DetailList>
+              {expanded && (
+                <Details>
+                  {answeredNotice && (
+                    <AnsweredNotice id={answeredNoticeId} role="status" data-cy="ppr-linked-request-answered">
+                      {t('ppr.linkedRequestAnswered')}
+                    </AnsweredNotice>
+                  )}
+                  <DetailList>
+                    <dt>{t('movement.details.email')}</dt>
+                    <dd><a href={`mailto:${req.email}`}>{req.email}</a></dd>
+                    {req.phone && (<>
+                      <dt>{t('movement.details.phone')}</dt>
+                      <dd><a href={`tel:${req.phone}`}>{req.phone}</a></dd>
+                    </>)}
+                    <dt>{t('movement.details.aircraftType')}</dt>
+                    <dd>{req.aircraftType || '-'}</dd>
+                    <dt>{t('movement.details.mtow')}</dt>
+                    <dd>{req.mtow ? `${req.mtow} kg` : '-'}</dd>
+                    {req.remarks && (<>
+                      <dt>{t('common.remarks')}</dt>
+                      <dd>{req.remarks}</dd>
+                    </>)}
+                    {automatic && (<>
+                      <dt>{t('ppr.answered')}</dt>
+                      <dd data-cy="ppr-answered-automatically">{t('ppr.answeredAutomatically')}</dd>
+                    </>)}
+                    {req.reviewRemarks && (<>
+                      <dt>{t(automatic && req.status === 'approved' ? 'ppr.pilotInfo' : 'ppr.adminRemarks')}</dt>
+                      <dd>{req.reviewRemarks}</dd>
+                    </>)}
+                  </DetailList>
 
-                {req.status === 'pending' && (
-                  <ReviewSection>
-                    <RemarksInput
-                      placeholder={t('ppr.adminRemarks')}
-                      aria-label={t('ppr.adminRemarks')}
-                      value={reviewRemarks}
-                      onChange={e => setReviewRemarks(e.target.value)}
-                      data-cy="ppr-review-remarks"
-                    />
-                    <ReviewButtons>
-                      <Button
-                        type="button"
-                        icon="close"
-                        label={t('ppr.reject')}
-                        onClick={firstClickOnly(() => handleReview(req.key, 'rejected'))}
-                        danger
-                        dataCy="ppr-reject"
+                  {req.status === 'pending' && (
+                    <ReviewSection>
+                      <RemarksInput
+                        placeholder={t('ppr.adminRemarks')}
+                        aria-label={t('ppr.adminRemarks')}
+                        value={reviewRemarks}
+                        onChange={e => setReviewRemarks(e.target.value)}
+                        data-cy="ppr-review-remarks"
                       />
-                      <Button
-                        type="button"
-                        icon="check"
-                        label={t('ppr.approve')}
-                        onClick={firstClickOnly(() => handleReview(req.key, 'approved'))}
-                        primary
-                        dataCy="ppr-approve"
-                      />
-                    </ReviewButtons>
-                  </ReviewSection>
-                )}
+                      <ReviewButtons>
+                        <Button
+                          type="button"
+                          icon="close"
+                          label={t('ppr.reject')}
+                          onClick={firstClickOnly(() => handleReview(req.key, 'rejected'))}
+                          danger
+                          dataCy="ppr-reject"
+                        />
+                        <Button
+                          type="button"
+                          icon="check"
+                          label={t('ppr.approve')}
+                          onClick={firstClickOnly(() => handleReview(req.key, 'approved'))}
+                          primary
+                          dataCy="ppr-approve"
+                        />
+                      </ReviewButtons>
+                    </ReviewSection>
+                  )}
 
-                {req.status === 'approved' && (
-                  <ReviewSection>
-                    <RemarksInput
-                      placeholder={t('ppr.revokeReason')}
-                      aria-label={t('ppr.revokeReason')}
-                      value={reviewRemarks}
-                      onChange={e => setReviewRemarks(e.target.value)}
-                      data-cy="ppr-revoke-reason"
-                    />
-                    <ReviewButtons>
-                      <Button
-                        type="button"
-                        icon="block"
-                        label={t('ppr.revoke')}
-                        onClick={firstClickOnly(() => handleRevoke(req.key))}
-                        disabled={!reviewRemarks.trim()}
-                        danger
-                        dataCy="ppr-revoke"
+                  {req.status === 'approved' && (
+                    <ReviewSection>
+                      <RemarksInput
+                        placeholder={t('ppr.revokeReason')}
+                        aria-label={t('ppr.revokeReason')}
+                        value={reviewRemarks}
+                        onChange={e => setReviewRemarks(e.target.value)}
+                        data-cy="ppr-revoke-reason"
                       />
-                    </ReviewButtons>
-                  </ReviewSection>
-                )}
-              </Details>
-            )}
-          </Row>
-        );
-      })}
+                      <ReviewButtons>
+                        <Button
+                          type="button"
+                          icon="block"
+                          label={t('ppr.revoke')}
+                          onClick={firstClickOnly(() => handleRevoke(req.key))}
+                          disabled={!reviewRemarks.trim()}
+                          danger
+                          dataCy="ppr-revoke"
+                        />
+                      </ReviewButtons>
+                    </ReviewSection>
+                  )}
+                </Details>
+              )}
+            </Row>
+          );
+        }}
+      />
     </div>
   );
 };

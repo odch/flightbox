@@ -1,4 +1,4 @@
-import reducer, { getPendingPprCount } from './reducer';
+import reducer, { getOpenPprCount } from './reducer';
 import sagas from './sagas';
 
 export {
@@ -15,6 +15,6 @@ export {
   savePprSettings
 } from './actions';
 
-export { sagas, getPendingPprCount };
+export { sagas, getOpenPprCount };
 
 export default reducer;

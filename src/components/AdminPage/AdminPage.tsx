@@ -66,7 +66,7 @@ const AdminPage = ({
   kioskAccessToken,
   customsAvailable,
   checkCustomsAvailability,
-  pprPendingCount,
+  pprOpenCount,
   loadPprRequests,
 }: any) => {
   const navigate = useNavigate();
@@ -160,7 +160,7 @@ const AdminPage = ({
               activeTab={activeTab}
               hiddenTabs={hiddenTabs}
               onTabChange={handleTabChange}
-              counts={{ppr: pprPendingCount}}
+              counts={{ppr: pprOpenCount}}
             />
             <AdminContent>
               <SubPage/>
@@ -182,7 +182,7 @@ const AdminPage = ({
   }),
   customsAvailable: PropTypes.bool,
   checkCustomsAvailability: PropTypes.func.isRequired,
-  pprPendingCount: PropTypes.number,
+  pprOpenCount: PropTypes.number,
   loadPprRequests: PropTypes.func,
 };
 

@@ -1,6 +1,8 @@
 import * as actions from './actions';
 import { PprAction, PprListScope, PprAnswerMode, PprClosure, PprSubmitResult } from './actions';
 import reducer from '../../util/reducer';
+import dates from '../../util/dates';
+import { isOpenPprRequest } from './groups';
 
 interface PprFormState {
   submitting: boolean;
@@ -251,13 +253,14 @@ const ACTION_HANDLERS = {
   [actions.SAVE_PPR_SETTINGS_FAILURE]: settingsSaveFailed,
 };
 
-// The pending requests of the admin list (shown on its admin tab); null
-// while the list of all requests isn't loaded
-export function getPendingPprCount(state: PprState): number | null {
+// The open requests of the admin list (shown on its admin tab): those of
+// its group "Offen", pending and planned for today or later. Null while the
+// list of all requests isn't loaded.
+export function getOpenPprCount(state: PprState, today: string = dates.localDate()): number | null {
   if (state.scope !== 'all') {
     return null;
   }
-  return (state.data as any[]).filter(request => request && request.status === 'pending').length;
+  return (state.data as any[]).filter(request => request && isOpenPprRequest(request, today)).length;
 }
 
 export type { PprState };

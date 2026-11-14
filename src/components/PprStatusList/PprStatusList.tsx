@@ -8,6 +8,7 @@ import ModalDialog from '../ModalDialog';
 import H1 from '../H1';
 import Button from '../Button';
 import PprStatusBadge from '../PprStatusBadge';
+import PprRequestGroups from '../PprRequestGroups';
 import dates from '../../util/dates';
 
 const Content = styled.div`
@@ -119,38 +120,42 @@ const PprStatusList = (props: any) => {
           <EmptyMessage>{t('ppr.noRequests')}</EmptyMessage>
         )}
 
-        {requests.map((req: any) => (
-          <RequestCard key={req.key} data-cy={`ppr-request-${req.key}`}>
-            <RequestHeader>
-              <Aircraft>{req.immatriculation}</Aircraft>
-              <PprStatusBadge status={req.status}/>
-            </RequestHeader>
-            <DetailRow>
-              <span>{dates.formatDate(req.plannedDate)}</span>
-              <span>{req.plannedTime}</span>
-              <span>{t(`flightTypes.${req.flightType}`)}</span>
-            </DetailRow>
-            <DetailRow>
-              <span>{req.firstname} {req.lastname}</span>
-            </DetailRow>
-            {req.status !== 'pending' && req.reviewRemarks && (
-              <ReviewRemarks $status={req.status}>{req.reviewRemarks}</ReviewRemarks>
-            )}
-            {req.status === 'pending' && (
-              <Actions>
-                <Button
-                  type="button"
-                  icon="delete"
-                  label={t('common.delete')}
-                  onClick={() => setDeleteConfirmKey(req.key)}
-                  flat
-                  danger
-                  dataCy={`ppr-delete-${req.key}`}
-                />
-              </Actions>
-            )}
-          </RequestCard>
-        ))}
+        <PprRequestGroups
+          requests={requests}
+          headingLevel="h2"
+          renderRequest={(req: any) => (
+            <RequestCard key={req.key} data-cy={`ppr-request-${req.key}`}>
+              <RequestHeader>
+                <Aircraft>{req.immatriculation}</Aircraft>
+                <PprStatusBadge status={req.status}/>
+              </RequestHeader>
+              <DetailRow>
+                <span>{dates.formatDate(req.plannedDate)}</span>
+                <span>{req.plannedTime}</span>
+                <span>{t(`flightTypes.${req.flightType}`)}</span>
+              </DetailRow>
+              <DetailRow>
+                <span>{req.firstname} {req.lastname}</span>
+              </DetailRow>
+              {req.status !== 'pending' && req.reviewRemarks && (
+                <ReviewRemarks $status={req.status}>{req.reviewRemarks}</ReviewRemarks>
+              )}
+              {req.status === 'pending' && (
+                <Actions>
+                  <Button
+                    type="button"
+                    icon="delete"
+                    label={t('common.delete')}
+                    onClick={() => setDeleteConfirmKey(req.key)}
+                    flat
+                    danger
+                    dataCy={`ppr-delete-${req.key}`}
+                  />
+                </Actions>
+              )}
+            </RequestCard>
+          )}
+        />
 
         {deleteConfirmKey && (
           <ModalDialog content={

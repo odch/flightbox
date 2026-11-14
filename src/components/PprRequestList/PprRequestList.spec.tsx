@@ -18,6 +18,7 @@ jest.mock('../MaterialIcon', () => {
 });
 
 import PprRequestList from './PprRequestList';
+import dates from '../../util/dates';
 
 const pendingRequest = {
   key: 'req-1',
@@ -218,6 +219,25 @@ describe('PprRequestList (admin)', () => {
     });
   });
 
+  it('shows the open requests first, then the upcoming and the past ones', () => {
+    const localDate = jest.spyOn(dates, 'localDate').mockReturnValue('2026-04-15');
+    try {
+      const pastRequest = { ...approvedRequest, key: 'req-9', immatriculation: 'HB-OLD', plannedDate: '2026-04-01' };
+      const { container } = renderWithTheme(
+        <PprRequestList {...defaultProps} data={[pastRequest, approvedRequest, pendingRequest]} />
+      );
+
+      expect(screen.getAllByRole('heading').map(h => h.textContent))
+        .toEqual(['ppr.groups.open 1', 'ppr.groups.upcoming 1', 'ppr.groups.past 1']);
+      const inGroup = (group: string) => container.querySelector(`[data-cy="ppr-group-${group}"]`)!;
+      expect(within(inGroup('open') as HTMLElement).getByText('HB-ABC')).toBeTruthy();
+      expect(within(inGroup('upcoming') as HTMLElement).getByText('HB-XYZ')).toBeTruthy();
+      expect(within(inGroup('past') as HTMLElement).getByText('HB-OLD')).toBeTruthy();
+    } finally {
+      localDate.mockRestore();
+    }
+  });
+
   it('shows review failed error', () => {
     renderWithTheme(
       <PprRequestList {...defaultProps} reviewFailed={true} />
@@ -352,6 +372,24 @@ describe('PprRequestList (admin)', () => {
       expect(scrollIntoView.mock.instances[0]).toBe(rowOf(container, 'req-1'));
       expect(screen.queryByText('ppr.linkedRequestAnswered')).toBeNull();
       expect(screen.queryByText('ppr.linkedRequestMissing')).toBeNull();
+    });
+
+    it('opens a request among the older past ones, which are only shown on request otherwise', () => {
+      const localDate = jest.spyOn(dates, 'localDate').mockReturnValue('2026-11-14');
+      try {
+        const past = Array.from({ length: 12 }, (_, i) => ({
+          ...approvedRequest,
+          key: `old-${i}`,
+          immatriculation: `HB-O${String(i).padStart(2, '0')}`,
+          plannedDate: `2026-10-${String(20 - i).padStart(2, '0')}`,
+        }));
+        const { container } = openList('old-11', { ...ready, data: past });
+
+        expect(isOpen('HB-O11')).toBe(true);
+        expect(scrollIntoView.mock.instances[0]).toBe(rowOf(container, 'old-11'));
+      } finally {
+        localDate.mockRestore();
+      }
     });
 
     it.each([
