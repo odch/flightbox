@@ -580,6 +580,16 @@ describe('PprSettingsForm', () => {
       expect(savedSettings(props).closures).toEqual([{ from: '2099-12-24', to: '2099-12-24', reason: 'Christmas' }]);
     });
 
+    it('draws lines between the closures, none below the last one', () => {
+      const christmas = { from: '2099-12-24', to: '2099-12-26', reason: 'Christmas' };
+      const { container } = renderForm({ closures: [runwayWorks, christmas] });
+
+      const [first, last] = [byCy(container, 'ppr-closure-0'), byCy(container, 'ppr-closure-1')];
+      expect(getComputedStyle(first).borderTopStyle).not.toBe('solid');
+      expect(getComputedStyle(last).borderTopStyle).toBe('solid');
+      [first, last].forEach(row => expect(getComputedStyle(row).borderBottomStyle).not.toBe('solid'));
+    });
+
     it('keeps an end that is after a changed start', () => {
       const { container } = renderForm({ closures: [runwayWorks] });
 
