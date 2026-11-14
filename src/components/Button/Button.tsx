@@ -10,7 +10,7 @@ interface ButtonProps {
   icon?: string;
   className?: string;
   disabled?: boolean;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   primary?: boolean;
   flat?: boolean;
   danger?: boolean;

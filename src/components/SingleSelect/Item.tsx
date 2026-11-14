@@ -21,10 +21,17 @@ const Description = styled.div`
   text-wrap: pretty;
 `;
 
+// The second click of a double click selects nothing: the first one did,
+// unless it opened the select right under the pointer (as "Bearbeiten" of
+// the PPR settings does). Keys click with detail 0.
 const Item = props => (
   <Button
     type="button"
-    onClick={() => props.onClick(props.value)}
+    onClick={event => {
+      if (event.detail <= 1) {
+        props.onClick(props.value);
+      }
+    }}
     $selected={props.selected}
     $widthPercentage={props.widthPercentage}
     $orientation={props.orientation}

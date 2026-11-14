@@ -277,7 +277,8 @@ day ("Gesperrte Tage" in the tab, stored at `/settings/ppr/closures`: days witho
 runway works or nobody on site, often while the aerodrome is open, so blocking days does not change the aerodrome
 status) are rejected with its reason, and requests for today are rejected while the aerodrome status is "closed"; the
 "Flugplatz-Status" tab says so. Blocking a day leaves the requests made before as they are. Admins can revoke an
-approval with a reason; the pilot gets it by e-mail.
+approval with a reason; the pilot gets it by e-mail. The tab shows the settings in short (answer mode, the next
+blocked days, the address) until an admin clicks "Bearbeiten".
 In the privacy tab ("Datenschutz"), which is shown when `privacySettings` or `ppr` is on, admins set how many days
 after the planned date requests are deleted (a whole number from 1 to 3650, stored at `/settings/ppr/retentionDays`).
 As for movements and messages, nothing is deleted while no value is set.

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import MaterialIcon from '../MaterialIcon';
+import SuccessMessage from '../SuccessMessage';
 import { addAircraft, updateAircraft, saveProfile } from '../../modules/profile';
 import { toAircraftsArray, Aircraft } from '../../modules/profile/migration';
 
@@ -56,18 +57,8 @@ const DismissButton = styled.button`
   }
 `;
 
-const SuccessMessage = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
-  padding: 0.6em 1em;
+const SavedMessage = styled(SuccessMessage)`
   margin: 0.5em auto;
-  background-color: #e8f5e9;
-  border: 1px solid #a5d6a7;
-  border-radius: 6px;
-  color: #2e7d32;
-  font-size: 0.9em;
-  font-weight: bold;
 `;
 
 interface SaveProfilePromptProps {
@@ -106,12 +97,7 @@ const SaveProfilePrompt: React.FC<SaveProfilePromptProps> = ({
   }
 
   if (state === 'confirmed') {
-    return (
-      <SuccessMessage>
-        <MaterialIcon icon="check"/>
-        {t('common.saved')}
-      </SuccessMessage>
-    );
+    return <SavedMessage>{t('common.saved')}</SavedMessage>;
   }
 
   const movementAircraft: Aircraft = {

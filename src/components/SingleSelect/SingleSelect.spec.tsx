@@ -57,6 +57,24 @@ describe('SingleSelect', () => {
     });
   });
 
+  it('selects with a click, and with a key (a click of detail 0)', () => {
+    const onChange = jest.fn();
+    renderWithTheme(<SingleSelect items={items} onChange={onChange} />);
+    fireEvent.click(screen.getByText('Option A'), { detail: 1 });
+    fireEvent.click(screen.getByText('Option B'), { detail: 0 });
+    expect(onChange.mock.calls).toEqual([[{ target: { value: 'a' } }], [{ target: { value: 'b' } }]]);
+  });
+
+  // E.g. the second click on "Bearbeiten" of the PPR settings, which opens
+  // a select right under the pointer
+  it('selects nothing with the further clicks of a double or triple click', () => {
+    const onChange = jest.fn();
+    renderWithTheme(<SingleSelect items={describedItems} value="manual" onChange={onChange} />);
+    fireEvent.click(itemButton('Automatically'), { detail: 2 });
+    fireEvent.click(itemButton('Automatically'), { detail: 3 });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('updates selected state when a different item is clicked', () => {
     const onChange = jest.fn();
     renderWithTheme(

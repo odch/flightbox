@@ -167,6 +167,57 @@ describe('PprRequestList (admin)', () => {
     expect(screen.getByText('max@example.com').closest('a')!.getAttribute('href')).toBe('mailto:max@example.com');
   });
 
+  // A double click on "Abbrechen" of the settings above (or a quick one on
+  // "Speichern") closes the form, which moves the list up under the pointer
+  describe('the further clicks of a double click', () => {
+    it('answer no request', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[pendingRequest]}/>);
+      fireEvent.click(screen.getByText('HB-ABC'));
+
+      fireEvent.click(screen.getByText('ppr.reject'), { detail: 2 });
+      fireEvent.click(screen.getByText('ppr.approve'), { detail: 2 });
+      fireEvent.click(screen.getByText('ppr.approve'), { detail: 3 });
+
+      expect(defaultProps.reviewPprRequest).not.toHaveBeenCalled();
+      expect(screen.getByText('ppr.approve')).toBeTruthy();
+    });
+
+    it('revoke no approval', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[approvedRequest]}/>);
+      fireEvent.click(screen.getByText('HB-XYZ'));
+      fireEvent.change(screen.getByPlaceholderText('ppr.revokeReason'), { target: { value: 'Runway works' } });
+
+      fireEvent.click(screen.getByText('ppr.revoke'), { detail: 2 });
+
+      expect(defaultProps.revokePprApproval).not.toHaveBeenCalled();
+    });
+
+    it('do not close a request with the remarks typed for it', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[pendingRequest]}/>);
+      const toggle = screen.getByRole('button', { name: /HB-ABC/ });
+      fireEvent.click(toggle, { detail: 1 });
+      fireEvent.change(screen.getByPlaceholderText('ppr.adminRemarks'), { target: { value: 'Bad weather' } });
+
+      fireEvent.click(toggle, { detail: 2 });
+
+      expect(toggle.getAttribute('aria-expanded')).toBe('true');
+      expect((screen.getByPlaceholderText('ppr.adminRemarks') as HTMLTextAreaElement).value).toBe('Bad weather');
+    });
+
+    it('leave single clicks as they are', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[pendingRequest, approvedRequest]}/>);
+
+      fireEvent.click(screen.getByText('HB-ABC'), { detail: 1 });
+      fireEvent.click(screen.getByText('ppr.reject'), { detail: 1 });
+      expect(defaultProps.reviewPprRequest).toHaveBeenCalledWith('req-1', 'rejected', undefined);
+
+      fireEvent.click(screen.getByText('HB-XYZ'), { detail: 1 });
+      fireEvent.change(screen.getByPlaceholderText('ppr.revokeReason'), { target: { value: 'Runway works' } });
+      fireEvent.click(screen.getByText('ppr.revoke'), { detail: 1 });
+      expect(defaultProps.revokePprApproval).toHaveBeenCalledWith('req-2', 'Runway works');
+    });
+  });
+
   it('shows review failed error', () => {
     renderWithTheme(
       <PprRequestList {...defaultProps} reviewFailed={true} />
