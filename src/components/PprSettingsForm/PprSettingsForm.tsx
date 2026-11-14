@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Field, Form } from 'react-final-form';
 import styled from 'styled-components';
@@ -45,17 +45,17 @@ const AnswerMode = styled.div`
   }
 `;
 
-const AnswerModeField = ({ items, label }: { items: { value: string; label: string; description: string }[]; label: string }) => {
+// Without a label of its own: the title of its section names it
+const AnswerModeField = ({ items, labelledBy }: { items: { value: string; label: string; description: string }[]; labelledBy: string }) => {
   const ref = useRef<HTMLDivElement>(null);
   const sideBySide = useMinWidth(ref, MIN_WIDTH_SIDE_BY_SIDE);
   return (
-    <AnswerMode ref={ref}>
+    <AnswerMode ref={ref} role="group" aria-labelledby={labelledBy}>
       <Field
         name="answerMode"
         component={renderSingleSelect}
         items={items}
         orientation={sideBySide ? 'horizontal' : 'vertical'}
-        label={label}
       />
     </AnswerMode>
   );
@@ -158,6 +158,7 @@ const PprSettingsForm = (props: any) => {
   // the form opens again
   const [saveFailed, setSaveFailed] = useState(false);
   const { visible: savedHintVisible, show: showSavedHint, hide: hideSavedHint } = useSavedHint();
+  const answerTitleId = useId();
 
   useEffect(() => {
     loadPprSettings();
@@ -329,9 +330,9 @@ const PprSettingsForm = (props: any) => {
             data-cy="ppr-settings-form"
           >
             <Section>
-              <SectionTitle>{t('ppr.settings.answer')}</SectionTitle>
+              <SectionTitle id={answerTitleId}>{t('ppr.settings.answer')}</SectionTitle>
               <FieldSet gutter={false}>
-                <AnswerModeField items={answerModes} label={t('ppr.settings.answerMode')}/>
+                <AnswerModeField items={answerModes} labelledBy={answerTitleId}/>
               </FieldSet>
               {values.answerMode === 'automatic' && (
                 <PilotInfo>

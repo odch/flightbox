@@ -6,7 +6,8 @@ import ValidationMessage from './ValidationMessage';
 import Wrapper from './Wrapper';
 
 interface LabeledComponentProps {
-  label: string;
+  // Without one, e.g. when a heading above names the field
+  label?: string;
   component: React.ReactElement;
   className?: string;
   validationError?: string | null;
@@ -29,7 +30,7 @@ const LabeledComponent: React.FC<LabeledComponentProps> = ({
 
   return (
     <Wrapper className={className} onFocus={() => setTooltipVisible(true)} onBlur={() => setTooltipVisible(false)}>
-      <Label>{label}</Label>
+      {label && <Label>{label}</Label>}
       {validationError && <ValidationMessage error={validationError}/>}
       <ComponentContainer>{component}</ComponentContainer>
       {footer}

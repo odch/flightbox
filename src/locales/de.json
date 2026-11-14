@@ -734,7 +734,6 @@
     "settings": {
       "title": "Einstellungen",
       "answer": "Beantwortung",
-      "answerMode": "Anfragen beantworten",
       "answerManual": "Manuell",
       "answerManualHelp": "Ein Admin genehmigt oder lehnt jede Anfrage ab.",
       "answerAutomatic": "Automatisch",

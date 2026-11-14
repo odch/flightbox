@@ -9,6 +9,12 @@ describe('components', () => {
       expect(container).toMatchSnapshot();
     });
 
+    it('renders no label without one', () => {
+      const { container } = render(<LabeledComponent component={<input type="text" id="my-input"/>}/>);
+      expect(container.querySelector('label')).toBeNull();
+      expect(container.querySelector('input')).not.toBeNull();
+    });
+
     it('renders a footer when provided', () => {
       const { getByTestId } = render(
         <LabeledComponent
