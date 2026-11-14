@@ -7,6 +7,7 @@ import MaterialIcon from '../MaterialIcon';
 import ModalDialog from '../ModalDialog';
 import H1 from '../H1';
 import Button from '../Button';
+import PprStatusBadge from '../PprStatusBadge';
 import dates from '../../util/dates';
 
 const Content = styled.div`
@@ -30,24 +31,6 @@ const RequestHeader = styled.div`
 const Aircraft = styled.span`
   font-weight: 600;
   font-size: 1.1em;
-`;
-
-const StatusBadge = styled.span<{ $status: string }>`
-  display: inline-block;
-  padding: 0.2em 0.8em;
-  border-radius: 12px;
-  font-size: 0.85em;
-  font-weight: 600;
-  color: white;
-  background-color: ${props => {
-    switch (props.$status) {
-      case 'approved': return '#28a745';
-      case 'rejected': return '#dc3545';
-      case 'revoked': return '#6c757d';
-      default: return '#ffc107';
-    }
-  }};
-  ${props => props.$status === 'pending' && 'color: #333;'}
 `;
 
 const DetailRow = styled.div`
@@ -140,9 +123,7 @@ const PprStatusList = (props: any) => {
           <RequestCard key={req.key} data-cy={`ppr-request-${req.key}`}>
             <RequestHeader>
               <Aircraft>{req.immatriculation}</Aircraft>
-              <StatusBadge $status={req.status}>
-                {t(`ppr.status.${req.status}`)}
-              </StatusBadge>
+              <PprStatusBadge status={req.status}/>
             </RequestHeader>
             <DetailRow>
               <span>{dates.formatDate(req.plannedDate)}</span>
