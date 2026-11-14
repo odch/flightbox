@@ -732,20 +732,20 @@
       "answerManual": "Manuell",
       "answerManualHelp": "Ein Admin genehmigt oder lehnt jede Anfrage ab.",
       "answerAutomatic": "Automatisch",
-      "answerAutomaticHelp": "Jede Anfrage wird sofort genehmigt, ausser der Flugplatz ist geschlossen.",
+      "answerAutomaticHelp": "Jede Anfrage wird sofort genehmigt, ausser für gesperrte Tage und für heute bei geschlossenem Flugplatz.",
       "pilotInfo": "Hinweise für Piloten",
       "pilotInfoHelp": "Stehen in jeder automatischen Genehmigung, z. B. Piste, Volte, Funkfrequenz, Landetaxe und Telefonnummer.",
       "tooLong": "Höchstens {{max}} Zeichen.",
-      "closures": "Schliessungen",
-      "closuresHelp": "Anfragen für einen Tag in einer Schliessung werden mit ihrem Grund abgelehnt, auch bei manueller Beantwortung. Solange der Flugplatz-Status «Geschlossen» ist, werden auch Anfragen für heute abgelehnt.",
-      "noClosures": "Keine Schliessungen geplant.",
+      "closures": "Gesperrte Tage",
+      "closuresHelp": "Sperren Sie Tage, an denen Sie keine PPR-Anfragen genehmigen, z. B. wegen Pistenarbeiten, eines Anlasses oder weil niemand vor Ort ist. Neue Anfragen für diese Tage werden mit dem Grund abgelehnt, auch bei manueller Beantwortung. Gesperrte Tage ändern den Flugplatz-Status nicht. Solange er «Geschlossen» ist, werden auch Anfragen für heute abgelehnt. Bereits gestellte Anfragen bleiben, wie sie sind: Ausstehende lehnen Sie unten in der Liste «PPR-Anfragen» ab, Genehmigungen widerrufen Sie dort.",
+      "noClosures": "Keine Tage gesperrt.",
       "closureFrom": "Von",
       "closureTo": "Bis",
       "closureReason": "Grund (steht in der Ablehnung)",
-      "addClosure": "Schliessung hinzufügen",
-      "removeClosure": "Schliessung entfernen",
-      "closureDatesRequired": "Geben Sie Beginn und Ende der Schliessung ein.",
-      "closureOrder": "Das Ende darf nicht vor dem Beginn liegen.",
+      "addClosure": "Tage sperren",
+      "removeClosure": "Sperre entfernen",
+      "closureDatesRequired": "Geben Sie den ersten und den letzten gesperrten Tag ein.",
+      "closureOrder": "Der letzte Tag darf nicht vor dem ersten liegen.",
       "closureReasonRequired": "Geben Sie einen Grund ein.",
       "notification": "Benachrichtigung",
       "adminEmail": "E-Mail-Adresse für neue Anfragen",
@@ -754,7 +754,8 @@
       "invalidEmail": "Geben Sie eine gültige E-Mail-Adresse ein.",
       "loadFailed": "Die Einstellungen konnten nicht geladen werden.",
       "saveFailed": "Die Einstellungen konnten nicht gespeichert werden."
-    }
+    },
+    "aerodromeStatusHint": "Solange der Status «Geschlossen» ist, werden PPR-Anfragen für heute abgelehnt. Tage, an denen Sie keine PPR-Anfragen genehmigen, sperren Sie im Tab «PPR-Anfragen» unter «Gesperrte Tage»."
   },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."
