@@ -57,8 +57,12 @@ functions/ppr/
     firebaseAerodromeStatus.js # latest entry of /status
     emailNotifier.js           # nodemailer/SMTP implementation
     emailTemplates.js          # email HTML templates
+  deployConfig.js          # the deploy's config (functions/ppr-config.generated.js), for this project only
   routes.js                # Express router mounted in api/index.js
 ```
+
+`tasks/generatePprConfig.js` writes the deploy's config; `functions/email/themeColor.js` checks the theme colour for
+the sign-in and the PPR emails.
 
 ### Frontend `remote.ts` — HTTP client via existing API base
 
@@ -77,7 +81,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 
 ### Phase 1: Config
 - [x] Add `"ppr": false` to `projects/default.json`
-- [x] Deploy the PPR endpoints and cleanup job only where `ppr` is true (`functions/ppr-config.generated.js`, written by the deploy workflows)
+- [x] Deploy the PPR endpoints and cleanup job only where `ppr` is true (`functions/ppr-config.generated.js`, written by `tasks/generatePprConfig.js` in the deploy workflows, with the aerodrome's name and theme colour for the emails)
 - [ ] Set `"ppr": true` in `projects/<name>.json` for each PPR aerodrome
 - [x] Admins set the notification address (`/settings/ppr/adminEmail`) in the PPR admin tab
 - [ ] Set the notification address at each PPR aerodrome
@@ -140,6 +144,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
   - Pilot emails in the pilot's language (`*_en` templates for English, as for sign-in); the admin email stays German
   - HTML-escape all user-supplied values; include text/plain alternative
 - [x] Create `functions/ppr/adapters/emailNotifier.js`
+- [x] The emails have the sign-in email's header ("Flightbox" and the aerodrome's name on the theme colour, from the deploy's config) with the status as the first heading; the text emails start with "Flightbox – <name>"; the pilot's subjects end with the aerodrome's name
 
 #### 2f. Express router
 - [x] Create `functions/ppr/routes.js`

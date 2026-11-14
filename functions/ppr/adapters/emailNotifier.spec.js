@@ -11,14 +11,20 @@ jest.mock('../../email/smtp', () => ({
   }),
   createTransporter: jest.fn()
 }))
+jest.mock('../deployConfig', () => ({
+  pprBranding: jest.fn()
+}))
 
 const mockSendMail = jest.fn().mockResolvedValue({ messageId: 'msg-1' })
 
 const { loadSmtpSettings, createTransporter } = require('../../email/smtp')
+const { pprBranding } = require('../deployConfig')
 
 createTransporter.mockReturnValue({ sendMail: mockSendMail })
 
 const { notifyRequestSubmitted, notifyRequestReviewed } = require('./emailNotifier')
+
+const brandingReadsAtLoad = pprBranding.mock.calls.length
 
 const basePprRequest = {
   key: 'req-123',
@@ -31,10 +37,14 @@ const basePprRequest = {
   flightType: 'private'
 }
 
+const UNBRANDED = { aerodromeName: '', themeColor: '#000000' }
+const BRANDING = { aerodromeName: 'Langenthal', themeColor: '#027ABB' }
+
 describe('emailNotifier', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     createTransporter.mockReturnValue({ sendMail: mockSendMail })
+    pprBranding.mockReturnValue(UNBRANDED)
   })
 
   describe('notifyRequestSubmitted', () => {
@@ -94,6 +104,47 @@ describe('emailNotifier', () => {
       await expect(notifyRequestReviewed({ ...basePprRequest, status: 'pending' }))
         .rejects.toThrow('No email for PPR status pending')
       expect(mockSendMail).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('aerodrome branding', () => {
+    beforeEach(() => {
+      pprBranding.mockReturnValue(BRANDING)
+    })
+
+    it('is passed to the admin email', async () => {
+      await notifyRequestSubmitted({ ...basePprRequest, status: 'pending' }, 'admin@aero.ch')
+
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.subject).toBe('PPR-Anfrage: HB-ABC am 2026-04-15')
+      expect(mailArgs.html).toContain('background: #027ABB;')
+      expect(mailArgs.html).toContain('opacity: 0.9;">Langenthal</p>')
+      expect(mailArgs.text.split('\n')[0]).toBe('Flightbox – Langenthal')
+    })
+
+    it.each([
+      ['approved', 'PPR genehmigt: HB-ABC am 2026-04-15 – Langenthal'],
+      ['rejected', 'PPR abgelehnt: HB-ABC am 2026-04-15 – Langenthal'],
+      ['revoked', 'PPR widerrufen: HB-ABC am 2026-04-15 – Langenthal']
+    ])('is passed to the pilot email for %s', async (status, subject) => {
+      await notifyRequestReviewed({ ...basePprRequest, status, reviewRemarks: 'Runway works' })
+
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.subject).toBe(subject)
+      expect(mailArgs.html).toContain('background: #027ABB;')
+      expect(mailArgs.text.split('\n')[0]).toBe('Flightbox – Langenthal')
+    })
+
+    it('is read for each email, not when the notifier is loaded', async () => {
+      expect(brandingReadsAtLoad).toBe(0)
+
+      await notifyRequestReviewed({ ...basePprRequest, status: 'approved' })
+      pprBranding.mockReturnValue(UNBRANDED)
+      await notifyRequestReviewed({ ...basePprRequest, status: 'approved' })
+
+      expect(pprBranding).toHaveBeenCalledTimes(2)
+      expect(mockSendMail.mock.calls[0][0].subject).toBe('PPR genehmigt: HB-ABC am 2026-04-15 – Langenthal')
+      expect(mockSendMail.mock.calls[1][0].subject).toBe('PPR genehmigt: HB-ABC am 2026-04-15')
     })
   })
 })

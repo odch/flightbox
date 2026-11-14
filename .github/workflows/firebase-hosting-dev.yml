@@ -68,17 +68,14 @@ jobs:
       - name: Generate functions/ppr-config.generated.js from project config
         # Resolved like the app's __CONF__ (webpack.config.js), environment
         # overrides included, so the PPR routes and cleanup job are deployed
-        # exactly where the PPR pages are built.
-        # The functions only honour it for this Firebase project (enabled.js).
-        run: |
-          node -e "
-            const { environments, ...conf } = require('./projects').load('${{ vars.PROJECT }}');
-            const flag = {
-              enabled: ({ ...conf, ...environments?.test }).ppr === true,
-              firebaseProjectId: '${{ vars.FIREBASE_PROJECT }}',
-            };
-            require('fs').writeFileSync('functions/ppr-config.generated.js', 'module.exports = ' + JSON.stringify(flag) + ';\\n');
-          "
+        # exactly where the PPR pages are built. It also carries the
+        # aerodrome name, theme colour and app URL for the PPR emails; an
+        # invalid value fails the deploy.
+        # The functions only honour it for this Firebase project
+        # (functions/ppr/deployConfig.js).
+        run: >-
+          node tasks/generatePprConfig.js "${{ vars.PROJECT }}" test
+          functions/ppr-config.generated.js "${{ vars.FIREBASE_PROJECT }}"
       - name: Generate functions/project-config.generated.json from project config
         run: >-
           node tasks/generateServerConfig.js "${{ vars.PROJECT }}" test

@@ -1,3 +1,5 @@
+{{headerText}}
+
 PPR-Genehmigung widerrufen
 
 Ihre PPR-Genehmigung wurde leider widerrufen.

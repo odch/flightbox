@@ -19,6 +19,7 @@ project.
   * `test`
   * `production`
 * `theme`
+* `themeColor`
 * `title`
 * `enabledFlightTypes`
 * `reportApiEnabled`
@@ -188,13 +189,22 @@ Description of the test environment.
 Description of the production environment.
 
 A property set in an environment replaces the top-level property of the same name in the app's configuration
-and in the functions' generated config (`reportApiEnabled`, `memberManagement`, `aerodrome`) and PPR flag (`ppr`), e.g.
+and in the functions' generated configs (`reportApiEnabled`, `memberManagement`, `aerodrome`; for PPR `ppr`, the
+aerodrome's `name` and `themeColor`), e.g.
 `"reportApiEnabled": true` in `test` only. `theme`, the landing and go-around fees and `privacySettings` are
 always read from the top level.
 
 ### `theme`
 
 The name of the theme to use (must exist in the `theme` directory in the project root). The default theme is "lszt".
+
+### `themeColor`
+
+The main colour of the theme as a hex colour (`#rgb`, `#rrggbb` or `#rrggbbaa`) or a CSS colour name; keep it the same
+as the theme's main colour. The browser's theme colour and the web app manifest use it, and so do the header and the
+button of the PPR e-mails. A value in another form fails the deploy.
+
+Example: `"#027ABB"`
 
 ### `title`
 
@@ -240,10 +250,15 @@ their requests in the app, the aerodrome gets an e-mail for each new request, ad
 in the "PPR-Anfragen" tab, and pilots get an e-mail with the decision. Disabled by default.
 
 In the Cloud Functions the flag decides at deploy time whether the PPR endpoints (`/api/ppr/...`) and the daily
-cleanup job (`scheduledPprCleanup`) exist: the deploy workflows write it, together with the Firebase project it is for,
-to `functions/ppr-config.generated.js`, and the functions ignore it in any other project. Without that file (locally,
+cleanup job (`scheduledPprCleanup`) exist: the deploy workflows write it with
+`node tasks/generatePprConfig.js <project> <test|production> <file> <Firebase project>`, together with the Firebase
+project it is for and, for the e-mails, the aerodrome's name and the theme colour, to
+`functions/ppr-config.generated.js`, and the functions ignore it in any other project. Without that file (locally,
 in unit tests) PPR is off in the functions; for local work on PPR, create it for the project you run the emulator with:
 `echo "module.exports = { enabled: true, firebaseProjectId: '<project>' };" > functions/ppr-config.generated.js`.
+
+The PPR e-mails have the header of the sign-in e-mail: the aerodrome's name on the theme colour. The subjects of the
+pilot's e-mails end with the aerodrome's name.
 
 Admins set the address new requests are sent to in the "PPR-Anfragen" tab (stored at `/settings/ppr/adminEmail`);
 while none is set, requests are accepted but not sent to anyone, and the tab shows a warning when requests are

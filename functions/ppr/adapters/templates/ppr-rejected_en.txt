@@ -1,3 +1,5 @@
+{{headerText}}
+
 PPR request rejected
 
 Unfortunately, your PPR request has been rejected.

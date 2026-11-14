@@ -284,4 +284,98 @@ describe('PPR emailTemplates', () => {
       }
     })
   })
+
+  describe('aerodrome branding', () => {
+    const BRANDING = { aerodromeName: 'Langenthal', themeColor: '#027ABB' }
+    const english = { ...basePprRequest, language: 'en' }
+
+    // Every template: the admin's, and the pilot's in both languages, with
+    // the status heading and its colour
+    const EMAILS = [
+      ['submitted', getPprSubmittedEmail, { ...basePprRequest, status: 'pending' }, 'Neue PPR-Anfrage', '#333'],
+      ['approved', getPprApprovedEmail, { ...basePprRequest, status: 'approved' }, 'PPR-Anfrage genehmigt', '#28a745'],
+      ['approved (en)', getPprApprovedEmail, { ...english, status: 'approved' }, 'PPR request approved', '#28a745'],
+      ['rejected', getPprRejectedEmail, { ...basePprRequest, status: 'rejected' }, 'PPR-Anfrage abgelehnt', '#dc3545'],
+      ['rejected (en)', getPprRejectedEmail, { ...english, status: 'rejected' }, 'PPR request rejected', '#dc3545'],
+      ['revoked', getPprRevokedEmail, { ...basePprRequest, status: 'revoked' }, 'PPR-Genehmigung widerrufen', '#dc3545'],
+      ['revoked (en)', getPprRevokedEmail, { ...english, status: 'revoked' }, 'PPR approval revoked', '#dc3545']
+    ]
+
+    const headerStart = color =>
+      `<div style="background: ${color}; color: white; padding: 20px 30px; text-align: center;">\n` +
+      '      <h1 style="margin: 0; font-size: 28px; font-weight: 300;">Flightbox</h1>'
+
+    it.each(EMAILS)('%s: has the header of the sign-in email with the aerodrome name', (name, getEmail, request) => {
+      const { html, text } = getEmail(request, BRANDING)
+      expect(html).toContain(headerStart('#027ABB') +
+        '\n      <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Langenthal</p>\n    </div>')
+      expect(text.startsWith('Flightbox – Langenthal\n\n')).toBe(true)
+      expect(html).not.toMatch(/\{\{\w+\}\}/)
+      expect(text).not.toMatch(/\{\{\w+\}\}/)
+    })
+
+    it.each(EMAILS)('%s: has no subtitle and the default colour without branding', (name, getEmail, request, title) => {
+      for (const context of [undefined, null, {}, { aerodromeName: '' }, { aerodromeName: '  ' }]) {
+        const { html, text } = getEmail(request, context)
+        expect(html).toContain(headerStart('#000000') + '\n    </div>')
+        expect(html).not.toContain('opacity: 0.9')
+        expect(text.split('\n').slice(0, 3)).toEqual(['Flightbox', '', title])
+        expect(html).not.toMatch(/\{\{\w+\}\}/)
+        expect(text).not.toMatch(/\{\{\w+\}\}/)
+      }
+    })
+
+    it.each(EMAILS)('%s: starts the body with the status, in the colour of the answer', (name, getEmail, request, title, color) => {
+      const { html, text } = getEmail(request, BRANDING)
+      expect(html).toContain('<div style="padding: 20px 30px;">\n' +
+        `      <h2 style="margin: 10px 0 0 0; font-size: 22px; font-weight: 600; color: ${color};">${title}</h2>`)
+      expect(html.split(title)).toHaveLength(3) // in the <title> and the heading only
+      expect(text.split('\n').slice(0, 3)).toEqual(['Flightbox – Langenthal', '', title])
+    })
+
+    it.each(EMAILS)('%s: escapes the aerodrome name in HTML only', (name, getEmail, request) => {
+      const { html, text } = getEmail(request, { aerodromeName: 'A & <B>', themeColor: '#027ABB' })
+      expect(html).toContain('opacity: 0.9;">A &amp; &lt;B&gt;</p>')
+      expect(html).not.toContain('<B>')
+      expect(text.split('\n')[0]).toBe('Flightbox – A & <B>')
+    })
+
+    it.each([
+      undefined,
+      '',
+      42,
+      'rgb(2, 122, 187)',
+      'red; } </style><script>alert(1)</script>',
+      'red" onload="alert(1)'
+    ])('uses the default colour instead of %p', themeColor => {
+      for (const [, getEmail, request] of EMAILS) {
+        const { html } = getEmail(request, { aerodromeName: 'Langenthal', themeColor })
+        expect(html).toContain(headerStart('#000000'))
+        expect(html).not.toContain('<script>')
+        expect(html).not.toContain('onload')
+      }
+    })
+
+    it('keeps a colour name', () => {
+      expect(getPprApprovedEmail(basePprRequest, { themeColor: 'navy' }).html).toContain(headerStart('navy'))
+    })
+
+    it.each([
+      ['approved', getPprApprovedEmail, basePprRequest, 'PPR genehmigt: HB-ABC am 2026-04-15'],
+      ['approved (en)', getPprApprovedEmail, english, 'PPR approved: HB-ABC on 2026-04-15'],
+      ['rejected', getPprRejectedEmail, basePprRequest, 'PPR abgelehnt: HB-ABC am 2026-04-15'],
+      ['rejected (en)', getPprRejectedEmail, english, 'PPR rejected: HB-ABC on 2026-04-15'],
+      ['revoked', getPprRevokedEmail, basePprRequest, 'PPR widerrufen: HB-ABC am 2026-04-15'],
+      ['revoked (en)', getPprRevokedEmail, english, 'PPR revoked: HB-ABC on 2026-04-15']
+    ])('ends the pilot subject (%s) with the aerodrome name when it is known', (name, getEmail, request, subject) => {
+      expect(getEmail(request, BRANDING).subject).toBe(`${subject} – Langenthal`)
+      expect(getEmail(request, { aerodromeName: 'A & <B>' }).subject).toBe(`${subject} – A & <B>`)
+      expect(getEmail(request, { themeColor: '#027ABB' }).subject).toBe(subject)
+      expect(getEmail(request).subject).toBe(subject)
+    })
+
+    it('keeps the subject of the admin email as it is', () => {
+      expect(getPprSubmittedEmail(basePprRequest, BRANDING).subject).toBe('PPR-Anfrage: HB-ABC am 2026-04-15')
+    })
+  })
 })

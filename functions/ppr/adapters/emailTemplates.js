@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const { flightTypeLabel } = require('./flightTypeLabels')
 const { AUTOMATIC_REVIEWER } = require('../domain/pprRequest')
+const { sanitizeThemeColor } = require('../../email/themeColor')
 
 const PLACEHOLDER_REGEX = /\{\{(\w+)\}\}/g
 
@@ -41,6 +42,39 @@ function isAutomatic(pprRequest) {
   return pprRequest.reviewedBy === AUTOMATIC_REVIEWER
 }
 
+// Every builder takes the aerodrome's branding as its context (pprBranding()
+// in deployConfig.js): { aerodromeName, themeColor }. An unknown name is left
+// out, an unknown or invalid colour becomes the default.
+function branding(context) {
+  const { aerodromeName, themeColor } = context || {}
+  return {
+    aerodromeName: typeof aerodromeName === 'string' ? aerodromeName.trim() : '',
+    themeColor: sanitizeThemeColor(themeColor)
+  }
+}
+
+// The header of every PPR email, like the sign-in email's: "Flightbox" on the
+// theme colour with the aerodrome's name below; the first line in text.
+function headerReplacements({ aerodromeName, themeColor }) {
+  return {
+    html: {
+      themeColor,
+      aerodromeHtml: aerodromeName
+        ? `\n      <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">${escapeHtml(aerodromeName)}</p>`
+        : ''
+    },
+    text: {
+      headerText: aerodromeName ? `Flightbox – ${aerodromeName}` : 'Flightbox'
+    }
+  }
+}
+
+// The pilot's subjects end with the aerodrome's name when it is known: a
+// pilot may have requests at several aerodromes.
+function pilotSubject(subject, { aerodromeName }) {
+  return aerodromeName ? `${subject} – ${aerodromeName}` : subject
+}
+
 // How the request was answered, for the aerodrome
 function answerLine(pprRequest) {
   if (pprRequest.status === 'approved') {
@@ -55,10 +89,12 @@ function answerLine(pprRequest) {
 }
 
 // Goes to the aerodrome's PPR address, whose language is not known: German.
-function getPprSubmittedEmail(pprRequest) {
+function getPprSubmittedEmail(pprRequest, context = {}) {
+  const header = headerReplacements(branding(context))
   const answer = answerLine(pprRequest)
 
   const replacements = {
+    ...header.html,
     pilotName: escapeHtml(`${pprRequest.firstname} ${pprRequest.lastname}`),
     immatriculation: escapeHtml(pprRequest.immatriculation),
     plannedDate: escapeHtml(pprRequest.plannedDate),
@@ -68,6 +104,7 @@ function getPprSubmittedEmail(pprRequest) {
   }
 
   const plainReplacements = {
+    ...header.text,
     pilotName: `${pprRequest.firstname} ${pprRequest.lastname}`,
     immatriculation: pprRequest.immatriculation,
     plannedDate: pprRequest.plannedDate,
@@ -114,10 +151,13 @@ function approvalRemarks(pprRequest) {
   return result
 }
 
-function getPprApprovedEmail(pprRequest) {
+function getPprApprovedEmail(pprRequest, context = {}) {
+  const brand = branding(context)
+  const header = headerReplacements(brand)
   const remarks = approvalRemarks(pprRequest)
 
   const replacements = {
+    ...header.html,
     immatriculation: escapeHtml(pprRequest.immatriculation),
     plannedDate: escapeHtml(pprRequest.plannedDate),
     plannedTime: escapeHtml(pprRequest.plannedTime),
@@ -125,25 +165,31 @@ function getPprApprovedEmail(pprRequest) {
   }
 
   const plainReplacements = {
+    ...header.text,
     immatriculation: pprRequest.immatriculation,
     plannedDate: pprRequest.plannedDate,
     plannedTime: pprRequest.plannedTime,
     remarksText: remarks.text
   }
 
+  const subject = isEnglish(pprRequest)
+    ? `PPR approved: ${pprRequest.immatriculation} on ${pprRequest.plannedDate}`
+    : `PPR genehmigt: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`
+
   return {
-    subject: isEnglish(pprRequest)
-      ? `PPR approved: ${pprRequest.immatriculation} on ${pprRequest.plannedDate}`
-      : `PPR genehmigt: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`,
+    subject: pilotSubject(subject, brand),
     html: replacePlaceholders(localizedTemplate('ppr-approved', pprRequest, 'html'), replacements),
     text: replacePlaceholders(localizedTemplate('ppr-approved', pprRequest, 'txt'), plainReplacements)
   }
 }
 
-function getPprRejectedEmail(pprRequest) {
+function getPprRejectedEmail(pprRequest, context = {}) {
+  const brand = branding(context)
+  const header = headerReplacements(brand)
   const remarks = pprRequest.reviewRemarks || '-'
 
   const replacements = {
+    ...header.html,
     immatriculation: escapeHtml(pprRequest.immatriculation),
     plannedDate: escapeHtml(pprRequest.plannedDate),
     plannedTime: escapeHtml(pprRequest.plannedTime),
@@ -151,25 +197,31 @@ function getPprRejectedEmail(pprRequest) {
   }
 
   const plainReplacements = {
+    ...header.text,
     immatriculation: pprRequest.immatriculation,
     plannedDate: pprRequest.plannedDate,
     plannedTime: pprRequest.plannedTime,
     reviewRemarks: remarks
   }
 
+  const subject = isEnglish(pprRequest)
+    ? `PPR rejected: ${pprRequest.immatriculation} on ${pprRequest.plannedDate}`
+    : `PPR abgelehnt: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`
+
   return {
-    subject: isEnglish(pprRequest)
-      ? `PPR rejected: ${pprRequest.immatriculation} on ${pprRequest.plannedDate}`
-      : `PPR abgelehnt: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`,
+    subject: pilotSubject(subject, brand),
     html: replacePlaceholders(localizedTemplate('ppr-rejected', pprRequest, 'html'), replacements),
     text: replacePlaceholders(localizedTemplate('ppr-rejected', pprRequest, 'txt'), plainReplacements)
   }
 }
 
-function getPprRevokedEmail(pprRequest) {
+function getPprRevokedEmail(pprRequest, context = {}) {
+  const brand = branding(context)
+  const header = headerReplacements(brand)
   const remarks = pprRequest.reviewRemarks || '-'
 
   const replacements = {
+    ...header.html,
     immatriculation: escapeHtml(pprRequest.immatriculation),
     plannedDate: escapeHtml(pprRequest.plannedDate),
     plannedTime: escapeHtml(pprRequest.plannedTime),
@@ -177,16 +229,19 @@ function getPprRevokedEmail(pprRequest) {
   }
 
   const plainReplacements = {
+    ...header.text,
     immatriculation: pprRequest.immatriculation,
     plannedDate: pprRequest.plannedDate,
     plannedTime: pprRequest.plannedTime,
     reviewRemarks: remarks
   }
 
+  const subject = isEnglish(pprRequest)
+    ? `PPR revoked: ${pprRequest.immatriculation} on ${pprRequest.plannedDate}`
+    : `PPR widerrufen: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`
+
   return {
-    subject: isEnglish(pprRequest)
-      ? `PPR revoked: ${pprRequest.immatriculation} on ${pprRequest.plannedDate}`
-      : `PPR widerrufen: ${pprRequest.immatriculation} am ${pprRequest.plannedDate}`,
+    subject: pilotSubject(subject, brand),
     html: replacePlaceholders(localizedTemplate('ppr-revoked', pprRequest, 'html'), replacements),
     text: replacePlaceholders(localizedTemplate('ppr-revoked', pprRequest, 'txt'), plainReplacements)
   }

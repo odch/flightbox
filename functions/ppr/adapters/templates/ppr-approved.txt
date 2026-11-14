@@ -1,3 +1,5 @@
+{{headerText}}
+
 PPR-Anfrage genehmigt
 
 Ihre PPR-Anfrage wurde genehmigt.

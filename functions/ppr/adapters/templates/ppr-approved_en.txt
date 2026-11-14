@@ -1,3 +1,5 @@
+{{headerText}}
+
 PPR request approved
 
 Your PPR request has been approved.

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { sanitizeThemeColor } = require('../email/themeColor');
 
 const PLACEHOLDER_REGEX = /\{\{(\w+)\}\}/g;
 
@@ -20,15 +21,6 @@ const escapeHtml = value =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-
-// Accept only a hex colour (#rgb / #rrggbb / #rrggbbaa) or a plain CSS colour
-// keyword; anything else falls back to a safe default so it cannot break out of
-// the style attribute or inject CSS.
-const SAFE_COLOR_REGEX = /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)$/;
-const DEFAULT_THEME_COLOR = '#000000';
-
-const sanitizeThemeColor = color =>
-  (typeof color === 'string' && SAFE_COLOR_REGEX.test(color)) ? color : DEFAULT_THEME_COLOR;
 
 const readTemplate = (templateName, format) => {
   const templatePath = path.join(__dirname, 'templates', `${templateName}.${format}`);
