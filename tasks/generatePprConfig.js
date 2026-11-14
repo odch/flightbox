@@ -114,6 +114,18 @@ function buildPprConfigFor(project, env, firebaseProjectId) {
   return buildPprConfig(project, projects.load(project), env, firebaseProjectId);
 }
 
+/**
+ * Pure. What the deploy log should point out about a valid config: values
+ * that are optional, but whose absence changes the emails unnoticed.
+ */
+function pprConfigWarnings(project, env, config) {
+  if (config.enabled && config.appUrl === undefined) {
+    return [`PPR is on for project "${project}" (env "${env}"), but appUrl is not set:`
+      + ' the aerodrome\'s emails have no link to the requests'];
+  }
+  return [];
+}
+
 // JSON.stringify leaves out the undefined values, so the file of a project
 // without them keeps its former shape ({ enabled, firebaseProjectId }).
 function formatPprConfig(config) {
@@ -135,6 +147,7 @@ function main(args) {
   try {
     const config = buildPprConfigFor(project, env, firebaseProjectId);
     fs.writeFileSync(outFile, formatPprConfig(config));
+    pprConfigWarnings(project, env, config).forEach(warning => console.warn(warning));
   } catch (e) {
     console.error(e.message);
     return 1;
@@ -150,5 +163,6 @@ module.exports = {
   buildPprConfig,
   buildPprConfigFor,
   formatPprConfig,
+  pprConfigWarnings,
   main
 };

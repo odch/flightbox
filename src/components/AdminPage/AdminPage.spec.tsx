@@ -1,6 +1,6 @@
 import React from 'react';
 import '../../i18n';
-import {renderWithTheme, screen, fireEvent} from '../../../test/renderWithTheme';
+import {renderWithTheme, withTheme, screen, fireEvent} from '../../../test/renderWithTheme';
 
 jest.mock('../VerticalHeaderLayout', () => ({
   __esModule: true,
@@ -23,6 +23,7 @@ jest.mock('./subpages/AdminGuestAccessPage', () => mockSubpage('guest-access'));
 jest.mock('./subpages/AdminKioskAccessPage', () => mockSubpage('kiosk-access'));
 jest.mock('./subpages/AdminPrivacySettingsPage', () => mockSubpage('privacy'));
 jest.mock('./subpages/AdminApiAccessPage', () => mockSubpage('api-access'));
+jest.mock('./subpages/AdminPprPage', () => mockSubpage('ppr'));
 
 import AdminPage from './AdminPage';
 
@@ -32,9 +33,13 @@ const renderAdminPage = (props: any = {}) => renderWithTheme(
   <AdminPage auth={auth} checkCustomsAvailability={jest.fn()} {...props}/>
 );
 
+// The router of renderWithTheme reads the URL of jsdom
+const visit = (url: string) => window.history.replaceState(null, '', url);
+
 describe('AdminPage', () => {
   afterEach(() => {
     delete (global as any).__CONF__;
+    visit('/');
   });
 
   it.each([
@@ -138,6 +143,107 @@ describe('AdminPage', () => {
 
       fireEvent.click(screen.getByRole('button', {name: /Zoll-Selbstdeklaration/}));
       expect(screen.getByTestId('subpage-customs-self-declaration')).toBeInTheDocument();
+    });
+  });
+
+  describe('tab in the URL', () => {
+    it('shows the tab of the URL, e.g. of a link in the PPR notification email', () => {
+      (global as any).__CONF__ = {paymentMethods: {}, ppr: true};
+      visit('/admin?tab=ppr&request=-Nabc');
+      renderAdminPage();
+
+      expect(screen.getByTestId('subpage-ppr')).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /PPR-Anfragen/})).toHaveAttribute('aria-current', 'page');
+      expect(window.location.search).toBe('?tab=ppr&request=-Nabc');
+    });
+
+    it('shows the export without a tab in the URL', () => {
+      (global as any).__CONF__ = {paymentMethods: {}};
+      visit('/admin');
+      renderAdminPage();
+
+      expect(screen.getByTestId('subpage-export')).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /Export/})).toHaveAttribute('aria-current', 'page');
+    });
+
+    it.each([
+      ['an unknown tab', 'unknown'],
+      ['an empty tab', ''],
+      ['a key every object has', 'constructor'],
+      ['a key every object has', '__proto__'],
+      ['a key every object has', 'toString'],
+    ])('shows the export for %s (%s)', (_, tab) => {
+      (global as any).__CONF__ = {paymentMethods: {}};
+      visit(`/admin?tab=${tab}`);
+      renderAdminPage();
+
+      expect(screen.getByTestId('subpage-export')).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /Export/})).toHaveAttribute('aria-current', 'page');
+    });
+
+    it.each([
+      ['ppr', {}],
+      ['api-access', {reportApiEnabled: false}],
+      ['privacy', {}],
+      ['invoice-recipients', {}],
+      ['guest-access', {}],
+    ])('shows the export for the hidden tab %s', (tab, conf) => {
+      (global as any).__CONF__ = {paymentMethods: {}, ...conf};
+      visit(`/admin?tab=${tab}`);
+      renderAdminPage();
+
+      expect(screen.getByTestId('subpage-export')).toBeInTheDocument();
+      expect(screen.queryByTestId(`subpage-${tab}`)).toBeNull();
+    });
+
+    it('shows the customs self-declaration of the URL once the integration is known to be available', () => {
+      (global as any).__CONF__ = {paymentMethods: {}, customsSelfDeclarationEnabled: true};
+      visit('/admin?tab=customs-self-declaration');
+      const {rerender} = renderAdminPage();
+      expect(screen.getByTestId('subpage-export')).toBeInTheDocument();
+
+      rerender(withTheme(<AdminPage auth={auth} checkCustomsAvailability={jest.fn()} customsAvailable/>));
+      expect(screen.getByTestId('subpage-customs-self-declaration')).toBeInTheDocument();
+    });
+
+    it('puts the clicked tab in the URL, so a reload stays on it', () => {
+      (global as any).__CONF__ = {paymentMethods: {}, reportApiEnabled: true};
+      visit('/admin');
+      renderAdminPage();
+
+      fireEvent.click(screen.getByRole('button', {name: /API-Zugriff/}));
+
+      expect(window.location.pathname).toBe('/admin');
+      expect(window.location.search).toBe('?tab=api-access');
+      expect(screen.getByTestId('subpage-api-access')).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /API-Zugriff/})).toHaveAttribute('aria-current', 'page');
+    });
+
+    it('drops the request of a PPR link when another tab is clicked', () => {
+      (global as any).__CONF__ = {paymentMethods: {}, ppr: true};
+      visit('/admin?tab=ppr&request=-Nabc');
+      renderAdminPage();
+
+      fireEvent.click(screen.getByRole('button', {name: /Export/}));
+
+      expect(window.location.search).toBe('?tab=export');
+      expect(screen.getByTestId('subpage-export')).toBeInTheDocument();
+    });
+
+    it('adds an entry to the history for another tab only, not for the tab shown', () => {
+      (global as any).__CONF__ = {paymentMethods: {}, ppr: true};
+      visit('/admin?tab=ppr&request=-Nabc');
+      renderAdminPage();
+      const entries = window.history.length;
+
+      fireEvent.click(screen.getByRole('button', {name: /PPR/}));
+      expect(window.location.search).toBe('?tab=ppr');
+      expect(screen.getByTestId('subpage-ppr')).toBeInTheDocument();
+      expect(window.history.length).toBe(entries);
+
+      fireEvent.click(screen.getByRole('button', {name: /Export/}));
+      expect(window.location.search).toBe('?tab=export');
+      expect(window.history.length).toBe(entries + 1);
     });
   });
 });

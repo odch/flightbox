@@ -179,6 +179,9 @@ Description of the environments. Each environment description consists of the fo
 * `firebaseProjectId`: The Firebase project. Required: the functions deploy fails without it.
 * `firebaseDatabaseUrl`: The URL of the Realtime Database.
 * `firebaseApiKey`: The Firebase web API key.
+* `appUrl`: The https origin the app is served from, e.g. `https://lspl-test.web.app` (no path, query or fragment).
+  The aerodrome's e-mail about an open PPR request links to the request in the admin area; without `appUrl` it has no
+  link, and the deploy log warns about it where `ppr` is on. Optional; a value in another form fails the deploy.
 
 #### `test`
 
@@ -190,7 +193,7 @@ Description of the production environment.
 
 A property set in an environment replaces the top-level property of the same name in the app's configuration
 and in the functions' generated configs (`reportApiEnabled`, `memberManagement`, `aerodrome`; for PPR `ppr`, the
-aerodrome's `name` and `themeColor`), e.g.
+aerodrome's `name`, `themeColor` and `appUrl`), e.g.
 `"reportApiEnabled": true` in `test` only. `theme`, the landing and go-around fees and `privacySettings` are
 always read from the top level.
 
@@ -252,13 +255,16 @@ in the "PPR-Anfragen" tab, and pilots get an e-mail with the decision. Disabled 
 In the Cloud Functions the flag decides at deploy time whether the PPR endpoints (`/api/ppr/...`) and the daily
 cleanup job (`scheduledPprCleanup`) exist: the deploy workflows write it with
 `node tasks/generatePprConfig.js <project> <test|production> <file> <Firebase project>`, together with the Firebase
-project it is for and, for the e-mails, the aerodrome's name and the theme colour, to
+project it is for and, for the e-mails, the aerodrome's name, the theme colour and `appUrl`, to
 `functions/ppr-config.generated.js`, and the functions ignore it in any other project. Without that file (locally,
 in unit tests) PPR is off in the functions; for local work on PPR, create it for the project you run the emulator with:
 `echo "module.exports = { enabled: true, firebaseProjectId: '<project>' };" > functions/ppr-config.generated.js`.
 
 The PPR e-mails have the header of the sign-in e-mail: the aerodrome's name on the theme colour. The subjects of the
-pilot's e-mails end with the aerodrome's name.
+pilot's e-mails end with the aerodrome's name. When `appUrl` is set, the aerodrome's e-mail about an open request
+links to it in the admin area (`<appUrl>/#/admin?tab=ppr&request=<key>`). The link only opens the request: admins
+answer it after their normal login. The admin area keeps the open tab in the URL, so tabs can be linked and survive a
+reload.
 
 Admins set the address new requests are sent to in the "PPR-Anfragen" tab (stored at `/settings/ppr/adminEmail`);
 while none is set, requests are accepted but not sent to anyone, and the tab shows a warning when requests are

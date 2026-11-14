@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderWithTheme, screen, fireEvent } from '../../../test/renderWithTheme';
+import { renderWithTheme, withTheme, screen, fireEvent, within } from '../../../test/renderWithTheme';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: key => key }),
@@ -67,6 +67,18 @@ describe('PprRequestList (admin)', () => {
   it('shows empty message when no requests', () => {
     renderWithTheme(<PprRequestList {...defaultProps} />);
     expect(screen.getByText('ppr.noRequests')).toBeTruthy();
+  });
+
+  it('tells when the requests could not be loaded, instead of that there are none', () => {
+    renderWithTheme(<PprRequestList {...defaultProps} loadFailed={true} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('ppr.loadFailed');
+    expect(screen.queryByText('ppr.noRequests')).toBeNull();
+  });
+
+  it('keeps the requests of an earlier load below the error', () => {
+    renderWithTheme(<PprRequestList {...defaultProps} data={[pendingRequest]} loadFailed={true} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('ppr.loadFailed');
+    expect(screen.getByText('HB-ABC')).toBeTruthy();
   });
 
   it('renders request cards with status', () => {
@@ -228,6 +240,264 @@ describe('PprRequestList (admin)', () => {
     it('shows a failed revocation', () => {
       renderWithTheme(<PprRequestList {...defaultProps} revokeFailed={true}/>);
       expect(screen.getByText('ppr.revokeFailed')).toBeTruthy();
+    });
+  });
+
+  describe('a linked request (from the notification email)', () => {
+    const otherPending = { ...pendingRequest, key: 'req-3', immatriculation: 'HB-DEF' };
+    const requests = [otherPending, pendingRequest, approvedRequest];
+
+    // When the list is opened from the link: nothing loaded yet
+    const opened = { ...defaultProps, data: [], loaded: false, settingsReady: false };
+    // After the load of all requests, with the settings above the list
+    const ready = { ...defaultProps, data: requests, loaded: true, settingsReady: true };
+
+    let scrollIntoView: jest.Mock;
+    let originalScrollIntoView: any;
+
+    beforeEach(() => {
+      // Not in jsdom
+      originalScrollIntoView = (HTMLElement.prototype as any).scrollIntoView;
+      scrollIntoView = jest.fn();
+      (HTMLElement.prototype as any).scrollIntoView = scrollIntoView;
+    });
+
+    afterEach(() => {
+      (HTMLElement.prototype as any).scrollIntoView = originalScrollIntoView;
+    });
+
+    // Renders the list with the given props first, and returns a function
+    // that renders it with new props
+    const renderList = (linkedKey: string | undefined, props: any) => {
+      const utils = renderWithTheme(<PprRequestList {...props} linkedKey={linkedKey}/>);
+      const update = (newProps: any) => {
+        utils.rerender(withTheme(<PprRequestList {...newProps} linkedKey={linkedKey}/>));
+      };
+      return { ...utils, update };
+    };
+
+    // Opens the list and goes through its load
+    const openList = (linkedKey: string | undefined, loadedProps: any = ready) => {
+      const utils = renderList(linkedKey, opened);
+      utils.update({ ...opened, loading: true });
+      utils.update(loadedProps);
+      return utils;
+    };
+
+    const rowOf = (container: HTMLElement, key: string) =>
+      container.querySelector(`[data-cy="ppr-admin-${key}"]`) as HTMLElement;
+    const isOpen = (immatriculation: string) =>
+      screen.getByRole('button', { name: new RegExp(immatriculation) }).getAttribute('aria-expanded') === 'true';
+
+    it('opens the request and scrolls it into view, ready to be answered', () => {
+      const { container } = openList('req-1');
+
+      expect(isOpen('HB-ABC')).toBe(true);
+      expect(isOpen('HB-DEF')).toBe(false);
+      expect(screen.getByText('ppr.approve')).toBeTruthy();
+      expect(screen.getByText('ppr.reject')).toBeTruthy();
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+      expect(scrollIntoView.mock.instances[0]).toBe(rowOf(container, 'req-1'));
+      expect(screen.queryByText('ppr.linkedRequestAnswered')).toBeNull();
+      expect(screen.queryByText('ppr.linkedRequestMissing')).toBeNull();
+    });
+
+    it.each([
+      ['a pending', 'req-1'],
+      ['an approved', 'req-2'],
+      ['a missing', 'gone-key'],
+    ])('does nothing but show %s request', (_, key) => {
+      openList(key);
+
+      expect(defaultProps.reviewPprRequest).not.toHaveBeenCalled();
+      expect(defaultProps.revokePprApproval).not.toHaveBeenCalled();
+      expect(defaultProps.loadPprRequests).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits for the settings above the list, which would push the row away', () => {
+      const { container, update } = openList('req-1', { ...ready, settingsReady: false });
+      expect(isOpen('HB-ABC')).toBe(false);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      update(ready);
+      expect(isOpen('HB-ABC')).toBe(true);
+      expect(scrollIntoView.mock.instances[0]).toBe(rowOf(container, 'req-1'));
+    });
+
+    it('waits for the list of all requests (not the pilot\'s own)', () => {
+      const { update } = openList('req-1', { ...ready, loaded: false });
+      expect(isOpen('HB-ABC')).toBe(false);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      update({ ...ready, loading: true });
+      update(ready);
+      expect(isOpen('HB-ABC')).toBe(true);
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits for a load since the list was opened, not the requests of an earlier visit', () => {
+      const { update } = renderList('req-1', ready);
+      expect(isOpen('HB-ABC')).toBe(false);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      update({ ...ready, loading: true });
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      update(ready);
+      expect(isOpen('HB-ABC')).toBe(true);
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens the request only once, not again after a reload', () => {
+      const { update } = openList('req-1');
+      fireEvent.click(screen.getByText('HB-ABC'));
+      expect(isOpen('HB-ABC')).toBe(false);
+
+      update({ ...ready, loading: true });
+      update({ ...ready, data: [...requests] });
+      expect(isOpen('HB-ABC')).toBe(false);
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens the request without the remarks typed for another one', () => {
+      const { update } = renderList('req-1', ready);
+      fireEvent.click(screen.getByText('HB-DEF'));
+      fireEvent.change(screen.getByPlaceholderText('ppr.adminRemarks'), { target: { value: 'Runway closed for you' } });
+
+      update({ ...ready, loading: true });
+      update(ready);
+      expect(isOpen('HB-ABC')).toBe(true);
+      expect((screen.getByPlaceholderText('ppr.adminRemarks') as HTMLTextAreaElement).value).toBe('');
+
+      fireEvent.click(screen.getByText('ppr.approve'));
+      expect(defaultProps.reviewPprRequest).toHaveBeenCalledWith('req-1', 'approved', undefined);
+    });
+
+    it('tells when the request no longer exists, without the key from the link', () => {
+      const { container } = openList('gone-key');
+
+      const notice = screen.getByText('ppr.linkedRequestMissing');
+      expect(notice).toBe(container.firstElementChild!.firstElementChild);
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+      expect(scrollIntoView.mock.instances[0]).toBe(notice);
+      expect(container.querySelector('[aria-expanded="true"]')).toBeNull();
+      expect(container.innerHTML).not.toContain('gone-key');
+    });
+
+    it('tells in its details when the request has already been answered', () => {
+      const { container } = openList('req-2');
+
+      expect(isOpen('HB-XYZ')).toBe(true);
+      const row = rowOf(container, 'req-2');
+      expect(within(row).getByText('ppr.linkedRequestAnswered')).toBeTruthy();
+      expect(scrollIntoView.mock.instances[0]).toBe(row);
+      expect(screen.queryByText('ppr.linkedRequestMissing')).toBeNull();
+    });
+
+    it('does not call the request already answered after the admin answers it', () => {
+      const { update } = openList('req-1');
+      fireEvent.click(screen.getByText('ppr.approve'));
+      expect(defaultProps.reviewPprRequest).toHaveBeenCalledWith('req-1', 'approved', undefined);
+
+      // The list is reloaded after the review
+      const answered = requests.map(req => (req.key === 'req-1' ? { ...req, status: 'approved' } : req));
+      update({ ...ready, loading: true });
+      update({ ...ready, data: answered });
+      expect(isOpen('HB-ABC')).toBe(false);
+
+      fireEvent.click(screen.getByText('HB-ABC'));
+      expect(screen.getByText('ppr.revoke')).toBeTruthy();
+      expect(screen.queryByText('ppr.linkedRequestAnswered')).toBeNull();
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens nothing without a link', () => {
+      const { container } = openList(undefined);
+
+      expect(container.querySelector('[aria-expanded="true"]')).toBeNull();
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      expect(screen.queryByText('ppr.linkedRequestMissing')).toBeNull();
+    });
+
+    describe('after a failed load', () => {
+      const newRequest = { ...pendingRequest, key: 'req-new', immatriculation: 'HB-NEW' };
+
+      it('does not look for the request in those of an earlier visit, but in those of the next load', () => {
+        // The list of an earlier visit, without the request of the link
+        const { container, update } = renderList('req-new', ready);
+        update({ ...ready, loading: true });
+        update({ ...ready, loadFailed: true });
+
+        expect(screen.getByRole('alert')).toHaveTextContent('ppr.loadFailed');
+        expect(screen.queryByText('ppr.linkedRequestMissing')).toBeNull();
+        expect(container.querySelector('[aria-expanded="true"]')).toBeNull();
+        expect(scrollIntoView).not.toHaveBeenCalled();
+
+        // e.g. the reload after answering another request
+        update({ ...ready, loading: true });
+        update({ ...ready, data: [newRequest, ...requests] });
+        expect(screen.queryByRole('alert')).toBeNull();
+        expect(isOpen('HB-NEW')).toBe(true);
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+        expect(scrollIntoView.mock.instances[0]).toBe(rowOf(container, 'req-new'));
+        expect(screen.queryByText('ppr.linkedRequestMissing')).toBeNull();
+      });
+
+      it('tells that the requests could not be loaded, not that the request is missing', () => {
+        const { update } = renderList('req-1', opened);
+        update({ ...opened, loading: true });
+        update({ ...opened, settingsReady: true, loadFailed: true });
+
+        expect(screen.getByRole('alert')).toHaveTextContent('ppr.loadFailed');
+        expect(screen.queryByText('ppr.linkedRequestMissing')).toBeNull();
+        expect(screen.queryByText('ppr.noRequests')).toBeNull();
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('focus', () => {
+      afterEach(() => {
+        (document.activeElement as HTMLElement | null)?.blur();
+      });
+
+      it('goes to the opened request, to go on with the keyboard', () => {
+        openList('req-1');
+        expect(document.activeElement).toBe(screen.getByRole('button', { name: /HB-ABC/ }));
+      });
+
+      it('goes to the notice that the request no longer exists', () => {
+        openList('gone-key');
+        expect(document.activeElement).toBe(screen.getByText('ppr.linkedRequestMissing'));
+      });
+
+      it('goes to a request already answered, which is described as such', () => {
+        openList('req-2');
+        const toggle = screen.getByRole('button', { name: /HB-XYZ/ });
+        expect(document.activeElement).toBe(toggle);
+        expect(toggle).toHaveAccessibleDescription('ppr.linkedRequestAnswered');
+      });
+
+      it('describes no other request as already answered', () => {
+        openList('req-1');
+        expect(screen.getByRole('button', { name: /HB-ABC/ })).not.toHaveAttribute('aria-describedby');
+        fireEvent.click(screen.getByRole('button', { name: /HB-XYZ/ }));
+        expect(screen.getByRole('button', { name: /HB-XYZ/ })).not.toHaveAttribute('aria-describedby');
+      });
+
+      it('stays where it was moved while the list loaded', () => {
+        const elsewhere = document.createElement('button');
+        document.body.appendChild(elsewhere);
+        try {
+          elsewhere.focus();
+          openList('req-1');
+          expect(isOpen('HB-ABC')).toBe(true);
+          expect(document.activeElement).toBe(elsewhere);
+        } finally {
+          elsewhere.remove();
+        }
+      });
     });
   });
 });

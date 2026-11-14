@@ -1,4 +1,4 @@
-import {all, call, put, takeEvery, takeLeading} from 'redux-saga/effects'
+import {all, call, put, takeEvery, takeLatest, takeLeading} from 'redux-saga/effects'
 import {history} from '../../history'
 import {getIdToken} from '../../util/firebase'
 import i18n from '../../i18n'
@@ -139,7 +139,9 @@ export function* confirmPprSubmitSuccess() {
 export default function* sagas() {
   yield all([
     takeEvery(actions.INIT_PPR_FORM, initPprForm),
-    takeEvery(actions.LOAD_PPR_REQUESTS, loadPprRequests),
+    // A newer load replaces the one running: the store holds the state of
+    // one load (e.g. of the admin page and the list, started together)
+    takeLatest(actions.LOAD_PPR_REQUESTS, loadPprRequests),
     // Ignores further submits while one is being sent (double clicks)
     takeLeading(actions.SUBMIT_PPR_REQUEST, submitPprRequest),
     takeEvery(actions.REVIEW_PPR_REQUEST, reviewPprRequest),

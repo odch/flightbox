@@ -11,6 +11,7 @@ describe('modules', () => {
           data: [],
           scope: null,
           loading: false,
+          loadFailed: false,
           selected: null,
           initialValues: {},
           form: { submitting: false, submitted: false, result: null, commitFailed: false, reviewFailed: false, revokeFailed: false, deleteFailed: false },
@@ -128,6 +129,21 @@ describe('modules', () => {
         const state = reducer(stateWithData, actions.pprLoadFailed());
         expect(state.loading).toBe(false);
         expect(state.data).toEqual([{ key: 'req-1' }]);
+      });
+
+      it('marks a failed load, keeping the requests and whose they are', () => {
+        const loaded = reducer(initialState, actions.pprRequestsLoaded([{ key: 'req-1' }], 'all'));
+        const state = reducer(reducer(loaded, actions.setPprLoading()), actions.pprLoadFailed());
+        expect(state.loadFailed).toBe(true);
+        expect(state.data).toEqual([{ key: 'req-1' }]);
+        expect(state.scope).toBe('all');
+      });
+
+      it('clears a failed load when loading again, and when requests are loaded', () => {
+        const failed = reducer(initialState, actions.pprLoadFailed());
+        expect(reducer(failed, actions.setPprLoading()).loadFailed).toBe(false);
+        // e.g. two loads at once, the one that failed finishing first
+        expect(reducer(failed, actions.pprRequestsLoaded([], 'all')).loadFailed).toBe(false);
       });
 
       it('should set submitting and clear commitFailed when a submit starts', () => {

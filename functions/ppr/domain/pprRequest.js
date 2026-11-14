@@ -11,6 +11,10 @@ const Status = {
 // reviewedBy of the requests answered on submission (see pprAnswer.js)
 const AUTOMATIC_REVIEWER = 'automatic'
 
+// The keys requests are stored under (Firebase push keys). The routes refuse
+// other keys, and the aerodrome's email links only to such keys.
+const REQUEST_KEY_PATTERN = /^[-\w]{1,128}$/
+
 const MAX_LENGTHS = {
   firstname: 100,
   lastname: 100,
@@ -97,12 +101,34 @@ function isValidDate(value) {
   return typeof value === 'string' && DATE_REGEX.test(value) && isCalendarDate(value)
 }
 
+// Fields of a single line. A line break in them would start a new line in
+// the text emails, e.g. one imitating the link the aerodrome's email ends
+// with; the remarks keep theirs.
+const SINGLE_LINE_FIELDS = [
+  'firstname',
+  'lastname',
+  'phone',
+  'immatriculation',
+  'aircraftType',
+  'flightType'
+]
+
+// Runs of white space and control characters, line breaks of any kind
+// included (NEL is a control character, not white space, for \s)
+const BREAKS_AND_CONTROLS = /[\s\u0000-\u001f\u007f-\u009f]+/g
+
+function toSingleLine(value) {
+  return value.replace(BREAKS_AND_CONTROLS, ' ')
+}
+
 // Free text is stored as entered, only trimmed and length-limited: every
 // output escapes it (React, escapeHtml in the email templates), so removing
-// markup would only lose text like "MTOW < 2t, ETA > 14:00".
+// markup would only lose text like "MTOW < 2t, ETA > 14:00". Fields of a
+// single line are kept on one.
 function sanitizeString(value, field) {
   if (typeof value !== 'string') return ''
-  const trimmed = value.trim()
+  const text = SINGLE_LINE_FIELDS.includes(field) ? toSingleLine(value) : value
+  const trimmed = text.trim()
   const maxLength = MAX_LENGTHS[field]
   return maxLength ? trimmed.slice(0, maxLength) : trimmed
 }
@@ -116,8 +142,9 @@ function validateTypes(input) {
   }
 }
 
+// Control characters alone don't fill a field either: they are removed
 function validateRequired(input) {
-  const missing = REQUIRED_FIELDS.filter(field => !input[field] || input[field].trim() === '')
+  const missing = REQUIRED_FIELDS.filter(field => !input[field] || toSingleLine(input[field]).trim() === '')
   if (missing.length > 0) {
     throw invalid(`Missing required fields: ${missing.join(', ')}`)
   }
@@ -247,6 +274,7 @@ function canBeDeletedBy(request, email) {
 module.exports = {
   Status,
   AUTOMATIC_REVIEWER,
+  REQUEST_KEY_PATTERN,
   MAX_LENGTHS,
   MAX_DAYS_AHEAD,
   REQUIRED_FIELDS,

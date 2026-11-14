@@ -1,4 +1,4 @@
-import { call, put } from 'redux-saga/effects';
+import { call, put, takeLatest } from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
@@ -252,6 +252,16 @@ describe('modules', () => {
           generator.next(); // getIdToken
 
           expect(generator.throw(new Error('400')).value).toEqual(put(actions.savePprSettingsFailure()));
+        });
+      });
+
+      describe('the watchers', () => {
+        // The store holds the state of one load (loading, loadFailed): the
+        // result of an older load must not overwrite that of a newer one,
+        // e.g. when the admin page and the PPR list load at the same time
+        it('let a newer load of the requests replace the one running', () => {
+          const watchers = (sagas.default().next().value as any).payload;
+          expect(watchers).toContainEqual(takeLatest(actions.LOAD_PPR_REQUESTS, sagas.loadPprRequests));
         });
       });
 

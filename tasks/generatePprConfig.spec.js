@@ -3,7 +3,13 @@ const os = require('os');
 const path = require('path');
 const projects = require('../projects');
 const { sanitizeThemeColor } = require('../functions/email/themeColor');
-const { buildPprConfig, buildPprConfigFor, formatPprConfig, main } = require('./generatePprConfig');
+const {
+  buildPprConfig,
+  buildPprConfigFor,
+  formatPprConfig,
+  pprConfigWarnings,
+  main
+} = require('./generatePprConfig');
 
 const PROJECTS_DIR = path.resolve(__dirname, '../projects');
 
@@ -74,7 +80,7 @@ describe('tasks/generatePprConfig', () => {
   it('builds the file of lspl, where PPR is on in test only', () => {
     expect(formatPprConfig(buildPprConfigFor('lspl', 'test', 'lspl-test'))).toBe(
       'module.exports = {"enabled":true,"firebaseProjectId":"lspl-test",'
-      + '"aerodromeName":"Langenthal","themeColor":"#027ABB"};\n'
+      + '"aerodromeName":"Langenthal","themeColor":"#027ABB","appUrl":"https://lspl-test.web.app"};\n'
     );
     expect(buildPprConfigFor('lspl', 'production', 'lspl-prod')).toEqual({
       enabled: false,
@@ -238,6 +244,22 @@ describe('tasks/generatePprConfig', () => {
     });
   });
 
+  describe('pprConfigWarnings', () => {
+    const config = fields => ({ enabled: true, firebaseProjectId: 'lspl-test', ...fields });
+
+    it('points out a missing app URL where PPR is on', () => {
+      expect(pprConfigWarnings('lspl', 'test', config({}))).toEqual([
+        'PPR is on for project "lspl" (env "test"), but appUrl is not set:'
+          + ' the aerodrome\'s emails have no link to the requests'
+      ]);
+    });
+
+    it('has nothing to point out with an app URL, or where PPR is off', () => {
+      expect(pprConfigWarnings('lspl', 'test', config({ appUrl: 'https://lspl-test.web.app' }))).toEqual([]);
+      expect(pprConfigWarnings('lspl', 'production', config({ enabled: false }))).toEqual([]);
+    });
+  });
+
   describe('main', () => {
     let dir;
     let consoleError;
@@ -271,6 +293,38 @@ describe('tasks/generatePprConfig', () => {
       const out = path.join(dir, 'ppr-config.generated.js');
       expect(main(['lsxx', 'test', out, 'lsxx-test'])).toBe(1);
       expect(fs.existsSync(out)).toBe(false);
+    });
+
+    describe('warnings', () => {
+      let consoleWarn;
+
+      beforeEach(() => {
+        consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      });
+
+      afterEach(() => {
+        consoleWarn.mockRestore();
+        jest.restoreAllMocks();
+      });
+
+      it('writes the config, but warns, where PPR is on without an app URL', () => {
+        jest.spyOn(projects, 'load').mockReturnValue(makeConf({}, {
+          test: { firebaseProjectId: 'lspl-test', ppr: true }
+        }));
+        const out = path.join(dir, 'ppr-config.generated.js');
+
+        expect(main(['lspl', 'test', out, 'lspl-test'])).toBe(0);
+
+        expect(evaluate(fs.readFileSync(out, 'utf8'))).toMatchObject({ enabled: true, firebaseProjectId: 'lspl-test' });
+        expect(consoleWarn).toHaveBeenCalledTimes(1);
+        expect(consoleWarn).toHaveBeenCalledWith(expect.stringContaining('appUrl is not set'));
+      });
+
+      it('does not warn for lspl, which sets the app URL where PPR is on', () => {
+        expect(main(['lspl', 'test', path.join(dir, 'test.js'), 'lspl-test'])).toBe(0);
+        expect(main(['lspl', 'production', path.join(dir, 'production.js'), 'lspl-prod'])).toBe(0);
+        expect(consoleWarn).not.toHaveBeenCalled();
+      });
     });
 
     it.each([

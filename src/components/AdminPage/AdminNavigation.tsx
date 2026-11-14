@@ -161,6 +161,7 @@ const AdminNavigation = ({ activeTab, hiddenTabs, onTabChange, counts = {} }: an
             <MenuItem
               key={item.key}
               $active={activeTab === item.key}
+              aria-current={activeTab === item.key ? 'page' : undefined}
               onClick={() => onTabChange(item.key)}
               data-cy={item.key}
             >

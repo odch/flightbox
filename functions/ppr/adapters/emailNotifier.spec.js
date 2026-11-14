@@ -12,19 +12,20 @@ jest.mock('../../email/smtp', () => ({
   createTransporter: jest.fn()
 }))
 jest.mock('../deployConfig', () => ({
-  pprBranding: jest.fn()
+  pprBranding: jest.fn(),
+  pprAppOrigin: jest.fn()
 }))
 
 const mockSendMail = jest.fn().mockResolvedValue({ messageId: 'msg-1' })
 
 const { loadSmtpSettings, createTransporter } = require('../../email/smtp')
-const { pprBranding } = require('../deployConfig')
+const { pprBranding, pprAppOrigin } = require('../deployConfig')
 
 createTransporter.mockReturnValue({ sendMail: mockSendMail })
 
 const { notifyRequestSubmitted, notifyRequestReviewed } = require('./emailNotifier')
 
-const brandingReadsAtLoad = pprBranding.mock.calls.length
+const configReadsAtLoad = pprBranding.mock.calls.length + pprAppOrigin.mock.calls.length
 
 const basePprRequest = {
   key: 'req-123',
@@ -45,6 +46,7 @@ describe('emailNotifier', () => {
     jest.clearAllMocks()
     createTransporter.mockReturnValue({ sendMail: mockSendMail })
     pprBranding.mockReturnValue(UNBRANDED)
+    pprAppOrigin.mockReturnValue(null)
   })
 
   describe('notifyRequestSubmitted', () => {
@@ -136,7 +138,7 @@ describe('emailNotifier', () => {
     })
 
     it('is read for each email, not when the notifier is loaded', async () => {
-      expect(brandingReadsAtLoad).toBe(0)
+      expect(configReadsAtLoad).toBe(0)
 
       await notifyRequestReviewed({ ...basePprRequest, status: 'approved' })
       pprBranding.mockReturnValue(UNBRANDED)
@@ -145,6 +147,67 @@ describe('emailNotifier', () => {
       expect(pprBranding).toHaveBeenCalledTimes(2)
       expect(mockSendMail.mock.calls[0][0].subject).toBe('PPR genehmigt: HB-ABC am 2026-04-15 – Langenthal')
       expect(mockSendMail.mock.calls[1][0].subject).toBe('PPR genehmigt: HB-ABC am 2026-04-15')
+    })
+  })
+
+  describe('link to the request in the admin email', () => {
+    const pending = { ...basePprRequest, status: 'pending' }
+    const ADMIN_URL = 'https://lspl-test.web.app/#/admin?tab=ppr&request=req-123'
+
+    beforeEach(() => {
+      pprBranding.mockReturnValue(BRANDING)
+      pprAppOrigin.mockReturnValue('https://lspl-test.web.app')
+    })
+
+    it('opens a pending request in the admin area of the app', async () => {
+      await notifyRequestSubmitted(pending, 'admin@aero.ch')
+
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.text).toContain(`\nPPR-Anfrage beantworten: ${ADMIN_URL}\n`)
+      expect(mailArgs.html).toContain('<a href="https://lspl-test.web.app/#/admin?tab=ppr&amp;request=req-123" ' +
+        'style="display: inline-block; padding: 12px 24px; background-color: #027ABB;')
+      expect(mailArgs.html).toContain('opacity: 0.9;">Langenthal</p>')
+    })
+
+    it('reads the app address for each email', async () => {
+      await notifyRequestSubmitted(pending, 'admin@aero.ch')
+      pprAppOrigin.mockReturnValue('https://flightbox.example')
+      await notifyRequestSubmitted(pending, 'admin@aero.ch')
+
+      expect(pprAppOrigin).toHaveBeenCalledTimes(2)
+      expect(mockSendMail.mock.calls[1][0].text)
+        .toContain('PPR-Anfrage beantworten: https://flightbox.example/#/admin?tab=ppr&request=req-123')
+    })
+
+    it('is left out without the app address', async () => {
+      pprAppOrigin.mockReturnValue(null)
+      await notifyRequestSubmitted(pending, 'admin@aero.ch')
+
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.text).not.toContain('beantworten')
+      expect(mailArgs.html).not.toContain('<a ')
+    })
+
+    it('is left out for an answered request', async () => {
+      await notifyRequestSubmitted({ ...basePprRequest, status: 'approved', reviewedBy: 'automatic' }, 'admin@aero.ch')
+
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.text).toContain('Antwort: Automatisch genehmigt')
+      expect(mailArgs.text).not.toContain('beantworten')
+      expect(mailArgs.html).not.toContain('<a ')
+    })
+
+    it.each([['an invalid key', '../../etc'], ['no key', undefined]])('is left out for %s', async (name, key) => {
+      await notifyRequestSubmitted({ ...pending, key }, 'admin@aero.ch')
+
+      expect(mockSendMail.mock.calls[0][0].text).not.toContain('beantworten')
+    })
+
+    it('is not in the pilot emails', async () => {
+      await notifyRequestReviewed({ ...basePprRequest, status: 'approved' })
+
+      expect(pprAppOrigin).not.toHaveBeenCalled()
+      expect(mockSendMail.mock.calls[0][0].html).not.toContain('lspl-test.web.app')
     })
   })
 })

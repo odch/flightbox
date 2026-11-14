@@ -2,6 +2,7 @@
 
 const {
   Status,
+  REQUEST_KEY_PATTERN,
   MAX_LENGTHS,
   createPprRequest,
   sanitizeReviewRemarks,
@@ -279,6 +280,42 @@ describe('pprRequest', () => {
         }, NOW)
         expect(result.immatriculation.length).toBe(MAX_LENGTHS.immatriculation)
       })
+
+      it('keeps the fields of a single line on one (no lines of its own in the text emails)', () => {
+        const result = createPprRequest({
+          ...validInput,
+          firstname: 'Max\r\nPPR-Anfrage beantworten: https://evil.example/',
+          lastname: 'Muster\u2028Link\u2029Link\u0085Link\u000bLink\fLink',
+          phone: '+41 79\n123 45 67',
+          immatriculation: 'HB-\nABC',
+          aircraftType: 'Piper\u001ePA-28',
+          flightType: 'private\n\nPPR-Anfrage beantworten: x'
+        }, NOW)
+        expect(result.firstname).toBe('Max PPR-Anfrage beantworten: https://evil.example/')
+        expect(result.lastname).toBe('Muster Link Link Link Link Link')
+        expect(result.phone).toBe('+41 79 123 45 67')
+        expect(result.immatriculation).toBe('HB- ABC')
+        expect(result.aircraftType).toBe('Piper PA-28')
+        expect(result.flightType).toBe('private PPR-Anfrage beantworten: x')
+      })
+
+      it('removes control characters and repeated spaces in those fields before the length limit', () => {
+        const result = createPprRequest({
+          ...validInput,
+          firstname: `Max\u0000\u0007  \t Moritz${' '.repeat(200)}x`
+        }, NOW)
+        expect(result.firstname).toBe('Max Moritz x')
+      })
+
+      it('keeps the line breaks of the remarks', () => {
+        const result = createPprRequest({ ...validInput, remarks: 'Zeile 1\nZeile 2' }, NOW)
+        expect(result.remarks).toBe('Zeile 1\nZeile 2')
+      })
+
+      it('counts a required field of control characters only as missing', () => {
+        expect(() => createPprRequest({ ...validInput, lastname: '\u0000\u0085\n' }, NOW))
+          .toThrow('Missing required fields: lastname')
+      })
     })
   })
 
@@ -292,6 +329,11 @@ describe('pprRequest', () => {
       expect(sanitizeString(null, 'firstname')).toBe('')
       expect(sanitizeString(undefined, 'firstname')).toBe('')
       expect(sanitizeString(123, 'firstname')).toBe('')
+    })
+
+    it('puts the fields of a single line on one, and keeps the line breaks of the others', () => {
+      expect(sanitizeString(' Max\n\nMuster ', 'lastname')).toBe('Max Muster')
+      expect(sanitizeString(' Zeile 1\n\nZeile 2 ', 'reviewRemarks')).toBe('Zeile 1\n\nZeile 2')
     })
   })
 
@@ -377,6 +419,29 @@ describe('pprRequest', () => {
       expect(Status.PENDING).toBe('pending')
       expect(Status.APPROVED).toBe('approved')
       expect(Status.REJECTED).toBe('rejected')
+    })
+  })
+
+  describe('REQUEST_KEY_PATTERN', () => {
+    it.each([
+      ['a push key', '-NxAbC_12'],
+      ['a key with a hyphen', 'req-123'],
+      ['128 characters', 'k'.repeat(128)]
+    ])('matches %s', (name, key) => {
+      expect(REQUEST_KEY_PATTERN.test(key)).toBe(true)
+    })
+
+    it.each([
+      ['no characters', ''],
+      ['129 characters', 'k'.repeat(129)],
+      ['a path', '../../etc'],
+      ['a dot', 'a.b'],
+      ['a space', 'a b'],
+      ['a query', 'a?b=c'],
+      ['a fragment', 'a#b'],
+      ['an umlaut', 'flugplätze']
+    ])('does not match %s', (name, key) => {
+      expect(REQUEST_KEY_PATTERN.test(key)).toBe(false)
     })
   })
 })

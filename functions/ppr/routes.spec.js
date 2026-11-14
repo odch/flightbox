@@ -652,6 +652,67 @@ describe('PPR routes', () => {
     })
   })
 
+  // validateKey uses REQUEST_KEY_PATTERN, the pattern the email links follow
+  describe('request keys', () => {
+    const KEY_ROUTES = [
+      ['post', '/requests/:key/review', 'admin'],
+      ['post', '/requests/:key/revoke', 'admin'],
+      ['delete', '/requests/:key', 'pilot']
+    ]
+
+    function callWithKey(method, path, role, key) {
+      if (role === 'admin') {
+        authenticateAs('uid-admin', 'admin@aero.ch')
+        setupAdminDbRef('uid-admin')
+      } else {
+        authenticateAs('uid-1', 'pilot@example.com')
+        setupAdminDbRef(null)
+      }
+      const req = mockReq({
+        method: method.toUpperCase(),
+        headers: { authorization: 'Bearer valid-token' },
+        params: { key },
+        body: { status: 'approved', remarks: 'Runway works' }
+      })
+      const res = mockRes()
+      return runMiddlewareChain(findHandler(method, path), req, res).then(() => res)
+    }
+
+    const valid = KEY_ROUTES.flatMap(route =>
+      [['a push key', '-NxAbC_12'], ['128 characters', 'k'.repeat(128)]].map(([name, key]) => [...route, name, key]))
+
+    it.each(valid)('%s %s (%s) accepts %s', async (method, path, role, name, key) => {
+      mockReviewRequest.mockResolvedValue()
+      mockRevokeApproval.mockResolvedValue()
+      mockDeleteRequest.mockResolvedValue()
+
+      const res = await callWithKey(method, path, role, key)
+
+      expect(res.statusCode).toBe(200)
+      const calls = [mockReviewRequest, mockRevokeApproval, mockDeleteRequest].flatMap(mock => mock.mock.calls)
+      expect(calls).toHaveLength(1)
+      expect(calls[0][1]).toBe(key)
+    })
+
+    const invalid = KEY_ROUTES.flatMap(route => [
+      ['129 characters', 'k'.repeat(129)],
+      ['a dot', 'a.b'],
+      ['a space', 'a b'],
+      ['a path', '../../etc'],
+      ['no characters', '']
+    ].map(([name, key]) => [...route, name, key]))
+
+    it.each(invalid)('%s %s (%s) refuses %s', async (method, path, role, name, key) => {
+      const res = await callWithKey(method, path, role, key)
+
+      expect(res.statusCode).toBe(400)
+      expect(res.body).toEqual({ error: 'Invalid request key' })
+      expect(mockReviewRequest).not.toHaveBeenCalled()
+      expect(mockRevokeApproval).not.toHaveBeenCalled()
+      expect(mockDeleteRequest).not.toHaveBeenCalled()
+    })
+  })
+
   describe('logins without an email (username/password)', () => {
     const pilotRoutes = [['post', '/requests'], ['get', '/requests'], ['delete', '/requests/:key']]
 

@@ -206,6 +206,30 @@ describe('<App>', () => {
       );
       expect(container.textContent).toContain('movements-page');
     });
+
+    it('keeps the location of a link through the login', () => {
+      // e.g. the link to a request in the PPR notification email
+      const link = '/admin?tab=ppr&request=-Nabc';
+      const { history, container, rerender } = renderApp(
+        { initialized: true, authenticated: false },
+        [link]
+      );
+      const { key } = history.location;
+      expect(container.textContent).toContain('login-page');
+
+      rerender(
+        <ThemeProvider theme={theme}>
+          <HistoryRouter history={history as any}>
+            <App auth={{ initialized: true, authenticated: true }} showLogin={false} />
+          </HistoryRouter>
+        </ThemeProvider>
+      );
+
+      expect(container.textContent).toContain('admin-page');
+      expect(history.location.pathname + history.location.search).toBe(link);
+      expect(history.location.key).toBe(key);
+      expect(scrollToSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('profileEnabled feature flag', () => {

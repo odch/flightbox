@@ -57,7 +57,9 @@ functions/ppr/
     firebaseAerodromeStatus.js # latest entry of /status
     emailNotifier.js           # nodemailer/SMTP implementation
     emailTemplates.js          # email HTML templates
+    adminLinks.js              # link to a request in the admin area (a contract with the app)
   deployConfig.js          # the deploy's config (functions/ppr-config.generated.js), for this project only
+  httpsOrigin.js           # checks the app's https origin (appUrl)
   routes.js                # Express router mounted in api/index.js
 ```
 
@@ -145,6 +147,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
   - HTML-escape all user-supplied values; include text/plain alternative
 - [x] Create `functions/ppr/adapters/emailNotifier.js`
 - [x] The emails have the sign-in email's header ("Flightbox" and the aerodrome's name on the theme colour, from the deploy's config) with the status as the first heading; the text emails start with "Flightbox – <name>"; the pilot's subjects end with the aerodrome's name
+- [x] The aerodrome's email links an open request to the admin area when `appUrl` is set (`<appUrl>/#/admin?tab=ppr&request=<key>`); no one-click approve/reject links (mail scanners open links, and the notification address may be a shared mailbox); the pilot's fields of a single line (name, phone, registration, aircraft type, flight type) are stored on one line, so they cannot imitate the link in the text email
 
 #### 2f. Express router
 - [x] Create `functions/ppr/routes.js`
@@ -210,6 +213,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Add PPR tab to `src/components/AdminPage/AdminPage.tsx` (hide when `__CONF__.ppr !== true`)
 - [x] Add PPR nav item to AdminNavigation
 - [x] Write tests: `PprRequestList/PprRequestList.spec.tsx`
+- [x] The admin tab is in the URL (`#/admin?tab=<tab>`); the link `#/admin?tab=ppr&request=<key>` opens and focuses that request once a load of the list has succeeded and the settings are loaded, with a notice when it no longer exists or is already answered; it never answers anything; after a failed load the list shows an error and leaves the link to the next load; a newer load replaces the one running (the admin page and the list load together), so the list shows how the latest one went
 
 ### Phase 7: GDPR/DSGVO Compliance
 - [x] Create `functions/ppr/cleanup.js` — scheduled function, deletes requests a set number of days past plannedDate

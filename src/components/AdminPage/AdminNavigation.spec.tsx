@@ -46,6 +46,13 @@ describe('AdminNavigation', () => {
     expect(container.querySelector('[data-cy="ppr-count"]')).toBeNull();
   });
 
+  it('marks the active tab as the current page', () => {
+    renderWithTheme(<AdminNavigation activeTab="ppr" hiddenTabs={[]} onTabChange={jest.fn()}/>);
+
+    expect(screen.getByRole('button', {name: /PPR-Anfragen/})).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', {name: /Export/})).not.toHaveAttribute('aria-current');
+  });
+
   it('hides the API access tab', () => {
     renderWithTheme(<AdminNavigation activeTab="export" hiddenTabs={['api-access']} onTabChange={jest.fn()}/>);
     expect(screen.queryByRole('button', {name: /API-Zugriff/})).toBeNull();

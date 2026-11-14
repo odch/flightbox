@@ -11,14 +11,18 @@ const theme = {
   },
 };
 
+// The providers renderWithTheme wraps a component in, e.g. for rerender
+// (which renders exactly what it gets)
+export const withTheme = (component) => (
+  <BrowserRouter>
+    <ThemeProvider theme={theme}>
+      {component}
+    </ThemeProvider>
+  </BrowserRouter>
+);
+
 export const renderWithTheme = (component) => {
-  return render(
-    <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        {component}
-      </ThemeProvider>
-    </BrowserRouter>
-  );
+  return render(withTheme(component));
 };
 
 // Re-export everything from RTL
