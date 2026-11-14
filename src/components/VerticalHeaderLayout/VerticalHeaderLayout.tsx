@@ -4,11 +4,12 @@ import Header from './Header';
 import Content from './Content';
 import MarketingLink from '../MarketingLink';
 import LanguageSwitch from '../LanguageSwitch';
+import fullHeight from '../../style/fullHeight';
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  ${fullHeight()}
 `
 
 const Main = styled.div`
