@@ -58,6 +58,9 @@ Cypress.Commands.add('resetMovementsTestData', () => {
   );
 });
 
+// Waits until the association of a movement is set: to `expectedType`
+// ("none" included), to any partner when it is left out, or to anything the
+// movement's trigger has written ("none" included) with 'any'.
 Cypress.Commands.add('waitForAssociation', (movementType, movementKey, expectedType) => {
   const path = `/movementAssociations/${movementType}s/${movementKey}`;
   const attempt = (retries) => {
@@ -65,7 +68,8 @@ Cypress.Commands.add('waitForAssociation', (movementType, movementKey, expectedT
       win.firebase.getRef(path).once('value').then(snap => {
         const val = snap.val();
         if (val && val.type !== undefined) {
-          const settled = expectedType ? val.type === expectedType : val.type !== 'none';
+          const settled = expectedType === 'any'
+            || (expectedType ? val.type === expectedType : val.type !== 'none');
           if (settled) return val;
         }
         if (retries <= 0) throw new Error(`No association settled at ${path}`);
@@ -73,5 +77,7 @@ Cypress.Commands.add('waitForAssociation', (movementType, movementKey, expectedT
       })
     );
   };
-  return attempt(10); // poll up to 5s
+  // Poll up to 15s: the triggers run in the shared cypress-testing project,
+  // and the first one of a run can take several seconds to start
+  return attempt(30);
 });
