@@ -71,6 +71,12 @@ const SingleSelect: React.FC<SingleSelectProps> = ({
     ? 100 / items.length
     : null;
 
+  // Labels with descriptions below them read best from the start, next to
+  // the tick, and so do all items of such a select, to look alike. Selects
+  // without descriptions keep their labels centered side by side, or one
+  // below the other after the tick.
+  const alignStart = items.some(item => !!item.description);
+
   return (
     <Wrapper $orientation={orientation}>
       {items.map((item, index) => (
@@ -82,6 +88,7 @@ const SingleSelect: React.FC<SingleSelectProps> = ({
           selected={value === item.value}
           widthPercentage={widthPercentage}
           orientation={orientation}
+          alignStart={alignStart}
           onClick={handleClick}
           dataCy={`${dataCy}-${item.value}`}
         />
