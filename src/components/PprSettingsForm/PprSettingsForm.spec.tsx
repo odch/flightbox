@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
-import { renderWithTheme, screen, fireEvent, act } from '../../../test/renderWithTheme';
+import { renderWithTheme, screen, fireEvent, act, within } from '../../../test/renderWithTheme';
 
 // The key, with the count where one is given
 jest.mock('react-i18next', () => ({
@@ -503,6 +503,17 @@ describe('PprSettingsForm', () => {
 
       expect(byCy(container, 'pilotInfo')).toBeNull();
       expect(saveButton(container)).toBeDisabled();
+    });
+
+    // "Beantwortung" above says it all
+    it('names the modes by the title of their section, without a label of their own', () => {
+      const { container } = renderForm();
+
+      const group = screen.getByRole('group', { name: 'ppr.settings.answer' });
+      expect(group).toContainElement(byCy(container, 'answerMode-manual'));
+      expect(group).toContainElement(byCy(container, 'answerMode-automatic'));
+      expect(within(group).queryByText('ppr.settings.answerMode')).toBeNull();
+      expect(group.querySelector('label')).toBeNull();
     });
 
     it('shows the information for pilots only when answering automatically', () => {
