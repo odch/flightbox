@@ -39,6 +39,7 @@ jest.mock('../ModalDialog', () => {
 });
 
 import PprStatusList from './PprStatusList';
+import dates from '../../util/dates';
 
 const pendingRequest = {
   key: 'req-1',
@@ -100,6 +101,22 @@ describe('PprStatusList', () => {
     expect(screen.getByText('HB-ABC')).toBeTruthy();
     expect(screen.getByText('ppr.status.pending')).toBeTruthy();
     expect(screen.getByText('ppr.status.approved')).toBeTruthy();
+  });
+
+  // Pilots see their next flights first, not their oldest requests
+  it('shows the requests in groups: open, upcoming and past ones', () => {
+    const localDate = jest.spyOn(dates, 'localDate').mockReturnValue('2026-04-15');
+    try {
+      const pastRequest = { ...approvedRequest, key: 'req-9', immatriculation: 'HB-OLD', plannedDate: '2026-04-01' };
+      renderWithTheme(<PprStatusList {...defaultProps} data={[pastRequest, approvedRequest, pendingRequest]} />);
+
+      const headings = screen.getAllByRole('heading', { level: 2 }).map(h => h.textContent);
+      expect(headings).toEqual(['ppr.groups.open 1', 'ppr.groups.upcoming 1', 'ppr.groups.past 1']);
+      const cards = screen.getAllByText(/^HB-/).map(el => el.textContent);
+      expect(cards).toEqual(['HB-ABC', 'HB-XYZ', 'HB-OLD']);
+    } finally {
+      localDate.mockRestore();
+    }
   });
 
   it('shows the planned date in the date format of the app', () => {

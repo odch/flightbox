@@ -1,4 +1,4 @@
-import reducer, { getPendingPprCount } from './reducer';
+import reducer, { getOpenPprCount } from './reducer';
 import * as actions from './actions';
 
 describe('modules', () => {
@@ -95,28 +95,35 @@ describe('modules', () => {
         expect(reducer(initialState, actions.pprRequestsLoaded([], 'own')).scope).toBe('own');
       });
 
-      describe('getPendingPprCount', () => {
+      describe('getOpenPprCount', () => {
+        const TODAY = '2026-11-14';
         const data = [
-          { key: 'req-1', status: 'pending' },
-          { key: 'req-2', status: 'approved' },
-          { key: 'req-3', status: 'pending' },
-          { key: 'req-4', status: 'rejected' },
+          { key: 'req-1', status: 'pending', plannedDate: TODAY },
+          { key: 'req-2', status: 'approved', plannedDate: '2026-11-20' },
+          { key: 'req-3', status: 'pending', plannedDate: '2026-11-20' },
+          { key: 'req-4', status: 'rejected', plannedDate: '2026-11-20' },
+          { key: 'req-5', status: 'pending', plannedDate: '2026-11-13' },
         ];
 
-        it('counts the pending requests of the admin list', () => {
-          expect(getPendingPprCount(reducer(initialState, actions.pprRequestsLoaded(data, 'all')))).toBe(2);
+        it('counts the requests of the group "Offen": pending and planned for today or later', () => {
+          expect(getOpenPprCount(reducer(initialState, actions.pprRequestsLoaded(data, 'all')), TODAY)).toBe(2);
         });
 
-        it('is 0 when no request of the admin list is pending', () => {
-          expect(getPendingPprCount(reducer(initialState, actions.pprRequestsLoaded([data[1]], 'all')))).toBe(0);
+        it('is 0 when no request of the admin list is open', () => {
+          expect(getOpenPprCount(reducer(initialState, actions.pprRequestsLoaded([data[1], data[4]], 'all')), TODAY)).toBe(0);
         });
 
         it('is null before the admin list is loaded', () => {
-          expect(getPendingPprCount(initialState)).toBeNull();
+          expect(getOpenPprCount(initialState, TODAY)).toBeNull();
         });
 
         it('does not count the pilot\'s own requests', () => {
-          expect(getPendingPprCount(reducer(initialState, actions.pprRequestsLoaded(data, 'own')))).toBeNull();
+          expect(getOpenPprCount(reducer(initialState, actions.pprRequestsLoaded(data, 'own')), TODAY)).toBeNull();
+        });
+
+        it('counts from the aerodrome\'s date of today by default', () => {
+          const future = [{ key: 'req-1', status: 'pending', plannedDate: '2999-01-01' }];
+          expect(getOpenPprCount(reducer(initialState, actions.pprRequestsLoaded(future, 'all')))).toBe(1);
         });
       });
 

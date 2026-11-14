@@ -463,12 +463,19 @@ describe('customs containers', () => {
       auth: { data: { admin: true } },
       settings: { guestAccessToken: { token: null }, kioskAccessToken: { token: null } },
       customs: { available: null },
-      ppr: { data: [{ key: 'r1', status: 'pending' }, { key: 'r2', status: 'approved' }], scope: 'all' },
+      ppr: {
+        data: [
+          { key: 'r1', status: 'pending', plannedDate: '2099-01-01' },
+          { key: 'r2', status: 'approved', plannedDate: '2099-01-01' },
+          { key: 'r3', status: 'pending', plannedDate: '2000-01-01' },
+        ],
+        scope: 'all',
+      },
     });
     render(wrap(store, <Container />));
 
     const props = lastPropsOf(Component);
-    expect(props.pprPendingCount).toBe(1);
+    expect(props.pprOpenCount).toBe(1);
 
     props.loadPprRequests('all');
     expect(store.actions).toEqual([{ type: 'LOAD_PPR_REQUESTS', payload: { scope: 'all' } }]);

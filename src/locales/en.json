@@ -700,6 +700,12 @@
       "rejected": "Rejected",
       "revoked": "Revoked"
     },
+    "groups": {
+      "open": "Open",
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "showOlder": "Show older ({{count}})"
+    },
     "approve": "Approve",
     "reject": "Reject",
     "answered": "Answered",

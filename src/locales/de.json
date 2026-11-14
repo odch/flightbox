@@ -700,6 +700,12 @@
       "rejected": "Abgelehnt",
       "revoked": "Widerrufen"
     },
+    "groups": {
+      "open": "Offen",
+      "upcoming": "Bevorstehend",
+      "past": "Vergangen",
+      "showOlder": "Ältere anzeigen ({{count}})"
+    },
     "approve": "Genehmigen",
     "reject": "Ablehnen",
     "answered": "Beantwortet",

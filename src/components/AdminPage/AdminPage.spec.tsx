@@ -66,7 +66,7 @@ describe('AdminPage', () => {
     it('loads all requests for the number of open ones when ppr is on', () => {
       (global as any).__CONF__ = {paymentMethods: {}, ppr: true};
       const loadPprRequests = jest.fn();
-      renderAdminPage({loadPprRequests, pprPendingCount: 2});
+      renderAdminPage({loadPprRequests, pprOpenCount: 2});
 
       expect(loadPprRequests).toHaveBeenCalledWith('all');
       expect(screen.getByRole('button', {name: /PPR-Anfragen/})).toHaveTextContent('2');
