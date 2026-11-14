@@ -21,6 +21,7 @@ export interface ClosureError {
 export const MAX_CLOSURES = 50;
 export const MAX_CLOSURE_REASON_LENGTH = 300;
 
+// Lines between the rows only, none below the last one
 const Row = styled.div`
   display: grid;
   grid-template-columns: 9em 9em minmax(0, 1fr) auto;
@@ -28,7 +29,10 @@ const Row = styled.div`
   gap: 0.5em 1em;
   align-items: end;
   padding: 0.75em 0;
-  border-bottom: 1px solid #eee;
+
+  & + & {
+    border-top: 1px solid #eee;
+  }
 
   @media (max-width: 768px) {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
