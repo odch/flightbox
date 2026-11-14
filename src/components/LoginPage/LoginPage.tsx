@@ -7,10 +7,11 @@ import styled from 'styled-components'
 import {useLocation} from 'react-router-dom'
 import getAuthQueryToken, {getGuestOnly} from '../../util/getAuthQueryToken'
 import LanguageSwitch from '../LanguageSwitch';
+import fullHeight from '../../style/fullHeight';
 
 const StyledWrapper = styled.div`
   display: flex;
-  min-height: 100vh;
+  ${fullHeight()}
   position: relative;
 
   @media screen and (max-width: 520px) {

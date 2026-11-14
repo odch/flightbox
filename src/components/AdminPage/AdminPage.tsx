@@ -19,11 +19,12 @@ import AdminApiAccessPage from './subpages/AdminApiAccessPage';
 import AdminPprPage from './subpages/AdminPprPage';
 import Content from './Content';
 import objectToArray from '../../util/objectToArray';
+import fullHeight from '../../style/fullHeight';
 
 const AdminLayout = styled.div`
   display: flex;
   height: 100%;
-  min-height: calc(100vh - 60px);
+  ${fullHeight('60px')}
 
   @media (max-width: 768px) {
     flex-direction: column;

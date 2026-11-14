@@ -3,11 +3,12 @@ import styled from 'styled-components';
 import Header from './Header';
 import Main from './Main';
 import MarketingLink from '../MarketingLink';
+import fullHeight from '../../style/fullHeight';
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  ${fullHeight()}
 `
 
 const ContentArea = styled.div`
