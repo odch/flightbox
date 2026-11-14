@@ -65,6 +65,16 @@ describe('associated movements', () => {
   const pushRef = (path, data) =>
     cy.window().then(win => win.firebase.getRef(path).push(data));
 
+  // Writes a movement and waits until its trigger has set its association
+  // ("none" too), so the trigger of the next movement sees it. Each trigger
+  // reads the aircraft's movements and writes both associations without a
+  // transaction: a trigger that read before the other movement existed but
+  // wrote after its trigger would overwrite the association with "none".
+  const pushSettled = (path, data) =>
+    pushRef(path, data).then(ref =>
+      cy.waitForAssociation(path === '/departures' ? 'departure' : 'arrival', ref.key, 'any').then(() => ref)
+    );
+
   const removeRef = (path) =>
     cy.window().then(win => win.firebase.getRef(path).remove());
 
@@ -97,7 +107,7 @@ describe('associated movements', () => {
     after(teardownAuth);
 
     it('creates bidirectional association for homebase aircraft', () => {
-      pushRef('/departures', minimalDeparture('HBKOF', 60)).then(ref => {
+      pushSettled('/departures', minimalDeparture('HBKOF', 60)).then(ref => {
         departureKey = ref.key;
       });
 
@@ -176,7 +186,7 @@ describe('associated movements', () => {
     after(teardownAuth);
 
     it('creates bidirectional association for external aircraft', () => {
-      pushRef('/arrivals', minimalArrival('DEXYZ', 60)).then(ref => {
+      pushSettled('/arrivals', minimalArrival('DEXYZ', 60)).then(ref => {
         arrivalKey = ref.key;
       });
 
@@ -255,7 +265,7 @@ describe('associated movements', () => {
     after(teardownAuth);
 
     it('arrival association becomes none after linked departure is deleted', () => {
-      pushRef('/departures', minimalDeparture('HBKOF', 60)).then(ref => {
+      pushSettled('/departures', minimalDeparture('HBKOF', 60)).then(ref => {
         departureKey = ref.key;
       });
 
@@ -320,7 +330,7 @@ describe('associated movements', () => {
     after(teardownAuth);
 
     it('departure association becomes none after linked arrival is deleted', () => {
-      pushRef('/arrivals', minimalArrival('DEXYZ', 60)).then(ref => {
+      pushSettled('/arrivals', minimalArrival('DEXYZ', 60)).then(ref => {
         arrivalKey = ref.key;
       });
 
@@ -396,7 +406,7 @@ describe('associated movements', () => {
         location: 'LSXX'
       };
 
-      pushRef('/departures', circuitDep).then(ref => {
+      pushSettled('/departures', circuitDep).then(ref => {
         departureKey = ref.key;
       });
 
@@ -474,7 +484,7 @@ describe('associated movements', () => {
 
     it('inserting departure D between B and A causes D to steal A and B to unlink', () => {
       // Write B (T+60) and A (T+180) and wait for B↔A to link
-      pushRef('/departures', minimalDeparture('HBKOF', 60)).then(ref => {
+      pushSettled('/departures', minimalDeparture('HBKOF', 60)).then(ref => {
         depBKey = ref.key;
       });
 
