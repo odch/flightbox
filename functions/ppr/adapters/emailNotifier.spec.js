@@ -98,7 +98,7 @@ describe('emailNotifier', () => {
 
       const mailArgs = mockSendMail.mock.calls[0][0]
       expect(mailArgs.to).toBe('max@example.com')
-      expect(mailArgs.subject).toBe('PPR widerrufen: HB-ABC am 2026-04-15')
+      expect(mailArgs.subject).toBe('PPR widerrufen: HB-ABC am 15.04.2026')
       expect(mailArgs.text).toContain('Grund: Runway works')
     })
 
@@ -118,16 +118,16 @@ describe('emailNotifier', () => {
       await notifyRequestSubmitted({ ...basePprRequest, status: 'pending' }, 'admin@aero.ch')
 
       const mailArgs = mockSendMail.mock.calls[0][0]
-      expect(mailArgs.subject).toBe('PPR-Anfrage: HB-ABC am 2026-04-15')
+      expect(mailArgs.subject).toBe('PPR-Anfrage: HB-ABC am 15.04.2026')
       expect(mailArgs.html).toContain('background: #027ABB;')
       expect(mailArgs.html).toContain('opacity: 0.9;">Langenthal</p>')
       expect(mailArgs.text.split('\n')[0]).toBe('Flightbox – Langenthal')
     })
 
     it.each([
-      ['approved', 'PPR genehmigt: HB-ABC am 2026-04-15 – Langenthal'],
-      ['rejected', 'PPR abgelehnt: HB-ABC am 2026-04-15 – Langenthal'],
-      ['revoked', 'PPR widerrufen: HB-ABC am 2026-04-15 – Langenthal']
+      ['approved', 'PPR genehmigt: HB-ABC am 15.04.2026 – Langenthal'],
+      ['rejected', 'PPR abgelehnt: HB-ABC am 15.04.2026 – Langenthal'],
+      ['revoked', 'PPR widerrufen: HB-ABC am 15.04.2026 – Langenthal']
     ])('is passed to the pilot email for %s', async (status, subject) => {
       await notifyRequestReviewed({ ...basePprRequest, status, reviewRemarks: 'Runway works' })
 
@@ -145,8 +145,8 @@ describe('emailNotifier', () => {
       await notifyRequestReviewed({ ...basePprRequest, status: 'approved' })
 
       expect(pprBranding).toHaveBeenCalledTimes(2)
-      expect(mockSendMail.mock.calls[0][0].subject).toBe('PPR genehmigt: HB-ABC am 2026-04-15 – Langenthal')
-      expect(mockSendMail.mock.calls[1][0].subject).toBe('PPR genehmigt: HB-ABC am 2026-04-15')
+      expect(mockSendMail.mock.calls[0][0].subject).toBe('PPR genehmigt: HB-ABC am 15.04.2026 – Langenthal')
+      expect(mockSendMail.mock.calls[1][0].subject).toBe('PPR genehmigt: HB-ABC am 15.04.2026')
     })
   })
 
