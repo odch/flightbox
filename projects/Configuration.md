@@ -272,10 +272,12 @@ answered manually.
 
 In the same tab admins choose how requests are answered (`/settings/ppr/answerMode`): manually by an admin (the
 default) or automatically, i.e. approved right away with the information for pilots set there
-(`/settings/ppr/pilotInfo`, e.g. runway, circuit, landing fee, phone number). Either way, requests for a day within a
-closure entered in the tab (`/settings/ppr/closures`) are rejected with its reason, and requests for today are
-rejected while the aerodrome status is "closed". Admins can revoke an approval with a reason; the pilot gets it by
-e-mail.
+(`/settings/ppr/pilotInfo`, e.g. runway, circuit, landing fee, phone number). Either way, new requests for a blocked
+day ("Gesperrte Tage" in the tab, stored at `/settings/ppr/closures`: days without PPR visitors, e.g. events, camps,
+runway works or nobody on site, often while the aerodrome is open, so blocking days does not change the aerodrome
+status) are rejected with its reason, and requests for today are rejected while the aerodrome status is "closed"; the
+"Flugplatz-Status" tab says so. Blocking a day leaves the requests made before as they are. Admins can revoke an
+approval with a reason; the pilot gets it by e-mail.
 In the privacy tab ("Datenschutz"), which is shown when `privacySettings` or `ppr` is on, admins set how many days
 after the planned date requests are deleted (a whole number from 1 to 3650, stored at `/settings/ppr/retentionDays`).
 As for movements and messages, nothing is deleted while no value is set.

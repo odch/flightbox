@@ -4,7 +4,7 @@
 
 Aerodromes lszm, lsze, lspv (and soon lspl) are PPR — pilots must get permission before flying in. Currently they just publish a phone number. This feature digitizes that: pilots submit PPR requests, admins approve/reject, pilots get notified via email.
 
-Often nobody answers that phone and a recorded message gives the information for pilots. For such aerodromes, requests can also be answered automatically: approved right away with that information, and rejected on the days the aerodrome is closed (see Phase 10).
+Often nobody answers that phone and a recorded message gives the information for pilots. For such aerodromes, requests can also be answered automatically: approved right away with that information, and rejected on blocked days (events, runway works, nobody on site) and for today while the aerodrome status is closed (see Phase 10).
 
 **Key constraints:**
 - Firebase will eventually be replaced (likely Postgres). Hexagonal architecture — Firebase is a swappable repository adapter.
@@ -236,16 +236,18 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Settings in the PPR admin tab ("Einstellungen"), stored at `/settings/ppr` like the address
   - `answerMode`: `manual` (default) or `automatic`
   - `pilotInfo`: the information automatic approvals carry (runway, circuit, landing fee, phone; at most 1000 characters)
-  - `closures`: `[{ from, to, reason }]`, at most 50; the form shows those that have not ended, so the next save removes the others
+  - `closures` ("Gesperrte Tage" / blocked days in the app: days without PPR visitors, often while the aerodrome is open): `[{ from, to, reason }]`, at most 50; the form shows those that have not ended, so the next save removes the others; blocking a day leaves the requests made before as they are (admins reject or revoke them in the list)
 - [x] `functions/ppr/domain/pprAnswer.js` decides on submission, in this order:
-  - planned date within a closure → rejected with its reason (also with manual answers)
+  - planned date on a blocked day → rejected with its reason (also with manual answers)
   - planned date today while the aerodrome status (`/status`, the admin tab "Flugplatz-Status") is closed → rejected with its details (the status tells about today only)
   - automatic answers → approved with the information for pilots
   - otherwise pending, for an admin
 - [x] Answered requests are saved with their answer (`reviewedBy: 'automatic'`), never pending in between; the pilot gets the answer by email right away, the admin email shows it ("Automatisch genehmigt"); with automatic answers no notification address is needed
 - [x] Automatic approval emails ask the pilot to check the aerodrome status and the NOTAMs before the flight
 - [x] The form shows the answer after sending; the admin list marks automatic answers
-- [x] Admins revoke an approval with a reason (e.g. a closure that came up later); the pilot gets it by email (`ppr-revoked` templates)
+- [x] Admins revoke an approval with a reason (e.g. a day blocked later); the pilot gets it by email (`ppr-revoked` templates)
+- [x] With `ppr` on, the "Flugplatz-Status" tab notes that the status «Geschlossen» rejects PPR requests for today
+- [ ] Later: scheduled aerodrome statuses on the "Flugplatz-Status" tab, shown by the banner, the status page and the API, and rejected by PPR too, so a planned closure of the whole aerodrome is entered once; to decide: a manual status during a planned period, times of day, the API fields
 
 ### Final Verification
 - [ ] `npm test` — all Jest tests pass

@@ -732,20 +732,20 @@
       "answerManual": "Manually",
       "answerManualHelp": "An admin approves or rejects each request.",
       "answerAutomatic": "Automatically",
-      "answerAutomaticHelp": "Each request is approved right away, unless the aerodrome is closed.",
+      "answerAutomaticHelp": "Each request is approved right away, except for blocked days, and for today while the aerodrome is closed.",
       "pilotInfo": "Information for pilots",
       "pilotInfoHelp": "Included in each automatic approval, e.g. runway, circuit, radio frequency, landing fee and phone number.",
       "tooLong": "At most {{max}} characters.",
-      "closures": "Closures",
-      "closuresHelp": "Requests for a day within a closure are rejected with its reason, also when answering manually. While the aerodrome status is «Closed», requests for today are rejected as well.",
-      "noClosures": "No closures planned.",
+      "closures": "Blocked days",
+      "closuresHelp": "Block the days on which you do not approve PPR requests, e.g. for runway works, an event or when nobody is on site. New requests for these days are rejected with the reason, also when answering manually. Blocked days do not change the aerodrome status. While it is «Closed», requests for today are rejected as well. Requests already made stay as they are: reject pending ones in the «PPR requests» list below, and revoke approvals there.",
+      "noClosures": "No days blocked.",
       "closureFrom": "From",
       "closureTo": "To",
       "closureReason": "Reason (included in the rejection)",
-      "addClosure": "Add closure",
-      "removeClosure": "Remove closure",
-      "closureDatesRequired": "Enter the start and end of the closure.",
-      "closureOrder": "The end must not be before the start.",
+      "addClosure": "Block days",
+      "removeClosure": "Remove block",
+      "closureDatesRequired": "Enter the first and the last blocked day.",
+      "closureOrder": "The last day must not be before the first.",
       "closureReasonRequired": "Enter a reason.",
       "notification": "Notifications",
       "adminEmail": "Email address for new requests",
@@ -754,7 +754,8 @@
       "invalidEmail": "Enter a valid email address.",
       "loadFailed": "The settings could not be loaded.",
       "saveFailed": "The settings could not be saved."
-    }
+    },
+    "aerodromeStatusHint": "While the status is «Closed», PPR requests for today are rejected. Days on which you do not approve PPR requests are blocked in the «PPR requests» tab under «Blocked days»."
   },
   "maskedInput": {
     "tooltip": "To edit this field, clear it first and then enter the desired value."
