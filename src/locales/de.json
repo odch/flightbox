@@ -749,7 +749,7 @@
       "closureFrom": "Von",
       "closureTo": "Bis",
       "closureReason": "Grund (steht in der Ablehnung)",
-      "addClosure": "Tage sperren",
+      "addClosure": "Sperre hinzufügen",
       "removeClosure": "Sperre entfernen",
       "closureDatesRequired": "Geben Sie den ersten und den letzten gesperrten Tag ein.",
       "closureOrder": "Der letzte Tag darf nicht vor dem ersten liegen.",
