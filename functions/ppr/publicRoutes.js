@@ -2,6 +2,7 @@
 
 const express = require('express')
 const cors = require('cors')
+const { fbAuth } = require('../api/fbAuth')
 const { mailboxKey, normalizeEmail } = require('../auth/signInEmail')
 const submitRequest = require('./usecases/submitRequest')
 const getRequestStatus = require('./usecases/getRequestStatus')
@@ -18,10 +19,11 @@ const { clientRateLimitSubject } = require('./clientIp')
 const { REQUEST_KEY_PATTERN, pilotInput } = require('./domain/pprRequest')
 const { STATUS_TOKEN_PATTERN } = require('./domain/pprStatusLink')
 
-// The PPR routes that need no login: submissions without login (where
-// `pprGuestRequests` is on) and the status page the pilot's emails link to.
-// functions/api/index.js mounts them at /ppr only, ahead of the permissive
-// CORS of the other routes.
+// The PPR routes of sessions without an email address and of nobody:
+// submissions without login (where `pprGuestRequests` is on), which need a
+// guest session or a login without an email address, and the status page the
+// pilot's emails link to, which needs no login. functions/api/index.js mounts
+// them at /ppr only, ahead of the permissive CORS of the other routes.
 const router = express.Router()
 
 // Pages of the app's dev server (npm start), on the developer's own machine
@@ -35,6 +37,7 @@ const DEV_SERVER_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0):\d+$/
 const allowAppOrigins = cors({
   origin: [...pprAppOrigins(), DEV_SERVER_ORIGIN],
   methods: ['POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Retry-After']
 })
 
@@ -46,10 +49,28 @@ function requireJson(req, res, next) {
 }
 
 // A POST route for the app's pages, with its preflight
-function appPost(path, handler) {
+function appPost(path, ...handlers) {
   router.route(path)
     .options(allowAppOrigins)
-    .post(allowAppOrigins, requireJson, handler)
+    .post(allowAppOrigins, requireJson, ...handlers)
+}
+
+// Requests without login come from the sessions the app starts with its own
+// tokens (sign-in provider 'custom'), apart from a login with an email
+// address, which requests with it (routes.js): the guest session (started
+// with the guest access token, so renewing it stops them) and logins without
+// an email address (username/password). All guest sessions share the user
+// 'guest', so an email address set on that user must not shut every guest
+// out. The kiosk never requests PPR, and sessions of other providers (e.g. a
+// password set on the 'guest' user) are not the app's. Runs after fbAuth,
+// which rejects missing, invalid and revoked ID tokens.
+function requireSessionWithoutEmail(req, res, next) {
+  const appSession = req.fbSignInProvider === 'custom'
+  const guest = req.fbUserId === 'guest'
+  if (!appSession || req.fbUserId === 'kiosk' || (!guest && req.fbUserEmail)) {
+    return res.status(403).json({ error: 'Not available to this session' })
+  }
+  next()
 }
 
 // The slots a submission without login holds: one of the limit per client,
@@ -92,10 +113,11 @@ function tooManyRequests(res, waitMs) {
   return res.status(429).json({ error: 'Too many requests' })
 }
 
-// POST /guest-requests — a pilot submits a request without login. Nobody
-// confirmed the address: the request belongs to no login, is marked for the
-// aerodrome (createPprRequest), and the limits bound how many emails the
-// form sends to any one address.
+// POST /guest-requests — a pilot submits a request without login, from a
+// guest session or a login without an email address. Nobody confirmed the
+// address: the request belongs to no login, is marked for the aerodrome
+// (createPprRequest), and the limits bound how many emails the form sends to
+// any one address.
 async function submitWithoutLogin(req, res) {
   const body = req.body || {}
   // Checked first: the limit per mailbox needs the address
@@ -179,7 +201,7 @@ async function withdraw(req, res) {
 // status routes exist wherever PPR is on: the emails of requests made with
 // login link to the status page too.
 if (isPprGuestRequestsEnabled()) {
-  appPost('/guest-requests', submitWithoutLogin)
+  appPost('/guest-requests', fbAuth, requireSessionWithoutEmail, submitWithoutLogin)
 }
 appPost('/status/:key', showStatus)
 appPost('/status/:key/withdraw', withdraw)

@@ -17,6 +17,21 @@ jest.mock('./adapters/firebaseRateLimiter', () => ({
   guestMailboxDayLimiter: mockMailboxDayLimiter
 }))
 
+// The session fbAuth found for a request (null: no valid ID token): a guest
+// session unless a test says otherwise
+let mockSession
+jest.mock('../api/fbAuth', () => ({
+  fbAuth: jest.fn((req, res, next) => {
+    if (!mockSession) {
+      return res.status(401).send('Unauthorized')
+    }
+    req.fbUserId = mockSession.uid
+    req.fbUserEmail = mockSession.email
+    req.fbSignInProvider = mockSession.provider === undefined ? 'custom' : mockSession.provider
+    return next()
+  })
+}))
+
 const APP_ORIGINS = ['https://lspl-test.web.app', 'https://lspl-test.firebaseapp.com', 'https://ppr.flugplatz.example']
 jest.mock('./deployConfig', () => ({ pprAppOrigins: () => APP_ORIGINS }))
 jest.mock('./enabled', () => ({ isPprGuestRequestsEnabled: jest.fn(() => true) }))
@@ -70,6 +85,7 @@ function mockRes() {
     ended: false,
     status(code) { res.statusCode = code; return res },
     json(data) { res.body = data; return res },
+    send(data) { res.body = data; res.ended = true; return res },
     set(name, value) { res.headers[name.toLowerCase()] = value; return res },
     setHeader(name, value) { res.headers[name.toLowerCase()] = value },
     getHeader(name) { return res.headers[name.toLowerCase()] },
@@ -103,6 +119,7 @@ const submit = body => run('post', '/guest-requests', mockReq({ body }))
 describe('PPR routes without login', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockSession = { uid: 'guest' }
     mockClientLimiter.acquire.mockResolvedValue(true)
     mockMailboxLimiter.acquire.mockResolvedValue(true)
     mockMailboxDayLimiter.acquire.mockResolvedValue(true)
@@ -153,6 +170,8 @@ describe('PPR routes without login', () => {
       expect(res.statusCode).toBe(204)
       expect(res.headers['access-control-allow-origin']).toBe(origin)
       expect(res.headers['access-control-allow-methods']).toBe('POST')
+      // The ID token of the session that submits
+      expect(res.headers['access-control-allow-headers']).toBe('Content-Type,Authorization')
       expect(passedOn).toBe(false)
     })
 
@@ -303,6 +322,60 @@ describe('PPR routes without login', () => {
 
       expect(res.statusCode).toBe(400)
       expect(mockSubmitRequest).not.toHaveBeenCalled()
+    })
+
+    describe('session', () => {
+      it('is needed: without a valid ID token the request is refused before anything else', async () => {
+        mockSession = null
+
+        const { res } = await submit({ ...pilotFields, email: 'max@example.com' })
+
+        expect(res.statusCode).toBe(401)
+        expect(mockClientLimiter.acquire).not.toHaveBeenCalled()
+        expect(mockSubmitRequest).not.toHaveBeenCalled()
+      })
+
+      it.each([
+        ['the kiosk', { uid: 'kiosk' }],
+        ['a login with an email address, which requests with it', { uid: 'u1', email: 'pilot@example.com' }],
+        // e.g. a password set on the shared user 'guest', which would outlive
+        // a renewal of the guest access token
+        ['the user \'guest\' signed in with a password', { uid: 'guest', provider: 'password' }],
+        ['an anonymous session', { uid: 'anon-1', provider: 'anonymous' }],
+      ])('refuses %s', async (name, session) => {
+        mockSession = session
+
+        const { res } = await submit({ ...pilotFields, email: 'max@example.com' })
+
+        expect(res.statusCode).toBe(403)
+        expect(mockClientLimiter.acquire).not.toHaveBeenCalled()
+        expect(mockSubmitRequest).not.toHaveBeenCalled()
+      })
+
+      it.each([
+        ['a guest session', { uid: 'guest' }],
+        // All guest sessions share it: an address set on it must not shut
+        // every guest out
+        ['a guest session whose shared user has an email address', { uid: 'guest', email: 'x@attacker.example' }],
+        ['a login without an email address', { uid: 'u1' }],
+      ])('takes %s', async (name, session) => {
+        mockSession = session
+        mockSubmitRequest.mockResolvedValue({ key: KEY, status: 'pending', statusToken: TOKEN, emailSent: true })
+
+        const { res } = await submit({ ...pilotFields, email: 'max@example.com' })
+
+        expect(res.statusCode).toBe(201)
+        expect(mockSubmitRequest.mock.calls[0][1]).toEqual({ ...pilotFields, email: 'max@example.com', withoutLogin: true })
+      })
+
+      it('is not needed for the status of a request', async () => {
+        mockSession = null
+        const { fbAuth } = require('../api/fbAuth')
+
+        await run('post', '/status/:key', mockReq({ params: { key: KEY }, body: { token: TOKEN } }))
+
+        expect(fbAuth).not.toHaveBeenCalled()
+      })
     })
 
     describe('limits', () => {
