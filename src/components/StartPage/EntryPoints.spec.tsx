@@ -48,7 +48,7 @@ describe('EntryPoints', () => {
     });
 
     it.each([['guests', { guest: true }], ['the kiosk', { kiosk: true }]])(
-      'offers %s recording their movements and the help only',
+      'offers %s recording their movements and the help only, where requests without login are off',
       (_, props) => {
         (global as any).__CONF__ = { ppr: true };
         const { container } = renderWithTheme(<EntryPoints {...props} admin email="x@example.com"/>);
@@ -85,7 +85,7 @@ describe('EntryPoints', () => {
     expect(screen.queryByText('nav.pprList')).not.toBeNull();
   });
 
-  it('hides the PPR entries from logins without an email (username/password)', () => {
+  it('hides the PPR entries from logins without an email (username/password) where requests without login are off', () => {
     (global as any).__CONF__ = { ppr: true };
     renderWithTheme(<EntryPoints email={null}/>);
     expect(screen.queryByText('nav.ppr')).toBeNull();
@@ -98,9 +98,38 @@ describe('EntryPoints', () => {
     expect(screen.queryByText('nav.ppr')).toBeNull();
   });
 
-  it('hides the PPR entries from guests', () => {
+  it('hides the PPR entries from guests where requests without login are off', () => {
     (global as any).__CONF__ = { ppr: true };
     renderWithTheme(<EntryPoints guest email="guest@example.com"/>);
     expect(screen.queryByText('nav.ppr')).toBeNull();
+  });
+
+  describe('with requests without login', () => {
+    beforeEach(() => {
+      (global as any).__CONF__ = { ppr: true, pprGuestRequests: true };
+    });
+
+    it.each([
+      ['guests', { guest: true }],
+      ['logins without an email (username/password)', { email: null }],
+    ])('offers %s the PPR request, but no list of their own', (_, props) => {
+      const { container } = renderWithTheme(<EntryPoints {...props}/>);
+
+      expect(entriesIn(container, 'secondary')).toEqual(['new-ppr']);
+      expect(screen.getByRole('link', { name: 'nav.ppr' })).toHaveAttribute('href', '/ppr/new');
+      expect(screen.queryByText('nav.pprList')).toBeNull();
+    });
+
+    it('still offers the kiosk recording its movements and the help only', () => {
+      const { container } = renderWithTheme(<EntryPoints kiosk/>);
+
+      expect(tier(container, 'secondary')).toBeNull();
+      expect(entriesIn(container, 'tertiary')).toEqual(['help']);
+    });
+
+    it('offers logins with an email both PPR entries, as before', () => {
+      const { container } = renderWithTheme(<EntryPoints email="pilot@example.com"/>);
+      expect(entriesIn(container, 'secondary')).toEqual(['new-ppr', 'ppr-list']);
+    });
   });
 });

@@ -310,6 +310,8 @@ const PprRequestList = (props: any) => {
         renderRequest={(req: any) => {
           const expanded = expandedKey === req.key;
           const automatic = req.reviewedBy === 'automatic';
+          // Anybody may have typed the email address of a request without login
+          const withoutLogin = req.withoutLogin === true;
           const linked = linkResult && linkResult.key === req.key ? linkResult : null;
           const answeredNotice = !!linked && linked.answered && expanded;
           return (
@@ -334,6 +336,8 @@ const PprRequestList = (props: any) => {
                   </Title>
                   <Pilot>
                     {req.firstname} {req.lastname} · {t(`flightTypes.${req.flightType}`)}
+                    {/* Text, so that it is part of the row's name */}
+                    {withoutLogin && ` · ${t('ppr.withoutLogin.marker')}`}
                   </Pilot>
                 </Summary>
                 <PprStatusBadge status={req.status}/>
@@ -349,6 +353,10 @@ const PprRequestList = (props: any) => {
                   <DetailList>
                     <dt>{t('movement.details.email')}</dt>
                     <dd><a href={`mailto:${req.email}`}>{req.email}</a></dd>
+                    {withoutLogin && (<>
+                      <dt>{t('ppr.withoutLogin.submitted')}</dt>
+                      <dd data-cy="ppr-without-login">{t('ppr.withoutLogin.unconfirmed')}</dd>
+                    </>)}
                     {req.phone && (<>
                       <dt>{t('movement.details.phone')}</dt>
                       <dd><a href={`tel:${req.phone}`}>{req.phone}</a></dd>

@@ -18,7 +18,7 @@ const mapStateToProps = (state: RootState) => ({
 
 const mapActionCreators = {
   initPprForm,
-  submitPprRequest,
+  onSubmit: submitPprRequest,
   resetPprForm,
   confirmPprSubmitSuccess,
 };

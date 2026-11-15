@@ -112,6 +112,30 @@ jest.mock('../components/PprRequestList', () => {
   };
 });
 
+jest.mock('../components/PprRequestPage', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: jest.fn((_props: any) => React.createElement('div', {'data-testid': 'ppr-request-page'})),
+  };
+});
+
+jest.mock('../components/PprIntroPage', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: jest.fn((_props: any) => React.createElement('div', {'data-testid': 'ppr-intro-page'})),
+  };
+});
+
+jest.mock('../components/PprStatusPage', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: jest.fn((_props: any) => React.createElement('div', {'data-testid': 'ppr-status-page'})),
+  };
+});
+
 jest.mock('../components/ApiAccess', () => ({
   __esModule: true,
   default: () => <div data-testid="api-access" />,
@@ -528,5 +552,134 @@ describe('PprRequestListContainer', () => {
 
     props.loadPprRequests();
     expect(store.actions).toEqual([{ type: 'LOAD_PPR_REQUESTS', payload: { scope: 'all' } }]);
+  });
+});
+
+describe('PPR request containers', () => {
+  const pprState = {
+    form: {
+      submitting: false,
+      submitted: true,
+      result: { key: 'r1', status: 'pending', statusToken: 't1' },
+      commitFailed: false,
+      rateLimited: true,
+    },
+    initialValues: { plannedTime: '10:30' },
+  };
+  const state = (auth: any, privacyPolicyUrl: string | null = 'https://aerodrome.ch/privacy') => ({
+    auth,
+    ppr: pprState,
+    profile: { profile: undefined },
+    settings: { privacyPolicyUrl: { url: privacyPolicyUrl } },
+  });
+
+  const pagePropsOf = (path: string, storeState: any) => {
+    const Container = require(path).default;
+    const Component = require('../components/PprRequestPage').default;
+    const store = makeStore(storeState);
+    render(wrap(store, <Container />));
+    return { props: lastPropsOf(Component), store };
+  };
+
+  it('PprRequestPageContainer submits with the login', () => {
+    const { props, store } = pagePropsOf('./PprRequestPageContainer', state({ authenticated: true }));
+    expect(props.withoutLogin).toBeUndefined();
+
+    props.onSubmit({ firstname: 'Max' });
+    expect(store.actions).toEqual([{ type: 'SUBMIT_PPR_REQUEST', payload: { values: { firstname: 'Max' } } }]);
+  });
+
+  it('PprGuestRequestPageContainer passes the form without login and submits without login', () => {
+    const { props, store } = pagePropsOf('./PprGuestRequestPageContainer', state({ authenticated: false }));
+
+    expect(props).toEqual(expect.objectContaining({
+      submitted: true,
+      result: { key: 'r1', status: 'pending', statusToken: 't1' },
+      rateLimited: true,
+      initialValues: { plannedTime: '10:30' },
+      withoutLogin: true,
+      visitor: true,
+      privacyPolicyUrl: 'https://aerodrome.ch/privacy',
+    }));
+
+    props.onSubmit({ email: 'max@example.com' });
+    expect(store.actions).toEqual([
+      { type: 'SUBMIT_PPR_GUEST_REQUEST', payload: { values: { email: 'max@example.com' } } },
+    ]);
+  });
+
+  it('PprGuestRequestPageContainer tells guest sessions apart from visitors', () => {
+    const { props } = pagePropsOf('./PprGuestRequestPageContainer', state({ authenticated: true, data: { guest: true } }));
+    expect(props.visitor).toBe(false);
+  });
+
+  it('PprGuestRequestPageContainer links a privacy policy over https only', () => {
+    const { props } = pagePropsOf(
+      './PprGuestRequestPageContainer',
+      state({ authenticated: false }, 'http://aerodrome.ch/privacy')
+    );
+    expect(props.privacyPolicyUrl).toBeNull();
+  });
+
+  it('PprIntroPageContainer links a privacy policy over https only', () => {
+    const Container = require('./PprIntroPageContainer').default;
+    const Component = require('../components/PprIntroPage').default;
+
+    render(wrap(makeStore(state({ authenticated: false })), <Container />));
+    expect(lastPropsOf(Component).privacyPolicyUrl).toBe('https://aerodrome.ch/privacy');
+
+    render(wrap(makeStore(state({ authenticated: false }, 'http://aerodrome.ch/privacy')), <Container />));
+    expect(lastPropsOf(Component).privacyPolicyUrl).toBeNull();
+  });
+
+  it('PprStatusPageContainer passes the request of the status link, and loads, withdraws and forgets it', () => {
+    const Container = require('./PprStatusPageContainer').default;
+    const Component = require('../components/PprStatusPage').default;
+    const status = { request: { status: 'pending' }, loading: false, withdrawing: true, notice: 'withdrawFailed' };
+    const store = makeStore({ auth: { authenticated: false }, ppr: { status } });
+    render(wrap(store, <Container />));
+
+    const props = lastPropsOf(Component);
+    expect(props).toEqual(expect.objectContaining({ ...status, visitor: true }));
+    // PPR is off in this config
+    expect(props.canRequest).toBe(false);
+
+    props.loadPprStatus('r1', 't1');
+    props.withdrawPprRequest('r1', 't1');
+    props.resetPprStatus();
+    expect(store.actions).toEqual([
+      { type: 'LOAD_PPR_STATUS', payload: { key: 'r1', token: 't1' } },
+      { type: 'WITHDRAW_PPR_REQUEST', payload: { key: 'r1', token: 't1' } },
+      { type: 'RESET_PPR_STATUS' },
+    ]);
+  });
+
+  describe('PprStatusPageContainer offers a new request', () => {
+    const conf = (global as any).__CONF__;
+    const canRequestWith = (auth: any) => {
+      const Container = require('./PprStatusPageContainer').default;
+      const Component = require('../components/PprStatusPage').default;
+      const status = { request: null, loading: false, withdrawing: false, notice: null };
+      render(wrap(makeStore({ auth, ppr: { status } }), <Container />));
+      return lastPropsOf(Component).canRequest;
+    };
+
+    afterEach(() => {
+      (global as any).__CONF__ = conf;
+    });
+
+    it.each([
+      ['visitors', { authenticated: false }, true],
+      ['logins with an email address', { authenticated: true, data: { email: 'max@example.com' } }, true],
+      ['guest sessions, where requests without login are off', { authenticated: true, data: { guest: true } }, false],
+    ])('to %s: %p', (name, auth, expected) => {
+      (global as any).__CONF__ = { ...conf, ppr: true };
+      expect(canRequestWith(auth)).toBe(expected);
+    });
+
+    it('to guest sessions where requests without login are on', () => {
+      (global as any).__CONF__ = { ...conf, ppr: true, pprGuestRequests: true };
+      expect(canRequestWith({ authenticated: true, data: { guest: true } })).toBe(true);
+    });
   });
 });

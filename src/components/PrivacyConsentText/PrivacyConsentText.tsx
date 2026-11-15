@@ -13,14 +13,21 @@ const StyledText = styled.p`
   }
 `;
 
-const PrivacyConsentText = ({privacyPolicyUrl}: {privacyPolicyUrl?: string | null}) => {
+interface PrivacyConsentTextProps {
+  privacyPolicyUrl?: string | null;
+  // A text with the link as <1>…</1>, for another action than saving
+  i18nKey?: string;
+  className?: string;
+}
+
+const PrivacyConsentText = ({privacyPolicyUrl, i18nKey = 'legal.movementPrivacyConsent', className}: PrivacyConsentTextProps) => {
   if (!privacyPolicyUrl || !/^https?:\/\//.test(privacyPolicyUrl)) {
     return null;
   }
 
   return (
-    <StyledText>
-      <Trans i18nKey="legal.movementPrivacyConsent">
+    <StyledText className={className}>
+      <Trans i18nKey={i18nKey}>
         Mit dem Speichern akzeptieren Sie die <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer">Datenschutzerkl&auml;rung</a>.
       </Trans>
     </StyledText>

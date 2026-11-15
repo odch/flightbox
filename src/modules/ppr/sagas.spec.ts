@@ -1,4 +1,4 @@
-import { call, put, takeLatest } from 'redux-saga/effects';
+import { call, put, race, take, takeLatest, takeLeading } from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
@@ -77,34 +77,51 @@ describe('modules', () => {
       });
 
       describe('submitPprRequest', () => {
-        it('should submit request with the app language', () => {
+        it('sends the request until the form is left', () => {
           const values = { firstname: 'Max' };
           const action = actions.submitPprRequest(values);
           const generator = sagas.submitPprRequest(action);
+
+          expect(generator.next().value).toEqual(race({
+            result: call(sagas.sendPprRequest, values),
+            reset: take(actions.RESET_PPR_FORM),
+          }));
+          const result = { key: 'req-1', status: 'pending' as const };
+          expect(generator.next({ result }).value).toEqual(put(actions.submitPprRequestSuccess(result)));
+          expect(generator.next().done).toEqual(true);
+        });
+
+        it('sends the request with the ID token and the app language', () => {
+          const generator = sagas.sendPprRequest({ firstname: 'Max' });
 
           expect(generator.next().value).toEqual(call(getIdToken));
           expect(generator.next('token-123').value).toEqual(
             call(remote.submitRequest, { firstname: 'Max', language: 'en' }, 'token-123')
           );
-          const result = { key: 'req-1', status: 'pending' as const };
-          expect(generator.next(result).value).toEqual(put(actions.submitPprRequestSuccess(result)));
-          expect(generator.next().done).toEqual(true);
+          const result = { key: 'req-1', status: 'pending' };
+          expect(generator.next(result)).toEqual({ value: result, done: true });
         });
 
         it('passes on an automatic answer', () => {
           const generator = sagas.submitPprRequest(actions.submitPprRequest({}));
-          generator.next(); // getIdToken
-          generator.next('token-123'); // submitRequest
+          generator.next(); // sendPprRequest
 
           const result = { key: 'req-1', status: 'approved' as const, reviewRemarks: 'Runway 05/23' };
-          expect(generator.next(result).value).toEqual(put(actions.submitPprRequestSuccess(result)));
+          expect(generator.next({ result }).value).toEqual(put(actions.submitPprRequestSuccess(result)));
+        });
+
+        it('drops the answer when the form was left before it came', () => {
+          const generator = sagas.submitPprRequest(actions.submitPprRequest({}));
+          generator.next(); // sendPprRequest
+
+          expect(generator.next({ reset: actions.resetPprForm() }).done).toEqual(true);
         });
 
         it('should put failure on error', () => {
           const action = actions.submitPprRequest({});
           const generator = sagas.submitPprRequest(action);
 
-          generator.next(); // getIdToken
+          generator.next(); // sendPprRequest
 
           const error = new Error('submit failed');
           expect(generator.throw(error).value).toEqual(put(actions.submitPprRequestFailure()));
@@ -255,13 +272,170 @@ describe('modules', () => {
         });
       });
 
+      // Refusals of the routes without login, as remote throws them
+      const refusal = (status: number) => Object.assign(new Error(`Request failed: ${status}`), { status });
+
+      describe('without login', () => {
+        let consoleError: jest.SpyInstance;
+
+        beforeEach(() => {
+          consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        });
+
+        afterEach(() => {
+          consoleError.mockRestore();
+        });
+
+        describe('submitPprGuestRequest', () => {
+          it('sends the request with the app language and without an ID token', () => {
+            const values = { firstname: 'Max', email: 'max@example.com' };
+            const generator = sagas.submitPprGuestRequest(actions.submitPprGuestRequest(values));
+
+            expect(generator.next().value).toEqual(race({
+              result: call(remote.submitGuestRequest, { firstname: 'Max', email: 'max@example.com', language: 'en' }),
+              reset: take(actions.RESET_PPR_FORM),
+            }));
+            const result = { key: 'req-1', status: 'pending', statusToken: 'token-1', emailSent: true };
+            expect(generator.next({ result }).value).toEqual(
+              put(actions.submitPprRequestSuccess({ ...result, email: 'max@example.com' }))
+            );
+            expect(generator.next().done).toEqual(true);
+          });
+
+          it('keeps the address the request was sent with, as the server takes it', () => {
+            const generator = sagas.submitPprGuestRequest(actions.submitPprGuestRequest({ email: ' Max@Example.COM ' }));
+            generator.next(); // submitGuestRequest
+
+            const result = { key: 'req-1', status: 'pending', statusToken: 'token-1' };
+            expect(generator.next({ result }).value).toEqual(
+              put(actions.submitPprRequestSuccess({ ...result, email: 'max@example.com' }))
+            );
+          });
+
+          it('drops the answer when the form was left before it came', () => {
+            const generator = sagas.submitPprGuestRequest(actions.submitPprGuestRequest({ email: 'max@example.com' }));
+            generator.next(); // submitGuestRequest
+
+            expect(generator.next({ reset: actions.resetPprForm() }).done).toEqual(true);
+          });
+
+          it('tells a refusal for too many requests apart', () => {
+            const generator = sagas.submitPprGuestRequest(actions.submitPprGuestRequest({}));
+            generator.next(); // submitGuestRequest
+
+            expect(generator.throw(refusal(429)).value).toEqual(put(actions.submitPprRequestFailure(true)));
+            expect(generator.next().done).toEqual(true);
+          });
+
+          it.each([[refusal(400)], [refusal(500)], [new TypeError('Failed to fetch')]])('reports the failure %p', error => {
+            const generator = sagas.submitPprGuestRequest(actions.submitPprGuestRequest({}));
+            generator.next(); // submitGuestRequest
+
+            expect(generator.throw(error).value).toEqual(put(actions.submitPprRequestFailure(false)));
+          });
+        });
+
+        describe('loadPprStatus', () => {
+          it('loads the request of the link', () => {
+            const generator = sagas.loadPprStatus(actions.loadPprStatus('req-1', 'token-1'));
+
+            expect(generator.next().value).toEqual(race({
+              request: call(remote.loadRequestStatus, 'req-1', 'token-1'),
+              reset: take(actions.RESET_PPR_STATUS),
+            }));
+            const request = {
+              status: 'pending', immatriculation: 'HBKOF', plannedDate: '2026-11-20', plannedTime: '10:30',
+              flightType: 'private', automatic: false, canWithdraw: true,
+            };
+            expect(generator.next({ request }).value).toEqual(put(actions.pprStatusLoaded(request)));
+            expect(generator.next().done).toEqual(true);
+          });
+
+          it('drops the request when the page was left before it came', () => {
+            const generator = sagas.loadPprStatus(actions.loadPprStatus('req-1', 'token-1'));
+            generator.next(); // loadRequestStatus
+
+            expect(generator.next({ reset: actions.resetPprStatus() }).done).toEqual(true);
+          });
+
+          it('tells when the link leads to no request', () => {
+            const generator = sagas.loadPprStatus(actions.loadPprStatus('req-1', 'token-1'));
+            generator.next(); // loadRequestStatus
+
+            expect(generator.throw(refusal(404)).value).toEqual(put(actions.pprStatusLoadFailed('notFound')));
+          });
+
+          it.each([[refusal(500)], [new TypeError('Failed to fetch')]])('reports the failure %p', error => {
+            const generator = sagas.loadPprStatus(actions.loadPprStatus('req-1', 'token-1'));
+            generator.next(); // loadRequestStatus
+
+            expect(generator.throw(error).value).toEqual(put(actions.pprStatusLoadFailed('failed')));
+          });
+        });
+
+        describe('withdrawPprRequest', () => {
+          it('withdraws the request of the link', () => {
+            const generator = sagas.withdrawPprRequest(actions.withdrawPprRequest('req-1', 'token-1'));
+
+            expect(generator.next().value).toEqual(race({
+              withdrawn: call(remote.withdrawRequest, 'req-1', 'token-1'),
+              reset: take(actions.RESET_PPR_STATUS),
+            }));
+            expect(generator.next({ withdrawn: { withdrawn: true } }).value)
+              .toEqual(put(actions.withdrawPprRequestSuccess()));
+            expect(generator.next().done).toEqual(true);
+          });
+
+          it('drops the result when the page was left before it came', () => {
+            const generator = sagas.withdrawPprRequest(actions.withdrawPprRequest('req-1', 'token-1'));
+            generator.next(); // withdrawRequest
+
+            expect(generator.next({ reset: actions.resetPprStatus() }).done).toEqual(true);
+          });
+
+          it('loads a request answered in the meantime again, to show the answer', () => {
+            const generator = sagas.withdrawPprRequest(actions.withdrawPprRequest('req-1', 'token-1'));
+            generator.next(); // withdrawRequest
+
+            expect(generator.throw(refusal(409)).value).toEqual(put(actions.withdrawPprRequestFailure('notPending')));
+            expect(generator.next().value).toEqual(put(actions.loadPprStatus('req-1', 'token-1')));
+            expect(generator.next().done).toEqual(true);
+          });
+
+          it.each([
+            ['a request that no longer exists', refusal(404), 'notFound'],
+            ['a failure', refusal(500), 'failed'],
+            ['a network failure', new TypeError('Failed to fetch'), 'failed'],
+          ] as const)('reports %s', (_, error, reason) => {
+            const generator = sagas.withdrawPprRequest(actions.withdrawPprRequest('req-1', 'token-1'));
+            generator.next(); // withdrawRequest
+
+            expect(generator.throw(error).value).toEqual(put(actions.withdrawPprRequestFailure(reason)));
+            expect(generator.next().done).toEqual(true);
+          });
+        });
+      });
+
       describe('the watchers', () => {
+        const watchers = () => (sagas.default().next().value as any).payload;
+
         // The store holds the state of one load (loading, loadFailed): the
         // result of an older load must not overwrite that of a newer one,
         // e.g. when the admin page and the PPR list load at the same time
         it('let a newer load of the requests replace the one running', () => {
-          const watchers = (sagas.default().next().value as any).payload;
-          expect(watchers).toContainEqual(takeLatest(actions.LOAD_PPR_REQUESTS, sagas.loadPprRequests));
+          expect(watchers()).toContainEqual(takeLatest(actions.LOAD_PPR_REQUESTS, sagas.loadPprRequests));
+        });
+
+        it('ignore further submits without login while one is being sent', () => {
+          expect(watchers()).toContainEqual(takeLeading(actions.SUBMIT_PPR_GUEST_REQUEST, sagas.submitPprGuestRequest));
+        });
+
+        it('let the load of another status link replace the one running', () => {
+          expect(watchers()).toContainEqual(takeLatest(actions.LOAD_PPR_STATUS, sagas.loadPprStatus));
+        });
+
+        it('ignore further withdrawals while one is being sent', () => {
+          expect(watchers()).toContainEqual(takeLeading(actions.WITHDRAW_PPR_REQUEST, sagas.withdrawPprRequest));
         });
       });
 

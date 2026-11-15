@@ -5,6 +5,7 @@
   }],
   "hosting": {
     "public": "build",
+    "trailingSlash": false,
     "rewrites": [
       {
         "source": "/api/**",
@@ -25,6 +26,12 @@
       },
       {
         "source": "/index.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
+      },
+      {
+        "regex": "^/[Pp][Pp][Rr]/?$",
         "headers": [
           { "key": "Cache-Control", "value": "no-cache" }
         ]

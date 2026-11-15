@@ -37,6 +37,17 @@ describe('ClipboardCopier', () => {
     expect(screen.getByTitle('Copy to Clipboard')).toBeInTheDocument();
   });
 
+  it('does not submit a form it sits in', () => {
+    document.execCommand = jest.fn().mockReturnValue(true);
+    const onSubmit = jest.fn(e => e.preventDefault());
+    renderWithTheme(<form onSubmit={onSubmit}><ClipboardCopier text="test" /></form>);
+
+    expect(screen.getByTitle('Copy to Clipboard')).toHaveAttribute('type', 'button');
+    fireEvent.click(screen.getByTitle('Copy to Clipboard'));
+    expect(onSubmit).not.toHaveBeenCalled();
+    delete (document as any).execCommand;
+  });
+
   describe('with navigator.clipboard', () => {
     let writeTextMock;
 

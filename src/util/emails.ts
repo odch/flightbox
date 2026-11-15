@@ -14,6 +14,17 @@ export function isValidEmail(value: string): boolean {
   return value.length <= MAX_EMAIL_LENGTH && EMAIL_PATTERN.test(value);
 }
 
+// The rule of the functions for the addresses they send to unconfirmed
+// (functions/auth/signInEmail.js): plain ASCII and a top-level domain of
+// letters. The server refuses e.g. a request without login whose address
+// breaks it.
+const SENDABLE_EMAIL_PATTERN = /^[a-z0-9!#$%&'*+/=?^_`{|}~.-]+@([a-z0-9-]+\.)+[a-z]{2,}$/;
+
+export function isSendableEmail(value: string): boolean {
+  const email = normalizeEmail(value);
+  return email.length <= MAX_EMAIL_LENGTH && SENDABLE_EMAIL_PATTERN.test(email);
+}
+
 // An entry is an e-mail, or an `{email, registrations}` object written by an
 // earlier version (with aircraft per person); its aircraft no longer matter.
 function entryEmail(entry: unknown): unknown {

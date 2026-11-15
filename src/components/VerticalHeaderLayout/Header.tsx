@@ -50,10 +50,10 @@ const StyledLanguageSwitch = styled(LanguageSwitch)`
   margin-top: 20px;
 `;
 
-function Header() {
+function Header({ homePath = '/' }: { homePath?: string }) {
   return (
     <Wrapper>
-      <Link to="/">
+      <Link to={homePath}>
         <StyledLogo/>
       </Link>
       <StyledTitle>

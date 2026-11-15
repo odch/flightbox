@@ -1,58 +1,13 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import Header from './Header';
 import EmailLoginForm from '../../containers/EmailLoginFormContainer'
 import UsernamePasswordLoginForm from '../../containers/UsernamePasswordLoginFormContainer'
 import styled from 'styled-components'
-import {useLocation} from 'react-router-dom'
+import {Link, matchPath, useLocation} from 'react-router-dom'
 import getAuthQueryToken, {getGuestOnly} from '../../util/getAuthQueryToken'
-import LanguageSwitch from '../LanguageSwitch';
-import fullHeight from '../../style/fullHeight';
-
-const StyledWrapper = styled.div`
-  display: flex;
-  ${fullHeight()}
-  position: relative;
-
-  @media screen and (max-width: 520px) {
-    & {
-      flex-direction: column;
-    }
-  }
-`
-
-const StyledLanguageSwitch = styled(LanguageSwitch)`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 10;
-`
-
-const LoginWrapper = styled.div`
-  width: 60%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  @media screen and (max-width: 520px) {
-    & {
-      width: 100%;
-      flex: 1;
-    }
-  }
-`;
-
-const LoginInnerWrapper = styled.div`
-  width: 60%;
-  max-width: 800px;
-  padding: 1em;
-
-  @media screen and (max-width: 520px) {
-    & {
-      width: 100%;
-    }
-  }
-`
+import EntranceLayout from '../EntranceLayout';
+import MaterialIcon from '../MaterialIcon';
+import { pprEnabled } from '../../modules/ppr/access';
 
 const PrivacyText = styled.p`
   margin-top: 2em;
@@ -65,31 +20,54 @@ const PrivacyText = styled.p`
   }
 `
 
+const PprContext = styled.div`
+  margin-bottom: 2em;
+`
+
+const BackLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  margin-bottom: 1em;
+  color: #666;
+`
+
+// The icon font's ligature is a word: not for screen readers
+const BackIcon = styled.span`
+  display: flex;
+`
+
 const LoginPage = ({privacyPolicyUrl, emailSent}: {privacyPolicyUrl?: string | null, emailSent?: boolean}) => {
   const { t } = useTranslation();
   const location = useLocation();
   const queryToken = getAuthQueryToken(location)
   const guestOnly = getGuestOnly(location)
+  // «Mit Anmeldung fortfahren» of the PPR intro: the PPR form follows the
+  // login (the route itself leads there)
+  const pprLogin = pprEnabled() && matchPath('/ppr/login', location.pathname) !== null;
   return (
-    <StyledWrapper>
-      <StyledLanguageSwitch/>
-      <Header/>
-      <LoginWrapper>
-        <LoginInnerWrapper>
-          {__CONF__.loginForm === 'email'
-            ? <EmailLoginForm queryToken={queryToken} guestOnly={guestOnly}/>
-            : <UsernamePasswordLoginForm/>
-          }
-          {privacyPolicyUrl && !emailSent && /^https?:\/\//.test(privacyPolicyUrl) && (
-            <PrivacyText>
-              <Trans i18nKey="legal.privacyConsent">
-                Mit der Anmeldung akzeptieren Sie die <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer">Datenschutzerklärung</a>.
-              </Trans>
-            </PrivacyText>
-          )}
-        </LoginInnerWrapper>
-      </LoginWrapper>
-    </StyledWrapper>
+    <EntranceLayout>
+      {pprLogin && (
+        <PprContext data-cy="ppr-login-context">
+          <BackLink to="/ppr/new">
+            <BackIcon aria-hidden="true"><MaterialIcon icon="arrow_back" size={18}/></BackIcon>
+            {t('ppr.login.back')}
+          </BackLink>
+          <p>{t('ppr.login.context')}</p>
+        </PprContext>
+      )}
+      {__CONF__.loginForm === 'email'
+        ? <EmailLoginForm queryToken={queryToken} guestOnly={guestOnly}/>
+        : <UsernamePasswordLoginForm/>
+      }
+      {privacyPolicyUrl && !emailSent && /^https?:\/\//.test(privacyPolicyUrl) && (
+        <PrivacyText>
+          <Trans i18nKey="legal.privacyConsent">
+            Mit der Anmeldung akzeptieren Sie die <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer">Datenschutzerklärung</a>.
+          </Trans>
+        </PrivacyText>
+      )}
+    </EntranceLayout>
   );
 }
 

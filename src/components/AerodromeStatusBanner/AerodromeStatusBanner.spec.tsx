@@ -50,6 +50,18 @@ describe('components', () => {
       expect(container.firstChild).toBeNull();
     });
 
+    it('can be fitted to a page, e.g. the PPR intro', () => {
+      const {getByRole} = renderWithTheme(
+        <AerodromeStatusBanner
+          className="fitted"
+          enabled={true}
+          status={{status: 'open', details: '', timestamp: 1717500000000}}
+          watchCurrentAerodromeStatus={jest.fn()}
+        />
+      );
+      expect(getByRole('status')).toHaveClass('fitted');
+    });
+
     it('renders nothing while status is loading (undefined)', () => {
       const {container} = renderWithTheme(
         <AerodromeStatusBanner enabled={true} status={undefined} watchCurrentAerodromeStatus={jest.fn()}/>

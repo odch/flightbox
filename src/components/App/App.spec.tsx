@@ -80,6 +80,18 @@ jest.mock(
   '../../containers/PprStatusListContainer',
   () => ({ __esModule: true, default: () => <div>ppr-status-list</div> })
 );
+jest.mock(
+  '../../containers/PprIntroPageContainer',
+  () => ({ __esModule: true, default: () => <div>ppr-intro-page</div> })
+);
+jest.mock(
+  '../../containers/PprGuestRequestPageContainer',
+  () => ({ __esModule: true, default: () => <div>ppr-guest-request-page</div> })
+);
+jest.mock(
+  '../../containers/PprStatusPageContainer',
+  () => ({ __esModule: true, default: () => <div>ppr-status-page</div> })
+);
 
 import App from './App';
 
@@ -87,18 +99,19 @@ const theme: any = {
   colors: { main: '#003863', background: '#fafafa', danger: '#e00f00' },
 };
 
-type AuthProps = { initialized: boolean; authenticated?: boolean };
+type AuthProps = { initialized: boolean; authenticated?: boolean; data?: object };
 
 const renderApp = (auth: AuthProps, initialEntries: string[] = ['/']) => {
   const history = createMemoryHistory({ initialEntries });
-  const utils = render(
+  const app = (appAuth: AuthProps) => (
     <ThemeProvider theme={theme}>
       <HistoryRouter history={history as any}>
-        <App auth={auth} showLogin={false} />
+        <App auth={appAuth} showLogin={false} />
       </HistoryRouter>
     </ThemeProvider>
   );
-  return { history, ...utils };
+  const utils = render(app(auth));
+  return { history, ...utils, rerenderWith: (nextAuth: AuthProps) => utils.rerender(app(nextAuth)) };
 };
 
 describe('<App>', () => {
@@ -229,6 +242,141 @@ describe('<App>', () => {
       expect(history.location.pathname + history.location.search).toBe(link);
       expect(history.location.key).toBe(key);
       expect(scrollToSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('PPR', () => {
+    const VISITOR = { initialized: true, authenticated: false };
+    const MEMBER = { initialized: true, authenticated: true, data: { uid: 'u1', email: 'pilot@example.com', guest: false, kiosk: false } };
+    const GUEST_SESSION = { initialized: true, authenticated: true, data: { uid: 'guest', email: null, guest: true, kiosk: false } };
+    const WITHOUT_EMAIL = { initialized: true, authenticated: true, data: { uid: 'tower', email: null, guest: false, kiosk: false } };
+    const KIOSK = { initialized: true, authenticated: true, data: { uid: 'kiosk', email: null, guest: false, kiosk: true } };
+    const STATUS_LINK = '/ppr/status/-Nabc/abcdefghijklmnopqrstuvwxyzABCDEFGHIJ-_0123';
+
+    const pageAt = (auth: AuthProps, path: string) => {
+      const { container, history } = renderApp(auth, [path]);
+      return { page: container.textContent, path: history.location.pathname };
+    };
+
+    describe('with requests without login', () => {
+      beforeEach(() => {
+        (global as any).__CONF__ = { profileEnabled: false, ppr: true, pprGuestRequests: true };
+      });
+
+      it.each([
+        ['/ppr/new', 'ppr-intro-page'],
+        ['/ppr/new/', 'ppr-intro-page'],
+        ['/PPR/New', 'ppr-intro-page'],
+        ['/ppr/guest', 'ppr-guest-request-page'],
+        [STATUS_LINK, 'ppr-status-page'],
+        ['/ppr/login', 'login-page'],
+        ['/ppr', 'login-page'],
+        ['/ppr/status/-Nabc', 'login-page'],
+        ['/ppr/status/-Nabc/token/more', 'login-page'],
+      ])('shows visitors at %s the %s', (path, page) => {
+        expect(pageAt(VISITOR, path)).toEqual({ page, path });
+      });
+
+      it.each([
+        ['/ppr/new', 'ppr-request-page', '/ppr/new'],
+        ['/ppr/guest', 'ppr-request-page', '/ppr/new'],
+        ['/ppr/login', 'ppr-request-page', '/ppr/new'],
+        ['/ppr', 'ppr-status-list', '/ppr'],
+        [STATUS_LINK, 'ppr-status-page', STATUS_LINK],
+      ])('shows a login with an email address at %s the %s', (path, page, landing) => {
+        expect(pageAt(MEMBER, path)).toEqual({ page, path: landing });
+      });
+
+      it.each([
+        ['a guest session', GUEST_SESSION],
+        ['a login without an email address', WITHOUT_EMAIL],
+      ])('gives %s the form without login', (_, auth) => {
+        expect(pageAt(auth, '/ppr/new')).toEqual({ page: 'ppr-guest-request-page', path: '/ppr/new' });
+        expect(pageAt(auth, '/ppr/guest')).toEqual({ page: 'ppr-guest-request-page', path: '/ppr/guest' });
+        expect(pageAt(auth, '/ppr/login')).toEqual({ page: 'ppr-guest-request-page', path: '/ppr/new' });
+        // there is no list of requests without login
+        expect(pageAt(auth, '/ppr')).toEqual({ page: 'ppr-guest-request-page', path: '/ppr/new' });
+        expect(pageAt(auth, STATUS_LINK)).toEqual({ page: 'ppr-status-page', path: STATUS_LINK });
+      });
+
+      it.each(['/ppr/new', '/ppr/guest', '/ppr/login', '/ppr', STATUS_LINK])('takes the kiosk from %s to the start page', path => {
+        expect(pageAt(KIOSK, path)).toEqual({ page: 'start-page', path: '/' });
+      });
+
+      it('continues with login: the login, then the form of the login in place of the login\'s entry', () => {
+        const { history, container, rerenderWith } = renderApp(VISITOR, ['/ppr/new']);
+        expect(container.textContent).toBe('ppr-intro-page');
+
+        act(() => {
+          history.push('/ppr/login');
+        });
+        expect(container.textContent).toBe('login-page');
+
+        rerenderWith(MEMBER);
+
+        expect(container.textContent).toBe('ppr-request-page');
+        expect(history.location.pathname).toBe('/ppr/new');
+        expect((history as any).index).toBe(1);
+      });
+
+      it('goes back from the login to the intro', () => {
+        const { history, container } = renderApp(VISITOR, ['/ppr/new']);
+
+        act(() => {
+          history.push('/ppr/login');
+        });
+        act(() => {
+          history.back();
+        });
+
+        expect(container.textContent).toBe('ppr-intro-page');
+      });
+    });
+
+    describe('without requests without login', () => {
+      beforeEach(() => {
+        (global as any).__CONF__ = { profileEnabled: false, ppr: true };
+      });
+
+      it.each([
+        ['/ppr/new', 'ppr-intro-page'],
+        [STATUS_LINK, 'ppr-status-page'],
+        ['/ppr/guest', 'login-page'],
+      ])('shows visitors at %s the %s', (path, page) => {
+        expect(pageAt(VISITOR, path)).toEqual({ page, path });
+      });
+
+      it('has no form without login', () => {
+        expect(pageAt(MEMBER, '/ppr/guest')).toEqual({ page: 'start-page', path: '/' });
+      });
+
+      it.each([
+        ['a guest session', GUEST_SESSION],
+        ['a login without an email address', WITHOUT_EMAIL],
+      ])('gives %s no PPR requests, but the status links', (_, auth) => {
+        expect(pageAt(auth, '/ppr/new')).toEqual({ page: 'start-page', path: '/' });
+        expect(pageAt(auth, '/ppr')).toEqual({ page: 'start-page', path: '/' });
+        expect(pageAt(auth, STATUS_LINK)).toEqual({ page: 'ppr-status-page', path: STATUS_LINK });
+      });
+
+      it('keeps the request of a login with an email address', () => {
+        expect(pageAt(MEMBER, '/ppr/new')).toEqual({ page: 'ppr-request-page', path: '/ppr/new' });
+        expect(pageAt(MEMBER, '/ppr')).toEqual({ page: 'ppr-status-list', path: '/ppr' });
+      });
+    });
+
+    describe('without PPR', () => {
+      beforeEach(() => {
+        (global as any).__CONF__ = { profileEnabled: false, ppr: false, pprGuestRequests: true };
+      });
+
+      it.each(['/ppr/new', '/ppr/guest', STATUS_LINK])('shows visitors at %s the login', path => {
+        expect(pageAt(VISITOR, path)).toEqual({ page: 'login-page', path });
+      });
+
+      it.each(['/ppr/new', '/ppr', STATUS_LINK])('takes logins from %s to the start page', path => {
+        expect(pageAt(MEMBER, path)).toEqual({ page: 'start-page', path: '/' });
+      });
     });
   });
 

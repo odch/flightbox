@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MaterialIcon from '../MaterialIcon';
+import { getPprAccess } from '../../modules/ppr/access';
 
 const departureImagePath = require('./ic_flight_takeoff_black_48dp_2x.png');
 const arrivalImagePath = require('./ic_flight_land_black_48dp_2x.png');
@@ -178,9 +179,12 @@ const EntryPoints = ({ admin, guest, kiosk, email }: any) => {
   const { t } = useTranslation();
   // Guests and the kiosk only record their movements
   const limited = guest === true || kiosk === true;
-  // PPR requests belong to the pilot's email address, so logins without
-  // one (username/password) cannot use them.
-  const pprAvailable = !limited && typeof __CONF__ !== 'undefined' && __CONF__.ppr === true && !!email;
+  // The start page is shown to logins only. Requests with login belong to
+  // the login's email address («Meine PPR-Anfragen»); guest sessions and
+  // logins without one (username/password) may request without login.
+  const pprAccess = getPprAccess({ authenticated: true, data: { guest, kiosk, email } });
+  const pprRequestAvailable = pprAccess === 'member' || pprAccess === 'guest';
+  const pprListAvailable = pprAccess === 'member';
   const adminAvailable = !limited && admin === true;
 
   return (
@@ -199,14 +203,14 @@ const EntryPoints = ({ admin, guest, kiosk, email }: any) => {
         )}
       </Primary>
 
-      {(pprAvailable || adminAvailable) && (
+      {(pprRequestAvailable || adminAvailable) && (
         <Secondary data-cy="entry-points-secondary">
-          {pprAvailable && (
+          {pprRequestAvailable && (
             <SecondaryEntry to="/ppr/new" data-cy="new-ppr">
               <EntryIcon icon="assignment" size={28}/>{t('nav.ppr')}
             </SecondaryEntry>
           )}
-          {pprAvailable && (
+          {pprListAvailable && (
             <SecondaryEntry to="/ppr" data-cy="ppr-list">
               <EntryIcon icon="assignment_ind" size={28}/>{t('nav.pprList')}
             </SecondaryEntry>

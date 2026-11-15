@@ -43,6 +43,11 @@ module.exports = {
     chunkFilename: 'chunk.[contenthash].js',
     clean: true,
   },
+  // The app for every path, as Firebase Hosting serves it, so that short
+  // links such as /ppr work in development too (src/util/shortLink.ts)
+  devServer: {
+    historyApiFallback: true,
+  },
   resolve: {
     fallback: {
       "stream": require.resolve("stream-browserify"),
