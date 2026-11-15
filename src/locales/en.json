@@ -764,21 +764,15 @@
     },
     "aerodromeStatusHint": "While the status is «Closed», PPR requests for today are rejected. Days on which you do not approve PPR requests are blocked in the «PPR requests» tab under «Blocked days».",
     "requestFor": "PPR request for {{aerodrome}}",
-    "intro": {
-      "text": "To land at {{aerodrome}}, you need prior permission (PPR). Fill in the form: you will receive the answer by email.",
-      "withLogin": "Continue with login",
-      "withLoginHelp": "Your details from your profile are filled in, and you see your requests under «My PPR requests». You log in with a code that you receive by email.",
-      "withoutLogin": "Continue without login",
-      "withoutLoginHelp": "You enter your details yourself and follow the request through the link you receive by email."
-    },
     "login": {
-      "context": "Log in to send your PPR request.",
-      "back": "Back"
+      "text": "To land at {{aerodrome}}, you need prior permission (PPR). You will receive the answer by email.",
+      "emailHint": "If you log in, your details from your profile are filled in, and you see your requests under «My PPR requests».",
+      "continueAsGuest": "Continue as guest",
+      "guestHint": "As a guest, you enter your details yourself and follow the request through the link you receive by email."
     },
     "withoutLogin": {
       "emailHelp": "The emails about your request go to this address.",
       "invalidEmail": "Enter a valid email address, e.g. name@example.com.",
-      "privacyConsent": "By sending you accept the <1>privacy policy</1>.",
       "receiptSent": "We have sent a confirmation of receipt to {{email}}.",
       "answerSent": "We have also sent the answer to {{email}}.",
       "receiptFailed": "The confirmation of receipt to {{email}} could not be sent. Open the status now and bookmark it: you will also see the answer there.",
@@ -802,8 +796,13 @@
     },
     "websiteLink": {
       "title": "Link for your website",
-      "description": "Link to this address on your website, e.g. as «Request PPR». It takes pilots straight to the PPR request.",
-      "ownView": "As you are logged in, this link shows you the form. A private browser window shows you what visitors without a login see."
+      "login": "With login",
+      "loginHelp": "Pilots log in before they send the request.",
+      "guest": "With guest access",
+      "guestHelp": "Pilots can also continue as guests. The link contains the guest access token: it also allows recording movements and works until the token is renewed.",
+      "ownView": "As you are logged in, these links show you the form. A private browser window shows you what visitors without a login see.",
+      "showQrCode": "Show QR code",
+      "hideQrCode": "Hide QR code"
     }
   },
   "maskedInput": {

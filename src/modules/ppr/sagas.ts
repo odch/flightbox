@@ -153,12 +153,19 @@ export function* confirmPprSubmitSuccess() {
 // The HTTP status of a refusal by a route without login
 const statusOf = (e: unknown) => (e as Partial<remote.PprApiError> | null)?.status;
 
+// Sends a request without login with the ID token of its session: a guest
+// session or a login without an email address
+export function* sendPprGuestRequest(values: Record<string, any>) {
+  const idToken = yield call(getIdToken);
+  // The language decides which language the pilot's emails are sent in
+  return yield call(remote.submitGuestRequest, {...values, language: i18n.language}, idToken);
+}
+
 export function* submitPprGuestRequest(action: any) {
   const values = action.payload.values;
   try {
-    // The language decides which language the pilot's emails are sent in
     const raced = yield race({
-      result: call(remote.submitGuestRequest, {...values, language: i18n.language}),
+      result: call(sendPprGuestRequest, values),
       reset: take(actions.RESET_PPR_FORM),
     });
     if (raced.reset) {

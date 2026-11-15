@@ -54,15 +54,14 @@ describe('AdminPprPage', () => {
     expect(lastListProps().linkedKey).toBeNull();
   });
 
-  it('shows the link for the aerodrome\'s website below the list', () => {
+  // In the settings above it, however long the list gets
+  it('shows nothing below the list', () => {
     visit('/admin?tab=ppr');
-    const { container } = renderWithTheme(<AdminPprPage/>);
+    renderWithTheme(<AdminPprPage/>);
 
-    expect(screen.getByText('Link für Ihre Website')).toBeInTheDocument();
-    expect(screen.getByText('https://lspl-test.web.app/ppr')).toBeInTheDocument();
     const list = screen.getByTestId('ppr-request-list');
-    const box = container.querySelector('.ppr-website-link')!;
-    expect(list.compareDocumentPosition(box) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(list.closest('.ppr')!.nextElementSibling).toBeNull();
+    expect(screen.queryByText('Link für Ihre Website')).toBeNull();
   });
 
   it('passes the request of a link in the notification email to the list', () => {

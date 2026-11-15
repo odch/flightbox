@@ -8,7 +8,6 @@ import Button from '../Button';
 import ModalDialog from '../ModalDialog';
 import MaterialIcon from '../MaterialIcon';
 import PprAnswer from '../PprAnswer';
-import PrivacyConsentText from '../PrivacyConsentText';
 import FieldSet from '../wizards/FieldSet';
 import { CancelButton, NextButton } from '../WizardNavigation/WizardNavigation';
 import { Chip, FavouritesBar, StarIcon } from '../wizards/QuickPickBar';
@@ -23,7 +22,6 @@ import {
   renderTimeField,
 } from '../wizards/renderField';
 import { getEnabledFlightTypes } from '../../util/flightTypes';
-import { REGISTRATION_REGEX } from '../../util/aircrafts';
 import type { Aircraft } from '../../modules/profile/migration';
 import type { PprSubmitResult } from '../../modules/ppr/actions';
 import validate, { validateWithoutLogin } from './validate';
@@ -74,11 +72,6 @@ const FieldHelp = styled.p`
   margin: 0.5em 0 0;
 `;
 
-// At the edge of the page, like the fields
-const ConsentText = styled(PrivacyConsentText)`
-  padding: 0;
-`;
-
 // The flight types the arrival can later be recorded with: those of the
 // aerodrome that fit the aircraft category, as in the arrival wizard
 const getFlightTypeItems = (aircraftCategory?: string | null) =>
@@ -115,9 +108,6 @@ const applyAircraft = (
   changeCategory(form, aircraft.category);
 };
 
-// As the aircraft dropdown takes it
-const normalizeRegistration = (value: string) => value.toUpperCase().replace(REGISTRATION_REGEX, '');
-
 // The public status page of a request (route /ppr/status/:key/:token)
 const statusPath = (key: string, token: string) =>
   `/ppr/status/${encodeURIComponent(key)}/${encodeURIComponent(token)}`;
@@ -137,21 +127,17 @@ interface PprRequestFormProps {
   onSubmit: (values: Record<string, any>) => void;
   // With login: closes the answer and goes to the start page
   confirmPprSubmitSuccess?: () => void;
-  // A request without login: the pilot enters the address the receipt and
-  // the answer go to, and the answer leads to the status page
+  // A request without login, from a guest session or a login without an
+  // email address: the pilot enters the address the receipt and the answer
+  // go to, and the answer leads to the status page. The privacy policy was
+  // accepted with the login.
   withoutLogin?: boolean;
-  // Nobody is logged in: the aircraft list can't be read, and the pages
-  // behind the login would show the login
-  visitor?: boolean;
-  privacyPolicyUrl?: string | null;
 }
 
 const PprRequestForm = (props: PprRequestFormProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { initPprForm, resetPprForm, profileAircrafts, withoutLogin, visitor } = props;
-  // Visitors go back to the PPR intro, everybody else to the start page
-  const homePath = visitor ? '/ppr/new' : '/';
+  const { initPprForm, resetPprForm, profileAircrafts, withoutLogin } = props;
 
   useEffect(() => {
     initPprForm();
@@ -246,7 +232,7 @@ const PprRequestForm = (props: PprRequestFormProps) => {
           type="button"
           icon="close"
           label={t('common.close')}
-          onClick={() => navigate(homePath)}
+          onClick={() => navigate('/')}
           flat
         />
       </>
@@ -321,33 +307,24 @@ const PprRequestForm = (props: PprRequestFormProps) => {
             </QuickPicks>
           )}
           <FieldSet gutter={false}>
-            {visitor ? (
-              // The aircraft list needs a login
-              <Field name="immatriculation" parse={normalizeRegistration}>
-                {({ input, meta }) =>
-                  renderInputField({ input, meta, label: t('movement.details.immatriculation') })
-                }
-              </Field>
-            ) : (
-              <Field name="immatriculation">
-                {({ input, meta }) =>
-                  renderAircraftDropdown({
-                    input: {
-                      ...input,
-                      onChange: (aircraft: any) => {
-                        if (aircraft) {
-                          applyAircraft(form, aircraft);
-                        } else {
-                          form.change('immatriculation', null);
-                        }
-                      },
+            <Field name="immatriculation">
+              {({ input, meta }) =>
+                renderAircraftDropdown({
+                  input: {
+                    ...input,
+                    onChange: (aircraft: any) => {
+                      if (aircraft) {
+                        applyAircraft(form, aircraft);
+                      } else {
+                        form.change('immatriculation', null);
+                      }
                     },
-                    meta,
-                    label: t('movement.details.immatriculation'),
-                  })
-                }
-              </Field>
-            )}
+                  },
+                  meta,
+                  label: t('movement.details.immatriculation'),
+                })
+              }
+            </Field>
             <Field
               name="aircraftType"
               type="text"
@@ -409,10 +386,6 @@ const PprRequestForm = (props: PprRequestFormProps) => {
             />
           </FieldSet>
 
-          {withoutLogin && (
-            <ConsentText privacyPolicyUrl={props.privacyPolicyUrl} i18nKey="ppr.withoutLogin.privacyConsent"/>
-          )}
-
           <Actions>
             <NextButton
               type="submit"
@@ -427,7 +400,7 @@ const PprRequestForm = (props: PprRequestFormProps) => {
             <CancelButton
               type="button"
               label={t('wizard.cancel')}
-              onClick={() => navigate(homePath)}
+              onClick={() => navigate('/')}
               disabled={props.submitting}
             />
           </Actions>

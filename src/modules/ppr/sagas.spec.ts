@@ -287,12 +287,12 @@ describe('modules', () => {
         });
 
         describe('submitPprGuestRequest', () => {
-          it('sends the request with the app language and without an ID token', () => {
+          it('sends the request until the form is left', () => {
             const values = { firstname: 'Max', email: 'max@example.com' };
             const generator = sagas.submitPprGuestRequest(actions.submitPprGuestRequest(values));
 
             expect(generator.next().value).toEqual(race({
-              result: call(remote.submitGuestRequest, { firstname: 'Max', email: 'max@example.com', language: 'en' }),
+              result: call(sagas.sendPprGuestRequest, values),
               reset: take(actions.RESET_PPR_FORM),
             }));
             const result = { key: 'req-1', status: 'pending', statusToken: 'token-1', emailSent: true };
@@ -300,6 +300,17 @@ describe('modules', () => {
               put(actions.submitPprRequestSuccess({ ...result, email: 'max@example.com' }))
             );
             expect(generator.next().done).toEqual(true);
+          });
+
+          it('sends the request with the ID token of the session and the app language', () => {
+            const generator = sagas.sendPprGuestRequest({ firstname: 'Max', email: 'max@example.com' });
+
+            expect(generator.next().value).toEqual(call(getIdToken));
+            expect(generator.next('id-token-1').value).toEqual(
+              call(remote.submitGuestRequest, { firstname: 'Max', email: 'max@example.com', language: 'en' }, 'id-token-1')
+            );
+            const result = { key: 'req-1', status: 'pending' };
+            expect(generator.next(result)).toEqual({ value: result, done: true });
           });
 
           it('keeps the address the request was sent with, as the server takes it', () => {

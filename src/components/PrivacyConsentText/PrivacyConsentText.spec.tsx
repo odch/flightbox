@@ -1,5 +1,4 @@
 import React from 'react';
-import '../../i18n';
 import {renderWithTheme} from '../../../test/renderWithTheme';
 import PrivacyConsentText from './PrivacyConsentText';
 
@@ -27,14 +26,6 @@ describe('PrivacyConsentText', () => {
       <PrivacyConsentText />
     );
     expect(container.innerHTML).toEqual('');
-  });
-
-  it('can tell about another action than saving, with the same link', () => {
-    const {container, getByText} = renderWithTheme(
-      <PrivacyConsentText privacyPolicyUrl="https://example.com/privacy" i18nKey="ppr.withoutLogin.privacyConsent" />
-    );
-    expect(container.textContent).toBe('Mit dem Senden akzeptieren Sie die Datenschutzerklärung.');
-    expect(getByText('Datenschutzerklärung')).toHaveAttribute('href', 'https://example.com/privacy');
   });
 
   it('should render nothing when privacyPolicyUrl is not a valid http URL', () => {

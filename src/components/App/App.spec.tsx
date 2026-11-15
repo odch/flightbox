@@ -81,10 +81,6 @@ jest.mock(
   () => ({ __esModule: true, default: () => <div>ppr-status-list</div> })
 );
 jest.mock(
-  '../../containers/PprIntroPageContainer',
-  () => ({ __esModule: true, default: () => <div>ppr-intro-page</div> })
-);
-jest.mock(
   '../../containers/PprGuestRequestPageContainer',
   () => ({ __esModule: true, default: () => <div>ppr-guest-request-page</div> })
 );
@@ -263,14 +259,15 @@ describe('<App>', () => {
         (global as any).__CONF__ = { profileEnabled: false, ppr: true, pprGuestRequests: true };
       });
 
+      // The request is behind the login, which offers the guest session
+      // where the link carries the guest access token
       it.each([
-        ['/ppr/new', 'ppr-intro-page'],
-        ['/ppr/new/', 'ppr-intro-page'],
-        ['/PPR/New', 'ppr-intro-page'],
-        ['/ppr/guest', 'ppr-guest-request-page'],
+        ['/ppr/new', 'login-page'],
+        ['/ppr/new/', 'login-page'],
+        ['/PPR/New', 'login-page'],
         [STATUS_LINK, 'ppr-status-page'],
-        ['/ppr/login', 'login-page'],
         ['/ppr', 'login-page'],
+        ['/ppr/guest', 'login-page'],
         ['/ppr/status/-Nabc', 'login-page'],
         ['/ppr/status/-Nabc/token/more', 'login-page'],
       ])('shows visitors at %s the %s', (path, page) => {
@@ -279,10 +276,11 @@ describe('<App>', () => {
 
       it.each([
         ['/ppr/new', 'ppr-request-page', '/ppr/new'],
-        ['/ppr/guest', 'ppr-request-page', '/ppr/new'],
-        ['/ppr/login', 'ppr-request-page', '/ppr/new'],
         ['/ppr', 'ppr-status-list', '/ppr'],
         [STATUS_LINK, 'ppr-status-page', STATUS_LINK],
+        // The pages of the earlier intro
+        ['/ppr/guest', 'start-page', '/'],
+        ['/ppr/login', 'start-page', '/'],
       ])('shows a login with an email address at %s the %s', (path, page, landing) => {
         expect(pageAt(MEMBER, path)).toEqual({ page, path: landing });
       });
@@ -292,44 +290,27 @@ describe('<App>', () => {
         ['a login without an email address', WITHOUT_EMAIL],
       ])('gives %s the form without login', (_, auth) => {
         expect(pageAt(auth, '/ppr/new')).toEqual({ page: 'ppr-guest-request-page', path: '/ppr/new' });
-        expect(pageAt(auth, '/ppr/guest')).toEqual({ page: 'ppr-guest-request-page', path: '/ppr/guest' });
-        expect(pageAt(auth, '/ppr/login')).toEqual({ page: 'ppr-guest-request-page', path: '/ppr/new' });
         // there is no list of requests without login
         expect(pageAt(auth, '/ppr')).toEqual({ page: 'ppr-guest-request-page', path: '/ppr/new' });
         expect(pageAt(auth, STATUS_LINK)).toEqual({ page: 'ppr-status-page', path: STATUS_LINK });
       });
 
-      it.each(['/ppr/new', '/ppr/guest', '/ppr/login', '/ppr', STATUS_LINK])('takes the kiosk from %s to the start page', path => {
+      it.each(['/ppr/new', '/ppr', STATUS_LINK])('takes the kiosk from %s to the start page', path => {
         expect(pageAt(KIOSK, path)).toEqual({ page: 'start-page', path: '/' });
       });
 
-      it('continues with login: the login, then the form of the login in place of the login\'s entry', () => {
+      it.each([
+        ['with an email address', MEMBER, 'ppr-request-page'],
+        ['as guest', GUEST_SESSION, 'ppr-guest-request-page'],
+      ])('continues after the login %s with the request, where the link led', (_, auth, page) => {
         const { history, container, rerenderWith } = renderApp(VISITOR, ['/ppr/new']);
-        expect(container.textContent).toBe('ppr-intro-page');
-
-        act(() => {
-          history.push('/ppr/login');
-        });
         expect(container.textContent).toBe('login-page');
 
-        rerenderWith(MEMBER);
+        rerenderWith(auth);
 
-        expect(container.textContent).toBe('ppr-request-page');
+        expect(container.textContent).toBe(page);
         expect(history.location.pathname).toBe('/ppr/new');
-        expect((history as any).index).toBe(1);
-      });
-
-      it('goes back from the login to the intro', () => {
-        const { history, container } = renderApp(VISITOR, ['/ppr/new']);
-
-        act(() => {
-          history.push('/ppr/login');
-        });
-        act(() => {
-          history.back();
-        });
-
-        expect(container.textContent).toBe('ppr-intro-page');
+        expect((history as any).index).toBe(0);
       });
     });
 
@@ -339,15 +320,10 @@ describe('<App>', () => {
       });
 
       it.each([
-        ['/ppr/new', 'ppr-intro-page'],
+        ['/ppr/new', 'login-page'],
         [STATUS_LINK, 'ppr-status-page'],
-        ['/ppr/guest', 'login-page'],
       ])('shows visitors at %s the %s', (path, page) => {
         expect(pageAt(VISITOR, path)).toEqual({ page, path });
-      });
-
-      it('has no form without login', () => {
-        expect(pageAt(MEMBER, '/ppr/guest')).toEqual({ page: 'start-page', path: '/' });
       });
 
       it.each([

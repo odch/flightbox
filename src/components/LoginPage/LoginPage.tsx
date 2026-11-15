@@ -3,11 +3,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import EmailLoginForm from '../../containers/EmailLoginFormContainer'
 import UsernamePasswordLoginForm from '../../containers/UsernamePasswordLoginFormContainer'
 import styled from 'styled-components'
-import {Link, matchPath, useLocation} from 'react-router-dom'
+import {matchPath, useLocation} from 'react-router-dom'
 import getAuthQueryToken, {getGuestOnly} from '../../util/getAuthQueryToken'
 import EntranceLayout from '../EntranceLayout';
-import MaterialIcon from '../MaterialIcon';
-import { pprEnabled } from '../../modules/ppr/access';
+import H1 from '../H1';
+import AerodromeStatusBanner from '../AerodromeStatusBanner';
+import { pprEnabled, pprGuestRequestsEnabled } from '../../modules/ppr/access';
 
 const PrivacyText = styled.p`
   margin-top: 2em;
@@ -24,40 +25,40 @@ const PprContext = styled.div`
   margin-bottom: 2em;
 `
 
-const BackLink = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25em;
-  margin-bottom: 1em;
-  color: #666;
+const PprText = styled.p`
+  line-height: 1.4;
 `
 
-// The icon font's ligature is a word: not for screen readers
-const BackIcon = styled.span`
-  display: flex;
+// Across the column, like the text above it
+const StatusBanner = styled(AerodromeStatusBanner)`
+  && {
+    width: auto;
+    margin: 1.5em 0 0;
+  }
 `
 
 const LoginPage = ({privacyPolicyUrl, emailSent}: {privacyPolicyUrl?: string | null, emailSent?: boolean}) => {
   const { t } = useTranslation();
   const location = useLocation();
-  const queryToken = getAuthQueryToken(location)
+  // The PPR request, e.g. from the link on the aerodrome's website: the form
+  // follows the login (the route itself leads there). The link with the
+  // guest access token also offers the guest session, where guests may
+  // request PPR: elsewhere it would lead them to the start page.
+  const pprLogin = pprEnabled() && matchPath('/ppr/new', location.pathname) !== null;
+  const queryToken = pprLogin && !pprGuestRequestsEnabled() ? null : getAuthQueryToken(location)
   const guestOnly = getGuestOnly(location)
-  // «Mit Anmeldung fortfahren» of the PPR intro: the PPR form follows the
-  // login (the route itself leads there)
-  const pprLogin = pprEnabled() && matchPath('/ppr/login', location.pathname) !== null;
+  const aerodrome = __CONF__.aerodrome.name;
   return (
     <EntranceLayout>
       {pprLogin && (
         <PprContext data-cy="ppr-login-context">
-          <BackLink to="/ppr/new">
-            <BackIcon aria-hidden="true"><MaterialIcon icon="arrow_back" size={18}/></BackIcon>
-            {t('ppr.login.back')}
-          </BackLink>
-          <p>{t('ppr.login.context')}</p>
+          <H1>{t('ppr.requestFor', { aerodrome })}</H1>
+          <PprText>{t('ppr.login.text', { aerodrome })}</PprText>
+          <StatusBanner/>
         </PprContext>
       )}
       {__CONF__.loginForm === 'email'
-        ? <EmailLoginForm queryToken={queryToken} guestOnly={guestOnly}/>
+        ? <EmailLoginForm queryToken={queryToken} guestOnly={guestOnly} ppr={pprLogin}/>
         : <UsernamePasswordLoginForm/>
       }
       {privacyPolicyUrl && !emailSent && /^https?:\/\//.test(privacyPolicyUrl) && (

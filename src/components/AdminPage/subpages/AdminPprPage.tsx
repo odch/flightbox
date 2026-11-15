@@ -1,7 +1,6 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import LabeledBox from '../../LabeledBox';
-import PprWebsiteLinkBox from '../PprWebsiteLinkBox';
 import PprRequestList from '../../../containers/PprRequestListContainer';
 import PprSettingsForm from '../../../containers/PprSettingsFormContainer';
 import { useTranslation } from 'react-i18next';
@@ -23,8 +22,6 @@ const AdminPprPage = () => {
             the list also finds a request submitted since */}
         <PprRequestList key={linkedKey} linkedKey={linkedKey}/>
       </LabeledBox>
-      {/* Set up once, so below the list that is used every day */}
-      <PprWebsiteLinkBox/>
     </>
   );
 };

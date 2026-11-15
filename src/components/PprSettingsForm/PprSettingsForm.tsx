@@ -305,6 +305,7 @@ const PprSettingsForm = (props: any) => {
             answerMode={settings.answerMode}
             adminEmail={settings.adminEmail}
             closures={settings.closures}
+            guestAccessToken={props.guestAccessToken}
             saved={savedHintVisible}
             onEdit={startEditing}
           />

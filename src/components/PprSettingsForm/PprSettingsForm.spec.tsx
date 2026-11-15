@@ -123,6 +123,20 @@ describe('PprSettingsForm', () => {
   });
 
   describe('summary', () => {
+    // At the top of the tab, however long the list of requests gets
+    it('shows the links for the aerodrome\'s website, with the guest access where it is set', () => {
+      const token = '0f8fad5b-d9cb-469f-a165-70867728950e';
+      (global as any).__CONF__ = { appUrl: 'https://lspl-test.web.app', ppr: true, pprGuestRequests: true, loginForm: 'email' };
+      const props = { settings: loadedSettings, loadPprSettings: jest.fn(), savePprSettings: jest.fn(), guestAccessToken: token };
+      const { container } = renderWithTheme(<PprSettingsForm {...props} />);
+
+      const row = summaryRow(container, 'website-link');
+      expect(row).toHaveTextContent('ppr.websiteLink.login');
+      expect(row).toHaveTextContent('https://lspl-test.web.app/ppr');
+      expect(row).toHaveTextContent(`https://lspl-test.web.app/#/ppr/new?t=${token}`);
+      delete (global as any).__CONF__;
+    });
+
     it('shows the stored settings instead of the form', () => {
       const { container } = renderSettings();
 

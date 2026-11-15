@@ -3,12 +3,14 @@
 
 export const pprEnabled = () => typeof __CONF__ !== 'undefined' && __CONF__.ppr === true;
 
-// Requests without login: only where PPR is on, as on the server
+// Requests without login, from guest sessions and logins without an email
+// address: only where PPR is on, as on the server
 export const pprGuestRequestsEnabled = () => pprEnabled() && __CONF__.pprGuestRequests === true;
 
 // - member: a personal login with an email address. Its requests belong to
 //   that address («Meine PPR-Anfragen»).
-// - visitor: nobody is logged in. The intro offers the ways to request.
+// - visitor: nobody is logged in. The login comes first, and offers the
+//   guest session where the link carries the guest access token.
 // - guest: a guest session or a login without an email address, where
 //   requests without login are on. They use the form without login.
 // - kiosk: no PPR at all, not even the status pages.

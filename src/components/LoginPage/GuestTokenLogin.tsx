@@ -10,7 +10,8 @@ const StyledButton = styled(Button)`
   width: 100%;
 `
 
-const GuestTokenLogin = ({submitting, failure, queryToken, authenticate}) => {
+// `label`: e.g. «Als Gast fortfahren» on the login of a PPR request
+const GuestTokenLogin = ({submitting, failure, queryToken, authenticate, label}) => {
   const { t } = useTranslation();
   const handleClick = () => {
     authenticate(queryToken)
@@ -20,7 +21,7 @@ const GuestTokenLogin = ({submitting, failure, queryToken, authenticate}) => {
     <>
       <StyledButton
         type="button"
-        label={t('login.loginAsGuest')}
+        label={label || t('login.loginAsGuest')}
         icon="send"
         disabled={submitting}
         primary
