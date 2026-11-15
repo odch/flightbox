@@ -655,7 +655,9 @@ describe('PPR request containers', () => {
     });
 
     it.each([
-      ['visitors', { authenticated: false }, true],
+      // A guest's tab with the status link has no session, and the login
+      // offers the guest session only with the aerodrome's link
+      ['visitors', { authenticated: false }, false],
       ['logins with an email address', { authenticated: true, data: { email: 'max@example.com' } }, true],
       ['guest sessions, where requests without login are off', { authenticated: true, data: { guest: true } }, false],
     ])('to %s: %p', (name, auth, expected) => {

@@ -4,8 +4,11 @@ import PprStatusPage from '../components/PprStatusPage';
 import { RootState } from '../modules';
 import { getPprAccess } from '../modules/ppr/access';
 
-// Who can make a new request from the status page (the kiosk never sees it)
-const CAN_REQUEST = ['member', 'visitor', 'guest'];
+// Who can make a new request from the status page (the kiosk never sees it).
+// Not visitors: a guest session ends with its tab, and the PPR login
+// offers the guest session only with the guest access token of the
+// aerodrome's link, so a guest would find the login only.
+const CAN_REQUEST = ['member', 'guest'];
 
 const mapStateToProps = (state: RootState) => ({
   request: state.ppr.status.request,
