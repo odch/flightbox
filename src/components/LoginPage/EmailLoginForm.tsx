@@ -64,6 +64,8 @@ const EmailLoginForm = props => {
   const {
     queryToken,
     guestOnly,
+    // The login for a PPR request: what each way offers for it
+    ppr,
     sendAuthenticationEmail,
     verifyOtpCode,
     email,
@@ -136,8 +138,8 @@ const EmailLoginForm = props => {
           )}
         </StyledForm>
       )}
-      {!guestOnly && queryToken && (
-        <StyledHint>{t('login.hintEmailLogin')}</StyledHint>
+      {!guestOnly && (ppr || queryToken) && (
+        <StyledHint>{t(ppr ? 'ppr.login.emailHint' : 'login.hintEmailLogin')}</StyledHint>
       )}
       {!guestOnly && passkeysEnabled && isPasskeySupported() && (
         <>
@@ -152,12 +154,12 @@ const EmailLoginForm = props => {
       )}
       {queryToken && (
         guestOnly
-          ? <GuestTokenLogin queryToken={queryToken}/>
+          ? <GuestTokenLogin queryToken={queryToken} label={ppr ? t('ppr.login.continueAsGuest') : undefined}/>
           : (
             <>
               <StyledOrContainer><StyledOrText>{t('login.or')}</StyledOrText></StyledOrContainer>
-              <GuestTokenLogin queryToken={queryToken}/>
-              <StyledHint>{t('login.hintGuestLogin')}</StyledHint>
+              <GuestTokenLogin queryToken={queryToken} label={ppr ? t('ppr.login.continueAsGuest') : undefined}/>
+              <StyledHint>{t(ppr ? 'ppr.login.guestHint' : 'login.hintGuestLogin')}</StyledHint>
             </>
           )
       )}
@@ -168,6 +170,7 @@ const EmailLoginForm = props => {
 (EmailLoginForm as any).propTypes = {
   queryToken: PropTypes.string,
   guestOnly: PropTypes.bool,
+  ppr: PropTypes.bool,
   sendAuthenticationEmail: PropTypes.func.isRequired,
   verifyOtpCode: PropTypes.func.isRequired,
   updateEmail: PropTypes.func.isRequired,

@@ -180,6 +180,7 @@ const PprStatusPage = (props: PprStatusPageProps) => {
     </div>
   );
 
+  // For visitors the logo leads to the PPR request, i.e. its login
   return (
     <VerticalHeaderLayout homePath={props.visitor ? '/ppr/new' : undefined}>
       <Content>

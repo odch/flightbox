@@ -5,6 +5,7 @@ import Button from '../Button';
 import SuccessMessage from '../SuccessMessage';
 import dates from '../../util/dates';
 import { ClosureValue, upcomingClosures } from './ClosuresEditor';
+import PprWebsiteLinks from './PprWebsiteLinks';
 
 // The blocked periods listed; the others are counted
 export const MAX_LISTED_CLOSURES = 3;
@@ -81,6 +82,8 @@ interface PprSettingsSummaryProps {
   answerMode: string;
   adminEmail: string | null;
   closures: ClosureValue[];
+  // For the link to the PPR request with the guest access
+  guestAccessToken?: string | null;
   // Confirms a save just made, to the eye: screen readers hear it from the
   // live region of the settings (PprSettingsForm), which stays on the page
   saved: boolean;
@@ -89,9 +92,12 @@ interface PprSettingsSummaryProps {
 
 /**
  * The stored PPR settings in short (without the information for pilots),
- * with the button to change them.
+ * with the button to change them, and the links for the aerodrome's website:
+ * at the top of the tab, however long the list of requests below gets.
  */
-const PprSettingsSummary = ({ answerMode, adminEmail, closures, saved, onEdit }: PprSettingsSummaryProps) => {
+const PprSettingsSummary = ({
+  answerMode, adminEmail, closures, guestAccessToken, saved, onEdit,
+}: PprSettingsSummaryProps) => {
   const { t } = useTranslation();
   const automatic = answerMode === 'automatic';
   const upcoming = upcomingClosures(closures, dates.localDate());
@@ -123,6 +129,11 @@ const PprSettingsSummary = ({ answerMode, adminEmail, closures, saved, onEdit }:
         <dd data-cy="ppr-settings-summary-notification">
           {/* As in the form: unanswered requests nobody hears about */}
           {adminEmail || (automatic ? '-' : <Warning>{t('ppr.settings.noAdminEmail')}</Warning>)}
+        </dd>
+
+        <dt>{t('ppr.websiteLink.title')}</dt>
+        <dd data-cy="ppr-settings-summary-website-link">
+          <PprWebsiteLinks guestAccessToken={guestAccessToken}/>
         </dd>
       </DetailList>
 

@@ -120,11 +120,11 @@ jest.mock('../components/PprRequestPage', () => {
   };
 });
 
-jest.mock('../components/PprIntroPage', () => {
+jest.mock('../components/PprSettingsForm', () => {
   const React = require('react');
   return {
     __esModule: true,
-    default: jest.fn((_props: any) => React.createElement('div', {'data-testid': 'ppr-intro-page'})),
+    default: jest.fn((_props: any) => React.createElement('div', {'data-testid': 'ppr-settings-form'})),
   };
 });
 
@@ -589,8 +589,9 @@ describe('PPR request containers', () => {
     expect(store.actions).toEqual([{ type: 'SUBMIT_PPR_REQUEST', payload: { values: { firstname: 'Max' } } }]);
   });
 
+  // A guest session: the privacy policy was accepted with the login
   it('PprGuestRequestPageContainer passes the form without login and submits without login', () => {
-    const { props, store } = pagePropsOf('./PprGuestRequestPageContainer', state({ authenticated: false }));
+    const { props, store } = pagePropsOf('./PprGuestRequestPageContainer', state({ authenticated: true, data: { guest: true } }));
 
     expect(props).toEqual(expect.objectContaining({
       submitted: true,
@@ -598,9 +599,9 @@ describe('PPR request containers', () => {
       rateLimited: true,
       initialValues: { plannedTime: '10:30' },
       withoutLogin: true,
-      visitor: true,
-      privacyPolicyUrl: 'https://aerodrome.ch/privacy',
     }));
+    expect(props).not.toHaveProperty('visitor');
+    expect(props).not.toHaveProperty('privacyPolicyUrl');
 
     props.onSubmit({ email: 'max@example.com' });
     expect(store.actions).toEqual([
@@ -608,28 +609,13 @@ describe('PPR request containers', () => {
     ]);
   });
 
-  it('PprGuestRequestPageContainer tells guest sessions apart from visitors', () => {
-    const { props } = pagePropsOf('./PprGuestRequestPageContainer', state({ authenticated: true, data: { guest: true } }));
-    expect(props.visitor).toBe(false);
-  });
+  it('PprSettingsFormContainer passes the settings and the guest access token, for the website link with it', () => {
+    const Container = require('./PprSettingsFormContainer').default;
+    const Component = require('../components/PprSettingsForm').default;
+    const settings = { adminEmail: 'ppr@aerodrome.ch', loaded: true };
+    render(wrap(makeStore({ ppr: { settings }, settings: { guestAccessToken: { token: 'guest-token-1' } } }), <Container />));
 
-  it('PprGuestRequestPageContainer links a privacy policy over https only', () => {
-    const { props } = pagePropsOf(
-      './PprGuestRequestPageContainer',
-      state({ authenticated: false }, 'http://aerodrome.ch/privacy')
-    );
-    expect(props.privacyPolicyUrl).toBeNull();
-  });
-
-  it('PprIntroPageContainer links a privacy policy over https only', () => {
-    const Container = require('./PprIntroPageContainer').default;
-    const Component = require('../components/PprIntroPage').default;
-
-    render(wrap(makeStore(state({ authenticated: false })), <Container />));
-    expect(lastPropsOf(Component).privacyPolicyUrl).toBe('https://aerodrome.ch/privacy');
-
-    render(wrap(makeStore(state({ authenticated: false }, 'http://aerodrome.ch/privacy')), <Container />));
-    expect(lastPropsOf(Component).privacyPolicyUrl).toBeNull();
+    expect(lastPropsOf(Component)).toEqual(expect.objectContaining({ settings, guestAccessToken: 'guest-token-1' }));
   });
 
   it('PprStatusPageContainer passes the request of the status link, and loads, withdraws and forgets it', () => {

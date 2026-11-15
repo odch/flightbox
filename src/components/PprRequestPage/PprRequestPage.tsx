@@ -8,13 +8,10 @@ const Content = styled.div`
   padding: 2em;
 `;
 
-// Visitors without a login get neither the navigation nor the start page
-// behind the logo, which would show them the login: the logo leads to the
-// PPR intro instead.
 const PprRequestPage = props => (
-  <VerticalHeaderLayout homePath={props.visitor ? '/ppr/new' : undefined}>
+  <VerticalHeaderLayout>
     <Content>
-      {!props.visitor && <JumpNavigation/>}
+      <JumpNavigation/>
       <PprRequestForm
         submitting={props.submitting}
         submitted={props.submitted}
@@ -28,8 +25,6 @@ const PprRequestPage = props => (
         resetPprForm={props.resetPprForm}
         confirmPprSubmitSuccess={props.confirmPprSubmitSuccess}
         withoutLogin={props.withoutLogin}
-        visitor={props.visitor}
-        privacyPolicyUrl={props.privacyPolicyUrl}
       />
     </Content>
   </VerticalHeaderLayout>

@@ -139,15 +139,20 @@ async function apiError(res: Response): Promise<PprApiError> {
   return error;
 }
 
-// The routes for requests without login take no ID token: nobody may be
-// logged in, and the routes of logins refuse guest sessions. They take
-// JSON only.
-async function postWithoutLogin(path: string, data: unknown) {
+// The routes of sessions without an email address and of nobody (the status
+// pages) take JSON only. A request without login comes with the ID token of
+// its guest session or login without an email address; the routes of logins
+// with an email address refuse those sessions.
+async function postWithoutLogin(path: string, data: unknown, idToken?: string) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (idToken) {
+    headers.Authorization = `Bearer ${idToken}`;
+  }
   const res = await fetch(`${baseUrl()}${path}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify(data),
   });
   if (!res.ok) {
@@ -156,8 +161,8 @@ async function postWithoutLogin(path: string, data: unknown) {
   return res.json();
 }
 
-export function submitGuestRequest(data: unknown): Promise<PprSubmitResult> {
-  return postWithoutLogin('/ppr/guest-requests', data);
+export function submitGuestRequest(data: unknown, idToken: string): Promise<PprSubmitResult> {
+  return postWithoutLogin('/ppr/guest-requests', data, idToken);
 }
 
 // The token goes in the body, not in the URL, which request logs record

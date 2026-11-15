@@ -40,18 +40,12 @@ describe('PprRequestPage', () => {
     resetPprForm: jest.fn(),
   };
 
-  it('shows logins the navigation, and the start page behind the logo', () => {
-    render(<PprRequestPage {...props}/>);
+  // Guest sessions too: the request is behind the login
+  it.each([[false], [true]])('shows the navigation and the start page behind the logo (without login: %p)', withoutLogin => {
+    render(<PprRequestPage {...props} withoutLogin={withoutLogin}/>);
 
     expect(screen.getByTestId('jump-nav')).toBeTruthy();
     expect(screen.getByTestId('layout')).not.toHaveAttribute('data-home-path');
-  });
-
-  it('shows visitors no navigation to pages behind the login, and the PPR intro behind the logo', () => {
-    render(<PprRequestPage {...props} withoutLogin visitor/>);
-
-    expect(screen.queryByTestId('jump-nav')).toBeNull();
-    expect(screen.getByTestId('layout')).toHaveAttribute('data-home-path', '/ppr/new');
   });
 
   it('passes the form the request with login', () => {
@@ -63,7 +57,6 @@ describe('PprRequestPage', () => {
       onSubmit: props.onSubmit,
       confirmPprSubmitSuccess,
       withoutLogin: undefined,
-      visitor: undefined,
     }));
   });
 
@@ -72,18 +65,14 @@ describe('PprRequestPage', () => {
       <PprRequestPage
         {...props}
         withoutLogin
-        visitor
         rateLimited
-        privacyPolicyUrl="https://aerodrome.ch/privacy"
       />
     );
 
     expect(formProps()).toEqual(expect.objectContaining({
       onSubmit: props.onSubmit,
       withoutLogin: true,
-      visitor: true,
       rateLimited: true,
-      privacyPolicyUrl: 'https://aerodrome.ch/privacy',
     }));
   });
 });

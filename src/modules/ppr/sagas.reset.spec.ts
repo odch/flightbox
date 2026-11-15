@@ -112,6 +112,7 @@ describe('PPR sagas: answers that come after the page was left', () => {
   });
 
   it('open no result dialog of a submission without login on the next form', async () => {
+    mockedGetIdToken.mockResolvedValue('id-token-1');
     const submission = deferred<actions.PprSubmitResult>();
     mockedRemote.submitGuestRequest.mockReturnValue(submission.promise);
 

@@ -344,8 +344,6 @@ describe('PprRequestForm', () => {
     // A guest session or a login without an email address: logged in, so
     // the aircraft list can be offered
     const renderGuestForm = (props = {}) => renderForm({ withoutLogin: true, ...props });
-    // Nobody logged in
-    const renderVisitorForm = (props = {}) => renderForm({ withoutLogin: true, visitor: true, ...props });
 
     it('names the aerodrome in the heading, as the side header is hidden on phones', () => {
       renderGuestForm();
@@ -403,36 +401,10 @@ describe('PprRequestForm', () => {
       expect(screen.getByText('pick HBKOF')).toBeTruthy();
     });
 
-    it('asks visitors for the registration in a plain field, in capitals, without loading the aircraft list', () => {
-      const { container } = renderVisitorForm();
-
-      expect(screen.queryByText('pick HBKOF')).toBeNull();
-      fireEvent.change(field(container, 'immatriculation'), { target: { value: 'hb-kof' } });
-      expect(field(container, 'immatriculation').value).toBe('HBKOF');
-    });
-
-    it('asks to accept the privacy policy when the aerodrome has one', () => {
-      renderVisitorForm({ privacyPolicyUrl: 'https://aerodrome.ch/privacy' });
-      expect(screen.getByText('ppr.withoutLogin.privacyConsent')).toBeTruthy();
-    });
-
-    it('asks nothing about privacy without a privacy policy', () => {
-      renderVisitorForm({ privacyPolicyUrl: null });
-      expect(screen.queryByText('ppr.withoutLogin.privacyConsent')).toBeNull();
-    });
-
-    it('asks nothing about privacy with a login, which accepted it', () => {
-      renderForm({ privacyPolicyUrl: 'https://aerodrome.ch/privacy' });
-      expect(screen.queryByText('ppr.withoutLogin.privacyConsent')).toBeNull();
-    });
-
-    it('takes visitors back to the PPR intro on cancel', () => {
-      goTo('/ppr/guest');
-      renderVisitorForm();
-
-      fireEvent.click(screen.getByText('wizard.cancel'));
-
-      expect(window.location.pathname).toBe('/ppr/new');
+    // Accepted with the login, guest sessions too
+    it('asks nothing about privacy', () => {
+      renderGuestForm();
+      expect(screen.queryByText(/privacy|Datenschutz/i)).toBeNull();
     });
 
     it('takes guest sessions back to the start page on cancel', () => {
@@ -449,8 +421,8 @@ describe('PprRequestForm', () => {
       const initialValues = { email: 'max@example.com' };
 
       it('tells where the receipt went and leads to the status page', () => {
-        goTo('/ppr/guest');
-        const { props } = renderVisitorForm({ submitted: true, result: pending, initialValues });
+        goTo('/ppr/new');
+        const { props } = renderGuestForm({ submitted: true, result: pending, initialValues });
 
         expect(screen.getByText('ppr.submitSuccess')).toBeTruthy();
         expect(screen.getByText('ppr.submitPending')).toBeTruthy();
@@ -464,7 +436,7 @@ describe('PprRequestForm', () => {
       });
 
       it('tells where an answer on submission went, with the answer', () => {
-        const { container } = renderVisitorForm({
+        const { container } = renderGuestForm({
           submitted: true,
           result: { ...pending, status: 'approved', reviewRemarks: 'Runway 05/23' },
           initialValues,
@@ -480,7 +452,7 @@ describe('PprRequestForm', () => {
       });
 
       it('names the address the request was sent with, not the one in the field now', () => {
-        renderVisitorForm({
+        renderGuestForm({
           submitted: true,
           result: { ...pending, email: 'max@example.com' },
           initialValues: { email: 'moritz@example.com' },
@@ -490,7 +462,7 @@ describe('PprRequestForm', () => {
       });
 
       it('asks to open the status when the receipt could not be sent, and promises no email', () => {
-        renderVisitorForm({ submitted: true, result: { ...pending, emailSent: false }, initialValues });
+        renderGuestForm({ submitted: true, result: { ...pending, emailSent: false }, initialValues });
 
         expect(screen.getByText('ppr.withoutLogin.receiptFailed:{"email":"max@example.com"}')).toBeTruthy();
         expect(screen.queryByText('ppr.submitPending')).toBeNull();
@@ -503,7 +475,7 @@ describe('PprRequestForm', () => {
         ['approved', { ...pending, status: 'approved' }],
         ['rejected', { ...pending, status: 'rejected', reviewRemarks: 'Geschlossen' }],
       ])('asks to open the status when the answer to a request %s on submission could not be sent', (name, result) => {
-        renderVisitorForm({ submitted: true, result: { ...result, emailSent: false }, initialValues });
+        renderGuestForm({ submitted: true, result: { ...result, emailSent: false }, initialValues });
 
         expect(screen.getByText('ppr.withoutLogin.answerFailed:{"email":"max@example.com"}')).toBeTruthy();
         expect(screen.queryByText(/ppr\.withoutLogin\.answerSent/)).toBeNull();
@@ -516,36 +488,27 @@ describe('PprRequestForm', () => {
       });
 
       it('tells that the email was sent when the server does not say', () => {
-        renderVisitorForm({ submitted: true, result: { ...pending, emailSent: true }, initialValues });
+        renderGuestForm({ submitted: true, result: { ...pending, emailSent: true }, initialValues });
         expect(screen.getByText('ppr.withoutLogin.receiptSent:{"email":"max@example.com"}')).toBeTruthy();
       });
 
       it('gives no hint about a wrong address for an answered request, which can\'t be withdrawn', () => {
-        renderVisitorForm({ submitted: true, result: { ...pending, status: 'approved' }, initialValues });
+        renderGuestForm({ submitted: true, result: { ...pending, status: 'approved' }, initialValues });
         expect(screen.queryByText('ppr.withoutLogin.wrongAddress')).toBeNull();
-      });
-
-      it('takes visitors back to the PPR intro when the dialog is closed', () => {
-        goTo('/ppr/guest');
-        const { props } = renderVisitorForm({ submitted: true, result: pending, initialValues });
-
-        fireEvent.click(screen.getByText('common.close'));
-
-        expect(window.location.pathname).toBe('/ppr/new');
-        expect(props.confirmPprSubmitSuccess).not.toHaveBeenCalled();
       });
 
       it('takes guest sessions back to the start page when the dialog is closed', () => {
         goTo('/ppr/new');
-        renderGuestForm({ submitted: true, result: pending, initialValues });
+        const { props } = renderGuestForm({ submitted: true, result: pending, initialValues });
 
         fireEvent.click(screen.getByText('common.close'));
 
         expect(window.location.pathname).toBe('/');
+        expect(props.confirmPprSubmitSuccess).not.toHaveBeenCalled();
       });
 
       it('offers no status page without the token of its link', () => {
-        renderVisitorForm({ submitted: true, result: { key: '-Nabc', status: 'pending' }, initialValues });
+        renderGuestForm({ submitted: true, result: { key: '-Nabc', status: 'pending' }, initialValues });
 
         expect(screen.queryByText('ppr.withoutLogin.showStatus')).toBeNull();
         expect(screen.getByText('common.close')).toBeTruthy();

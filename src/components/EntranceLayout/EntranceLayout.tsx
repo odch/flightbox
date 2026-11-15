@@ -49,8 +49,8 @@ const ContentInnerWrapper = styled.div`
   }
 `;
 
-// The pages visitors enter on, the login and the PPR intro: the logo and
-// the aerodrome's name beside the content, above it on phones
+// The page visitors enter on, the login (also of a PPR request): the logo
+// and the aerodrome's name beside the content, above it on phones
 const EntranceLayout = ({ children }: { children: React.ReactNode }) => (
   <Wrapper>
     <StyledLanguageSwitch/>

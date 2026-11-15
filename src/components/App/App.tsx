@@ -17,45 +17,37 @@ import AerodromeStatusPage from '../../containers/AerodromeStatusPageContainer';
 import ProfilePage from '../../containers/ProfilePageContainer';
 import PprRequestPage from '../../containers/PprRequestPageContainer';
 import PprStatusList from '../../containers/PprStatusListContainer';
-import PprIntroPage from '../../containers/PprIntroPageContainer';
 import PprGuestRequestPage from '../../containers/PprGuestRequestPageContainer';
 import PprStatusPage from '../../containers/PprStatusPageContainer';
-import {getPprAccess, pprEnabled, pprGuestRequestsEnabled} from '../../modules/ppr/access';
+import {getPprAccess, pprEnabled} from '../../modules/ppr/access';
 import type {PprAccess} from '../../modules/ppr/access';
 
 // The pages visitors see without a login. Matched like the routes below
 // (any case, with or without a trailing slash): a path that has no route
-// leads to the start page, i.e. the login.
+// leads to the start page, i.e. the login. The PPR request itself is behind
+// the login, which offers the guest session where the link carries the
+// guest access token (LoginPage).
 const publicPaths = () => [
   '/aerodrome-status',
-  // The intro and the status links in the pilots' emails
-  ...(pprEnabled() ? ['/ppr/new', '/ppr/status/:key/:token'] : []),
-  ...(pprGuestRequestsEnabled() ? ['/ppr/guest'] : []),
+  // The status links in the pilots' emails
+  ...(pprEnabled() ? ['/ppr/status/:key/:token'] : []),
 ];
 
 const isPublicPath = (pathname: string) =>
   publicPaths().some(path => matchPath(path, pathname) !== null);
 
-// The entry of PPR requests, e.g. from the link on the aerodrome's website
+// The entry of PPR requests, e.g. from the link on the aerodrome's website:
+// after the login, the form of a login with an email address, or the form
+// without login of a guest session or a login without one
 const pprRequestPage = (access: PprAccess) => {
   switch (access) {
     case 'member':
       return <PprRequestPage/>;
-    case 'visitor':
-      return <PprIntroPage/>;
     case 'guest':
       return <PprGuestRequestPage/>;
     default:
       return <Navigate to="/" replace/>;
   }
-};
-
-// «Ohne Anmeldung fortfahren»: a login with an email address requests with it
-const pprGuestRequestPage = (access: PprAccess) => {
-  if (access === 'visitor' || access === 'guest') {
-    return <PprGuestRequestPage/>;
-  }
-  return <Navigate to={access === 'member' ? '/ppr/new' : '/'} replace/>;
 };
 
 // «Meine PPR-Anfragen»: the requests of the login's email address
@@ -108,11 +100,6 @@ const App = (props: any) => {
       <Route path="/aerodrome-status" element={<AerodromeStatusPage/>}/>
       {(typeof __CONF__ === 'undefined' || __CONF__.profileEnabled !== false) && <Route path="/profile" element={<ProfilePage/>}/>}
       {pprEnabled() && <Route path="/ppr/new" element={pprRequestPage(pprAccess)}/>}
-      {pprGuestRequestsEnabled() && <Route path="/ppr/guest" element={pprGuestRequestPage(pprAccess)}/>}
-      {/* «Mit Anmeldung fortfahren»: behind the login, which visitors see
-          first (Back leads to the intro). After any login it leads to the
-          request, replacing itself so that Back does not come here again. */}
-      {pprEnabled() && <Route path="/ppr/login" element={<Navigate to="/ppr/new" replace/>}/>}
       {pprEnabled() && <Route path="/ppr" element={pprListPage(pprAccess)}/>}
       {pprEnabled() && (
         <Route

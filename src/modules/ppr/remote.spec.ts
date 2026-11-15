@@ -28,23 +28,24 @@ describe('modules', () => {
       };
 
       describe('submitGuestRequest', () => {
-        it('sends the request as JSON, without an ID token, and returns the answer', async () => {
+        it('sends the request as JSON, with the ID token of the session, and returns the answer', async () => {
           const answer = { key: '-Nabc', status: 'pending', statusToken: TOKEN };
           fetchMock.mockResolvedValue(response(201, answer));
 
-          await expect(submitGuestRequest({ email: 'pilot@example.com', language: 'en' })).resolves.toEqual(answer);
+          await expect(submitGuestRequest({ email: 'pilot@example.com', language: 'en' }, 'id-token-1'))
+            .resolves.toEqual(answer);
 
           const { url, init, body } = sent();
           expect(url).toBe(`${API}/ppr/guest-requests`);
           expect(init.method).toBe('POST');
-          expect(init.headers).toEqual({ 'Content-Type': 'application/json' });
+          expect(init.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer id-token-1' });
           expect(body).toEqual({ email: 'pilot@example.com', language: 'en' });
         });
 
         it('keeps the status and the waiting time of a refusal for too many requests', async () => {
           fetchMock.mockResolvedValue(response(429, { error: 'Too many requests' }, { 'Retry-After': '1800' }));
 
-          await expect(submitGuestRequest({})).rejects.toMatchObject({
+          await expect(submitGuestRequest({}, 'id-token-1')).rejects.toMatchObject({
             message: 'Too many requests',
             status: 429,
             retryAfterSeconds: 1800,
@@ -54,7 +55,7 @@ describe('modules', () => {
         it('has no waiting time when the browser may not read it', async () => {
           fetchMock.mockResolvedValue(response(429, { error: 'Too many requests' }));
 
-          const error = await submitGuestRequest({}).catch(e => e);
+          const error = await submitGuestRequest({}, 'id-token-1').catch(e => e);
           expect(error.status).toBe(429);
           expect(error).not.toHaveProperty('retryAfterSeconds');
         });
@@ -62,7 +63,7 @@ describe('modules', () => {
         it('keeps the status of a refusal without a JSON body', async () => {
           fetchMock.mockResolvedValue(response(415, undefined));
 
-          await expect(submitGuestRequest({})).rejects.toMatchObject({ message: 'Request failed: 415', status: 415 });
+          await expect(submitGuestRequest({}, 'id-token-1')).rejects.toMatchObject({ message: 'Request failed: 415', status: 415 });
         });
       });
 
