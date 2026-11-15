@@ -124,16 +124,21 @@ describe('PprSettingsForm', () => {
 
   describe('summary', () => {
     // At the top of the tab, however long the list of requests gets
-    it('shows the links for the aerodrome\'s website, with the guest access where it is set', () => {
+    it('opens the links for the aerodrome\'s website, with the guest access where it is set', () => {
       const token = '0f8fad5b-d9cb-469f-a165-70867728950e';
       (global as any).__CONF__ = { appUrl: 'https://lspl-test.web.app', ppr: true, pprGuestRequests: true, loginForm: 'email' };
       const props = { settings: loadedSettings, loadPprSettings: jest.fn(), savePprSettings: jest.fn(), guestAccessToken: token };
       const { container } = renderWithTheme(<PprSettingsForm {...props} />);
+      expect(byCy(container, 'ppr-website-links')).toBeNull();
 
-      const row = summaryRow(container, 'website-link');
-      expect(row).toHaveTextContent('ppr.websiteLink.login');
-      expect(row).toHaveTextContent('https://lspl-test.web.app/ppr');
-      expect(row).toHaveTextContent(`https://lspl-test.web.app/#/ppr/new?t=${token}`);
+      fireEvent.click(byCy(container, 'ppr-website-links-open'));
+
+      const dialog = byCy(container, 'ppr-website-links');
+      expect(dialog).toHaveTextContent('https://lspl-test.web.app/ppr');
+      expect(dialog).toHaveTextContent(`https://lspl-test.web.app/#/ppr/new?t=${token}`);
+
+      fireEvent.click(byCy(container, 'ppr-website-links-close'));
+      expect(byCy(container, 'ppr-website-links')).toBeNull();
       delete (global as any).__CONF__;
     });
 
@@ -141,7 +146,7 @@ describe('PprSettingsForm', () => {
       const { container } = renderSettings();
 
       expect(summaryRow(container, 'answer')).toHaveTextContent('ppr.settings.answerManual');
-      expect(summaryRow(container, 'closures')).toHaveTextContent('ppr.settings.noClosures');
+      expect(summaryRow(container, 'closures')).toHaveTextContent('ppr.settings.noClosuresShort');
       expect(summaryRow(container, 'notification')).toHaveTextContent('ppr@aerodrome.ch');
       expect(emailInput(container)).toBeNull();
       expect(saveButton(container)).toBeNull();
@@ -183,31 +188,20 @@ describe('PprSettingsForm', () => {
 
         const { container } = renderSettings({ closures: [ended] });
 
-        expect(summaryRow(container, 'closures')).toHaveTextContent('ppr.settings.noClosures');
+        expect(summaryRow(container, 'closures')).toHaveTextContent('ppr.settings.noClosuresShort');
         expect(periods(container)).toEqual([]);
       });
 
-      it('lists up to three periods', () => {
+      // The summary is one line
+      it('lists the next period and counts the others', () => {
         const { container } = renderSettings({ closures: blockedDays(3) });
-        expect(periods(container)).toEqual(['01.05.2099 · Event 1', '02.05.2099 · Event 2', '03.05.2099 · Event 3']);
-      });
-
-      it('counts the periods after the first three', () => {
-        const { container } = renderSettings({ closures: blockedDays(4) });
-        expect(periods(container)).toEqual([
-          '01.05.2099 · Event 1',
-          '02.05.2099 · Event 2',
-          '03.05.2099 · Event 3',
-          'ppr.settings.moreClosures (1)',
-        ]);
+        expect(periods(container)).toEqual(['01.05.2099 · Event 1', 'ppr.settings.moreClosures (2)']);
       });
 
       it('counts only the periods that have not ended', () => {
         const ended = { from: '2020-01-01', to: '2020-01-02', reason: 'New year' };
         const { container } = renderSettings({ closures: [ended, ...blockedDays(6)] });
-        expect(periods(container)).toHaveLength(4);
-        expect(periods(container)[0]).toBe('01.05.2099 · Event 1');
-        expect(periods(container)[3]).toBe('ppr.settings.moreClosures (3)');
+        expect(periods(container)).toEqual(['01.05.2099 · Event 1', 'ppr.settings.moreClosures (5)']);
       });
     });
 

@@ -62,6 +62,34 @@ describe('PprRequestGroups', () => {
     expect(groupEl(container, 'past')).toBeNull();
   });
 
+  // Like the movement list: the rows of a group in the admin list (inset,
+  // rows without a frame) on a card of their own, below the title
+  it('puts the rows of each group of the admin list on a card', () => {
+    const { container } = renderGroups([
+      request('open', 'pending', TODAY),
+      request('upcoming', 'approved', '2026-11-20'),
+    ], { inset: true });
+
+    for (const name of ['open', 'upcoming']) {
+      const title = within(groupEl(container, name)).getByRole('heading');
+      const card = title.nextElementSibling as HTMLElement;
+      expect(within(card).getAllByTestId('request')).toHaveLength(1);
+    }
+  });
+
+  it('leaves the requests of the pilot\'s list, cards themselves, as they are', () => {
+    const { container } = renderGroups([request('open', 'pending', TODAY)]);
+    const title = within(groupEl(container, 'open')).getByRole('heading');
+    expect(title.nextElementSibling).toHaveAttribute('data-testid', 'request');
+  });
+
+  it('marks the count of the open requests, which wait for an answer', () => {
+    renderGroups([request('open', 'pending', TODAY), request('upcoming', 'approved', '2026-11-20')]);
+    const [open, upcoming] = screen.getAllByRole('heading').map(h => h.querySelector('span') as HTMLElement);
+    expect(open).toHaveStyle('background-color: #003863');
+    expect(upcoming).toHaveStyle('background-color: #8a96a3');
+  });
+
   it('takes the heading level of the page', () => {
     renderGroups([request('a', 'pending', TODAY)], { headingLevel: 'h2' });
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('ppr.groups.open');

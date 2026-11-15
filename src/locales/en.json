@@ -745,6 +745,7 @@
       "closures": "Blocked days",
       "closuresHelp": "Block the days on which you do not approve PPR requests, e.g. for runway works, an event or when nobody is on site. New requests for these days are rejected with the reason, also when answering manually. Blocked days do not change the aerodrome status. While it is «Closed», requests for today are rejected as well. Requests already made stay as they are: reject pending ones in the «PPR requests» list below, and revoke approvals there.",
       "noClosures": "No days blocked.",
+      "noClosuresShort": "none",
       "moreClosures": "and {{count}} more",
       "closureFrom": "From",
       "closureTo": "To",
@@ -795,14 +796,14 @@
       "withdrawFailed": "The PPR request could not be withdrawn."
     },
     "websiteLink": {
-      "title": "Link for your website",
+      "title": "PPR link for your website",
+      "button": "PPR link",
+      "intro": "For your website, e.g. behind «Request PPR», and as a QR code for printed notices.",
       "login": "With login",
       "loginHelp": "Pilots log in before they send the request.",
       "guest": "With guest access",
       "guestHelp": "Pilots can also continue as guests. The link contains the guest access token: it also allows recording movements and works until the token is renewed.",
-      "ownView": "As you are logged in, these links show you the form. A private browser window shows you what visitors without a login see.",
-      "showQrCode": "Show QR code",
-      "hideQrCode": "Hide QR code"
+      "ownView": "As you are logged in, these links show you the form. A private browser window shows you what visitors without a login see."
     }
   },
   "maskedInput": {

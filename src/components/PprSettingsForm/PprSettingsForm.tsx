@@ -13,6 +13,8 @@ import ClosuresEditor, {
   upcomingClosures,
 } from './ClosuresEditor';
 import PprSettingsSummary from './PprSettingsSummary';
+import PprWebsiteLinks from './PprWebsiteLinks';
+import LabeledBox from '../LabeledBox';
 import useMinWidth from './useMinWidth';
 import useSavedHint from './useSavedHint';
 
@@ -154,6 +156,8 @@ const PprSettingsForm = (props: any) => {
   const { t } = useTranslation();
   const { settings, loadPprSettings } = props;
   const [editing, setEditing] = useState(false);
+  // The dialog with the links for the aerodrome's website
+  const [linksShown, setLinksShown] = useState(false);
   // A save started in the form failed: shown until the next save or until
   // the form opens again
   const [saveFailed, setSaveFailed] = useState(false);
@@ -280,7 +284,11 @@ const PprSettingsForm = (props: any) => {
   };
 
   if (settings.loadFailed) {
-    return <Warning>{t('ppr.settings.loadFailed')}</Warning>;
+    return (
+      <LabeledBox label={t('ppr.settings.title')} className="ppr-settings">
+        <Warning>{t('ppr.settings.loadFailed')}</Warning>
+      </LabeledBox>
+    );
   }
 
   if (!settings.loaded) {
@@ -305,12 +313,15 @@ const PprSettingsForm = (props: any) => {
             answerMode={settings.answerMode}
             adminEmail={settings.adminEmail}
             closures={settings.closures}
-            guestAccessToken={props.guestAccessToken}
             saved={savedHintVisible}
             onEdit={startEditing}
+            onShowLinks={() => setLinksShown(true)}
           />
         </div>
         {savedStatus}
+        {linksShown && (
+          <PprWebsiteLinks guestAccessToken={props.guestAccessToken} onClose={() => setLinksShown(false)}/>
+        )}
       </>
     );
   }
@@ -318,89 +329,93 @@ const PprSettingsForm = (props: any) => {
   // Describes the stored settings: unanswered requests nobody hears about
   const unannounced = !settings.adminEmail && settings.answerMode !== 'automatic';
 
+  // The form in a box of its own, where the summary was; the live region
+  // stays in its place beside it
   return (
     <>
-      <Form onSubmit={handleSubmit} validate={validate} initialValues={initialValues}>
-        {({ handleSubmit, dirty, values }) => (
-          // Focusable, to be focused when it opens
-          <form
-            ref={formRef}
-            onSubmit={handleSubmit}
-            tabIndex={-1}
-            aria-label={t('ppr.settings.title')}
-            data-cy="ppr-settings-form"
-          >
-            <Section>
-              <SectionTitle id={answerTitleId}>{t('ppr.settings.answer')}</SectionTitle>
-              <FieldSet gutter={false}>
-                <AnswerModeField items={answerModes} labelledBy={answerTitleId}/>
-              </FieldSet>
-              {values.answerMode === 'automatic' && (
-                <PilotInfo>
-                  <Field
-                    name="pilotInfo"
-                    component={renderTextArea}
-                    rows={5}
-                    maxLength={MAX_PILOT_INFO_LENGTH}
-                    label={t('ppr.settings.pilotInfo')}
-                  />
-                  <HelpText>{t('ppr.settings.pilotInfoHelp')}</HelpText>
-                </PilotInfo>
-              )}
-            </Section>
-
-            <Section>
-              <SectionTitle>{t('ppr.settings.closures')}</SectionTitle>
-              <HelpText>{t('ppr.settings.closuresHelp')}</HelpText>
-              <Field name="closures">
-                {({ input, meta }) => (
-                  <ClosuresEditor
-                    value={input.value || []}
-                    onChange={input.onChange}
-                    errors={Array.isArray(meta.error) ? meta.error : undefined}
-                    showAllErrors={!!meta.submitFailed}
-                  />
+      <LabeledBox label={t('ppr.settings.title')} className="ppr-settings">
+        <Form onSubmit={handleSubmit} validate={validate} initialValues={initialValues}>
+          {({ handleSubmit, dirty, values }) => (
+            // Focusable, to be focused when it opens
+            <form
+              ref={formRef}
+              onSubmit={handleSubmit}
+              tabIndex={-1}
+              aria-label={t('ppr.settings.title')}
+              data-cy="ppr-settings-form"
+            >
+              <Section>
+                <SectionTitle id={answerTitleId}>{t('ppr.settings.answer')}</SectionTitle>
+                <FieldSet gutter={false}>
+                  <AnswerModeField items={answerModes} labelledBy={answerTitleId}/>
+                </FieldSet>
+                {values.answerMode === 'automatic' && (
+                  <PilotInfo>
+                    <Field
+                      name="pilotInfo"
+                      component={renderTextArea}
+                      rows={5}
+                      maxLength={MAX_PILOT_INFO_LENGTH}
+                      label={t('ppr.settings.pilotInfo')}
+                    />
+                    <HelpText>{t('ppr.settings.pilotInfoHelp')}</HelpText>
+                  </PilotInfo>
                 )}
-              </Field>
-            </Section>
+              </Section>
 
-            <Section>
-              <SectionTitle>{t('ppr.settings.notification')}</SectionTitle>
-              <FieldSet gutter={false}>
-                <Field
-                  name="adminEmail"
-                  type="email"
-                  label={t('ppr.settings.adminEmail')}
-                  component={renderInputField}
+              <Section>
+                <SectionTitle>{t('ppr.settings.closures')}</SectionTitle>
+                <HelpText>{t('ppr.settings.closuresHelp')}</HelpText>
+                <Field name="closures">
+                  {({ input, meta }) => (
+                    <ClosuresEditor
+                      value={input.value || []}
+                      onChange={input.onChange}
+                      errors={Array.isArray(meta.error) ? meta.error : undefined}
+                      showAllErrors={!!meta.submitFailed}
+                    />
+                  )}
+                </Field>
+              </Section>
+
+              <Section>
+                <SectionTitle>{t('ppr.settings.notification')}</SectionTitle>
+                <FieldSet gutter={false}>
+                  <Field
+                    name="adminEmail"
+                    type="email"
+                    label={t('ppr.settings.adminEmail')}
+                    component={renderInputField}
+                  />
+                </FieldSet>
+                <HelpText>{t('ppr.settings.adminEmailHelp')}</HelpText>
+                {unannounced && <Warning>{t('ppr.settings.noAdminEmail')}</Warning>}
+              </Section>
+
+              {saveFailed && <SaveError role="alert">{t('ppr.settings.saveFailed')}</SaveError>}
+              <Buttons>
+                <Button
+                  type="button"
+                  label={t('common.cancel')}
+                  onClick={() => switchTo(false)}
+                  disabled={settings.saving}
+                  flat
+                  dataCy="ppr-settings-cancel"
                 />
-              </FieldSet>
-              <HelpText>{t('ppr.settings.adminEmailHelp')}</HelpText>
-              {unannounced && <Warning>{t('ppr.settings.noAdminEmail')}</Warning>}
-            </Section>
-
-            {saveFailed && <SaveError role="alert">{t('ppr.settings.saveFailed')}</SaveError>}
-            <Buttons>
-              <Button
-                type="button"
-                label={t('common.cancel')}
-                onClick={() => switchTo(false)}
-                disabled={settings.saving}
-                flat
-                dataCy="ppr-settings-cancel"
-              />
-              <Button
-                type="submit"
-                label={t('common.save')}
-                icon="save"
-                disabled={!dirty || settings.saving}
-                loading={settings.saving}
-                primary
-                dataCy="ppr-settings-save"
-              />
-            </Buttons>
-          </form>
-        )}
-      </Form>
+                <Button
+                  type="submit"
+                  label={t('common.save')}
+                  icon="save"
+                  disabled={!dirty || settings.saving}
+                  loading={settings.saving}
+                  primary
+                  dataCy="ppr-settings-save"
+                />
+              </Buttons>
+            </form>
+          )}
+        </Form>
+      </LabeledBox>
       {savedStatus}
     </>
   );
