@@ -35,6 +35,8 @@ jest.mock('./adapters/firebaseRateLimiter', () => ({ acquire: mockAcquire, relea
 
 const router = require('./routes')
 
+const STATUS_TOKEN = 'T'.repeat(43)
+
 // Minimal Express request/response mocks
 function mockReq({ method = 'GET', body = {}, params = {}, headers = {} } = {}) {
   return { method, body, params, headers, fbUserId: null, fbUserEmail: null }
@@ -134,10 +136,10 @@ describe('PPR routes', () => {
       handlers = findHandler('post', '/requests')
     })
 
-    it('calls submitRequest and returns 201', async () => {
+    it('calls submitRequest and returns 201 with the status token', async () => {
       authenticateAs('uid-1', 'pilot@example.com')
       setupAdminDbRef(null, 'admin@aero.ch')
-      mockSubmitRequest.mockResolvedValue({ key: 'req-123', status: 'pending' })
+      mockSubmitRequest.mockResolvedValue({ key: 'req-123', status: 'pending', statusToken: STATUS_TOKEN })
 
       const req = mockReq({
         headers: { authorization: 'Bearer valid-token' },
@@ -148,7 +150,7 @@ describe('PPR routes', () => {
       await runMiddlewareChain(handlers, req, res)
 
       expect(res.statusCode).toBe(201)
-      expect(res.body).toEqual({ key: 'req-123', status: 'pending' })
+      expect(res.body).toEqual({ key: 'req-123', status: 'pending', statusToken: STATUS_TOKEN })
     })
 
     it('returns an automatic answer to the pilot right away', async () => {
@@ -165,7 +167,7 @@ describe('PPR routes', () => {
       expect(res.body).toEqual({ key: 'req-123', status: 'approved', reviewRemarks: 'Runway 05/23' })
       // the use case reads the settings and the aerodrome status itself
       expect(Object.keys(mockSubmitRequest.mock.calls[0][0]).sort())
-        .toEqual(['aerodromeStatus', 'notifier', 'repository', 'settings'])
+        .toEqual(['aerodromeStatus', 'notifier', 'repository', 'settings', 'statusTokens'])
     })
 
     it('sets createdBy from auth', async () => {
@@ -183,6 +185,46 @@ describe('PPR routes', () => {
 
       const callArgs = mockSubmitRequest.mock.calls[0]
       expect(callArgs[1].createdBy).toBe('pilot@example.com')
+    })
+
+    it('takes only what a pilot fills in: never the owner, address or mark from the body', async () => {
+      authenticateAs('uid-1', 'pilot@example.com')
+      setupAdminDbRef(null, 'admin@aero.ch')
+      mockSubmitRequest.mockResolvedValue({ key: 'req-123' })
+
+      const req = mockReq({
+        headers: { authorization: 'Bearer valid-token' },
+        body: {
+          firstname: 'Max',
+          email: 'victim@example.com',
+          createdBy: 'victim@example.com',
+          withoutLogin: true,
+          status: 'approved'
+        }
+      })
+
+      await runMiddlewareChain(handlers, req, mockRes())
+
+      expect(mockSubmitRequest.mock.calls[0][1]).toEqual({
+        firstname: 'Max', email: 'pilot@example.com', createdBy: 'pilot@example.com'
+      })
+    })
+
+    it('answers an empty body as invalid input, not as a failure', async () => {
+      authenticateAs('uid-1', 'pilot@example.com')
+      setupAdminDbRef(null, 'admin@aero.ch')
+      const err = new Error('Missing required fields: firstname')
+      err.code = 'INVALID_INPUT'
+      mockSubmitRequest.mockRejectedValue(err)
+
+      const req = mockReq({ headers: { authorization: 'Bearer valid-token' } })
+      req.body = undefined
+      const res = mockRes()
+
+      await runMiddlewareChain(handlers, req, res)
+
+      expect(res.statusCode).toBe(400)
+      expect(mockSubmitRequest.mock.calls[0][1]).toEqual({ email: 'pilot@example.com', createdBy: 'pilot@example.com' })
     })
 
     it('passes the pilot\'s language on for the emails', async () => {

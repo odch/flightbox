@@ -12,6 +12,7 @@ jest.mock('./fbAuth', () => ({
 jest.mock('firebase-admin/database', () => ({ getDatabase: jest.fn() }));
 jest.mock('../ppr/enabled', () => ({
   isPprEnabled: jest.fn(),
+  isPprGuestRequestsEnabled: jest.fn(),
 }));
 
 const routeLayers = app => app.router.stack.filter(layer => layer.route);
@@ -26,6 +27,7 @@ function loadApi(projectConfig, { pprEnabled = false } = {}) {
       fbAdminAuth: require('./fbAuth').fbAdminAuth,
       getDatabase: require('firebase-admin/database').getDatabase,
       pprRoutes: require('../ppr/routes'),
+      publicPprRoutes: require('../ppr/publicRoutes'),
     };
   });
   return loaded;
@@ -34,11 +36,35 @@ function loadApi(projectConfig, { pprEnabled = false } = {}) {
 const findRoute = (api, path) => routeLayers(api).find(layer => layer.route.path.includes(path));
 
 const pprLayer = ({ api, pprRoutes }) => api.router.stack.find(layer => layer.handle === pprRoutes);
+const publicPprIndex = ({ api, publicPprRoutes }) => api.router.stack.findIndex(layer => layer.handle === publicPprRoutes);
+const corsIndex = ({ api }) => api.router.stack.findIndex(layer => layer.name === 'corsMiddleware');
 
 describe('functions', () => {
   describe('api', () => {
     it('has no PPR routes for aerodromes without PPR', () => {
-      expect(pprLayer(loadApi({ reportApiEnabled: false }))).toBeUndefined();
+      const loaded = loadApi({ reportApiEnabled: false });
+
+      expect(pprLayer(loaded)).toBeUndefined();
+      expect(publicPprIndex(loaded)).toBe(-1);
+    });
+
+    it('serves the PPR routes without login on /ppr only, ahead of the permissive CORS', () => {
+      const loaded = loadApi({ reportApiEnabled: false }, { pprEnabled: true });
+      const index = publicPprIndex(loaded);
+      const layer = loaded.api.router.stack[index];
+
+      expect(index).toBeGreaterThanOrEqual(0);
+      // Otherwise the permissive CORS would answer their preflights
+      expect(index).toBeLessThan(corsIndex(loaded));
+      expect(layer.match('/ppr/status/-NxAbC_12')).toBe(true);
+      // Not through Firebase Hosting, whose CDN hides the client's address
+      expect(layer.match('/api/ppr/status/-NxAbC_12')).toBe(false);
+    });
+
+    it('keeps the PPR routes with login behind the permissive CORS', () => {
+      const loaded = loadApi({ reportApiEnabled: false }, { pprEnabled: true });
+
+      expect(loaded.api.router.stack.indexOf(pprLayer(loaded))).toBeGreaterThan(corsIndex(loaded));
     });
 
     it('serves the PPR routes on /ppr and /api/ppr for aerodromes with PPR', () => {

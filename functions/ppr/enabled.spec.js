@@ -1,6 +1,6 @@
 'use strict'
 
-const { isPprEnabled } = require('./enabled')
+const { isPprEnabled, isPprGuestRequestsEnabled } = require('./enabled')
 
 const ENV = { GCLOUD_PROJECT: 'flightbox-lsze' }
 
@@ -47,6 +47,36 @@ describe('isPprEnabled', () => {
     jest.isolateModules(() => {
       jest.doMock('../ppr-config.generated.js', () => ({ enabled: true, firebaseProjectId: 'flightbox-lsze' }), { virtual: true })
       const { isPprEnabled: isEnabled } = require('./enabled')
+      expect(isEnabled(undefined, ENV)).toBe(true)
+    })
+  })
+})
+
+describe('isPprGuestRequestsEnabled', () => {
+  const config = fields => () => ({ enabled: true, guestRequests: true, firebaseProjectId: 'flightbox-lsze', ...fields })
+
+  it('is on where PPR and requests without login are on for this project', () => {
+    expect(isPprGuestRequestsEnabled(config({}), ENV)).toBe(true)
+  })
+
+  it.each([
+    ['PPR is off', { enabled: false }],
+    ['requests without login are off', { guestRequests: false }],
+    ['the file predates the flag', { guestRequests: undefined }],
+    ['the flag is no boolean', { guestRequests: 'true' }],
+    ['the file is for another project', { firebaseProjectId: 'flightbox-test' }]
+  ])('is off when %s', (name, fields) => {
+    expect(isPprGuestRequestsEnabled(config(fields), ENV)).toBe(false)
+  })
+
+  it('is off without the file', () => {
+    expect(isPprGuestRequestsEnabled(missingFlagFile, ENV)).toBe(false)
+  })
+
+  it('reads functions/ppr-config.generated.js by default', () => {
+    jest.isolateModules(() => {
+      jest.doMock('../ppr-config.generated.js', config({}), { virtual: true })
+      const { isPprGuestRequestsEnabled: isEnabled } = require('./enabled')
       expect(isEnabled(undefined, ENV)).toBe(true)
     })
   })

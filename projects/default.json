@@ -34,5 +34,6 @@
   "privacySettings": false,
   "profileEnabled": true,
   "passkeysEnabled": false,
-  "ppr": false
+  "ppr": false,
+  "pprGuestRequests": false
 }

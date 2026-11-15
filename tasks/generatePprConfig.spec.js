@@ -42,7 +42,7 @@ function makeConf(overrides = {}, environments) {
     themeColor: '#027ABB',
     ppr: false,
     environments: environments || {
-      test: { firebaseProjectId: 'lspl-test', ppr: true, appUrl: 'https://lspl-test.web.app' },
+      test: { firebaseProjectId: 'lspl-test', ppr: true, pprGuestRequests: true, appUrl: 'https://lspl-test.web.app' },
       production: { firebaseProjectId: 'lspl-prod' }
     },
     ...overrides
@@ -66,6 +66,7 @@ describe('tasks/generatePprConfig', () => {
 
     expect(config).toEqual({
       enabled: client.ppr === true,
+      guestRequests: client.ppr === true && client.pprGuestRequests === true,
       firebaseProjectId: 'firebase-project',
       aerodromeName: client.aerodrome && client.aerodrome.name,
       themeColor: client.themeColor,
@@ -77,13 +78,14 @@ describe('tasks/generatePprConfig', () => {
     expect(evaluate(formatPprConfig(config))).toEqual(config);
   });
 
-  it('builds the file of lspl, where PPR is on in test only', () => {
+  it('builds the file of lspl, where PPR and requests without login are on in test only', () => {
     expect(formatPprConfig(buildPprConfigFor('lspl', 'test', 'lspl-test'))).toBe(
-      'module.exports = {"enabled":true,"firebaseProjectId":"lspl-test",'
+      'module.exports = {"enabled":true,"guestRequests":true,"firebaseProjectId":"lspl-test",'
       + '"aerodromeName":"Langenthal","themeColor":"#027ABB","appUrl":"https://lspl-test.web.app"};\n'
     );
     expect(buildPprConfigFor('lspl', 'production', 'lspl-prod')).toEqual({
       enabled: false,
+      guestRequests: false,
       firebaseProjectId: 'lspl-prod',
       aerodromeName: 'Langenthal',
       themeColor: '#027ABB'
@@ -92,7 +94,8 @@ describe('tasks/generatePprConfig', () => {
 
   it('builds the file of a project without theme colour (cypress-testing)', () => {
     expect(formatPprConfig(buildPprConfigFor('cypress-testing', 'test', 'cypress-testing'))).toBe(
-      'module.exports = {"enabled":false,"firebaseProjectId":"cypress-testing","aerodromeName":"Cypress"};\n'
+      'module.exports = {"enabled":false,"guestRequests":false,"firebaseProjectId":"cypress-testing",'
+      + '"aerodromeName":"Cypress"};\n'
     );
   });
 
@@ -100,6 +103,7 @@ describe('tasks/generatePprConfig', () => {
     it('has every field', () => {
       expect(buildPprConfig('lspl', makeConf(), 'test', 'lspl-test')).toStrictEqual({
         enabled: true,
+        guestRequests: true,
         firebaseProjectId: 'lspl-test',
         aerodromeName: 'Langenthal',
         themeColor: '#027ABB',
@@ -119,10 +123,31 @@ describe('tasks/generatePprConfig', () => {
       expect(buildPprConfig('lspl', withPpr(undefined), 'test', 'x').enabled).toBe(false);
     });
 
+    it('allows requests without login only where PPR is on', () => {
+      const withFlags = (ppr, pprGuestRequests) =>
+        makeConf({ ppr, pprGuestRequests, appUrl: 'https://lspl-test.web.app' }, { test: { firebaseProjectId: 'x' } });
+      expect(buildPprConfig('lspl', withFlags(true, true), 'test', 'x').guestRequests).toBe(true);
+      expect(buildPprConfig('lspl', withFlags(false, true), 'test', 'x').guestRequests).toBe(false);
+      expect(buildPprConfig('lspl', withFlags(undefined, true), 'test', 'x').guestRequests).toBe(false);
+      expect(buildPprConfig('lspl', withFlags(true, false), 'test', 'x').guestRequests).toBe(false);
+      expect(buildPprConfig('lspl', withFlags(true, undefined), 'test', 'x').guestRequests).toBe(false);
+      expect(buildPprConfig('lspl', withFlags(true, null), 'test', 'x').guestRequests).toBe(false);
+    });
+
+    it('lets an environment turn requests without login off with false or null', () => {
+      const conf = makeConf({ ppr: true, pprGuestRequests: true, appUrl: 'https://lspl-test.web.app' }, {
+        test: { pprGuestRequests: false },
+        production: { pprGuestRequests: null }
+      });
+      expect(buildPprConfig('lspl', conf, 'test', 'x').guestRequests).toBe(false);
+      expect(buildPprConfig('lspl', conf, 'production', 'x').guestRequests).toBe(false);
+    });
+
     it('lets an environment override every value', () => {
       const conf = makeConf({ appUrl: 'https://flightbox.example' }, {
         test: {
           ppr: true,
+          pprGuestRequests: true,
           aerodrome: { ICAO: 'LSXX', name: 'Test' },
           themeColor: 'red',
           appUrl: 'https://test.example'
@@ -131,6 +156,7 @@ describe('tasks/generatePprConfig', () => {
       });
       expect(buildPprConfig('lspl', conf, 'test', 'x')).toEqual({
         enabled: true,
+        guestRequests: true,
         firebaseProjectId: 'x',
         aerodromeName: 'Test',
         themeColor: 'red',
@@ -138,6 +164,7 @@ describe('tasks/generatePprConfig', () => {
       });
       expect(buildPprConfig('lspl', conf, 'production', 'x')).toEqual({
         enabled: false,
+        guestRequests: false,
         firebaseProjectId: 'x',
         aerodromeName: 'Langenthal',
         themeColor: '#027ABB',
@@ -165,10 +192,10 @@ describe('tasks/generatePprConfig', () => {
     it('leaves out the values a project does not set', () => {
       const conf = makeConf({ aerodrome: { ICAO: 'LSXX' }, themeColor: undefined }, { test: {} });
       expect(formatPprConfig(buildPprConfig('lsxx', conf, 'test', 'x')))
-        .toBe('module.exports = {"enabled":false,"firebaseProjectId":"x"};\n');
+        .toBe('module.exports = {"enabled":false,"guestRequests":false,"firebaseProjectId":"x"};\n');
       const { aerodrome, ...withoutAerodrome } = conf;
       expect(formatPprConfig(buildPprConfig('lsxx', withoutAerodrome, 'test', 'x')))
-        .toBe('module.exports = {"enabled":false,"firebaseProjectId":"x"};\n');
+        .toBe('module.exports = {"enabled":false,"guestRequests":false,"firebaseProjectId":"x"};\n');
     });
 
     it('does not mutate its input', () => {
@@ -242,6 +269,22 @@ describe('tasks/generatePprConfig', () => {
     it('rejects an aerodrome that is no object', () => {
       expectError(withTest({ aerodrome: 'Langenthal' }), 'test', 'aerodrome must be an object');
     });
+
+    it.each(['true', 1, 0, 'yes', {}, []])('rejects pprGuestRequests %p, also where PPR is off', pprGuestRequests => {
+      expectError(withTest({ pprGuestRequests }), 'test', 'pprGuestRequests must be a boolean');
+      expectError(makeConf({}, { test: { pprGuestRequests } }), 'test', 'pprGuestRequests must be a boolean');
+    });
+
+    it('rejects requests without login without an app URL: the receipt links to the status', () => {
+      expectError(makeConf({}, { test: { ppr: true, pprGuestRequests: true } }), 'test', 'pprGuestRequests needs appUrl');
+      expectError(makeConf({ appUrl: 'https://x.example' }, { test: { ppr: true, pprGuestRequests: true, appUrl: null } }),
+        'test', 'pprGuestRequests needs appUrl');
+    });
+
+    it('accepts the flag without an app URL where PPR is off', () => {
+      const conf = makeConf({ pprGuestRequests: true }, { test: {} });
+      expect(buildPprConfig('lsxy', conf, 'test', 'x').guestRequests).toBe(false);
+    });
   });
 
   describe('pprConfigWarnings', () => {
@@ -250,7 +293,7 @@ describe('tasks/generatePprConfig', () => {
     it('points out a missing app URL where PPR is on', () => {
       expect(pprConfigWarnings('lspl', 'test', config({}))).toEqual([
         'PPR is on for project "lspl" (env "test"), but appUrl is not set:'
-          + ' the aerodrome\'s emails have no link to the requests'
+          + ' the aerodrome\'s emails have no link to the requests, the pilots\' none to their status'
       ]);
     });
 

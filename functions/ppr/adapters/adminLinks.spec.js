@@ -1,13 +1,13 @@
 'use strict'
 
-const { pprRequestAdminUrl } = require('./adminLinks')
+const { pprRequestAdminUrl, pprRequestStatusUrl } = require('./adminLinks')
 
 const ORIGIN = 'https://lspl-test.web.app'
 
 // The query of a hash-routing link ('#/admin?a=b' -> 'a=b')
 const hashQuery = url => new URLSearchParams(new URL(url).hash.split('?')[1])
 
-describe('PPR adminLinks', () => {
+describe('PPR links into the app', () => {
   describe('pprRequestAdminUrl', () => {
     it('links to the request in the PPR tab of the admin area', () => {
       expect(pprRequestAdminUrl(ORIGIN, '-NxAbC_12')).toBe(`${ORIGIN}/#/admin?tab=ppr&request=-NxAbC_12`)
@@ -45,6 +45,48 @@ describe('PPR adminLinks', () => {
       ['null', null]
     ])('has no link for a key with %s', (name, key) => {
       expect(pprRequestAdminUrl(ORIGIN, key)).toBeNull()
+    })
+  })
+
+  describe('pprRequestStatusUrl', () => {
+    const TOKEN = 'Ab9_-'.repeat(8) + 'xyz'
+
+    it('links to the status page with the key and the token as path segments', () => {
+      expect(pprRequestStatusUrl(ORIGIN, '-NxAbC_12', TOKEN)).toBe(`${ORIGIN}/#/ppr/status/-NxAbC_12/${TOKEN}`)
+    })
+
+    it('keeps the token out of the server\'s sight and has no parameters', () => {
+      const url = new URL(pprRequestStatusUrl(ORIGIN, '-NxAbC_12', TOKEN))
+      expect(url.pathname).toBe('/')
+      expect(url.search).toBe('')
+      expect(url.hash).toBe(`#/ppr/status/-NxAbC_12/${TOKEN}`)
+      expect(url.hash).not.toContain('?')
+    })
+
+    it.each([null, undefined, ''])('has no link without the app origin %p', origin => {
+      expect(pprRequestStatusUrl(origin, '-NxAbC_12', TOKEN)).toBeNull()
+    })
+
+    it.each([
+      ['a path', '../../etc'],
+      ['a slash', 'a/b'],
+      ['a query', 'a?t=00000000-0000-0000-0000-000000000000'],
+      ['too many characters', 'k'.repeat(129)],
+      ['no characters', ''],
+      ['nothing', undefined]
+    ])('has no link for a key with %s', (name, key) => {
+      expect(pprRequestStatusUrl(ORIGIN, key, TOKEN)).toBeNull()
+    })
+
+    it.each([
+      ['42 characters', 'a'.repeat(42)],
+      ['44 characters', 'a'.repeat(44)],
+      ['a slash', 'a'.repeat(42) + '/'],
+      ['a query', 'a'.repeat(40) + '?t=x'],
+      ['no string', 42],
+      ['nothing', undefined]
+    ])('has no link for a token with %s', (name, token) => {
+      expect(pprRequestStatusUrl(ORIGIN, '-NxAbC_12', token)).toBeNull()
     })
   })
 })

@@ -10,10 +10,17 @@
  * @property {function(Object, string): Promise<void>} notifyRequestSubmitted
  *   Notify admin that a new PPR request was submitted.
  *   Args: (pprRequest, adminEmail)
- * @property {function(Object): Promise<void>} notifyRequestReviewed
+ * @property {function(Object, string): Promise<void>} notifyRequestReceived
+ *   Confirm to the pilot that their pending request was received, with the
+ *   link to its status.
+ *   Args: (pprRequest, statusToken) — the token of the link (only its hash
+ *   is stored with the request).
+ * @property {function(Object, string): Promise<void>} notifyRequestReviewed
  *   Notify pilot that their PPR request was approved or rejected (by an
- *   admin or automatically) or that an approval was revoked.
- *   Args: (pprRequest) — must include status, email, and review metadata.
+ *   admin or automatically) or that an approval was revoked, with the link
+ *   to its status.
+ *   Args: (pprRequest, statusToken) — the request must include status,
+ *   email, and review metadata.
  */
 
 module.exports = {}

@@ -9,7 +9,7 @@ Often nobody answers that phone and a recorded message gives the information for
 **Key constraints:**
 - Firebase will eventually be replaced (likely Postgres). Hexagonal architecture — Firebase is a swappable repository adapter.
 - All reads and writes go through backend Cloud Functions (HTTP endpoints). The frontend never talks to Firebase directly for PPR. No new Firebase database rules.
-- Login required via existing email OTP flow — verifies the pilot's email, gives status tracking, no new auth needed. Sessions without an email address are rejected server-side and don't see the PPR entries: shared guest and kiosk sessions (`fbAuthExcludingShared`) and username/password logins (`requireEmail`). lspv uses username/password login, so it needs email login before PPR can be used there.
+- Login required via existing email OTP flow unless `pprGuestRequests` is on (Phase 11) — verifies the pilot's email, gives status tracking, no new auth needed. Sessions without an email address are rejected by the routes with login: shared guest and kiosk sessions (`fbAuthExcludingShared`) and username/password logins (`requireEmail`). Where `pprGuestRequests` is on, visitors without login, guest sessions and username/password logins send requests without login (the address is not confirmed); kiosk sessions never get PPR. lspv uses username/password login, so it needs email login or `pprGuestRequests` before PPR can be used there.
 - Frontend stays in current React+Redux stack.
 
 ---
@@ -43,24 +43,33 @@ functions/ppr/
     pprRequest.js          # entity factory + validation + status constants
     pprSettings.js         # validation of the admin settings
     pprAnswer.js           # the answer on submission: closures, automatic answers
+    pprStatusLink.js       # status tokens of a request (hashes only), the public status view
   usecases/
     submitRequest.js       # create request, answer it if decided, notify
     reviewRequest.js       # approve/reject, notify pilot
     revokeApproval.js      # revoke an approval, notify pilot
     listRequests.js        # query: all (admin) or by user
+    getRequestStatus.js    # the status for the holder of a status link
+    withdrawRequest.js     # withdraw a pending request with its status link
   ports/
     pprRepository.js       # repository interface (JSDoc)
     notifier.js            # notification interface (JSDoc)
     aerodromeStatus.js     # current aerodrome status (JSDoc)
+    statusTokens.js        # tokens of the status links (JSDoc)
   adapters/
     firebasePprRepository.js   # Firebase RTDB implementation
     firebaseAerodromeStatus.js # latest entry of /status
+    firebaseRateLimiter.js     # limits per login, and without login per client and mailbox
+    cryptoStatusTokens.js      # random status tokens and their SHA-256 hashes
     emailNotifier.js           # nodemailer/SMTP implementation
     emailTemplates.js          # email HTML templates
-    adminLinks.js              # link to a request in the admin area (a contract with the app)
+    adminLinks.js              # links from the emails into the app: admin area, status page (a contract with the app)
+  clientIp.js              # the client's address for the limits without login
   deployConfig.js          # the deploy's config (functions/ppr-config.generated.js), for this project only
+  deps.js                  # the adapters the use cases run with
   httpsOrigin.js           # checks the app's https origin (appUrl)
   routes.js                # Express router mounted in api/index.js
+  publicRoutes.js          # Express router of the routes without login, mounted at /ppr only
 ```
 
 `tasks/generatePprConfig.js` writes the deploy's config; `functions/email/themeColor.js` checks the theme colour for
@@ -84,6 +93,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 ### Phase 1: Config
 - [x] Add `"ppr": false` to `projects/default.json`
 - [x] Deploy the PPR endpoints and cleanup job only where `ppr` is true (`functions/ppr-config.generated.js`, written by `tasks/generatePprConfig.js` in the deploy workflows, with the aerodrome's name and theme colour for the emails)
+- [x] Add `"pprGuestRequests": false` to `projects/default.json` (requests without login, Phase 11)
 - [ ] Set `"ppr": true` in `projects/<name>.json` for each PPR aerodrome
 - [x] Admins set the notification address (`/settings/ppr/adminEmail`) in the PPR admin tab
 - [ ] Set the notification address at each PPR aerodrome
@@ -105,13 +115,18 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 #### 2b. Ports
 - [x] Create `functions/ppr/ports/pprRepository.js` — JSDoc interface
   - `save(pprRequest) → { key }`
-  - `updateIf(key, predicate, data) → { applied, request }` — atomic (RTDB transaction)
+  - `findByKey(key) → pprRequest | null`
+  - `updateIf(key, predicate, data) → { applied, request }` — atomic (RTDB transaction); `data` may be a function of the request, e.g. to add a status token
   - `findAll() → pprRequest[]`
   - `findByEmail(email) → pprRequest[]`
   - `removeIf(key, predicate) → { applied, request }` — atomic (RTDB transaction)
 - [x] Create `functions/ppr/ports/notifier.js` — JSDoc interface
   - `notifyRequestSubmitted(pprRequest, adminEmail)`
-  - `notifyRequestReviewed(pprRequest)` — approved, rejected or revoked
+  - `notifyRequestReceived(pprRequest, statusToken)` — the receipt of a pending request
+  - `notifyRequestReviewed(pprRequest, statusToken)` — approved, rejected or revoked
+- [x] Create `functions/ppr/ports/statusTokens.js` — JSDoc interface
+  - `create() → { token, hash }`
+  - `matches(token, hashes) → boolean`
 - [x] Create `functions/ppr/ports/aerodromeStatus.js` — JSDoc interface
   - `getCurrent() → { status, details } | null`
 
@@ -161,9 +176,13 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
   - Rate limiting: 10 requests/hour/user on submit
   - Validate `:key` format before querying
   - Generic error messages, proper HTTP status codes
+- [x] Create `functions/ppr/publicRoutes.js` — the routes without login (Phase 11)
+  - `POST /guest-requests` — a request without login (only with `pprGuestRequests`)
+  - `POST /status/:key`, `POST /status/:key/withdraw` — the status page of the pilot's links (wherever `ppr` is on), the token in the JSON body
 
 #### 2g. Mount in API
 - [x] Add `api.use('(/api)?/ppr', pprRoutes)` to `functions/api/index.js`
+- [x] Mount `publicRoutes` at `/ppr` only (the function's own URL), ahead of the permissive CORS
 
 #### Security tests (backend)
 - [x] HTML tags stripped from all string fields (pprRequest.spec.js)
@@ -176,6 +195,12 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Guest and kiosk sessions return 403 (routes.spec.js)
 - [x] Logins without an email (username/password) return 403 on the pilot routes (routes.spec.js)
 - [x] Email templates HTML-escape user input (emailTemplates.spec.js)
+- [x] Requests without login never take the owner, status or mark from the body, and take a strict, lower-cased address (pprRequest.spec.js, publicRoutes.spec.js)
+- [x] Status tokens: only hashes stored, compared in constant time; a missing request, a wrong token and malformed ones are the same 404 (cryptoStatusTokens.spec.js, getRequestStatus.spec.js, publicRoutes.spec.js)
+- [x] The lists never return the hashes of the status tokens (listRequests.spec.js)
+- [x] The routes without login give other origins no CORS permission, also in preflights, and take JSON only (publicRoutes.spec.js, api/index.spec.js)
+- [x] Limits without login per client and mailbox; entries the client sends in `X-Forwarded-For` are ignored (publicRoutes.spec.js, clientIp.spec.js)
+- [x] Pilot input cannot imitate the status link line of the text emails (emailTemplates.spec.js)
 
 ### Phase 3: Internationalization
 - [x] Add `ppr.*` keys to `src/locales/de.json`
@@ -201,7 +226,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Create `src/components/PprStatusList/` — pilot's own requests with status badges
 - [x] Create `src/containers/PprRequestPageContainer.tsx`
 - [x] Create `src/containers/PprStatusListContainer.tsx`
-- [x] Add PPR entry to `src/components/StartPage/EntryPoints.tsx` (when `__CONF__.ppr && !guest && !kiosk`)
+- [x] Add PPR entry to `src/components/StartPage/EntryPoints.tsx` (when `__CONF__.ppr && !guest && !kiosk`; with `pprGuestRequests` also «PPR-Anfrage» for guest sessions and logins without an email)
 - [x] Add routes to `src/components/App/App.tsx`: `/ppr/new`, `/ppr` (guarded by `__CONF__.ppr`)
 - [x] Write tests: `PprRequestForm/validate.spec.ts`
 - [x] Write tests: `PprStatusList/PprStatusList.spec.tsx`
@@ -250,6 +275,26 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] With `ppr` on, the "Flugplatz-Status" tab notes that the status «Geschlossen» rejects PPR requests for today
 - [x] The admin list and the pilot's list show the requests in groups: «Offen» (pending, planned for today or later, the next first), «Bevorstehend» (answered, today or later) and «Vergangen» (planned before today, the most recent first; the 10 most recent, the others with «Ältere anzeigen», a linked one always); the admin tab counts the open ones
 - [ ] Later: scheduled aerodrome statuses on the "Flugplatz-Status" tab, shown by the banner, the status page and the API, and rejected by PPR too, so a planned closure of the whole aerodrome is entered once; to decide: a manual status during a planned period, times of day, the API fields
+
+### Phase 11: Requests without login (`pprGuestRequests`)
+- [x] Flag `pprGuestRequests` per project (default `false`, on in lspl's test environment), only where `ppr` is on; written as `guestRequests` to `functions/ppr-config.generated.js`; a value other than a boolean, or the flag without `appUrl`, fails the deploy
+- [x] Status links for every request, with or without login: each pilot email (receipt, answer, revocation) gets a token of its own; only its SHA-256 hash is stored, in `statusTokens` on the request (`{ <hash>: <ms> }`), in the same write or transaction as the request or its answer; the lists never return the hashes; the link is `<appUrl>/#/ppr/status/<key>/<token>`
+- [x] Receipt email for every pending request (`ppr-received` templates, de/en): only registration, date and time, the status link and a note for whoever did not make the request; a request answered on submission gets the answer only, which then carries a note that whoever did not make it can ignore it (requests without login); answer and revocation emails carry the status link
+- [x] The registration is the one value a pilot types that these emails show: the server takes letters, digits and hyphens only, as the app sends them (mail clients would turn e.g. `EVIL.XYZ` into a link)
+- [x] Routes without login (`publicRoutes.js`) at `/ppr` only, ahead of the permissive CORS: CORS for the app's origins only (`appUrl`, the project's Hosting domains, the dev server), JSON only (415)
+  - `POST /ppr/guest-requests` (only with the flag): strict, lower-cased address; no `createdBy`, `withoutLogin: true` set by the server; 201 `{ key, status, reviewRemarks?, statusToken, emailSent }`; `emailSent` is false when the receipt or answer could not be sent, and the form then asks the pilot to open the status and bookmark it
+  - `POST /ppr/status/:key` (wherever `ppr` is on): the status without personal data for the `{ token }` in the body
+  - `POST /ppr/status/:key/withdraw`: deletes a pending request (atomic `removeIf` checking the token and the status); 409 when it is no longer pending; no email to the aerodrome
+- [x] `POST /ppr/requests` (with login) also returns the status token and sends the receipt
+- [x] Limits without login: 10 per client and hour (the rightmost `X-Forwarded-For` entry, IPv6 by its /64), 5 per mailbox and hour and 10 per mailbox and day (`mailboxKey`), as SHA-256 hashes under `/pprGuestRateLimits`, pruned by the daily cleanup; the same 429 with `Retry-After` for all; rejected submissions give their slots back
+- [ ] Later, if requests without login are abused: a way for admins to delete a request without emailing the address (today they can only reject it, which emails it), and possibly a limit for the whole project
+- [x] The aerodrome's email and the admin list mark requests without login ("Ohne Anmeldung gestellt – E-Mail-Adresse nicht bestätigt"); they never appear under «Meine PPR-Anfragen»
+- [x] Intro at `#/ppr/new` for visitors without login: «Mit Anmeldung fortfahren» (where `loginForm` is `email`) or «Ohne Anmeldung fortfahren» (with the flag); the form without login at `#/ppr/guest`; the status page at `#/ppr/status/<key>/<token>`, where a pending request can be withdrawn; kiosk sessions are sent to the start page
+- [x] Website link `<appUrl>/ppr` (turned into `#/ppr/new` before the router starts), shown with copy button and QR code in the PPR admin tab; Sentry redacts the status links
+- [x] Docs: `projects/Configuration.md` (`pprGuestRequests`, the website link)
+- [ ] Check once on lspl-test that the rightmost `X-Forwarded-For` entry on the function's URL is the client's address (one front-end hop): send a made-up entry and compare
+- [ ] Manual test on lspl-test: request without login, receipt, status page, withdrawal, answer emails with the link, limits, kiosk without PPR, the website link
+- [ ] Cypress: cypress-testing has PPR off and username/password login; the flow without login would need a PPR config for that project and sends real emails, so it is covered by Jest and the manual test for now
 
 ### Final Verification
 - [ ] `npm test` — all Jest tests pass

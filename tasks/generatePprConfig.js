@@ -8,11 +8,12 @@ const { SAFE_COLOR_REGEX } = require('../functions/email/themeColor');
 const { httpsOrigin } = require('../functions/ppr/httpsOrigin');
 
 // Builds functions/ppr-config.generated.js, which the Cloud Functions read at
-// deploy and at run time (functions/ppr/deployConfig.js): whether PPR is on,
-// the Firebase project the file is for, and the aerodrome's name, theme
-// colour and app URL for the PPR emails. The values are resolved exactly like
-// the client's `__CONF__` in webpack.config.js, so the PPR routes and cleanup
-// job are deployed where the PPR pages are built.
+// deploy and at run time (functions/ppr/deployConfig.js): whether PPR and
+// requests without login are on, the Firebase project the file is for, and
+// the aerodrome's name, theme colour and app URL for the PPR emails. The
+// values are resolved exactly like the client's `__CONF__` in
+// webpack.config.js, so the PPR routes and cleanup job are deployed where the
+// PPR pages are built.
 
 const ENVS = ['test', 'production'];
 
@@ -72,6 +73,20 @@ function readThemeColor(project, env, { themeColor }) {
   return themeColor;
 }
 
+// Requests without login (`pprGuestRequests`) are part of PPR, so they are off
+// wherever PPR is off. Absent or null is off, like the client's `=== true`;
+// any other value than a boolean fails, so a typo cannot leave the flag off
+// unnoticed.
+function readGuestRequests(project, env, { pprGuestRequests }, pprEnabled) {
+  if (!isSet(pprGuestRequests)) {
+    return false;
+  }
+  if (typeof pprGuestRequests !== 'boolean') {
+    throw configError(project, env, 'pprGuestRequests', `must be a boolean: ${JSON.stringify(pprGuestRequests)}`);
+  }
+  return pprEnabled && pprGuestRequests;
+}
+
 // The app's address, the base of links in the PPR emails
 function readAppUrl(project, env, { appUrl }) {
   if (!isSet(appUrl)) {
@@ -101,12 +116,22 @@ function buildPprConfig(project, conf, env, firebaseProjectId) {
     throw configError(project, env, 'Firebase project', `must be a non-empty string: ${JSON.stringify(firebaseProjectId)}`);
   }
 
+  const enabled = merged.ppr === true;
+  const guestRequests = readGuestRequests(project, env, merged, enabled);
+  const appUrl = readAppUrl(project, env, merged);
+  // A pilot without login follows the request by the receipt's link only
+  if (guestRequests && appUrl === undefined) {
+    throw configError(project, env, 'pprGuestRequests',
+      'needs appUrl: the receipt links to the status of the request');
+  }
+
   return {
-    enabled: merged.ppr === true,
+    enabled,
+    guestRequests,
     firebaseProjectId,
     aerodromeName: readAerodromeName(project, env, merged),
     themeColor: readThemeColor(project, env, merged),
-    appUrl: readAppUrl(project, env, merged)
+    appUrl
   };
 }
 
@@ -121,13 +146,13 @@ function buildPprConfigFor(project, env, firebaseProjectId) {
 function pprConfigWarnings(project, env, config) {
   if (config.enabled && config.appUrl === undefined) {
     return [`PPR is on for project "${project}" (env "${env}"), but appUrl is not set:`
-      + ' the aerodrome\'s emails have no link to the requests'];
+      + ' the aerodrome\'s emails have no link to the requests, the pilots\' none to their status'];
   }
   return [];
 }
 
 // JSON.stringify leaves out the undefined values, so the file of a project
-// without them keeps its former shape ({ enabled, firebaseProjectId }).
+// without them has only { enabled, guestRequests, firebaseProjectId }.
 function formatPprConfig(config) {
   return `module.exports = ${JSON.stringify(config)};\n`;
 }

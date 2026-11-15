@@ -5,6 +5,9 @@ const submitRequest = require('./submitRequest')
 // 14:00 in Zurich
 const NOW = new Date('2026-04-01T12:00:00Z').getTime()
 
+const TOKEN = 'T'.repeat(43)
+const HASH = 'a'.repeat(64)
+
 const validInput = {
   firstname: 'Max',
   lastname: 'Muster',
@@ -23,6 +26,7 @@ function createMockDeps({ adminEmail = 'admin@aero.ch', answerSettings = {}, aer
     },
     notifier: {
       notifyRequestSubmitted: jest.fn().mockResolvedValue(),
+      notifyRequestReceived: jest.fn().mockResolvedValue(),
       notifyRequestReviewed: jest.fn().mockResolvedValue()
     },
     settings: {
@@ -33,17 +37,20 @@ function createMockDeps({ adminEmail = 'admin@aero.ch', answerSettings = {}, aer
     },
     aerodromeStatus: {
       getCurrent: jest.fn().mockResolvedValue(aerodromeStatus)
+    },
+    statusTokens: {
+      create: jest.fn(() => ({ token: TOKEN, hash: HASH }))
     }
   }
 }
 
 describe('submitRequest', () => {
   describe('manual answers', () => {
-    it('saves a pending request and returns its key and status', async () => {
+    it('saves a pending request and returns its key, status and status token', async () => {
       const deps = createMockDeps()
       const result = await submitRequest(deps, validInput, NOW)
 
-      expect(result).toEqual({ key: 'req-123', status: 'pending' })
+      expect(result).toEqual({ key: 'req-123', status: 'pending', statusToken: TOKEN, emailSent: true })
       expect(deps.repository.save).toHaveBeenCalledTimes(1)
 
       const saved = deps.repository.save.mock.calls[0][0]
@@ -54,7 +61,7 @@ describe('submitRequest', () => {
       expect(saved.reviewedBy).toBeUndefined()
     })
 
-    it('notifies the admin with the saved request including its key, and not the pilot', async () => {
+    it('notifies the admin with the saved request including its key, and sends the pilot a receipt', async () => {
       const deps = createMockDeps()
       await submitRequest(deps, validInput, NOW)
 
@@ -63,10 +70,13 @@ describe('submitRequest', () => {
       expect(request.key).toBe('req-123')
       expect(request.firstname).toBe('Max')
       expect(adminEmail).toBe('admin@aero.ch')
+      expect(deps.notifier.notifyRequestReceived).toHaveBeenCalledWith(
+        expect.objectContaining({ key: 'req-123', status: 'pending', email: 'max@example.com' }), TOKEN
+      )
       expect(deps.notifier.notifyRequestReviewed).not.toHaveBeenCalled()
     })
 
-    it('warns when no notification address is set', async () => {
+    it('warns when no notification address is set, and still sends the receipt', async () => {
       const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
       const deps = createMockDeps({ adminEmail: null })
 
@@ -74,7 +84,70 @@ describe('submitRequest', () => {
 
       expect(deps.notifier.notifyRequestSubmitted).not.toHaveBeenCalled()
       expect(warn).toHaveBeenCalledWith('No PPR notification address is set, request not announced:', 'req-123')
+      expect(deps.notifier.notifyRequestReceived).toHaveBeenCalledTimes(1)
       warn.mockRestore()
+    })
+  })
+
+  describe('status token', () => {
+    it('is saved with the request as a hash only, with the time it was issued', async () => {
+      const deps = createMockDeps()
+      await submitRequest(deps, validInput, NOW)
+
+      const saved = deps.repository.save.mock.calls[0][0]
+      expect(saved.statusTokens).toEqual({ [HASH]: NOW })
+      expect(JSON.stringify(saved)).not.toContain(TOKEN)
+    })
+
+    it('reaches the pilot\'s email as an argument of its own, not with the request', async () => {
+      const deps = createMockDeps()
+      await submitRequest(deps, validInput, NOW)
+
+      const [request, token] = deps.notifier.notifyRequestReceived.mock.calls[0]
+      expect(token).toBe(TOKEN)
+      expect(JSON.stringify(request)).not.toContain(TOKEN)
+      expect(JSON.stringify(deps.notifier.notifyRequestSubmitted.mock.calls[0])).not.toContain(TOKEN)
+    })
+
+    it('is not created for invalid input', async () => {
+      const deps = createMockDeps()
+
+      await expect(submitRequest(deps, { ...validInput, plannedTime: '25:00' }, NOW)).rejects.toThrow()
+      expect(deps.statusTokens.create).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('without login', () => {
+    const withoutLogin = { ...validInput, createdBy: undefined, email: 'Max@Example.com', withoutLogin: true }
+
+    it('saves a request that is marked and belongs to no login', async () => {
+      const deps = createMockDeps()
+      const result = await submitRequest(deps, withoutLogin, NOW)
+
+      expect(result).toEqual({ key: 'req-123', status: 'pending', statusToken: TOKEN, emailSent: true })
+      const saved = deps.repository.save.mock.calls[0][0]
+      expect(saved.withoutLogin).toBe(true)
+      expect(saved).not.toHaveProperty('createdBy')
+      expect(saved.email).toBe('max@example.com')
+    })
+
+    it('sends the receipt to the address given, and the admin the marked request', async () => {
+      const deps = createMockDeps()
+      await submitRequest(deps, withoutLogin, NOW)
+
+      expect(deps.notifier.notifyRequestReceived).toHaveBeenCalledWith(
+        expect.objectContaining({ email: 'max@example.com', withoutLogin: true }), TOKEN
+      )
+      expect(deps.notifier.notifyRequestSubmitted).toHaveBeenCalledWith(
+        expect.objectContaining({ withoutLogin: true }), 'admin@aero.ch'
+      )
+    })
+
+    it('is answered automatically as configured', async () => {
+      const deps = createMockDeps({ answerSettings: { answerMode: 'automatic', pilotInfo: 'Runway 05/23' } })
+      const result = await submitRequest(deps, withoutLogin, NOW)
+
+      expect(result).toEqual({ key: 'req-123', status: 'approved', reviewRemarks: 'Runway 05/23', statusToken: TOKEN, emailSent: true })
     })
   })
 
@@ -85,22 +158,27 @@ describe('submitRequest', () => {
       const deps = createMockDeps({ answerSettings: automatic })
       const result = await submitRequest(deps, validInput, NOW)
 
-      expect(result).toEqual({ key: 'req-123', status: 'approved', reviewRemarks: 'Runway 05/23, landing fee CHF 20' })
+      expect(result).toEqual({
+        key: 'req-123', status: 'approved', reviewRemarks: 'Runway 05/23, landing fee CHF 20', statusToken: TOKEN,
+        emailSent: true
+      })
       expect(deps.repository.save.mock.calls[0][0]).toEqual(expect.objectContaining({
         status: 'approved',
         reviewedBy: 'automatic',
         reviewedAt: NOW,
-        reviewRemarks: 'Runway 05/23, landing fee CHF 20'
+        reviewRemarks: 'Runway 05/23, landing fee CHF 20',
+        statusTokens: { [HASH]: NOW }
       }))
     })
 
-    it('sends the pilot the approval and the admin the request', async () => {
+    it('sends the pilot the approval with the status token instead of a receipt, and the admin the request', async () => {
       const deps = createMockDeps({ answerSettings: automatic })
       await submitRequest(deps, validInput, NOW)
 
       expect(deps.notifier.notifyRequestReviewed).toHaveBeenCalledWith(
-        expect.objectContaining({ key: 'req-123', status: 'approved', email: 'max@example.com' })
+        expect.objectContaining({ key: 'req-123', status: 'approved', email: 'max@example.com' }), TOKEN
       )
+      expect(deps.notifier.notifyRequestReceived).not.toHaveBeenCalled()
       expect(deps.notifier.notifyRequestSubmitted).toHaveBeenCalledWith(
         expect.objectContaining({ key: 'req-123', status: 'approved' }), 'admin@aero.ch'
       )
@@ -121,7 +199,7 @@ describe('submitRequest', () => {
       const deps = createMockDeps({ answerSettings: { answerMode: 'automatic' } })
       const result = await submitRequest(deps, validInput, NOW)
 
-      expect(result).toEqual({ key: 'req-123', status: 'approved' })
+      expect(result).toEqual({ key: 'req-123', status: 'approved', statusToken: TOKEN, emailSent: true })
       expect(deps.repository.save.mock.calls[0][0].reviewRemarks).toBeUndefined()
     })
   })
@@ -133,18 +211,19 @@ describe('submitRequest', () => {
       })
       const result = await submitRequest(deps, validInput, NOW)
 
-      expect(result).toEqual({ key: 'req-123', status: 'rejected', reviewRemarks: 'Runway works' })
+      expect(result).toEqual({ key: 'req-123', status: 'rejected', reviewRemarks: 'Runway works', statusToken: TOKEN, emailSent: true })
       expect(deps.repository.save.mock.calls[0][0]).toEqual(expect.objectContaining({
         status: 'rejected', reviewedBy: 'automatic', reviewRemarks: 'Runway works'
       }))
-      expect(deps.notifier.notifyRequestReviewed).toHaveBeenCalledWith(expect.objectContaining({ status: 'rejected' }))
+      expect(deps.notifier.notifyRequestReviewed).toHaveBeenCalledWith(expect.objectContaining({ status: 'rejected' }), TOKEN)
+      expect(deps.notifier.notifyRequestReceived).not.toHaveBeenCalled()
     })
 
     it('rejects a request for today while the aerodrome status is closed', async () => {
       const deps = createMockDeps({ aerodromeStatus: { status: 'closed', details: 'Thunderstorms' } })
       const result = await submitRequest(deps, { ...validInput, plannedDate: '2026-04-01' }, NOW)
 
-      expect(result).toEqual({ key: 'req-123', status: 'rejected', reviewRemarks: 'Thunderstorms' })
+      expect(result).toEqual({ key: 'req-123', status: 'rejected', reviewRemarks: 'Thunderstorms', statusToken: TOKEN, emailSent: true })
     })
 
     it('ignores closures stored invalidly', async () => {
@@ -173,11 +252,12 @@ describe('submitRequest', () => {
     expect(deps.repository.save).not.toHaveBeenCalled()
   })
 
-  it('propagates repository errors', async () => {
+  it('propagates repository errors, without emails', async () => {
     const deps = createMockDeps()
     deps.repository.save.mockRejectedValue(new Error('DB error'))
 
     await expect(submitRequest(deps, validInput, NOW)).rejects.toThrow('DB error')
+    expect(deps.notifier.notifyRequestReceived).not.toHaveBeenCalled()
   })
 
   it('succeeds even when the notifications fail', async () => {
@@ -187,8 +267,32 @@ describe('submitRequest', () => {
     deps.notifier.notifyRequestReviewed.mockImplementation(() => { throw new Error('SMTP down') })
 
     const result = await submitRequest(deps, validInput, NOW)
-    expect(result).toEqual({ key: 'req-123', status: 'approved' })
+    expect(result).toEqual({ key: 'req-123', status: 'approved', statusToken: TOKEN, emailSent: false })
     expect(error).toHaveBeenCalledTimes(2)
+    error.mockRestore()
+  })
+
+  it('tells that the pilot\'s email was sent also when the aerodrome\'s fails', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+    const deps = createMockDeps()
+    deps.notifier.notifyRequestSubmitted.mockRejectedValue(new Error('SMTP down'))
+
+    const result = await submitRequest(deps, validInput, NOW)
+
+    expect(result.emailSent).toBe(true)
+    expect(error).toHaveBeenCalledWith('Failed to send PPR notification for request', 'req-123')
+    error.mockRestore()
+  })
+
+  it('succeeds even when the receipt fails, tells so, and logs only the key', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+    const deps = createMockDeps()
+    deps.notifier.notifyRequestReceived.mockRejectedValue(new Error('SMTP down'))
+
+    const result = await submitRequest(deps, validInput, NOW)
+
+    expect(result).toEqual({ key: 'req-123', status: 'pending', statusToken: TOKEN, emailSent: false })
+    expect(error).toHaveBeenCalledWith('Failed to send the PPR receipt for request', 'req-123')
     error.mockRestore()
   })
 
@@ -203,6 +307,6 @@ describe('submitRequest', () => {
     // The pilot's answer is on its way while the admin's email is not sent yet
     expect(deps.notifier.notifyRequestReviewed).toHaveBeenCalledTimes(1)
     sendSubmitted()
-    await expect(submitted).resolves.toEqual({ key: 'req-123', status: 'approved' })
+    await expect(submitted).resolves.toEqual({ key: 'req-123', status: 'approved', statusToken: TOKEN, emailSent: true })
   })
 })

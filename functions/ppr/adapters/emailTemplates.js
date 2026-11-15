@@ -95,20 +95,88 @@ function answerLine(pprRequest) {
   return 'Offen, bitte im Admin-Bereich genehmigen oder ablehnen'
 }
 
-// A pending request gets a link that opens it in the app's admin area, where
-// an admin answers it (context.reviewUrl, an https URL from adminLinks.js).
-// Answered requests, and emails without the app's address, get none.
-function reviewLink(pprRequest, reviewUrl, themeColor) {
-  if (pprRequest.status !== Status.PENDING || typeof reviewUrl !== 'string' || !reviewUrl.startsWith('https://')) {
-    return { html: '', text: '' }
-  }
+const NO_FRAGMENT = Object.freeze({ html: '', text: '' })
+
+// The links come from adminLinks.js. Only https URLs of printable ASCII are
+// linked: in the text emails a link is a line of its own, which no space or
+// line break in it may end early.
+function isLinkableUrl(url) {
+  return typeof url === 'string' && /^https:\/\/[\x21-\x7e]+$/.test(url)
+}
+
+// A link as a button in the theme colour below the details (html), and as a
+// line of its own (text)
+function linkFragment(url, label, themeColor) {
   const style = `display: inline-block; padding: 12px 24px; background-color: ${themeColor}; ` +
     'color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600;'
   return {
     html: '\n      <p style="margin: 30px 0 10px 0; text-align: center;">' +
-      `\n        <a href="${escapeHtml(reviewUrl)}" style="${style}">PPR-Anfrage beantworten</a>` +
+      `\n        <a href="${escapeHtml(url)}" style="${style}">${label}</a>` +
       '\n      </p>',
-    text: `\n\nPPR-Anfrage beantworten: ${reviewUrl}`
+    text: `\n\n${label}: ${url}`
+  }
+}
+
+// A pending request gets a link that opens it in the app's admin area, where
+// an admin answers it (context.reviewUrl). Answered requests, and emails
+// without the app's address, get none.
+function reviewLink(pprRequest, reviewUrl, themeColor) {
+  if (pprRequest.status !== Status.PENDING || !isLinkableUrl(reviewUrl)) {
+    return NO_FRAGMENT
+  }
+  return linkFragment(reviewUrl, 'PPR-Anfrage beantworten', themeColor)
+}
+
+// The pilot's emails link to the status page of the request
+// (context.statusUrl); emails without the app's address have no link.
+function statusLink(statusUrl, themeColor, english) {
+  if (!isLinkableUrl(statusUrl)) {
+    return NO_FRAGMENT
+  }
+  return linkFragment(statusUrl, english ? 'Show status' : 'Status anzeigen', themeColor)
+}
+
+// A note below the link to the status
+function noteFragment(note) {
+  return {
+    html: `\n      <p style="margin: 20px 0 0 0; font-size: 14px; color: #666;">${note}</p>`,
+    text: `\n\n${note}`
+  }
+}
+
+// The receipt may reach someone who did not make the request: the address of
+// a request without login is not confirmed. They can withdraw it with the
+// status link, so the note only comes with the link.
+function withdrawNote(english) {
+  return noteFragment(english
+    ? 'If you did not make this request, you can withdraw it using the link or ignore this email.'
+    : 'Falls Sie diese Anfrage nicht gestellt haben, können Sie sie über den Link zurückziehen oder diese E-Mail ignorieren.')
+}
+
+// A request without login answered on submission gets its answer without a
+// receipt before it: the answer tells whoever did not make the request that
+// they can ignore it (an answered request can't be withdrawn).
+function ignoreNote(pprRequest) {
+  if (pprRequest.withoutLogin !== true || !isAutomatic(pprRequest)) {
+    return NO_FRAGMENT
+  }
+  return noteFragment(isEnglish(pprRequest)
+    ? 'If you did not make this request, you can ignore this email.'
+    : 'Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignorieren.')
+}
+
+// Anyone can enter any address in a request without login: the aerodrome
+// should know that nobody confirmed it before answering.
+function withoutLoginNote(pprRequest) {
+  if (pprRequest.withoutLogin !== true) {
+    return NO_FRAGMENT
+  }
+  const note = 'Ohne Anmeldung gestellt – E-Mail-Adresse nicht bestätigt'
+  return {
+    html: '\n      <div style="margin-top: 20px; padding: 15px; background-color: #fff8e1; border-left: 4px solid #ffc107; border-radius: 4px;">' +
+      `\n        <p style="margin: 0; font-size: 15px;">${note}</p>` +
+      '\n      </div>',
+    text: `\n\n${note}`
   }
 }
 
@@ -119,6 +187,7 @@ function getPprSubmittedEmail(pprRequest, context = {}) {
   const header = headerReplacements(brand)
   const { reviewUrl } = context || {}
   const link = reviewLink(pprRequest, reviewUrl, brand.themeColor)
+  const withoutLogin = withoutLoginNote(pprRequest)
   const answer = answerLine(pprRequest)
 
   const replacements = {
@@ -129,6 +198,7 @@ function getPprSubmittedEmail(pprRequest, context = {}) {
     plannedTime: escapeHtml(pprRequest.plannedTime),
     flightType: escapeHtml(flightTypeLabel(pprRequest.flightType)),
     answer: escapeHtml(answer),
+    withoutLoginHtml: withoutLogin.html,
     reviewLinkHtml: link.html
   }
 
@@ -140,6 +210,7 @@ function getPprSubmittedEmail(pprRequest, context = {}) {
     plannedTime: pprRequest.plannedTime,
     flightType: flightTypeLabel(pprRequest.flightType),
     answer,
+    withoutLoginText: withoutLogin.text,
     reviewLinkText: link.text
   }
 
@@ -181,17 +252,25 @@ function approvalRemarks(pprRequest) {
   return result
 }
 
-function getPprApprovedEmail(pprRequest, context = {}) {
+// The pilot's emails below take the branding and, for the link to the
+// request's status, statusUrl as their context.
+
+// Confirms a pending request. It shows only the flight: the address of a
+// request without login may be someone else's.
+function getPprReceivedEmail(pprRequest, context = {}) {
   const brand = branding(context)
   const header = headerReplacements(brand)
-  const remarks = approvalRemarks(pprRequest)
+  const english = isEnglish(pprRequest)
+  const { statusUrl } = context || {}
+  const link = statusLink(statusUrl, brand.themeColor, english)
+  const note = link.text ? withdrawNote(english) : NO_FRAGMENT
 
   const replacements = {
     ...header.html,
     immatriculation: escapeHtml(pprRequest.immatriculation),
     plannedDate: escapeHtml(displayDate(pprRequest.plannedDate)),
     plannedTime: escapeHtml(pprRequest.plannedTime),
-    remarksHtml: remarks.html
+    statusLinkHtml: link.html + note.html
   }
 
   const plainReplacements = {
@@ -199,7 +278,44 @@ function getPprApprovedEmail(pprRequest, context = {}) {
     immatriculation: pprRequest.immatriculation,
     plannedDate: displayDate(pprRequest.plannedDate),
     plannedTime: pprRequest.plannedTime,
-    remarksText: remarks.text
+    statusLinkText: link.text + note.text
+  }
+
+  const subject = english
+    ? `PPR request received: ${pprRequest.immatriculation} on ${displayDate(pprRequest.plannedDate)}`
+    : `PPR-Anfrage erhalten: ${pprRequest.immatriculation} am ${displayDate(pprRequest.plannedDate)}`
+
+  return {
+    subject: pilotSubject(subject, brand),
+    html: replacePlaceholders(localizedTemplate('ppr-received', pprRequest, 'html'), replacements),
+    text: replacePlaceholders(localizedTemplate('ppr-received', pprRequest, 'txt'), plainReplacements)
+  }
+}
+
+function getPprApprovedEmail(pprRequest, context = {}) {
+  const brand = branding(context)
+  const header = headerReplacements(brand)
+  const remarks = approvalRemarks(pprRequest)
+  const { statusUrl } = context || {}
+  const link = statusLink(statusUrl, brand.themeColor, isEnglish(pprRequest))
+  const note = ignoreNote(pprRequest)
+
+  const replacements = {
+    ...header.html,
+    immatriculation: escapeHtml(pprRequest.immatriculation),
+    plannedDate: escapeHtml(displayDate(pprRequest.plannedDate)),
+    plannedTime: escapeHtml(pprRequest.plannedTime),
+    remarksHtml: remarks.html,
+    statusLinkHtml: link.html + note.html
+  }
+
+  const plainReplacements = {
+    ...header.text,
+    immatriculation: pprRequest.immatriculation,
+    plannedDate: displayDate(pprRequest.plannedDate),
+    plannedTime: pprRequest.plannedTime,
+    remarksText: remarks.text,
+    statusLinkText: link.text + note.text
   }
 
   const subject = isEnglish(pprRequest)
@@ -217,13 +333,17 @@ function getPprRejectedEmail(pprRequest, context = {}) {
   const brand = branding(context)
   const header = headerReplacements(brand)
   const remarks = pprRequest.reviewRemarks || '-'
+  const { statusUrl } = context || {}
+  const link = statusLink(statusUrl, brand.themeColor, isEnglish(pprRequest))
+  const note = ignoreNote(pprRequest)
 
   const replacements = {
     ...header.html,
     immatriculation: escapeHtml(pprRequest.immatriculation),
     plannedDate: escapeHtml(displayDate(pprRequest.plannedDate)),
     plannedTime: escapeHtml(pprRequest.plannedTime),
-    reviewRemarks: escapeHtml(remarks)
+    reviewRemarks: escapeHtml(remarks),
+    statusLinkHtml: link.html + note.html
   }
 
   const plainReplacements = {
@@ -231,7 +351,8 @@ function getPprRejectedEmail(pprRequest, context = {}) {
     immatriculation: pprRequest.immatriculation,
     plannedDate: displayDate(pprRequest.plannedDate),
     plannedTime: pprRequest.plannedTime,
-    reviewRemarks: remarks
+    reviewRemarks: remarks,
+    statusLinkText: link.text + note.text
   }
 
   const subject = isEnglish(pprRequest)
@@ -249,13 +370,16 @@ function getPprRevokedEmail(pprRequest, context = {}) {
   const brand = branding(context)
   const header = headerReplacements(brand)
   const remarks = pprRequest.reviewRemarks || '-'
+  const { statusUrl } = context || {}
+  const link = statusLink(statusUrl, brand.themeColor, isEnglish(pprRequest))
 
   const replacements = {
     ...header.html,
     immatriculation: escapeHtml(pprRequest.immatriculation),
     plannedDate: escapeHtml(displayDate(pprRequest.plannedDate)),
     plannedTime: escapeHtml(pprRequest.plannedTime),
-    reviewRemarks: escapeHtml(remarks)
+    reviewRemarks: escapeHtml(remarks),
+    statusLinkHtml: link.html
   }
 
   const plainReplacements = {
@@ -263,7 +387,8 @@ function getPprRevokedEmail(pprRequest, context = {}) {
     immatriculation: pprRequest.immatriculation,
     plannedDate: displayDate(pprRequest.plannedDate),
     plannedTime: pprRequest.plannedTime,
-    reviewRemarks: remarks
+    reviewRemarks: remarks,
+    statusLinkText: link.text
   }
 
   const subject = isEnglish(pprRequest)
@@ -279,6 +404,7 @@ function getPprRevokedEmail(pprRequest, context = {}) {
 
 module.exports = {
   getPprSubmittedEmail,
+  getPprReceivedEmail,
   getPprApprovedEmail,
   getPprRejectedEmail,
   getPprRevokedEmail,

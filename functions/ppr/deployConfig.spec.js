@@ -1,6 +1,6 @@
 'use strict'
 
-const { loadPprConfig, pprBranding } = require('./deployConfig')
+const { loadPprConfig, pprBranding, pprAppOrigins } = require('./deployConfig')
 
 const ENV = { GCLOUD_PROJECT: 'lspl-test' }
 
@@ -170,6 +170,36 @@ describe('PPR deployConfig', () => {
         const { pprAppOrigin } = require('./deployConfig')
         expect(pprAppOrigin(undefined, ENV)).toBe('https://lspl-test.web.app')
       })
+    })
+  })
+
+  describe('pprAppOrigins', () => {
+    const HOSTING = ['https://lspl-test.web.app', 'https://lspl-test.firebaseapp.com']
+
+    it('has the Firebase Hosting domains of the project', () => {
+      expect(pprAppOrigins(() => CONFIG, ENV)).toEqual(HOSTING)
+    })
+
+    it('adds the origin of the app URL, e.g. a domain of the aerodrome\'s own', () => {
+      const config = { ...CONFIG, appUrl: 'https://PPR.Flugplatz.example/' }
+      expect(pprAppOrigins(() => config, ENV)).toEqual([...HOSTING, 'https://ppr.flugplatz.example'])
+    })
+
+    it('has every origin once', () => {
+      const config = { ...CONFIG, appUrl: 'https://lspl-test.web.app' }
+      expect(pprAppOrigins(() => config, ENV)).toEqual(HOSTING)
+    })
+
+    it('leaves out an invalid app URL', () => {
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+      const config = { ...CONFIG, appUrl: 'http://ppr.flugplatz.example' }
+      expect(pprAppOrigins(() => config, ENV)).toEqual(HOSTING)
+      consoleError.mockRestore()
+    })
+
+    it('has none without a config for this project', () => {
+      expect(pprAppOrigins(missingFile, ENV)).toEqual([])
+      expect(pprAppOrigins(() => CONFIG, { GCLOUD_PROJECT: 'lspl-prod' })).toEqual([])
     })
   })
 })

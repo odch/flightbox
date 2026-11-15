@@ -23,7 +23,7 @@ const { pprBranding, pprAppOrigin } = require('../deployConfig')
 
 createTransporter.mockReturnValue({ sendMail: mockSendMail })
 
-const { notifyRequestSubmitted, notifyRequestReviewed } = require('./emailNotifier')
+const { notifyRequestSubmitted, notifyRequestReceived, notifyRequestReviewed } = require('./emailNotifier')
 
 const configReadsAtLoad = pprBranding.mock.calls.length + pprAppOrigin.mock.calls.length
 
@@ -40,6 +40,9 @@ const basePprRequest = {
 
 const UNBRANDED = { aerodromeName: '', themeColor: '#000000' }
 const BRANDING = { aerodromeName: 'Langenthal', themeColor: '#027ABB' }
+
+const TOKEN = 'T'.repeat(43)
+const STATUS_URL = `https://lspl-test.web.app/#/ppr/status/req-123/${TOKEN}`
 
 describe('emailNotifier', () => {
   beforeEach(() => {
@@ -204,10 +207,94 @@ describe('emailNotifier', () => {
     })
 
     it('is not in the pilot emails', async () => {
-      await notifyRequestReviewed({ ...basePprRequest, status: 'approved' })
+      await notifyRequestReviewed({ ...basePprRequest, status: 'approved' }, TOKEN)
 
-      expect(pprAppOrigin).not.toHaveBeenCalled()
-      expect(mockSendMail.mock.calls[0][0].html).not.toContain('lspl-test.web.app')
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.text).not.toContain('#/admin')
+      expect(mailArgs.html).not.toContain('#/admin')
+    })
+  })
+
+  describe('notifyRequestReceived', () => {
+    const pending = { ...basePprRequest, status: 'pending' }
+
+    beforeEach(() => {
+      pprBranding.mockReturnValue(BRANDING)
+      pprAppOrigin.mockReturnValue('https://lspl-test.web.app')
+    })
+
+    it('sends the pilot the receipt with the link to the status', async () => {
+      await notifyRequestReceived(pending, TOKEN)
+
+      expect(mockSendMail).toHaveBeenCalledTimes(1)
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.to).toBe('max@example.com')
+      expect(mailArgs.from).toBe('"Flightbox" <noreply@example.com>')
+      expect(mailArgs.subject).toBe('PPR-Anfrage erhalten: HB-ABC am 15.04.2026 – Langenthal')
+      expect(mailArgs.text).toContain(`\nStatus anzeigen: ${STATUS_URL}\n`)
+      expect(mailArgs.html).toContain(`<a href="${STATUS_URL}"`)
+    })
+
+    it('sends it in the pilot\'s language', async () => {
+      await notifyRequestReceived({ ...pending, language: 'en' }, TOKEN)
+
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.subject).toBe('PPR request received: HB-ABC on 15.04.2026 – Langenthal')
+      expect(mailArgs.text).toContain(`\nShow status: ${STATUS_URL}\n`)
+    })
+
+    it('has no link without the app address', async () => {
+      pprAppOrigin.mockReturnValue(null)
+      await notifyRequestReceived(pending, TOKEN)
+
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.text).not.toContain('Status anzeigen')
+      expect(mailArgs.html).not.toContain('<a ')
+    })
+
+    it.each([undefined, 'abc', 'T'.repeat(44)])('has no link for the token %p', async token => {
+      await notifyRequestReceived(pending, token)
+
+      expect(mockSendMail.mock.calls[0][0].text).not.toContain('Status anzeigen')
+    })
+
+    it('has no link for an invalid key', async () => {
+      await notifyRequestReceived({ ...pending, key: '../../etc' }, TOKEN)
+
+      expect(mockSendMail.mock.calls[0][0].text).not.toContain('Status anzeigen')
+    })
+  })
+
+  describe('link to the status in the answer', () => {
+    beforeEach(() => {
+      pprBranding.mockReturnValue(BRANDING)
+      pprAppOrigin.mockReturnValue('https://lspl-test.web.app')
+    })
+
+    it.each(['approved', 'rejected', 'revoked'])('is in the %s email, with the token of that email', async status => {
+      await notifyRequestReviewed({ ...basePprRequest, status, reviewRemarks: 'Runway works' }, TOKEN)
+
+      const mailArgs = mockSendMail.mock.calls[0][0]
+      expect(mailArgs.to).toBe('max@example.com')
+      expect(mailArgs.text).toContain(`\nStatus anzeigen: ${STATUS_URL}\n`)
+      expect(mailArgs.html).toContain(`<a href="${STATUS_URL}"`)
+    })
+
+    it('reads the app address for each email', async () => {
+      await notifyRequestReviewed({ ...basePprRequest, status: 'approved' }, TOKEN)
+      pprAppOrigin.mockReturnValue('https://flightbox.example')
+      await notifyRequestReviewed({ ...basePprRequest, status: 'approved' }, TOKEN)
+
+      expect(pprAppOrigin).toHaveBeenCalledTimes(2)
+      expect(mockSendMail.mock.calls[1][0].text)
+        .toContain(`Status anzeigen: https://flightbox.example/#/ppr/status/req-123/${TOKEN}`)
+    })
+
+    it('is left out without the app address', async () => {
+      pprAppOrigin.mockReturnValue(null)
+      await notifyRequestReviewed({ ...basePprRequest, status: 'approved' }, TOKEN)
+
+      expect(mockSendMail.mock.calls[0][0].text).not.toContain('Status anzeigen')
     })
   })
 })

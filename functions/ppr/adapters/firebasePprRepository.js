@@ -16,18 +16,25 @@ function toRequest(key, snapshot) {
   return value === null ? null : { key, ...value }
 }
 
+async function findByKey(key) {
+  return toRequest(key, await pprRef().child(key).once('value'))
+}
+
 // Both run as transactions, so the check and the write can't be interleaved
 // with a concurrent update or delete. The first call of the update function
 // may get null before the server value is known: returning null then lets
 // the server answer with the real value (and is a no-op if there is none).
+// `data` given as a function is applied to the value the transaction
+// commits on, so what it adds to (e.g. the status tokens) is never stale.
 async function updateIf(key, predicate, data) {
   let applied = false
   const { snapshot } = await pprRef().child(key).transaction(current => {
     applied = false
     if (current === null) return null
-    if (!predicate({ key, ...current })) return undefined // abort
+    const request = { key, ...current }
+    if (!predicate(request)) return undefined // abort
     applied = true
-    return { ...current, ...data }
+    return { ...current, ...(typeof data === 'function' ? data(request) : data) }
   })
   return { applied, request: toRequest(key, snapshot) }
 }
@@ -71,6 +78,7 @@ function snapshotToArray(snapshot) {
 
 module.exports = {
   save,
+  findByKey,
   updateIf,
   removeIf,
   findAll,

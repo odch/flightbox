@@ -7,14 +7,14 @@ const { httpsOrigin } = require('./httpsOrigin')
 const loadGeneratedConfig = () => require('../ppr-config.generated.js')
 
 // The deploy workflows write functions/ppr-config.generated.js with
-// tasks/generatePprConfig.js: { enabled, firebaseProjectId } plus the
-// aerodromeName, themeColor and appUrl the project sets. It is read at module
-// load (enabled.js: during deploy source analysis, where firebase-tools sets
-// GCLOUD_PROJECT, and at runtime) and for each PPR email. It only counts for
-// the Firebase project it was written for, so a file left over from local
-// work cannot enable PPR or change the emails in another project. Without
-// the file (unit tests) there is no config: null, as for another project.
-// Other errors (e.g. a broken file) are thrown.
+// tasks/generatePprConfig.js: { enabled, guestRequests, firebaseProjectId }
+// plus the aerodromeName, themeColor and appUrl the project sets. It is read
+// at module load (enabled.js: during deploy source analysis, where
+// firebase-tools sets GCLOUD_PROJECT, and at runtime) and for each PPR
+// email. It only counts for the Firebase project it was written for, so a
+// file left over from local work cannot enable PPR or change the emails in
+// another project. Without the file (unit tests) there is no config: null,
+// as for another project. Other errors (e.g. a broken file) are thrown.
 function loadPprConfig(loadConfig = loadGeneratedConfig, env = process.env) {
   let config
   try {
@@ -61,8 +61,22 @@ function pprAppOrigin(loadConfig, env) {
   return origin
 }
 
+// The origins the app's pages are served from: its Firebase Hosting domains
+// and appUrl, e.g. a domain of the aerodrome's own. None without a config.
+function pprAppOrigins(loadConfig, env) {
+  const config = loadPprConfig(loadConfig, env)
+  if (!config) {
+    return []
+  }
+  const projectId = config.firebaseProjectId
+  const origins = [`https://${projectId}.web.app`, `https://${projectId}.firebaseapp.com`]
+  const appOrigin = pprAppOrigin(loadConfig, env)
+  return appOrigin && !origins.includes(appOrigin) ? [...origins, appOrigin] : origins
+}
+
 module.exports = {
   loadPprConfig,
   pprBranding,
-  pprAppOrigin
+  pprAppOrigin,
+  pprAppOrigins
 }
