@@ -13,11 +13,21 @@ const {isPprEnabled} = require('../ppr/enabled')
 
 const api = express()
 
-api.use(cors)
-
 // PPR is enabled per aerodrome (`ppr` in projects/<name>.json, see
 // functions/ppr/enabled.js); elsewhere its routes do not exist.
-if (isPprEnabled()) {
+const pprEnabled = isPprEnabled()
+
+// The PPR routes without login allow only the app's origins, so they come
+// before the permissive CORS below, which would answer their preflights. They
+// are served on the function's own URL only, not through Firebase Hosting
+// (/api/ppr), whose CDN would hide the client's address from their limits.
+if (pprEnabled) {
+  api.use('/ppr', require('../ppr/publicRoutes'))
+}
+
+api.use(cors)
+
+if (pprEnabled) {
   api.use(['/ppr', '/api/ppr'], require('../ppr/routes'))
 }
 

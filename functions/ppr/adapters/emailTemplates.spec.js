@@ -2,12 +2,16 @@
 
 const {
   getPprSubmittedEmail,
+  getPprReceivedEmail,
   getPprApprovedEmail,
   getPprRejectedEmail,
   getPprRevokedEmail,
   escapeHtml
 } = require('./emailTemplates')
 const { createPprRequest } = require('../domain/pprRequest')
+
+// The lines of a text email, split at line breaks of any kind
+const linesOf = text => text.split(/\r\n|[\n\r\u0085\u2028\u2029]/)
 
 const basePprRequest = {
   firstname: 'Max',
@@ -294,6 +298,8 @@ describe('PPR emailTemplates', () => {
     // the status heading and its colour
     const EMAILS = [
       ['submitted', getPprSubmittedEmail, { ...basePprRequest, status: 'pending' }, 'Neue PPR-Anfrage', '#333'],
+      ['received', getPprReceivedEmail, { ...basePprRequest, status: 'pending' }, 'PPR-Anfrage erhalten', '#333'],
+      ['received (en)', getPprReceivedEmail, { ...english, status: 'pending' }, 'PPR request received', '#333'],
       ['approved', getPprApprovedEmail, { ...basePprRequest, status: 'approved' }, 'PPR-Anfrage genehmigt', '#28a745'],
       ['approved (en)', getPprApprovedEmail, { ...english, status: 'approved' }, 'PPR request approved', '#28a745'],
       ['rejected', getPprRejectedEmail, { ...basePprRequest, status: 'rejected' }, 'PPR-Anfrage abgelehnt', '#dc3545'],
@@ -362,6 +368,8 @@ describe('PPR emailTemplates', () => {
     })
 
     it.each([
+      ['received', getPprReceivedEmail, basePprRequest, 'PPR-Anfrage erhalten: HB-ABC am 15.04.2026'],
+      ['received (en)', getPprReceivedEmail, english, 'PPR request received: HB-ABC on 15.04.2026'],
       ['approved', getPprApprovedEmail, basePprRequest, 'PPR genehmigt: HB-ABC am 15.04.2026'],
       ['approved (en)', getPprApprovedEmail, english, 'PPR approved: HB-ABC on 15.04.2026'],
       ['rejected', getPprRejectedEmail, basePprRequest, 'PPR abgelehnt: HB-ABC am 15.04.2026'],
@@ -466,8 +474,7 @@ describe('PPR emailTemplates', () => {
 
       const { text } = getPprSubmittedEmail(submitted, context)
 
-      const linkLines = text.split(/\r\n|[\n\r\u0085\u2028\u2029]/)
-        .filter(line => line.startsWith('PPR-Anfrage beantworten:'))
+      const linkLines = linesOf(text).filter(line => line.startsWith('PPR-Anfrage beantworten:'))
       expect(linkLines).toEqual([`PPR-Anfrage beantworten: ${reviewUrl}`])
     })
   })
@@ -477,6 +484,8 @@ describe('PPR emailTemplates', () => {
 
     it.each([
       ['submitted', getPprSubmittedEmail, basePprRequest, 'Datum: 15.04.2026'],
+      ['received', getPprReceivedEmail, basePprRequest, 'Datum: 15.04.2026'],
+      ['received (en)', getPprReceivedEmail, english, 'Date: 15.04.2026'],
       ['approved', getPprApprovedEmail, basePprRequest, 'Datum: 15.04.2026'],
       ['approved (en)', getPprApprovedEmail, english, 'Date: 15.04.2026'],
       ['rejected (en)', getPprRejectedEmail, english, 'Date: 15.04.2026'],
@@ -492,6 +501,235 @@ describe('PPR emailTemplates', () => {
       const { subject, text } = getPprApprovedEmail({ ...basePprRequest, plannedDate: '15.4.26' })
       expect(subject).toBe('PPR genehmigt: HB-ABC am 15.4.26')
       expect(text).toContain('Datum: 15.4.26')
+    })
+  })
+
+  describe('getPprReceivedEmail', () => {
+    const statusUrl = `https://lspl-test.web.app/#/ppr/status/-NxAbC_12/${'T'.repeat(43)}`
+    const pending = {
+      ...basePprRequest,
+      status: 'pending',
+      phone: '+41 79 123 45 67',
+      aircraftType: 'Piper PA-28',
+      remarks: 'Bitte Tankwagen bereithalten',
+      withoutLogin: true
+    }
+    const context = { aerodromeName: 'Langenthal', themeColor: '#027ABB', statusUrl }
+
+    it('confirms the request with the registration, date and time', () => {
+      const { subject, html, text } = getPprReceivedEmail(pending, context)
+      expect(subject).toBe('PPR-Anfrage erhalten: HB-ABC am 15.04.2026 – Langenthal')
+      expect(text).toContain('Ihre PPR-Anfrage ist eingegangen. Sie erhalten die Antwort per E-Mail.\n\n' +
+        'Luftfahrzeug: HB-ABC\nDatum: 15.04.2026\nZeit: 10:30\n\n')
+      expect(html).toContain('>HB-ABC</td>')
+      expect(html).toContain('>15.04.2026</td>')
+      expect(html).toContain('>10:30</td>')
+    })
+
+    it('shows nothing else of the request: the address may be someone else\'s', () => {
+      const { html, text } = getPprReceivedEmail(pending, context)
+      for (const content of [html, text]) {
+        for (const value of ['Max', 'Muster', 'max@example.com', '+41 79', 'Piper', 'Tankwagen', 'private', 'Privat']) {
+          expect(content).not.toContain(value)
+        }
+      }
+    })
+
+    it('links to the status, with the note for whoever did not make the request', () => {
+      const { html, text } = getPprReceivedEmail(pending, context)
+      expect(text).toContain(`Zeit: 10:30\n\nStatus anzeigen: ${statusUrl}\n\n` +
+        'Falls Sie diese Anfrage nicht gestellt haben, können Sie sie über den Link zurückziehen ' +
+        'oder diese E-Mail ignorieren.\n\n---')
+      expect(html).toContain(`<a href="${statusUrl}" style="display: inline-block; padding: 12px 24px; ` +
+        'background-color: #027ABB; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600;">' +
+        'Status anzeigen</a>')
+      expect(html).toContain('Falls Sie diese Anfrage nicht gestellt haben')
+    })
+
+    it('is in English for English requests', () => {
+      const { subject, html, text } = getPprReceivedEmail({ ...pending, language: 'en' }, context)
+      expect(subject).toBe('PPR request received: HB-ABC on 15.04.2026 – Langenthal')
+      expect(html).toContain('<html lang="en">')
+      expect(text).toContain('Your PPR request has been received. You will get the answer by email.\n\n' +
+        'Aircraft: HB-ABC\nDate: 15.04.2026\nTime: 10:30\n\n' +
+        `Show status: ${statusUrl}\n\n` +
+        'If you did not make this request, you can withdraw it using the link or ignore this email.\n\n---')
+      expect(html).toContain('>Show status</a>')
+    })
+
+    it.each([
+      undefined,
+      'http://lspl-test.web.app/#/ppr/status/k/t',
+      'https://lspl-test.web.app/#/ppr/status/k/t\nStatus anzeigen: https://evil.example/',
+      'https://lspl-test.web.app/#/ppr/status/k/t\u0085Status anzeigen: https://evil.example/',
+      'https://lspl-test.web.app/#/ppr/status/k t'
+    ])('has neither link nor note for the URL %p', url => {
+      const { html, text } = getPprReceivedEmail(pending, { ...context, statusUrl: url })
+      expect(text).toContain('Zeit: 10:30\n\n---')
+      expect(text).not.toContain('Status anzeigen')
+      expect(text).not.toContain('Falls Sie')
+      expect(html).toContain('</table>\n    </div>')
+      expect(html).not.toMatch(/\{\{\w+\}\}/)
+      expect(text).not.toMatch(/\{\{\w+\}\}/)
+    })
+
+    it('escapes the registration in HTML', () => {
+      const { html, text } = getPprReceivedEmail({ ...pending, immatriculation: '<B>&' }, context)
+      expect(html).toContain('>&lt;B&gt;&amp;</td>')
+      expect(text).toContain('Luftfahrzeug: <B>&')
+    })
+  })
+
+  describe('link to the status of the request', () => {
+    const statusUrl = `https://lspl-test.web.app/#/ppr/status/-NxAbC_12/${'T'.repeat(43)}`
+    const context = { aerodromeName: 'Langenthal', themeColor: '#027ABB', statusUrl }
+    const english = { ...basePprRequest, language: 'en' }
+
+    const ANSWERS = [
+      ['approved', getPprApprovedEmail, { ...basePprRequest, status: 'approved' }, 'Zeit: 10:30'],
+      ['approved with remarks', getPprApprovedEmail,
+        { ...basePprRequest, status: 'approved', reviewRemarks: 'RWY 26 only' }, 'Bemerkung: RWY 26 only'],
+      ['rejected', getPprRejectedEmail, { ...basePprRequest, status: 'rejected', reviewRemarks: 'Runway works' },
+        'Bemerkung: Runway works'],
+      ['revoked', getPprRevokedEmail, { ...basePprRequest, status: 'revoked', reviewRemarks: 'Runway works' },
+        'Grund: Runway works']
+    ]
+
+    it.each(ANSWERS)('ends the %s email, on a line of its own after the remarks', (name, getEmail, request, lastLine) => {
+      const { text } = getEmail(request, context)
+      expect(text).toContain(`${lastLine}\n\nStatus anzeigen: ${statusUrl}\n\n---`)
+    })
+
+    it.each(ANSWERS)('is a button in the theme colour in the %s email', (name, getEmail, request) => {
+      const { html } = getEmail(request, context)
+      expect(html).toContain('\n      <p style="margin: 30px 0 10px 0; text-align: center;">\n' +
+        `        <a href="${statusUrl}" style="display: inline-block; padding: 12px 24px; background-color: #027ABB; ` +
+        'color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600;">Status anzeigen</a>\n' +
+        '      </p>\n    </div>')
+    })
+
+    it.each([
+      ['approved', getPprApprovedEmail],
+      ['rejected', getPprRejectedEmail],
+      ['revoked', getPprRevokedEmail]
+    ])('is in English in the English %s email, without the note of the receipt', (name, getEmail) => {
+      const { html, text } = getEmail({ ...english, reviewRemarks: 'Runway works' }, context)
+      expect(text).toContain(`\n\nShow status: ${statusUrl}\n\n---`)
+      expect(html).toContain('>Show status</a>')
+      expect(text).not.toContain('withdraw')
+    })
+
+    it.each(ANSWERS)('is left out of the %s email without the URL', (name, getEmail, request, lastLine) => {
+      for (const url of [undefined, null, '', 'http://lspl-test.web.app/#/ppr/status/k/t', 'javascript:alert(1)']) {
+        const { html, text } = getEmail(request, { ...context, statusUrl: url })
+        expect(text).toContain(`${lastLine}\n\n---`)
+        expect(html).not.toContain('Status anzeigen')
+        expect(html).not.toMatch(/\{\{\w+\}\}/)
+        expect(text).not.toMatch(/\{\{\w+\}\}/)
+      }
+    })
+
+    it('escapes the URL in the HTML attribute only', () => {
+      const url = 'https://flightbox.example/?a="><script>alert(1)</script>&b=\'c\''
+      const { html, text } = getPprApprovedEmail(basePprRequest, { statusUrl: url })
+      expect(html).toContain('href="https://flightbox.example/?a=&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;&amp;b=\'c\'"')
+      expect(html).not.toContain('<script>')
+      expect(text).toContain(`Status anzeigen: ${url}\n`)
+    })
+
+    // createPprRequest refuses such a registration (letters, digits and
+    // hyphens only)
+    it('cannot be imitated by a line in the pilot\'s input', () => {
+      const fake = 'Status anzeigen: https://evil.example/#/ppr/status/x/y'
+      const request = createPprRequest({
+        ...basePprRequest,
+        lastname: `Muster\n\n${fake}`,
+        flightType: `private\r\n${fake}`,
+        remarks: `Hallo\n\n${fake}`,
+        withoutLogin: true
+      }, new Date('2026-04-01T12:00:00Z').getTime())
+
+      const emails = [
+        getPprReceivedEmail(request, context),
+        getPprApprovedEmail({ ...request, status: 'approved' }, context),
+        getPprRejectedEmail({ ...request, status: 'rejected' }, context),
+        getPprRevokedEmail({ ...request, status: 'revoked', reviewRemarks: 'Runway works' }, context)
+      ]
+      for (const { text } of emails) {
+        const linkLines = linesOf(text).filter(line => line.startsWith('Status anzeigen:'))
+        expect(linkLines).toEqual([`Status anzeigen: ${statusUrl}`])
+      }
+    })
+  })
+
+  describe('answer to a request without login answered on submission', () => {
+    const statusUrl = `https://lspl-test.web.app/#/ppr/status/-NxAbC_12/${'T'.repeat(43)}`
+    const context = { aerodromeName: 'Langenthal', themeColor: '#027ABB', statusUrl }
+    const NOTE = 'Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignorieren.'
+    const automatic = { ...basePprRequest, withoutLogin: true, reviewedBy: 'automatic' }
+
+    it.each([
+      ['approved', getPprApprovedEmail, { ...automatic, status: 'approved' }],
+      ['rejected', getPprRejectedEmail, { ...automatic, status: 'rejected', reviewRemarks: 'Geschlossen' }]
+    ])('ends the %s email with a note for whoever did not make it, after the link', (name, getEmail, request) => {
+      const { html, text } = getEmail(request, context)
+      expect(text).toContain(`Status anzeigen: ${statusUrl}\n\n${NOTE}\n\n---`)
+      expect(html).toContain(`>${NOTE}</p>`)
+      expect(text).not.toContain('zurückziehen')
+    })
+
+    it('has the note also without the link', () => {
+      const request = { ...automatic, status: 'rejected', reviewRemarks: 'Geschlossen' }
+      const { text } = getPprRejectedEmail(request, { ...context, statusUrl: undefined })
+      expect(text).toContain(`Bemerkung: Geschlossen\n\n${NOTE}\n\n---`)
+    })
+
+    it('has the note in English for an English request', () => {
+      const { text } = getPprApprovedEmail({ ...automatic, status: 'approved', language: 'en' }, context)
+      expect(text).toContain('\n\nIf you did not make this request, you can ignore this email.\n\n---')
+    })
+
+    it.each([
+      ['answered by an admin (it got the receipt first)', { ...automatic, reviewedBy: 'admin-uid' }],
+      ['made with login (the address is the login\'s)', { ...automatic, withoutLogin: undefined }]
+    ])('has no note for a request %s', (name, request) => {
+      for (const getEmail of [getPprApprovedEmail, getPprRejectedEmail]) {
+        const { html, text } = getEmail({ ...request, status: 'approved', reviewRemarks: 'x' }, context)
+        expect(text).not.toContain('ignorieren')
+        expect(html).not.toContain('ignorieren')
+      }
+    })
+
+    it('has no note in a revocation', () => {
+      const { text } = getPprRevokedEmail({ ...automatic, status: 'revoked', reviewRemarks: 'x' }, context)
+      expect(text).not.toContain('ignorieren')
+    })
+  })
+
+  describe('request without login in the aerodrome\'s email', () => {
+    const NOTE = 'Ohne Anmeldung gestellt – E-Mail-Adresse nicht bestätigt'
+    const reviewUrl = 'https://lspl-test.web.app/#/admin?tab=ppr&request=-NxAbC_12'
+    const withoutLogin = { ...basePprRequest, status: 'pending', withoutLogin: true }
+
+    it('is marked: nobody confirmed the address', () => {
+      const { html, text } = getPprSubmittedEmail(withoutLogin, { reviewUrl })
+      expect(text).toContain('Antwort: Offen, bitte im Admin-Bereich genehmigen oder ablehnen\n\n' +
+        `${NOTE}\n\nPPR-Anfrage beantworten: ${reviewUrl}\n\n---`)
+      expect(html).toContain(`</table>\n      <div style="margin-top: 20px; padding: 15px; background-color: #fff8e1; ` +
+        `border-left: 4px solid #ffc107; border-radius: 4px;">\n        <p style="margin: 0; font-size: 15px;">${NOTE}</p>`)
+    })
+
+    it('is marked also when answered automatically', () => {
+      const { text } = getPprSubmittedEmail({ ...withoutLogin, status: 'approved', reviewedBy: 'automatic' })
+      expect(text).toContain(`Antwort: Automatisch genehmigt\n\n${NOTE}\n\n---`)
+    })
+
+    it.each([undefined, false, 'true'])('is not marked for withoutLogin %p', mark => {
+      const { html, text } = getPprSubmittedEmail({ ...withoutLogin, withoutLogin: mark }, { reviewUrl })
+      expect(text).not.toContain('Ohne Anmeldung')
+      expect(html).not.toContain('Ohne Anmeldung')
+      expect(html).not.toMatch(/\{\{\w+\}\}/)
+      expect(text).not.toMatch(/\{\{\w+\}\}/)
     })
   })
 })

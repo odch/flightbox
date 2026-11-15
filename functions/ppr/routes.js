@@ -9,15 +9,11 @@ const listRequests = require('./usecases/listRequests')
 const deleteRequest = require('./usecases/deleteRequest')
 const getSettings = require('./usecases/getSettings')
 const updateSettings = require('./usecases/updateSettings')
-const repository = require('./adapters/firebasePprRepository')
-const notifier = require('./adapters/emailNotifier')
+const deps = require('./deps')
 const rateLimiter = require('./adapters/firebaseRateLimiter')
-const settings = require('./adapters/firebasePprSettings')
-const aerodromeStatus = require('./adapters/firebaseAerodromeStatus')
-const { REQUEST_KEY_PATTERN } = require('./domain/pprRequest')
+const { REQUEST_KEY_PATTERN, pilotInput } = require('./domain/pprRequest')
 
 const router = express.Router()
-const deps = { repository, notifier, settings, aerodromeStatus }
 
 function validateKey(req, res, next) {
   if (!REQUEST_KEY_PATTERN.test(req.params.key)) {
@@ -47,14 +43,12 @@ router.post('/requests', fbAuthExcludingShared, requireEmail, async (req, res) =
     if (!slotReserved) {
       return res.status(429).json({ error: 'Too many requests' })
     }
-    const { firstname, lastname, phone, immatriculation,
-      aircraftType, mtow, plannedDate, plannedTime, flightType,
-      remarks, language } = req.body
-    // { key, status, reviewRemarks? }: requests can be answered right away
+    // { key, status, reviewRemarks?, statusToken }: requests can be answered
+    // right away
     const result = await submitRequest(deps, {
-      firstname, lastname, phone, immatriculation,
-      aircraftType, mtow, plannedDate, plannedTime, flightType,
-      remarks, language, email: req.fbUserEmail, createdBy: req.fbUserEmail
+      ...pilotInput(req.body),
+      email: req.fbUserEmail,
+      createdBy: req.fbUserEmail
     })
     res.status(201).json(result)
   } catch (e) {

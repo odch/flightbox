@@ -21,9 +21,10 @@ function packinize(obj) {
     var newValue;
     if (typeof value === 'string') {
       newValue = JSON.stringify(value);
-    } else if (typeof value === 'object') {
+    } else if (value !== null && typeof value === 'object') {
       newValue = packinize(value)
     } else {
+      // Also null: an environment can set it to drop a top-level value
       newValue = value;
     }
 

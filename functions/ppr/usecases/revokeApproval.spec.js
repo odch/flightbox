@@ -14,41 +14,61 @@ const approvedRequest = {
   plannedTime: '10:30'
 }
 
-// Behaves like the atomic repository method: applies the data only if the
-// request exists and the predicate holds
+const TOKEN = 'T'.repeat(43)
+const HASH = 'b'.repeat(64)
+const ANSWER_HASH = 'a'.repeat(64)
+
+// Behaves like the atomic repository method: applies the data (or what the
+// data function returns for the request) only if the request exists and the
+// predicate holds; the applied changes are kept in `changes`
 function createMockDeps(existing) {
-  return {
+  const deps = {
     repository: {
       updateIf: jest.fn(async (key, predicate, data) => {
         if (!existing) return { applied: false, request: null }
         const current = { key, ...existing }
         if (!predicate(current)) return { applied: false, request: current }
-        return { applied: true, request: { ...current, ...data } }
+        deps.changes = typeof data === 'function' ? data(current) : data
+        return { applied: true, request: { ...current, ...deps.changes } }
       })
     },
     notifier: {
       notifyRequestReviewed: jest.fn().mockResolvedValue()
+    },
+    statusTokens: {
+      create: jest.fn(() => ({ token: TOKEN, hash: HASH }))
     }
   }
+  return deps
 }
 
 const revocation = { reviewedBy: 'admin@aero.ch', reviewedAt: NOW, reviewRemarks: ' Closed due to runway works ' }
 
 describe('revokeApproval', () => {
-  it('revokes an approval with the reason and tells the pilot', async () => {
+  it('revokes an approval with the reason and tells the pilot, with a new status token', async () => {
     const deps = createMockDeps(approvedRequest)
 
     await revokeApproval(deps, 'req-1', revocation)
 
-    expect(deps.repository.updateIf).toHaveBeenCalledWith('req-1', expect.any(Function), {
+    expect(deps.repository.updateIf).toHaveBeenCalledWith('req-1', expect.any(Function), expect.any(Function))
+    expect(deps.changes).toEqual({
       status: 'revoked',
       reviewedBy: 'admin@aero.ch',
       reviewedAt: NOW,
-      reviewRemarks: 'Closed due to runway works'
+      reviewRemarks: 'Closed due to runway works',
+      statusTokens: { [HASH]: NOW }
     })
     expect(deps.notifier.notifyRequestReviewed).toHaveBeenCalledWith(expect.objectContaining({
       key: 'req-1', status: 'revoked', email: 'max@example.com', reviewRemarks: 'Closed due to runway works'
-    }))
+    }), TOKEN)
+  })
+
+  it('adds the hash of the new status token in the same step, keeping the others', async () => {
+    const deps = createMockDeps({ ...approvedRequest, statusTokens: { [ANSWER_HASH]: NOW - 1000 } })
+
+    await revokeApproval(deps, 'req-1', revocation)
+
+    expect(deps.changes.statusTokens).toEqual({ [ANSWER_HASH]: NOW - 1000, [HASH]: NOW })
   })
 
   it.each([undefined, '', '   '])('needs a reason (%p)', async reviewRemarks => {
@@ -57,6 +77,7 @@ describe('revokeApproval', () => {
     await expect(revokeApproval(deps, 'req-1', { ...revocation, reviewRemarks }))
       .rejects.toThrow(expect.objectContaining({ code: 'INVALID_INPUT' }))
     expect(deps.repository.updateIf).not.toHaveBeenCalled()
+    expect(deps.statusTokens.create).not.toHaveBeenCalled()
   })
 
   it('throws NOT_FOUND for a missing request', async () => {

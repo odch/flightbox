@@ -4,12 +4,14 @@ const {
   Status,
   REQUEST_KEY_PATTERN,
   MAX_LENGTHS,
+  pilotInput,
   createPprRequest,
   sanitizeReviewRemarks,
   validateReviewStatus,
   canBeReviewed,
   canBeRevoked,
   canBeDeletedBy,
+  canBeWithdrawn,
   isValidDate,
   sanitizeString,
   zurichDate,
@@ -92,6 +94,51 @@ describe('pprRequest', () => {
     it('uppercases immatriculation', () => {
       const result = createPprRequest({ ...validInput, immatriculation: 'hb-abc' }, NOW)
       expect(result.immatriculation).toBe('HB-ABC')
+    })
+
+    it.each([undefined, null, ''])('leaves out the owner for createdBy %p', createdBy => {
+      const result = createPprRequest({ ...validInput, createdBy }, NOW)
+      expect(result).not.toHaveProperty('createdBy')
+      expect(result).not.toHaveProperty('withoutLogin')
+    })
+
+    describe('without login', () => {
+      const withoutLogin = { ...validInput, createdBy: undefined, withoutLogin: true }
+
+      it('is marked and belongs to no login', () => {
+        const result = createPprRequest(withoutLogin, NOW)
+        expect(result.withoutLogin).toBe(true)
+        expect(result).not.toHaveProperty('createdBy')
+      })
+
+      it('belongs to no login even when an owner is given', () => {
+        const result = createPprRequest({ ...withoutLogin, createdBy: 'victim@example.com' }, NOW)
+        expect(result).not.toHaveProperty('createdBy')
+      })
+
+      it('takes the address trimmed and lower-cased', () => {
+        expect(createPprRequest({ ...withoutLogin, email: ' Max.Muster@Example.CH ' }, NOW).email)
+          .toBe('max.muster@example.ch')
+      })
+
+      it.each([
+        ['a display name', 'Max <max@example.com>'],
+        ['angle brackets', '<max@example.com>'],
+        ['quotes', '"max"@example.com'],
+        ['a comma', 'max@example.com,victim@example.com'],
+        ['a space', 'max muster@example.com'],
+        ['a line break', 'max@example.com\nbcc@example.com'],
+        ['no domain', 'max@example']
+      ])('refuses an address with %s', (name, email) => {
+        expect(() => createPprRequest({ ...withoutLogin, email }, NOW))
+          .toThrow(expect.objectContaining({ code: 'INVALID_INPUT', message: 'Invalid email format' }))
+      })
+
+      it('needs the mark to be exactly true', () => {
+        const result = createPprRequest({ ...validInput, withoutLogin: 'true' }, NOW)
+        expect(result).not.toHaveProperty('withoutLogin')
+        expect(result.createdBy).toBe('max@example.com')
+      })
     })
 
     describe('required field validation', () => {
@@ -273,6 +320,30 @@ describe('pprRequest', () => {
         expect(result.remarks.length).toBe(MAX_LENGTHS.remarks)
       })
 
+      it.each([
+        ['a domain', 'evil.xyz'],
+        ['a short link', 'is.gd/AbCd'],
+        ['a URL', 'http://x.y'],
+        ['a bidi control character', 'HB\u202eCBA'],
+        ['a space', 'HB ABC'],
+        ['a line break', 'HB-\nABC'],
+        ['a letter that upper-cases beyond the limit', 'HB\u00df\u00df\u00df\u00df\u00df\u00df\u00df\u00df']
+      ])('rejects an immatriculation with %s as invalid input', (name, immatriculation) => {
+        let error
+        try {
+          createPprRequest({ ...validInput, immatriculation }, NOW)
+        } catch (e) {
+          error = e
+        }
+        expect(error.message).toBe('Invalid immatriculation')
+        expect(error.code).toBe('INVALID_INPUT')
+      })
+
+      it('takes letters, digits and hyphens as the immatriculation', () => {
+        expect(createPprRequest({ ...validInput, immatriculation: ' d-eabc ' }, NOW).immatriculation).toBe('D-EABC')
+        expect(createPprRequest({ ...validInput, immatriculation: 'HB1234' }, NOW).immatriculation).toBe('HB1234')
+      })
+
       it('truncates immatriculation at 10 chars', () => {
         const result = createPprRequest({
           ...validInput,
@@ -287,14 +358,12 @@ describe('pprRequest', () => {
           firstname: 'Max\r\nPPR-Anfrage beantworten: https://evil.example/',
           lastname: 'Muster\u2028Link\u2029Link\u0085Link\u000bLink\fLink',
           phone: '+41 79\n123 45 67',
-          immatriculation: 'HB-\nABC',
           aircraftType: 'Piper\u001ePA-28',
           flightType: 'private\n\nPPR-Anfrage beantworten: x'
         }, NOW)
         expect(result.firstname).toBe('Max PPR-Anfrage beantworten: https://evil.example/')
         expect(result.lastname).toBe('Muster Link Link Link Link Link')
         expect(result.phone).toBe('+41 79 123 45 67')
-        expect(result.immatriculation).toBe('HB- ABC')
         expect(result.aircraftType).toBe('Piper PA-28')
         expect(result.flightType).toBe('private PPR-Anfrage beantworten: x')
       })
@@ -411,6 +480,53 @@ describe('pprRequest', () => {
 
     it.each([Status.APPROVED, Status.REJECTED])('refuses %s requests', status => {
       expect(canBeDeletedBy({ ...request, status }, 'max@example.com')).toBe(false)
+    })
+
+    it.each([undefined, null, ''])('never matches the address %p, also not a request without owner', email => {
+      expect(canBeDeletedBy({ status: Status.PENDING }, email)).toBe(false)
+      expect(canBeDeletedBy({ status: Status.PENDING, createdBy: email }, email)).toBe(false)
+      expect(canBeDeletedBy({ status: Status.PENDING, withoutLogin: true }, email)).toBe(false)
+    })
+  })
+
+  describe('canBeWithdrawn', () => {
+    it('allows pending requests only', () => {
+      expect(canBeWithdrawn({ status: Status.PENDING })).toBe(true)
+      expect(canBeWithdrawn({ status: Status.APPROVED })).toBe(false)
+      expect(canBeWithdrawn({ status: Status.REJECTED })).toBe(false)
+      expect(canBeWithdrawn({ status: Status.REVOKED })).toBe(false)
+    })
+  })
+
+  describe('pilotInput', () => {
+    it('takes the fields a pilot fills in', () => {
+      const body = {
+        ...validInput,
+        phone: '+41 79 123 45 67',
+        aircraftType: 'PA-28',
+        mtow: 1100,
+        remarks: 'Training',
+        language: 'en'
+      }
+      const { email, createdBy, ...filledIn } = body
+      expect(pilotInput(body)).toEqual(filledIn)
+    })
+
+    it('leaves out what the server sets and anything else', () => {
+      const input = pilotInput({
+        firstname: 'Max',
+        email: 'victim@example.com',
+        createdBy: 'victim@example.com',
+        withoutLogin: false,
+        status: 'approved',
+        reviewedBy: 'automatic',
+        statusTokens: { abc: 1 }
+      })
+      expect(input).toEqual({ firstname: 'Max' })
+    })
+
+    it('has nothing for an empty body', () => {
+      expect(pilotInput(undefined)).toEqual({})
     })
   })
 

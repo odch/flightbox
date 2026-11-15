@@ -70,7 +70,14 @@ exports.scheduledPprCleanup = onSchedule(
     if (count > 0) {
       console.log(`Cleaned up ${count} expired PPR requests`)
     }
-    await rateLimiter.pruneExpired()
+    // The limits per login, and without login per client and per mailbox
+    const limiters = [
+      rateLimiter,
+      rateLimiter.guestClientLimiter,
+      rateLimiter.guestMailboxLimiter,
+      rateLimiter.guestMailboxDayLimiter
+    ]
+    await Promise.all(limiters.map(limiter => limiter.pruneExpired()))
   }
 )
 

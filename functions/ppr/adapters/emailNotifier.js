@@ -4,9 +4,10 @@ const { loadSmtpSettings, createTransporter } = require('../../email/smtp')
 // The aerodrome's name and theme colour for every email and the app's
 // address for links, read when an email is built rather than at module load
 const { pprBranding, pprAppOrigin } = require('../deployConfig')
-const { pprRequestAdminUrl } = require('./adminLinks')
+const { pprRequestAdminUrl, pprRequestStatusUrl } = require('./adminLinks')
 const {
   getPprSubmittedEmail,
+  getPprReceivedEmail,
   getPprApprovedEmail,
   getPprRejectedEmail,
   getPprRevokedEmail
@@ -31,6 +32,13 @@ async function sendEmail(to, emailContent) {
   })
 }
 
+// The context of the pilot's emails: the branding and the link to the
+// request's status with the token issued for this email
+function pilotContext(pprRequest, statusToken) {
+  const statusUrl = pprRequestStatusUrl(pprAppOrigin(), pprRequest.key, statusToken)
+  return { ...pprBranding(), statusUrl }
+}
+
 // A pending request gets a link that opens it in the admin area (the
 // template leaves it out for answered requests)
 async function notifyRequestSubmitted(pprRequest, adminEmail) {
@@ -39,16 +47,22 @@ async function notifyRequestSubmitted(pprRequest, adminEmail) {
   await sendEmail(adminEmail, emailContent)
 }
 
+// The receipt for a pending request
+async function notifyRequestReceived(pprRequest, statusToken) {
+  await sendEmail(pprRequest.email, getPprReceivedEmail(pprRequest, pilotContext(pprRequest, statusToken)))
+}
+
 // The answer to the pilot: approved, rejected or a revoked approval
-async function notifyRequestReviewed(pprRequest) {
+async function notifyRequestReviewed(pprRequest, statusToken) {
   const getEmail = REVIEW_EMAILS[pprRequest.status]
   if (!getEmail) {
     throw new Error(`No email for PPR status ${pprRequest.status}`)
   }
-  await sendEmail(pprRequest.email, getEmail(pprRequest, pprBranding()))
+  await sendEmail(pprRequest.email, getEmail(pprRequest, pilotContext(pprRequest, statusToken)))
 }
 
 module.exports = {
   notifyRequestSubmitted,
+  notifyRequestReceived,
   notifyRequestReviewed
 }

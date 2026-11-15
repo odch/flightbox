@@ -1,0 +1,12 @@
+{{headerText}}
+
+PPR-Anfrage erhalten
+
+Ihre PPR-Anfrage ist eingegangen. Sie erhalten die Antwort per E-Mail.
+
+Luftfahrzeug: {{immatriculation}}
+Datum: {{plannedDate}}
+Zeit: {{plannedTime}}{{statusLinkText}}
+
+---
+Diese E-Mail wurde von der open digital Flightbox gesendet

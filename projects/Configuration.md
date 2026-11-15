@@ -25,6 +25,7 @@ project.
 * `reportApiEnabled`
 * `customsSelfDeclarationEnabled`
 * `ppr`
+* `pprGuestRequests`
 
 ### `aerodrome`
 
@@ -180,8 +181,10 @@ Description of the environments. Each environment description consists of the fo
 * `firebaseDatabaseUrl`: The URL of the Realtime Database.
 * `firebaseApiKey`: The Firebase web API key.
 * `appUrl`: The https origin the app is served from, e.g. `https://lspl-test.web.app` (no path, query or fragment).
-  The aerodrome's e-mail about an open PPR request links to the request in the admin area; without `appUrl` it has no
-  link, and the deploy log warns about it where `ppr` is on. Optional; a value in another form fails the deploy.
+  The aerodrome's e-mail about an open PPR request links to the request in the admin area, and the pilot's PPR e-mails
+  link to the status of the request; without `appUrl` they have no links, and the deploy log warns about it where
+  `ppr` is on. Required for `pprGuestRequests` (the deploy fails without it), optional otherwise; a value in another
+  form fails the deploy.
 
 #### `test`
 
@@ -192,8 +195,8 @@ Description of the test environment.
 Description of the production environment.
 
 A property set in an environment replaces the top-level property of the same name in the app's configuration
-and in the functions' generated configs (`reportApiEnabled`, `memberManagement`, `aerodrome`; for PPR `ppr`, the
-aerodrome's `name`, `themeColor` and `appUrl`), e.g.
+and in the functions' generated configs (`reportApiEnabled`, `memberManagement`, `aerodrome`; for PPR `ppr`,
+`pprGuestRequests`, the aerodrome's `name`, `themeColor` and `appUrl`), e.g.
 `"reportApiEnabled": true` in `test` only. `theme`, the landing and go-around fees and `privacySettings` are
 always read from the top level.
 
@@ -252,6 +255,13 @@ Enables PPR (prior permission required) requests: pilots ask for permission to f
 their requests in the app, the aerodrome gets an e-mail for each new request, admins approve or reject requests
 in the "PPR-Anfragen" tab, and pilots get an e-mail with the decision. Disabled by default.
 
+The pilot gets a receipt for a request that waits for an answer, and the answer by e-mail (a request answered on
+submission gets the answer only). Each of these e-mails links to the status of the request
+(`<appUrl>/#/ppr/status/<key>/<token>`), which needs no login and shows no personal data, only the flight, the
+status and the aerodrome's answer; there a pending request can be withdrawn (it is deleted, as when the pilot
+deletes it in the app, and the aerodrome gets no e-mail). Every e-mail has a token of its own; the request stores
+only their SHA-256 hashes, so they go with it when it is deleted.
+
 In the Cloud Functions the flag decides at deploy time whether the PPR endpoints (`/api/ppr/...`) and the daily
 cleanup job (`scheduledPprCleanup`) exist: the deploy workflows write it with
 `node tasks/generatePprConfig.js <project> <test|production> <file> <Firebase project>`, together with the Firebase
@@ -284,6 +294,52 @@ after the planned date requests are deleted (a whole number from 1 to 3650, stor
 As for movements and messages, nothing is deleted while no value is set.
 
 Example: `true`
+
+### `pprGuestRequests`
+
+Lets visiting pilots send PPR requests without login. It only counts where `ppr` is on. Disabled by default.
+
+Pilots follow the link on the aerodrome's website (see below) and choose: «Mit Anmeldung fortfahren» (the e-mail
+code login, offered where `loginForm` is `email`; the profile fills in the form, and the requests are listed under
+«Meine PPR-Anfragen») or «Ohne Anmeldung fortfahren»: the pilot enters the details and an e-mail address, which
+nobody confirms, and follows the request with the link in its e-mails (see `ppr`). Requests without login are
+answered automatically as configured, are marked in the "PPR-Anfragen" tab and in the aerodrome's e-mail ("Ohne
+Anmeldung gestellt – E-Mail-Adresse nicht bestätigt"), and belong to no login: they never appear under «Meine
+PPR-Anfragen», also not after a later login with that address. Guest-token sessions and logins without an e-mail
+address (username/password) get the form without login too; kiosk sessions never get PPR. Without the flag, the
+page behind the website link offers the login only.
+
+A client (IP address; IPv6 by its /64 network) can send 10 requests without login per hour, and at most 5 per hour
+and 10 per day go to the same mailbox (`+tags` and the dots of Gmail addresses count as one mailbox). The limits are
+counted in the database under hashes of the addresses (`/pprGuestRateLimits`), and the daily cleanup prunes them.
+
+Before turning it on:
+
+* Set `appUrl` in the same environment: the receipt links to the status of the request, so the deploy fails without
+  it.
+* Set the SMTP settings (`/settings/emailSmtp`), as for the e-mail code login.
+* Set the link to the privacy policy in the privacy tab (shown with `privacySettings`): the page behind the website
+  link and the form without login link it.
+
+In the Cloud Functions the flag decides at deploy time whether the endpoint for requests without login
+(`POST /ppr/guest-requests`) exists; the status endpoints exist wherever `ppr` is on, since every pilot's e-mails link
+to the status page. The deploy writes it as `guestRequests` to `functions/ppr-config.generated.js` (see `ppr`); a
+value other than `true`, `false` or `null` fails the deploy. These endpoints need no login, so they are served only
+on the function's own URL, not through Firebase Hosting (`/api/ppr`); they accept JSON only, and browsers let only
+the app's pages call them (CORS): `appUrl`, `https://<Firebase project>.web.app`,
+`https://<Firebase project>.firebaseapp.com` and the dev server (`http://localhost:<port>`,
+`http://127.0.0.1:<port>`, `http://0.0.0.0:<port>`). For local work, write the flag into the generated file too:
+`echo "module.exports = { enabled: true, guestRequests: true, firebaseProjectId: '<project>' };" > functions/ppr-config.generated.js`.
+
+#### Link for the aerodrome's website
+
+`<appUrl>/ppr`, e.g. `https://lspl-test.web.app/ppr`; the app turns it into `<appUrl>/#/ppr/new`, which can be
+linked as well. On the dev server, `http://0.0.0.0:8080/ppr` works the same way. The "PPR-Anfragen" tab shows the
+link with a copy button and a QR code. An admin who opens it is logged in and gets the form of logged-in pilots; a
+private window shows what visitors see. Use a plain link or button, e.g. "PPR-Anfrage stellen": the app cannot be
+shown in an iframe on another site (`X-Frame-Options: DENY` and `frame-ancestors 'none'` in `firebase.json`).
+
+Example: `true` in `environments.test`, next to `ppr` and `appUrl`
 
 ## Full example
 

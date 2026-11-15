@@ -1,5 +1,7 @@
 'use strict'
 
+const { normalizeEmail } = require('../../auth/signInEmail')
+
 const Status = {
   PENDING: 'pending',
   APPROVED: 'approved',
@@ -43,6 +45,23 @@ const TEXT_FIELDS = [
   'aircraftType',
   'remarks',
   'createdBy'
+]
+
+// What a pilot fills in, apart from the address. The routes take only these
+// fields from a submission; they add the address and either the owner (the
+// login) or the mark of a request without login themselves.
+const PILOT_FIELDS = [
+  'firstname',
+  'lastname',
+  'phone',
+  'immatriculation',
+  'aircraftType',
+  'mtow',
+  'plannedDate',
+  'plannedTime',
+  'flightType',
+  'remarks',
+  'language'
 ]
 
 // Language of the pilot's emails: the app language at submission time.
@@ -160,6 +179,40 @@ function validateEmail(email) {
   }
 }
 
+// The address the pilot's emails go to. With a login it is the login's,
+// which Firebase Auth verified. Nobody confirmed the address of a request
+// without login, so it must be a plain one, lower-cased, by the rule of the
+// sign-in code (auth/signInEmail.js): the mailer would read e.g. a comma as
+// the start of a further recipient.
+function readEmail(value, withoutLogin) {
+  if (withoutLogin) {
+    const email = normalizeEmail(value)
+    if (email === null) {
+      throw invalid('Invalid email format')
+    }
+    return email
+  }
+  const email = sanitizeString(value, 'email')
+  validateEmail(email)
+  return email
+}
+
+// Letters, digits and hyphens only, as the app sends registrations (it drops
+// everything else). The registration is the one value a pilot types that the
+// receipt and the answer show, also at addresses nobody confirmed, and mail
+// clients would turn e.g. 'EVIL.XYZ' into a link.
+const IMMATRICULATION_REGEX = /^[A-Z0-9-]+$/
+
+function readImmatriculation(value) {
+  const immatriculation = sanitizeString(value, 'immatriculation').toUpperCase()
+  // Upper-casing can lengthen it (e.g. 'ß' becomes 'SS')
+  if (!IMMATRICULATION_REGEX.test(immatriculation) ||
+    immatriculation.length > MAX_LENGTHS.immatriculation) {
+    throw invalid('Invalid immatriculation')
+  }
+  return immatriculation
+}
+
 function validateDate(dateStr) {
   if (!DATE_REGEX.test(dateStr)) {
     throw invalid('Invalid date format, expected YYYY-MM-DD')
@@ -189,21 +242,39 @@ function validateTime(timeStr) {
   }
 }
 
+// The fields of a submission a pilot fills in (PILOT_FIELDS), whatever else
+// it holds; an empty body (undefined) has none.
+function pilotInput(body) {
+  const source = body || {}
+  const input = {}
+  PILOT_FIELDS.forEach(field => {
+    if (source[field] !== undefined) {
+      input[field] = source[field]
+    }
+  })
+  return input
+}
+
+/**
+ * A new pending request from the input of a route: the pilot's fields, the
+ * address, and either the login that makes it (createdBy, its address) or
+ * `withoutLogin: true`. Throws INVALID_INPUT for input it can't take.
+ */
 function createPprRequest(input, now) {
   validateTypes(input)
   validateRequired(input)
 
   const timestamp = now || Date.now()
+  const withoutLogin = input.withoutLogin === true
 
   const firstname = sanitizeString(input.firstname, 'firstname')
   const lastname = sanitizeString(input.lastname, 'lastname')
-  const email = sanitizeString(input.email, 'email')
-  const immatriculation = sanitizeString(input.immatriculation, 'immatriculation')
+  const email = readEmail(input.email, withoutLogin)
+  const immatriculation = readImmatriculation(input.immatriculation)
   const plannedDate = input.plannedDate.trim()
   const plannedTime = input.plannedTime.trim()
   const flightType = sanitizeString(input.flightType, 'flightType')
 
-  validateEmail(email)
   validateDate(plannedDate)
   validateDateRange(plannedDate, timestamp)
   validateTime(plannedTime)
@@ -213,14 +284,23 @@ function createPprRequest(input, now) {
     firstname,
     lastname,
     email,
-    immatriculation: immatriculation.toUpperCase(),
+    immatriculation,
     plannedDate,
     plannedTime,
     flightType,
     language: LANGUAGES.includes(input.language) ? input.language : DEFAULT_LANGUAGE,
-    createdBy: sanitizeString(input.createdBy, 'email'),
     createdAt: timestamp,
     negativeTimestamp: -timestamp
+  }
+
+  // The login that made a request owns it: it is in that pilot's list, and
+  // the pilot can delete it. A request without login belongs to nobody, also
+  // not to a later login with its unconfirmed address.
+  const createdBy = sanitizeString(input.createdBy, 'email')
+  if (withoutLogin) {
+    request.withoutLogin = true
+  } else if (createdBy) {
+    request.createdBy = createdBy
   }
 
   if (input.phone) {
@@ -267,8 +347,17 @@ function canBeRevoked(request) {
   return request.status === Status.APPROVED
 }
 
+// A missing or empty address owns nothing: requests without login have no
+// createdBy, and undefined === undefined would match.
 function canBeDeletedBy(request, email) {
-  return request.createdBy === email && request.status === Status.PENDING
+  return typeof email === 'string' && email !== '' &&
+    request.createdBy === email && request.status === Status.PENDING
+}
+
+// The holder of a status link withdraws a request while it is pending, as a
+// pilot deletes it in the app.
+function canBeWithdrawn(request) {
+  return request.status === Status.PENDING
 }
 
 module.exports = {
@@ -280,12 +369,14 @@ module.exports = {
   REQUIRED_FIELDS,
   LANGUAGES,
   DEFAULT_LANGUAGE,
+  pilotInput,
   createPprRequest,
   sanitizeReviewRemarks,
   validateReviewStatus,
   canBeReviewed,
   canBeRevoked,
   canBeDeletedBy,
+  canBeWithdrawn,
   sanitizeString,
   zurichDate,
   addDays,

@@ -8,7 +8,7 @@ Aircraft: {{immatriculation}}
 Date: {{plannedDate}}
 Time: {{plannedTime}}
 
-Remarks: {{reviewRemarks}}
+Remarks: {{reviewRemarks}}{{statusLinkText}}
 
 ---
 This email was sent by open digital Flightbox

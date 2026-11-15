@@ -24,7 +24,8 @@ describe('firebasePprRepository', () => {
     jest.clearAllMocks()
 
     mockChild.mockReturnValue({
-      transaction: mockTransaction
+      transaction: mockTransaction,
+      once: mockOnce
     })
 
     mockOrderByChild.mockReturnValue({
@@ -45,6 +46,24 @@ describe('firebasePprRepository', () => {
 
       expect(mockPush).toHaveBeenCalledWith({ firstname: 'Max' })
       expect(result).toEqual({ key: 'abc123' })
+    })
+  })
+
+  describe('findByKey', () => {
+    it('returns the request with its key', async () => {
+      mockOnce.mockResolvedValue({ val: () => ({ status: 'pending', firstname: 'Max' }) })
+
+      const result = await repository.findByKey('abc123')
+
+      expect(mockChild).toHaveBeenCalledWith('abc123')
+      expect(mockOnce).toHaveBeenCalledWith('value')
+      expect(result).toEqual({ key: 'abc123', status: 'pending', firstname: 'Max' })
+    })
+
+    it('returns null for a missing request', async () => {
+      mockOnce.mockResolvedValue({ val: () => null })
+
+      expect(await repository.findByKey('missing')).toBeNull()
     })
   })
 
@@ -131,6 +150,29 @@ describe('firebasePprRepository', () => {
       const result = await repository.updateIf('abc123', () => false, { status: 'approved' })
 
       expect(result).toEqual({ applied: false, request: { key: 'abc123', status: 'rejected' } })
+    })
+
+    it('computes the data from the request the transaction commits on', async () => {
+      mockTransaction.mockImplementation(serverTransaction({ status: 'pending', statusTokens: { a: 1 } }))
+      const data = jest.fn(request => ({ status: 'approved', statusTokens: { ...request.statusTokens, b: 2 } }))
+
+      const result = await repository.updateIf('abc123', () => true, data)
+
+      expect(data).toHaveBeenCalledWith({ key: 'abc123', status: 'pending', statusTokens: { a: 1 } })
+      expect(result).toEqual({
+        applied: true,
+        request: { key: 'abc123', status: 'approved', statusTokens: { a: 1, b: 2 } }
+      })
+    })
+
+    it('does not compute the data when the predicate fails', async () => {
+      mockTransaction.mockImplementation(serverTransaction({ status: 'rejected' }))
+      const data = jest.fn(() => ({ status: 'approved' }))
+
+      const result = await repository.updateIf('abc123', () => false, data)
+
+      expect(data).not.toHaveBeenCalled()
+      expect(result.applied).toBe(false)
     })
 
     it('reports a missing request without creating it', async () => {

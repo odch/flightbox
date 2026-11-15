@@ -14,4 +14,12 @@ function isPprEnabled(loadFlag, env) {
   return !!config && config.enabled === true
 }
 
-module.exports = { isPprEnabled }
+// Requests without login are allowed with `pprGuestRequests` (only where
+// `ppr` is on), written to the same file as `guestRequests`. A file written
+// before the flag existed has none: off.
+function isPprGuestRequestsEnabled(loadFlag, env) {
+  const config = loadPprConfig(loadFlag, env)
+  return !!config && config.enabled === true && config.guestRequests === true
+}
+
+module.exports = { isPprEnabled, isPprGuestRequestsEnabled }

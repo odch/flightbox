@@ -6,7 +6,7 @@ Your PPR request has been approved.
 
 Aircraft: {{immatriculation}}
 Date: {{plannedDate}}
-Time: {{plannedTime}}{{remarksText}}
+Time: {{plannedTime}}{{remarksText}}{{statusLinkText}}
 
 ---
 This email was sent by open digital Flightbox

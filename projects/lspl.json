@@ -54,6 +54,7 @@
       "firebaseApiKey": "AIzaSyAMrXeJqssO1Wixyf25T-_UBJFyR8emcdk",
       "passkeysEnabled": true,
       "ppr": true,
+      "pprGuestRequests": true,
       "appUrl": "https://lspl-test.web.app"
     },
     "production": {

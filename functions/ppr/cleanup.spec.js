@@ -13,7 +13,24 @@ jest.mock('firebase-functions/v2/scheduler', () => ({
 }))
 
 const mockPruneExpired = jest.fn()
-jest.mock('./adapters/firebaseRateLimiter', () => ({ pruneExpired: mockPruneExpired }))
+const mockPruneClients = jest.fn()
+const mockPruneMailboxes = jest.fn()
+const mockPruneMailboxDays = jest.fn()
+jest.mock('./adapters/firebaseRateLimiter', () => ({
+  pruneExpired: mockPruneExpired,
+  guestClientLimiter: { pruneExpired: mockPruneClients },
+  guestMailboxLimiter: { pruneExpired: mockPruneMailboxes },
+  guestMailboxDayLimiter: { pruneExpired: mockPruneMailboxDays }
+}))
+
+// Every limit: per login, and without login per client and per mailbox
+// (hour and day)
+const expectEveryLimitPruned = () => {
+  expect(mockPruneExpired).toHaveBeenCalledTimes(1)
+  expect(mockPruneClients).toHaveBeenCalledTimes(1)
+  expect(mockPruneMailboxes).toHaveBeenCalledTimes(1)
+  expect(mockPruneMailboxDays).toHaveBeenCalledTimes(1)
+}
 
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { cleanupExpiredPprRequests, getCutoffDate } = require('./cleanup')
@@ -40,7 +57,7 @@ describe('PPR cleanup', () => {
 
     await scheduledHandler()
 
-    expect(mockPruneExpired).toHaveBeenCalledTimes(1)
+    expectEveryLimitPruned()
     log.mockRestore()
   })
 
@@ -54,7 +71,7 @@ describe('PPR cleanup', () => {
 
     await scheduledHandler()
 
-    expect(mockPruneExpired).toHaveBeenCalledTimes(1)
+    expectEveryLimitPruned()
   })
 
   describe('getCutoffDate', () => {
