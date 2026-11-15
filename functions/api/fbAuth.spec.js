@@ -55,6 +55,17 @@ describe('functions', () => {
         expect(getAuth().verifyIdToken).toHaveBeenCalledWith('valid-token', true);
         expect(req.fbUserId).toBe('user123');
         expect(req.fbUserEmail).toBe('user@test.com');
+        expect(req.fbSignInProvider).toBeUndefined();
+        expect(next).toHaveBeenCalled();
+      });
+
+      it('sets how the session was started', async () => {
+        req.headers.authorization = 'Bearer valid-token';
+        getAuth().verifyIdToken.mockResolvedValue({ uid: 'guest', firebase: { sign_in_provider: 'custom' } });
+
+        await fbAuth(req, res, next);
+
+        expect(req.fbSignInProvider).toBe('custom');
         expect(next).toHaveBeenCalled();
       });
 

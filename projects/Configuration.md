@@ -297,17 +297,22 @@ Example: `true`
 
 ### `pprGuestRequests`
 
-Lets visiting pilots send PPR requests without login. It only counts where `ppr` is on. Disabled by default.
+Lets guest sessions and logins without an e-mail address (username/password) send PPR requests without login. It
+only counts where `ppr` is on. Disabled by default.
 
-Pilots follow the link on the aerodrome's website (see below) and choose: «Mit Anmeldung fortfahren» (the e-mail
-code login, offered where `loginForm` is `email`; the profile fills in the form, and the requests are listed under
-«Meine PPR-Anfragen») or «Ohne Anmeldung fortfahren»: the pilot enters the details and an e-mail address, which
-nobody confirms, and follows the request with the link in its e-mails (see `ppr`). Requests without login are
-answered automatically as configured, are marked in the "PPR-Anfragen" tab and in the aerodrome's e-mail ("Ohne
-Anmeldung gestellt – E-Mail-Adresse nicht bestätigt"), and belong to no login: they never appear under «Meine
-PPR-Anfragen», also not after a later login with that address. Guest-token sessions and logins without an e-mail
-address (username/password) get the form without login too; kiosk sessions never get PPR. Without the flag, the
-page behind the website link offers the login only.
+Pilots follow a link on the aerodrome's website (see below) to the login page of the PPR request, which names the
+aerodrome and offers the e-mail code login and passkeys as usual (the profile fills in the form, and the requests
+are listed under «Meine PPR-Anfragen»). The link with the guest access token also offers «Als Gast fortfahren»: it
+starts a guest session, the same as the guest access link for recording movements, and the pilot enters the
+details and an e-mail address, which nobody confirms, and follows the request with the link in its e-mails (see
+`ppr`). Requests without login are answered automatically as configured, are marked in the "PPR-Anfragen" tab and in
+the aerodrome's e-mail ("Ohne Anmeldung gestellt – E-Mail-Adresse nicht bestätigt"), and belong to no login: they
+never appear under «Meine PPR-Anfragen», also not after a later login with that address. Kiosk sessions never get PPR.
+Without the flag, guest sessions and logins without an e-mail address get no PPR request.
+
+The e-mail code login and the guest session are offered where `loginForm` is `email`. On username/password projects
+the login page offers that login: its logins have no e-mail address and request without login where the flag is on,
+and pilots without such a login cannot request PPR there.
 
 A client (IP address; IPv6 by its /64 network) can send 10 requests without login per hour, and at most 5 per hour
 and 10 per day go to the same mailbox (`+tags` and the dots of Gmail addresses count as one mailbox). The limits are
@@ -318,26 +323,38 @@ Before turning it on:
 * Set `appUrl` in the same environment: the receipt links to the status of the request, so the deploy fails without
   it.
 * Set the SMTP settings (`/settings/emailSmtp`), as for the e-mail code login.
-* Set the link to the privacy policy in the privacy tab (shown with `privacySettings`): the page behind the website
-  link and the form without login link it.
+* Set the link to the privacy policy in the privacy tab (shown with `privacySettings`): the login page links it, also
+  for the guest session.
+* Set up the guest access (the guest access token) for the link with «Als Gast fortfahren». Renewing the token ends
+  all guest sessions; links with the old token still show «Als Gast fortfahren», which then fails, so update the
+  published links and QR codes right away.
 
 In the Cloud Functions the flag decides at deploy time whether the endpoint for requests without login
-(`POST /ppr/guest-requests`) exists; the status endpoints exist wherever `ppr` is on, since every pilot's e-mails link
-to the status page. The deploy writes it as `guestRequests` to `functions/ppr-config.generated.js` (see `ppr`); a
-value other than `true`, `false` or `null` fails the deploy. These endpoints need no login, so they are served only
-on the function's own URL, not through Firebase Hosting (`/api/ppr`); they accept JSON only, and browsers let only
-the app's pages call them (CORS): `appUrl`, `https://<Firebase project>.web.app`,
+(`POST /ppr/guest-requests`) exists; it takes the ID token of a guest session or a login without an e-mail address,
+so renewing the guest access token stops it for guests. The status endpoints exist wherever `ppr` is on and need no
+login, since every pilot's e-mails link to the status page. The deploy writes the flag as `guestRequests` to
+`functions/ppr-config.generated.js` (see `ppr`); a value other than `true`, `false` or `null` fails the deploy. These
+endpoints are served only on the function's own URL, not through Firebase Hosting (`/api/ppr`); they accept JSON
+only, and browsers let only the app's pages call them (CORS): `appUrl`, `https://<Firebase project>.web.app`,
 `https://<Firebase project>.firebaseapp.com` and the dev server (`http://localhost:<port>`,
 `http://127.0.0.1:<port>`, `http://0.0.0.0:<port>`). For local work, write the flag into the generated file too:
 `echo "module.exports = { enabled: true, guestRequests: true, firebaseProjectId: '<project>' };" > functions/ppr-config.generated.js`.
 
-#### Link for the aerodrome's website
+#### Links for the aerodrome's website
 
-`<appUrl>/ppr`, e.g. `https://lspl-test.web.app/ppr`; the app turns it into `<appUrl>/#/ppr/new`, which can be
-linked as well. On the dev server, `http://0.0.0.0:8080/ppr` works the same way. The "PPR-Anfragen" tab shows the
-link with a copy button and a QR code. An admin who opens it is logged in and gets the form of logged-in pilots; a
-private window shows what visitors see. Use a plain link or button, e.g. "PPR-Anfrage stellen": the app cannot be
-shown in an iframe on another site (`X-Frame-Options: DENY` and `frame-ancestors 'none'` in `firebase.json`).
+The PPR settings in the "PPR-Anfragen" tab show the links with a copy button and a QR code each; the aerodrome
+chooses where to use which:
+
+* With the login: `<appUrl>/ppr`, e.g. `https://lspl-test.web.app/ppr`; the app turns it into `<appUrl>/#/ppr/new`,
+  which can be linked as well. On the dev server, `http://0.0.0.0:8080/ppr` works the same way.
+* With the guest access too, where the guest access token is set, `pprGuestRequests` is on and `loginForm` is
+  `email`: `<appUrl>/#/ppr/new?t=<guest access token>`. The token is in the fragment, like in the guest access link,
+  so browsers send it to no server, and the app removes it from the address once the guest session has started.
+  Whoever has this link can also record movements as guest, as with the guest access link.
+
+An admin who opens a link is logged in and gets the form of logged-in pilots; a private window shows what visitors
+see. Use a plain link or button, e.g. "PPR-Anfrage stellen": the app cannot be shown in an iframe on another site
+(`X-Frame-Options: DENY` and `frame-ancestors 'none'` in `firebase.json`).
 
 Example: `true` in `environments.test`, next to `ppr` and `appUrl`
 

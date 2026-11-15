@@ -32,6 +32,9 @@ const fbAuth = async (req, res, next) => {
 
     req.fbUserId = uid
     req.fbUserEmail = decodedToken.email
+    // How the session was started, e.g. 'custom' for the app's own tokens
+    // (all of its logins) or 'password'
+    req.fbSignInProvider = decodedToken.firebase ? decodedToken.firebase.sign_in_provider : undefined
     return next()
 
   } catch (error) {
