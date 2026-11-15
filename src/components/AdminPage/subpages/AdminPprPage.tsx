@@ -13,9 +13,8 @@ const AdminPprPage = () => {
   const linkedKey = searchParams.get('request');
   return (
     <>
-      <LabeledBox label={t('ppr.settings.title')} className="ppr-settings">
-        <PprSettingsForm/>
-      </LabeledBox>
+      {/* A slim bar above the list, or the form in a box when it is open */}
+      <PprSettingsForm/>
       <LabeledBox label={t('admin.ppr')} className="ppr" contentPadding={0}>
         {/* One list per link: the list opens the linked request after a
             load of its own, so a link opened in a tab that already shows

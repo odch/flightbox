@@ -5,70 +5,111 @@ import Button from '../Button';
 import SuccessMessage from '../SuccessMessage';
 import dates from '../../util/dates';
 import { ClosureValue, upcomingClosures } from './ClosuresEditor';
-import PprWebsiteLinks from './PprWebsiteLinks';
 
-// The blocked periods listed; the others are counted
-export const MAX_LISTED_CLOSURES = 3;
+// The next blocked period is listed; the others are counted
+export const MAX_LISTED_CLOSURES = 1;
 
-// As the details of a PPR request (PprRequestList)
-const DetailList = styled.dl`
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  gap: 0.4em 1.5em;
+// A slim bar above the list of requests, which admins use every day: the
+// settings in one line, and the buttons for the website link and the form
+const Bar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75em 1.5em;
+  margin: 0 0 2em;
+  padding: 0.75em 1rem;
+  border: 1px solid #ddd;
+  background-color: ${props => props.theme.colors.background};
+
+  @media (max-width: 768px) {
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
+`;
+
+const Title = styled.h2`
   margin: 0;
+  font-size: 1em;
+  font-weight: bold;
+
+  @media (max-width: 768px) {
+    flex: 1 1 100%;
+  }
+`;
+
+// Each setting with its name, wrapping as a whole
+const Settings = styled.dl`
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25em 1.25em;
+  margin: 0;
+`;
+
+const Setting = styled.div`
+  display: flex;
+  gap: 0.4em;
+  min-width: 0;
 
   dt {
+    flex: 0 0 auto;
     color: #666;
+    white-space: nowrap;
   }
 
   dd {
     margin: 0;
     overflow-wrap: anywhere;
   }
-
-  @media (max-width: 768px) {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0;
-
-    dd {
-      margin-bottom: 0.6em;
-    }
-  }
 `;
 
 const Periods = styled.ul`
+  display: inline;
   margin: 0;
   padding: 0;
   list-style: none;
+
+  li {
+    display: inline;
+  }
 `;
 
 const More = styled.li`
   color: #666;
+
+  &::before {
+    content: ' ';
+  }
 `;
 
 const Warning = styled.span`
   color: #dc3545;
 `;
 
-// Right-aligned like the buttons below the form
 const Actions = styled.div`
+  flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
-  column-gap: 1em;
-  margin-top: 1em;
-`;
+  gap: 0.5em 1em;
 
-const EditButton = styled(Button)`
   @media (max-width: 768px) {
     flex: 1 1 100%;
   }
 `;
 
+const ActionButton = styled(Button)`
+  white-space: nowrap;
+
+  @media (max-width: 768px) {
+    flex: 1 1 0;
+  }
+`;
+
 const SavedMessage = styled(SuccessMessage)`
   @media (max-width: 768px) {
-    margin-bottom: 0.5em;
+    flex: 1 1 100%;
   }
 `;
 
@@ -82,21 +123,20 @@ interface PprSettingsSummaryProps {
   answerMode: string;
   adminEmail: string | null;
   closures: ClosureValue[];
-  // For the link to the PPR request with the guest access
-  guestAccessToken?: string | null;
   // Confirms a save just made, to the eye: screen readers hear it from the
   // live region of the settings (PprSettingsForm), which stays on the page
   saved: boolean;
   onEdit: () => void;
+  // Opens the links for the aerodrome's website
+  onShowLinks: () => void;
 }
 
 /**
  * The stored PPR settings in short (without the information for pilots),
- * with the button to change them, and the links for the aerodrome's website:
- * at the top of the tab, however long the list of requests below gets.
+ * with the buttons for the website link and to change them.
  */
 const PprSettingsSummary = ({
-  answerMode, adminEmail, closures, guestAccessToken, saved, onEdit,
+  answerMode, adminEmail, closures, saved, onEdit, onShowLinks,
 }: PprSettingsSummaryProps) => {
   const { t } = useTranslation();
   const automatic = answerMode === 'automatic';
@@ -104,46 +144,51 @@ const PprSettingsSummary = ({
   const listed = upcoming.slice(0, MAX_LISTED_CLOSURES);
 
   return (
-    <div data-cy="ppr-settings-summary">
-      <DetailList>
-        <dt>{t('ppr.settings.answer')}</dt>
-        <dd data-cy="ppr-settings-summary-answer">
-          {automatic ? t('ppr.settings.answerAutomatic') : t('ppr.settings.answerManual')}
-        </dd>
-
-        <dt>{t('ppr.settings.closures')}</dt>
-        <dd data-cy="ppr-settings-summary-closures">
-          {upcoming.length === 0 ? t('ppr.settings.noClosures') : (
-            <Periods>
-              {listed.map((closure, index) => (
-                <li key={index}>{formatPeriod(closure)} · {closure.reason}</li>
-              ))}
-              {upcoming.length > listed.length && (
-                <More>{t('ppr.settings.moreClosures', { count: upcoming.length - listed.length })}</More>
-              )}
-            </Periods>
-          )}
-        </dd>
-
-        <dt>{t('ppr.settings.notification')}</dt>
-        <dd data-cy="ppr-settings-summary-notification">
-          {/* As in the form: unanswered requests nobody hears about */}
-          {adminEmail || (automatic ? '-' : <Warning>{t('ppr.settings.noAdminEmail')}</Warning>)}
-        </dd>
-
-        <dt>{t('ppr.websiteLink.title')}</dt>
-        <dd data-cy="ppr-settings-summary-website-link">
-          <PprWebsiteLinks guestAccessToken={guestAccessToken}/>
-        </dd>
-      </DetailList>
-
+    <Bar data-cy="ppr-settings-summary">
+      <Title>{t('ppr.settings.title')}</Title>
+      <Settings>
+        <Setting>
+          <dt>{t('ppr.settings.answer')}</dt>
+          <dd data-cy="ppr-settings-summary-answer">
+            {automatic ? t('ppr.settings.answerAutomatic') : t('ppr.settings.answerManual')}
+          </dd>
+        </Setting>
+        <Setting>
+          <dt>{t('ppr.settings.closures')}</dt>
+          <dd data-cy="ppr-settings-summary-closures">
+            {upcoming.length === 0 ? t('ppr.settings.noClosuresShort') : (
+              <Periods>
+                {listed.map((closure, index) => (
+                  <li key={index}>{formatPeriod(closure)} · {closure.reason}</li>
+                ))}
+                {upcoming.length > listed.length && (
+                  <More>{t('ppr.settings.moreClosures', { count: upcoming.length - listed.length })}</More>
+                )}
+              </Periods>
+            )}
+          </dd>
+        </Setting>
+        <Setting>
+          <dt>{t('ppr.settings.notification')}</dt>
+          <dd data-cy="ppr-settings-summary-notification">
+            {/* As in the form: unanswered requests nobody hears about */}
+            {adminEmail || (automatic ? '-' : <Warning>{t('ppr.settings.noAdminEmail')}</Warning>)}
+          </dd>
+        </Setting>
+      </Settings>
       <Actions>
         {saved && (
           <SavedMessage aria-hidden="true" data-cy="ppr-settings-saved">{t('common.saved')}</SavedMessage>
         )}
-        <EditButton icon="edit" label={t('common.edit')} onClick={onEdit} dataCy="ppr-settings-edit"/>
+        <ActionButton
+          icon="link"
+          label={t('ppr.websiteLink.button')}
+          onClick={onShowLinks}
+          dataCy="ppr-website-links-open"
+        />
+        <ActionButton icon="edit" label={t('common.edit')} onClick={onEdit} dataCy="ppr-settings-edit"/>
       </Actions>
-    </div>
+    </Bar>
   );
 };
 

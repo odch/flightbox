@@ -342,8 +342,8 @@ only, and browsers let only the app's pages call them (CORS): `appUrl`, `https:/
 
 #### Links for the aerodrome's website
 
-The PPR settings in the "PPR-Anfragen" tab show the links with a copy button and a QR code each; the aerodrome
-chooses where to use which:
+The «PPR-Link» button of the PPR settings in the "PPR-Anfragen" tab shows the links with a copy button and a QR code
+each; the aerodrome chooses where to use which:
 
 * With the login: `<appUrl>/ppr`, e.g. `https://lspl-test.web.app/ppr`; the app turns it into `<appUrl>/#/ppr/new`,
   which can be linked as well. On the dev server, `http://0.0.0.0:8080/ppr` works the same way.

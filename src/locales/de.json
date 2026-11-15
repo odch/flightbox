@@ -745,6 +745,7 @@
       "closures": "Gesperrte Tage",
       "closuresHelp": "Sperren Sie Tage, an denen Sie keine PPR-Anfragen genehmigen, z. B. wegen Pistenarbeiten, eines Anlasses oder weil niemand vor Ort ist. Neue Anfragen für diese Tage werden mit dem Grund abgelehnt, auch bei manueller Beantwortung. Gesperrte Tage ändern den Flugplatz-Status nicht. Solange er «Geschlossen» ist, werden auch Anfragen für heute abgelehnt. Bereits gestellte Anfragen bleiben, wie sie sind: Ausstehende lehnen Sie unten in der Liste «PPR-Anfragen» ab, Genehmigungen widerrufen Sie dort.",
       "noClosures": "Keine Tage gesperrt.",
+      "noClosuresShort": "keine",
       "moreClosures": "und {{count}} weitere",
       "closureFrom": "Von",
       "closureTo": "Bis",
@@ -795,14 +796,14 @@
       "withdrawFailed": "Die PPR-Anfrage konnte nicht zurückgezogen werden."
     },
     "websiteLink": {
-      "title": "Link für Ihre Website",
+      "title": "PPR-Link für Ihre Website",
+      "button": "PPR-Link",
+      "intro": "Für Ihre Website, z. B. hinter «PPR-Anfrage stellen», und als QR-Code für Aushänge.",
       "login": "Mit Anmeldung",
       "loginHelp": "Piloten melden sich an, bevor sie die Anfrage stellen.",
       "guest": "Mit Gastzugang",
       "guestHelp": "Piloten können auch als Gast fortfahren. Der Link enthält das Token des Gastzugangs: Er erlaubt auch das Erfassen von Bewegungen und gilt, bis das Token erneuert wird.",
-      "ownView": "Da Sie angemeldet sind, sehen Sie unter diesen Links das Formular. Was Besucher ohne Anmeldung sehen, zeigt Ihnen ein privates Fenster des Browsers.",
-      "showQrCode": "QR-Code anzeigen",
-      "hideQrCode": "QR-Code ausblenden"
+      "ownView": "Da Sie angemeldet sind, sehen Sie unter diesen Links das Formular. Was Besucher ohne Anmeldung sehen, zeigt Ihnen ein privates Fenster des Browsers."
     }
   },
   "maskedInput": {

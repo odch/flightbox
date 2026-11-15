@@ -10,34 +10,50 @@ export const PAST_SHOWN = 10;
 
 const GROUPS = ['open', 'upcoming', 'past'] as const;
 
+// Like the groups of the movement list: a heading above each group, and
+// space between the groups
 const Group = styled.div<{ $inset?: boolean }>`
-  margin-top: 1.5em;
+  margin-top: 1.75em;
 
   &:first-child {
-    margin-top: ${props => props.$inset ? '0.5em' : '0'};
+    margin-top: ${props => props.$inset ? '0.25em' : '0'};
+  }
+
+  &:last-child {
+    margin-bottom: ${props => props.$inset ? '1rem' : '0'};
   }
 `;
 
 const Title = styled.h3<{ $inset?: boolean }>`
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5em;
   margin: 0;
-  padding: ${props => props.$inset ? '0 1em 0.75em' : '0 0 0.75em'};
-  font-size: 0.85em;
+  padding: ${props => props.$inset ? '0 1rem 0.6em' : '0 0 0.6em'};
+  font-size: 1.1em;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #666;
+  color: #222;
 `;
 
-const Count = styled.span`
-  font-weight: normal;
-  color: #999;
+// The open requests wait for an answer: their count stands out
+const Count = styled.span<{ $open?: boolean }>`
+  padding: 0.1em 0.55em;
+  border-radius: 1em;
+  background-color: ${props => props.$open ? props.theme.colors.main : '#8a96a3'};
+  color: #fff;
+  font-size: 0.75em;
+  font-weight: 600;
+`;
+
+// The rows of a group in the admin list, on a card like the movements
+const Card = styled.div`
+  margin: 0 1rem;
+  background-color: #fff;
+  box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, .12), 0 2px 4px rgba(0, 0, 0, .24);
 `;
 
 const ShowOlder = styled.div<{ $inset?: boolean }>`
-  padding: ${props => props.$inset ? '0.5em 1em 1em' : '0.5em 0 0'};
+  padding: ${props => props.$inset ? '0.75em 1rem 0' : '0.5em 0 0'};
 `;
 
 interface GroupableRequest {
@@ -53,8 +69,9 @@ interface PprRequestGroupsProps<T extends GroupableRequest> {
   // A request to show even when it is among the older past ones (the
   // request of a link in the aerodrome's email)
   revealKey?: string | null;
-  // Within a box without padding (the admin list): the titles and the
-  // button keep the rows' distance from its edge
+  // Within a box without padding (the admin list), with rows without a
+  // frame of their own: the rows of each group are put on a card, and the
+  // titles and the button keep the card's distance from the box's edge
   inset?: boolean;
   headingLevel?: 'h2' | 'h3';
 }
@@ -72,6 +89,9 @@ const PprRequestGroups = <T extends GroupableRequest>({
   const revealIndex = revealKey ? groups.past.findIndex(request => request.key === revealKey) : -1;
   const allPastShown = showOlder || revealIndex >= PAST_SHOWN;
   const olderCount = allPastShown ? 0 : Math.max(groups.past.length - PAST_SHOWN, 0);
+  const rows = (shown: T[]) => shown.map(request => (
+    <React.Fragment key={request.key}>{renderRequest(request)}</React.Fragment>
+  ));
 
   return (
     <>
@@ -84,11 +104,9 @@ const PprRequestGroups = <T extends GroupableRequest>({
         return (
           <Group key={name} $inset={inset} data-cy={`ppr-group-${name}`}>
             <Title as={headingLevel} $inset={inset}>
-              {t(`ppr.groups.${name}`)} <Count>{all.length}</Count>
+              {t(`ppr.groups.${name}`)} <Count $open={name === 'open'}>{all.length}</Count>
             </Title>
-            {shown.map(request => (
-              <React.Fragment key={request.key}>{renderRequest(request)}</React.Fragment>
-            ))}
+            {inset ? <Card>{rows(shown)}</Card> : rows(shown)}
             {name === 'past' && olderCount > 0 && (
               <ShowOlder $inset={inset}>
                 <Button

@@ -1,19 +1,55 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import Button from '../Button';
 import ClipboardCopier from '../ClipboardCopier';
-import MaterialIcon from '../MaterialIcon';
+import ModalDialog from '../ModalDialog';
 import QrCodeGenerator from '../QrCodeGenerator';
 import { pprGuestRequestsEnabled } from '../../modules/ppr/access';
 
-const Links = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
+const Wrapper = styled.div`
+  width: 720px;
+  max-width: calc(100vw - 4em);
+  max-height: calc(100vh - 6em);
+  overflow-y: auto;
+  text-align: left;
+
+  @media (max-width: 600px) {
+    width: auto;
+    max-width: none;
+  }
 `;
 
-const LinkLabel = styled.div`
-  font-weight: 600;
+const DialogTitle = styled.h2`
+  margin: 0 0 0.25em;
+  font-size: 1.5em;
+  font-weight: normal;
+`;
+
+const Intro = styled.p`
+  margin: 0 0 1.25em;
+  color: #555;
+`;
+
+// One per link: what it does, the link and its QR code
+const Card = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em 1.5em;
+  margin-bottom: 1em;
+  padding: 1em;
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
+`;
+
+const CardText = styled.div`
+  flex: 1 1 18em;
+  min-width: 0;
+`;
+
+const CardTitle = styled.h3`
+  margin: 0 0 0.25em;
+  font-size: 1.1em;
 `;
 
 const LinkLine = styled.div`
@@ -24,36 +60,33 @@ const LinkLine = styled.div`
 `;
 
 const Help = styled.p`
-  margin: 0.25em 0 0;
+  margin: 0 0 0.75em;
   color: #666;
   font-size: 0.9em;
   line-height: 1.4;
 `;
 
-const QrCodeToggle = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25em;
-  margin-top: 0.25em;
-  padding: 0.25em 0;
-  border: 0;
-  background: none;
-  color: ${props => props.theme.colors.main};
-  font: inherit;
-  font-size: 0.9em;
-  cursor: pointer;
-`;
-
-// The icon font's ligature is a word: not for screen readers
-const ToggleIcon = styled.span`
-  display: flex;
-`;
-
-// The code is centred in its own width, which keeps it at the left like the
-// rest of the summary
 const QrCode = styled.div`
-  display: inline-block;
-  margin-top: 0.5em;
+  flex: 0 0 auto;
+  margin: 0 auto;
+`;
+
+const Hint = styled.p`
+  margin: 0.5em 0 1em;
+  color: #666;
+  font-size: 0.9em;
+  line-height: 1.4;
+`;
+
+const Close = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const CloseButton = styled(Button)`
+  @media (max-width: 600px) {
+    flex: 1 1 100%;
+  }
 `;
 
 // The app's address, which the PPR emails link to, or else this page's
@@ -76,73 +109,64 @@ interface WebsiteLinkProps {
   dataCy: string;
 }
 
-// A link with its copy button, and its QR code for printed notices on
-// request: the summary stays short
-const WebsiteLink = ({ label, help, url, dataCy }: WebsiteLinkProps) => {
-  const { t } = useTranslation();
-  const [qrCodeShown, setQrCodeShown] = useState(false);
-  return (
-    <div data-cy={dataCy}>
-      <LinkLabel>{label}</LinkLabel>
+const WebsiteLink = ({ label, help, url, dataCy }: WebsiteLinkProps) => (
+  <Card data-cy={dataCy}>
+    <CardText>
+      <CardTitle>{label}</CardTitle>
+      <Help>{help}</Help>
       <LinkLine>
         <a href={url} target="_blank" rel="noopener noreferrer" data-cy={`${dataCy}-url`}>{url}</a>
         <ClipboardCopier text={url}/>
       </LinkLine>
-      <Help>{help}</Help>
-      <QrCodeToggle
-        type="button"
-        aria-expanded={qrCodeShown}
-        onClick={() => setQrCodeShown(!qrCodeShown)}
-        data-cy={`${dataCy}-qr-toggle`}
-      >
-        <ToggleIcon aria-hidden="true"><MaterialIcon icon={qrCodeShown ? 'expand_less' : 'expand_more'} size={18}/></ToggleIcon>
-        {t(qrCodeShown ? 'ppr.websiteLink.hideQrCode' : 'ppr.websiteLink.showQrCode')}
-      </QrCodeToggle>
-      {qrCodeShown && (
-        <div>
-          <QrCode>
-            <QrCodeGenerator url={url}/>
-          </QrCode>
-        </div>
-      )}
-    </div>
-  );
-};
+    </CardText>
+    <QrCode>
+      <QrCodeGenerator url={url}/>
+    </QrCode>
+  </Card>
+);
 
 interface PprWebsiteLinksProps {
   // The guest access token, which admins read; null without guest access
   guestAccessToken?: string | null;
+  onClose: () => void;
 }
 
 /**
  * The links to the PPR request for the aerodrome's website and printed
- * notices: with the login, and with the guest access too where guests may
- * request PPR (a guest access token, requests without login, and the email
- * login, whose page offers the guest session). The aerodrome chooses where
- * to use which.
+ * notices, in a dialog: with the login, and with the guest access too where
+ * guests may request PPR (a guest access token, requests without login, and
+ * the email login, whose page offers the guest session). The aerodrome
+ * chooses where to use which.
  */
-const PprWebsiteLinks = ({ guestAccessToken }: PprWebsiteLinksProps) => {
+const PprWebsiteLinks = ({ guestAccessToken, onClose }: PprWebsiteLinksProps) => {
   const { t } = useTranslation();
   const emailLogin = typeof __CONF__ !== 'undefined' && __CONF__.loginForm === 'email';
   const withGuestAccess = !!guestAccessToken && pprGuestRequestsEnabled() && emailLogin;
   return (
-    <Links>
-      <WebsiteLink
-        label={t('ppr.websiteLink.login')}
-        help={t('ppr.websiteLink.loginHelp')}
-        url={loginLink()}
-        dataCy="ppr-website-link"
-      />
-      {withGuestAccess && (
+    <ModalDialog onBlur={onClose} content={
+      <Wrapper role="dialog" aria-labelledby="ppr-website-links-title" data-cy="ppr-website-links">
+        <DialogTitle id="ppr-website-links-title">{t('ppr.websiteLink.title')}</DialogTitle>
+        <Intro>{t('ppr.websiteLink.intro')}</Intro>
         <WebsiteLink
-          label={t('ppr.websiteLink.guest')}
-          help={t('ppr.websiteLink.guestHelp')}
-          url={guestLink(guestAccessToken as string)}
-          dataCy="ppr-website-guest-link"
+          label={t('ppr.websiteLink.login')}
+          help={t('ppr.websiteLink.loginHelp')}
+          url={loginLink()}
+          dataCy="ppr-website-link"
         />
-      )}
-      <Help>{t('ppr.websiteLink.ownView')}</Help>
-    </Links>
+        {withGuestAccess && (
+          <WebsiteLink
+            label={t('ppr.websiteLink.guest')}
+            help={t('ppr.websiteLink.guestHelp')}
+            url={guestLink(guestAccessToken as string)}
+            dataCy="ppr-website-guest-link"
+          />
+        )}
+        <Hint>{t('ppr.websiteLink.ownView')}</Hint>
+        <Close>
+          <CloseButton type="button" icon="close" label={t('common.close')} onClick={onClose} flat dataCy="ppr-website-links-close"/>
+        </Close>
+      </Wrapper>
+    }/>
   );
 };
 

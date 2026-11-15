@@ -29,7 +29,7 @@ describe('PprWebsiteLinks', () => {
   });
 
   it('offers the short link to the PPR request with the login, on the address of the app', () => {
-    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={null}/>);
+    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={null} onClose={jest.fn()}/>);
 
     const link = urlOf(container, 'ppr-website-link')!;
     expect(link.textContent).toBe(LOGIN_LINK);
@@ -42,7 +42,7 @@ describe('PprWebsiteLinks', () => {
 
   it('ignores a slash at the end of the address of the app', () => {
     (global as any).__CONF__.appUrl = 'https://lspl-test.web.app/';
-    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={TOKEN}/>);
+    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={TOKEN} onClose={jest.fn()}/>);
 
     expect(urlOf(container, 'ppr-website-link')!.textContent).toBe(LOGIN_LINK);
     expect(urlOf(container, 'ppr-website-guest-link')!.textContent).toBe(GUEST_LINK);
@@ -50,14 +50,14 @@ describe('PprWebsiteLinks', () => {
 
   it('takes the address of the page where the project sets none', () => {
     delete (global as any).__CONF__.appUrl;
-    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={null}/>);
+    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={null} onClose={jest.fn()}/>);
     expect(urlOf(container, 'ppr-website-link')!.textContent).toBe(`${window.location.origin}/ppr`);
   });
 
   // In the fragment like the link of the guest access: the browser sends it
   // to no server, and the login page offers the guest session with it
   it('offers the link with the guest access token where guests may request PPR', () => {
-    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={TOKEN}/>);
+    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={TOKEN} onClose={jest.fn()}/>);
 
     const link = urlOf(container, 'ppr-website-guest-link')!;
     expect(link.textContent).toBe(GUEST_LINK);
@@ -73,7 +73,7 @@ describe('PprWebsiteLinks', () => {
     ['without the email login, whose page offers the guest session', { loginForm: 'usernamePassword' }, TOKEN],
   ])('offers no link with the guest access %s', (name, conf, token) => {
     (global as any).__CONF__ = { ...CONF, ...conf };
-    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={token}/>);
+    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={token} onClose={jest.fn()}/>);
 
     expect(urlOf(container, 'ppr-website-link')).not.toBeNull();
     expect(urlOf(container, 'ppr-website-guest-link')).toBeNull();
@@ -83,7 +83,7 @@ describe('PprWebsiteLinks', () => {
   it('copies a link', async () => {
     const writeText = jest.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
-    renderWithTheme(<PprWebsiteLinks guestAccessToken={TOKEN}/>);
+    renderWithTheme(<PprWebsiteLinks guestAccessToken={TOKEN} onClose={jest.fn()}/>);
 
     await act(async () => {
       fireEvent.click(screen.getAllByTitle('Copy to Clipboard')[1]);
@@ -93,21 +93,23 @@ describe('PprWebsiteLinks', () => {
     Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
   });
 
-  it('shows the QR code of a link for printed notices on request', () => {
-    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={TOKEN}/>);
-    const toggle = container.querySelector('[data-cy="ppr-website-guest-link-qr-toggle"]') as HTMLButtonElement;
-    expect(container.querySelector('svg')).toBeNull();
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(toggle.textContent).toBe('ppr.websiteLink.showQrCode');
+  it('shows each link with its QR code for printed notices', () => {
+    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={TOKEN} onClose={jest.fn()}/>);
 
-    fireEvent.click(toggle);
+    expect(container.querySelectorAll('[data-cy="ppr-website-link"] svg, [data-cy="ppr-website-guest-link"] svg'))
+      .toHaveLength(2);
+    expect(screen.getAllByText('common.download')).toHaveLength(2);
+    expect(screen.getByText('ppr.websiteLink.title')).toBeTruthy();
+    expect(screen.getByText('ppr.websiteLink.intro')).toBeTruthy();
+  });
 
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(toggle.textContent).toBe('ppr.websiteLink.hideQrCode');
-    expect(container.querySelectorAll('svg')).toHaveLength(1);
-    expect(screen.getByText('common.download')).toBeTruthy();
+  it('closes on its button and next to it', () => {
+    const onClose = jest.fn();
+    const { container } = renderWithTheme(<PprWebsiteLinks guestAccessToken={null} onClose={onClose}/>);
 
-    fireEvent.click(toggle);
-    expect(container.querySelector('svg')).toBeNull();
+    fireEvent.click(container.querySelector('[data-cy="ppr-website-links-close"]')!);
+    fireEvent.click(screen.getByTestId('modal-mask'));
+
+    expect(onClose).toHaveBeenCalledTimes(2);
   });
 });
