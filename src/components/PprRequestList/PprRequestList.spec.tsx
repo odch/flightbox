@@ -270,6 +270,35 @@ describe('PprRequestList (admin)', () => {
     });
   });
 
+  describe('requests without login', () => {
+    const withoutLogin = { ...pendingRequest, withoutLogin: true };
+
+    it('are marked in the row, as part of its name', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[withoutLogin]}/>);
+
+      expect(screen.getByRole('button', { name: /HB-ABC/ })).toHaveTextContent('Max Muster · flightTypes.private · ppr.withoutLogin.marker');
+    });
+
+    it('tell in their details that the email address is not confirmed', () => {
+      const { container } = renderWithTheme(<PprRequestList {...defaultProps} data={[withoutLogin]}/>);
+      fireEvent.click(screen.getByText('HB-ABC'));
+
+      const marker = container.querySelector('[data-cy="ppr-without-login"]')!;
+      expect(marker.textContent).toBe('ppr.withoutLogin.unconfirmed');
+      expect(marker.previousElementSibling!.textContent).toBe('ppr.withoutLogin.submitted');
+      // right below the address
+      expect(marker.previousElementSibling!.previousElementSibling!.textContent).toBe('max@example.com');
+    });
+
+    it('are not confused with requests with login', () => {
+      const { container } = renderWithTheme(<PprRequestList {...defaultProps} data={[pendingRequest]}/>);
+      expect(screen.queryByText(/ppr\.withoutLogin\.marker/)).toBeNull();
+
+      fireEvent.click(screen.getByText('HB-ABC'));
+      expect(container.querySelector('[data-cy="ppr-without-login"]')).toBeNull();
+    });
+  });
+
   describe('revoking an approval', () => {
     it('needs a reason', () => {
       renderWithTheme(<PprRequestList {...defaultProps} data={[approvedRequest]}/>);

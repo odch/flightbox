@@ -14,11 +14,15 @@ describe('modules', () => {
           loadFailed: false,
           selected: null,
           initialValues: {},
-          form: { submitting: false, submitted: false, result: null, commitFailed: false, reviewFailed: false, revokeFailed: false, deleteFailed: false },
+          form: {
+            submitting: false, submitted: false, result: null, commitFailed: false, rateLimited: false,
+            reviewFailed: false, revokeFailed: false, deleteFailed: false,
+          },
           settings: {
             adminEmail: null, retentionDays: null, answerMode: 'manual', pilotInfo: null, closures: [],
             loaded: false, loadFailed: false, saving: false, saved: false, saveFailed: false,
           },
+          status: { request: null, loading: false, withdrawing: false, notice: null },
         });
       });
 
@@ -187,7 +191,10 @@ describe('modules', () => {
       it('should preserve other form flags on submit success', () => {
         const stateWithFlags = {
           ...initialState,
-          form: { submitting: false, submitted: false, result: null, commitFailed: false, reviewFailed: true, revokeFailed: false, deleteFailed: true },
+          form: {
+            submitting: false, submitted: false, result: null, commitFailed: false, rateLimited: false,
+            reviewFailed: true, revokeFailed: false, deleteFailed: true,
+          },
         };
         const state = reducer(stateWithFlags, actions.submitPprRequestSuccess());
         expect(state.form.reviewFailed).toBe(true);
@@ -205,11 +212,110 @@ describe('modules', () => {
       it('should preserve other form flags on submit failure', () => {
         const stateWithFlags = {
           ...initialState,
-          form: { submitting: false, submitted: false, result: null, commitFailed: false, reviewFailed: true, revokeFailed: false, deleteFailed: true },
+          form: {
+            submitting: false, submitted: false, result: null, commitFailed: false, rateLimited: false,
+            reviewFailed: true, revokeFailed: false, deleteFailed: true,
+          },
         };
         const state = reducer(stateWithFlags, actions.submitPprRequestFailure());
         expect(state.form.reviewFailed).toBe(true);
         expect(state.form.deleteFailed).toBe(true);
+      });
+
+      describe('requests without login', () => {
+        it('tracks sending like requests with login', () => {
+          const failed = reducer(initialState, actions.submitPprRequestFailure());
+          const state = reducer(failed, actions.submitPprGuestRequest({ email: 'pilot@example.com' }));
+          expect(state.form.submitting).toBe(true);
+          expect(state.form.commitFailed).toBe(false);
+        });
+
+        it('remembers a refusal for too many requests until the next submit or a reset', () => {
+          const refused = reducer(initialState, actions.submitPprRequestFailure(true));
+          expect(refused.form).toEqual(expect.objectContaining({ commitFailed: true, rateLimited: true }));
+
+          expect(reducer(refused, actions.submitPprGuestRequest({})).form.rateLimited).toBe(false);
+          expect(reducer(refused, actions.resetPprForm()).form.rateLimited).toBe(false);
+        });
+
+        it('tells other failures apart from a refusal for too many requests', () => {
+          const refused = reducer(initialState, actions.submitPprRequestFailure(true));
+          expect(reducer(refused, actions.submitPprRequestFailure()).form.rateLimited).toBe(false);
+        });
+
+        it('stores the token of the status link with the answer', () => {
+          const result = { key: 'req-1', status: 'pending', statusToken: 'token-1' };
+          expect(reducer(initialState, actions.submitPprRequestSuccess(result)).form.result).toEqual(result);
+        });
+      });
+
+      describe('the request of a status link', () => {
+        const request = {
+          status: 'pending', immatriculation: 'HBKOF', plannedDate: '2026-11-20', plannedTime: '10:30',
+          flightType: 'private', automatic: false, canWithdraw: true,
+        };
+        const loaded = reducer(reducer(initialState, actions.loadPprStatus('req-1', 'token-1')), actions.pprStatusLoaded(request));
+
+        it('is loaded', () => {
+          const loading = reducer(initialState, actions.loadPprStatus('req-1', 'token-1'));
+          expect(loading.status).toEqual({ request: null, loading: true, withdrawing: false, notice: null });
+
+          expect(loaded.status).toEqual({ request, loading: false, withdrawing: false, notice: null });
+        });
+
+        it('tells when the link leads to no request', () => {
+          const state = reducer(loaded, actions.pprStatusLoadFailed('notFound'));
+          expect(state.status).toEqual({ request: null, loading: false, withdrawing: false, notice: 'notFound' });
+        });
+
+        it('tells when the load failed', () => {
+          const state = reducer(loaded, actions.pprStatusLoadFailed('failed'));
+          expect(state.status).toEqual({ request: null, loading: false, withdrawing: false, notice: 'loadFailed' });
+        });
+
+        it('is no longer shown once withdrawn', () => {
+          const withdrawing = reducer(loaded, actions.withdrawPprRequest('req-1', 'token-1'));
+          expect(withdrawing.status).toEqual({ request, loading: false, withdrawing: true, notice: null });
+
+          const state = reducer(withdrawing, actions.withdrawPprRequestSuccess());
+          expect(state.status).toEqual({ request: null, loading: false, withdrawing: false, notice: 'withdrawn' });
+        });
+
+        it('keeps telling it was answered in the meantime while it is loaded again', () => {
+          const withdrawing = reducer(loaded, actions.withdrawPprRequest('req-1', 'token-1'));
+          const refused = reducer(withdrawing, actions.withdrawPprRequestFailure('notPending'));
+          expect(refused.status).toEqual({ request, loading: false, withdrawing: false, notice: 'answeredMeanwhile' });
+
+          const reloading = reducer(refused, actions.loadPprStatus('req-1', 'token-1'));
+          expect(reloading.status).toEqual({ request: null, loading: true, withdrawing: false, notice: 'answeredMeanwhile' });
+
+          const answered = { ...request, status: 'approved', canWithdraw: false };
+          expect(reducer(reloading, actions.pprStatusLoaded(answered)).status)
+            .toEqual({ request: answered, loading: false, withdrawing: false, notice: 'answeredMeanwhile' });
+        });
+
+        it('is no longer shown when it no longer exists', () => {
+          const state = reducer(loaded, actions.withdrawPprRequestFailure('notFound'));
+          expect(state.status).toEqual({ request: null, loading: false, withdrawing: false, notice: 'notFound' });
+        });
+
+        it('stays shown when the withdrawal failed', () => {
+          const state = reducer(loaded, actions.withdrawPprRequestFailure('failed'));
+          expect(state.status).toEqual({ request, loading: false, withdrawing: false, notice: 'withdrawFailed' });
+        });
+
+        it('is forgotten on a reset', () => {
+          const state = reducer(reducer(loaded, actions.withdrawPprRequestSuccess()), actions.resetPprStatus());
+          expect(state.status).toEqual(initialState.status);
+        });
+
+        it('leaves the lists alone', () => {
+          const lists = reducer(initialState, actions.pprRequestsLoaded([{ key: 'req-2' }], 'all'));
+          const state = reducer(reducer(lists, actions.loadPprStatus('req-1', 'token-1')), actions.pprStatusLoaded(request));
+          expect(state.data).toEqual([{ key: 'req-2' }]);
+          expect(state.scope).toBe('all');
+          expect(state.loading).toBe(false);
+        });
       });
 
       it('should clear reviewFailed on review success', () => {
@@ -271,6 +377,7 @@ describe('modules', () => {
           submitted: true,
           result: { key: 'req-1', status: 'pending' },
           commitFailed: true,
+          rateLimited: true,
           reviewFailed: true,
           revokeFailed: true,
           deleteFailed: true,
@@ -284,6 +391,7 @@ describe('modules', () => {
           submitted: false,
           result: null,
           commitFailed: false,
+          rateLimited: false,
           reviewFailed: false,
           revokeFailed: false,
           deleteFailed: false,

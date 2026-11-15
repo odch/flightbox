@@ -1,3 +1,5 @@
+import type { PprRequestStatus, PprSubmitResult } from './actions';
+
 declare var __FIREBASE_PROJECT_ID__: string;
 
 const baseUrl = () =>
@@ -116,4 +118,53 @@ export async function deleteRequest(key: string, token: string) {
     throw new Error(body.error || `Request failed: ${res.status}`);
   }
   return res.json();
+}
+
+// A refusal of a route without login, e.g. 404 for a status link that leads
+// to no request, or 429 for too many requests
+export interface PprApiError extends Error {
+  status: number;
+  // From the Retry-After header of a 429, when the browser may read it
+  retryAfterSeconds?: number;
+}
+
+async function apiError(res: Response): Promise<PprApiError> {
+  const body = await res.json().catch(() => ({}));
+  const error = new Error(body.error || `Request failed: ${res.status}`) as PprApiError;
+  error.status = res.status;
+  const retryAfter = res.headers.get('Retry-After');
+  if (retryAfter && /^\d+$/.test(retryAfter)) {
+    error.retryAfterSeconds = Number(retryAfter);
+  }
+  return error;
+}
+
+// The routes for requests without login take no ID token: nobody may be
+// logged in, and the routes of logins refuse guest sessions. They take
+// JSON only.
+async function postWithoutLogin(path: string, data: unknown) {
+  const res = await fetch(`${baseUrl()}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    throw await apiError(res);
+  }
+  return res.json();
+}
+
+export function submitGuestRequest(data: unknown): Promise<PprSubmitResult> {
+  return postWithoutLogin('/ppr/guest-requests', data);
+}
+
+// The token goes in the body, not in the URL, which request logs record
+export function loadRequestStatus(key: string, token: string): Promise<PprRequestStatus> {
+  return postWithoutLogin(`/ppr/status/${encodeURIComponent(key)}`, { token });
+}
+
+export function withdrawRequest(key: string, token: string): Promise<{ withdrawn: true }> {
+  return postWithoutLogin(`/ppr/status/${encodeURIComponent(key)}/withdraw`, { token });
 }

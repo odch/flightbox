@@ -28,10 +28,16 @@ const MobileLanguageSwitch = styled(LanguageSwitch)`
   }
 `;
 
-function VerticalHeaderLayout({ children }: { children: React.ReactNode }) {
+interface VerticalHeaderLayoutProps {
+  children: React.ReactNode;
+  // Where the logo leads: the start page, unless it would show the login
+  homePath?: string;
+}
+
+function VerticalHeaderLayout({ children, homePath }: VerticalHeaderLayoutProps) {
   return (
     <Wrapper>
-      <Header/>
+      <Header homePath={homePath}/>
       <Main>
         <MobileLanguageSwitch/>
         <Content>{children}</Content>

@@ -63,7 +63,8 @@ const ClipboardCopier: React.FC<ClipboardCopierProps> = ({ text }) => {
           Copied
         </CopiedMessage>
       ) : (
-        <CopyButton onClick={handleCopy} title="Copy to Clipboard">
+        // Not a submit button where it sits in a form
+        <CopyButton type="button" onClick={handleCopy} title="Copy to Clipboard">
           <MaterialIcon icon="content_copy"/>
         </CopyButton>
       )}

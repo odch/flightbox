@@ -37,6 +37,7 @@ import * as Sentry from "@sentry/react";
 import ErrorFallback from './components/ErrorFallback';
 import { getMidnightDelayMs } from './util/getMidnightDelay';
 import { shouldReloadOnControllerChange, markReload } from './util/shouldReloadOnControllerChange';
+import { redactBreadcrumb, redactEvent } from './util/sentryRedaction';
 
 Sentry.init({
   dsn: "https://8a606d82aa68850021fbfac2ffda30b5@o4509293310967808.ingest.de.sentry.io/4509293314113617",
@@ -55,6 +56,9 @@ Sentry.init({
     queues: false,
     stackFrameVariables: false,
   },
+  // The URLs Sentry keeps can hold the token of a PPR status link
+  beforeSend: redactEvent,
+  beforeBreadcrumb: redactBreadcrumb,
 });
 
 const theme = require('../theme/' + __THEME__);

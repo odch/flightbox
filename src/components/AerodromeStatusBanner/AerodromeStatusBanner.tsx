@@ -99,7 +99,7 @@ const Timestamp = styled.div`
 const AerodromeStatusBanner = (props: any) => {
   const {t} = useTranslation();
   const theme = useTheme();
-  const {status, enabled, watchCurrentAerodromeStatus} = props;
+  const {status, enabled, watchCurrentAerodromeStatus, className} = props;
 
   // Collapsed by default; the pilot's choice persists across visits. The status
   // word and colored icon stay visible while collapsed, so nothing important is
@@ -127,6 +127,7 @@ const AerodromeStatusBanner = (props: any) => {
 
   return (
     <Wrapper
+      className={className}
       role="status"
       aria-label={t('admin.aerodromeStatus')}
     >
@@ -157,6 +158,7 @@ const AerodromeStatusBanner = (props: any) => {
   }),
   enabled: PropTypes.bool,
   watchCurrentAerodromeStatus: PropTypes.func.isRequired,
+  className: PropTypes.string,
 };
 
 export default AerodromeStatusBanner;

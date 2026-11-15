@@ -37,10 +37,12 @@ describe('AdminPprPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockOpenedLists.length = 0;
+    (global as any).__CONF__ = { appUrl: 'https://lspl-test.web.app' };
   });
 
   afterEach(() => {
     visit('/');
+    delete (global as any).__CONF__;
   });
 
   it('shows the settings and the list', () => {
@@ -50,6 +52,17 @@ describe('AdminPprPage', () => {
     expect(screen.getByTestId('ppr-settings-form')).toBeInTheDocument();
     expect(screen.getByTestId('ppr-request-list')).toBeInTheDocument();
     expect(lastListProps().linkedKey).toBeNull();
+  });
+
+  it('shows the link for the aerodrome\'s website below the list', () => {
+    visit('/admin?tab=ppr');
+    const { container } = renderWithTheme(<AdminPprPage/>);
+
+    expect(screen.getByText('Link für Ihre Website')).toBeInTheDocument();
+    expect(screen.getByText('https://lspl-test.web.app/ppr')).toBeInTheDocument();
+    const list = screen.getByTestId('ppr-request-list');
+    const box = container.querySelector('.ppr-website-link')!;
+    expect(list.compareDocumentPosition(box) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('passes the request of a link in the notification email to the list', () => {

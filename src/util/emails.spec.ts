@@ -1,4 +1,4 @@
-import {isValidEmail, MAX_EMAIL_LENGTH, normalizeEmail, normalizeEmailList} from './emails';
+import {isSendableEmail, isValidEmail, MAX_EMAIL_LENGTH, normalizeEmail, normalizeEmailList} from './emails';
 
 describe('util', () => {
   describe('emails', () => {
@@ -36,6 +36,38 @@ describe('util', () => {
         const longest = 'a'.repeat(MAX_EMAIL_LENGTH - domain.length) + domain;
         expect(isValidEmail(longest)).toBe(true);
         expect(isValidEmail('a' + longest)).toBe(false);
+      });
+    });
+
+    describe('isSendableEmail', () => {
+      it.each([
+        'hans@example.ch',
+        ' Hans.Muster+PPR@Sub.Example.com ',
+        "o'brien@example.ie",
+        'a@b.co',
+      ])('accepts %p, as the server does', email => {
+        expect(isSendableEmail(email)).toBe(true);
+      });
+
+      it.each([
+        '',
+        'hans@example',
+        'hans@bluewin.c',
+        'hans@example.ch1',
+        'hans@zürich.ch',
+        'hans muster@example.ch',
+        'a1,victim@example.com',
+        '"hans"@example.ch',
+        'hans@example.ch>',
+      ])('rejects %p, as the server does', email => {
+        expect(isSendableEmail(email)).toBe(false);
+      });
+
+      it('rejects addresses longer than the maximum length', () => {
+        const domain = '@example.ch';
+        const longest = 'a'.repeat(MAX_EMAIL_LENGTH - domain.length) + domain;
+        expect(isSendableEmail(longest)).toBe(true);
+        expect(isSendableEmail('a' + longest)).toBe(false);
       });
     });
 

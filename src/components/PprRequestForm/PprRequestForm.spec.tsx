@@ -2,7 +2,8 @@ import React from 'react';
 import { renderWithTheme, screen, fireEvent } from '../../../test/renderWithTheme';
 
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: key => key }),
+  useTranslation: () => ({ t: (key, options) => options ? `${key}:${JSON.stringify(options)}` : key }),
+  Trans: ({ i18nKey }) => i18nKey,
   initReactI18next: { type: '3rdParty', init: () => undefined },
 }));
 
@@ -56,6 +57,7 @@ import i18n from '../../i18n';
 // it is set before the form is. Arrays in __CONF__ arrive as index-keyed
 // objects (packinize in projects/index.js).
 (global as any).__CONF__ = {
+  aerodrome: { name: 'Langenthal' },
   enabledFlightTypes: {
     0: 'private',
     1: 'instruction',
@@ -262,6 +264,16 @@ describe('PprRequestForm', () => {
     expect(field(container, 'ppr-submit').hasAttribute('disabled')).toBe(true);
   });
 
+  it('keeps the form open while the request is being sent, so the pilot sees how it went', () => {
+    window.history.pushState({}, '', '/ppr/new');
+    renderForm({ submitting: true });
+
+    const cancel = screen.getByText('wizard.cancel').closest('button') as HTMLButtonElement;
+    expect(cancel).toHaveAttribute('disabled');
+    fireEvent.click(cancel);
+    expect(window.location.pathname).toBe('/ppr/new');
+  });
+
   describe('after sending', () => {
     it('says the request waits for an answer', () => {
       renderForm({ submitted: true, result: { key: 'req-1', status: 'pending' } });
@@ -306,6 +318,238 @@ describe('PprRequestForm', () => {
       fireEvent.click(screen.getByText('common.close'));
 
       expect(props.confirmPprSubmitSuccess).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when sending fails', () => {
+    it('tells that the request could not be sent', () => {
+      renderForm({ commitFailed: true });
+      expect(screen.getByText('ppr.submitFailed')).toBeTruthy();
+    });
+
+    it('tells about a refusal for too many requests', () => {
+      renderForm({ commitFailed: true, rateLimited: true });
+      expect(screen.getByText('ppr.withoutLogin.tooManyRequests')).toBeTruthy();
+      expect(screen.queryByText('ppr.submitFailed')).toBeNull();
+    });
+  });
+
+  describe('without login', () => {
+    const goTo = (path: string) => window.history.pushState({}, '', path);
+
+    afterEach(() => {
+      window.history.replaceState({}, '', '/');
+    });
+
+    // A guest session or a login without an email address: logged in, so
+    // the aircraft list can be offered
+    const renderGuestForm = (props = {}) => renderForm({ withoutLogin: true, ...props });
+    // Nobody logged in
+    const renderVisitorForm = (props = {}) => renderForm({ withoutLogin: true, visitor: true, ...props });
+
+    it('names the aerodrome in the heading, as the side header is hidden on phones', () => {
+      renderGuestForm();
+      expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('ppr.requestFor:{"aerodrome":"Langenthal"}');
+    });
+
+    it('asks for the email address the receipt and the answer go to', () => {
+      const { container } = renderGuestForm();
+      expect(field(container, 'email').getAttribute('type')).toBe('email');
+      expect(screen.getByText('ppr.withoutLogin.emailHelp')).toBeTruthy();
+    });
+
+    it('does not ask for an email address with a login', () => {
+      const { container } = renderForm();
+      expect(field(container, 'email')).toBeNull();
+    });
+
+    it('submits the entered values with the email address', () => {
+      const plannedDate = inDays(10);
+      const { container, props } = renderGuestForm({ initialValues: { plannedDate, plannedTime: '10:30' } });
+
+      fireEvent.change(field(container, 'lastname'), { target: { value: 'Muster' } });
+      fireEvent.change(field(container, 'firstname'), { target: { value: 'Max' } });
+      fireEvent.change(field(container, 'email'), { target: { value: 'max@example.com' } });
+      fireEvent.click(screen.getByText('pick HBKOF'));
+      fireEvent.click(field(container, 'flightType-private'));
+      fireEvent.click(screen.getByText('ppr.submit'));
+
+      expect(props.onSubmit).toHaveBeenCalledTimes(1);
+      expect(props.onSubmit.mock.calls[0][0]).toMatchObject({
+        lastname: 'Muster',
+        firstname: 'Max',
+        email: 'max@example.com',
+        immatriculation: 'HBKOF',
+      });
+    });
+
+    it('does not submit without a valid email address', () => {
+      const { container, props } = renderGuestForm({
+        initialValues: {
+          lastname: 'Muster', firstname: 'Max', email: 'max@example', immatriculation: 'HBKOF',
+          aircraftCategory: 'Flugzeug', plannedDate: inDays(10), plannedTime: '10:30', flightType: 'private',
+        },
+      });
+
+      fireEvent.click(screen.getByText('ppr.submit'));
+
+      expect(props.onSubmit).not.toHaveBeenCalled();
+      // validate() uses i18n directly, not the mocked useTranslation
+      expect(container.textContent).toContain(i18n.t('ppr.withoutLogin.invalidEmail'));
+    });
+
+    it('offers guest sessions the aircraft list', () => {
+      renderGuestForm();
+      expect(screen.getByText('pick HBKOF')).toBeTruthy();
+    });
+
+    it('asks visitors for the registration in a plain field, in capitals, without loading the aircraft list', () => {
+      const { container } = renderVisitorForm();
+
+      expect(screen.queryByText('pick HBKOF')).toBeNull();
+      fireEvent.change(field(container, 'immatriculation'), { target: { value: 'hb-kof' } });
+      expect(field(container, 'immatriculation').value).toBe('HBKOF');
+    });
+
+    it('asks to accept the privacy policy when the aerodrome has one', () => {
+      renderVisitorForm({ privacyPolicyUrl: 'https://aerodrome.ch/privacy' });
+      expect(screen.getByText('ppr.withoutLogin.privacyConsent')).toBeTruthy();
+    });
+
+    it('asks nothing about privacy without a privacy policy', () => {
+      renderVisitorForm({ privacyPolicyUrl: null });
+      expect(screen.queryByText('ppr.withoutLogin.privacyConsent')).toBeNull();
+    });
+
+    it('asks nothing about privacy with a login, which accepted it', () => {
+      renderForm({ privacyPolicyUrl: 'https://aerodrome.ch/privacy' });
+      expect(screen.queryByText('ppr.withoutLogin.privacyConsent')).toBeNull();
+    });
+
+    it('takes visitors back to the PPR intro on cancel', () => {
+      goTo('/ppr/guest');
+      renderVisitorForm();
+
+      fireEvent.click(screen.getByText('wizard.cancel'));
+
+      expect(window.location.pathname).toBe('/ppr/new');
+    });
+
+    it('takes guest sessions back to the start page on cancel', () => {
+      goTo('/ppr/new');
+      renderGuestForm();
+
+      fireEvent.click(screen.getByText('wizard.cancel'));
+
+      expect(window.location.pathname).toBe('/');
+    });
+
+    describe('after sending', () => {
+      const pending = { key: '-Nabc', status: 'pending', statusToken: 'token_1-x' };
+      const initialValues = { email: 'max@example.com' };
+
+      it('tells where the receipt went and leads to the status page', () => {
+        goTo('/ppr/guest');
+        const { props } = renderVisitorForm({ submitted: true, result: pending, initialValues });
+
+        expect(screen.getByText('ppr.submitSuccess')).toBeTruthy();
+        expect(screen.getByText('ppr.submitPending')).toBeTruthy();
+        expect(screen.getByText('ppr.withoutLogin.receiptSent:{"email":"max@example.com"}')).toBeTruthy();
+        expect(screen.getByText('ppr.withoutLogin.wrongAddress')).toBeTruthy();
+
+        fireEvent.click(screen.getByText('ppr.withoutLogin.showStatus'));
+
+        expect(window.location.pathname).toBe('/ppr/status/-Nabc/token_1-x');
+        expect(props.confirmPprSubmitSuccess).not.toHaveBeenCalled();
+      });
+
+      it('tells where an answer on submission went, with the answer', () => {
+        const { container } = renderVisitorForm({
+          submitted: true,
+          result: { ...pending, status: 'approved', reviewRemarks: 'Runway 05/23' },
+          initialValues,
+        });
+
+        expect(screen.getByText('ppr.submitApproved')).toBeTruthy();
+        expect(field(container, 'ppr-submit-remarks').textContent).toBe('ppr.pilotInfoRunway 05/23');
+        expect(screen.getByText('ppr.checkBeforeFlight')).toBeTruthy();
+        expect(screen.getByText('ppr.withoutLogin.answerSent:{"email":"max@example.com"}')).toBeTruthy();
+        expect(screen.queryByText('ppr.answerByEmail')).toBeNull();
+        expect(screen.queryByText(/ppr\.withoutLogin\.receiptSent/)).toBeNull();
+        expect(screen.getByText('ppr.withoutLogin.showStatus')).toBeTruthy();
+      });
+
+      it('names the address the request was sent with, not the one in the field now', () => {
+        renderVisitorForm({
+          submitted: true,
+          result: { ...pending, email: 'max@example.com' },
+          initialValues: { email: 'moritz@example.com' },
+        });
+
+        expect(screen.getByText('ppr.withoutLogin.receiptSent:{"email":"max@example.com"}')).toBeTruthy();
+      });
+
+      it('asks to open the status when the receipt could not be sent, and promises no email', () => {
+        renderVisitorForm({ submitted: true, result: { ...pending, emailSent: false }, initialValues });
+
+        expect(screen.getByText('ppr.withoutLogin.receiptFailed:{"email":"max@example.com"}')).toBeTruthy();
+        expect(screen.queryByText('ppr.submitPending')).toBeNull();
+        expect(screen.queryByText(/ppr\.withoutLogin\.receiptSent/)).toBeNull();
+        expect(screen.getByText('ppr.withoutLogin.wrongAddress')).toBeTruthy();
+        expect(screen.getByText('ppr.withoutLogin.showStatus')).toBeTruthy();
+      });
+
+      it.each([
+        ['approved', { ...pending, status: 'approved' }],
+        ['rejected', { ...pending, status: 'rejected', reviewRemarks: 'Geschlossen' }],
+      ])('asks to open the status when the answer to a request %s on submission could not be sent', (name, result) => {
+        renderVisitorForm({ submitted: true, result: { ...result, emailSent: false }, initialValues });
+
+        expect(screen.getByText('ppr.withoutLogin.answerFailed:{"email":"max@example.com"}')).toBeTruthy();
+        expect(screen.queryByText(/ppr\.withoutLogin\.answerSent/)).toBeNull();
+        expect(screen.getByText('ppr.withoutLogin.showStatus')).toBeTruthy();
+      });
+
+      it('keeps promising the answer by email to a login, whatever the server says', () => {
+        renderForm({ submitted: true, result: { key: 'req-1', status: 'pending', emailSent: false } });
+        expect(screen.getByText('ppr.submitPending')).toBeTruthy();
+      });
+
+      it('tells that the email was sent when the server does not say', () => {
+        renderVisitorForm({ submitted: true, result: { ...pending, emailSent: true }, initialValues });
+        expect(screen.getByText('ppr.withoutLogin.receiptSent:{"email":"max@example.com"}')).toBeTruthy();
+      });
+
+      it('gives no hint about a wrong address for an answered request, which can\'t be withdrawn', () => {
+        renderVisitorForm({ submitted: true, result: { ...pending, status: 'approved' }, initialValues });
+        expect(screen.queryByText('ppr.withoutLogin.wrongAddress')).toBeNull();
+      });
+
+      it('takes visitors back to the PPR intro when the dialog is closed', () => {
+        goTo('/ppr/guest');
+        const { props } = renderVisitorForm({ submitted: true, result: pending, initialValues });
+
+        fireEvent.click(screen.getByText('common.close'));
+
+        expect(window.location.pathname).toBe('/ppr/new');
+        expect(props.confirmPprSubmitSuccess).not.toHaveBeenCalled();
+      });
+
+      it('takes guest sessions back to the start page when the dialog is closed', () => {
+        goTo('/ppr/new');
+        renderGuestForm({ submitted: true, result: pending, initialValues });
+
+        fireEvent.click(screen.getByText('common.close'));
+
+        expect(window.location.pathname).toBe('/');
+      });
+
+      it('offers no status page without the token of its link', () => {
+        renderVisitorForm({ submitted: true, result: { key: '-Nabc', status: 'pending' }, initialValues });
+
+        expect(screen.queryByText('ppr.withoutLogin.showStatus')).toBeNull();
+        expect(screen.getByText('common.close')).toBeTruthy();
+      });
     });
   });
 });

@@ -14,9 +14,20 @@ describe('PPR translations', () => {
     expect(keysOf((en as any).ppr)).toEqual(keysOf((de as any).ppr));
   });
 
-  it.each(['nav.ppr', 'nav.pprList', 'admin.ppr'])('has %s in German and English', key => {
-    expect(lookup(de, key)).toEqual(expect.any(String));
-    expect(lookup(en, key)).toEqual(expect.any(String));
+  it.each(['nav.ppr', 'nav.pprList', 'admin.ppr', 'validate.email', 'legal.privacyPolicy'])(
+    'has %s in German and English',
+    key => {
+      expect(lookup(de, key)).toEqual(expect.any(String));
+      expect(lookup(en, key)).toEqual(expect.any(String));
+    }
+  );
+
+  // e.g. {{aerodrome}}, or <1> for the link of a consent text
+  it('has the same placeholders in German and English', () => {
+    const placeholders = (text: unknown) => (String(text).match(/{{\w+}}|<\/?\d+>/g) || []).sort();
+    keysOf((de as any).ppr).forEach(key => {
+      expect([key, placeholders(lookup((en as any).ppr, key))]).toEqual([key, placeholders(lookup((de as any).ppr, key))]);
+    });
   });
 
   it('uses Swiss German spelling (no sharp s)', () => {

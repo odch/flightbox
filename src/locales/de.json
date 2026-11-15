@@ -723,6 +723,7 @@
     "submitApproved": "Ihre PPR-Anfrage wurde genehmigt.",
     "submitRejected": "Ihre PPR-Anfrage wurde abgelehnt.",
     "pilotInfo": "Hinweise für Piloten",
+    "approvalRemarks": "Bemerkung",
     "reason": "Grund",
     "checkBeforeFlight": "Bitte prüfen Sie vor dem Flug den aktuellen Flugplatz-Status und die NOTAM.",
     "answerByEmail": "Sie erhalten die Antwort auch per E-Mail.",
@@ -761,7 +762,49 @@
       "loadFailed": "Die Einstellungen konnten nicht geladen werden.",
       "saveFailed": "Die Einstellungen konnten nicht gespeichert werden."
     },
-    "aerodromeStatusHint": "Solange der Status «Geschlossen» ist, werden PPR-Anfragen für heute abgelehnt. Tage, an denen Sie keine PPR-Anfragen genehmigen, sperren Sie im Tab «PPR-Anfragen» unter «Gesperrte Tage»."
+    "aerodromeStatusHint": "Solange der Status «Geschlossen» ist, werden PPR-Anfragen für heute abgelehnt. Tage, an denen Sie keine PPR-Anfragen genehmigen, sperren Sie im Tab «PPR-Anfragen» unter «Gesperrte Tage».",
+    "requestFor": "PPR-Anfrage für {{aerodrome}}",
+    "intro": {
+      "text": "Für eine Landung in {{aerodrome}} brauchen Sie eine vorherige Genehmigung (PPR). Füllen Sie das Formular aus: Sie erhalten die Antwort per E-Mail.",
+      "withLogin": "Mit Anmeldung fortfahren",
+      "withLoginHelp": "Ihre Angaben aus dem Profil werden vorausgefüllt, und Sie sehen Ihre Anfragen unter «Meine PPR-Anfragen». Sie melden sich mit einem Code an, den Sie per E-Mail erhalten.",
+      "withoutLogin": "Ohne Anmeldung fortfahren",
+      "withoutLoginHelp": "Sie geben Ihre Angaben selbst ein und verfolgen die Anfrage über den Link, den Sie per E-Mail erhalten."
+    },
+    "login": {
+      "context": "Melden Sie sich an, um Ihre PPR-Anfrage zu stellen.",
+      "back": "Zurück"
+    },
+    "withoutLogin": {
+      "emailHelp": "Die E-Mails zu Ihrer Anfrage gehen an diese Adresse.",
+      "invalidEmail": "Geben Sie eine gültige E-Mail-Adresse ein, z. B. name@beispiel.ch.",
+      "privacyConsent": "Mit dem Senden akzeptieren Sie die <1>Datenschutzerklärung</1>.",
+      "receiptSent": "Wir haben eine Eingangsbestätigung an {{email}} gesendet.",
+      "answerSent": "Wir haben die Antwort auch an {{email}} gesendet.",
+      "receiptFailed": "Die Eingangsbestätigung an {{email}} konnte nicht gesendet werden. Öffnen Sie jetzt den Status und setzen Sie ein Lesezeichen: Dort sehen Sie auch die Antwort.",
+      "answerFailed": "Die Antwort konnte nicht an {{email}} gesendet werden. Öffnen Sie jetzt den Status und setzen Sie ein Lesezeichen, um die Anfrage später wieder aufzurufen.",
+      "wrongAddress": "Stimmt die Adresse nicht? Ziehen Sie die Anfrage unter «Status anzeigen» zurück und senden Sie sie mit der richtigen Adresse neu.",
+      "showStatus": "Status anzeigen",
+      "tooManyRequests": "Sie haben zu viele Anfragen gesendet. Versuchen Sie es später wieder.",
+      "marker": "ohne Anmeldung",
+      "submitted": "Gestellt",
+      "unconfirmed": "Ohne Anmeldung – E-Mail-Adresse nicht bestätigt"
+    },
+    "statusPage": {
+      "pendingHint": "Die Anfrage ist noch nicht beantwortet. Sie erhalten die Antwort per E-Mail und sehen sie auch hier.",
+      "withdraw": "Anfrage zurückziehen",
+      "withdrawConfirm": "Möchten Sie diese PPR-Anfrage wirklich zurückziehen?",
+      "withdrawn": "Ihre PPR-Anfrage wurde zurückgezogen.",
+      "notFound": "Diese PPR-Anfrage gibt es nicht mehr, oder der Link ist ungültig.",
+      "answeredMeanwhile": "Die PPR-Anfrage wurde inzwischen beantwortet und kann nicht mehr zurückgezogen werden.",
+      "loadFailed": "Der Status der PPR-Anfrage konnte nicht geladen werden. Versuchen Sie es später wieder.",
+      "withdrawFailed": "Die PPR-Anfrage konnte nicht zurückgezogen werden."
+    },
+    "websiteLink": {
+      "title": "Link für Ihre Website",
+      "description": "Verlinken Sie diese Adresse auf Ihrer Website, z. B. mit «PPR-Anfrage stellen». Sie führt Piloten direkt zur PPR-Anfrage.",
+      "ownView": "Da Sie angemeldet sind, sehen Sie unter diesem Link das Formular. Was Besucher ohne Anmeldung sehen, zeigt Ihnen ein privates Fenster des Browsers."
+    }
   },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."

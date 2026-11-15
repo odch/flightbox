@@ -723,6 +723,7 @@
     "submitApproved": "Your PPR request has been approved.",
     "submitRejected": "Your PPR request has been rejected.",
     "pilotInfo": "Information for pilots",
+    "approvalRemarks": "Remarks",
     "reason": "Reason",
     "checkBeforeFlight": "Please check the current aerodrome status and the NOTAMs before the flight.",
     "answerByEmail": "You will also receive the answer by email.",
@@ -761,7 +762,49 @@
       "loadFailed": "The settings could not be loaded.",
       "saveFailed": "The settings could not be saved."
     },
-    "aerodromeStatusHint": "While the status is «Closed», PPR requests for today are rejected. Days on which you do not approve PPR requests are blocked in the «PPR requests» tab under «Blocked days»."
+    "aerodromeStatusHint": "While the status is «Closed», PPR requests for today are rejected. Days on which you do not approve PPR requests are blocked in the «PPR requests» tab under «Blocked days».",
+    "requestFor": "PPR request for {{aerodrome}}",
+    "intro": {
+      "text": "To land at {{aerodrome}}, you need prior permission (PPR). Fill in the form: you will receive the answer by email.",
+      "withLogin": "Continue with login",
+      "withLoginHelp": "Your details from your profile are filled in, and you see your requests under «My PPR requests». You log in with a code that you receive by email.",
+      "withoutLogin": "Continue without login",
+      "withoutLoginHelp": "You enter your details yourself and follow the request through the link you receive by email."
+    },
+    "login": {
+      "context": "Log in to send your PPR request.",
+      "back": "Back"
+    },
+    "withoutLogin": {
+      "emailHelp": "The emails about your request go to this address.",
+      "invalidEmail": "Enter a valid email address, e.g. name@example.com.",
+      "privacyConsent": "By sending you accept the <1>privacy policy</1>.",
+      "receiptSent": "We have sent a confirmation of receipt to {{email}}.",
+      "answerSent": "We have also sent the answer to {{email}}.",
+      "receiptFailed": "The confirmation of receipt to {{email}} could not be sent. Open the status now and bookmark it: you will also see the answer there.",
+      "answerFailed": "The answer could not be sent to {{email}}. Open the status now and bookmark it to return to the request later.",
+      "wrongAddress": "Wrong address? Withdraw the request under «Show status» and send it again with the right address.",
+      "showStatus": "Show status",
+      "tooManyRequests": "You have sent too many requests. Please try again later.",
+      "marker": "without login",
+      "submitted": "Submitted",
+      "unconfirmed": "Without login – email address not confirmed"
+    },
+    "statusPage": {
+      "pendingHint": "The request has not been answered yet. You will receive the answer by email and also see it here.",
+      "withdraw": "Withdraw request",
+      "withdrawConfirm": "Are you sure you want to withdraw this PPR request?",
+      "withdrawn": "Your PPR request has been withdrawn.",
+      "notFound": "This PPR request no longer exists, or the link is invalid.",
+      "answeredMeanwhile": "The PPR request has been answered in the meantime and can no longer be withdrawn.",
+      "loadFailed": "The status of the PPR request could not be loaded. Please try again later.",
+      "withdrawFailed": "The PPR request could not be withdrawn."
+    },
+    "websiteLink": {
+      "title": "Link for your website",
+      "description": "Link to this address on your website, e.g. as «Request PPR». It takes pilots straight to the PPR request.",
+      "ownView": "As you are logged in, this link shows you the form. A private browser window shows you what visitors without a login see."
+    }
   },
   "maskedInput": {
     "tooltip": "To edit this field, clear it first and then enter the desired value."

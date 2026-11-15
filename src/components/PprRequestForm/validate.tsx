@@ -1,5 +1,6 @@
 import validateUtil from '../../util/validate';
 import dates from '../../util/dates';
+import { isSendableEmail } from '../../util/emails';
 import { categories as aircraftCategories } from '../../util/aircraftCategories';
 import i18n from '../../i18n';
 
@@ -79,6 +80,20 @@ const validate = (values: Record<string, any>, today: string = dates.localDate()
     }
   }
 
+  return errors;
+};
+
+// Without a login the pilot enters the address the emails about the request
+// go to (with a login they go to the login's address). Checked by the
+// server's rule, which would refuse the request.
+export const validateWithoutLogin = (values: Record<string, any>, today: string = dates.localDate()) => {
+  const errors = validate(values, today);
+  const email = typeof values.email === 'string' ? values.email.trim() : '';
+  if (email === '') {
+    errors.email = i18n.t('validate.email');
+  } else if (!isSendableEmail(email)) {
+    errors.email = i18n.t('ppr.withoutLogin.invalidEmail');
+  }
   return errors;
 };
 

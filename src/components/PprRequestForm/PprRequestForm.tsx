@@ -7,6 +7,8 @@ import H1 from '../H1';
 import Button from '../Button';
 import ModalDialog from '../ModalDialog';
 import MaterialIcon from '../MaterialIcon';
+import PprAnswer from '../PprAnswer';
+import PrivacyConsentText from '../PrivacyConsentText';
 import FieldSet from '../wizards/FieldSet';
 import { CancelButton, NextButton } from '../WizardNavigation/WizardNavigation';
 import { Chip, FavouritesBar, StarIcon } from '../wizards/QuickPickBar';
@@ -21,9 +23,10 @@ import {
   renderTimeField,
 } from '../wizards/renderField';
 import { getEnabledFlightTypes } from '../../util/flightTypes';
+import { REGISTRATION_REGEX } from '../../util/aircrafts';
 import type { Aircraft } from '../../modules/profile/migration';
 import type { PprSubmitResult } from '../../modules/ppr/actions';
-import validate from './validate';
+import validate, { validateWithoutLogin } from './validate';
 
 // The page has the same padding as the message and profile pages, so the
 // fields, section titles, shortcuts and buttons all start at its edge
@@ -60,33 +63,20 @@ const DialogButton = styled(Button)`
   float: right;
 `;
 
-// Information for pilots or the reason of a rejection, as the pilot's
-// requests list shows them
-const AnswerRemarks = styled.div<{ $approved: boolean }>`
-  margin-bottom: 1em;
-  padding: 0.5em 0.75em;
-  background-color: #f8f9fa;
-  border-left: 3px solid ${props => props.$approved ? '#28a745' : '#dc3545'};
-  text-align: left;
-  line-height: 1.4;
-  white-space: pre-line;
-  overflow-wrap: anywhere;
-`;
-
-const AnswerLabel = styled.div`
-  margin-bottom: 0.25em;
-  color: #666;
-  font-size: 0.9em;
-`;
-
 // Like the help texts of the settings forms. The field container enlarges
-// its direct children, so this needs the higher specificity of &&.
-const CategoryFirst = styled.p`
+// its direct children (the hint of the flight types is one), so this needs
+// the higher specificity of &&.
+const FieldHelp = styled.p`
   && {
     font-size: 0.9em;
   }
   color: #666;
   margin: 0.5em 0 0;
+`;
+
+// At the edge of the page, like the fields
+const ConsentText = styled(PrivacyConsentText)`
+  padding: 0;
 `;
 
 // The flight types the arrival can later be recorded with: those of the
@@ -125,6 +115,13 @@ const applyAircraft = (
   changeCategory(form, aircraft.category);
 };
 
+// As the aircraft dropdown takes it
+const normalizeRegistration = (value: string) => value.toUpperCase().replace(REGISTRATION_REGEX, '');
+
+// The public status page of a request (route /ppr/status/:key/:token)
+const statusPath = (key: string, token: string) =>
+  `/ppr/status/${encodeURIComponent(key)}/${encodeURIComponent(token)}`;
+
 interface PprRequestFormProps {
   initialValues: Record<string, any>;
   profileAircrafts?: Aircraft[];
@@ -133,16 +130,28 @@ interface PprRequestFormProps {
   // The answer, when the request was answered right away
   result?: PprSubmitResult | null;
   commitFailed: boolean;
+  // The server refused a request without login for too many requests
+  rateLimited?: boolean;
   initPprForm: () => void;
   resetPprForm: () => void;
   onSubmit: (values: Record<string, any>) => void;
-  confirmPprSubmitSuccess: () => void;
+  // With login: closes the answer and goes to the start page
+  confirmPprSubmitSuccess?: () => void;
+  // A request without login: the pilot enters the address the receipt and
+  // the answer go to, and the answer leads to the status page
+  withoutLogin?: boolean;
+  // Nobody is logged in: the aircraft list can't be read, and the pages
+  // behind the login would show the login
+  visitor?: boolean;
+  privacyPolicyUrl?: string | null;
 }
 
 const PprRequestForm = (props: PprRequestFormProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { initPprForm, resetPprForm, profileAircrafts } = props;
+  const { initPprForm, resetPprForm, profileAircrafts, withoutLogin, visitor } = props;
+  // Visitors go back to the PPR intro, everybody else to the start page
+  const homePath = visitor ? '/ppr/new' : '/';
 
   useEffect(() => {
     initPprForm();
@@ -161,38 +170,100 @@ const PprRequestForm = (props: PprRequestFormProps) => {
   const showQuickPicks = !!profileAircrafts && profileAircrafts.length >= 2;
 
   // Requests can be answered on submission: automatically, or rejected for a
-  // closure
-  const renderSubmitResult = () => {
+  // closure. Without a login the address the emails went to is shown, so a
+  // mistyped one is noticed, and the pilot learns when the email failed:
+  // its link is the only way back to the request.
+  const renderSubmitResult = (typedEmail?: string) => {
     const result = props.result;
+    const email = result?.email ?? typedEmail;
+    const emailFailed = result?.emailSent === false;
     if (result && (result.status === 'approved' || result.status === 'rejected')) {
       const approved = result.status === 'approved';
       return (
         <>
           <DialogHeading>{t(approved ? 'ppr.submitApproved' : 'ppr.submitRejected')}</DialogHeading>
           {result.reviewRemarks && (
-            <AnswerRemarks $approved={approved} data-cy="ppr-submit-remarks">
-              <AnswerLabel>{t(approved ? 'ppr.pilotInfo' : 'ppr.reason')}</AnswerLabel>
-              {result.reviewRemarks}
-            </AnswerRemarks>
+            <PprAnswer status={result.status} remarks={result.reviewRemarks} dataCy="ppr-submit-remarks"/>
           )}
           {approved && <DialogMessage>{t('ppr.checkBeforeFlight')}</DialogMessage>}
-          <DialogMessage>{t('ppr.answerByEmail')}</DialogMessage>
+          <DialogMessage>
+            {withoutLogin
+              ? t(emailFailed ? 'ppr.withoutLogin.answerFailed' : 'ppr.withoutLogin.answerSent', { email })
+              : t('ppr.answerByEmail')}
+          </DialogMessage>
         </>
       );
     }
+    // Without its receipt the answer by email can't be promised either: the
+    // status page shows it
+    const receiptFailed = withoutLogin && emailFailed;
     return (
       <>
         <DialogHeading>{t('ppr.submitSuccess')}</DialogHeading>
-        <DialogMessage>{t('ppr.submitPending')}</DialogMessage>
+        {!receiptFailed && <DialogMessage>{t('ppr.submitPending')}</DialogMessage>}
+        {withoutLogin && (
+          <>
+            <DialogMessage>
+              {t(receiptFailed ? 'ppr.withoutLogin.receiptFailed' : 'ppr.withoutLogin.receiptSent', { email })}
+            </DialogMessage>
+            {/* Only the status page can withdraw it once the dialog is closed */}
+            <DialogMessage>{t('ppr.withoutLogin.wrongAddress')}</DialogMessage>
+          </>
+        )}
+      </>
+    );
+  };
+
+  // With a login the saga goes to the start page and resets the form.
+  // Without one the buttons leave the form, which resets it on unmount.
+  const renderSubmitResultButtons = () => {
+    if (!withoutLogin) {
+      return (
+        <DialogButton
+          type="button"
+          icon="close"
+          label={t('common.close')}
+          onClick={props.confirmPprSubmitSuccess}
+          flat
+        />
+      );
+    }
+    const key = props.result?.key;
+    const token = props.result?.statusToken;
+    return (
+      <>
+        {key && token && (
+          <DialogButton
+            type="button"
+            icon="arrow_forward"
+            label={t('ppr.withoutLogin.showStatus')}
+            onClick={() => navigate(statusPath(key, token))}
+            primary
+            dataCy="ppr-show-status"
+          />
+        )}
+        <DialogButton
+          type="button"
+          icon="close"
+          label={t('common.close')}
+          onClick={() => navigate(homePath)}
+          flat
+        />
       </>
     );
   };
 
   return (
-    <Form validate={validate} onSubmit={handleFormSubmit} initialValues={props.initialValues} keepDirtyOnReinitialize>
+    <Form
+      validate={withoutLogin ? validateWithoutLogin : validate}
+      onSubmit={handleFormSubmit}
+      initialValues={props.initialValues}
+      keepDirtyOnReinitialize
+    >
       {({ handleSubmit, form, values }) => (
         <form onSubmit={handleSubmit} className="PprRequestForm">
-          <H1>{t('ppr.newRequest')}</H1>
+          {/* The side header with the aerodrome's name is hidden on phones */}
+          <H1>{withoutLogin ? t('ppr.requestFor', { aerodrome: __CONF__.aerodrome.name }) : t('ppr.newRequest')}</H1>
 
           <SectionTitle>{t('movement.details.pilot')}</SectionTitle>
           <FieldSet gutter={false}>
@@ -208,6 +279,19 @@ const PprRequestForm = (props: PprRequestFormProps) => {
               component={renderInputField}
               label={t('movement.details.firstname')}
             />
+            {withoutLogin && (
+              <Field name="email">
+                {({ input, meta }) =>
+                  renderInputField({
+                    input,
+                    meta,
+                    label: t('movement.details.email'),
+                    type: 'email',
+                    footer: <FieldHelp>{t('ppr.withoutLogin.emailHelp')}</FieldHelp>,
+                  })
+                }
+              </Field>
+            )}
             <Field
               name="phone"
               component={renderPhoneField}
@@ -237,24 +321,33 @@ const PprRequestForm = (props: PprRequestFormProps) => {
             </QuickPicks>
           )}
           <FieldSet gutter={false}>
-            <Field name="immatriculation">
-              {({ input, meta }) =>
-                renderAircraftDropdown({
-                  input: {
-                    ...input,
-                    onChange: (aircraft: any) => {
-                      if (aircraft) {
-                        applyAircraft(form, aircraft);
-                      } else {
-                        form.change('immatriculation', null);
-                      }
+            {visitor ? (
+              // The aircraft list needs a login
+              <Field name="immatriculation" parse={normalizeRegistration}>
+                {({ input, meta }) =>
+                  renderInputField({ input, meta, label: t('movement.details.immatriculation') })
+                }
+              </Field>
+            ) : (
+              <Field name="immatriculation">
+                {({ input, meta }) =>
+                  renderAircraftDropdown({
+                    input: {
+                      ...input,
+                      onChange: (aircraft: any) => {
+                        if (aircraft) {
+                          applyAircraft(form, aircraft);
+                        } else {
+                          form.change('immatriculation', null);
+                        }
+                      },
                     },
-                  },
-                  meta,
-                  label: t('movement.details.immatriculation'),
-                })
-              }
-            </Field>
+                    meta,
+                    label: t('movement.details.immatriculation'),
+                  })
+                }
+              </Field>
+            )}
             <Field
               name="aircraftType"
               type="text"
@@ -306,7 +399,7 @@ const PprRequestForm = (props: PprRequestFormProps) => {
               orientation="vertical"
               label={t('movement.details.flightType')}
               hint={!values.aircraftCategory && (
-                <CategoryFirst data-cy="flightType-categoryFirst">{t('ppr.chooseCategoryFirst')}</CategoryFirst>
+                <FieldHelp data-cy="flightType-categoryFirst">{t('ppr.chooseCategoryFirst')}</FieldHelp>
               )}
             />
             <Field
@@ -315,6 +408,10 @@ const PprRequestForm = (props: PprRequestFormProps) => {
               label={t('ppr.remarks')}
             />
           </FieldSet>
+
+          {withoutLogin && (
+            <ConsentText privacyPolicyUrl={props.privacyPolicyUrl} i18nKey="ppr.withoutLogin.privacyConsent"/>
+          )}
 
           <Actions>
             <NextButton
@@ -326,24 +423,20 @@ const PprRequestForm = (props: PprRequestFormProps) => {
               loading={props.submitting}
               dataCy="ppr-submit"
             />
+            {/* Not while it is sent: the pilot sees how it went */}
             <CancelButton
               type="button"
               label={t('wizard.cancel')}
-              onClick={() => navigate('/')}
+              onClick={() => navigate(homePath)}
+              disabled={props.submitting}
             />
           </Actions>
 
           {props.submitted && (
             <ModalDialog content={
               <DialogContent data-cy="ppr-submit-result">
-                {renderSubmitResult()}
-                <DialogButton
-                  type="button"
-                  icon="close"
-                  label={t('common.close')}
-                  onClick={props.confirmPprSubmitSuccess}
-                  flat
-                />
+                {renderSubmitResult(values.email)}
+                {renderSubmitResultButtons()}
               </DialogContent>
             }/>
           )}
@@ -352,7 +445,9 @@ const PprRequestForm = (props: PprRequestFormProps) => {
             <ModalDialog content={
               <DialogContent>
                 <DialogHeading>{t('commitFailure.heading')}</DialogHeading>
-                <DialogMessage>{t('ppr.submitFailed')}</DialogMessage>
+                <DialogMessage>
+                  {t(props.rateLimited ? 'ppr.withoutLogin.tooManyRequests' : 'ppr.submitFailed')}
+                </DialogMessage>
                 <DialogButton
                   type="button"
                   icon="close"
