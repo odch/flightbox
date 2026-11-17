@@ -94,7 +94,14 @@ export const renderIncrementationField = (props) => {
 };
 
 export const renderDateField = (props) => {
-  const cmp = <DatePicker {...props.input} readOnly={props.readOnly} dataCy={props.input.name}/>;
+  const cmp = (
+    <DatePicker
+      {...props.input}
+      readOnly={props.readOnly}
+      blockedPeriods={props.blockedPeriods}
+      dataCy={props.input.name}
+    />
+  );
   return renderLabeledComponent(props, cmp);
 };
 

@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { initPprForm, submitPprGuestRequest, resetPprForm } from '../modules/ppr';
+import { initPprForm, submitPprGuestRequest, resetPprForm, dismissPprSubmitFailure } from '../modules/ppr';
 import PprRequestPage from '../components/PprRequestPage';
 import { RootState } from '../modules';
 
@@ -12,6 +12,7 @@ const mapStateToProps = (state: RootState) => ({
   commitFailed: state.ppr.form.commitFailed,
   rateLimited: state.ppr.form.rateLimited,
   initialValues: state.ppr.initialValues,
+  closures: state.ppr.form.closures,
   withoutLogin: true,
 });
 
@@ -19,6 +20,7 @@ const mapActionCreators = {
   initPprForm,
   onSubmit: submitPprGuestRequest,
   resetPprForm,
+  dismissPprSubmitFailure,
 };
 
 export default connect(mapStateToProps, mapActionCreators)(PprRequestPage);

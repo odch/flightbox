@@ -38,6 +38,7 @@ describe('PprRequestPage', () => {
     initPprForm: jest.fn(),
     onSubmit: jest.fn(),
     resetPprForm: jest.fn(),
+    dismissPprSubmitFailure: jest.fn(),
   };
 
   // Guest sessions too: the request is behind the login
@@ -71,8 +72,16 @@ describe('PprRequestPage', () => {
 
     expect(formProps()).toEqual(expect.objectContaining({
       onSubmit: props.onSubmit,
+      dismissPprSubmitFailure: props.dismissPprSubmitFailure,
       withoutLogin: true,
       rateLimited: true,
     }));
+  });
+
+  it.each([[false], [true]])('passes the form the closures (without login: %p)', withoutLogin => {
+    const closures = [{ from: '2026-11-20', to: '2026-11-22', reason: 'Runway works' }];
+    render(<PprRequestPage {...props} withoutLogin={withoutLogin} closures={closures}/>);
+
+    expect(formProps().closures).toBe(closures);
   });
 });

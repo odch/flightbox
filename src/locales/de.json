@@ -692,7 +692,8 @@
     "validation": {
       "plannedTime": "Geben Sie hier die geplante Zeit in Stunden und Minuten ein (Lokalzeit).",
       "plannedDatePast": "Das geplante Datum darf nicht in der Vergangenheit liegen.",
-      "plannedDateTooFar": "Das geplante Datum darf höchstens ein Jahr in der Zukunft liegen."
+      "plannedDateTooFar": "Das geplante Datum darf höchstens ein Jahr in der Zukunft liegen.",
+      "plannedDateBlocked": "An diesem Tag ist keine PPR-Anfrage möglich: {{reason}}"
     },
     "status": {
       "pending": "Ausstehend",
@@ -743,13 +744,13 @@
       "pilotInfoHelp": "Stehen in jeder automatischen Genehmigung, z. B. Piste, Volte, Funkfrequenz, Landetaxe und Telefonnummer.",
       "tooLong": "Höchstens {{max}} Zeichen.",
       "closures": "Gesperrte Tage",
-      "closuresHelp": "Sperren Sie Tage, an denen Sie keine PPR-Anfragen genehmigen, z. B. wegen Pistenarbeiten, eines Anlasses oder weil niemand vor Ort ist. Neue Anfragen für diese Tage werden mit dem Grund abgelehnt, auch bei manueller Beantwortung. Gesperrte Tage ändern den Flugplatz-Status nicht. Solange er «Geschlossen» ist, werden auch Anfragen für heute abgelehnt. Bereits gestellte Anfragen bleiben, wie sie sind: Ausstehende lehnen Sie unten in der Liste «PPR-Anfragen» ab, Genehmigungen widerrufen Sie dort.",
+      "closuresHelp": "Sperren Sie Tage, an denen Sie keine PPR-Anfragen genehmigen, z. B. wegen Pistenarbeiten, eines Anlasses oder weil niemand vor Ort ist. Das Anfrageformular zeigt diese Tage mit dem Grund im Kalender, und neue Anfragen für sie werden mit dem Grund abgelehnt, auch bei manueller Beantwortung. Gesperrte Tage ändern den Flugplatz-Status nicht. Solange er «Geschlossen» ist, werden auch Anfragen für heute abgelehnt. Bereits gestellte Anfragen bleiben, wie sie sind: Ausstehende lehnen Sie unten in der Liste «PPR-Anfragen» ab, Genehmigungen widerrufen Sie dort.",
       "noClosures": "Keine Tage gesperrt.",
       "noClosuresShort": "keine",
       "moreClosures": "und {{count}} weitere",
       "closureFrom": "Von",
       "closureTo": "Bis",
-      "closureReason": "Grund (steht in der Ablehnung)",
+      "closureReason": "Grund (sehen die Piloten)",
       "addClosure": "Sperre hinzufügen",
       "removeClosure": "Sperre entfernen",
       "closureDatesRequired": "Geben Sie den ersten und den letzten gesperrten Tag ein.",
@@ -808,6 +809,9 @@
   },
   "maskedInput": {
     "tooltip": "Um dieses Feld zu bearbeiten, leeren Sie es und setzen Sie anschliessend den gewünschten Wert."
+  },
+  "datePicker": {
+    "blocked": "Gesperrt"
   },
   "invoicesReport": {
     "onlinePayments": "Online-Zahlungen",

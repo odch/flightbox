@@ -128,4 +128,39 @@ describe('PPR sagas: answers that come after the page was left', () => {
     expect(state().form.result).toBeNull();
     expect(state().form.submitting).toBe(false);
   });
+
+  it('show the closures that come while the form is open', async () => {
+    const closures = [{ from: '2026-11-20', to: '2026-11-22', reason: 'Runway works' }];
+    mockedRemote.loadClosures.mockResolvedValue(closures);
+
+    const { task, state } = run(sagas.loadPprClosures, actions.initPprForm());
+    await task.toPromise();
+
+    expect(state().form.closures).toEqual(closures);
+  });
+
+  it('leave no closures for the next form', async () => {
+    const load = deferred<actions.PprClosure[]>();
+    mockedRemote.loadClosures.mockReturnValue(load.promise);
+
+    const { task, dispatch, state } = run(sagas.loadPprClosures, actions.initPprForm());
+    dispatch(actions.resetPprForm());
+    load.resolve([{ from: '2026-11-20', to: '2026-11-22', reason: 'Runway works' }]);
+    await task.toPromise();
+
+    expect(state().form.closures).toEqual([]);
+  });
+
+  // The server still rejects requests for their days
+  it('leave the form without closures when they cannot be loaded', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockedRemote.loadClosures.mockRejectedValue(new Error('Failed to read closures'));
+
+    const { task, state } = run(sagas.loadPprClosures, actions.initPprForm());
+    await task.toPromise();
+
+    expect(state().form.closures).toEqual([]);
+    expect(error).toHaveBeenCalledWith('Failed to load PPR closures', expect.any(Error));
+    error.mockRestore();
+  });
 });

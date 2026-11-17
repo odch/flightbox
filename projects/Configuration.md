@@ -286,8 +286,10 @@ default) or automatically, i.e. approved right away with the information for pil
 day ("Gesperrte Tage" in the tab, stored at `/settings/ppr/closures`: days without PPR visitors, e.g. events, camps,
 runway works or nobody on site, often while the aerodrome is open, so blocking days does not change the aerodrome
 status) are rejected with its reason, and requests for today are rejected while the aerodrome status is "closed"; the
-"Flugplatz-Status" tab says so. Blocking a day leaves the requests made before as they are. Admins can revoke an
-approval with a reason; the pilot gets it by e-mail. The tab shows the settings in short (answer mode, the next
+"Flugplatz-Status" tab says so. Blocking a day leaves the requests made before as they are. The request form shows
+the blocked days that have not ended (from the public route `GET /ppr/closures`): red in the calendar, with the reason
+on hover and listed below the month, and it refuses them with the reason instead of sending a request that would be
+rejected. Admins can revoke an approval with a reason; the pilot gets it by e-mail. The tab shows the settings in short (answer mode, the next
 blocked days, the address) until an admin clicks "Bearbeiten".
 In the privacy tab ("Datenschutz"), which is shown when `privacySettings` or `ppr` is on, admins set how many days
 after the planned date requests are deleted (a whole number from 1 to 3650, stored at `/settings/ppr/retentionDays`).

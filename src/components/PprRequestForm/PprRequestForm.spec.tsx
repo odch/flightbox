@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderWithTheme, screen, fireEvent } from '../../../test/renderWithTheme';
+import { renderWithTheme, withTheme, screen, fireEvent } from '../../../test/renderWithTheme';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key, options) => options ? `${key}:${JSON.stringify(options)}` : key }),
@@ -74,6 +74,7 @@ const renderForm = (props = {}) => {
   const allProps = {
     initPprForm: jest.fn(),
     resetPprForm: jest.fn(),
+    dismissPprSubmitFailure: jest.fn(),
     confirmPprSubmitSuccess: jest.fn(),
     onSubmit: jest.fn(),
     initialValues: {},
@@ -250,6 +251,83 @@ describe('PprRequestForm', () => {
     expect(container.textContent).toContain(i18n.t('ppr.validation.plannedDatePast'));
   });
 
+  describe('closures', () => {
+    // Days of one month, some weeks ahead
+    const month = inDays(40).slice(0, 7);
+    const day = (dayOfMonth: number) => `${month}-${String(dayOfMonth).padStart(2, '0')}`;
+    const closures = [{ from: day(10), to: day(12), reason: 'Runway works' }];
+    // validate() uses i18n directly, not the mocked useTranslation
+    const blockedMessage = () => i18n.t('ppr.validation.plannedDateBlocked', { reason: 'Runway works' });
+
+    const filled = (plannedDate: string) => ({
+      lastname: 'Muster', firstname: 'Max', immatriculation: 'HBKOF', aircraftCategory: 'Flugzeug',
+      plannedDate, plannedTime: '10:30', flightType: 'private',
+    });
+
+    const chooseDay = (container: HTMLElement, date: string) => {
+      fireEvent.click(field(container, 'plannedDate'));
+      fireEvent.click(container.querySelector(`td[data-day="${date}"] button`)!);
+    };
+
+    it('marks their days in the calendar', () => {
+      const { container } = renderForm({ initialValues: filled(day(20)), closures });
+
+      fireEvent.click(field(container, 'plannedDate'));
+
+      expect(container.querySelector(`td[data-day="${day(11)}"]`)).toHaveClass('blocked-day');
+      expect(container.querySelector(`td[data-day="${day(13)}"]`)).not.toHaveClass('blocked-day');
+      expect(container.querySelector('[data-cy="date-picker-blocked"]')!.textContent).toContain('Runway works');
+    });
+
+    it('says right away that a chosen day is blocked, and sends no request for it', () => {
+      const { container, props } = renderForm({ initialValues: filled(day(20)), closures });
+      expect(container.textContent).not.toContain(blockedMessage());
+
+      chooseDay(container, day(11));
+
+      expect(field(container, 'plannedDate').textContent).toBe(`11.${month.slice(5)}.${month.slice(0, 4)}`);
+      expect(container.textContent).toContain(blockedMessage());
+      fireEvent.click(screen.getByText('ppr.submit'));
+      expect(props.onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('sends the request for another day', () => {
+      const { container, props } = renderForm({ initialValues: filled(day(11)), closures });
+
+      chooseDay(container, day(13));
+      fireEvent.click(screen.getByText('ppr.submit'));
+
+      expect(container.textContent).not.toContain(blockedMessage());
+      expect(props.onSubmit).toHaveBeenCalledTimes(1);
+      expect(props.onSubmit.mock.calls[0][0].plannedDate).toBe(day(13));
+    });
+
+    it('checks the date again when the closures come after it was chosen', () => {
+      const { container, props, rerender } = renderForm({ initialValues: filled(day(11)) });
+      chooseDay(container, day(11));
+      expect(container.textContent).not.toContain(blockedMessage());
+
+      rerender(withTheme(<PprRequestForm {...props} closures={closures}/>));
+
+      expect(container.textContent).toContain(blockedMessage());
+      fireEvent.click(screen.getByText('ppr.submit'));
+      expect(props.onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('refuses their days without login too', () => {
+      const { props } = renderForm({
+        initialValues: { ...filled(day(12)), email: 'max@example.com' },
+        closures,
+        withoutLogin: true,
+      });
+
+      fireEvent.click(screen.getByText('ppr.submit'));
+
+      expect(props.onSubmit).not.toHaveBeenCalled();
+      expect(screen.getByText(blockedMessage())).toBeTruthy();
+    });
+  });
+
   it('goes back to the start page on cancel', () => {
     window.history.pushState({}, '', '/ppr/new');
     renderForm();
@@ -331,6 +409,17 @@ describe('PprRequestForm', () => {
       renderForm({ commitFailed: true, rateLimited: true });
       expect(screen.getByText('ppr.withoutLogin.tooManyRequests')).toBeTruthy();
       expect(screen.queryByText('ppr.submitFailed')).toBeNull();
+    });
+
+    // The form stays open with what it has, e.g. the closures: a reset of
+    // the page would drop them
+    it('closes the notice without resetting the page', () => {
+      const { props } = renderForm({ commitFailed: true });
+
+      fireEvent.click(screen.getByText('common.close'));
+
+      expect(props.dismissPprSubmitFailure).toHaveBeenCalledTimes(1);
+      expect(props.resetPprForm).not.toHaveBeenCalled();
     });
   });
 

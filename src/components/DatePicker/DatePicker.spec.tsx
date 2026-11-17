@@ -2,7 +2,7 @@ import React from 'react';
 import { renderWithTheme, screen, fireEvent } from '../../../test/renderWithTheme';
 import DatePicker from './DatePicker';
 
-// Mock the styled DayPicker wrapper (imported as ./DayPicker in DatePicker.tsx)
+// Mock the styled DayPicker wrapper (imported as ./DayPicker in Calendar.tsx)
 jest.mock('./DayPicker', () => {
   const React = require('react');
   const MockDayPicker = ({ onSelect, locale }) => (
@@ -10,13 +10,19 @@ jest.mock('./DayPicker', () => {
       <button
         data-testid="day-picker-day"
         type="button"
-        onClick={() => onSelect && onSelect(new Date('2024-06-15'))}
+        onClick={() => onSelect && onSelect(new Date(2024, 5, 15))}
       >
         15
       </button>
     </div>
   );
-  return MockDayPicker;
+  return {
+    __esModule: true,
+    default: MockDayPicker,
+    BLOCKED_CLASS: 'blocked-day',
+    BLOCKED_COLOR: 'red',
+    BLOCKED_BACKGROUND: 'pink',
+  };
 });
 
 // Mock ModalDialog to render content directly for testability
@@ -96,9 +102,9 @@ describe('DatePicker', () => {
       fireEvent.click(valueDiv!);
 
       fireEvent.click(screen.getByTestId('day-picker-day'));
-      expect(onChange).toHaveBeenCalledWith({
-        value: expect.any(String),
-      });
+      // The calendar's days are midnight of the browser's time zone: the
+      // date of the day clicked, in any time zone
+      expect(onChange).toHaveBeenCalledWith({ value: '2024-06-15' });
     });
 
     it('closes picker after day is selected', () => {
@@ -109,6 +115,44 @@ describe('DatePicker', () => {
 
       fireEvent.click(screen.getByTestId('day-picker-day'));
       expect(screen.queryByTestId('day-picker')).not.toBeInTheDocument();
+    });
+
+    // As an input calls it when it loses the focus: react-final-form shows
+    // the errors of a field once it was left
+    it('leaves the field when a day is chosen, after the change', () => {
+      const calls: string[] = [];
+      const { container } = renderWithTheme(
+        <DatePicker onChange={() => calls.push('change')} onBlur={() => calls.push('blur')} />
+      );
+      fireEvent.click(container.firstChild!.firstChild!);
+      expect(calls).toEqual([]);
+
+      fireEvent.click(screen.getByTestId('day-picker-day'));
+      expect(calls).toEqual(['change', 'blur']);
+    });
+
+    it('leaves the field when the picker is closed without a choice', () => {
+      const onBlur = jest.fn();
+      const onChange = jest.fn();
+      const { container } = renderWithTheme(<DatePicker onChange={onChange} onBlur={onBlur} />);
+      fireEvent.click(container.firstChild!.firstChild!);
+
+      fireEvent.click(screen.getByTestId('modal-close'));
+      expect(onBlur).toHaveBeenCalledTimes(1);
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('lists the blocked periods of the shown month below the calendar', () => {
+      const { container } = renderWithTheme(
+        <DatePicker
+          value="2024-06-15"
+          onChange={jest.fn()}
+          blockedPeriods={[{ from: '2024-06-20', to: '2024-06-20', reason: 'Air show' }]}
+        />
+      );
+      fireEvent.click(container.firstChild!.firstChild!);
+
+      expect(container.querySelector('[data-cy="date-picker-blocked"]')!.textContent).toContain('Air show');
     });
 
     it('does not call onChange when onChange is not provided', () => {

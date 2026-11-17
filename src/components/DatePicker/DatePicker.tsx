@@ -1,19 +1,16 @@
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { de } from 'date-fns/locale/de';
-import { enGB } from 'date-fns/locale/en-GB';
+import { format } from 'date-fns';
 import ModalDialog from '../ModalDialog';
 import MaterialIcon from '../MaterialIcon';
 import dates from '../../util/dates';
 import Wrapper from './Wrapper';
-import DayPicker from './DayPicker';
+import Calendar from './Calendar';
 import ClearButton from './ClearButton';
 import Value from './Value';
 
 const DatePicker = (props: any) => {
-  const { i18n } = useTranslation();
-  const { clearable = false, readOnly, dataCy, onChange } = props;
+  const { clearable = false, readOnly, dataCy, onChange, onBlur, blockedPeriods } = props;
 
   const [showPicker, setShowPicker] = useState(false);
   const [state, setState] = useState(() => ({
@@ -27,13 +24,24 @@ const DatePicker = (props: any) => {
     setState({ value: props.value, prevPropsValue: props.value });
   }
 
-  const handleDayClick = (date: Date | null | undefined) => {
-    const dateString = date ? dates.localDate(date as any) : null;
+  // Leaving the picker leaves the field, as the blur of an input does: a
+  // form shows the field's errors from then on (react-final-form's touched)
+  const closePicker = () => {
     setShowPicker(false);
+    if (typeof onBlur === 'function') {
+      onBlur();
+    }
+  };
+
+  // The calendar's days are midnight of the browser's time zone: the date
+  // a day shows, whatever the zone
+  const handleDayClick = (date: Date | null | undefined) => {
+    const dateString = date ? format(date, 'yyyy-MM-dd') : null;
     setState({ value: dateString, prevPropsValue: props.value });
     if (typeof onChange === 'function') {
       onChange({ value: dateString });
     }
+    closePicker();
   };
 
   const handleClear = (e: React.MouseEvent) => {
@@ -51,26 +59,17 @@ const DatePicker = (props: any) => {
     );
   }
 
-  const renderPicker = () => {
-    const date = currentValue ? new Date(currentValue) : undefined;
-    const locale = i18n?.language === 'en' ? enGB : de;
-    return (
-      <DayPicker
-        mode="single"
-        required={!clearable}
-        selected={date}
-        defaultMonth={date}
-        onSelect={handleDayClick}
-        locale={locale}
-        weekStartsOn={1}
-      />
-    );
-  };
-
   const dialog = showPicker ? (
     <ModalDialog
-      content={renderPicker()}
-      onBlur={() => setShowPicker(false)}
+      content={
+        <Calendar
+          value={currentValue}
+          onSelect={handleDayClick}
+          clearable={clearable}
+          blockedPeriods={blockedPeriods}
+        />
+      }
+      onBlur={closePicker}
       fullWidthThreshold={0}
     />
   ) : null;
@@ -93,8 +92,15 @@ const DatePicker = (props: any) => {
 (DatePicker as any).propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
+  onBlur: PropTypes.func,
   clearable: PropTypes.bool,
   readOnly: PropTypes.bool,
+  // Days to mark, with their reasons (Calendar's BlockedPeriod)
+  blockedPeriods: PropTypes.arrayOf(PropTypes.shape({
+    from: PropTypes.string.isRequired,
+    to: PropTypes.string.isRequired,
+    reason: PropTypes.string.isRequired,
+  })),
 };
 
 export default DatePicker;

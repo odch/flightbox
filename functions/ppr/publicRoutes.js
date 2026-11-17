@@ -7,6 +7,7 @@ const { mailboxKey, normalizeEmail } = require('../auth/signInEmail')
 const submitRequest = require('./usecases/submitRequest')
 const getRequestStatus = require('./usecases/getRequestStatus')
 const withdrawRequest = require('./usecases/withdrawRequest')
+const getClosures = require('./usecases/getClosures')
 const deps = require('./deps')
 const {
   guestClientLimiter,
@@ -21,22 +22,23 @@ const { STATUS_TOKEN_PATTERN } = require('./domain/pprStatusLink')
 
 // The PPR routes of sessions without an email address and of nobody:
 // submissions without login (where `pprGuestRequests` is on), which need a
-// guest session or a login without an email address, and the status page the
-// pilot's emails link to, which needs no login. functions/api/index.js mounts
-// them at /ppr only, ahead of the permissive CORS of the other routes.
+// guest session or a login without an email address, the status page the
+// pilot's emails link to and the closures the request form shows, which need
+// no login. functions/api/index.js mounts them at /ppr only, ahead of the
+// permissive CORS of the other routes.
 const router = express.Router()
 
 // Pages of the app's dev server (npm start), on the developer's own machine
 const DEV_SERVER_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0):\d+$/
 
-// Browsers let only the app's pages call these routes. As the routes take
-// JSON only, which a page elsewhere cannot post without a preflight, no
+// Browsers let only the app's pages call these routes. As the POST routes
+// take JSON only, which a page elsewhere cannot post without a preflight, no
 // other site can submit requests through its visitors' browsers; scripts
 // are stopped by the limits. Preflights from other origins are answered
 // here too, without permission. The app may read Retry-After of a 429.
 const allowAppOrigins = cors({
   origin: [...pprAppOrigins(), DEV_SERVER_ORIGIN],
-  methods: ['POST'],
+  methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Retry-After']
 })
@@ -53,6 +55,14 @@ function appPost(path, ...handlers) {
   router.route(path)
     .options(allowAppOrigins)
     .post(allowAppOrigins, requireJson, ...handlers)
+}
+
+// A GET route for the app's pages. Their GET needs no preflight; the
+// preflights of other origins are answered here, without permission.
+function appGet(path, ...handlers) {
+  router.route(path)
+    .options(allowAppOrigins)
+    .get(allowAppOrigins, ...handlers)
 }
 
 // Requests without login come from the sessions the app starts with its own
@@ -197,13 +207,28 @@ async function withdraw(req, res) {
   }
 }
 
+// GET /closures — the closures that haven't ended, for the request form
+// with and without login: pilots see the days requests are rejected for
+// before they ask. Nothing personal; the rejection tells the same reason to
+// anyone who asks for such a day.
+async function listClosures(req, res) {
+  try {
+    res.json({ closures: await getClosures(deps) })
+  } catch (e) {
+    console.error('Failed to read the PPR closures')
+    res.status(500).json({ error: 'Failed to read closures' })
+  }
+}
+
 // Where requests without login are off, their route does not exist. The
-// status routes exist wherever PPR is on: the emails of requests made with
-// login link to the status page too.
+// status and closures routes exist wherever PPR is on: the emails of
+// requests made with login link to the status page too, and the form with
+// login shows the closures.
 if (isPprGuestRequestsEnabled()) {
   appPost('/guest-requests', fbAuth, requireSessionWithoutEmail, submitWithoutLogin)
 }
 appPost('/status/:key', showStatus)
 appPost('/status/:key/withdraw', withdraw)
+appGet('/closures', listClosures)
 
 module.exports = router

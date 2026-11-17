@@ -65,6 +65,45 @@ describe('components', () => {
           .toBe(i18n.t('ppr.validation.plannedDateTooFar'));
       });
 
+      describe('closures', () => {
+        const closures = [
+          { from: '2026-11-19', to: '2026-11-21', reason: 'Runway works' },
+          { from: '2026-11-21', to: '2026-11-22', reason: 'Air show' },
+        ];
+
+        it.each(['2026-11-19', '2026-11-20', '2026-11-21'])(
+          'refuses %s, a day of a closure, with its reason, as the server would reject it',
+          plannedDate => {
+            expect(validate({ ...valid, plannedDate }, TODAY, closures).plannedDate)
+              .toBe(i18n.t('ppr.validation.plannedDateBlocked', { reason: 'Runway works' }));
+          }
+        );
+
+        it('names the reason of the next closure that covers the day', () => {
+          expect(validate({ ...valid, plannedDate: '2026-11-22' }, TODAY, closures).plannedDate)
+            .toBe(i18n.t('ppr.validation.plannedDateBlocked', { reason: 'Air show' }));
+        });
+
+        it.each(['2026-11-18', '2026-11-23'])('accepts %s, a day without closure', plannedDate => {
+          expect(validate({ ...valid, plannedDate }, TODAY, closures)).toEqual({});
+        });
+
+        it('tells about a date in the past first', () => {
+          const past = [{ from: '2026-11-01', to: '2026-11-30', reason: 'Runway works' }];
+          expect(validate({ ...valid, plannedDate: '2026-11-12' }, TODAY, past).plannedDate)
+            .toBe(i18n.t('ppr.validation.plannedDatePast'));
+        });
+
+        it('knows no closures by default', () => {
+          expect(validate({ ...valid, plannedDate: '2026-11-20' }, TODAY)).toEqual({});
+        });
+
+        it('shows the reason as it is', () => {
+          const message = validate({ ...valid }, TODAY, [{ from: '2026-11-20', to: '2026-11-20', reason: 'Fly-in & BBQ' }]);
+          expect(message.plannedDate).toContain('Fly-in & BBQ');
+        });
+      });
+
       it('uses the aerodrome date by default', () => {
         expect(validate({ ...valid, plannedDate: '2000-01-01' }).plannedDate)
           .toBe(i18n.t('ppr.validation.plannedDatePast'));
@@ -105,6 +144,13 @@ describe('components', () => {
         const errors = validateWithoutLogin({ email: 'max@example.com', plannedDate: '2026-11-12' }, TODAY);
         expect(Object.keys(errors)).toEqual(expect.arrayContaining(['firstname', 'lastname', 'immatriculation']));
         expect(errors.plannedDate).toBe(i18n.t('ppr.validation.plannedDatePast'));
+      });
+
+      it('refuses the days of the closures as with a login', () => {
+        const closures = [{ from: '2026-11-20', to: '2026-11-20', reason: 'Air show' }];
+        expect(validateWithoutLogin({ ...valid, email: 'max@example.com' }, TODAY, closures)).toEqual({
+          plannedDate: i18n.t('ppr.validation.plannedDateBlocked', { reason: 'Air show' }),
+        });
       });
     });
   });

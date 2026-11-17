@@ -1,4 +1,4 @@
-import { call, put, race, take, takeLatest, takeLeading } from 'redux-saga/effects';
+import { call, put, race, take, takeEvery, takeLatest, takeLeading } from 'redux-saga/effects';
 import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
@@ -439,6 +439,12 @@ describe('modules', () => {
 
         it('ignore further submits without login while one is being sent', () => {
           expect(watchers()).toContainEqual(takeLeading(actions.SUBMIT_PPR_GUEST_REQUEST, sagas.submitPprGuestRequest));
+        });
+
+        // Two watchers of the form's start: its values and its closures
+        it('load the closures with the form, those of the newest form only', () => {
+          expect(watchers()).toContainEqual(takeEvery(actions.INIT_PPR_FORM, sagas.initPprForm));
+          expect(watchers()).toContainEqual(takeLatest(actions.INIT_PPR_FORM, sagas.loadPprClosures));
         });
 
         it('let the load of another status link replace the one running', () => {
