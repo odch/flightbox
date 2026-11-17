@@ -3,11 +3,13 @@ import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { renderWithTheme, screen, fireEvent, act, within } from '../../../test/renderWithTheme';
 
-// The key, with the count where one is given
+// The key, with the count or the MTOW where one is given
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, options?: { count?: number }) =>
-      options && options.count !== undefined ? `${key} (${options.count})` : key,
+    t: (key: string, options?: { count?: number; mtow?: number }) => {
+      const value = options && (options.count !== undefined ? options.count : options.mtow);
+      return value !== undefined ? `${key} (${value})` : key;
+    },
   }),
   initReactI18next: { type: '3rdParty', init: () => undefined },
 }));
@@ -448,6 +450,7 @@ describe('PprSettingsForm', () => {
     expect(props.savePprSettings).toHaveBeenCalledWith({
       answerMode: 'automatic',
       pilotInfo: 'Runway 05/23',
+      manualAnswers: { helicopters: false, mtowFrom: null },
       adminEmail: 'new@aerodrome.ch',
       closures,
     });
@@ -563,6 +566,114 @@ describe('PprSettingsForm', () => {
       save();
 
       expect(savedSettings(props).pilotInfo).toBeNull();
+    });
+  });
+
+  describe('manual answers', () => {
+    // lszm: all helicopters, other aircraft from 2250 kg
+    const lszm = { answerMode: 'automatic', manualAnswers: { helicopters: true, mtowFrom: 2250 } };
+    const check = (container: HTMLElement, name: string) => fireEvent.click(byCy(container, name));
+
+    it('are offered with automatic answers only', () => {
+      const { container } = renderForm();
+      expect(byCy(container, 'ppr-manual-answers')).toBeNull();
+
+      fireEvent.click(byCy(container, 'answerMode-automatic'));
+
+      const group = screen.getByRole('group', { name: 'ppr.settings.manualAnswers' });
+      expect(group).toContainElement(byCy(container, 'ppr-manual-helicopters'));
+      expect(group).toContainElement(byCy(container, 'ppr-manual-mtow'));
+      expect(screen.getByText('ppr.settings.manualAnswersHelp')).toBeTruthy();
+    });
+
+    it('show the stored ones', () => {
+      const { container } = renderForm(lszm);
+
+      expect(byCy(container, 'ppr-manual-helicopters')).toBeChecked();
+      expect(byCy(container, 'ppr-manual-mtow')).toBeChecked();
+      expect(byCy(container, 'ppr-manual-mtow-from')).toHaveValue('2250');
+      expect(byCy(container, 'ppr-manual-mtow-from')).toBeEnabled();
+    });
+
+    it('save helicopters and the MTOW limit', () => {
+      const { container, props } = renderForm({ answerMode: 'automatic' });
+      expect(byCy(container, 'ppr-manual-mtow-from')).toBeDisabled();
+
+      check(container, 'ppr-manual-helicopters');
+      check(container, 'ppr-manual-mtow');
+      change(container, 'ppr-manual-mtow-from', '2250');
+      save();
+
+      expect(savedSettings(props).manualAnswers).toEqual({ helicopters: true, mtowFrom: 2250 });
+    });
+
+    it('save no limit while it is off, whatever was typed', () => {
+      const { container, props } = renderForm(lszm);
+
+      check(container, 'ppr-manual-mtow');
+      expect(byCy(container, 'ppr-manual-mtow-from')).toBeDisabled();
+      save();
+
+      expect(savedSettings(props).manualAnswers).toEqual({ helicopters: true, mtowFrom: null });
+    });
+
+    it.each([[''], ['0'], ['2250.5'], ['-1'], ['1000001']])('refuse the limit %p', value => {
+      const { container, props } = renderForm({ answerMode: 'automatic' });
+
+      check(container, 'ppr-manual-mtow');
+      change(container, 'ppr-manual-mtow-from', value);
+      save();
+
+      expect(props.savePprSettings).not.toHaveBeenCalled();
+      expect(byCy(container, 'ppr-manual-answers')).toHaveTextContent('ppr.settings.manualMtowInvalid');
+    });
+
+    // The limit isn't shown then, nor its error
+    it('save the other settings when going back to manual answers with an invalid limit', () => {
+      const { container, props } = renderForm(lszm);
+
+      change(container, 'ppr-manual-mtow-from', '2250.5');
+      fireEvent.click(byCy(container, 'answerMode-manual'));
+      save();
+
+      expect(savedSettings(props).answerMode).toBe('manual');
+      expect(savedSettings(props)).not.toHaveProperty('manualAnswers');
+    });
+
+    it('are kept when going back to manual answers', () => {
+      const { container, props } = renderForm(lszm);
+
+      fireEvent.click(byCy(container, 'answerMode-manual'));
+      expect(byCy(container, 'ppr-manual-answers')).toBeNull();
+      save();
+
+      expect(savedSettings(props)).toEqual(expect.objectContaining({
+        answerMode: 'manual', manualAnswers: { helicopters: true, mtowFrom: 2250 },
+      }));
+    });
+
+    it.each([
+      [{ helicopters: true, mtowFrom: 2250 }, 'ppr.settings.answerAutomaticExceptBoth (2250)'],
+      [{ helicopters: true, mtowFrom: null }, 'ppr.settings.answerAutomaticExceptHelicopters'],
+      [{ helicopters: false, mtowFrom: 5700 }, 'ppr.settings.answerAutomaticExceptMtow (5700)'],
+      [{ helicopters: false, mtowFrom: null }, 'ppr.settings.answerAutomatic'],
+    ])('are named in the summary (%p)', (manualAnswers, text) => {
+      const { container } = renderSettings({ answerMode: 'automatic', manualAnswers });
+      expect(summaryRow(container, 'answer')).toHaveTextContent(new RegExp(`^${text.replace(/[()]/g, '\\$&')}$`));
+    });
+
+    it('are not named in the summary with manual answers', () => {
+      const { container } = renderSettings({ ...lszm, answerMode: 'manual' });
+      expect(summaryRow(container, 'answer')).toHaveTextContent(/^ppr.settings.answerManual$/);
+    });
+
+    // Their requests wait for an admin
+    it('ask for a notification address', () => {
+      const { container } = renderSettings({ ...lszm, adminEmail: null });
+      expect(summaryRow(container, 'notification')).toHaveTextContent('ppr.settings.noAdminEmail');
+
+      edit();
+      expect(byCy(container, 'ppr-settings-form')).toContainElement(screen.getByText('ppr.settings.noAdminEmail'));
     });
   });
 

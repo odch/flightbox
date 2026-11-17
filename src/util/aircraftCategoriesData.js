@@ -1,7 +1,7 @@
 // Source of truth for aircraft category data.
 // Imported by aircraftCategories.ts (TS/webpack build) and
 // processFirebaseRules.js (gulp build, which cannot load .ts files).
-// Note: keep in sync with the map in `updateAircraftList.js`
+// Note: keep in sync with the map in `functions/aircraftCategories.js`
 module.exports = [
   {name: 'Flugzeug', flightTypeAircraftType: 'aircraft'},
   {name: 'Eigenbauflugzeug', flightTypeAircraftType: 'aircraft'},

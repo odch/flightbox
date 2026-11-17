@@ -4,19 +4,21 @@ const {
   isValidRetentionDays,
   answerModeFromStore,
   pilotInfoFromStore,
-  closuresFromStore
+  closuresFromStore,
+  manualAnswersFromStore
 } = require('../domain/pprSettings')
 
 /**
  * The PPR settings, for the admin area. Stored values that aren't valid are
  * reported the way they are used: an invalid retention as null (the cleanup
  * ignores it), anything but 'automatic' as manual answers, invalid closures
- * not at all.
+ * not at all, and so are invalid parts of the manual answers.
  *
  * @param {Object} deps - { settings }
  * @returns {Promise<{adminEmail: string|null, retentionDays: number|null,
  *   answerMode: string, pilotInfo: string|null,
- *   closures: Array<{from: string, to: string, reason: string}>}>}
+ *   closures: Array<{from: string, to: string, reason: string}>,
+ *   manualAnswers: {helicopters: boolean, mtowFrom: number|null}}>}
  */
 async function getSettings({ settings }) {
   const [adminEmail, retentionDays, answerSettings] = await Promise.all([
@@ -29,7 +31,8 @@ async function getSettings({ settings }) {
     retentionDays: isValidRetentionDays(retentionDays) ? retentionDays : null,
     answerMode: answerModeFromStore(answerSettings.answerMode),
     pilotInfo: pilotInfoFromStore(answerSettings.pilotInfo),
-    closures: closuresFromStore(answerSettings.closures)
+    closures: closuresFromStore(answerSettings.closures),
+    manualAnswers: manualAnswersFromStore(answerSettings.manualAnswers)
   }
 }
 

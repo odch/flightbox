@@ -5,8 +5,10 @@ import { categories as aircraftCategories } from '../../util/aircraftCategories'
 import i18n from '../../i18n';
 import type { PprClosure } from '../../modules/ppr/actions';
 
-// The date range the server accepts (functions/ppr/domain/pprRequest.js)
+// The date range and the largest MTOW the server accepts
+// (functions/ppr/domain/pprRequest.js)
 const MAX_DAYS_AHEAD = 365;
+const MAX_MTOW = 1000000;
 
 // Calendar arithmetic on 'YYYY-MM-DD' dates, independent of time zones
 const addDays = (date: string, days: number) => {
@@ -33,7 +35,22 @@ const getConfig = () => ({
     },
     message: i18n.t('validate.immatriculation'),
   },
-  // As when recording the movement; it decides which flight types fit
+  // As when recording the movement: type, MTOW and category, which the
+  // pilot declares and automatic answers go by
+  aircraftType: {
+    types: {
+      required: true,
+    },
+    message: i18n.t('validate.aircraftType'),
+  },
+  mtow: {
+    types: {
+      required: true,
+      integer: true,
+    },
+    message: i18n.t('validate.mtow'),
+  },
+  // It also decides which flight types fit
   aircraftCategory: {
     types: {
       required: true,
@@ -71,6 +88,11 @@ const validate = (values: Record<string, any>, today: string = dates.localDate()
   errorArr.forEach(error => {
     errors[error.key] = error.message;
   });
+
+  // Above 0, as on the server
+  if (!errors.mtow && (values.mtow <= 0 || values.mtow > MAX_MTOW)) {
+    errors.mtow = i18n.t('validate.mtow');
+  }
 
   // Checked here, as the server would only refuse the request
   const plannedDate = values.plannedDate;

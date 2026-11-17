@@ -13,6 +13,9 @@ const validInput = {
   lastname: 'Muster',
   email: 'max@example.com',
   immatriculation: 'HB-ABC',
+  aircraftType: 'PA-28',
+  aircraftCategory: 'Flugzeug',
+  mtow: 1100,
   plannedDate: '2026-04-15',
   plannedTime: '10:30',
   flightType: 'private',
@@ -32,7 +35,7 @@ function createMockDeps({ adminEmail = 'admin@aero.ch', answerSettings = {}, aer
     settings: {
       getAdminEmail: jest.fn().mockResolvedValue(adminEmail),
       getAnswerSettings: jest.fn().mockResolvedValue({
-        answerMode: null, pilotInfo: null, closures: null, ...answerSettings
+        answerMode: null, pilotInfo: null, closures: null, manualAnswers: null, ...answerSettings
       })
     },
     aerodromeStatus: {
@@ -201,6 +204,67 @@ describe('submitRequest', () => {
 
       expect(result).toEqual({ key: 'req-123', status: 'approved', statusToken: TOKEN, emailSent: true })
       expect(deps.repository.save.mock.calls[0][0].reviewRemarks).toBeUndefined()
+    })
+  })
+
+  describe('manual answers for some aircraft', () => {
+    // lszm: all helicopters, other aircraft from 2250 kg
+    const lszm = { answerMode: 'automatic', pilotInfo: 'Runway 05/23', manualAnswers: { helicopters: true, mtowFrom: 2250 } }
+    const helicopter = { ...validInput, aircraftType: 'R44', aircraftCategory: 'Hubschrauber', mtow: 1134 }
+
+    it('leaves a helicopter to an admin and saves why', async () => {
+      const deps = createMockDeps({ answerSettings: lszm })
+      const result = await submitRequest(deps, helicopter, NOW)
+
+      expect(result).toEqual({ key: 'req-123', status: 'pending', statusToken: TOKEN, emailSent: true })
+      const saved = deps.repository.save.mock.calls[0][0]
+      expect(saved).toEqual(expect.objectContaining({ status: 'pending', manualAnswer: { reason: 'helicopter' } }))
+      expect(saved.reviewedBy).toBeUndefined()
+      expect(deps.notifier.notifyRequestReceived).toHaveBeenCalledTimes(1)
+      expect(deps.notifier.notifyRequestSubmitted).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'pending', manualAnswer: { reason: 'helicopter' } }), 'admin@aero.ch'
+      )
+    })
+
+    it('leaves an aircraft from the MTOW limit on to an admin', async () => {
+      const deps = createMockDeps({ answerSettings: lszm })
+      await submitRequest(deps, { ...validInput, mtow: 2250 }, NOW)
+
+      expect(deps.repository.save.mock.calls[0][0].manualAnswer).toEqual({ reason: 'mtow', mtowFrom: 2250 })
+    })
+
+    it('approves a lighter airplane automatically, without a reason', async () => {
+      const deps = createMockDeps({ answerSettings: lszm })
+      const result = await submitRequest(deps, validInput, NOW)
+
+      expect(result.status).toBe('approved')
+      expect(deps.repository.save.mock.calls[0][0]).not.toHaveProperty('manualAnswer')
+    })
+
+    it('rejects a helicopter for a closure, without a reason for an admin', async () => {
+      const closures = [{ from: '2026-04-15', to: '2026-04-15', reason: 'Air show' }]
+      const deps = createMockDeps({ answerSettings: { ...lszm, closures } })
+      const result = await submitRequest(deps, helicopter, NOW)
+
+      expect(result.status).toBe('rejected')
+      expect(deps.repository.save.mock.calls[0][0]).not.toHaveProperty('manualAnswer')
+    })
+
+    it('saves no reason with manual answers', async () => {
+      const deps = createMockDeps({ answerSettings: { ...lszm, answerMode: 'manual' } })
+      await submitRequest(deps, helicopter, NOW)
+
+      expect(deps.repository.save.mock.calls[0][0]).not.toHaveProperty('manualAnswer')
+    })
+
+    it('warns about a missing notification address for a request left to an admin', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+      const deps = createMockDeps({ adminEmail: null, answerSettings: lszm })
+
+      await submitRequest(deps, helicopter, NOW)
+
+      expect(warn).toHaveBeenCalledWith('No PPR notification address is set, request not announced:', 'req-123')
+      warn.mockRestore()
     })
   })
 

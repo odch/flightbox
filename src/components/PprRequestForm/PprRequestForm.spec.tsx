@@ -131,8 +131,8 @@ describe('PprRequestForm', () => {
   it('keeps a chosen flight type that also fits the new category', () => {
     const { container, props } = renderForm({
       initialValues: {
-        lastname: 'Muster', firstname: 'Max', immatriculation: 'HBZZZ', aircraftCategory: 'Flugzeug',
-        plannedDate: inDays(10), plannedTime: '10:30',
+        lastname: 'Muster', firstname: 'Max', immatriculation: 'HBZZZ', aircraftType: 'R44', mtow: 1134,
+        aircraftCategory: 'Flugzeug', plannedDate: inDays(10), plannedTime: '10:30',
       },
     });
     fireEvent.click(field(container, 'flightType-private'));
@@ -260,8 +260,8 @@ describe('PprRequestForm', () => {
     const blockedMessage = () => i18n.t('ppr.validation.plannedDateBlocked', { reason: 'Runway works' });
 
     const filled = (plannedDate: string) => ({
-      lastname: 'Muster', firstname: 'Max', immatriculation: 'HBKOF', aircraftCategory: 'Flugzeug',
-      plannedDate, plannedTime: '10:30', flightType: 'private',
+      lastname: 'Muster', firstname: 'Max', immatriculation: 'HBKOF', aircraftType: 'DR40', mtow: 1000,
+      aircraftCategory: 'Flugzeug', plannedDate, plannedTime: '10:30', flightType: 'private',
     });
 
     const chooseDay = (container: HTMLElement, date: string) => {
@@ -326,6 +326,23 @@ describe('PprRequestForm', () => {
       expect(props.onSubmit).not.toHaveBeenCalled();
       expect(screen.getByText(blockedMessage())).toBeTruthy();
     });
+  });
+
+  // As when recording the movement: automatic answers go by them
+  it('does not submit without the type and the MTOW of the aircraft', () => {
+    const { container, props } = renderForm({
+      initialValues: {
+        lastname: 'Muster', firstname: 'Max', immatriculation: 'HBKOF', aircraftCategory: 'Flugzeug',
+        plannedDate: inDays(10), plannedTime: '10:30', flightType: 'private',
+      },
+    });
+
+    fireEvent.click(screen.getByText('ppr.submit'));
+
+    expect(props.onSubmit).not.toHaveBeenCalled();
+    // validate() uses i18n directly, not the mocked useTranslation
+    expect(container.textContent).toContain(i18n.t('validate.aircraftType'));
+    expect(container.textContent).toContain(i18n.t('validate.mtow'));
   });
 
   it('goes back to the start page on cancel', () => {

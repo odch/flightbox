@@ -739,9 +739,19 @@
       "answerManual": "Manually",
       "answerManualHelp": "An admin approves or rejects each request.",
       "answerAutomatic": "Automatically",
-      "answerAutomaticHelp": "Each request is approved right away, except for blocked days, and for today while the aerodrome is closed.",
+      "answerAutomaticHelp": "Each request is approved right away, except for blocked days, for today while the aerodrome is closed, and for the aircraft the aerodrome management always answers.",
+      "answerAutomaticExceptHelicopters": "Automatic, except helicopters",
+      "answerAutomaticExceptMtow": "Automatic below {{mtow}} kg MTOW",
+      "answerAutomaticExceptBoth": "Automatic below {{mtow}} kg MTOW, except helicopters",
       "pilotInfo": "Information for pilots",
       "pilotInfoHelp": "Included in each automatic approval, e.g. runway, circuit, radio frequency, landing fee and phone number.",
+      "manualAnswers": "Always answered by the aerodrome management",
+      "manualHelicopters": "Helicopters",
+      "manualMtowFrom": "Aircraft from",
+      "manualMtowUnit": "kg MTOW",
+      "manualMtowLimit": "MTOW limit in kg",
+      "manualMtowInvalid": "Enter a whole number from 1 to {{max}}.",
+      "manualAnswersHelp": "These requests stay open until an admin answers them. The category and the MTOW given in the request decide.",
       "tooLong": "At most {{max}} characters.",
       "closures": "Blocked days",
       "closuresHelp": "Block the days on which you do not approve PPR requests, e.g. for runway works, an event or when nobody is on site. The request form shows these days with the reason in its calendar, and new requests for them are rejected with the reason, also when answering manually. Blocked days do not change the aerodrome status. While it is «Closed», requests for today are rejected as well. Requests already made stay as they are: reject pending ones in the «PPR requests» list below, and revoke approvals there.",
@@ -805,6 +815,11 @@
       "guest": "With guest access",
       "guestHelp": "Pilots can also continue as guests. The link contains the guest access token: it also allows recording movements and works until the token is renewed.",
       "ownView": "As you are logged in, these links show you the form. A private browser window shows you what visitors without a login see."
+    },
+    "manualAnswer": {
+      "label": "Not answered automatically",
+      "helicopter": "Helicopter",
+      "mtow": "MTOW from {{mtow}} kg"
     }
   },
   "maskedInput": {

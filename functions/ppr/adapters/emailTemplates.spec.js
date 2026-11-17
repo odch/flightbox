@@ -23,6 +23,9 @@ const basePprRequest = {
   flightType: 'private'
 }
 
+// What createPprRequest requires of the aircraft besides the registration
+const aircraft = { aircraftType: 'PA-28', aircraftCategory: 'Flugzeug', mtow: 1100 }
+
 describe('PPR emailTemplates', () => {
   describe('escapeHtml', () => {
     it('escapes HTML special characters', () => {
@@ -136,6 +139,16 @@ describe('PPR emailTemplates', () => {
     it('asks the admins to answer a pending request', () => {
       const result = getPprSubmittedEmail({ ...basePprRequest, status: 'pending' })
       expect(result.text).toContain('Antwort: Offen, bitte im Admin-Bereich genehmigen oder ablehnen')
+    })
+
+    it.each([
+      [{ reason: 'helicopter' }, 'Hubschrauber'],
+      [{ reason: 'mtow', mtowFrom: 2250 }, 'MTOW ab 2250 kg']
+    ])('tells why automatic answers left a pending request to the admins (%p)', (manualAnswer, reason) => {
+      const result = getPprSubmittedEmail({ ...basePprRequest, status: 'pending', manualAnswer })
+      const line = `Offen, nicht automatisch beantwortet (${reason}): bitte im Admin-Bereich genehmigen oder ablehnen`
+      expect(result.text).toContain(`Antwort: ${line}`)
+      expect(result.html).toContain(`>${line}</td>`)
     })
 
     it('tells about an automatic approval', () => {
@@ -467,6 +480,7 @@ describe('PPR emailTemplates', () => {
       const fake = 'PPR-Anfrage beantworten: https://evil.example/#/admin?tab=ppr&request=-Nx'
       const submitted = createPprRequest({
         ...basePprRequest,
+        ...aircraft,
         lastname: `Muster\n\n${fake}`,
         flightType: `private\r\n${fake}`,
         createdBy: 'max@example.com'
@@ -643,6 +657,7 @@ describe('PPR emailTemplates', () => {
       const fake = 'Status anzeigen: https://evil.example/#/ppr/status/x/y'
       const request = createPprRequest({
         ...basePprRequest,
+        ...aircraft,
         lastname: `Muster\n\n${fake}`,
         flightType: `private\r\n${fake}`,
         remarks: `Hallo\n\n${fake}`,

@@ -8,8 +8,14 @@ const {
   Status
 } = require('../domain/pprRequest')
 const { withStatusToken } = require('../domain/pprStatusLink')
-const { answerModeFromStore, pilotInfoFromStore, closuresFromStore } = require('../domain/pprSettings')
-const { decideAnswer } = require('../domain/pprAnswer')
+const {
+  AnswerMode,
+  answerModeFromStore,
+  pilotInfoFromStore,
+  closuresFromStore,
+  manualAnswersFromStore
+} = require('../domain/pprSettings')
+const { decideAnswer, manualAnswerReason } = require('../domain/pprAnswer')
 
 // A status that can't be read doesn't stop submissions; it only can't
 // reject requests for today
@@ -37,7 +43,8 @@ function sendSafely(send, failure, key) {
  * Submit a new PPR request, with or without login (see createPprRequest).
  * It is answered right away when the aerodrome is closed on the planned date
  * or answers automatically (see pprAnswer.js); otherwise it waits for an
- * admin. The pilot gets the answer or, while it waits, a receipt; both link
+ * admin, with the reason where automatic answers left it to one
+ * (manualAnswer). The pilot gets the answer or, while it waits, a receipt; both link
  * to the request's status with the token returned here. `emailSent` tells
  * whether that email went out: without login its link is the pilot's only
  * way back to the request.
@@ -57,19 +64,30 @@ async function submitRequest({ repository, notifier, settings, aerodromeStatus, 
     readAerodromeStatus(aerodromeStatus)
   ])
 
+  const answerMode = answerModeFromStore(answerSettings.answerMode)
+  const manualAnswers = manualAnswersFromStore(answerSettings.manualAnswers)
+
   const answer = decideAnswer(pprRequest, {
-    answerMode: answerModeFromStore(answerSettings.answerMode),
+    answerMode,
     pilotInfo: pilotInfoFromStore(answerSettings.pilotInfo),
     closures: closuresFromStore(answerSettings.closures),
     aerodromeStatus: currentStatus,
-    today: zurichDate(now)
+    today: zurichDate(now),
+    manualAnswers
   })
+  // Why a request automatic answers would have approved waits for an admin
+  const manualAnswer = !answer && answerMode === AnswerMode.AUTOMATIC
+    ? manualAnswerReason(pprRequest, manualAnswers)
+    : null
 
   // The token goes to the pilot only; its hash is saved with the request
   const { token, hash } = statusTokens.create()
 
   // Saved with its answer, so it is never pending in between
   const toSave = { ...pprRequest, statusTokens: withStatusToken(pprRequest, hash, now) }
+  if (manualAnswer) {
+    toSave.manualAnswer = manualAnswer
+  }
   if (answer) {
     toSave.status = answer.status
     toSave.reviewedBy = AUTOMATIC_REVIEWER

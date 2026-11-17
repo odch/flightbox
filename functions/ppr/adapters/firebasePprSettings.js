@@ -11,11 +11,6 @@ async function getAdminEmail() {
   return snapshot.val() || null
 }
 
-// null removes the address
-async function setAdminEmail(email) {
-  await adminEmailRef().set(email || null)
-}
-
 function retentionDaysRef() {
   return getDatabase().ref('/settings/ppr/retentionDays')
 }
@@ -26,45 +21,55 @@ async function getRetentionDays() {
   return snapshot.val()
 }
 
-// null removes it, so the cleanup deletes nothing
-async function setRetentionDays(days) {
-  await retentionDaysRef().set(days || null)
-}
-
-// How new requests are answered: answer mode, information for pilots and
-// closures, as stored (validated by the callers). One read for a submission.
+// How new requests are answered: answer mode, information for pilots,
+// closures and the requests an admin always answers, as stored (validated by
+// the callers). One read for a submission.
 async function getAnswerSettings() {
   const snapshot = await getDatabase().ref('/settings/ppr').once('value')
   const stored = snapshot.val() || {}
   return {
     answerMode: stored.answerMode === undefined ? null : stored.answerMode,
     pilotInfo: stored.pilotInfo === undefined ? null : stored.pilotInfo,
-    closures: stored.closures === undefined ? null : stored.closures
+    closures: stored.closures === undefined ? null : stored.closures,
+    manualAnswers: stored.manualAnswers === undefined ? null : stored.manualAnswers
   }
 }
 
-// 'manual' is the default, so it is stored as nothing
-async function setAnswerMode(answerMode) {
-  await getDatabase().ref('/settings/ppr/answerMode').set(answerMode === 'automatic' ? answerMode : null)
+// How each setting is stored: empty values as nothing, which removes them
+const STORED = {
+  // null removes the address
+  adminEmail: email => email || null,
+  // null removes it, so the cleanup deletes nothing
+  retentionDays: days => days || null,
+  // 'manual' is the default, so it is stored as nothing
+  answerMode: answerMode => answerMode === 'automatic' ? answerMode : null,
+  pilotInfo: pilotInfo => pilotInfo || null,
+  closures: closures => closures && closures.length > 0 ? closures : null,
+  // { helicopters, mtowFrom }; nothing while both are off
+  manualAnswers: manualAnswers => {
+    const { helicopters, mtowFrom } = manualAnswers || {}
+    return helicopters || mtowFrom ? { helicopters: helicopters === true, mtowFrom: mtowFrom || null } : null
+  }
 }
 
-// null removes the text
-async function setPilotInfo(pilotInfo) {
-  await getDatabase().ref('/settings/ppr/pilotInfo').set(pilotInfo || null)
-}
-
-// An empty list removes the closures
-async function setClosures(closures) {
-  await getDatabase().ref('/settings/ppr/closures').set(closures && closures.length > 0 ? closures : null)
+// The given settings (validated by the callers) in one write: a submission
+// never reads some of them changed and others not, e.g. automatic answers
+// without the aircraft an admin answers. Settings not given stay as they are.
+async function saveSettings(values) {
+  const update = {}
+  Object.keys(STORED).forEach(name => {
+    if (name in values) {
+      update[name] = STORED[name](values[name])
+    }
+  })
+  if (Object.keys(update).length > 0) {
+    await getDatabase().ref('/settings/ppr').update(update)
+  }
 }
 
 module.exports = {
   getAdminEmail,
-  setAdminEmail,
   getRetentionDays,
-  setRetentionDays,
   getAnswerSettings,
-  setAnswerMode,
-  setPilotInfo,
-  setClosures
+  saveSettings
 }

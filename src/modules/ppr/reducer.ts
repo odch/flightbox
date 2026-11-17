@@ -4,6 +4,7 @@ import {
   PprListScope,
   PprAnswerMode,
   PprClosure,
+  PprManualAnswers,
   PprRequestStatus,
   PprStatusLoadFailure,
   PprSubmitResult,
@@ -49,6 +50,7 @@ interface PprSettingsState {
   answerMode: PprAnswerMode;
   pilotInfo: string | null;
   closures: PprClosure[];
+  manualAnswers: PprManualAnswers;
   loaded: boolean;
   loadFailed: boolean;
   saving: boolean;
@@ -95,6 +97,7 @@ const INITIAL_STATE: PprState = {
     answerMode: 'manual',
     pilotInfo: null,
     closures: [],
+    manualAnswers: { helicopters: false, mtowFrom: null },
     loaded: false,
     loadFailed: false,
     saving: false,
@@ -232,10 +235,15 @@ function closuresLoaded(state: PprState, action: PprAction & { type: typeof acti
 // The answer settings as the server returns them, with the defaults for an
 // older server that doesn't know them
 function answerSettings(settings: Partial<PprSettingsState>) {
+  const manualAnswers = settings.manualAnswers;
   return {
     answerMode: settings.answerMode === 'automatic' ? 'automatic' : 'manual',
     pilotInfo: settings.pilotInfo || null,
     closures: Array.isArray(settings.closures) ? settings.closures : [],
+    manualAnswers: {
+      helicopters: manualAnswers?.helicopters === true,
+      mtowFrom: typeof manualAnswers?.mtowFrom === 'number' ? manualAnswers.mtowFrom : null,
+    },
   };
 }
 

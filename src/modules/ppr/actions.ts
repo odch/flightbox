@@ -45,12 +45,20 @@ export interface PprClosure {
 
 export type PprAnswerMode = 'manual' | 'automatic';
 
+// The requests an admin answers also with automatic answers: those for
+// helicopters, and for aircraft from an MTOW (kg, the limit included)
+export interface PprManualAnswers {
+  helicopters: boolean;
+  mtowFrom: number | null;
+}
+
 export interface PprSettings {
   adminEmail: string | null;
   retentionDays: number | null;
   answerMode: PprAnswerMode;
   pilotInfo: string | null;
   closures: PprClosure[];
+  manualAnswers: PprManualAnswers;
 }
 
 // What the server answers to a submission: requests can be answered right away

@@ -177,6 +177,22 @@ interface LinkResult {
   answered: boolean;
 }
 
+// Why automatic answers left a request to an admin (manualAnswer, see
+// functions/ppr/domain/pprAnswer.js), or null
+const manualAnswerText = (
+  t: (key: string, options?: any) => string,
+  manualAnswer?: { reason?: string; mtowFrom?: number } | null
+) => {
+  switch (manualAnswer?.reason) {
+    case 'helicopter':
+      return t('ppr.manualAnswer.helicopter');
+    case 'mtow':
+      return t('ppr.manualAnswer.mtow', { mtow: manualAnswer.mtowFrom });
+    default:
+      return null;
+  }
+};
+
 const PprRequestList = (props: any) => {
   const { t } = useTranslation();
   const { linkedKey, loading, loaded, loadFailed, settingsReady, data } = props;
@@ -312,6 +328,8 @@ const PprRequestList = (props: any) => {
           const automatic = req.reviewedBy === 'automatic';
           // Anybody may have typed the email address of a request without login
           const withoutLogin = req.withoutLogin === true;
+          // Why automatic answers left it to an admin
+          const manualReason = manualAnswerText(t, req.manualAnswer);
           const linked = linkResult && linkResult.key === req.key ? linkResult : null;
           const answeredNotice = !!linked && linked.answered && expanded;
           return (
@@ -363,6 +381,10 @@ const PprRequestList = (props: any) => {
                     </>)}
                     <dt>{t('movement.details.aircraftType')}</dt>
                     <dd>{req.aircraftType || '-'}</dd>
+                    {req.aircraftCategory && (<>
+                      <dt>{t('movement.details.category')}</dt>
+                      <dd>{req.aircraftCategory}</dd>
+                    </>)}
                     <dt>{t('movement.details.mtow')}</dt>
                     <dd>{req.mtow ? `${req.mtow} kg` : '-'}</dd>
                     {req.remarks && (<>
@@ -372,6 +394,10 @@ const PprRequestList = (props: any) => {
                     {automatic && (<>
                       <dt>{t('ppr.answered')}</dt>
                       <dd data-cy="ppr-answered-automatically">{t('ppr.answeredAutomatically')}</dd>
+                    </>)}
+                    {manualReason && (<>
+                      <dt>{t('ppr.manualAnswer.label')}</dt>
+                      <dd data-cy="ppr-manual-answer">{manualReason}</dd>
                     </>)}
                     {req.reviewRemarks && (<>
                       <dt>{t(automatic && req.status === 'approved' ? 'ppr.pilotInfo' : 'ppr.adminRemarks')}</dt>

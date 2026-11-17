@@ -7,6 +7,8 @@ const valid = {
   firstname: 'Max',
   lastname: 'Muster',
   immatriculation: 'HB-ABC',
+  aircraftType: 'PA-28',
+  mtow: 1100,
   aircraftCategory: 'Flugzeug',
   plannedDate: '2026-11-20',
   plannedTime: '10:30',
@@ -34,9 +36,19 @@ describe('components', () => {
       it('does not require optional fields', () => {
         const errors = validate(valid, TODAY);
         expect(Object.keys(errors)).not.toContain('phone');
-        expect(Object.keys(errors)).not.toContain('aircraftType');
-        expect(Object.keys(errors)).not.toContain('mtow');
         expect(Object.keys(errors)).not.toContain('remarks');
+      });
+
+      // As when recording the movement
+      it('requires the type, the MTOW and the category of the aircraft', () => {
+        const errors = validate({ ...valid, aircraftType: '', mtow: undefined, aircraftCategory: undefined }, TODAY);
+        expect(errors.aircraftType).toBe(i18n.t('validate.aircraftType'));
+        expect(errors.mtow).toBe(i18n.t('validate.mtow'));
+        expect(errors.aircraftCategory).toBe(i18n.t('validate.aircraftCategory'));
+      });
+
+      it.each([[0], [-1], [1100.5], [1000001]])('refuses the MTOW %p, as the server does', mtow => {
+        expect(validate({ ...valid, mtow }, TODAY).mtow).toBe(i18n.t('validate.mtow'));
       });
 
       it('error values are strings', () => {

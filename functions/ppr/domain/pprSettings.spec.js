@@ -10,6 +10,9 @@ const {
   pilotInfoFromStore,
   normalizeClosures,
   closuresFromStore,
+  normalizeManualAnswers,
+  manualAnswersFromStore,
+  MAX_MANUAL_MTOW,
   MAX_RETENTION_DAYS,
   MAX_PILOT_INFO_LENGTH,
   MAX_CLOSURES,
@@ -139,6 +142,46 @@ describe('pprSettings', () => {
       }
       expect(closuresFromStore(stored)).toEqual([stored[1], stored[0]])
       expect(closuresFromStore(null)).toEqual([])
+    })
+  })
+
+  describe('normalizeManualAnswers', () => {
+    it('takes helicopters and a limit in kg', () => {
+      expect(normalizeManualAnswers({ helicopters: true, mtowFrom: 2250 })).toEqual({ helicopters: true, mtowFrom: 2250 })
+      expect(normalizeManualAnswers({ helicopters: false, mtowFrom: MAX_MANUAL_MTOW }))
+        .toEqual({ helicopters: false, mtowFrom: MAX_MANUAL_MTOW })
+    })
+
+    it.each([
+      [undefined], [null], [{}], [{ helicopters: null, mtowFrom: null }], [{ helicopters: false, mtowFrom: '' }]
+    ])('switches them off for the empty value %p', value => {
+      expect(normalizeManualAnswers(value)).toEqual({ helicopters: false, mtowFrom: null })
+    })
+
+    it.each([
+      ['a list', []],
+      ['a text', 'helicopters'],
+      ['helicopters as text', { helicopters: 'yes' }],
+      ['a limit of 0', { mtowFrom: 0 }],
+      ['a negative limit', { mtowFrom: -2250 }],
+      ['a limit with decimals', { mtowFrom: 2250.5 }],
+      ['a limit as text', { mtowFrom: '2250' }],
+      ['a limit above the largest', { mtowFrom: MAX_MANUAL_MTOW + 1 }]
+    ])('refuses %s', (name, value) => {
+      expect(() => normalizeManualAnswers(value)).toThrow(expect.objectContaining({ code: 'INVALID_INPUT' }))
+    })
+  })
+
+  describe('manualAnswersFromStore', () => {
+    it('reads what is stored', () => {
+      expect(manualAnswersFromStore({ helicopters: true, mtowFrom: 2250 })).toEqual({ helicopters: true, mtowFrom: 2250 })
+    })
+
+    it('leaves out what is not valid', () => {
+      expect(manualAnswersFromStore({ helicopters: 'true', mtowFrom: '2250' })).toEqual({ helicopters: false, mtowFrom: null })
+      expect(manualAnswersFromStore({ helicopters: true, mtowFrom: -1 })).toEqual({ helicopters: true, mtowFrom: null })
+      expect(manualAnswersFromStore(null)).toEqual({ helicopters: false, mtowFrom: null })
+      expect(manualAnswersFromStore('x')).toEqual({ helicopters: false, mtowFrom: null })
     })
   })
 })

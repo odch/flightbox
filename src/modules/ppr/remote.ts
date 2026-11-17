@@ -42,6 +42,7 @@ export interface PprSettings {
   answerMode: 'manual' | 'automatic';
   pilotInfo: string | null;
   closures: { from: string; to: string; reason: string }[];
+  manualAnswers: { helicopters: boolean; mtowFrom: number | null };
 }
 
 export async function loadSettings(token: string): Promise<PprSettings> {

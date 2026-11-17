@@ -5,6 +5,8 @@ import Button from '../Button';
 import SuccessMessage from '../SuccessMessage';
 import dates from '../../util/dates';
 import { ClosureValue, upcomingClosures } from './ClosuresEditor';
+import { leavesRequestsToAdmins, NO_MANUAL_ANSWERS } from './manualAnswers';
+import type { PprManualAnswers } from '../../modules/ppr/actions';
 
 // The next blocked period is listed; the others are counted
 export const MAX_LISTED_CLOSURES = 1;
@@ -119,8 +121,28 @@ const formatPeriod = (closure: ClosureValue & { to: string }) =>
     ? `${dates.formatDate(closure.from)} – ${dates.formatDate(closure.to)}`
     : dates.formatDate(closure.to);
 
+// The answer mode, with the aircraft an admin answers for despite automatic
+// answers
+const answerText = (t: (key: string, options?: any) => string, answerMode: string, manualAnswers: PprManualAnswers) => {
+  if (answerMode !== 'automatic') {
+    return t('ppr.settings.answerManual');
+  }
+  const { helicopters, mtowFrom } = manualAnswers;
+  if (helicopters && mtowFrom !== null) {
+    return t('ppr.settings.answerAutomaticExceptBoth', { mtow: mtowFrom });
+  }
+  if (helicopters) {
+    return t('ppr.settings.answerAutomaticExceptHelicopters');
+  }
+  if (mtowFrom !== null) {
+    return t('ppr.settings.answerAutomaticExceptMtow', { mtow: mtowFrom });
+  }
+  return t('ppr.settings.answerAutomatic');
+};
+
 interface PprSettingsSummaryProps {
   answerMode: string;
+  manualAnswers?: PprManualAnswers;
   adminEmail: string | null;
   closures: ClosureValue[];
   // Confirms a save just made, to the eye: screen readers hear it from the
@@ -136,10 +158,9 @@ interface PprSettingsSummaryProps {
  * with the buttons for the website link and to change them.
  */
 const PprSettingsSummary = ({
-  answerMode, adminEmail, closures, saved, onEdit, onShowLinks,
+  answerMode, manualAnswers = NO_MANUAL_ANSWERS, adminEmail, closures, saved, onEdit, onShowLinks,
 }: PprSettingsSummaryProps) => {
   const { t } = useTranslation();
-  const automatic = answerMode === 'automatic';
   const upcoming = upcomingClosures(closures, dates.localDate());
   const listed = upcoming.slice(0, MAX_LISTED_CLOSURES);
 
@@ -149,9 +170,7 @@ const PprSettingsSummary = ({
       <Settings>
         <Setting>
           <dt>{t('ppr.settings.answer')}</dt>
-          <dd data-cy="ppr-settings-summary-answer">
-            {automatic ? t('ppr.settings.answerAutomatic') : t('ppr.settings.answerManual')}
-          </dd>
+          <dd data-cy="ppr-settings-summary-answer">{answerText(t, answerMode, manualAnswers)}</dd>
         </Setting>
         <Setting>
           <dt>{t('ppr.settings.closures')}</dt>
@@ -172,7 +191,9 @@ const PprSettingsSummary = ({
           <dt>{t('ppr.settings.notification')}</dt>
           <dd data-cy="ppr-settings-summary-notification">
             {/* As in the form: unanswered requests nobody hears about */}
-            {adminEmail || (automatic ? '-' : <Warning>{t('ppr.settings.noAdminEmail')}</Warning>)}
+            {adminEmail || (leavesRequestsToAdmins(answerMode, manualAnswers)
+              ? <Warning>{t('ppr.settings.noAdminEmail')}</Warning>
+              : '-')}
           </dd>
         </Setting>
       </Settings>

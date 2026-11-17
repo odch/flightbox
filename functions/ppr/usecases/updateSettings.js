@@ -5,7 +5,8 @@ const {
   normalizeRetentionDays,
   normalizeAnswerMode,
   normalizePilotInfo,
-  normalizeClosures
+  normalizeClosures,
+  normalizeManualAnswers
 } = require('../domain/pprSettings')
 const getSettings = require('./getSettings')
 
@@ -17,42 +18,45 @@ const getSettings = require('./getSettings')
  * - answerMode: 'manual' or 'automatic' (empty goes back to manual)
  * - pilotInfo: the text automatic approvals carry (empty removes it)
  * - closures: [{ from, to, reason }], the days requests are rejected for
- * Everything is validated before anything is written.
+ * - manualAnswers: { helicopters, mtowFrom }, the requests an admin answers
+ *   also with automatic answers (empty switches them off)
+ * Everything is validated, then written at once.
  *
  * @param {Object} deps - { settings }
- * @param {Object} input - { adminEmail?, retentionDays?, answerMode?, pilotInfo?, closures? }
+ * @param {Object} input - { adminEmail?, retentionDays?, answerMode?, pilotInfo?, closures?, manualAnswers? }
  * @returns {Promise<Object>} all settings, as getSettings returns them
  */
 async function updateSettings({ settings }, input) {
-  const writes = []
+  const changes = {}
 
   if ('adminEmail' in input) {
-    const adminEmail = normalizeAdminEmail(input.adminEmail)
-    writes.push(() => settings.setAdminEmail(adminEmail))
+    changes.adminEmail = normalizeAdminEmail(input.adminEmail)
   }
 
   if ('retentionDays' in input) {
-    const retentionDays = normalizeRetentionDays(input.retentionDays)
-    writes.push(() => settings.setRetentionDays(retentionDays))
+    changes.retentionDays = normalizeRetentionDays(input.retentionDays)
   }
 
   if ('answerMode' in input) {
-    const answerMode = normalizeAnswerMode(input.answerMode)
-    writes.push(() => settings.setAnswerMode(answerMode))
+    changes.answerMode = normalizeAnswerMode(input.answerMode)
   }
 
   if ('pilotInfo' in input) {
-    const pilotInfo = normalizePilotInfo(input.pilotInfo)
-    writes.push(() => settings.setPilotInfo(pilotInfo))
+    changes.pilotInfo = normalizePilotInfo(input.pilotInfo)
   }
 
   if ('closures' in input) {
-    const closures = normalizeClosures(input.closures)
-    writes.push(() => settings.setClosures(closures))
+    changes.closures = normalizeClosures(input.closures)
   }
 
-  for (const write of writes) {
-    await write()
+  if ('manualAnswers' in input) {
+    changes.manualAnswers = normalizeManualAnswers(input.manualAnswers)
+  }
+
+  // In one write: e.g. automatic answers never apply without the aircraft
+  // an admin answers that come with them
+  if (Object.keys(changes).length > 0) {
+    await settings.saveSettings(changes)
   }
 
   return getSettings({ settings })

@@ -20,6 +20,7 @@ describe('modules', () => {
           },
           settings: {
             adminEmail: null, retentionDays: null, answerMode: 'manual', pilotInfo: null, closures: [],
+            manualAnswers: { helicopters: false, mtowFrom: null },
             loaded: false, loadFailed: false, saving: false, saved: false, saveFailed: false,
           },
           status: { request: null, loading: false, withdrawing: false, notice: null },
@@ -27,17 +28,29 @@ describe('modules', () => {
       });
 
       describe('settings', () => {
-        const noAnswers = { answerMode: 'manual' as const, pilotInfo: null, closures: [] };
+        const noAnswers = {
+          answerMode: 'manual' as const, pilotInfo: null, closures: [], manualAnswers: { helicopters: false, mtowFrom: null },
+        };
 
         it('stores the loaded settings', () => {
           const closures = [{ from: '2026-11-19', to: '2026-11-21', reason: 'Runway works' }];
+          const manualAnswers = { helicopters: true, mtowFrom: 2250 };
           const state = reducer(initialState, actions.pprSettingsLoaded({
             adminEmail: 'ppr@aerodrome.ch', retentionDays: 60, answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures,
+            manualAnswers,
           }));
           expect(state.settings).toEqual(expect.objectContaining({
             adminEmail: 'ppr@aerodrome.ch', retentionDays: 60, answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures,
-            loaded: true, loadFailed: false,
+            manualAnswers, loaded: true, loadFailed: false,
           }));
+        });
+
+        it('stores the manual answers a save returns', () => {
+          const manualAnswers = { helicopters: false, mtowFrom: 5700 };
+          const state = reducer(initialState, actions.savePprSettingsSuccess({
+            adminEmail: null, retentionDays: null, answerMode: 'automatic', pilotInfo: null, closures: [], manualAnswers,
+          }));
+          expect(state.settings.manualAnswers).toEqual(manualAnswers);
         });
 
         it('uses the defaults for answer settings an older server does not send', () => {

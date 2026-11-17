@@ -2,7 +2,8 @@ import React from 'react';
 import { renderWithTheme, withTheme, screen, fireEvent, within } from '../../../test/renderWithTheme';
 
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: key => key }),
+  // The key, with the MTOW where one is given
+  useTranslation: () => ({ t: (key, options) => (options && options.mtow !== undefined ? `${key} (${options.mtow})` : key) }),
   withTranslation: () => Component => {
     const WrappedComponent = props => <Component {...props} t={key => key} />;
     WrappedComponent.displayName = `withTranslation(${Component.displayName || Component.name})`;
@@ -296,6 +297,35 @@ describe('PprRequestList (admin)', () => {
 
       fireEvent.click(screen.getByText('HB-ABC'));
       expect(container.querySelector('[data-cy="ppr-without-login"]')).toBeNull();
+    });
+  });
+
+  describe('requests automatic answers left to an admin', () => {
+    const detail = (container: HTMLElement) => container.querySelector('[data-cy="ppr-manual-answer"]');
+
+    it.each([
+      [{ reason: 'helicopter' }, 'ppr.manualAnswer.helicopter'],
+      [{ reason: 'mtow', mtowFrom: 2250 }, 'ppr.manualAnswer.mtow (2250)'],
+    ])('tell why in their details (%p)', (manualAnswer, text) => {
+      const { container } = renderWithTheme(<PprRequestList {...defaultProps} data={[{ ...pendingRequest, manualAnswer }]}/>);
+      fireEvent.click(screen.getByText('HB-ABC'));
+
+      expect(detail(container)!.textContent).toBe(text);
+      expect(detail(container)!.previousElementSibling!.textContent).toBe('ppr.manualAnswer.label');
+    });
+
+    it('tell nothing of the kind for the others', () => {
+      const { container } = renderWithTheme(<PprRequestList {...defaultProps} data={[pendingRequest]}/>);
+      fireEvent.click(screen.getByText('HB-ABC'));
+
+      expect(detail(container)).toBeNull();
+    });
+
+    it('show the category the pilot entered', () => {
+      renderWithTheme(<PprRequestList {...defaultProps} data={[{ ...pendingRequest, aircraftCategory: 'Hubschrauber' }]}/>);
+      fireEvent.click(screen.getByText('HB-ABC'));
+
+      expect(screen.getByText('Hubschrauber').previousElementSibling!.textContent).toBe('movement.details.category');
     });
   });
 

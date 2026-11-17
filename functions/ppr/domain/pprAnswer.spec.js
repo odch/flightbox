@@ -1,6 +1,6 @@
 'use strict'
 
-const { decideAnswer } = require('./pprAnswer')
+const { decideAnswer, manualAnswerReason } = require('./pprAnswer')
 
 const TODAY = '2026-11-13'
 const request = { plannedDate: '2026-11-20', plannedTime: '14:30' }
@@ -85,5 +85,62 @@ describe('decideAnswer', () => {
       aerodromeStatus: { status: 'closed', details: 'Thunderstorms' }
     }))
     expect(answer).toEqual({ status: 'rejected', reviewRemarks: 'Air show' })
+  })
+})
+
+describe('manualAnswerReason', () => {
+  const HELICOPTERS = { helicopters: true, mtowFrom: null }
+  // lszm: all helicopters, other aircraft from 2250 kg
+  const LSZM = { helicopters: true, mtowFrom: 2250 }
+  // As the pilot declared it
+  const declared = (aircraftCategory, mtow) => ({ ...request, aircraftCategory, mtow })
+
+  it.each(['Hubschrauber', 'Eigenbauhubschrauber'])('leaves a %s to an admin, whatever its MTOW', category => {
+    expect(manualAnswerReason(declared(category, 700), LSZM)).toEqual({ reason: 'helicopter' })
+    expect(manualAnswerReason(declared(category, 3500), HELICOPTERS)).toEqual({ reason: 'helicopter' })
+  })
+
+  it.each(['Flugzeug', 'Ultraleicht Tragschrauber', 'Motorsegler'])('answers a %s automatically under the limit', category => {
+    expect(manualAnswerReason(declared(category, 2249), LSZM)).toBeNull()
+    expect(manualAnswerReason(declared(category, 5700), HELICOPTERS)).toBeNull()
+  })
+
+  it.each([2250, 5700])('leaves an aircraft of %i kg to an admin from the limit on, the limit included', mtow => {
+    expect(manualAnswerReason(declared('Flugzeug', mtow), LSZM)).toEqual({ reason: 'mtow', mtowFrom: 2250 })
+    expect(manualAnswerReason(declared('Flugzeug', mtow), { helicopters: false, mtowFrom: 2250 }))
+      .toEqual({ reason: 'mtow', mtowFrom: 2250 })
+  })
+
+  it('leaves nothing to an admin without manual answers', () => {
+    for (const manualAnswers of [{ helicopters: false, mtowFrom: null }, undefined]) {
+      expect(manualAnswerReason(declared('Hubschrauber', 9000), manualAnswers)).toBeNull()
+    }
+  })
+})
+
+describe('decideAnswer with manual answers', () => {
+  const LSZM = { helicopters: true, mtowFrom: 2250 }
+  const automatic = (overrides = {}) =>
+    options({ answerMode: 'automatic', pilotInfo: 'Runway 05/23', manualAnswers: LSZM, ...overrides })
+  const declared = (aircraftCategory, mtow) => ({ ...request, aircraftCategory, mtow })
+
+  it('leaves a helicopter and a heavy aircraft to an admin', () => {
+    expect(decideAnswer(declared('Hubschrauber', 1370), automatic())).toBeNull()
+    expect(decideAnswer(declared('Flugzeug', 2250), automatic())).toBeNull()
+  })
+
+  it('approves the other aircraft automatically', () => {
+    expect(decideAnswer(declared('Flugzeug', 1100), automatic()))
+      .toEqual({ status: 'approved', reviewRemarks: 'Runway 05/23' })
+  })
+
+  it('rejects a helicopter for a closure all the same', () => {
+    const closures = [{ from: '2026-11-20', to: '2026-11-20', reason: 'Air show' }]
+    expect(decideAnswer(declared('Hubschrauber', 1370), automatic({ closures })))
+      .toEqual({ status: 'rejected', reviewRemarks: 'Air show' })
+  })
+
+  it('leaves a helicopter to an admin with manual answers too', () => {
+    expect(decideAnswer(declared('Hubschrauber', 1370), automatic({ answerMode: 'manual' }))).toBeNull()
   })
 })
