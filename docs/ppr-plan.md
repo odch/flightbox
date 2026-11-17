@@ -179,6 +179,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] Create `functions/ppr/publicRoutes.js` — the routes without login (Phase 11)
   - `POST /guest-requests` — a request without login (only with `pprGuestRequests`)
   - `POST /status/:key`, `POST /status/:key/withdraw` — the status page of the pilot's links (wherever `ppr` is on), the token in the JSON body
+  - `GET /closures` — the blocked days that have not ended, for the request form with and without login (wherever `ppr` is on)
 
 #### 2g. Mount in API
 - [x] Add `api.use('(/api)?/ppr', pprRoutes)` to `functions/api/index.js`
@@ -274,6 +275,7 @@ export const reviewRequest = (key, review, token) => fetch(`${BASE}/ppr/requests
 - [x] The settings box shows a summary (answer mode, up to three upcoming blocked periods, the address or the missing-address warning) until "Bearbeiten"; "Abbrechen" discards the changes; a successful save closes the form and shows "Gespeichert!" (the shared SuccessMessage) for 5 s, announced by a live region that stays on the page while the summary and the form take turns; a failed save keeps the form open with the error; the second click of a double click does nothing to what moves under the pointer: the options of the form opening on "Bearbeiten", and the request list moving up when the form closes (no request is answered or closed)
 - [x] With `ppr` on, the "Flugplatz-Status" tab notes that the status «Geschlossen» rejects PPR requests for today
 - [x] The admin list and the pilot's list show the requests in groups: «Offen» (pending, planned for today or later, the next first), «Bevorstehend» (answered, today or later) and «Vergangen» (planned before today, the most recent first; the 10 most recent, the others with «Ältere anzeigen», a linked one always); the admin tab counts the open ones
+- [x] The request form shows the blocked days that have not ended (`GET /ppr/closures`, no login, `{ closures: [{ from, to, reason }] }`, loaded with the form; without them the form only can't warn): red in the calendar with the reason as tooltip and in the day's ARIA label, listed below the month for touch screens, still selectable; the form refuses such a day at once with the reason («An diesem Tag ist keine PPR-Anfrage möglich: …»), as the server would reject the request. Today is marked in the main colour (blue) in every date picker; a date picker marks its field as left (touched) when it closes, so a form shows its error at once
 - [ ] Later: scheduled aerodrome statuses on the "Flugplatz-Status" tab, shown by the banner, the status page and the API, and rejected by PPR too, so a planned closure of the whole aerodrome is entered once; to decide: a manual status during a planned period, times of day, the API fields
 
 ### Phase 11: Requests without login (`pprGuestRequests`)

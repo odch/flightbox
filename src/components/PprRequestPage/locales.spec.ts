@@ -14,7 +14,7 @@ describe('PPR translations', () => {
     expect(keysOf((en as any).ppr)).toEqual(keysOf((de as any).ppr));
   });
 
-  it.each(['nav.ppr', 'nav.pprList', 'admin.ppr', 'validate.email', 'legal.privacyPolicy'])(
+  it.each(['nav.ppr', 'nav.pprList', 'admin.ppr', 'validate.email', 'legal.privacyPolicy', 'datePicker.blocked'])(
     'has %s in German and English',
     key => {
       expect(lookup(de, key)).toEqual(expect.any(String));

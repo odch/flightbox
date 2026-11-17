@@ -33,6 +33,8 @@ export const WITHDRAW_PPR_REQUEST = 'WITHDRAW_PPR_REQUEST' as const;
 export const WITHDRAW_PPR_REQUEST_SUCCESS = 'WITHDRAW_PPR_REQUEST_SUCCESS' as const;
 export const WITHDRAW_PPR_REQUEST_FAILURE = 'WITHDRAW_PPR_REQUEST_FAILURE' as const;
 export const RESET_PPR_STATUS = 'RESET_PPR_STATUS' as const;
+export const PPR_CLOSURES_LOADED = 'PPR_CLOSURES_LOADED' as const;
+export const DISMISS_PPR_SUBMIT_FAILURE = 'DISMISS_PPR_SUBMIT_FAILURE' as const;
 
 // Days requests are rejected for automatically, with the reason
 export interface PprClosure {
@@ -124,7 +126,9 @@ export type PprAction =
   | { type: typeof WITHDRAW_PPR_REQUEST; payload: { key: string; token: string } }
   | { type: typeof WITHDRAW_PPR_REQUEST_SUCCESS }
   | { type: typeof WITHDRAW_PPR_REQUEST_FAILURE; payload: { reason: PprWithdrawFailure } }
-  | { type: typeof RESET_PPR_STATUS };
+  | { type: typeof RESET_PPR_STATUS }
+  | { type: typeof PPR_CLOSURES_LOADED; payload: { closures: PprClosure[] } }
+  | { type: typeof DISMISS_PPR_SUBMIT_FAILURE };
 
 export function loadPprRequests(scope: PprListScope = 'own') {
   return { type: LOAD_PPR_REQUESTS, payload: { scope } };
@@ -270,4 +274,14 @@ export function withdrawPprRequestFailure(reason: PprWithdrawFailure) {
 
 export function resetPprStatus() {
   return { type: RESET_PPR_STATUS };
+}
+
+// The closures the request form shows (loaded with the form)
+export function pprClosuresLoaded(closures: PprClosure[]) {
+  return { type: PPR_CLOSURES_LOADED, payload: { closures } };
+}
+
+// Closes the notice of a failed submission; the form stays as it is
+export function dismissPprSubmitFailure() {
+  return { type: DISMISS_PPR_SUBMIT_FAILURE };
 }

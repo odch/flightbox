@@ -16,7 +16,8 @@ export {
   submitPprGuestRequest,
   loadPprStatus,
   withdrawPprRequest,
-  resetPprStatus
+  resetPprStatus,
+  dismissPprSubmitFailure
 } from './actions';
 
 export { sagas, getOpenPprCount };

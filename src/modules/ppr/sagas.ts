@@ -19,6 +19,26 @@ export function* initPprForm() {
   }
 }
 
+// The closures the form shows, loaded with it. Without them the form can't
+// warn; the server still rejects requests for their days. Dropped once the
+// form was left, as they would show on the next one.
+export function* loadPprClosures() {
+  try {
+    const raced = yield race({
+      closures: call(remote.loadClosures),
+      reset: take(actions.RESET_PPR_FORM),
+    });
+    if (raced.reset) {
+      return;
+    }
+    yield put(actions.pprClosuresLoaded(raced.closures));
+  } catch (e) {
+    if (console && typeof console.error === 'function') {
+      console.error('Failed to load PPR closures', e);
+    }
+  }
+}
+
 export function* loadPprRequests(action: any) {
   const scope = (action && action.payload && action.payload.scope) || 'own';
   yield put(actions.setPprLoading());
@@ -241,6 +261,8 @@ export function* withdrawPprRequest(action: any) {
 export default function* sagas() {
   yield all([
     takeEvery(actions.INIT_PPR_FORM, initPprForm),
+    // The form of the newest page
+    takeLatest(actions.INIT_PPR_FORM, loadPprClosures),
     // A newer load replaces the one running: the store holds the state of
     // one load (e.g. of the admin page and the list, started together)
     takeLatest(actions.LOAD_PPR_REQUESTS, loadPprRequests),

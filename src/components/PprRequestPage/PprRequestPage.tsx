@@ -23,8 +23,10 @@ const PprRequestPage = props => (
         initPprForm={props.initPprForm}
         onSubmit={props.onSubmit}
         resetPprForm={props.resetPprForm}
+        dismissPprSubmitFailure={props.dismissPprSubmitFailure}
         confirmPprSubmitSuccess={props.confirmPprSubmitSuccess}
         withoutLogin={props.withoutLogin}
+        closures={props.closures}
       />
     </Content>
   </VerticalHeaderLayout>

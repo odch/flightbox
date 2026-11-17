@@ -3,9 +3,11 @@
 const mockSubmitRequest = jest.fn()
 const mockGetRequestStatus = jest.fn()
 const mockWithdrawRequest = jest.fn()
+const mockGetClosures = jest.fn()
 jest.mock('./usecases/submitRequest', () => mockSubmitRequest)
 jest.mock('./usecases/getRequestStatus', () => mockGetRequestStatus)
 jest.mock('./usecases/withdrawRequest', () => mockWithdrawRequest)
+jest.mock('./usecases/getClosures', () => mockGetClosures)
 jest.mock('./deps', () => ({ repository: {}, notifier: {}, settings: {}, aerodromeStatus: {}, statusTokens: {} }))
 
 const mockClientLimiter = { acquire: jest.fn(), release: jest.fn(), retryAfterMs: jest.fn() }
@@ -129,16 +131,17 @@ describe('PPR routes without login', () => {
   })
 
   describe('router structure', () => {
-    it('has the submission without login and the status routes, for POST and its preflight only', () => {
+    it('has the submission without login, the status routes and the closures, each with its preflight', () => {
       const routes = router.stack.map(layer => [layer.route.path, layer.route.methods])
       expect(routes).toEqual([
         ['/guest-requests', { options: true, post: true }],
         ['/status/:key', { options: true, post: true }],
-        ['/status/:key/withdraw', { options: true, post: true }]
+        ['/status/:key/withdraw', { options: true, post: true }],
+        ['/closures', { options: true, get: true }]
       ])
     })
 
-    it('has no submission without login where it is off, but the status routes', () => {
+    it('has no submission without login where it is off, but the status routes and the closures', () => {
       let routes
       jest.isolateModules(() => {
         require('./enabled').isPprGuestRequestsEnabled.mockReturnValueOnce(false)
@@ -148,15 +151,20 @@ describe('PPR routes without login', () => {
       expect(routeOf(routes, '/guest-requests')).toBeUndefined()
       expect(handlersOf('post', '/status/:key', routes)).toHaveLength(3)
       expect(handlersOf('post', '/status/:key/withdraw', routes)).toHaveLength(3)
+      expect(handlersOf('get', '/closures', routes)).toHaveLength(2)
     })
   })
 
   describe('CORS', () => {
-    const PATHS = ['/guest-requests', '/status/:key', '/status/:key/withdraw']
+    const PATHS = ['/guest-requests', '/status/:key', '/status/:key/withdraw', '/closures']
     const preflight = (path, origin) => run('options', path, mockReq({
       method: 'OPTIONS',
       contentType: null,
-      headers: { origin, 'access-control-request-method': 'POST', 'access-control-request-headers': 'content-type' }
+      headers: {
+        origin,
+        'access-control-request-method': path === '/closures' ? 'GET' : 'POST',
+        'access-control-request-headers': 'content-type'
+      }
     }))
 
     const allowed = PATHS.flatMap(path => [
@@ -169,7 +177,7 @@ describe('PPR routes without login', () => {
       expect(res.ended).toBe(true)
       expect(res.statusCode).toBe(204)
       expect(res.headers['access-control-allow-origin']).toBe(origin)
-      expect(res.headers['access-control-allow-methods']).toBe('POST')
+      expect(res.headers['access-control-allow-methods']).toBe('GET,POST')
       // The ID token of the session that submits
       expect(res.headers['access-control-allow-headers']).toBe('Content-Type,Authorization')
       expect(passedOn).toBe(false)
@@ -218,6 +226,14 @@ describe('PPR routes without login', () => {
       const { res } = await run('post', '/status/:key', req)
 
       expect(res.headers['access-control-allow-origin']).toBeUndefined()
+    })
+
+    it('allows the app\'s page to read the closures, and no other site', async () => {
+      mockGetClosures.mockResolvedValue([])
+      const get = origin => run('get', '/closures', mockReq({ method: 'GET', contentType: null, headers: { origin } }))
+
+      expect((await get(APP_ORIGINS[2])).res.headers['access-control-allow-origin']).toBe(APP_ORIGINS[2])
+      expect((await get('https://evil.example')).res.headers['access-control-allow-origin']).toBeUndefined()
     })
   })
 
@@ -608,6 +624,35 @@ describe('PPR routes without login', () => {
       expect(res.statusCode).toBe(500)
       expect(res.body).toEqual({ error: 'Failed to withdraw request' })
       expect(error).toHaveBeenCalledWith('Failed to withdraw PPR request', KEY)
+      error.mockRestore()
+    })
+  })
+
+  describe('GET /closures', () => {
+    const closuresReq = () => mockReq({ method: 'GET', contentType: null })
+
+    it('returns the closures that have not ended, without login', async () => {
+      mockSession = null
+      const closures = [{ from: '2026-11-20', to: '2026-11-22', reason: 'Runway works' }]
+      mockGetClosures.mockResolvedValue(closures)
+
+      const { res, passedOn } = await run('get', '/closures', closuresReq())
+
+      expect(res.statusCode).toBe(200)
+      expect(res.body).toEqual({ closures })
+      expect(mockGetClosures).toHaveBeenCalledWith(deps)
+      expect(passedOn).toBe(false)
+    })
+
+    it('answers 500 when the closures cannot be read', async () => {
+      const error = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+      mockGetClosures.mockRejectedValue(new Error('DB down'))
+
+      const { res } = await run('get', '/closures', closuresReq())
+
+      expect(res.statusCode).toBe(500)
+      expect(res.body).toEqual({ error: 'Failed to read closures' })
+      expect(error).toHaveBeenCalledWith('Failed to read the PPR closures')
       error.mockRestore()
     })
   })

@@ -692,7 +692,8 @@
     "validation": {
       "plannedTime": "Enter the planned time in hours and minutes (local time).",
       "plannedDatePast": "The planned date must not be in the past.",
-      "plannedDateTooFar": "The planned date must be within one year."
+      "plannedDateTooFar": "The planned date must be within one year.",
+      "plannedDateBlocked": "No PPR requests on this day: {{reason}}"
     },
     "status": {
       "pending": "Pending",
@@ -743,13 +744,13 @@
       "pilotInfoHelp": "Included in each automatic approval, e.g. runway, circuit, radio frequency, landing fee and phone number.",
       "tooLong": "At most {{max}} characters.",
       "closures": "Blocked days",
-      "closuresHelp": "Block the days on which you do not approve PPR requests, e.g. for runway works, an event or when nobody is on site. New requests for these days are rejected with the reason, also when answering manually. Blocked days do not change the aerodrome status. While it is «Closed», requests for today are rejected as well. Requests already made stay as they are: reject pending ones in the «PPR requests» list below, and revoke approvals there.",
+      "closuresHelp": "Block the days on which you do not approve PPR requests, e.g. for runway works, an event or when nobody is on site. The request form shows these days with the reason in its calendar, and new requests for them are rejected with the reason, also when answering manually. Blocked days do not change the aerodrome status. While it is «Closed», requests for today are rejected as well. Requests already made stay as they are: reject pending ones in the «PPR requests» list below, and revoke approvals there.",
       "noClosures": "No days blocked.",
       "noClosuresShort": "none",
       "moreClosures": "and {{count}} more",
       "closureFrom": "From",
       "closureTo": "To",
-      "closureReason": "Reason (included in the rejection)",
+      "closureReason": "Reason (shown to pilots)",
       "addClosure": "Add blocked days",
       "removeClosure": "Remove block",
       "closureDatesRequired": "Enter the first and the last blocked day.",
@@ -808,6 +809,9 @@
   },
   "maskedInput": {
     "tooltip": "To edit this field, clear it first and then enter the desired value."
+  },
+  "datePicker": {
+    "blocked": "Blocked"
   },
   "invoicesReport": {
     "onlinePayments": "Online payments",

@@ -24,6 +24,10 @@ interface PprFormState {
   reviewFailed: boolean;
   revokeFailed: boolean;
   deleteFailed: boolean;
+  // The closures that haven't ended: the form shows them and refuses their
+  // days, which the server would reject. None until they are loaded, or
+  // when they can't be.
+  closures: PprClosure[];
 }
 
 // What the status page tells after a load or a withdrawal
@@ -83,6 +87,7 @@ const INITIAL_STATE: PprState = {
     reviewFailed: false,
     revokeFailed: false,
     deleteFailed: false,
+    closures: [],
   },
   settings: {
     adminEmail: null,
@@ -209,6 +214,18 @@ function selectRequest(state: PprState, action: PprAction & { type: typeof actio
 function resetForm(state: PprState) {
   return Object.assign({}, state, {
     form: INITIAL_STATE.form,
+  });
+}
+
+function dismissSubmitFailure(state: PprState) {
+  return Object.assign({}, state, {
+    form: Object.assign({}, state.form, { commitFailed: false, rateLimited: false }),
+  });
+}
+
+function closuresLoaded(state: PprState, action: PprAction & { type: typeof actions.PPR_CLOSURES_LOADED }) {
+  return Object.assign({}, state, {
+    form: Object.assign({}, state.form, { closures: action.payload.closures }),
   });
 }
 
@@ -349,6 +366,8 @@ const ACTION_HANDLERS = {
   [actions.DELETE_PPR_REQUEST_FAILURE]: deleteFailure,
   [actions.SELECT_PPR_REQUEST]: selectRequest,
   [actions.RESET_PPR_FORM]: resetForm,
+  [actions.PPR_CLOSURES_LOADED]: closuresLoaded,
+  [actions.DISMISS_PPR_SUBMIT_FAILURE]: dismissSubmitFailure,
   [actions.PPR_SETTINGS_LOADED]: settingsLoaded,
   [actions.PPR_SETTINGS_LOAD_FAILED]: settingsLoadFailed,
   [actions.SAVE_PPR_SETTINGS]: settingsSaving,

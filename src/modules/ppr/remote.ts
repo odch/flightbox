@@ -1,4 +1,4 @@
-import type { PprRequestStatus, PprSubmitResult } from './actions';
+import type { PprClosure, PprRequestStatus, PprSubmitResult } from './actions';
 
 declare var __FIREBASE_PROJECT_ID__: string;
 
@@ -172,4 +172,15 @@ export function loadRequestStatus(key: string, token: string): Promise<PprReques
 
 export function withdrawRequest(key: string, token: string): Promise<{ withdrawn: true }> {
   return postWithoutLogin(`/ppr/status/${encodeURIComponent(key)}/withdraw`, { token });
+}
+
+// The closures that haven't ended, for the request form with and without
+// login; they need no login
+export async function loadClosures(): Promise<PprClosure[]> {
+  const res = await fetch(`${baseUrl()}/ppr/closures`);
+  if (!res.ok) {
+    throw await apiError(res);
+  }
+  const body = await res.json();
+  return Array.isArray(body.closures) ? body.closures : [];
 }

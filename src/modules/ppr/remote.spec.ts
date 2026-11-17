@@ -1,4 +1,4 @@
-import { loadRequestStatus, submitGuestRequest, withdrawRequest } from './remote';
+import { loadClosures, loadRequestStatus, submitGuestRequest, withdrawRequest } from './remote';
 
 const API = 'https://europe-west1-test-project.cloudfunctions.net/api';
 const TOKEN = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJ-_0123';
@@ -112,6 +112,29 @@ describe('modules', () => {
           fetchMock.mockResolvedValue(response(409, { error: 'Not pending' }));
 
           await expect(withdrawRequest('-Nabc', TOKEN)).rejects.toMatchObject({ message: 'Not pending', status: 409 });
+        });
+      });
+
+      describe('loadClosures', () => {
+        it('loads the closures without login', async () => {
+          const closures = [{ from: '2026-11-20', to: '2026-11-22', reason: 'Runway works' }];
+          fetchMock.mockResolvedValue(response(200, { closures }));
+
+          await expect(loadClosures()).resolves.toEqual(closures);
+
+          expect(fetchMock).toHaveBeenCalledWith(`${API}/ppr/closures`);
+        });
+
+        it('returns none for an answer without a list', async () => {
+          fetchMock.mockResolvedValue(response(200, {}));
+
+          await expect(loadClosures()).resolves.toEqual([]);
+        });
+
+        it('keeps the status of a failure', async () => {
+          fetchMock.mockResolvedValue(response(500, { error: 'Failed to read closures' }));
+
+          await expect(loadClosures()).rejects.toMatchObject({ message: 'Failed to read closures', status: 500 });
         });
       });
     });

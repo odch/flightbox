@@ -3,6 +3,7 @@ import dates from '../../util/dates';
 import { isSendableEmail } from '../../util/emails';
 import { categories as aircraftCategories } from '../../util/aircraftCategories';
 import i18n from '../../i18n';
+import type { PprClosure } from '../../modules/ppr/actions';
 
 // The date range the server accepts (functions/ppr/domain/pprRequest.js)
 const MAX_DAYS_AHEAD = 365;
@@ -60,8 +61,9 @@ const getConfig = () => ({
   },
 });
 
-// `today` is the aerodrome's (Zurich) date as 'YYYY-MM-DD'
-const validate = (values: Record<string, any>, today: string = dates.localDate()) => {
+// `today` is the aerodrome's (Zurich) date as 'YYYY-MM-DD'; requests for the
+// days of the closures are rejected
+const validate = (values: Record<string, any>, today: string = dates.localDate(), closures: PprClosure[] = []) => {
   const errorArr = validateUtil(values, getConfig());
 
   const errors: Record<string, string | undefined> = {};
@@ -77,6 +79,12 @@ const validate = (values: Record<string, any>, today: string = dates.localDate()
       errors.plannedDate = i18n.t('ppr.validation.plannedDatePast');
     } else if (plannedDate > addDays(today, MAX_DAYS_AHEAD)) {
       errors.plannedDate = i18n.t('ppr.validation.plannedDateTooFar');
+    } else {
+      // The server rejects the request with the reason of the first one
+      const closure = closures.find(c => c.from <= plannedDate && plannedDate <= c.to);
+      if (closure) {
+        errors.plannedDate = i18n.t('ppr.validation.plannedDateBlocked', { reason: closure.reason });
+      }
     }
   }
 
@@ -86,8 +94,12 @@ const validate = (values: Record<string, any>, today: string = dates.localDate()
 // Without a login the pilot enters the address the emails about the request
 // go to (with a login they go to the login's address). Checked by the
 // server's rule, which would refuse the request.
-export const validateWithoutLogin = (values: Record<string, any>, today: string = dates.localDate()) => {
-  const errors = validate(values, today);
+export const validateWithoutLogin = (
+  values: Record<string, any>,
+  today: string = dates.localDate(),
+  closures: PprClosure[] = []
+) => {
+  const errors = validate(values, today, closures);
   const email = typeof values.email === 'string' ? values.email.trim() : '';
   if (email === '') {
     errors.email = i18n.t('validate.email');

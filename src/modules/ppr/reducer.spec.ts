@@ -16,7 +16,7 @@ describe('modules', () => {
           initialValues: {},
           form: {
             submitting: false, submitted: false, result: null, commitFailed: false, rateLimited: false,
-            reviewFailed: false, revokeFailed: false, deleteFailed: false,
+            reviewFailed: false, revokeFailed: false, deleteFailed: false, closures: [],
           },
           settings: {
             adminEmail: null, retentionDays: null, answerMode: 'manual', pilotInfo: null, closures: [],
@@ -193,7 +193,7 @@ describe('modules', () => {
           ...initialState,
           form: {
             submitting: false, submitted: false, result: null, commitFailed: false, rateLimited: false,
-            reviewFailed: true, revokeFailed: false, deleteFailed: true,
+            reviewFailed: true, revokeFailed: false, deleteFailed: true, closures: [],
           },
         };
         const state = reducer(stateWithFlags, actions.submitPprRequestSuccess());
@@ -214,7 +214,7 @@ describe('modules', () => {
           ...initialState,
           form: {
             submitting: false, submitted: false, result: null, commitFailed: false, rateLimited: false,
-            reviewFailed: true, revokeFailed: false, deleteFailed: true,
+            reviewFailed: true, revokeFailed: false, deleteFailed: true, closures: [],
           },
         };
         const state = reducer(stateWithFlags, actions.submitPprRequestFailure());
@@ -381,6 +381,7 @@ describe('modules', () => {
           reviewFailed: true,
           revokeFailed: true,
           deleteFailed: true,
+          closures: [{ from: '2026-11-20', to: '2026-11-22', reason: 'Runway works' }],
         };
         const state = reducer(
           { ...initialState, form: dirtyForm },
@@ -395,7 +396,31 @@ describe('modules', () => {
           reviewFailed: false,
           revokeFailed: false,
           deleteFailed: false,
+          closures: [],
         });
+      });
+
+      it('closes the notice of a failed submission, keeping the closures and the rest of the form', () => {
+        const closures = [{ from: '2026-11-20', to: '2026-11-22', reason: 'Runway works' }];
+        const failed = {
+          ...initialState,
+          form: { ...initialState.form, commitFailed: true, rateLimited: true, reviewFailed: true, closures },
+        };
+
+        const state = reducer(failed, actions.dismissPprSubmitFailure());
+
+        expect(state.form).toEqual({ ...failed.form, commitFailed: false, rateLimited: false });
+      });
+
+      it('keeps the closures for the form, apart from the other form state', () => {
+        const closures = [{ from: '2026-11-20', to: '2026-11-22', reason: 'Runway works' }];
+        const submitting = { ...initialState, form: { ...initialState.form, submitting: true } };
+
+        const state = reducer(submitting, actions.pprClosuresLoaded(closures));
+
+        expect(state.form.closures).toEqual(closures);
+        expect(state.form.submitting).toBe(true);
+        expect(state.settings).toBe(submitting.settings);
       });
 
       it('should return state for unknown action', () => {

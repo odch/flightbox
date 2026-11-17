@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Field, Form } from 'react-final-form';
@@ -23,7 +23,7 @@ import {
 } from '../wizards/renderField';
 import { getEnabledFlightTypes } from '../../util/flightTypes';
 import type { Aircraft } from '../../modules/profile/migration';
-import type { PprSubmitResult } from '../../modules/ppr/actions';
+import type { PprClosure, PprSubmitResult } from '../../modules/ppr/actions';
 import validate, { validateWithoutLogin } from './validate';
 
 // The page has the same padding as the message and profile pages, so the
@@ -124,6 +124,8 @@ interface PprRequestFormProps {
   rateLimited?: boolean;
   initPprForm: () => void;
   resetPprForm: () => void;
+  // Closes the notice of a failed submission, keeping the form as it is
+  dismissPprSubmitFailure: () => void;
   onSubmit: (values: Record<string, any>) => void;
   // With login: closes the answer and goes to the start page
   confirmPprSubmitSuccess?: () => void;
@@ -132,12 +134,17 @@ interface PprRequestFormProps {
   // go to, and the answer leads to the status page. The privacy policy was
   // accepted with the login.
   withoutLogin?: boolean;
+  // The closures that haven't ended: the calendar marks their days, and the
+  // form refuses them, as the server would reject the request
+  closures?: PprClosure[];
 }
+
+const NO_CLOSURES: PprClosure[] = [];
 
 const PprRequestForm = (props: PprRequestFormProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { initPprForm, resetPprForm, profileAircrafts, withoutLogin } = props;
+  const { initPprForm, resetPprForm, profileAircrafts, withoutLogin, closures = NO_CLOSURES } = props;
 
   useEffect(() => {
     initPprForm();
@@ -151,6 +158,12 @@ const PprRequestForm = (props: PprRequestFormProps) => {
   const handleFormSubmit = (values: Record<string, any>) => {
     props.onSubmit(values);
   };
+
+  // A new function when the closures come: the form validates again
+  const validateForm = useCallback(
+    (values: Record<string, any>) => (withoutLogin ? validateWithoutLogin : validate)(values, undefined, closures),
+    [withoutLogin, closures]
+  );
 
   // As in the movement wizards: shortcuts for pilots with several aircraft
   const showQuickPicks = !!profileAircrafts && profileAircrafts.length >= 2;
@@ -241,7 +254,7 @@ const PprRequestForm = (props: PprRequestFormProps) => {
 
   return (
     <Form
-      validate={withoutLogin ? validateWithoutLogin : validate}
+      validate={validateForm}
       onSubmit={handleFormSubmit}
       initialValues={props.initialValues}
       keepDirtyOnReinitialize
@@ -362,6 +375,7 @@ const PprRequestForm = (props: PprRequestFormProps) => {
               component={renderDateField}
               parse={(e: { value: string | null }) => e.value}
               label={t('ppr.plannedDate')}
+              blockedPeriods={closures}
             />
             <Field
               name="plannedTime"
@@ -425,7 +439,7 @@ const PprRequestForm = (props: PprRequestFormProps) => {
                   type="button"
                   icon="close"
                   label={t('common.close')}
-                  onClick={resetPprForm}
+                  onClick={props.dismissPprSubmitFailure}
                   flat
                 />
               </DialogContent>
