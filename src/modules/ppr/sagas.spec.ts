@@ -237,6 +237,7 @@ describe('modules', () => {
           expect(generator.next('token-123').value).toEqual(call(remote.loadSettings, 'token-123'));
           const settings = {
             adminEmail: 'ppr@aerodrome.ch', retentionDays: null, answerMode: 'manual' as const, pilotInfo: null, closures: [],
+            manualAnswers: { helicopters: false, mtowFrom: null },
           };
           expect(generator.next(settings).value).toEqual(put(actions.pprSettingsLoaded(settings)));
           expect(generator.next().done).toEqual(true);
@@ -259,6 +260,7 @@ describe('modules', () => {
           expect(generator.next('token-123').value).toEqual(call(remote.saveSettings, changed, 'token-123'));
           const all = {
             adminEmail: 'ppr@aerodrome.ch', retentionDays: 90, answerMode: 'automatic' as const, pilotInfo: null, closures: [],
+            manualAnswers: { helicopters: false, mtowFrom: null },
           };
           expect(generator.next(all).value).toEqual(put(actions.savePprSettingsSuccess(all)));
           expect(generator.next().done).toEqual(true);

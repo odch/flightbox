@@ -1,8 +1,8 @@
 'use strict'
 
 const mockOnce = jest.fn()
-const mockSet = jest.fn()
-const mockRef = jest.fn(() => ({ once: mockOnce, set: mockSet }))
+const mockUpdate = jest.fn()
+const mockRef = jest.fn(() => ({ once: mockOnce, update: mockUpdate }))
 
 jest.mock('firebase-admin/database', () => ({
   getDatabase: jest.fn(() => ({ ref: mockRef }))
@@ -28,19 +28,6 @@ describe('firebasePprSettings', () => {
     expect(await settings.getAdminEmail()).toBeNull()
   })
 
-  it('writes the admin email', async () => {
-    await settings.setAdminEmail('ppr@aerodrome.ch')
-
-    expect(mockRef).toHaveBeenCalledWith('/settings/ppr/adminEmail')
-    expect(mockSet).toHaveBeenCalledWith('ppr@aerodrome.ch')
-  })
-
-  it('removes the admin email with null', async () => {
-    await settings.setAdminEmail(null)
-
-    expect(mockSet).toHaveBeenCalledWith(null)
-  })
-
   it('reads the stored retention as it is', async () => {
     mockOnce.mockResolvedValue({ val: () => 90 })
 
@@ -48,21 +35,16 @@ describe('firebasePprSettings', () => {
     expect(mockRef).toHaveBeenCalledWith('/settings/ppr/retentionDays')
   })
 
-  it('writes or removes the retention', async () => {
-    await settings.setRetentionDays(90)
-    await settings.setRetentionDays(null)
-
-    expect(mockSet.mock.calls).toEqual([[90], [null]])
-  })
-
   describe('answer settings', () => {
-    it('reads answer mode, information for pilots and closures with one read of /settings/ppr', async () => {
+    it('reads answer mode, information for pilots, closures and manual answers with one read of /settings/ppr', async () => {
       const closures = [{ from: '2026-11-19', to: '2026-11-21', reason: 'Runway works' }]
+      const manualAnswers = { helicopters: true, mtowFrom: 2250 }
       mockOnce.mockResolvedValue({
-        val: () => ({ adminEmail: 'ppr@aerodrome.ch', answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures })
+        val: () => ({ adminEmail: 'ppr@aerodrome.ch', answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures, manualAnswers })
       })
 
-      expect(await settings.getAnswerSettings()).toEqual({ answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures })
+      expect(await settings.getAnswerSettings())
+        .toEqual({ answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures, manualAnswers })
       expect(mockRef).toHaveBeenCalledTimes(1)
       expect(mockRef).toHaveBeenCalledWith('/settings/ppr')
     })
@@ -70,35 +52,63 @@ describe('firebasePprSettings', () => {
     it('reads nulls when nothing is set', async () => {
       mockOnce.mockResolvedValue({ val: () => null })
 
-      expect(await settings.getAnswerSettings()).toEqual({ answerMode: null, pilotInfo: null, closures: null })
+      expect(await settings.getAnswerSettings()).toEqual({ answerMode: null, pilotInfo: null, closures: null, manualAnswers: null })
     })
+  })
 
-    it('stores automatic answers, and manual (the default) as nothing', async () => {
-      await settings.setAnswerMode('automatic')
-      expect(mockRef).toHaveBeenLastCalledWith('/settings/ppr/answerMode')
-      expect(mockSet).toHaveBeenLastCalledWith('automatic')
-
-      await settings.setAnswerMode('manual')
-      expect(mockSet).toHaveBeenLastCalledWith(null)
-    })
-
-    it('writes and removes the information for pilots', async () => {
-      await settings.setPilotInfo('Runway 05/23')
-      expect(mockRef).toHaveBeenLastCalledWith('/settings/ppr/pilotInfo')
-      expect(mockSet).toHaveBeenLastCalledWith('Runway 05/23')
-
-      await settings.setPilotInfo(null)
-      expect(mockSet).toHaveBeenLastCalledWith(null)
-    })
-
-    it('writes the closures, and removes them with an empty list', async () => {
+  describe('saving', () => {
+    it('writes the given settings in one update of /settings/ppr', async () => {
       const closures = [{ from: '2026-11-19', to: '2026-11-21', reason: 'Runway works' }]
-      await settings.setClosures(closures)
-      expect(mockRef).toHaveBeenLastCalledWith('/settings/ppr/closures')
-      expect(mockSet).toHaveBeenLastCalledWith(closures)
 
-      await settings.setClosures([])
-      expect(mockSet).toHaveBeenLastCalledWith(null)
+      await settings.saveSettings({
+        adminEmail: 'ppr@aerodrome.ch',
+        retentionDays: 90,
+        answerMode: 'automatic',
+        pilotInfo: 'Runway 05/23',
+        closures,
+        manualAnswers: { helicopters: true, mtowFrom: 2250 }
+      })
+
+      expect(mockRef).toHaveBeenCalledTimes(1)
+      expect(mockRef).toHaveBeenCalledWith('/settings/ppr')
+      expect(mockUpdate).toHaveBeenCalledTimes(1)
+      expect(mockUpdate).toHaveBeenCalledWith({
+        adminEmail: 'ppr@aerodrome.ch',
+        retentionDays: 90,
+        answerMode: 'automatic',
+        pilotInfo: 'Runway 05/23',
+        closures,
+        manualAnswers: { helicopters: true, mtowFrom: 2250 }
+      })
+    })
+
+    it('removes empty settings, manual answers (the default) included', async () => {
+      await settings.saveSettings({
+        adminEmail: null,
+        retentionDays: null,
+        answerMode: 'manual',
+        pilotInfo: null,
+        closures: [],
+        manualAnswers: { helicopters: false, mtowFrom: null }
+      })
+
+      expect(mockUpdate).toHaveBeenCalledWith({
+        adminEmail: null, retentionDays: null, answerMode: null, pilotInfo: null, closures: null, manualAnswers: null
+      })
+    })
+
+    it('keeps the manual answers while one of them is on', async () => {
+      await settings.saveSettings({ manualAnswers: { helicopters: false, mtowFrom: 5700 } })
+
+      expect(mockUpdate).toHaveBeenCalledWith({ manualAnswers: { helicopters: false, mtowFrom: 5700 } })
+    })
+
+    it('leaves the settings not given as they are, and writes nothing for none', async () => {
+      await settings.saveSettings({ retentionDays: 30, unknown: 'x' })
+      expect(mockUpdate).toHaveBeenLastCalledWith({ retentionDays: 30 })
+
+      await settings.saveSettings({})
+      expect(mockUpdate).toHaveBeenCalledTimes(1)
     })
   })
 })

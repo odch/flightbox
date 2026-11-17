@@ -2,7 +2,7 @@
 
 const getSettings = require('./getSettings')
 
-const NO_ANSWER_SETTINGS = { answerMode: null, pilotInfo: null, closures: null }
+const NO_ANSWER_SETTINGS = { answerMode: null, pilotInfo: null, closures: null, manualAnswers: null }
 
 function createSettings(adminEmail, retentionDays, answerSettings = NO_ANSWER_SETTINGS) {
   return {
@@ -15,14 +15,18 @@ function createSettings(adminEmail, retentionDays, answerSettings = NO_ANSWER_SE
 describe('getSettings', () => {
   it('returns all settings', async () => {
     const closures = [{ from: '2026-11-19', to: '2026-11-21', reason: 'Runway works' }]
-    const settings = createSettings('ppr@aerodrome.ch', 60, { answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures })
+    const manualAnswers = { helicopters: true, mtowFrom: 2250 }
+    const settings = createSettings('ppr@aerodrome.ch', 60, {
+      answerMode: 'automatic', pilotInfo: 'Runway 05/23', closures, manualAnswers
+    })
 
     expect(await getSettings({ settings })).toEqual({
       adminEmail: 'ppr@aerodrome.ch',
       retentionDays: 60,
       answerMode: 'automatic',
       pilotInfo: 'Runway 05/23',
-      closures
+      closures,
+      manualAnswers
     })
   })
 
@@ -32,15 +36,20 @@ describe('getSettings', () => {
       retentionDays: null,
       answerMode: 'manual',
       pilotInfo: null,
-      closures: []
+      closures: [],
+      manualAnswers: { helicopters: false, mtowFrom: null }
     })
   })
 
   it('reports invalid stored answer settings the way they are used', async () => {
     const result = await getSettings({
-      settings: createSettings(null, null, { answerMode: 'yes', pilotInfo: 42, closures: { 0: { from: 'x' } } })
+      settings: createSettings(null, null, {
+        answerMode: 'yes', pilotInfo: 42, closures: { 0: { from: 'x' } }, manualAnswers: { helicopters: 'yes', mtowFrom: -1 }
+      })
     })
-    expect(result).toEqual(expect.objectContaining({ answerMode: 'manual', pilotInfo: null, closures: [] }))
+    expect(result).toEqual(expect.objectContaining({
+      answerMode: 'manual', pilotInfo: null, closures: [], manualAnswers: { helicopters: false, mtowFrom: null }
+    }))
   })
 
   it.each([999999999, '30', 0])('reports the invalid stored retention %p as null (the default applies)', async stored => {

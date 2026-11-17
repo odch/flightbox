@@ -1,24 +1,8 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { getDatabase, ServerValue } = require('firebase-admin/database');
 
-// Note: this map must be kept in sync with the list in `aircraftCategories.js`.
-const aircraftCategoryMap = {
-  'Aeroplane': 'Flugzeug',
-  'Homebuilt Airplane': 'Eigenbauflugzeug',
-  'Powered Glider': 'Motorsegler',
-  'Helicopter': 'Hubschrauber',
-  'Homebuilt Helicopter': 'Eigenbauhubschrauber',
-  'Glider': 'Segelflugzeug',
-  'Homebuild Glider': 'Eigenbausegelflugzeug',
-  'Balloon (Hot-air)': 'Ballon (Heissluft)',
-  'Balloon (Gas)': 'Ballon (Gas)',
-  'Airship (Hot-air)': 'Luftschiff (Heissluft)',
-  'Ultralight Gyrocopter': 'Ultraleicht Tragschrauber',
-  'Ultralight (3-axis control)': 'Ultraleichtflugzeug (3-Achsen gesteuert)',
-  'Trike': 'Trike',
-  'Ecolight': 'Ecolight',
-  'Homebuilt Gyrocopter': 'Eigenbautragschrauber'
-}
+// The app's category of each aircraft type of the register
+const { REGISTER_CATEGORIES: aircraftCategoryMap } = require('./aircraftCategories');
 
 const AIRCRAFT_LIST_URL = 'https://raw.githubusercontent.com/odch/aircraft-list/refs/heads/main/aircraft.json';
 const SCHEDULE = '0 4 * * 3'; // Every Wednesday at 4 AM

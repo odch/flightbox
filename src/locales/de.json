@@ -739,9 +739,19 @@
       "answerManual": "Manuell",
       "answerManualHelp": "Ein Admin genehmigt oder lehnt jede Anfrage ab.",
       "answerAutomatic": "Automatisch",
-      "answerAutomaticHelp": "Jede Anfrage wird sofort genehmigt, ausser für gesperrte Tage und für heute bei geschlossenem Flugplatz.",
+      "answerAutomaticHelp": "Jede Anfrage wird sofort genehmigt, ausser für gesperrte Tage, für heute bei geschlossenem Flugplatz und für die Luftfahrzeuge, die immer die Flugplatzleitung beantwortet.",
+      "answerAutomaticExceptHelicopters": "Automatisch, ohne Hubschrauber",
+      "answerAutomaticExceptMtow": "Automatisch unter {{mtow}} kg MTOW",
+      "answerAutomaticExceptBoth": "Automatisch unter {{mtow}} kg MTOW, ohne Hubschrauber",
       "pilotInfo": "Hinweise für Piloten",
       "pilotInfoHelp": "Stehen in jeder automatischen Genehmigung, z. B. Piste, Volte, Funkfrequenz, Landetaxe und Telefonnummer.",
+      "manualAnswers": "Immer von der Flugplatzleitung beantworten",
+      "manualHelicopters": "Hubschrauber",
+      "manualMtowFrom": "Luftfahrzeuge ab",
+      "manualMtowUnit": "kg MTOW",
+      "manualMtowLimit": "MTOW-Grenze in kg",
+      "manualMtowInvalid": "Geben Sie eine ganze Zahl von 1 bis {{max}} ein.",
+      "manualAnswersHelp": "Diese Anfragen bleiben offen, bis ein Admin sie beantwortet. Massgebend sind die Kategorie und das MTOW, die in der Anfrage angegeben sind.",
       "tooLong": "Höchstens {{max}} Zeichen.",
       "closures": "Gesperrte Tage",
       "closuresHelp": "Sperren Sie Tage, an denen Sie keine PPR-Anfragen genehmigen, z. B. wegen Pistenarbeiten, eines Anlasses oder weil niemand vor Ort ist. Das Anfrageformular zeigt diese Tage mit dem Grund im Kalender, und neue Anfragen für sie werden mit dem Grund abgelehnt, auch bei manueller Beantwortung. Gesperrte Tage ändern den Flugplatz-Status nicht. Solange er «Geschlossen» ist, werden auch Anfragen für heute abgelehnt. Bereits gestellte Anfragen bleiben, wie sie sind: Ausstehende lehnen Sie unten in der Liste «PPR-Anfragen» ab, Genehmigungen widerrufen Sie dort.",
@@ -805,6 +815,11 @@
       "guest": "Mit Gastzugang",
       "guestHelp": "Piloten können auch als Gast fortfahren. Der Link enthält das Token des Gastzugangs: Er erlaubt auch das Erfassen von Bewegungen und gilt, bis das Token erneuert wird.",
       "ownView": "Da Sie angemeldet sind, sehen Sie unter diesen Links das Formular. Was Besucher ohne Anmeldung sehen, zeigt Ihnen ein privates Fenster des Browsers."
+    },
+    "manualAnswer": {
+      "label": "Nicht automatisch beantwortet",
+      "helicopter": "Hubschrauber",
+      "mtow": "MTOW ab {{mtow}} kg"
     }
   },
   "maskedInput": {

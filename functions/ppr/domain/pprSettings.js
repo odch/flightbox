@@ -13,6 +13,8 @@ const AnswerMode = {
 const MAX_PILOT_INFO_LENGTH = 1000
 const MAX_CLOSURES = 50
 const MAX_CLOSURE_REASON_LENGTH = 300
+// The largest MTOW limit (kg) of the manual answers
+const MAX_MANUAL_MTOW = 1000000
 
 // Days after a request's planned date until the daily cleanup deletes it.
 // Without a value nothing is deleted, as for the other retention settings.
@@ -146,6 +148,44 @@ function closuresFromStore(stored) {
   return closures.sort((a, b) => a.from.localeCompare(b.from))
 }
 
+const NO_MANUAL_ANSWERS = Object.freeze({ helicopters: false, mtowFrom: null })
+
+function isValidMtowLimit(value) {
+  return Number.isInteger(value) && value > 0 && value <= MAX_MANUAL_MTOW
+}
+
+// The requests an admin answers also when they are answered automatically:
+// those for helicopters, and for aircraft from an MTOW (kg, the limit
+// included). Empty values switch them off.
+function normalizeManualAnswers(value) {
+  if (value === undefined || value === null) {
+    return NO_MANUAL_ANSWERS
+  }
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw invalid('manualAnswers must be an object')
+  }
+  const { helicopters, mtowFrom } = value
+  if (helicopters !== undefined && helicopters !== null && typeof helicopters !== 'boolean') {
+    throw invalid('manualAnswers.helicopters must be true or false')
+  }
+  const noLimit = mtowFrom === undefined || mtowFrom === null || mtowFrom === ''
+  if (!noLimit && !isValidMtowLimit(mtowFrom)) {
+    throw invalid(`manualAnswers.mtowFrom must be a whole number from 1 to ${MAX_MANUAL_MTOW}`)
+  }
+  return { helicopters: helicopters === true, mtowFrom: noLimit ? null : mtowFrom }
+}
+
+// Values that aren't valid (e.g. changed in the console) are left out
+function manualAnswersFromStore(stored) {
+  if (!stored || typeof stored !== 'object') {
+    return NO_MANUAL_ANSWERS
+  }
+  return {
+    helicopters: stored.helicopters === true,
+    mtowFrom: isValidMtowLimit(stored.mtowFrom) ? stored.mtowFrom : null
+  }
+}
+
 module.exports = {
   MAX_RETENTION_DAYS,
   AnswerMode,
@@ -160,5 +200,8 @@ module.exports = {
   normalizePilotInfo,
   pilotInfoFromStore,
   normalizeClosures,
-  closuresFromStore
+  closuresFromStore,
+  MAX_MANUAL_MTOW,
+  normalizeManualAnswers,
+  manualAnswersFromStore
 }

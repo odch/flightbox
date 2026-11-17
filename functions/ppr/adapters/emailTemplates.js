@@ -82,6 +82,19 @@ function pilotSubject(subject, { aerodromeName }) {
   return aerodromeName ? `${subject} – ${aerodromeName}` : subject
 }
 
+// Why an admin answers a request automatic answers would have approved
+// (manualAnswer, see pprAnswer.js), or null
+function manualAnswerText(manualAnswer) {
+  switch (manualAnswer && manualAnswer.reason) {
+    case 'helicopter':
+      return 'Hubschrauber'
+    case 'mtow':
+      return `MTOW ab ${manualAnswer.mtowFrom} kg`
+    default:
+      return null
+  }
+}
+
 // How the request was answered, for the aerodrome
 function answerLine(pprRequest) {
   if (pprRequest.status === 'approved') {
@@ -92,7 +105,10 @@ function answerLine(pprRequest) {
       ? `Automatisch abgelehnt: ${pprRequest.reviewRemarks}`
       : 'Automatisch abgelehnt'
   }
-  return 'Offen, bitte im Admin-Bereich genehmigen oder ablehnen'
+  const manual = manualAnswerText(pprRequest.manualAnswer)
+  return manual
+    ? `Offen, nicht automatisch beantwortet (${manual}): bitte im Admin-Bereich genehmigen oder ablehnen`
+    : 'Offen, bitte im Admin-Bereich genehmigen oder ablehnen'
 }
 
 const NO_FRAGMENT = Object.freeze({ html: '', text: '' })

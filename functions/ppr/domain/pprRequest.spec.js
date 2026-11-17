@@ -26,6 +26,9 @@ const validInput = {
   lastname: 'Muster',
   email: 'max@example.com',
   immatriculation: 'HB-ABC',
+  aircraftType: 'PA-28',
+  aircraftCategory: 'Flugzeug',
+  mtow: 1100,
   plannedDate: '2026-04-15',
   plannedTime: '10:30',
   flightType: 'private',
@@ -43,6 +46,9 @@ describe('pprRequest', () => {
         lastname: 'Muster',
         email: 'max@example.com',
         immatriculation: 'HB-ABC',
+        aircraftType: 'PA-28',
+        aircraftCategory: 'Flugzeug',
+        mtow: 1100,
         plannedDate: '2026-04-15',
         plannedTime: '10:30',
         flightType: 'private',
@@ -68,15 +74,20 @@ describe('pprRequest', () => {
       expect(result.phone).toBe('+41791234567')
     })
 
-    it('includes optional aircraftType when provided', () => {
-      const result = createPprRequest({ ...validInput, aircraftType: 'PA-28' }, NOW)
-      expect(result.aircraftType).toBe('PA-28')
-    })
+    it.each(['Flugzeug', 'Hubschrauber', 'Ultraleichtflugzeug (3-Achsen gesteuert)'])(
+      'includes the aircraft category %s, one of the app\'s',
+      aircraftCategory => {
+        expect(createPprRequest({ ...validInput, aircraftCategory }, NOW).aircraftCategory).toBe(aircraftCategory)
+      }
+    )
 
-    it('includes optional mtow when provided', () => {
-      const result = createPprRequest({ ...validInput, mtow: 1200 }, NOW)
-      expect(result.mtow).toBe(1200)
-    })
+    it.each([['an unknown category', 'Helicopter'], ['a category in other case', 'hubschrauber'], ['no text', ['Flugzeug']]])(
+      'refuses %s',
+      (name, aircraftCategory) => {
+        expect(() => createPprRequest({ ...validInput, aircraftCategory }, NOW))
+          .toThrow(expect.objectContaining({ code: 'INVALID_INPUT' }))
+      }
+    )
 
     it('includes optional remarks when provided', () => {
       const result = createPprRequest({ ...validInput, remarks: 'Training flight' }, NOW)
@@ -86,8 +97,6 @@ describe('pprRequest', () => {
     it('omits optional fields when not provided', () => {
       const result = createPprRequest(validInput, NOW)
       expect(result.phone).toBeUndefined()
-      expect(result.aircraftType).toBeUndefined()
-      expect(result.mtow).toBeUndefined()
       expect(result.remarks).toBeUndefined()
     })
 
@@ -142,8 +151,9 @@ describe('pprRequest', () => {
     })
 
     describe('required field validation', () => {
+      // As in the movement form: the aircraft's type, MTOW and category too
       it.each([
-        'firstname', 'lastname', 'email', 'immatriculation',
+        'firstname', 'lastname', 'email', 'immatriculation', 'aircraftType', 'aircraftCategory', 'mtow',
         'plannedDate', 'plannedTime', 'flightType'
       ])('throws when %s is missing', (field) => {
         const input = { ...validInput }
@@ -154,6 +164,8 @@ describe('pprRequest', () => {
       it('throws when a required field is empty string', () => {
         expect(() => createPprRequest({ ...validInput, firstname: '' }, NOW))
           .toThrow('Missing required fields')
+        expect(() => createPprRequest({ ...validInput, mtow: '' }, NOW))
+          .toThrow('Missing required fields: mtow')
       })
 
       it('throws when a required field is whitespace only', () => {
@@ -249,10 +261,6 @@ describe('pprRequest', () => {
           expect(() => createPprRequest(input, NOW)).toThrow(expect.objectContaining({ code: 'INVALID_INPUT' }))
         })
       })
-
-      it('treats an empty mtow as not given', () => {
-        expect(createPprRequest({ ...validInput, mtow: '' }, NOW).mtow).toBeUndefined()
-      })
     })
 
     describe('time validation', () => {
@@ -278,18 +286,10 @@ describe('pprRequest', () => {
     })
 
     describe('mtow validation', () => {
-      it('throws on negative mtow', () => {
-        expect(() => createPprRequest({ ...validInput, mtow: -1 }, NOW))
+      // A whole number of kg, as in the movement form
+      it.each([[-1], [0], [1100.5], ['heavy'], [1000001], [true]])('throws on the mtow %p', mtow => {
+        expect(() => createPprRequest({ ...validInput, mtow }, NOW))
           .toThrow('Invalid mtow value')
-      })
-
-      it('throws on non-numeric mtow', () => {
-        expect(() => createPprRequest({ ...validInput, mtow: 'heavy' }, NOW))
-          .toThrow('Invalid mtow value')
-      })
-
-      it('accepts zero mtow', () => {
-        expect(createPprRequest({ ...validInput, mtow: 0 }, NOW).mtow).toBe(0)
       })
 
       it('converts string mtow to number', () => {
@@ -504,6 +504,7 @@ describe('pprRequest', () => {
         ...validInput,
         phone: '+41 79 123 45 67',
         aircraftType: 'PA-28',
+        aircraftCategory: 'Flugzeug',
         mtow: 1100,
         remarks: 'Training',
         language: 'en'

@@ -1,6 +1,7 @@
 'use strict'
 
 const { normalizeEmail } = require('../../auth/signInEmail')
+const { CATEGORIES } = require('../../aircraftCategories')
 
 const Status = {
   PENDING: 'pending',
@@ -29,11 +30,15 @@ const MAX_LENGTHS = {
   reviewRemarks: 500
 }
 
+// As in the movement form, the aircraft's type, MTOW and category too: the
+// pilot declares them, and the answer goes by them (see pprAnswer.js)
 const REQUIRED_FIELDS = [
   'firstname',
   'lastname',
   'email',
   'immatriculation',
+  'aircraftType',
+  'aircraftCategory',
   'plannedDate',
   'plannedTime',
   'flightType'
@@ -42,10 +47,12 @@ const REQUIRED_FIELDS = [
 const TEXT_FIELDS = [
   ...REQUIRED_FIELDS,
   'phone',
-  'aircraftType',
   'remarks',
   'createdBy'
 ]
+
+// The largest MTOW taken, in kg
+const MAX_MTOW = 1000000
 
 // What a pilot fills in, apart from the address. The routes take only these
 // fields from a submission; they add the address and either the owner (the
@@ -56,6 +63,7 @@ const PILOT_FIELDS = [
   'phone',
   'immatriculation',
   'aircraftType',
+  'aircraftCategory',
   'mtow',
   'plannedDate',
   'plannedTime',
@@ -164,9 +172,30 @@ function validateTypes(input) {
 // Control characters alone don't fill a field either: they are removed
 function validateRequired(input) {
   const missing = REQUIRED_FIELDS.filter(field => !input[field] || toSingleLine(input[field]).trim() === '')
+  if (input.mtow === undefined || input.mtow === null || input.mtow === '') {
+    missing.push('mtow')
+  }
   if (missing.length > 0) {
     throw invalid(`Missing required fields: ${missing.join(', ')}`)
   }
+}
+
+// A whole number of kg, as in the movement form, given as a number or as
+// its digits
+function readMtow(value) {
+  const mtow = typeof value === 'number' || typeof value === 'string' ? Number(value) : NaN
+  if (!Number.isInteger(mtow) || mtow <= 0 || mtow > MAX_MTOW) {
+    throw invalid('Invalid mtow value')
+  }
+  return mtow
+}
+
+// One of the app's categories
+function readAircraftCategory(value) {
+  if (!CATEGORIES.includes(value)) {
+    throw invalid('Invalid aircraftCategory')
+  }
+  return value
 }
 
 function isValidEmail(email) {
@@ -271,6 +300,9 @@ function createPprRequest(input, now) {
   const lastname = sanitizeString(input.lastname, 'lastname')
   const email = readEmail(input.email, withoutLogin)
   const immatriculation = readImmatriculation(input.immatriculation)
+  const aircraftType = sanitizeString(input.aircraftType, 'aircraftType')
+  const aircraftCategory = readAircraftCategory(input.aircraftCategory)
+  const mtow = readMtow(input.mtow)
   const plannedDate = input.plannedDate.trim()
   const plannedTime = input.plannedTime.trim()
   const flightType = sanitizeString(input.flightType, 'flightType')
@@ -285,6 +317,9 @@ function createPprRequest(input, now) {
     lastname,
     email,
     immatriculation,
+    aircraftType,
+    aircraftCategory,
+    mtow,
     plannedDate,
     plannedTime,
     flightType,
@@ -305,18 +340,6 @@ function createPprRequest(input, now) {
 
   if (input.phone) {
     request.phone = sanitizeString(input.phone, 'phone')
-  }
-
-  if (input.aircraftType) {
-    request.aircraftType = sanitizeString(input.aircraftType, 'aircraftType')
-  }
-
-  if (input.mtow !== undefined && input.mtow !== null && input.mtow !== '') {
-    const mtow = Number(input.mtow)
-    if (isNaN(mtow) || mtow < 0) {
-      throw invalid('Invalid mtow value')
-    }
-    request.mtow = mtow
   }
 
   if (input.remarks) {

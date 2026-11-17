@@ -13,6 +13,8 @@ import ClosuresEditor, {
   upcomingClosures,
 } from './ClosuresEditor';
 import PprSettingsSummary from './PprSettingsSummary';
+import ManualAnswersFields from './ManualAnswersFields';
+import { leavesRequestsToAdmins, MAX_MANUAL_MTOW, NO_MANUAL_ANSWERS, parseMtowLimit } from './manualAnswers';
 import PprWebsiteLinks from './PprWebsiteLinks';
 import LabeledBox from '../LabeledBox';
 import useMinWidth from './useMinWidth';
@@ -124,6 +126,11 @@ const MAX_PILOT_INFO_LENGTH = 1000;
 interface FormValues {
   answerMode: 'manual' | 'automatic';
   pilotInfo: string;
+  // The manual answers: helicopters, and the MTOW limit with its value as
+  // typed, which is kept while the limit is off
+  manualHelicopters: boolean;
+  manualMtow: boolean;
+  manualMtowFrom: string;
   adminEmail: string;
   closures: ClosureValue[];
 }
@@ -232,13 +239,19 @@ const PprSettingsForm = (props: any) => {
   // only when other settings are stored, so it doesn't start over while
   // saving. Closures that have ended are left out, and so are removed by
   // the next save.
-  const initialValues: FormValues = useMemo(() => ({
-    answerMode: settings.answerMode === 'automatic' ? 'automatic' : 'manual',
-    pilotInfo: settings.pilotInfo || '',
-    adminEmail: settings.adminEmail || '',
-    closures: upcomingClosures<ClosureValue>(settings.closures, dates.localDate())
-      .map(closure => ({ from: closure.from, to: closure.to, reason: closure.reason })),
-  }), [settings.answerMode, settings.pilotInfo, settings.adminEmail, settings.closures]);
+  const initialValues: FormValues = useMemo(() => {
+    const manualAnswers = settings.manualAnswers || NO_MANUAL_ANSWERS;
+    return {
+      answerMode: settings.answerMode === 'automatic' ? 'automatic' : 'manual',
+      pilotInfo: settings.pilotInfo || '',
+      manualHelicopters: manualAnswers.helicopters,
+      manualMtow: manualAnswers.mtowFrom !== null,
+      manualMtowFrom: manualAnswers.mtowFrom !== null ? String(manualAnswers.mtowFrom) : '',
+      adminEmail: settings.adminEmail || '',
+      closures: upcomingClosures<ClosureValue>(settings.closures, dates.localDate())
+        .map(closure => ({ from: closure.from, to: closure.to, reason: closure.reason })),
+    };
+  }, [settings.answerMode, settings.pilotInfo, settings.manualAnswers, settings.adminEmail, settings.closures]);
 
   const answerModes = [
     {
@@ -262,6 +275,10 @@ const PprSettingsForm = (props: any) => {
     if ((values.pilotInfo || '').trim().length > MAX_PILOT_INFO_LENGTH) {
       errors.pilotInfo = t('ppr.settings.tooLong', { max: MAX_PILOT_INFO_LENGTH });
     }
+    // Where it is shown: with manual answers an invalid limit is not saved
+    if (values.answerMode === 'automatic' && values.manualMtow && parseMtowLimit(values.manualMtowFrom) === null) {
+      errors.manualMtowFrom = t('ppr.settings.manualMtowInvalid', { max: MAX_MANUAL_MTOW });
+    }
     const closureErrors = (values.closures || []).map(closure => validateClosure(closure, t));
     if (closureErrors.some(Boolean)) {
       errors.closures = closureErrors;
@@ -269,11 +286,22 @@ const PprSettingsForm = (props: any) => {
     return errors;
   };
 
+  // Kept while answering manually, for a later return to automatic, apart
+  // from a limit that isn't valid: the stored manual answers stay then
+  const manualAnswersToSave = (values: FormValues) => {
+    const mtowFrom = values.manualMtow ? parseMtowLimit(values.manualMtowFrom) : null;
+    if (values.manualMtow && mtowFrom === null) {
+      return {};
+    }
+    return { manualAnswers: { helicopters: !!values.manualHelicopters, mtowFrom } };
+  };
+
   const handleSubmit = (values: FormValues) => {
     props.savePprSettings({
       answerMode: values.answerMode,
       // Kept while answering manually, for a later return to automatic
       pilotInfo: trimmedOrNull(values.pilotInfo),
+      ...manualAnswersToSave(values),
       adminEmail: trimmedOrNull(values.adminEmail),
       closures: (values.closures || []).map(closure => ({
         from: closure.from,
@@ -311,6 +339,7 @@ const PprSettingsForm = (props: any) => {
         <div ref={summaryRef}>
           <PprSettingsSummary
             answerMode={settings.answerMode}
+            manualAnswers={settings.manualAnswers}
             adminEmail={settings.adminEmail}
             closures={settings.closures}
             saved={savedHintVisible}
@@ -327,7 +356,7 @@ const PprSettingsForm = (props: any) => {
   }
 
   // Describes the stored settings: unanswered requests nobody hears about
-  const unannounced = !settings.adminEmail && settings.answerMode !== 'automatic';
+  const unannounced = !settings.adminEmail && leavesRequestsToAdmins(settings.answerMode, settings.manualAnswers);
 
   // The form in a box of its own, where the summary was; the live region
   // stays in its place beside it
@@ -361,6 +390,7 @@ const PprSettingsForm = (props: any) => {
                     <HelpText>{t('ppr.settings.pilotInfoHelp')}</HelpText>
                   </PilotInfo>
                 )}
+                {values.answerMode === 'automatic' && <ManualAnswersFields/>}
               </Section>
 
               <Section>

@@ -282,7 +282,11 @@ answered manually.
 
 In the same tab admins choose how requests are answered (`/settings/ppr/answerMode`): manually by an admin (the
 default) or automatically, i.e. approved right away with the information for pilots set there
-(`/settings/ppr/pilotInfo`, e.g. runway, circuit, landing fee, phone number). Either way, new requests for a blocked
+(`/settings/ppr/pilotInfo`, e.g. runway, circuit, landing fee, phone number). With automatic answers, "Immer von der
+Flugplatzleitung beantworten" (`/settings/ppr/manualAnswers`, `{ helicopters, mtowFrom }`) leaves the requests for
+helicopters and for aircraft from an MTOW (kg, the limit included) to an admin, e.g. all helicopters and other aircraft
+from 2250 kg. The category and the MTOW the pilot declares in the request decide; like the aircraft type, they are
+required, as when recording a movement. The aerodrome's e-mail and the request list say why such a request waits. Either way, new requests for a blocked
 day ("Gesperrte Tage" in the tab, stored at `/settings/ppr/closures`: days without PPR visitors, e.g. events, camps,
 runway works or nobody on site, often while the aerodrome is open, so blocking days does not change the aerodrome
 status) are rejected with its reason, and requests for today are rejected while the aerodrome status is "closed"; the
