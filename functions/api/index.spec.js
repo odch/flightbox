@@ -1,3 +1,4 @@
+/** @jest-environment node */
 jest.mock('firebase-functions/v2/https', () => ({
   onRequest: (options, app) => app,
 }));
@@ -117,6 +118,24 @@ describe('functions', () => {
       const next = jest.fn();
       await layer.route.stack[0].handle(req, {}, next);
       expect(fbAdminAuth).toHaveBeenCalledWith(req, {}, next);
+    });
+
+    it('has no MCP routes unless the tenant enables mcpEnabled', () => {
+      [{ reportApiEnabled: false, mcpEnabled: false }, { reportApiEnabled: true, aerodrome: { ICAO: 'LSZE', runways: [] } }]
+        .forEach(config => {
+          const { api } = loadApi(config);
+          const paths = routeLayers(api).map(layer => layer.route.path).flat();
+          expect(paths.filter(path => path.includes('mcp'))).toEqual([]);
+        });
+    });
+
+    it('serves the public MCP endpoint when the tenant enables mcpEnabled', () => {
+      const { api } = loadApi({ reportApiEnabled: false, mcpEnabled: true, aerodrome: { ICAO: 'LSZT', runways: [] } });
+      const mcpLayers = routeLayers(api).filter(layer => layer.route.path.includes('/api/v1/mcp'));
+
+      mcpLayers.forEach(layer => expect(layer.route.path).toEqual(['/v1/mcp', '/api/v1/mcp']));
+      expect(mcpLayers.map(layer => Object.keys(layer.route.methods)).flat().sort()).toEqual(['delete', 'get', 'post']);
+      expect(routeLayers(api).some(layer => layer.route.path.includes('/api/v1/reports/airstat'))).toBe(false);
     });
 
     it('lets admins manage API keys when the tenant has an API feature', () => {

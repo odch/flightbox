@@ -172,6 +172,7 @@ with it. All routes answer CORS requests from any origin.
 |--------|------|--------|---------|
 | `GET` | `/api/v1/aerodrome/status` | anyone | [Aerodrome status](#aerodrome-status) |
 | `GET` | `/api/v1/reports/airstat` | API key or admin | [Airstat report](#airstat-report) (CSV) |
+| `POST` | `/api/v1/mcp` | anyone | MCP endpoint for AI assistants (`get_aerodrome_status`) |
 | `GET`, `POST` | `/api/v1/api-keys` | admin | List and create [API keys](#api-keys) |
 | `DELETE` | `/api/v1/api-keys/<id>` | admin | Revoke an [API key](#api-keys) |
 | `GET` | `/api/customs/invoices` | admin | [Customs](#customs) invoices of a month |
@@ -182,7 +183,7 @@ with it. All routes answer CORS requests from any origin.
 
 *Anyone* needs no authentication, *user* the Firebase ID token of a logged-in user, *admin* that of an admin
 (see [Authentication](#authentication)). The airstat report and the API keys exist only on projects with
-`reportApiEnabled` (see `projects/Configuration.md`).
+`reportApiEnabled`, the MCP endpoint only on projects with `mcpEnabled` (see `projects/Configuration.md`).
 
 #### Authentication ####
 

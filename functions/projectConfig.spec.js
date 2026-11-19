@@ -8,11 +8,14 @@ const path = require('path');
 const logger = require('firebase-functions/logger');
 const { loadProjectConfig } = require('./projectConfig');
 
+const DISABLED = { reportApiEnabled: false, mcpEnabled: false };
+
 const CONFIG = {
   project: 'lsze',
   env: 'test',
   firebaseProjectId: 'lsze-test',
   reportApiEnabled: true,
+  mcpEnabled: false,
   memberManagement: false,
   aerodrome: { ICAO: 'LSZE', runways: [{ name: '12', type: 'A' }] },
 };
@@ -39,37 +42,50 @@ describe('functions', () => {
       expect(logger.error).not.toHaveBeenCalled();
     });
 
+    it('returns a config that enables only the MCP endpoint for the running project', () => {
+      const mcpOnly = { ...CONFIG, reportApiEnabled: false, mcpEnabled: true };
+      fs.writeFileSync(file, JSON.stringify(mcpOnly));
+      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-test' } })).toEqual(mcpOnly);
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('disables the MCP endpoint for a config generated for another project', () => {
+      fs.writeFileSync(file, JSON.stringify({ ...CONFIG, reportApiEnabled: false, mcpEnabled: true }));
+      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-prod' } })).toEqual(DISABLED);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+    });
+
     it('disables the features for a config generated for another project', () => {
       fs.writeFileSync(file, JSON.stringify(CONFIG));
-      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-prod' } })).toEqual({ reportApiEnabled: false });
-      expect(loadProjectConfig({ file, env: {} })).toEqual({ reportApiEnabled: false });
+      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-prod' } })).toEqual(DISABLED);
+      expect(loadProjectConfig({ file, env: {} })).toEqual(DISABLED);
       expect(logger.error).toHaveBeenCalledTimes(2);
     });
 
     it('disables the features silently when the file is missing locally', () => {
-      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-test' } })).toEqual({ reportApiEnabled: false });
+      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-test' } })).toEqual(DISABLED);
       expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('logs a missing file in a deployed function, not in the emulator', () => {
       const env = { GCLOUD_PROJECT: 'lsze-test', K_SERVICE: 'api' };
-      expect(loadProjectConfig({ file, env })).toEqual({ reportApiEnabled: false });
+      expect(loadProjectConfig({ file, env })).toEqual(DISABLED);
       expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(loadProjectConfig({ file, env: { ...env, FUNCTIONS_EMULATOR: 'true' } })).toEqual({ reportApiEnabled: false });
+      expect(loadProjectConfig({ file, env: { ...env, FUNCTIONS_EMULATOR: 'true' } })).toEqual(DISABLED);
       expect(logger.error).toHaveBeenCalledTimes(1);
     });
 
     it('disables the features for a file that is not a config', () => {
       fs.writeFileSync(file, '{"firebaseProjectId":');
-      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-test' } })).toEqual({ reportApiEnabled: false });
+      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-test' } })).toEqual(DISABLED);
       expect(logger.error).toHaveBeenCalledTimes(1);
       fs.writeFileSync(file, 'null');
-      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-test' } })).toEqual({ reportApiEnabled: false });
+      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-test' } })).toEqual(DISABLED);
     });
 
     it('does not check the project when no feature is enabled', () => {
-      fs.writeFileSync(file, JSON.stringify({ ...CONFIG, reportApiEnabled: false }));
-      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-prod' } })).toEqual({ reportApiEnabled: false });
+      fs.writeFileSync(file, JSON.stringify({ ...CONFIG, reportApiEnabled: false, mcpEnabled: false }));
+      expect(loadProjectConfig({ file, env: { GCLOUD_PROJECT: 'lsze-prod' } })).toEqual(DISABLED);
       expect(logger.error).not.toHaveBeenCalled();
     });
   });

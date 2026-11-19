@@ -138,5 +138,9 @@ if (projectConfig.reportApiEnabled === true) {
   const {apiKeyOrAdminAuth} = require('./apiKeyAuth')
   require('./reports').registerReportRoutes(api, projectConfig, apiKeyOrAdminAuth(SCOPES.REPORTS_AIRSTAT))
 }
+// MCP endpoint for AI assistants (mcpEnabled), public for now.
+if (projectConfig.mcpEnabled === true) {
+  require('../mcp').registerMcpRoutes(api, projectConfig)
+}
 
 module.exports = onRequest({ region: 'europe-west1' }, api)

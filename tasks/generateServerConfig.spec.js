@@ -99,6 +99,7 @@ describe('tasks/generateServerConfig', () => {
       env,
       firebaseProjectId: client.firebaseProjectId,
       reportApiEnabled: client.reportApiEnabled === true,
+      mcpEnabled: client.mcpEnabled === true,
       memberManagement: client.memberManagement === true,
       aerodrome: {
         ICAO: client.aerodrome.ICAO,
@@ -123,6 +124,21 @@ describe('tasks/generateServerConfig', () => {
       });
       expect(buildServerConfig('lszt', conf, 'test').reportApiEnabled).toBe(true);
       expect(buildServerConfig('lszt', conf, 'production').reportApiEnabled).toBe(false);
+    });
+
+    it('disables mcpEnabled when it is absent', () => {
+      const conf = makeConf();
+      expect(buildServerConfig('lszt', conf, 'test').mcpEnabled).toBe(false);
+      expect(buildServerConfig('lszt', conf, 'production').mcpEnabled).toBe(false);
+    });
+
+    it('lets an environment override mcpEnabled', () => {
+      const conf = makeConf({ mcpEnabled: false }, {
+        test: { firebaseProjectId: 'flightbox-test', mcpEnabled: true },
+        production: { firebaseProjectId: 'flightbox-prod' }
+      });
+      expect(buildServerConfig('lszt', conf, 'test').mcpEnabled).toBe(true);
+      expect(buildServerConfig('lszt', conf, 'production').mcpEnabled).toBe(false);
     });
 
     it('replaces the whole aerodrome when an environment defines one', () => {
@@ -233,6 +249,16 @@ describe('tasks/generateServerConfig', () => {
       });
       expectError(conf, 'test', 'reportApiEnabled');
       expect(buildServerConfig('lsxy', conf, 'production').reportApiEnabled).toBe(false);
+    });
+
+    it('rejects a non-boolean mcpEnabled, also when set per environment', () => {
+      expectError(makeConf({ mcpEnabled: 'true' }), 'test', 'mcpEnabled');
+      const conf = makeConf({}, {
+        test: { firebaseProjectId: 'flightbox-test', mcpEnabled: 1 },
+        production: { firebaseProjectId: 'flightbox-prod' }
+      });
+      expectError(conf, 'test', 'mcpEnabled');
+      expect(buildServerConfig('lsxy', conf, 'production').mcpEnabled).toBe(false);
     });
 
     it('rejects a missing firebaseProjectId', () => {

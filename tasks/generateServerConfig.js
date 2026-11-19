@@ -3,10 +3,11 @@
 const fs = require('fs');
 const projects = require('../projects');
 
-// Builds the tenant config the Cloud Functions need (airstat report) from a
-// project file, resolved exactly like the client's `__CONF__` in
-// webpack.config.js. Only whitelisted fields are returned, so secrets and
-// unrelated settings (API keys, fees, theme, ...) never reach functions/.
+// Builds the tenant config the Cloud Functions need (airstat report, MCP
+// endpoint) from a project file, resolved exactly like the client's
+// `__CONF__` in webpack.config.js. Only whitelisted fields are returned, so
+// secrets and unrelated settings (API keys, fees, theme, ...) never reach
+// functions/.
 
 const ENVS = ['test', 'production'];
 
@@ -102,6 +103,7 @@ function buildServerConfig(project, conf, env) {
     env,
     firebaseProjectId,
     reportApiEnabled: readFlag(project, env, merged, 'reportApiEnabled'),
+    mcpEnabled: readFlag(project, env, merged, 'mcpEnabled'),
     memberManagement: readFlag(project, env, merged, 'memberManagement'),
     aerodrome: {
       ICAO: aerodrome.ICAO,

@@ -23,6 +23,7 @@ project.
 * `title`
 * `enabledFlightTypes`
 * `reportApiEnabled`
+* `mcpEnabled`
 * `customsSelfDeclarationEnabled`
 * `ppr`
 * `pprGuestRequests`
@@ -195,8 +196,8 @@ Description of the test environment.
 Description of the production environment.
 
 A property set in an environment replaces the top-level property of the same name in the app's configuration
-and in the functions' generated configs (`reportApiEnabled`, `memberManagement`, `aerodrome`; for PPR `ppr`,
-`pprGuestRequests`, the aerodrome's `name`, `themeColor` and `appUrl`), e.g.
+and in the functions' generated configs (`reportApiEnabled`, `mcpEnabled`, `memberManagement`, `aerodrome`; for
+PPR `ppr`, `pprGuestRequests`, the aerodrome's `name`, `themeColor` and `appUrl`), e.g.
 `"reportApiEnabled": true` in `test` only. `theme`, the landing and go-around fees and `privacySettings` are
 always read from the top level.
 
@@ -239,6 +240,29 @@ the deploy writes with `node tasks/generateServerConfig.js <project> <test|produ
 (with the Firebase project given, a config for another project fails instead of being ignored at runtime).
 
 Example: `true`
+
+### `mcpEnabled`
+
+Enables the MCP endpoint (Model Context Protocol) in the Cloud Functions, so that AI assistants such as Claude
+can read data of the aerodrome: `POST https://<aerodrome domain>/api/v1/mcp` (stateless Streamable HTTP, JSON
+answers, no sessions; `GET` and `DELETE` answer `405`). Disabled by default; without it the endpoint does not
+exist. Like `reportApiEnabled`, the functions read it from `functions/project-config.generated.json`.
+
+It offers one tool for now, `get_aerodrome_status`: the current aerodrome status (`open`, `restricted` or
+`closed`), the message of the aerodrome staff, and when and by whom the status was last set. It returns only the
+name shown with the status, never the e-mail address or user ID.
+
+The endpoint is public: it needs no login and returns only what the public aerodrome status
+(`/api/v1/aerodrome/status`) shows anyway. Sign-in (OAuth) for tools with non-public data will follow.
+
+Adding it as a connector:
+
+* claude.ai: Customize > Connectors > "+ Add" > "Add custom connector", URL
+  `https://<aerodrome domain>/api/v1/mcp`, authentication "No sign in".
+* Claude Code: `claude mcp add --transport http flightbox-<icao> https://<aerodrome domain>/api/v1/mcp`, e.g.
+  `flightbox-lszt`.
+
+Example: `true`, or only in an environment (`"mcpEnabled": true` in `environments.test`).
 
 ### `customsSelfDeclarationEnabled`
 

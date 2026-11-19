@@ -10,7 +10,9 @@ const logger = require('firebase-functions/logger');
 // need it stay disabled. Never throws: every function loads this.
 
 const CONFIG_FILE = path.join(__dirname, 'project-config.generated.json');
-const DISABLED = Object.freeze({ reportApiEnabled: false });
+// The config is only used when it enables at least one of these features.
+const FEATURE_FLAGS = ['reportApiEnabled', 'mcpEnabled'];
+const DISABLED = Object.freeze({ reportApiEnabled: false, mcpEnabled: false });
 
 function runtimeProjectId(env) {
   if (env.GCLOUD_PROJECT) {
@@ -36,7 +38,7 @@ function loadProjectConfig({ file = CONFIG_FILE, env = process.env } = {}) {
     return DISABLED;
   }
 
-  if (config === null || typeof config !== 'object' || config.reportApiEnabled !== true) {
+  if (config === null || typeof config !== 'object' || !FEATURE_FLAGS.some(flag => config[flag] === true)) {
     return DISABLED;
   }
   const projectId = runtimeProjectId(env);
