@@ -3,6 +3,7 @@ const path = require('path');
 const projects = require('../projects');
 const objectToArray = require('../src/util/objectToArray').default;
 const os = require('os');
+const aircraftCategoriesData = require('../src/util/aircraftCategoriesData');
 const { buildServerConfig, buildServerConfigFor, main } = require('./generateServerConfig');
 
 const PROJECTS_DIR = path.resolve(__dirname, '../projects');
@@ -67,9 +68,29 @@ const RUNWAYS = [
   { name: '24', type: 'G' }
 ];
 
+const DEPARTURE_ROUTES = [
+  { name: 'south', label: 'Sektor Süd' },
+  { name: 'matzingen', label: 'Matzingen' }
+];
+
+const ARRIVAL_ROUTES = [
+  { name: 'north', label: 'Sektor Nord' }
+];
+
+function makeAerodrome(overrides = {}) {
+  return {
+    ICAO: 'LSZT',
+    name: 'Lommis',
+    runways: RUNWAYS,
+    departureRoutes: DEPARTURE_ROUTES,
+    arrivalRoutes: ARRIVAL_ROUTES,
+    ...overrides
+  };
+}
+
 function makeConf(overrides = {}, environments) {
   return {
-    aerodrome: { ICAO: 'LSZT', name: 'Lommis', runways: RUNWAYS },
+    aerodrome: makeAerodrome(),
     memberManagement: false,
     environments: environments || {
       test: { firebaseProjectId: 'flightbox-test' },
@@ -100,10 +121,44 @@ describe('tasks/generateServerConfig', () => {
       firebaseProjectId: client.firebaseProjectId,
       reportApiEnabled: client.reportApiEnabled === true,
       memberManagement: client.memberManagement === true,
+      movementWritesViaApi: client.movementWritesViaApi === true,
+      lockOnDateTime: client.lockOnDateTime === true,
+      loginForm: client.loginForm,
+      enabledFlightTypes: objectToArray(client.enabledFlightTypes),
+      aircraftCategories: aircraftCategoriesData.map(({ name }) => name),
       aerodrome: {
         ICAO: client.aerodrome.ICAO,
-        runways: objectToArray(client.aerodrome.runways).map(({ name, type }) => ({ name, type }))
+        runways: objectToArray(client.aerodrome.runways).map(({ name, type }) => ({ name, type })),
+        departureRoutes: objectToArray(client.aerodrome.departureRoutes).map(({ name }) => ({ name })),
+        arrivalRoutes: objectToArray(client.aerodrome.arrivalRoutes).map(({ name }) => ({ name }))
       }
+    });
+  });
+
+  // The movement domain (functions/movements/domain) mirrors the database
+  // rules, which tasks/processFirebaseRules.js builds from the top-level
+  // project config (gulpfile.js buildFirebaseRules): both must see the same
+  // values.
+  it.each(CASES)('%s / %s matches the config the database rules are built from', (project, env) => {
+    const rulesConf = projects.load(project);
+    const actual = buildServerConfigFor(project, env);
+
+    expect(actual.loginForm).toBe(rulesConf.loginForm);
+    expect(actual.lockOnDateTime).toBe(rulesConf.lockOnDateTime === true);
+    // Same set; the order is the client's (objectToArray), the rules ignore it.
+    expect([...actual.enabledFlightTypes].sort()).toEqual([...rulesConf.enabledFlightTypes].sort());
+    expect(actual.aerodrome.ICAO).toBe(rulesConf.aerodrome.ICAO);
+    expect(actual.aerodrome.runways.map(({ name }) => name).sort())
+      .toEqual(rulesConf.aerodrome.runways.map(({ name }) => name).sort());
+    expect(actual.aerodrome.departureRoutes.map(({ name }) => name).sort())
+      .toEqual(rulesConf.aerodrome.departureRoutes.map(({ name }) => name).sort());
+    expect(actual.aerodrome.arrivalRoutes.map(({ name }) => name).sort())
+      .toEqual(rulesConf.aerodrome.arrivalRoutes.map(({ name }) => name).sort());
+  });
+
+  it('does not enable movementWritesViaApi in any project yet', () => {
+    CASES.forEach(([project, env]) => {
+      expect(buildServerConfigFor(project, env).movementWritesViaApi).toBe(false);
     });
   });
 
@@ -129,30 +184,84 @@ describe('tasks/generateServerConfig', () => {
       const conf = makeConf({}, {
         test: {
           firebaseProjectId: 'flightbox-test',
-          aerodrome: { ICAO: 'LSXX', runways: [{ name: '36', type: 'A' }] }
+          aerodrome: {
+            ICAO: 'LSXX',
+            runways: [{ name: '36', type: 'A' }],
+            departureRoutes: [],
+            arrivalRoutes: [{ name: 'west', label: 'West' }]
+          }
         },
         production: { firebaseProjectId: 'flightbox-prod' }
       });
       expect(buildServerConfig('lszt', conf, 'test').aerodrome).toEqual({
         ICAO: 'LSXX',
-        runways: [{ name: '36', type: 'A' }]
+        runways: [{ name: '36', type: 'A' }],
+        departureRoutes: [],
+        arrivalRoutes: [{ name: 'west' }]
       });
       expect(buildServerConfig('lszt', conf, 'production').aerodrome).toEqual({
         ICAO: 'LSZT',
-        runways: RUNWAYS
+        runways: RUNWAYS,
+        departureRoutes: [{ name: 'south' }, { name: 'matzingen' }],
+        arrivalRoutes: [{ name: 'north' }]
       });
+    });
+
+    it('disables movementWritesViaApi when it is absent', () => {
+      const conf = makeConf();
+      expect(buildServerConfig('lszt', conf, 'test').movementWritesViaApi).toBe(false);
+      expect(buildServerConfig('lszt', conf, 'production').movementWritesViaApi).toBe(false);
+    });
+
+    it('lets an environment override movementWritesViaApi', () => {
+      const conf = makeConf({ movementWritesViaApi: false }, {
+        test: { firebaseProjectId: 'flightbox-test', movementWritesViaApi: true },
+        production: { firebaseProjectId: 'flightbox-prod' }
+      });
+      expect(buildServerConfig('lszt', conf, 'test').movementWritesViaApi).toBe(true);
+      expect(buildServerConfig('lszt', conf, 'production').movementWritesViaApi).toBe(false);
+    });
+
+    it('uses the client defaults for flight types and login form when they are absent', () => {
+      const actual = buildServerConfig('lszt', makeConf(), 'test');
+      expect(actual.enabledFlightTypes).toEqual(['private', 'instruction']);
+      expect(actual.loginForm).toBe('usernamePassword');
+      expect(actual.lockOnDateTime).toBe(false);
+    });
+
+    it('takes flight types, login form and lockOnDateTime from the project', () => {
+      const conf = makeConf({
+        enabledFlightTypes: ['private', 'aerotow'],
+        loginForm: 'email',
+        lockOnDateTime: true
+      });
+      const actual = buildServerConfig('lszt', conf, 'test');
+      expect(actual.enabledFlightTypes).toEqual(['private', 'aerotow']);
+      expect(actual.loginForm).toBe('email');
+      expect(actual.lockOnDateTime).toBe(true);
+    });
+
+    it('emits the aircraft category names the database rules accept', () => {
+      expect(buildServerConfig('lszt', makeConf(), 'test').aircraftCategories)
+        .toEqual(aircraftCategoriesData.map(({ name }) => name));
+    });
+
+    it('drops route fields other than name', () => {
+      const actual = buildServerConfig('lszt', makeConf(), 'test');
+      expect(actual.aerodrome.departureRoutes).toEqual([{ name: 'south' }, { name: 'matzingen' }]);
+      expect(actual.aerodrome.arrivalRoutes).toEqual([{ name: 'north' }]);
     });
 
     it('drops runway fields other than name and type', () => {
       const conf = makeConf({
-        aerodrome: { ICAO: 'LSZT', runways: [{ name: '06', type: 'G', length: 500 }] }
+        aerodrome: makeAerodrome({ runways: [{ name: '06', type: 'G', length: 500 }] })
       });
       expect(buildServerConfig('lszt', conf, 'test').aerodrome.runways).toEqual([{ name: '06', type: 'G' }]);
     });
 
     it('orders runways like objectToArray(packinize(...)) beyond ten entries', () => {
       const runways = Array.from({ length: 12 }, (_, i) => ({ name: `R${i}`, type: 'A' }));
-      const conf = makeConf({ aerodrome: { ICAO: 'LSZT', runways } });
+      const conf = makeConf({ aerodrome: makeAerodrome({ runways }) });
       const expected = objectToArray(unpackinize(projects.packinize({ runways }).runways));
       expect(buildServerConfig('lszt', conf, 'test').aerodrome.runways).toEqual(expected);
       expect(expected[2].name).toBe('R10');
@@ -189,7 +298,7 @@ describe('tasks/generateServerConfig', () => {
     });
 
     it('rejects a lowercase ICAO', () => {
-      expectError(makeConf({ aerodrome: { ICAO: 'lszt', runways: RUNWAYS } }), 'test', 'aerodrome\\.ICAO');
+      expectError(makeConf({ aerodrome: makeAerodrome({ ICAO: 'lszt', runways: RUNWAYS }) }), 'test', 'aerodrome\\.ICAO');
     });
 
     it('rejects a missing aerodrome', () => {
@@ -197,28 +306,28 @@ describe('tasks/generateServerConfig', () => {
     });
 
     it('rejects runways given as a string', () => {
-      expectError(makeConf({ aerodrome: { ICAO: 'LSZT', runways: '06,24' } }), 'test', 'aerodrome\\.runways');
+      expectError(makeConf({ aerodrome: makeAerodrome({ ICAO: 'LSZT', runways: '06,24' }) }), 'test', 'aerodrome\\.runways');
     });
 
     it('rejects empty runways', () => {
-      expectError(makeConf({ aerodrome: { ICAO: 'LSZT', runways: [] } }), 'test', 'aerodrome\\.runways');
+      expectError(makeConf({ aerodrome: makeAerodrome({ ICAO: 'LSZT', runways: [] }) }), 'test', 'aerodrome\\.runways');
     });
 
     it('rejects runways given as plain names', () => {
-      expectError(makeConf({ aerodrome: { ICAO: 'LSZT', runways: ['06', '24'] } }), 'test', 'aerodrome\\.runways');
+      expectError(makeConf({ aerodrome: makeAerodrome({ ICAO: 'LSZT', runways: ['06', '24'] }) }), 'test', 'aerodrome\\.runways');
     });
 
     it('rejects a runway without a name', () => {
-      expectError(makeConf({ aerodrome: { ICAO: 'LSZT', runways: [{ name: '', type: 'G' }] } }), 'test', 'aerodrome\\.runways');
+      expectError(makeConf({ aerodrome: makeAerodrome({ ICAO: 'LSZT', runways: [{ name: '', type: 'G' }] }) }), 'test', 'aerodrome\\.runways');
     });
 
     it('rejects a runway with a non-string type', () => {
-      expectError(makeConf({ aerodrome: { ICAO: 'LSZT', runways: [{ name: '06' }] } }), 'test', 'aerodrome\\.runways');
+      expectError(makeConf({ aerodrome: makeAerodrome({ ICAO: 'LSZT', runways: [{ name: '06' }] }) }), 'test', 'aerodrome\\.runways');
     });
 
     it('rejects duplicate runway names', () => {
       const runways = [{ name: '06', type: 'G' }, { name: '06', type: 'A' }];
-      expectError(makeConf({ aerodrome: { ICAO: 'LSZT', runways } }), 'test', 'aerodrome\\.runways.*duplicate');
+      expectError(makeConf({ aerodrome: makeAerodrome({ runways }) }), 'test', 'aerodrome\\.runways.*duplicate');
     });
 
     it('rejects a non-boolean memberManagement', () => {
@@ -233,6 +342,91 @@ describe('tasks/generateServerConfig', () => {
       });
       expectError(conf, 'test', 'reportApiEnabled');
       expect(buildServerConfig('lsxy', conf, 'production').reportApiEnabled).toBe(false);
+    });
+
+    it('rejects missing or malformed routes', () => {
+      expectError(makeConf({ aerodrome: makeAerodrome({ departureRoutes: undefined }) }), 'test', 'aerodrome\\.departureRoutes');
+      expectError(makeConf({ aerodrome: makeAerodrome({ arrivalRoutes: 'north' }) }), 'test', 'aerodrome\\.arrivalRoutes');
+      expectError(makeConf({ aerodrome: makeAerodrome({ arrivalRoutes: ['north'] }) }), 'test', 'aerodrome\\.arrivalRoutes');
+      expectError(makeConf({ aerodrome: makeAerodrome({ departureRoutes: [{ name: '' }] }) }), 'test', 'aerodrome\\.departureRoutes');
+      const duplicate = [{ name: 'north' }, { name: 'north', label: 'Nord' }];
+      expectError(makeConf({ aerodrome: makeAerodrome({ arrivalRoutes: duplicate }) }), 'test', 'aerodrome\\.arrivalRoutes.*duplicate');
+    });
+
+    it('rejects malformed enabledFlightTypes', () => {
+      expectError(makeConf({ enabledFlightTypes: [] }), 'test', 'enabledFlightTypes');
+      expectError(makeConf({ enabledFlightTypes: 'private' }), 'test', 'enabledFlightTypes');
+      expectError(makeConf({ enabledFlightTypes: ['private', ''] }), 'test', 'enabledFlightTypes');
+      expectError(makeConf({ enabledFlightTypes: ['private', 3] }), 'test', 'enabledFlightTypes');
+    });
+
+    it('rejects a malformed loginForm', () => {
+      expectError(makeConf({ loginForm: '' }), 'test', 'loginForm');
+      expectError(makeConf({ loginForm: true }), 'test', 'loginForm');
+    });
+
+    it('rejects non-boolean lockOnDateTime and movementWritesViaApi', () => {
+      expectError(makeConf({ lockOnDateTime: 'true' }), 'test', 'lockOnDateTime');
+      expectError(makeConf({ movementWritesViaApi: 1 }), 'test', 'movementWritesViaApi');
+      const conf = makeConf({}, {
+        test: { firebaseProjectId: 'flightbox-test', movementWritesViaApi: 'yes' },
+        production: { firebaseProjectId: 'flightbox-prod' }
+      });
+      expectError(conf, 'test', 'movementWritesViaApi');
+      expect(buildServerConfig('lsxy', conf, 'production').movementWritesViaApi).toBe(false);
+    });
+
+    it.each(['enabledFlightTypes', 'loginForm', 'lockOnDateTime'])(
+      'rejects %s set per environment (the database rules read the top level)',
+      key => {
+        const values = { enabledFlightTypes: ['private'], loginForm: 'email', lockOnDateTime: true };
+        const conf = makeConf({}, {
+          test: { firebaseProjectId: 'flightbox-test', [key]: values[key] },
+          production: { firebaseProjectId: 'flightbox-prod' }
+        });
+        expectError(conf, 'test', `environments\\.test\\.${key}`);
+        expect(() => buildServerConfig('lsxy', conf, 'production')).not.toThrow();
+      }
+    );
+
+    describe('environment-level aerodrome with movementWritesViaApi', () => {
+      const withTestAerodrome = (aerodrome, flags = { movementWritesViaApi: true }) => makeConf({}, {
+        test: { firebaseProjectId: 'flightbox-test', aerodrome, ...flags },
+        production: { firebaseProjectId: 'flightbox-prod' }
+      });
+
+      it.each([
+        ['ICAO', { ICAO: 'LSXX' }],
+        ['a runway name', { runways: [{ name: '36', type: 'A' }] }],
+        ['an additional runway', { runways: [...RUNWAYS, { name: '18', type: 'A' }] }],
+        ['a departure route name', { departureRoutes: [{ name: 'west', label: 'West' }] }],
+        ['the arrival routes', { arrivalRoutes: [] }]
+      ])('rejects one that changes %s (the database rules read the top level)', (label, overrides) => {
+        const conf = withTestAerodrome(makeAerodrome(overrides));
+        expectError(conf, 'test', 'environments\\.test\\.aerodrome.*movementWritesViaApi');
+        expect(() => buildServerConfig('lsxy', conf, 'production')).not.toThrow();
+      });
+
+      it('rejects it when the flag is set at the top level', () => {
+        const conf = { ...withTestAerodrome(makeAerodrome({ ICAO: 'LSXX' }), {}), movementWritesViaApi: true };
+        expectError(conf, 'test', 'environments\\.test\\.aerodrome');
+      });
+
+      it('accepts one that changes only what the movement rules do not read', () => {
+        const conf = withTestAerodrome(makeAerodrome({
+          name: 'Lommis Test',
+          runways: [{ name: '24', type: 'A' }, { name: '06', type: 'A' }],
+          departureRoutes: [...DEPARTURE_ROUTES].reverse().map(route => ({ ...route, label: 'X' }))
+        }));
+        const actual = buildServerConfig('lsxy', conf, 'test');
+        expect(actual.movementWritesViaApi).toBe(true);
+        expect(actual.aerodrome.runways).toEqual([{ name: '24', type: 'A' }, { name: '06', type: 'A' }]);
+      });
+
+      it('keeps the override working while the flag is off', () => {
+        const conf = withTestAerodrome(makeAerodrome({ ICAO: 'LSXX' }), { reportApiEnabled: true });
+        expect(buildServerConfig('lsxy', conf, 'test').aerodrome.ICAO).toBe('LSXX');
+      });
     });
 
     it('rejects a missing firebaseProjectId', () => {

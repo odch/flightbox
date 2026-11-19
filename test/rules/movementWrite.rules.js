@@ -36,29 +36,11 @@ function unboundedQuery(db, path) {
 }
 
 const projects = require('../../projects');
-const { buildRules } = require('../../tasks/processFirebaseRules');
 const aircraftCategories = require('../../src/util/aircraftCategoriesData');
-
-// The RTDB *emulator's* regex engine rejects the production `messages` email
-// `.validate` (it uses `\s`), though production accepts it. Neutralize only
-// those regex validates for the emulator load — they are unrelated to the
-// movement `.write` rules under test.
-function sanitizeForEmulator(node) {
-  if (node && typeof node === 'object') {
-    for (const key of Object.keys(node)) {
-      if (key === '.validate' && typeof node[key] === 'string' && node[key].includes('\\s')) {
-        node[key] = 'newData.isString()';
-      } else {
-        sanitizeForEmulator(node[key]);
-      }
-    }
-  }
-}
+const { emulatorRulesFor } = require('./emulatorRules');
 
 function rulesFor(projectName) {
-  const rules = buildRules(projects.load(projectName));
-  sanitizeForEmulator(rules);
-  return JSON.stringify(rules);
+  return emulatorRulesFor(projects.load(projectName));
 }
 
 function validDeparture(config, createdBy) {

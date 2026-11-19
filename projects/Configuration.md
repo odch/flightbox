@@ -23,6 +23,7 @@ project.
 * `title`
 * `enabledFlightTypes`
 * `reportApiEnabled`
+* `movementWritesViaApi`
 * `customsSelfDeclarationEnabled`
 * `ppr`
 * `pprGuestRequests`
@@ -195,10 +196,16 @@ Description of the test environment.
 Description of the production environment.
 
 A property set in an environment replaces the top-level property of the same name in the app's configuration
-and in the functions' generated configs (`reportApiEnabled`, `memberManagement`, `aerodrome`; for PPR `ppr`,
-`pprGuestRequests`, the aerodrome's `name`, `themeColor` and `appUrl`), e.g.
+and in the functions' generated configs (`reportApiEnabled`, `movementWritesViaApi`, `memberManagement`,
+`aerodrome`; for PPR `ppr`, `pprGuestRequests`, the aerodrome's `name`, `themeColor` and `appUrl`), e.g.
 `"reportApiEnabled": true` in `test` only. `theme`, the landing and go-around fees and `privacySettings` are
 always read from the top level.
+
+`enabledFlightTypes`, `loginForm` and `lockOnDateTime` must be set at the top level: the database rules are
+built from the top level only, and the functions apply the same movement rules, so the functions deploy fails
+when an environment sets one of them. For the same reason, while `movementWritesViaApi` is on, an
+environment-level `aerodrome` may not change the `ICAO`, the runway names or the departure and arrival route
+names of the top-level one.
 
 ### `theme`
 
@@ -222,9 +229,11 @@ Example: `"MFGT Bewegungen"`
 
 A list of the enabled flight types.
 
-Available flight types: `private`, `commercial`, `instruction`, `aerotow`, `paradrop`.
+Available flight types: `private`, `commercial`, `instruction`, `aerotow`, `paradrop`, `glider_private_aerotow`,
+`glider_private_winch`, `glider_private_self`, `glider_instruction_aerotow`, `glider_instruction_winch`,
+`glider_instruction_self`, `military`, `sar`.
 
-Enabled by default: `private`, `commercial`, `instruction`.
+Enabled by default (`projects/default.json`): `private`, `instruction`.
 
 Example: `["private", "commercial"]`
 
@@ -237,6 +246,24 @@ Disabled by default.
 The functions get this flag and the aerodrome data they need from `functions/project-config.generated.json`, which
 the deploy writes with `node tasks/generateServerConfig.js <project> <test|production> <file> [<Firebase project>]`
 (with the Firebase project given, a config for another project fails instead of being ignored at runtime).
+The generated config holds only whitelisted fields: the feature flags, `memberManagement`, `loginForm`,
+`lockOnDateTime`, `enabledFlightTypes`, the aircraft category names and, of the `aerodrome`, the `ICAO`, the
+runways (name and type) and the names of the departure and arrival routes.
+
+Example: `true`
+
+### `movementWritesViaApi`
+
+Moves the app's movement writes (creating and editing departures and arrivals, setting the payment method of an
+arrival) from direct Realtime Database writes to the API of the Cloud Functions. The functions check each write
+with the same rules as the database (required fields, formats, runways, routes, flight types, ownership,
+movement lock) and derive `negativeTimestamp`, `createdBy` and `createdBy_orderKey` themselves. Deleting
+movements and reading them still go to the database directly. Disabled by default; without it the app writes to
+the database as before.
+
+Both the app and the functions read it: the app from its configuration, the functions, like `reportApiEnabled`,
+from `functions/project-config.generated.json`. Set it in an environment to try it on test first
+(`"movementWritesViaApi": true` in `environments.test`).
 
 Example: `true`
 
