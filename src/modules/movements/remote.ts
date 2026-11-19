@@ -4,6 +4,7 @@ import {
   endAt as fbEndAt, onValue, remove, update, push
 } from 'firebase/database';
 import {toOrderKey} from './pagination'
+import {saveMovementViaApi} from './remoteApi'
 
 const associationListeners = new Map<string, () => void>();
 
@@ -47,7 +48,16 @@ export function removeMovement(path: string, key: string) {
   return remove(child(firebase(path), key));
 }
 
+// Per-aerodrome flag (projects/<name>.json, see projects/Configuration.md).
+// __CONF__ is not defined in unit tests unless a spec sets it.
+export function movementWritesViaApi(): boolean {
+  return typeof __CONF__ !== 'undefined' && __CONF__ !== null && __CONF__.movementWritesViaApi === true;
+}
+
 export function saveMovement(path: string, key: string | null | undefined, movement: Record<string, unknown>): Promise<string> {
+  if (movementWritesViaApi()) {
+    return saveMovementViaApi(path, key, movement);
+  }
   return new Promise(async (resolve, reject) => {
     try {
       if (key) {
