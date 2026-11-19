@@ -69,7 +69,14 @@
   "themeColor": "#027ABB",
   "shortName": "Flightbox LSPL",
   "paymentMethods": [
-    "checkout",
+    {
+      "name": "card",
+      "authCondition": "kiosk"
+    },
+    {
+      "name": "checkout",
+      "authCondition": "notKiosk"
+    },
     "cash",
     "invoice"
   ],
