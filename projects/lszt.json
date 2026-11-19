@@ -92,8 +92,7 @@
     "test": {
       "firebaseProjectId": "mfgt-flights",
       "firebaseApiKey": "AIzaSyDy63Y8GP6GExoP07KWJ6qneAeQalu9pK8",
-      "passkeysEnabled": true,
-      "mcpEnabled": true
+      "passkeysEnabled": true
     },
     "production": {
       "firebaseProjectId": "project-8979611309653332047",

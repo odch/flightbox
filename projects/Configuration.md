@@ -272,7 +272,7 @@ Adding it as a connector:
 * claude.ai: Customize > Connectors > "+ Add" > "Add custom connector", URL
   `https://<aerodrome domain>/api/v1/mcp`, authentication "No sign in".
 * Claude Code: `claude mcp add --transport http flightbox-<icao> https://<aerodrome domain>/api/v1/mcp`, e.g.
-  `flightbox-lszt`.
+  `flightbox-lsze`.
 
 Example: `true`, or only in an environment (`"mcpEnabled": true` in `environments.test`).
 
