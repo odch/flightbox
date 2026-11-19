@@ -156,9 +156,10 @@ describe('tasks/generateServerConfig', () => {
       .toEqual(rulesConf.aerodrome.arrivalRoutes.map(({ name }) => name).sort());
   });
 
-  it('does not enable movementWritesViaApi in any project yet', () => {
+  it('enables movementWritesViaApi on lsze test only', () => {
     CASES.forEach(([project, env]) => {
-      expect(buildServerConfigFor(project, env).movementWritesViaApi).toBe(false);
+      const expected = project === 'lsze' && env === 'test';
+      expect(buildServerConfigFor(project, env).movementWritesViaApi).toBe(expected);
     });
   });
 

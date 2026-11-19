@@ -3,8 +3,10 @@ import * as actions from './actions';
 import * as sagas from './sagas';
 import * as remote from './remote';
 import {Step} from './reducer';
+import {hasPendingMovementWrites, movementWritesSettled} from '../../movements/remoteApi';
 
 jest.mock('./remote');
+jest.mock('../../movements/remoteApi');
 jest.mock('../../../util/createChannel');
 
 let capturedOnValueCallback;
@@ -157,6 +159,47 @@ describe('modules', () => {
               expect(sagas.authUidSelector({auth: {}})).toBeUndefined();
               expect(sagas.authUidSelector({})).toBeUndefined();
             });
+          });
+        });
+
+        describe('redirectToCheckout', () => {
+          const originalHash = window.location.hash;
+
+          afterEach(() => {
+            (hasPendingMovementWrites as jest.Mock).mockReset();
+            (movementWritesSettled as jest.Mock).mockReset();
+            window.location.hash = originalHash;
+          });
+
+          // jsdom cannot navigate to another document, so a same-document URL
+          // (only the hash changes) stands in for the checkout URL.
+          const checkoutUrl = (id: string) => `${window.location.origin}${window.location.pathname}#${id}`;
+
+          it('redirects at once without pending movement writes', () => {
+            (hasPendingMovementWrites as jest.Mock).mockReturnValue(false);
+
+            sagas.redirectToCheckout(checkoutUrl('checkout-now'));
+
+            expect(window.location.hash).toBe('#checkout-now');
+            expect(movementWritesSettled).not.toHaveBeenCalled();
+          });
+
+          it('waits for pending movement writes before redirecting', async () => {
+            let settle: () => void = () => undefined;
+            const settled = new Promise<void>(resolve => {
+              settle = resolve;
+            });
+            (hasPendingMovementWrites as jest.Mock).mockReturnValue(true);
+            (movementWritesSettled as jest.Mock).mockReturnValue(settled);
+
+            sagas.redirectToCheckout(checkoutUrl('checkout-later'));
+            await Promise.resolve();
+            expect(window.location.hash).not.toBe('#checkout-later');
+
+            settle();
+            await settled;
+            await Promise.resolve();
+            expect(window.location.hash).toBe('#checkout-later');
           });
         });
 

@@ -1,4 +1,5 @@
 import {call, put, select} from 'redux-saga/effects';
+import {runSaga, stdChannel} from 'redux-saga';
 import dates from '../../util/dates';
 import ImmutableItemsArray from '../../util/ImmutableItemsArray';
 import * as actions from './actions';
@@ -1158,6 +1159,71 @@ describe('modules', () => {
           };
 
           expect(generator.next(state).done).toEqual(true);
+        });
+      });
+
+      describe('watchSaveMovement', () => {
+        const state = {
+          ui: {wizard: {values: {type: 'departure', immatriculation: 'HBABC', date: '2016-10-09', time: '16:00'}}},
+          auth: {data: {email: 'pilot@example.com'}},
+          settings: {privacyPolicyUrl: {url: null}},
+        };
+
+        const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+
+        function startWatcher() {
+          const channel = stdChannel();
+          const dispatched: any[] = [];
+          const task = runSaga({
+            channel,
+            dispatch: (action: any) => dispatched.push(action),
+            getState: () => state,
+          }, function* () {
+            yield sagas.watchSaveMovement();
+          });
+          const dispatch = (action: any) => channel.put(action);
+          return {task, dispatch, dispatched};
+        }
+
+        let resolveSave: (key: string) => void;
+
+        beforeEach(() => {
+          (remote.saveMovement as jest.Mock).mockReset();
+          (remote.saveMovement as jest.Mock).mockImplementation(() => new Promise(resolve => {
+            resolveSave = resolve;
+          }));
+        });
+
+        afterEach(() => {
+          (remote.movementWritesViaApi as jest.Mock).mockReset();
+        });
+
+        it('ignores a second save while one is running with movementWritesViaApi', async () => {
+          (remote.movementWritesViaApi as jest.Mock).mockReturnValue(true);
+          const {task, dispatch, dispatched} = startWatcher();
+
+          dispatch(actions.saveMovement());
+          dispatch(actions.saveMovement());
+          expect(remote.saveMovement).toHaveBeenCalledTimes(1);
+
+          resolveSave('new-key');
+          await flush();
+          expect(dispatched.filter(action => action.type === actions.SAVE_MOVEMENT_SUCCESS)).toHaveLength(1);
+
+          dispatch(actions.saveMovement());
+          expect(remote.saveMovement).toHaveBeenCalledTimes(2);
+          task.cancel();
+        });
+
+        it('starts every save with the database', () => {
+          (remote.movementWritesViaApi as jest.Mock).mockReturnValue(false);
+          const {task, dispatch} = startWatcher();
+
+          dispatch(actions.saveMovement());
+          dispatch(actions.saveMovement());
+
+          expect(remote.saveMovement).toHaveBeenCalledTimes(2);
+          task.cancel();
         });
       });
 

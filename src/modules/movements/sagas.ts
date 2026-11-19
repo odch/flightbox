@@ -1,6 +1,6 @@
 import {onChildAdded, onChildChanged, onChildRemoved} from 'firebase/database';
 import {getPagination, toOrderKey} from './pagination';
-import {all, call, fork, put, select, takeEvery, takeLatest} from 'redux-saga/effects'
+import {all, call, fork, put, select, takeEvery, takeLatest, takeLeading} from 'redux-saga/effects'
 import createChannel, {monitor} from '../../util/createChannel';
 import * as actions from './actions';
 import * as remote from './remote';
@@ -634,6 +634,17 @@ export function* saveMovementPaymentMethod(action: any) {
   }
 }
 
+// Through the API a create is not idempotent and takes long enough (CORS
+// preflight, cold start) for a second click on "Speichern" to send it
+// again, so further saves are ignored while one is running. The database
+// path keeps takeEvery: there a save offline waits until the connection is
+// back, and ignoring saves meanwhile would drop them.
+export function watchSaveMovement() {
+  return remote.movementWritesViaApi()
+    ? takeLeading(actions.SAVE_MOVEMENT, saveMovement)
+    : takeEvery(actions.SAVE_MOVEMENT, saveMovement);
+}
+
 function getPathByMovementType(type: string) {
   switch(type) {
     case 'departure':
@@ -679,7 +690,7 @@ export default function* sagas() {
     takeEvery(actions.DELETE_MOVEMENT, deleteMovement),
     takeEvery(actions.INIT_NEW_MOVEMENT, initNewMovement),
     takeEvery(actions.INIT_NEW_MOVEMENT_FROM_MOVEMENT, initNewMovementFromMovement),
-    takeEvery(actions.SAVE_MOVEMENT, saveMovement),
+    watchSaveMovement(),
     takeEvery(actions.SAVE_MOVEMENT_PAYMENT_METHOD, saveMovementPaymentMethod),
     takeLatest(actions.EDIT_MOVEMENT, editMovement),
     takeEvery(FIREBASE_AUTHENTICATION_EVENT, teardownOnAuthLost),
