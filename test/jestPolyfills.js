@@ -9,5 +9,8 @@ const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = global.TextEncoder || TextEncoder;
 global.TextDecoder = global.TextDecoder || TextDecoder;
 
-// Default to German in tests (jsdom sets navigator.language to 'en')
-localStorage.setItem('flightbox_language', 'de');
+// Default to German in tests (jsdom sets navigator.language to 'en').
+// Specs with `@jest-environment node` (functions/) have no localStorage.
+if (typeof localStorage !== 'undefined') {
+  localStorage.setItem('flightbox_language', 'de');
+}
