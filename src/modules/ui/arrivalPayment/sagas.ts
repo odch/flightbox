@@ -4,6 +4,7 @@ import * as actions from './actions';
 import * as remote from './remote'
 import createChannel, {monitor} from '../../../util/createChannel'
 import {Step} from './reducer'
+import {hasPendingMovementWrites, movementWritesSettled} from '../../movements/remoteApi'
 
 export const cardPaymentIdSelector = (state: any) => state.ui.arrivalPayment.cardPaymentId;
 
@@ -64,6 +65,21 @@ export function* createCardPayment(channel: any, action: any) {
   yield call(monitorPaymentStatus, newPaymentRef, channel)
 }
 
+// With movementWritesViaApi the payment method of the arrival is saved with
+// a fetch that may not have been sent yet when the checkout URL arrives;
+// leaving the page would cancel it and the paid arrival would never be
+// marked completed (functions/updateArrivalPaymentStatus.js). Without
+// pending API writes (always the case with the database) redirect at once.
+export function redirectToCheckout(url: string) {
+  if (!hasPendingMovementWrites()) {
+    window.location.href = url
+    return
+  }
+  movementWritesSettled().then(() => {
+    window.location.href = url
+  })
+}
+
 export function* monitorPaymentStatus(paymentRef: any, channel: any) {
   const unsubscribe = onValue(paymentRef, (snapshot: any) => {
     const val = snapshot.val()
@@ -72,7 +88,7 @@ export function* monitorPaymentStatus(paymentRef: any, channel: any) {
 
     if (data) {
       unsubscribe()
-      window.location.href = data
+      redirectToCheckout(data)
     } else if (status === 'success') {
       channel.put(actions.setStep(Step.COMPLETED))
       unsubscribe()

@@ -263,7 +263,45 @@ go to the database directly. Disabled by default; without it the app writes to t
 
 Both the app and the functions read it: the app from its configuration, the functions, like `reportApiEnabled`,
 from `functions/project-config.generated.json`. Set it in an environment to try it on test first
-(`"movementWritesViaApi": true` in `environments.test`).
+(`"movementWritesViaApi": true` in `environments.test`). Enabled on `lsze` test.
+
+In the app (`src/modules/movements/remoteApi.ts`), the writes go to
+`https://europe-west1-<firebaseProjectId>.cloudfunctions.net/api/app/movements/...` with the user's ID token,
+like the app's other API calls, so they work the same from `npm start` (the webpack dev server has no proxy for
+`/api`) and from Firebase Hosting; with `npm start --project=lsze` they go to the functions of `lsze-test`. The
+customs form link of a movement is saved the same way. A rejected write shows the usual "Speichern
+fehlgeschlagen" dialog with the API's message (e.g. `Movement is locked`, or `Validation failed: runway`).
+Differences to direct database writes:
+
+* Offline or on a network error, saving fails right away; a database write waited and was sent once the
+  connection was back. Nothing is retried automatically.
+* A new movement is created with `POST`, which is not idempotent: if the connection drops after the request
+  reached the functions, the movement may be saved although the app reports a network error. The message says
+  so ("check the list before saving again"); saving again creates a second movement. While a save is running,
+  further clicks on "Speichern" are ignored.
+* Every save is an HTTP request to the `api` function: slower, and a cold start can take a few seconds. No
+  progress is shown meanwhile.
+* The payment method of an arrival is saved in the background: if that fails, it is only logged in the
+  browser console, the user is not told, and the arrival stays without payment method (for `checkout` it is
+  then not marked as paid). Before redirecting to the checkout page, the app waits until the write has
+  finished, so that leaving the page does not cancel it.
+* Updating a movement that does not exist (any more) fails with `404`; the database created it if the rules
+  allowed the write.
+* The server sets `negativeTimestamp`, `createdBy` and `createdBy_orderKey`; the values of the app are ignored.
+
+Switching it on or off: the routes only exist in functions deployed with the flag (`functions/api/index.js`),
+while the app has the flag built in, also in tabs and kiosks that stay open after a deployment. An app with the
+flag and functions without it means every save fails with `Request failed (HTTP 404)` (also if the functions
+reject the generated configuration, e.g. a `firebaseProjectId` mismatch). The test deployment
+(`.github/workflows/firebase-hosting-dev.yml`) deploys hosting and functions in parallel jobs, so:
+
+* On: deploy the functions with the flag first, the way the `build_and_deploy_functions` job does it
+  (generated configuration and `.env` file, then `firebase deploy --only functions`), then push the change.
+  Otherwise saves fail until the functions job has finished.
+* Off: first deploy the app without the flag (build and `firebase deploy --only hosting`) while the functions
+  keep it, wait until open tabs and kiosks have been reloaded, then push the change that removes the flag.
+
+The database triggers (fees, payment status, associated movements, lock date) run as before.
 
 Example: `true`
 

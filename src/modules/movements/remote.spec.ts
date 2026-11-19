@@ -13,9 +13,12 @@ jest.mock('firebase/database', () => ({
   push: jest.fn(),
 }));
 
-import firebase from '../../util/firebase';
+import firebase, {getIdToken} from '../../util/firebase';
 import {get, child, query, orderByChild, startAt, limitToFirst, endAt, onValue, remove, update, push} from 'firebase/database';
-import {loadLimited, loadByKey, removeMovement, saveMovement, addMovementAssociationListener, removeMovementAssociationListener} from './remote';
+import {
+  loadLimited, loadByKey, removeMovement, saveMovement, movementWritesViaApi,
+  addMovementAssociationListener, removeMovementAssociationListener
+} from './remote';
 import {toOrderKey} from './pagination';
 
 describe('modules', () => {
@@ -113,6 +116,175 @@ describe('modules', () => {
       it('rejects when firebase operation fails', async () => {
         (update as jest.Mock).mockRejectedValue(new Error('Save failed'));
         await expect(saveMovement('/departures', 'key', {})).rejects.toThrow('Save failed');
+      });
+
+      describe('with movementWritesViaApi', () => {
+        const API = 'https://europe-west1-flightbox-test.cloudfunctions.net/api/app/movements';
+        const originalFetch = global.fetch;
+        let fetchMock: jest.Mock;
+
+        const jsonResponse = (status: number, body: unknown) => ({
+          ok: status >= 200 && status < 300,
+          status,
+          json: () => Promise.resolve(body),
+        });
+
+        const sentRequest = () => {
+          const [url, init] = fetchMock.mock.calls[0];
+          return {url, method: init.method, headers: init.headers, body: JSON.parse(init.body)};
+        };
+
+        beforeEach(() => {
+          (global as any).__FIREBASE_PROJECT_ID__ = 'flightbox-test';
+          (global as any).__CONF__ = {movementWritesViaApi: true};
+          (getIdToken as jest.Mock).mockResolvedValue('id-token');
+          fetchMock = jest.fn();
+          global.fetch = fetchMock;
+        });
+
+        afterEach(() => {
+          delete (global as any).__CONF__;
+          delete (global as any).__FIREBASE_PROJECT_ID__;
+          global.fetch = originalFetch;
+        });
+
+        it('creates a movement with POST and resolves to the new key', async () => {
+          fetchMock.mockResolvedValue(jsonResponse(201, {key: 'api-key'}));
+          const movement = {immatriculation: 'HBKOF', createdBy: 'pilot@example.com'};
+
+          await expect(saveMovement('/departures', null, movement)).resolves.toBe('api-key');
+
+          expect(sentRequest()).toEqual({
+            url: `${API}/departures`,
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer id-token',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: movement,
+          });
+          expect(push).not.toHaveBeenCalled();
+          expect(update).not.toHaveBeenCalled();
+        });
+
+        it('updates a movement with PATCH on its key', async () => {
+          fetchMock.mockResolvedValue(jsonResponse(200, {key: 'arr-key'}));
+
+          await expect(saveMovement('/arrivals', 'arr-key', {remarks: null})).resolves.toBe('arr-key');
+
+          const request = sentRequest();
+          expect(request.url).toBe(`${API}/arrivals/arr-key`);
+          expect(request.method).toBe('PATCH');
+          expect(request.body).toEqual({remarks: null});
+          expect(update).not.toHaveBeenCalled();
+        });
+
+        it('patches only the payment method (saveMovementPaymentMethod)', async () => {
+          fetchMock.mockResolvedValue(jsonResponse(200, {key: 'arr-key'}));
+          const paymentMethod = {method: 'card', status: 'completed'};
+
+          await saveMovement('/arrivals', 'arr-key', {paymentMethod});
+
+          const request = sentRequest();
+          expect(request.method).toBe('PATCH');
+          expect(request.url).toBe(`${API}/arrivals/arr-key`);
+          expect(request.body).toEqual({paymentMethod});
+        });
+
+        it('rejects with the validation errors of the envelope', async () => {
+          fetchMock.mockResolvedValue(jsonResponse(400, {
+            error: {
+              code: 'invalid-argument',
+              message: 'Validation failed',
+              details: {
+                reason: 'validation-failed',
+                validationErrors: [{field: 'runway', reason: 'not-allowed'}],
+              },
+            },
+          }));
+
+          const error = await saveMovement('/departures', null, {}).catch(e => e);
+
+          expect(error).toBeInstanceOf(Error);
+          expect(error).toMatchObject({
+            message: 'Validation failed: runway',
+            status: 400,
+            code: 'invalid-argument',
+            reason: 'validation-failed',
+            validationErrors: [{field: 'runway', reason: 'not-allowed'}],
+          });
+        });
+
+        it('rejects when the network request fails', async () => {
+          fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+
+          const error = await saveMovement('/departures', 'key', {}).catch(e => e);
+
+          expect(error).toBeInstanceOf(Error);
+          expect(error).toMatchObject({status: 0, code: 'unavailable', reason: 'network-error'});
+          expect(update).not.toHaveBeenCalled();
+        });
+
+        it('writes to the database when the flag is not exactly true', async () => {
+          (global as any).__CONF__ = {movementWritesViaApi: 'true'};
+
+          await expect(saveMovement('/departures', null, {})).resolves.toBe('new-key');
+
+          expect(push).toHaveBeenCalledWith(mockRef, {});
+          expect(fetchMock).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('without movementWritesViaApi', () => {
+        const originalFetch = global.fetch;
+        let fetchMock: jest.Mock;
+
+        beforeEach(() => {
+          fetchMock = jest.fn();
+          global.fetch = fetchMock;
+        });
+
+        afterEach(() => {
+          delete (global as any).__CONF__;
+          global.fetch = originalFetch;
+        });
+
+        it.each([
+          ['no configuration', undefined],
+          ['the flag absent', {}],
+          ['the flag false', {movementWritesViaApi: false}],
+        ])('writes to the database with %s', async (_, conf) => {
+          (global as any).__CONF__ = conf;
+          const movement = {immatriculation: 'HBKOF'};
+
+          await expect(saveMovement('/departures', null, movement)).resolves.toBe('new-key');
+          await expect(saveMovement('/departures', 'key', movement)).resolves.toBe('key');
+
+          expect(push).toHaveBeenCalledWith(mockRef, movement);
+          expect(child).toHaveBeenCalledWith(mockRef, 'key');
+          expect(update).toHaveBeenCalledWith(childRef, movement);
+          expect(fetchMock).not.toHaveBeenCalled();
+          expect(getIdToken).not.toHaveBeenCalled();
+        });
+      });
+    });
+
+    describe('movementWritesViaApi', () => {
+      afterEach(() => {
+        delete (global as any).__CONF__;
+      });
+
+      it.each([
+        [undefined, false],
+        [null, false],
+        [{}, false],
+        [{movementWritesViaApi: 'true'}, false],
+        [{movementWritesViaApi: false}, false],
+        [{movementWritesViaApi: true}, true],
+      ])('is true only for the flag exactly true (%p)', (conf, expected) => {
+        (global as any).__CONF__ = conf;
+        expect(movementWritesViaApi()).toBe(expected);
       });
     });
 
