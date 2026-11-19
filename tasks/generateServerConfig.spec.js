@@ -156,9 +156,12 @@ describe('tasks/generateServerConfig', () => {
       .toEqual(rulesConf.aerodrome.arrivalRoutes.map(({ name }) => name).sort());
   });
 
-  it('enables movementWritesViaApi on lsze test only', () => {
+  // cypress-testing-api only builds the Cypress run of the movement specs
+  // with the flag (same Firebase project as cypress-testing).
+  it('enables movementWritesViaApi on lsze test and the Cypress API run only', () => {
+    const enabled = ['lsze/test', 'cypress-testing-api/test'];
     CASES.forEach(([project, env]) => {
-      const expected = project === 'lsze' && env === 'test';
+      const expected = enabled.includes(`${project}/${env}`);
       expect(buildServerConfigFor(project, env).movementWritesViaApi).toBe(expected);
     });
   });

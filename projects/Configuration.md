@@ -5,6 +5,12 @@
 All project configurations are located in the `projects` directory. There is one JSON file for each
 project.
 
+A project can extend another one with `"extends": "<project>"`: its top-level properties replace those of the
+base project as a whole, and each of its environments is merged into the base project's environment of the same
+name. This is meant for build variants of one Firebase project, such as `cypress-testing-api` (the Cypress run
+with `movementWritesViaApi`). The deploy workflows read `privacySettings` from the project file directly, so a
+deployed tenant should not use `extends`.
+
 ## Properties
 
 * `aerodrome`

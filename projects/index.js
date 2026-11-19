@@ -6,9 +6,41 @@ function loadJsonFile(name) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
+// A project can extend another one ("extends": "<name>"): its top-level
+// properties replace the base's, and each of its environments is merged
+// into the base's environment of the same name. Used for build variants of
+// one Firebase project (e.g. cypress-testing-api).
+function mergeEnvironments(base = {}, own = {}) {
+  const merged = Object.assign({}, base);
+  Object.keys(own).forEach(name => {
+    merged[name] = Object.assign({}, base[name], own[name]);
+  });
+  return merged;
+}
+
+function loadProject(project, chain) {
+  const conf = loadJsonFile(project);
+  if (!Object.prototype.hasOwnProperty.call(conf, 'extends')) {
+    return conf;
+  }
+  const { extends: baseName, ...own } = conf;
+  if (typeof baseName !== 'string' || baseName === '' || baseName === 'default') {
+    throw new Error(`Project "${project}": "extends" must name another project`);
+  }
+  if (chain.includes(baseName)) {
+    throw new Error(`Project "${project}": circular "extends" (${chain.concat(baseName).join(' -> ')})`);
+  }
+  const base = loadProject(baseName, chain.concat(baseName));
+  const merged = Object.assign({}, base, own);
+  if (base.environments || own.environments) {
+    merged.environments = mergeEnvironments(base.environments, own.environments);
+  }
+  return merged;
+}
+
 function load(project) {
   const defaultConf = loadJsonFile('default');
-  const projectConf = loadJsonFile(project);
+  const projectConf = loadProject(project, [project]);
   return Object.assign({}, defaultConf, projectConf);
 }
 
