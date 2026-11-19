@@ -257,9 +257,9 @@ Example: `true`
 Moves the app's movement writes (creating and editing departures and arrivals, setting the payment method of an
 arrival) from direct Realtime Database writes to the API of the Cloud Functions. The functions check each write
 with the same rules as the database (required fields, formats, runways, routes, flight types, ownership,
-movement lock) and derive `negativeTimestamp`, `createdBy` and `createdBy_orderKey` themselves. Deleting
-movements and reading them still go to the database directly. Disabled by default; without it the app writes to
-the database as before.
+movement lock) and derive `negativeTimestamp`, `createdBy` and `createdBy_orderKey` themselves. They write as
+the signed-in user, so the database rules still apply to every write. Deleting movements and reading them still
+go to the database directly. Disabled by default; without it the app writes to the database as before.
 
 Both the app and the functions read it: the app from its configuration, the functions, like `reportApiEnabled`,
 from `functions/project-config.generated.json`. Set it in an environment to try it on test first

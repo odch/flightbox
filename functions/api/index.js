@@ -138,5 +138,9 @@ if (projectConfig.reportApiEnabled === true) {
   const {apiKeyOrAdminAuth} = require('./apiKeyAuth')
   require('./reports').registerReportRoutes(api, projectConfig, apiKeyOrAdminAuth(SCOPES.REPORTS_AIRSTAT))
 }
+// Movement writes of the web app (movementWritesViaApi), for signed-in users.
+if (projectConfig.movementWritesViaApi === true) {
+  require('../movements').registerMovementRoutes(api, projectConfig)
+}
 
 module.exports = onRequest({ region: 'europe-west1' }, api)
