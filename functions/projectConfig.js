@@ -11,8 +11,12 @@ const logger = require('firebase-functions/logger');
 
 const CONFIG_FILE = path.join(__dirname, 'project-config.generated.json');
 // The config is only used when it enables at least one of these features.
-const FEATURE_FLAGS = ['reportApiEnabled', 'mcpEnabled'];
-const DISABLED = Object.freeze({ reportApiEnabled: false, mcpEnabled: false });
+const FEATURE_FLAGS = ['reportApiEnabled', 'mcpEnabled', 'movementWritesViaApi'];
+const DISABLED = Object.freeze({
+  reportApiEnabled: false,
+  mcpEnabled: false,
+  movementWritesViaApi: false,
+});
 
 function runtimeProjectId(env) {
   if (env.GCLOUD_PROJECT) {

@@ -2,16 +2,23 @@
 
 const fs = require('fs');
 const projects = require('../projects');
+const defaultConf = require('../projects/default.json');
+const aircraftCategoriesData = require('../src/util/aircraftCategoriesData');
 
 // Builds the tenant config the Cloud Functions need (airstat report, MCP
-// endpoint) from a project file, resolved exactly like the client's
-// `__CONF__` in webpack.config.js. Only whitelisted fields are returned, so
-// secrets and unrelated settings (API keys, fees, theme, ...) never reach
-// functions/.
+// endpoint, movement writes) from a project file, resolved exactly like the
+// client's `__CONF__` in webpack.config.js. Only whitelisted fields are
+// returned, so secrets and unrelated settings (API keys, fees, theme, ...)
+// never reach functions/.
 
 const ENVS = ['test', 'production'];
 
 const ICAO_RE = /^[A-Z0-9]{4}$/;
+
+// The database rules (tasks/processFirebaseRules.js, gulpfile.js) are built
+// from the top-level project config only. The movement domain in functions/
+// mirrors those rules, so these fields must not differ per environment.
+const TOP_LEVEL_ONLY = ['enabledFlightTypes', 'loginForm', 'lockOnDateTime'];
 
 const hasOwn = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
@@ -34,6 +41,12 @@ function mergeEnvironment(project, conf, env) {
   if (!isPlainObject(environments) || !hasOwn(environments, env) || !isPlainObject(environments[env])) {
     throw configError(project, env, `environments.${env}`, 'is not defined');
   }
+  TOP_LEVEL_ONLY.forEach(key => {
+    if (hasOwn(environments[env], key)) {
+      throw configError(project, env, `environments.${env}.${key}`,
+        'is not supported: the database rules read it from the top level only');
+    }
+  });
   return { ...rest, ...environments[env] };
 }
 
@@ -68,6 +81,91 @@ function buildRunways(project, env, runways) {
   });
 }
 
+// Departure/arrival routes, by name only (the label is display text). Same
+// order as the client reads them; an empty list is allowed (only 'circuits'
+// remains, see processFirebaseRules.js processRoute).
+function buildRoutes(project, env, routes, field) {
+  if (!Array.isArray(routes)) {
+    throw configError(project, env, field, 'must be an array');
+  }
+  const seen = new Set();
+  return clientOrder(routes).map(route => {
+    if (!isPlainObject(route) || typeof route.name !== 'string' || route.name === '') {
+      throw configError(project, env, `${field}[].name`, `must be a non-empty string: ${JSON.stringify(route)}`);
+    }
+    if (seen.has(route.name)) {
+      throw configError(project, env, field, `contains duplicate name "${route.name}"`);
+    }
+    seen.add(route.name);
+    return { name: route.name };
+  });
+}
+
+// projects.load() merges projects/default.json, so the default only applies
+// to a conf passed in directly; it is the client's default either way.
+function buildFlightTypes(project, env, merged) {
+  const flightTypes = hasOwn(merged, 'enabledFlightTypes')
+    ? merged.enabledFlightTypes
+    : defaultConf.enabledFlightTypes;
+  if (!Array.isArray(flightTypes) || flightTypes.length === 0) {
+    throw configError(project, env, 'enabledFlightTypes', 'must be a non-empty array');
+  }
+  return clientOrder(flightTypes).map(flightType => {
+    if (typeof flightType !== 'string' || flightType === '') {
+      throw configError(project, env, 'enabledFlightTypes', `contains a non-string entry: ${JSON.stringify(flightType)}`);
+    }
+    return flightType;
+  });
+}
+
+function buildLoginForm(project, env, merged) {
+  const loginForm = hasOwn(merged, 'loginForm') ? merged.loginForm : defaultConf.loginForm;
+  if (typeof loginForm !== 'string' || loginForm === '') {
+    throw configError(project, env, 'loginForm', `must be a non-empty string: ${JSON.stringify(loginForm)}`);
+  }
+  return loginForm;
+}
+
+function buildAerodrome(project, env, aerodrome, field = 'aerodrome') {
+  if (!isPlainObject(aerodrome)) {
+    throw configError(project, env, field, 'must be an object');
+  }
+  if (typeof aerodrome.ICAO !== 'string' || !ICAO_RE.test(aerodrome.ICAO)) {
+    throw configError(project, env, `${field}.ICAO`, `must match ${ICAO_RE}: ${JSON.stringify(aerodrome.ICAO)}`);
+  }
+  return {
+    ICAO: aerodrome.ICAO,
+    runways: buildRunways(project, env, aerodrome.runways),
+    departureRoutes: buildRoutes(project, env, aerodrome.departureRoutes, `${field}.departureRoutes`),
+    arrivalRoutes: buildRoutes(project, env, aerodrome.arrivalRoutes, `${field}.arrivalRoutes`)
+  };
+}
+
+// What the movement rules read from the aerodrome: ICAO (circuits), runway
+// and route names (as sets, order does not matter to the rules).
+const movementRuleView = aerodrome => JSON.stringify({
+  ICAO: aerodrome.ICAO,
+  runways: aerodrome.runways.map(({ name }) => name).sort(),
+  departureRoutes: aerodrome.departureRoutes.map(({ name }) => name).sort(),
+  arrivalRoutes: aerodrome.arrivalRoutes.map(({ name }) => name).sort()
+});
+
+// The database rules are built from the top-level aerodrome only. With
+// movement writes through the API, an environment-level aerodrome must not
+// change what the movement rules read, or the API would accept runways or
+// routes the rules reject (and the other way round).
+function assertMovementAerodromeMatchesRules(project, env, conf, aerodrome) {
+  if (!hasOwn(conf.environments[env], 'aerodrome')) {
+    return;
+  }
+  const topLevel = buildAerodrome(project, env, conf.aerodrome);
+  if (movementRuleView(topLevel) !== movementRuleView(aerodrome)) {
+    throw configError(project, env, `environments.${env}.aerodrome`,
+      'must not change ICAO, runway or route names while movementWritesViaApi is on: '
+      + 'the database rules read them from the top level only');
+  }
+}
+
 // Optional flags: absent means false, like the client's `=== true` checks.
 function readFlag(project, env, merged, key) {
   if (hasOwn(merged, key) && typeof merged[key] !== 'boolean') {
@@ -87,15 +185,14 @@ function buildServerConfig(project, conf, env) {
   }
   const merged = mergeEnvironment(project, conf, env);
 
-  const { firebaseProjectId, aerodrome } = merged;
+  const { firebaseProjectId } = merged;
   if (typeof firebaseProjectId !== 'string' || firebaseProjectId === '') {
     throw configError(project, env, 'firebaseProjectId', `must be a non-empty string: ${JSON.stringify(firebaseProjectId)}`);
   }
-  if (!isPlainObject(aerodrome)) {
-    throw configError(project, env, 'aerodrome', 'must be an object');
-  }
-  if (typeof aerodrome.ICAO !== 'string' || !ICAO_RE.test(aerodrome.ICAO)) {
-    throw configError(project, env, 'aerodrome.ICAO', `must match ${ICAO_RE}: ${JSON.stringify(aerodrome.ICAO)}`);
+  const aerodrome = buildAerodrome(project, env, merged.aerodrome);
+  const movementWritesViaApi = readFlag(project, env, merged, 'movementWritesViaApi');
+  if (movementWritesViaApi) {
+    assertMovementAerodromeMatchesRules(project, env, conf, aerodrome);
   }
 
   return {
@@ -105,10 +202,13 @@ function buildServerConfig(project, conf, env) {
     reportApiEnabled: readFlag(project, env, merged, 'reportApiEnabled'),
     mcpEnabled: readFlag(project, env, merged, 'mcpEnabled'),
     memberManagement: readFlag(project, env, merged, 'memberManagement'),
-    aerodrome: {
-      ICAO: aerodrome.ICAO,
-      runways: buildRunways(project, env, aerodrome.runways)
-    }
+    movementWritesViaApi,
+    lockOnDateTime: readFlag(project, env, merged, 'lockOnDateTime'),
+    loginForm: buildLoginForm(project, env, merged),
+    enabledFlightTypes: buildFlightTypes(project, env, merged),
+    // Not per project: the list the database rules accept (aircraftCategory).
+    aircraftCategories: aircraftCategoriesData.map(category => category.name),
+    aerodrome
   };
 }
 
