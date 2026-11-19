@@ -101,13 +101,38 @@ npm run cy:open
 npm run cy:run
 ```
 
+### Movement writes via the API
+
+The movement specs also run with the app built with `movementWritesViaApi`
+(see `projects/Configuration.md`), so they cover saving through the app API
+as well as direct database writes:
+
+```bash
+npm run cy:test:api
+```
+
+It builds the app from `projects/cypress-testing-api.json` (which extends
+`cypress-testing` and only switches the flag on), exposes
+`movementWritesViaApi=true` to the specs (`cypress run --expose`, read
+with `Cypress.expose()`; `Cypress.env()` is gone since Cypress 16) and runs `cypress/integration/movements/**` and
+`cypress/integration/movements_api/**`. The specs in `movements_api` cover
+behaviour that only exists on the API path; the default run skips them. CI
+runs both (`.github/workflows/test-pull-request.yml`).
+
+The API run needs the movement routes in the deployed functions:
+`npm run deploy:cypress` generates the functions config from
+`cypress-testing-api`, so the `cypress-testing` functions have the flag. The
+default run is not affected: its app keeps writing to the database directly.
+
 ## Cloud Functions deployment
 
 The association E2E tests (Scenarios 3–6) require the **fixed** trigger functions
-to be deployed to the `cypress-testing` Firebase project:
+to be deployed to the `cypress-testing` Firebase project. Deploy with
+`npm run deploy:cypress` (see above), not a plain `firebase deploy`: without
+the generated config the movement routes the API run needs are missing.
 
 ```bash
-firebase deploy --only functions --project cypress-testing
+cd functions && npm run deploy:cypress
 ```
 
 Scenarios 1–2 (basic bidirectional linking) work with both old and new trigger code.

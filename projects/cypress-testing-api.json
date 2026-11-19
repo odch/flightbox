@@ -1,0 +1,9 @@
+{
+  "extends": "cypress-testing",
+  "title": "Cypress Testing (API)",
+  "environments": {
+    "test": {
+      "movementWritesViaApi": true
+    }
+  }
+}
