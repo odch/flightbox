@@ -15,6 +15,8 @@ jest.mock('../ppr/enabled', () => ({
   isPprEnabled: jest.fn(),
   isPprGuestRequestsEnabled: jest.fn(),
 }));
+jest.mock('firebase-admin/auth', () => ({ getAuth: jest.fn() }));
+jest.mock('firebase-admin/app', () => ({ getApp: jest.fn() }));
 
 const routeLayers = app => app.router.stack.filter(layer => layer.route);
 
@@ -136,6 +138,32 @@ describe('functions', () => {
       mcpLayers.forEach(layer => expect(layer.route.path).toEqual(['/v1/mcp', '/api/v1/mcp']));
       expect(mcpLayers.map(layer => Object.keys(layer.route.methods)).flat().sort()).toEqual(['delete', 'get', 'post']);
       expect(routeLayers(api).some(layer => layer.route.path.includes('/api/v1/reports/airstat'))).toBe(false);
+    });
+
+    it('has no movement write routes unless the tenant enables movementWritesViaApi', () => {
+      [
+        { reportApiEnabled: false, movementWritesViaApi: false },
+        { reportApiEnabled: true, mcpEnabled: true, aerodrome: { ICAO: 'LSZE', runways: [] } },
+      ].forEach(config => {
+        const { api } = loadApi(config);
+        const paths = routeLayers(api).map(layer => layer.route.path).flat();
+        expect(paths.filter(path => path.includes('movements'))).toEqual([]);
+      });
+    });
+
+    it('serves movement writes to users when the tenant enables movementWritesViaApi', () => {
+      const { api } = loadApi({ reportApiEnabled: false, movementWritesViaApi: true });
+      const movementLayers = routeLayers(api).filter(layer =>
+        [].concat(layer.route.path).some(path => path.startsWith('/api/app/movements')));
+      const routes = movementLayers.map(layer => [Object.keys(layer.route.methods), layer.route.path]);
+
+      expect(routes).toEqual([
+        [['post'], ['/app/movements/:type', '/api/app/movements/:type']],
+        [['patch'], ['/app/movements/:type/:key', '/api/app/movements/:type/:key']],
+      ]);
+      // requestId, appAuth, JSON body, handler
+      movementLayers.forEach(layer => expect(layer.route.stack).toHaveLength(4));
+      expect(routeLayers(api).some(layer => layer.route.path.includes('mcp'))).toBe(false);
     });
 
     it('lets admins manage API keys when the tenant has an API feature', () => {

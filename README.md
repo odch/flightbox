@@ -180,10 +180,13 @@ with it. All routes answer CORS requests from any origin.
 | `POST` | `/api/customs/prepopulated-forms` | user, not guest or kiosk | [Customs](#customs) form for a movement |
 | `GET` | `/api/customs/availability` | user | Whether [customs](#customs) is configured |
 | `GET` | `/api/users/me/invoice-recipients` | user | [Invoice recipients](#invoice-recipients) of the user |
+| `POST` | `/api/app/movements/<type>` | user | Creates a departure or arrival, see [Movement writes](#movement-writes) |
+| `PATCH` | `/api/app/movements/<type>/<key>` | user | Updates a departure or arrival, see [Movement writes](#movement-writes) |
 
 *Anyone* needs no authentication, *user* the Firebase ID token of a logged-in user, *admin* that of an admin
 (see [Authentication](#authentication)). The airstat report and the API keys exist only on projects with
-`reportApiEnabled`, the MCP endpoint only on projects with `mcpEnabled` (see `projects/Configuration.md`).
+`reportApiEnabled`, the MCP endpoint only on projects with `mcpEnabled`, the movement writes only on projects
+with `movementWritesViaApi` (see `projects/Configuration.md`).
 
 #### Authentication ####
 
@@ -191,7 +194,8 @@ with it. All routes answer CORS requests from any origin.
 * **Firebase ID token** (the app): `Authorization: Bearer <ID token>` of a logged-in user. Without a valid,
   unrevoked token the answer is `401 Unauthorized`. Routes for admins answer `403 Forbidden: Admins only` to
   other users, and the customs form answers `403 Forbidden: not available to shared sessions` to guest and kiosk
-  logins. These answers are not JSON: the body is just that text (sent as `text/html`).
+  logins. These answers are not JSON: the body is just that text (sent as `text/html`). The
+  [movement writes](#movement-writes) answer in their JSON error format instead.
 
 #### Aerodrome status ####
 
@@ -307,6 +311,29 @@ full list each time):
 For the first two, the outcome is stored in `/settings/customsSyncStatus/<invoiceRecipients|selfDeclarationEmails>`
 (`status` `ok` or `error`, `timestamp`, `rejected` entries, `httpStatus`) and shown on their admin tabs. A failed
 push is not retried automatically; the next change of the list pushes the whole list again.
+
+#### Movement writes ####
+
+Only on projects with `movementWritesViaApi`. `<type>` is `departures` or `arrivals`; the body is a JSON object
+with the movement's fields, as the app stores them in the database.
+
+* `POST /api/app/movements/<type>` (user): creates the movement, `201 {"key": "<key>"}`.
+* `PATCH /api/app/movements/<type>/<key>` (user): updates it like a Realtime Database `update()`: each field of the
+  body replaces the stored one, `null` removes it, other fields stay. `200 {"key": "<key>"}`.
+
+The checks are those of the database rules (fields, runways, routes, flight types, ownership, movement lock);
+`negativeTimestamp`, `createdBy` and `createdBy_orderKey` are set by the server, values sent for them are
+ignored. The function writes as the caller, so the database rules apply to the write as well. Errors are JSON,
+`{"error": {"code", "message", "details"}}`, with an `X-Request-Id` header:
+
+* `400 invalid-argument`: `details.validationErrors` lists `{field, reason}`, or `details.reason` is
+  `invalid-body` / `malformed-body`;
+* `401 unauthenticated`: no valid ID token;
+* `403 permission-denied`: the movement belongs to someone else (only on projects with `loginForm` `email`:
+  pilots write their own movements, guest and kiosk only those without owner, admins all);
+* `404 not-found`: unknown `<type>` or key;
+* `409 failed-precondition`: the movement is in a locked period;
+* `500 internal`: anything else, also when the database rules reject a write the checks accepted.
 
 #### Invoice recipients ####
 

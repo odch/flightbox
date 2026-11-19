@@ -142,5 +142,9 @@ if (projectConfig.reportApiEnabled === true) {
 if (projectConfig.mcpEnabled === true) {
   require('../mcp').registerMcpRoutes(api, projectConfig)
 }
+// Movement writes of the web app (movementWritesViaApi), for signed-in users.
+if (projectConfig.movementWritesViaApi === true) {
+  require('../movements').registerMovementRoutes(api, projectConfig)
+}
 
 module.exports = onRequest({ region: 'europe-west1' }, api)
