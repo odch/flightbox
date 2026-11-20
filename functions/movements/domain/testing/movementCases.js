@@ -71,6 +71,8 @@ function departureInput(policy, overrides = {}) {
     location: OTHER_LOCATION,
     mtow: 1000,
     aircraftCategory: policy.aircraftCategories[0],
+    // Not required by the rules; the app (and checkAppRules) asks for it.
+    runway: policy.runways[0],
     ...overrides,
   };
 }
@@ -89,6 +91,8 @@ function arrivalInput(policy, overrides = {}) {
     location: OTHER_LOCATION,
     mtow: 1000,
     aircraftCategory: policy.aircraftCategories[0],
+    // Not required by the rules; the app (and checkAppRules) asks for it.
+    runway: policy.runways[0],
     ...overrides,
   };
 }

@@ -3,6 +3,7 @@
 const {
   prepareWrite,
   validateMovement,
+  checkAppRules,
   checkWriteAccess,
   CODES,
 } = require('../domain');
@@ -60,10 +61,14 @@ async function saveMovement({ repository, policy, actor, type, key = null, input
   }
 
   const prepared = prepareWrite({ type, actor, existing, input });
-  const errors = validateMovement(type, prepared.movement, policy, {
-    writtenFields: prepared.writtenFields,
-    customsBaseUrl: settings.customsBaseUrl,
-  });
+  const errors = [
+    ...validateMovement(type, prepared.movement, policy, {
+      writtenFields: prepared.writtenFields,
+      customsBaseUrl: settings.customsBaseUrl,
+    }),
+    // What the app's wizard requires beyond the database rules.
+    ...checkAppRules(prepared.movement, policy, { writtenFields: prepared.writtenFields, isCreate }),
+  ];
   const access = checkWriteAccess({ actor, existing, next: prepared.movement, policy, settings });
   const rejection = decide({ errors, access });
   if (rejection) {

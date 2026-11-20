@@ -19,6 +19,8 @@ const REASONS = Object.freeze({
   MUST_BE_POSITIVE: 'must-be-positive',
   MUST_NOT_BE_NEGATIVE: 'must-not-be-negative',
   MUST_BE_NEGATIVE: 'must-be-negative',
+  // checkAppRules: {field, reason}
+  NOT_FOR_AIRCRAFT_CATEGORY: 'not-for-aircraft-category',
   // checkWriteAccess: {code, reason}
   UNAUTHENTICATED: 'unauthenticated',
   NOT_OWNER: 'not-owner',
