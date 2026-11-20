@@ -61,8 +61,13 @@ function fakeRepository({ movements = {}, settings = {} } = {}) {
     })),
     createMovement: jest.fn(async () => 'new-key'),
     updateMovement: jest.fn(async () => undefined),
+    resolveReader: jest.fn(async actor => ({ all: actor.isAdmin === true, authOverride: { uid: actor.uid, token: {} } })),
+    listMovements: jest.fn(async () => listed),
   };
 }
+
+// What repository.listMovements answers (per type).
+let listed = [];
 
 // {a: {a: ... 1}}, `depth` levels deep.
 function nested(depth) {
@@ -528,6 +533,65 @@ describe('functions', () => {
       });
     });
 
+    describe('GET /api/app/movements', () => {
+      const FROM = '2026-11-20T00:00:00.000Z';
+      const TO = '2026-11-20T23:59:59.999Z';
+      const list = (query, uid = 'pilot-uid') => send('GET', `/api/app/movements?${new URLSearchParams(query)}`, { uid });
+
+      beforeEach(() => {
+        listed = [];
+      });
+
+      it('lists the pilot\'s own movements of the period', async () => {
+        listed = [['k1', { dateTime: '2026-11-20T09:00:00.000Z', negativeTimestamp: -Date.parse('2026-11-20T09:00:00.000Z'), createdBy: 'pilot@example.com', firstname: 'Hans' }]];
+
+        const response = await list({ from: FROM, to: TO, type: 'departure' });
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get('cache-control')).toBe('no-store');
+        expect(await response.json()).toEqual({
+          from: FROM,
+          to: TO,
+          truncated: false,
+          movements: [{ type: 'departure', key: 'k1', own: true, dateTime: '2026-11-20T09:00:00.000Z', createdBy: 'pilot@example.com', firstname: 'Hans' }],
+        });
+        expect(repository.listMovements).toHaveBeenCalledTimes(1);
+        expect(repository.listMovements).toHaveBeenCalledWith('departure', {
+          fromMs: Date.parse(FROM), toMs: Date.parse(TO), owner: 'pilot@example.com', limit: 201,
+        }, { uid: 'pilot-uid', token: {} });
+      });
+
+      it('answers 400 for a missing, malformed or too long period', async () => {
+        const cases = [
+          [{ to: TO }, [{ field: 'from', reason: 'required' }]],
+          [{ from: '2026-11-20', to: TO }, [{ field: 'from', reason: 'invalid-format' }]],
+          [{ from: TO, to: FROM }, [{ field: 'to', reason: 'before-from' }]],
+          [{ from: '2026-10-01T00:00:00Z', to: TO }, [{ field: 'to', reason: 'range-too-long' }]],
+          [{ from: FROM, to: TO, type: 'all' }, [{ field: 'type', reason: 'not-allowed' }]],
+        ];
+        for (const [query, validationErrors] of cases) {
+          await expectError(await list(query), 400, {
+            code: 'invalid-argument', message: 'Invalid query', details: { reason: 'validation-failed', validationErrors },
+          });
+        }
+        expect(repository.listMovements).not.toHaveBeenCalled();
+      });
+
+      it('answers 401 without a token', async () => {
+        expect((await list({ from: FROM, to: TO }, null)).status).toBe(401);
+      });
+
+      it('answers 500 and logs when the database rules deny what the API allowed', async () => {
+        repository.listMovements.mockRejectedValue(new RulesRejectedError('departures', 'read'));
+
+        const response = await list({ from: FROM, to: TO });
+
+        expect(response.status).toBe(500);
+        expect(logger.error).toHaveBeenCalledWith(
+          'Movement list rejected by database rules after the API allowed it', expect.objectContaining({ uid: 'pilot-uid' }));
+      });
+    });
+
     describe('failures', () => {
       it('answers 500 and logs the disagreement when the rules reject an accepted write', async () => {
         repository.createMovement.mockRejectedValue(new RulesRejectedError('departures'));
@@ -662,8 +726,8 @@ describe('functions', () => {
         { algorithm: 'ES256', issuer: CENTRAL_LOGIN.issuer, audience, expiresIn: 300, header: { typ: 'at+jwt', kid: 'k1', alg: 'ES256' } }
       );
 
-      const loginActorOf = (email = 'pilot@example.com') => ({
-        uid: `login:${SUB}`, email, isAdmin: false, isGuest: false, isKiosk: false,
+      const loginActorOf = (email = 'pilot@example.com', scopes = ['movements:write']) => ({
+        uid: `login:${SUB}`, email, isAdmin: false, isGuest: false, isKiosk: false, scopes,
       });
 
       beforeAll(async () => {
@@ -728,6 +792,24 @@ describe('functions', () => {
           expect(response.status).toBe(401);
         }
         expect(repository.createMovement).not.toHaveBeenCalled();
+      });
+
+      it('needs movements:write to write and movements:read to list', async () => {
+        const readOnly = loginToken({ scope: 'movements:read' });
+        const writeOnly = loginToken({ scope: 'movements:write' });
+        const query = '/api/app/movements?from=2026-11-20T00:00:00.000Z&to=2026-11-20T23:59:59.999Z';
+
+        const write = await sendWith(login, 'POST', '/api/app/movements/departures', readOnly, departureInput(policy));
+        expect(write.status).toBe(403);
+        expect((await write.json()).error.details).toEqual({ reason: 'insufficient-scope' });
+        expect(repository.createMovement).not.toHaveBeenCalled();
+
+        const readWithoutScope = await login.request(query, { headers: { Authorization: `Bearer ${writeOnly}` } });
+        expect(readWithoutScope.status).toBe(403);
+
+        const read = await login.request(query, { headers: { Authorization: `Bearer ${readOnly}` } });
+        expect(read.status).toBe(200);
+        expect(repository.resolveReader).toHaveBeenCalledWith(loginActorOf('pilot@example.com', ['movements:read']), policy);
       });
 
       it('rejects login tokens where centralLogin is not configured', async () => {

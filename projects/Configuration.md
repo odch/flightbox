@@ -335,7 +335,7 @@ Lets the app API (the routes of `movementWritesViaApi`) also accept access token
 Digital account, `odch/odch-login`), next to the Firebase ID tokens of the app. The Open Digital MCP hub
 (`odch/mcp-hub`) uses them to record departures and arrivals for a pilot from an AI client (Claude etc.): it
 exchanges the pilot's token at the login (token exchange, RFC 8693) for a token for exactly this instance and
-calls `POST/PATCH /api/app/movements/...` with it.
+calls `POST/PATCH /api/app/movements/...` with it, and `GET /api/app/movements?from=&to=` to list movements.
 
 ```json
 "centralLogin": {
@@ -351,10 +351,20 @@ calls `POST/PATCH /api/app/movements/...` with it.
 * `audience`: the name of this instance at the login; a token for another instance is rejected.
 
 Accepted are JWTs (`typ` `at+jwt`) signed with ES256 that carry a verified e-mail address (`email`,
-`email_verified`) and the scope `movements:write`. The caller is the pilot with that address: the movement
-domain and the database rules (`auth.token.email`, through `auth_variable_override`) check ownership exactly as
-for a pilot signed in to the app with the same address, so the pilot sees and edits the same movements either
-way. The uid is `login:<account id>`; such callers are never admins, guests or kiosks.
+`email_verified`) and the scope `movements:write` (needed to write) and/or `movements:read` (needed to list). The
+caller is the pilot with that address: the movement domain and the database rules (`auth.token.email`, through
+`auth_variable_override`) check ownership exactly as for a pilot signed in to the app with the same address, so the
+pilot sees and edits the same movements either way. The uid is `login:<account id>`; for writes such callers are
+never admins, guests or kiosks.
+
+Listing (`GET /api/app/movements?from=<ISO>&to=<ISO>[&type=departure|arrival]`, at most 31 days and 200 movements
+per type, `truncated` when there are more): the caller gets what the app shows them. For a token of the login these
+are the rights of the app's Firebase user with the same verified e-mail: pilots get their own movements, admins
+(`/admins`) and allMovements operators (`/logins/<uid>/allMovements`) all of them. Movements of others come
+without personal data, only their operational fields (`functions/movements/domain/readView.js`: aircraft, time,
+location, route, runway, counts, fees, payment method and status; not the pilot's name, e-mail, phone, member
+number, remarks, route description, customs form or invoice recipient). The API reads as the caller
+(`auth_variable_override`; for an admin as their app user), so the read rules apply as in the app.
 
 Set it per environment. Only the functions read it (`functions/project-config.generated.json`, validated by
 `tasks/generateServerConfig.js`); without it, tokens of the login are rejected like any other unknown token.

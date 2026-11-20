@@ -20,11 +20,11 @@ const TOKEN_RENEWAL_MARGIN_MS = 5 * 60 * 1000;
 // does when FIREBASE_DATABASE_EMULATOR_HOST is set).
 const EMULATOR_TOKEN = 'owner';
 
-// The database denied the write: its rules (`.write` or `.validate`) do not
-// allow it for the caller the request was made for.
+// The database denied the request: its rules (`.read`, `.write` or
+// `.validate`) do not allow it for the caller the request was made for.
 class RulesRejectedError extends Error {
-  constructor(path) {
-    super(`Database rules rejected the write to ${path}`);
+  constructor(path, operation = 'write') {
+    super(`Database rules rejected the ${operation} of ${path}`);
     this.name = 'RulesRejectedError';
     this.path = path;
   }
@@ -72,7 +72,7 @@ function assertAuthOverride(authOverride) {
     && typeof authOverride.uid === 'string'
     && authOverride.uid !== '';
   if (!isValid) {
-    throw new TypeError('A write on behalf of a caller needs an auth override with a uid');
+    throw new TypeError('A request on behalf of a caller needs an auth override with a uid');
   }
 }
 
@@ -172,7 +172,40 @@ function createDatabaseRestClient({
     throw new DatabaseRestError(`Database ${method} ${path} answered ${response.status}`, response.status);
   }
 
-  return { write };
+  /**
+   * GET of `path` as the caller, with a query (`orderBy`, `startAt`,
+   * `endAt`, `limitToFirst`; values are JSON-encoded as the REST API
+   * expects). Resolves with the parsed value (null when there is none).
+   */
+  async function read(path, query, authOverride) {
+    assertAuthOverride(authOverride);
+    const destination = resolve();
+    const token = destination.emulator ? EMULATOR_TOKEN : await serviceAccountToken();
+    const params = { auth_variable_override: JSON.stringify(authOverride) };
+    Object.entries(query || {}).forEach(([name, value]) => {
+      params[name] = JSON.stringify(value);
+    });
+    let response;
+    try {
+      response = await fetchImpl(requestUrl(destination, path, params), {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+    } catch (e) {
+      throw new DatabaseRestError(`Database GET ${path} failed: ${e.name}: ${e.message}`);
+    }
+    const answer = await readJson(response);
+    if (response.ok) {
+      return answer;
+    }
+    if (isPermissionDenied(response.status, answer)) {
+      throw new RulesRejectedError(path, 'read');
+    }
+    throw new DatabaseRestError(`Database GET ${path} answered ${response.status}`, response.status);
+  }
+
+  return { write, read };
 }
 
 module.exports = {
