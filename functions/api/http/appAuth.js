@@ -78,14 +78,35 @@ async function resolveActor(decodedToken, db) {
 }
 
 // A pilot with a token of the central login (loginTokens.js). Never an
-// admin: admin rights stay with the Firebase accounts of this instance.
-function loginActor({ sub, email }) {
+// admin for writes: admin rights stay with the Firebase accounts of this
+// instance (reading resolves the app user of the e-mail, see
+// rtdbMovementRepository.js resolveReader). `scopes`: what the token allows
+// (movements:write, movements:read); Firebase actors have none, the app may
+// do everything its user may.
+function loginActor({ sub, email, scopes = [] }) {
   return {
     uid: `${LOGIN_UID_PREFIX}${sub}`,
     email,
     isAdmin: false,
     isGuest: false,
     isKiosk: false,
+    scopes: Object.freeze([...scopes]),
+  };
+}
+
+/**
+ * Middleware after appAuth: a caller whose token carries scopes (the central
+ * login) needs `scope`, otherwise 403 (reason insufficient-scope).
+ */
+function requireScope(scope) {
+  return (req, res, next) => {
+    const { scopes } = req.actor || {};
+    if (Array.isArray(scopes) && !scopes.includes(scope)) {
+      return sendError(req, res, new ApiError('permission-denied', `The token does not allow ${scope}`, {
+        reason: 'insufficient-scope',
+      }));
+    }
+    return next();
   };
 }
 
@@ -169,6 +190,7 @@ function appAuth({ auth = getAuth, db = getDatabase, loginTokens = null } = {}) 
 
 module.exports = {
   appAuth,
+  requireScope,
   resolveActor,
   loginActor,
   bearerToken,

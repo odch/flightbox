@@ -9,7 +9,7 @@ const express = require('express');
 const logger = require('firebase-functions/logger');
 const { getAuth } = require('firebase-admin/auth');
 const { getDatabase } = require('firebase-admin/database');
-const { appAuth, resolveActor, loginActor, bearerToken } = require('./appAuth');
+const { appAuth, resolveActor, loginActor, bearerToken, requireScope } = require('./appAuth');
 const { LoginTokenRejected } = require('./loginTokens');
 const { requestId } = require('./requestId');
 const { listen } = require('./testing/listen');
@@ -329,7 +329,7 @@ describe('functions', () => {
         db = fakeDb({ 'login:sub-1': true });
         loginTokens = {
           isLoginToken: jest.fn(token => token.startsWith('login.')),
-          verify: jest.fn(async () => ({ sub: 'sub-1', email: 'pilot@example.ch' })),
+          verify: jest.fn(async () => ({ sub: 'sub-1', email: 'pilot@example.ch', scopes: ['movements:write'] })),
         };
       });
 
@@ -345,6 +345,7 @@ describe('functions', () => {
           isAdmin: false,
           isGuest: false,
           isKiosk: false,
+          scopes: ['movements:write'],
         });
         expect(loginTokens.verify).toHaveBeenCalledWith('login.token');
         expect(auth.verifyIdToken).not.toHaveBeenCalled();
@@ -384,8 +385,32 @@ describe('functions', () => {
       });
 
       it('builds the actor with the login uid prefix', () => {
-        expect(loginActor({ sub: 'abc', email: 'a@b.ch' })).toEqual({
-          uid: 'login:abc', email: 'a@b.ch', isAdmin: false, isGuest: false, isKiosk: false,
+        expect(loginActor({ sub: 'abc', email: 'a@b.ch', scopes: ['movements:read'] })).toEqual({
+          uid: 'login:abc', email: 'a@b.ch', isAdmin: false, isGuest: false, isKiosk: false, scopes: ['movements:read'],
+        });
+      });
+    });
+
+    describe('requireScope', () => {
+      const run = (actor) => {
+        const req = { actor, requestId: 'r1', get: () => undefined };
+        const res = { status: jest.fn(() => res), json: jest.fn(() => res), set: jest.fn(() => res) };
+        const next = jest.fn();
+        requireScope('movements:read')(req, res, next);
+        return { res, next };
+      };
+
+      it('lets Firebase actors (no scopes) and tokens with the scope through', () => {
+        expect(run({ uid: 'u1' }).next).toHaveBeenCalled();
+        expect(run(loginActor({ sub: 'a', email: 'a@b.ch', scopes: ['movements:read'] })).next).toHaveBeenCalled();
+      });
+
+      it('answers 403 insufficient-scope for a token without it', () => {
+        const { res, next } = run(loginActor({ sub: 'a', email: 'a@b.ch', scopes: ['movements:write'] }));
+        expect(next).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith({
+          error: { code: 'permission-denied', message: 'The token does not allow movements:read', details: { reason: 'insufficient-scope' } },
         });
       });
     });

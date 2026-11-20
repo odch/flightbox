@@ -14,11 +14,12 @@ const { validateCentralLogin } = require('./centralLoginConfig');
 // The hub (odch/mcp-hub) obtains such tokens by token exchange (RFC 8693)
 // for exactly this instance: a JWT (RFC 9068, typ at+jwt) signed with ES256,
 // iss = issuer, aud = audience (e.g. "flightbox-lsze-test"), with the
-// pilot's verified e-mail and the movements:write scope.
+// pilot's verified e-mail and the movements:write and/or movements:read
+// scope; the routes check the one they need (appAuth.js requireScope).
 
 const ALGORITHMS = ['ES256'];
 const TOKEN_TYPES = new Set(['at+jwt', 'application/at+jwt']);
-const REQUIRED_SCOPE = 'movements:write';
+const MOVEMENT_SCOPES = Object.freeze(['movements:write', 'movements:read']);
 const CLOCK_TOLERANCE_SECONDS = 30;
 // The login issues these tokens for 5 minutes; anything longer lived is not
 // one of them.
@@ -203,13 +204,14 @@ function createLoginTokenVerifier(config, { fetchImpl = (...args) => fetch(...ar
     if (typeof payload.email !== 'string' || payload.email === '' || payload.email_verified !== true) {
       reject('no verified e-mail');
     }
-    const scopes = typeof payload.scope === 'string' ? payload.scope.split(' ') : [];
-    if (!scopes.includes(REQUIRED_SCOPE)) {
+    const scopes = (typeof payload.scope === 'string' ? payload.scope.split(' ') : [])
+      .filter(scope => MOVEMENT_SCOPES.includes(scope));
+    if (scopes.length === 0) {
       reject('scope');
     }
     // Lower-cased like Firebase Auth stores addresses, so a pilot owns the
     // same movements whichever way they signed in.
-    return { sub: payload.sub, email: payload.email.toLowerCase() };
+    return { sub: payload.sub, email: payload.email.toLowerCase(), scopes: [...new Set(scopes)] };
   }
 
   return {
@@ -220,8 +222,8 @@ function createLoginTokenVerifier(config, { fetchImpl = (...args) => fetch(...ar
 }
 
 module.exports = {
+  MOVEMENT_SCOPES,
   createLoginTokenVerifier,
   validateCentralLogin,
   LoginTokenRejected,
-  REQUIRED_SCOPE,
 };
