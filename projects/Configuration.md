@@ -30,6 +30,7 @@ deployed tenant should not use `extends`.
 * `enabledFlightTypes`
 * `reportApiEnabled`
 * `movementWritesViaApi`
+* `centralLogin`
 * `customsSelfDeclarationEnabled`
 * `ppr`
 * `pprGuestRequests`
@@ -253,8 +254,8 @@ The functions get this flag and the aerodrome data they need from `functions/pro
 the deploy writes with `node tasks/generateServerConfig.js <project> <test|production> <file> [<Firebase project>]`
 (with the Firebase project given, a config for another project fails instead of being ignored at runtime).
 The generated config holds only whitelisted fields: the feature flags, `memberManagement`, `loginForm`,
-`lockOnDateTime`, `enabledFlightTypes`, the aircraft category names and, of the `aerodrome`, the `ICAO`, the
-runways (name and type) and the names of the departure and arrival routes.
+`lockOnDateTime`, `enabledFlightTypes`, the aircraft category names, `centralLogin` (if set) and, of the
+`aerodrome`, the `ICAO`, the runways (name and type) and the names of the departure and arrival routes.
 
 Example: `true`
 
@@ -310,6 +311,38 @@ reject the generated configuration, e.g. a `firebaseProjectId` mismatch). The te
 The database triggers (fees, payment status, associated movements, lock date) run as before.
 
 Example: `true`
+
+### `centralLogin`
+
+Lets the app API (the routes of `movementWritesViaApi`) also accept access tokens of the central login (the Open
+Digital account, `odch/odch-login`), next to the Firebase ID tokens of the app. The Open Digital MCP hub
+(`odch/mcp-hub`) uses them to record departures and arrivals for a pilot from an AI client (Claude etc.): it
+exchanges the pilot's token at the login (token exchange, RFC 8693) for a token for exactly this instance and
+calls `POST/PATCH /api/app/movements/...` with it.
+
+```json
+"centralLogin": {
+  "issuer": "https://<login origin>",
+  "jwksUri": "https://<login origin>/jwks",
+  "audience": "flightbox-lsze-test"
+}
+```
+
+* `issuer`: origin of the login, without a trailing slash; only tokens whose `iss` is exactly this are checked
+  as login tokens, all others go through Firebase as before.
+* `jwksUri`: the login's signing keys (cached for 10 minutes, refetched when a token names an unknown key).
+* `audience`: the name of this instance at the login; a token for another instance is rejected.
+
+Accepted are JWTs (`typ` `at+jwt`) signed with ES256 that carry a verified e-mail address (`email`,
+`email_verified`) and the scope `movements:write`. The caller is the pilot with that address: the movement
+domain and the database rules (`auth.token.email`, through `auth_variable_override`) check ownership exactly as
+for a pilot signed in to the app with the same address, so the pilot sees and edits the same movements either
+way. The uid is `login:<account id>`; such callers are never admins, guests or kiosks.
+
+Set it per environment, in `environments.test` only for now. Only the functions read it
+(`functions/project-config.generated.json`, validated by `tasks/generateServerConfig.js`); without it, tokens
+of the login are rejected like any other unknown token. Not set yet: the login runs at a `*.run.app` address
+until `login.opendigital.ch` exists.
 
 ### `customsSelfDeclarationEnabled`
 

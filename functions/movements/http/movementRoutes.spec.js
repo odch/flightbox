@@ -14,6 +14,9 @@ const { listen } = require('../../api/http/testing/listen');
 const { loadVariant } = require('../domain/testing/projectPolicies');
 const { departureInput, arrivalInput, stored, DATE_TIME } = require('../domain/testing/movementCases');
 const { toOrderKey } = require('../domain/orderKey');
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const { createLoginTokenVerifier } = require('../../api/http/loginTokens');
 
 const KEY = '-Nabc123_XYZ-def4567';
 const NEGATIVE_TIMESTAMP = -Date.parse(DATE_TIME);
@@ -620,6 +623,101 @@ describe('functions', () => {
         await expectError(await post('application/json', JSON.stringify(body)), 400,
           invalidBody('The body is nested too deeply'));
         expect(logger.error).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('with tokens of the central login (centralLogin)', () => {
+      const CENTRAL_LOGIN = {
+        issuer: 'https://login.example.ch',
+        jwksUri: 'https://login.example.ch/jwks',
+        audience: 'flightbox-lsze-test',
+      };
+      const SUB = '7f3c1a52-0d7e-4c43-9a55-2a1f1a0e8b11';
+      const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: 'P-256' });
+      const jwks = { keys: [{ ...publicKey.export({ format: 'jwk' }), kid: 'k1', alg: 'ES256', use: 'sig' }] };
+      let login;
+      let withoutConfig;
+
+      // What the login issues to the hub by token exchange.
+      const loginToken = (claims = {}, audience = CENTRAL_LOGIN.audience) => jwt.sign(
+        { sub: SUB, email: 'pilot@example.com', email_verified: true, scope: 'movements:write', ...claims },
+        privateKey,
+        { algorithm: 'ES256', issuer: CENTRAL_LOGIN.issuer, audience, expiresIn: 300, header: { typ: 'at+jwt', kid: 'k1', alg: 'ES256' } }
+      );
+
+      const loginActorOf = (email = 'pilot@example.com') => ({
+        uid: `login:${SUB}`, email, isAdmin: false, isGuest: false, isKiosk: false,
+      });
+
+      beforeAll(async () => {
+        const fetchImpl = jest.fn(async () => ({ ok: true, status: 200, json: async () => jwks }));
+        const repositoryProxy = new Proxy({}, { get: (_, method) => repository[method] });
+        const app = express();
+        registerMovementRoutes(app, { ...serverConfig, centralLogin: CENTRAL_LOGIN }, {
+          auth: fakeAuth,
+          db: fakeDb,
+          repository: repositoryProxy,
+          loginTokens: createLoginTokenVerifier(CENTRAL_LOGIN, { fetchImpl }),
+        });
+        login = await listen(app);
+
+        const plain = express();
+        registerMovementRoutes(plain, serverConfig, { auth: fakeAuth, db: fakeDb, repository: repositoryProxy });
+        withoutConfig = await listen(plain);
+      });
+
+      afterAll(() => Promise.all([login.close(), withoutConfig.close()]));
+
+      const sendWith = (target, method, path, token, body) => target.request(path, {
+        method,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+
+      it('creates a departure owned by the pilot of the token', async () => {
+        const response = await sendWith(login, 'POST', '/api/app/movements/departures', loginToken(), departureInput(policy));
+
+        expect(response.status).toBe(201);
+        expect(repository.createMovement).toHaveBeenCalledWith('departure', {
+          ...departureInput(policy),
+          createdBy: 'pilot@example.com',
+          negativeTimestamp: NEGATIVE_TIMESTAMP,
+          createdBy_orderKey: toOrderKey('pilot@example.com', NEGATIVE_TIMESTAMP),
+        }, loginActorOf());
+      });
+
+      it('updates the pilot\'s own movement, also one recorded in the app', async () => {
+        storeArrival(KEY, { createdBy: 'pilot@example.com' });
+
+        const response = await sendWith(login, 'PATCH', `/api/app/movements/arrivals/${KEY}`, loginToken(), { landingCount: 2 });
+
+        expect(response.status).toBe(200);
+        expect(repository.updateMovement).toHaveBeenCalledWith(
+          'arrival', KEY, expect.objectContaining({ landingCount: 2 }), loginActorOf());
+      });
+
+      it('answers 403 for a movement of another pilot', async () => {
+        storeArrival(KEY, { createdBy: 'other@example.com' });
+
+        const response = await sendWith(login, 'PATCH', `/api/app/movements/arrivals/${KEY}`, loginToken(), { landingCount: 2 });
+
+        expect(response.status).toBe(403);
+        expect(repository.updateMovement).not.toHaveBeenCalled();
+      });
+
+      it('answers 401 for a token of another instance or without the scope', async () => {
+        for (const token of [loginToken({}, 'flightbox-lszt-prod'), loginToken({ scope: 'openid' }), loginToken({ email_verified: false })]) {
+          const response = await sendWith(login, 'POST', '/api/app/movements/departures', token, departureInput(policy));
+          expect(response.status).toBe(401);
+        }
+        expect(repository.createMovement).not.toHaveBeenCalled();
+      });
+
+      it('rejects login tokens where centralLogin is not configured', async () => {
+        const response = await sendWith(withoutConfig, 'POST', '/api/app/movements/departures', loginToken(), departureInput(policy));
+
+        expect(response.status).toBe(401);
+        expect(repository.createMovement).not.toHaveBeenCalled();
       });
     });
 

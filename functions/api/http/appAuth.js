@@ -4,10 +4,16 @@ const { getAuth } = require('firebase-admin/auth');
 const { getDatabase } = require('firebase-admin/database');
 const logger = require('firebase-functions/logger');
 const { ApiError, sendError } = require('./errors');
+const { LoginTokenRejected } = require('./loginTokens');
 
 // Shared sessions sign in with a fixed uid (functions/auth/modes).
 const GUEST_UID = 'guest';
 const KIOSK_UID = 'kiosk';
+
+// Callers with a token of the central login get this uid prefix, so they
+// can never collide with a Firebase uid (no ':' in those), e.g. the admin
+// lookup or the guest and kiosk uids.
+const LOGIN_UID_PREFIX = 'login:';
 
 // Characters that are not allowed in a Realtime Database key.
 const INVALID_KEY_CHARS = /[.#$[\]/]/;
@@ -71,6 +77,18 @@ async function resolveActor(decodedToken, db) {
   };
 }
 
+// A pilot with a token of the central login (loginTokens.js). Never an
+// admin: admin rights stay with the Firebase accounts of this instance.
+function loginActor({ sub, email }) {
+  return {
+    uid: `${LOGIN_UID_PREFIX}${sub}`,
+    email,
+    isAdmin: false,
+    isGuest: false,
+    isKiosk: false,
+  };
+}
+
 function rejectUnauthenticated(req, res, message) {
   res.set('WWW-Authenticate', 'Bearer');
   sendError(req, res, new ApiError('unauthenticated', message));
@@ -87,6 +105,24 @@ async function verifyToken(auth, idToken) {
   }
 }
 
+async function authenticateLoginToken(req, res, next, loginTokens, token) {
+  let identity;
+  try {
+    identity = await loginTokens.verify(token);
+  } catch (error) {
+    if (error instanceof LoginTokenRejected) {
+      logger.info('Login token rejected', {
+        requestId: req.requestId,
+        reason: error.message,
+      });
+      return rejectUnauthenticated(req, res, 'Invalid or expired token');
+    }
+    return sendError(req, res, error);
+  }
+  req.actor = loginActor(identity);
+  return next();
+}
+
 /**
  * Middleware for routes the web app calls with the user's Firebase ID token
  * (`Authorization: Bearer <idToken>`). Revoked tokens and disabled users are
@@ -95,12 +131,20 @@ async function verifyToken(auth, idToken) {
  * token is answered 401 in the error envelope; infrastructure faults
  * (signing keys or revocation lookup unavailable, failed admin lookup) are
  * logged and answered 500, so an outage does not look like a sign-out.
+ *
+ * With `loginTokens` (createLoginTokenVerifier of loginTokens.js, only where
+ * the project config sets centralLogin), access tokens of the central login
+ * are accepted as well: the actor is then the pilot with the token's
+ * verified e-mail, uid "login:<account id>", never an admin.
  */
-function appAuth({ auth = getAuth, db = getDatabase } = {}) {
+function appAuth({ auth = getAuth, db = getDatabase, loginTokens = null } = {}) {
   return async (req, res, next) => {
     const idToken = bearerToken(req.get('Authorization'));
     if (!idToken) {
       return rejectUnauthenticated(req, res, 'Authentication required');
+    }
+    if (loginTokens && loginTokens.isLoginToken(idToken)) {
+      return authenticateLoginToken(req, res, next, loginTokens, idToken);
     }
 
     let actor;
@@ -123,4 +167,12 @@ function appAuth({ auth = getAuth, db = getDatabase } = {}) {
   };
 }
 
-module.exports = { appAuth, resolveActor, bearerToken, GUEST_UID, KIOSK_UID };
+module.exports = {
+  appAuth,
+  resolveActor,
+  loginActor,
+  bearerToken,
+  GUEST_UID,
+  KIOSK_UID,
+  LOGIN_UID_PREFIX,
+};

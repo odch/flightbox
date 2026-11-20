@@ -9,7 +9,8 @@ const express = require('express');
 const logger = require('firebase-functions/logger');
 const { getAuth } = require('firebase-admin/auth');
 const { getDatabase } = require('firebase-admin/database');
-const { appAuth, resolveActor, bearerToken } = require('./appAuth');
+const { appAuth, resolveActor, loginActor, bearerToken } = require('./appAuth');
+const { LoginTokenRejected } = require('./loginTokens');
 const { requestId } = require('./requestId');
 const { listen } = require('./testing/listen');
 
@@ -293,6 +294,99 @@ describe('functions', () => {
         const actor = await (await get('Bearer token-anon1')).json();
 
         expect(actor.email).toBeNull();
+      });
+    });
+
+    describe('central login tokens', () => {
+      let auth;
+      let db;
+      let loginTokens;
+      let server;
+
+      beforeAll(async () => {
+        const app = express();
+        app.use(requestId);
+        app.get(
+          '/me',
+          appAuth({
+            auth: () => auth,
+            db: () => db,
+            loginTokens: {
+              isLoginToken: token => loginTokens.isLoginToken(token),
+              verify: token => loginTokens.verify(token),
+            },
+          }),
+          (req, res) => res.json(req.actor)
+        );
+        server = await listen(app);
+      });
+
+      afterAll(() => server.close());
+
+      beforeEach(() => {
+        auth = fakeAuth();
+        // Even an /admins entry for the uid must not make it an admin.
+        db = fakeDb({ 'login:sub-1': true });
+        loginTokens = {
+          isLoginToken: jest.fn(token => token.startsWith('login.')),
+          verify: jest.fn(async () => ({ sub: 'sub-1', email: 'pilot@example.ch' })),
+        };
+      });
+
+      const get = token => server.request('/me', { headers: { Authorization: `Bearer ${token}` } });
+
+      it('describes the pilot of a login token, never as admin', async () => {
+        const response = await get('login.token');
+
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual({
+          uid: 'login:sub-1',
+          email: 'pilot@example.ch',
+          isAdmin: false,
+          isGuest: false,
+          isKiosk: false,
+        });
+        expect(loginTokens.verify).toHaveBeenCalledWith('login.token');
+        expect(auth.verifyIdToken).not.toHaveBeenCalled();
+        expect(db.ref).not.toHaveBeenCalled();
+      });
+
+      it('answers 401 for a rejected login token', async () => {
+        loginTokens.verify.mockRejectedValue(new LoginTokenRejected('expired'));
+
+        const response = await get('login.token');
+
+        expect(response.status).toBe(401);
+        expect(response.headers.get('www-authenticate')).toBe('Bearer');
+        expect(await response.json()).toEqual({
+          error: { code: 'unauthenticated', message: 'Invalid or expired token' },
+        });
+        expect(logger.info).toHaveBeenCalledWith('Login token rejected', expect.objectContaining({ reason: 'expired' }));
+      });
+
+      it('answers 500 when the login keys cannot be fetched', async () => {
+        loginTokens.verify.mockRejectedValue(new Error('Fetching the login keys failed'));
+
+        const response = await get('login.token');
+
+        expect(response.status).toBe(500);
+        expect(await response.json()).toEqual({ error: { code: 'internal', message: 'Internal error' } });
+        expect(logger.error).toHaveBeenCalled();
+      });
+
+      it('still verifies Firebase ID tokens with Firebase', async () => {
+        const response = await get('token-u1');
+
+        expect(response.status).toBe(200);
+        expect((await response.json()).uid).toBe('u1');
+        expect(loginTokens.verify).not.toHaveBeenCalled();
+        expect(auth.verifyIdToken).toHaveBeenCalledWith('token-u1', true);
+      });
+
+      it('builds the actor with the login uid prefix', () => {
+        expect(loginActor({ sub: 'abc', email: 'a@b.ch' })).toEqual({
+          uid: 'login:abc', email: 'a@b.ch', isAdmin: false, isGuest: false, isKiosk: false,
+        });
       });
     });
 
