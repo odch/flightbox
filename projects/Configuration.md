@@ -339,10 +339,10 @@ domain and the database rules (`auth.token.email`, through `auth_variable_overri
 for a pilot signed in to the app with the same address, so the pilot sees and edits the same movements either
 way. The uid is `login:<account id>`; such callers are never admins, guests or kiosks.
 
-Set it per environment, in `environments.test` only for now. Only the functions read it
-(`functions/project-config.generated.json`, validated by `tasks/generateServerConfig.js`); without it, tokens
-of the login are rejected like any other unknown token. Not set yet: the login runs at a `*.run.app` address
-until `login.opendigital.ch` exists.
+Set it per environment. Only the functions read it (`functions/project-config.generated.json`, validated by
+`tasks/generateServerConfig.js`); without it, tokens of the login are rejected like any other unknown token.
+Set on `lsze` test, with the dev login (`odch-login-dev`) at its `*.run.app` address until
+`login.opendigital.ch` exists.
 
 ### `customsSelfDeclarationEnabled`
 

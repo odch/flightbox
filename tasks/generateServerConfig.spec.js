@@ -131,7 +131,8 @@ describe('tasks/generateServerConfig', () => {
         runways: objectToArray(client.aerodrome.runways).map(({ name, type }) => ({ name, type })),
         departureRoutes: objectToArray(client.aerodrome.departureRoutes).map(({ name }) => ({ name })),
         arrivalRoutes: objectToArray(client.aerodrome.arrivalRoutes).map(({ name }) => ({ name }))
-      }
+      },
+      ...(client.centralLogin ? { centralLogin: client.centralLogin } : {})
     });
   });
 
@@ -158,6 +159,17 @@ describe('tasks/generateServerConfig', () => {
 
   // cypress-testing-api only builds the Cypress run of the movement specs
   // with the flag (same Firebase project as cypress-testing).
+  it('accepts central login tokens on lsze test only', () => {
+    CASES.forEach(([project, env]) => {
+      const { centralLogin } = buildServerConfigFor(project, env);
+      if (`${project}/${env}` === 'lsze/test') {
+        expect(centralLogin).toEqual(expect.objectContaining({ audience: 'flightbox-lsze-test' }));
+      } else {
+        expect(centralLogin).toBeUndefined();
+      }
+    });
+  });
+
   it('enables movementWritesViaApi on lsze test and the Cypress API run only', () => {
     const enabled = ['lsze/test', 'cypress-testing-api/test'];
     CASES.forEach(([project, env]) => {
