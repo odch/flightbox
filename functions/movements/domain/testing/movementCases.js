@@ -356,6 +356,8 @@ function departureOnlyCases(policy) {
     invalid(['paymentMethod', REASONS.UNKNOWN_FIELD]));
   create('landingCount is not a departure field', { landingCount: 1 },
     invalid(['landingCount', REASONS.UNKNOWN_FIELD]));
+  create('aircraftDataSource is not a departure field', { aircraftDataSource: 'registry' },
+    invalid(['aircraftDataSource', REASONS.UNKNOWN_FIELD]));
   return cases;
 }
 
@@ -394,6 +396,13 @@ function arrivalOnlyCases(policy) {
   create('duration is not an arrival field', { duration: '01:00' },
     invalid(['duration', REASONS.UNKNOWN_FIELD]));
   create('route is not an arrival field', { route: 'via VOR' }, invalid(['route', REASONS.UNKNOWN_FIELD]));
+  // Written by the server-side fee computation; the app sends it back.
+  create('aircraftDataSource registry', { aircraftDataSource: 'registry' }, accepted());
+  create('aircraftDataSource manual', { aircraftDataSource: 'manual' }, accepted());
+  create('aircraftDataSource unknown value', { aircraftDataSource: 'guessed' },
+    invalid(['aircraftDataSource', REASONS.NOT_ALLOWED]));
+  create('aircraftDataSource as a number', { aircraftDataSource: 1 },
+    invalid(['aircraftDataSource', REASONS.NOT_ALLOWED]));
   return cases;
 }
 
@@ -434,6 +443,14 @@ function updateCases(type, policy) {
     { remarks: 'x', negativeTimestamp: -1, createdBy: 'pilot@example.com', createdBy_orderKey: 'forged' }, accepted());
   update('with an invalid field', {}, { mtow: 0 }, invalid(['mtow', REASONS.MUST_BE_POSITIVE]));
   update('with an unknown field', {}, { foo: 1 }, invalid(['foo', REASONS.UNKNOWN_FIELD]));
+  if (type === 'arrival') {
+    // An arrival priced by the server, edited in the app: the whole movement
+    // comes back, with the server's fee fields and data source.
+    const priced = { aircraftDataSource: 'registry', landingFeeSingle: 27.75, landingFeeTotal: 27.75,
+      feeTotalNet: 27.75, feeVat: 2.25, feeRoundingDifference: 0, feeTotalGross: 30 };
+    update('of an arrival priced by the server, as the app sends it', priced,
+      { ...inputFor(type, policy, { remarks: 'x' }), ...priced }, accepted());
+  }
   update('with an own __proto__ key', {}, withOwnProto({ remarks: 'x' }, type === 'departure'
     ? { carriageVoucher: 'garbage' }
     : { paymentMethod: { status: 'pending' } }),

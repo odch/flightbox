@@ -23,6 +23,9 @@ const PAYMENT_METHODS = Object.freeze([
 
 const CIRCUITS = 'circuits';
 
+// Where the server-side fee computation took MTOW and category from.
+const AIRCRAFT_DATA_SOURCES = Object.freeze(['manual', 'registry']);
+
 // Realtime Database keys: non-empty, at most 768 UTF-8 bytes, none of
 // . $ # [ ] / and no ASCII control characters. The SDKs refuse such keys
 // before the rules run; the Admin SDK writer must not get them either.
@@ -220,6 +223,9 @@ const SCHEMAS = {
       feeVat: anyNumber,
       feeRoundingDifference: anyNumber,
       feeTotalGross: anyNumber,
+      // Set by the server-side fee computation (functions/fees); the app
+      // sends it back unchanged when an arrival is edited.
+      aircraftDataSource: oneOf(() => AIRCRAFT_DATA_SOURCES),
       paymentMethod,
     },
   },
