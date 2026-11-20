@@ -76,7 +76,7 @@ describe('functions', () => {
     it('accepts a token of the login and returns the subject and lower-cased e-mail', async () => {
       const token = sign(keys.privateKey);
       expect(verifier.isLoginToken(token)).toBe(true);
-      await expect(verifier.verify(token)).resolves.toEqual({ sub: SUB, email: 'pilot@example.com' });
+      await expect(verifier.verify(token)).resolves.toEqual({ sub: SUB, email: 'pilot@example.com', scopes: ['movements:write'] });
       expect(fetchImpl).toHaveBeenCalledWith(CONFIG.jwksUri, expect.objectContaining({ signal: expect.anything() }));
     });
 
@@ -124,6 +124,13 @@ describe('functions', () => {
       expect(await rejection(sign(keys.privateKey, { email_verified: false }))).toBe('no verified e-mail');
       expect(await rejection(sign(keys.privateKey, { sub: 'a/b' }))).toBe('subject');
       expect(await rejection(sign(keys.privateKey, { scope: 'openid email' }))).toBe('scope');
+    });
+
+    it('accepts movements:read and returns only the movement scopes', async () => {
+      await expect(verifier.verify(sign(keys.privateKey, { scope: 'movements:read' })))
+        .resolves.toEqual({ sub: SUB, email: 'pilot@example.com', scopes: ['movements:read'] });
+      await expect(verifier.verify(sign(keys.privateKey, { scope: 'openid movements:read movements:write account' })))
+        .resolves.toEqual({ sub: SUB, email: 'pilot@example.com', scopes: ['movements:read', 'movements:write'] });
     });
 
     it('caches the keys and refetches for an unknown kid, rate limited', async () => {
