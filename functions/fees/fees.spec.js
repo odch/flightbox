@@ -168,3 +168,95 @@ describe('functions/fees (lspl strategy — client parity)', () => {
     });
   });
 });
+
+// Copied verbatim from src/util/landingFeeStrategies/lsze.spec.ts: the parity
+// contract for LSZE (fees declared including VAT, net fee rounded to cents).
+const LSZE_LANDING_FEE_CASES = [
+  [0, 'Flugzeug', 18.5],
+  [0, 'Hubschrauber', 18.5],
+  [1000, 'Flugzeug', 18.5],
+  [1000, 'Hubschrauber', 18.5],
+  [1001, 'Flugzeug', 27.75],
+  [1001, 'Hubschrauber', 27.75],
+  [2000, 'Flugzeug', 27.75],
+  [2000, 'Hubschrauber', 27.75],
+  [2001, 'Flugzeug', 37],
+  [2001, 'Hubschrauber', 55.5],
+  [3000, 'Flugzeug', 37],
+  [3000, 'Hubschrauber', 55.5],
+  // > 3000 kg: CHF 20 per ton (incl. VAT)
+  [3001, 'Flugzeug', 74.01],
+  [3001, 'Hubschrauber', 74.01],
+  [4000, 'Flugzeug', 74.01],
+  [4000, 'Hubschrauber', 74.01],
+  [4001, 'Flugzeug', 92.51],
+  [4001, 'Hubschrauber', 92.51],
+  [5000, 'Flugzeug', 92.51],
+  [5000, 'Hubschrauber', 92.51],
+  [50000, 'Flugzeug', 925.07],
+  [50000, 'Hubschrauber', 925.07],
+];
+
+describe('functions/fees (lsze strategy — client parity)', () => {
+  const lsze = require('./landingFeeStrategies/lsze');
+
+  it.each(LSZE_LANDING_FEE_CASES)('getLandingFee(%i, %s) === %s', (mtow, aircraftCategory, expected) => {
+    expect(lsze.getLandingFee(mtow, undefined, undefined, aircraftCategory).fee).toBe(expected);
+  });
+
+  it('applies the same tariff to every flight type and aircraft origin', () => {
+    ['private', 'instruction', 'aerotow', 'glider_private_self'].forEach(flightType => {
+      Object.values(AircraftOrigin).forEach(origin => {
+        expect(lsze.getLandingFee(1157, flightType, origin, 'Flugzeug')).toEqual({ fee: 27.75 });
+      });
+    });
+  });
+
+  it('has no go-around fee and 8.1% VAT', () => {
+    expect(lsze.getGoAroundFee(1000, 'private', AircraftOrigin.OTHER, 'Flugzeug')).toBeUndefined();
+    expect(lsze.getVatRate(undefined, undefined, 'Flugzeug')).toBe(8.1);
+  });
+
+  it('computeFees: 1157 kg plane, 1 landing is CHF 30.00 gross', () => {
+    expect(computeFees({
+      strategy: 'lsze',
+      mtow: 1157,
+      flightType: 'private',
+      aircraftOrigin: AircraftOrigin.OTHER,
+      aircraftCategory: 'Flugzeug',
+      landingCount: 1,
+    })).toEqual({
+      landingFeeSingle: 27.75,
+      landingFeeTotal: 27.75,
+      feeTotalNet: 27.75,
+      feeVat: 2.25, // round(27.75 * 0.081, 1c)
+      feeRoundingDifference: 0,
+      feeTotalGross: 30,
+    });
+  });
+
+  it('computeFees: 3 landings with a go-around', () => {
+    const fees = computeFees({
+      strategy: 'lsze',
+      mtow: 900,
+      flightType: 'instruction',
+      aircraftOrigin: AircraftOrigin.CLUB,
+      aircraftCategory: 'Flugzeug',
+      landingCount: 3,
+      goAroundCount: 1,
+    });
+    expect(fees.landingFeeTotal).toBe(55.5);
+    expect(fees.goAroundFeeTotal).toBeUndefined();
+    expect(fees.feeVat).toBe(4.5); // round(55.5 * 0.081 = 4.4955, 1c)
+    expect(fees.feeTotalGross).toBe(60);
+  });
+});
+
+describe('functions/fees: tariff data identical to the client', () => {
+  const path = require('path');
+  const clientData = name => require(path.join(__dirname, '../../src/util/landingFeeStrategies', `${name}_data.json`));
+
+  it.each(['lspl', 'lsze'])('%s_data.json', name => {
+    expect(require(`./landingFeeStrategies/${name}_data.json`)).toEqual(clientData(name));
+  });
+});

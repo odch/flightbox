@@ -182,6 +182,18 @@ Configuration:
 Same structure for the go arounds as for the landings. If no go around fees are defined, the pilots won't be charged
 for go arounds.
 
+#### `landingFeesStrategy`
+
+The tariff code in `src/util/landingFeeStrategies/<name>.ts` (e.g. `lsze`), used instead of `landingFees` and
+`goAroundFees`. The app computes the fees while the pilot records an arrival and saves them with it.
+
+Arrivals recorded without fees (e.g. through the movement API by the Open Digital MCP hub) are priced by the server
+when the database holds the strategy under `/settings/landingFeesStrategy` (set it in the Firebase console). The
+function `computeArrivalFeesOnWrite` then recomputes the fee fields of every arrival that is written, from the app or
+the API, with MTOW and category from the aircraft register where the registration is known, and records where they came
+from in `aircraftDataSource` (`registry` or `manual`). Only strategies ported to `functions/fees/landingFeeStrategies`
+can be used this way: `lspl` and `lsze`. Arrivals stored before are priced at their next change.
+
 ### `environments`
 
 Description of the environments. Each environment description consists of the following properties:

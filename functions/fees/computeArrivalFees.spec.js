@@ -119,6 +119,32 @@ describe('functions/fees/computeArrivalFees', () => {
     expect(update.feeVat).toBe(1.87);
   });
 
+  it('prices an LSZE arrival recorded without fees (e.g. through the API)', async () => {
+    mockAdmin.getDatabase.mockReturnValue(makeDb({
+      '/settings/landingFeesStrategy': 'lsze',
+      '/aircrafts/HBPIV': { mtow: 1157, category: 'Flugzeug' }
+    }));
+    const event = makeEvent({
+      immatriculation: 'HBPIV', mtow: 1157, flightType: 'private',
+      aircraftCategory: 'Flugzeug', landingCount: 1
+    });
+    await _test.recomputeArrivalFees(event);
+
+    expect(event._update).toHaveBeenCalledWith({
+      aircraftDataSource: 'registry',
+      landingFeeSingle: 27.75,
+      landingFeeCode: null,
+      landingFeeTotal: 27.75,
+      goAroundFeeSingle: null,
+      goAroundFeeCode: null,
+      goAroundFeeTotal: null,
+      feeTotalNet: 27.75,
+      feeVat: 2.25,
+      feeRoundingDifference: 0,
+      feeTotalGross: 30,
+    });
+  });
+
   it('prices a known registration from the registry MTOW, not the submitted one', async () => {
     // Submitted MTOW (500) would price at 18.50; the registry MTOW (1001)
     // prices at 23.13. The registry must win, and the record's declared

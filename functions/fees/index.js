@@ -6,6 +6,7 @@
 // server-side; a project whose strategy is not present must not be switched to
 // server-owned fees.
 const lspl = require('./landingFeeStrategies/lspl');
+const lsze = require('./landingFeeStrategies/lsze');
 
 const AircraftOrigin = Object.freeze({
   CLUB: 'club',
@@ -15,6 +16,7 @@ const AircraftOrigin = Object.freeze({
 
 const strategies = {
   lspl,
+  lsze,
 };
 
 const roundToFiveCents = (val) => Math.round(val * 20) / 20;
