@@ -6,6 +6,7 @@ const { getDatabase } = require('firebase-admin/database');
 const logger = require('firebase-functions/logger');
 const { requestId } = require('../../api/http/requestId');
 const { appAuth } = require('../../api/http/appAuth');
+const { createLoginTokenVerifier } = require('../../api/http/loginTokens');
 const { asyncRoute } = require('../../api/http/asyncRoute');
 const { ApiError, validationError, sendError } = require('../../api/http/errors');
 const { buildMovementPolicy } = require('../domain');
@@ -177,16 +178,19 @@ function saveHandler({ repository, policy, isCreate }) {
 /**
  * Registers POST /app/movements/:type (create) and PATCH
  * /app/movements/:type/:key (update, merged like RTDB update()), also under
- * /api, for the Firebase ID token of a signed-in user. Answers 201/200
- * {key}; errors in the envelope of functions/api/http/errors.js.
+ * /api, for the Firebase ID token of a signed-in user and, where the config
+ * sets centralLogin, for access tokens of the central login (the MCP hub
+ * writing for a pilot). Answers 201/200 {key}; errors in the envelope of
+ * functions/api/http/errors.js.
  */
 function registerMovementRoutes(app, config, {
   auth = getAuth,
   db = getDatabase,
   repository = createRtdbMovementRepository({ db }),
+  loginTokens = createLoginTokenVerifier(config.centralLogin),
 } = {}) {
   const policy = lazyPolicy(config);
-  const common = [requestId, appAuth({ auth, db }), jsonBody()];
+  const common = [requestId, appAuth({ auth, db, loginTokens }), jsonBody()];
   app.post(CREATE_PATHS, ...common, saveHandler({ repository, policy, isCreate: true }));
   app.patch(UPDATE_PATHS, ...common, saveHandler({ repository, policy, isCreate: false }));
 }

@@ -211,6 +211,21 @@ describe('tasks/generateServerConfig', () => {
       });
     });
 
+    it('emits centralLogin only for the environment that configures it', () => {
+      const centralLogin = {
+        issuer: 'https://login.example.ch',
+        jwksUri: 'https://login.example.ch/jwks',
+        audience: 'flightbox-lsxy-test'
+      };
+      const conf = makeConf({}, {
+        test: { firebaseProjectId: 'flightbox-test', centralLogin },
+        production: { firebaseProjectId: 'flightbox-prod' }
+      });
+
+      expect(buildServerConfig('lsxy', conf, 'test').centralLogin).toEqual(centralLogin);
+      expect(buildServerConfig('lsxy', conf, 'production')).not.toHaveProperty('centralLogin');
+    });
+
     it('disables movementWritesViaApi when it is absent', () => {
       const conf = makeConf();
       expect(buildServerConfig('lszt', conf, 'test').movementWritesViaApi).toBe(false);
@@ -367,6 +382,22 @@ describe('tasks/generateServerConfig', () => {
     it('rejects a malformed loginForm', () => {
       expectError(makeConf({ loginForm: '' }), 'test', 'loginForm');
       expectError(makeConf({ loginForm: true }), 'test', 'loginForm');
+    });
+
+    it('rejects a malformed centralLogin', () => {
+      const centralLogin = {
+        issuer: 'https://login.example.ch',
+        jwksUri: 'https://login.example.ch/jwks',
+        audience: 'flightbox-lsxy-test'
+      };
+      const inTest = value => makeConf({}, {
+        test: { firebaseProjectId: 'flightbox-test', centralLogin: value },
+        production: { firebaseProjectId: 'flightbox-prod' }
+      });
+      expectError(inTest('https://login.example.ch'), 'test', 'centralLogin');
+      expectError(inTest({ ...centralLogin, issuer: 'http://login.example.ch' }), 'test', 'centralLogin');
+      expectError(inTest({ ...centralLogin, audience: '' }), 'test', 'centralLogin');
+      expectError(inTest({ issuer: centralLogin.issuer }), 'test', 'centralLogin');
     });
 
     it('rejects non-boolean lockOnDateTime and movementWritesViaApi', () => {

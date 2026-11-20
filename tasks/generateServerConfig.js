@@ -4,6 +4,7 @@ const fs = require('fs');
 const projects = require('../projects');
 const defaultConf = require('../projects/default.json');
 const aircraftCategoriesData = require('../src/util/aircraftCategoriesData');
+const { validateCentralLogin } = require('../functions/api/http/centralLoginConfig');
 
 // Builds the tenant config the Cloud Functions need (airstat report,
 // movement writes) from a project file, resolved exactly like the client's
@@ -166,6 +167,20 @@ function assertMovementAerodromeMatchesRules(project, env, conf, aerodrome) {
   }
 }
 
+// Optional: access tokens of the central login for the app API
+// (functions/api/http/loginTokens.js). Only in the output when configured.
+function buildCentralLogin(project, env, merged) {
+  if (!hasOwn(merged, 'centralLogin')) {
+    return {};
+  }
+  try {
+    const { issuer, jwksUri, audience } = validateCentralLogin(merged.centralLogin);
+    return { centralLogin: { issuer, jwksUri, audience } };
+  } catch (e) {
+    throw configError(project, env, 'centralLogin', e.message);
+  }
+}
+
 // Optional flags: absent means false, like the client's `=== true` checks.
 function readFlag(project, env, merged, key) {
   if (hasOwn(merged, key) && typeof merged[key] !== 'boolean') {
@@ -207,7 +222,8 @@ function buildServerConfig(project, conf, env) {
     enabledFlightTypes: buildFlightTypes(project, env, merged),
     // Not per project: the list the database rules accept (aircraftCategory).
     aircraftCategories: aircraftCategoriesData.map(category => category.name),
-    aerodrome
+    aerodrome,
+    ...buildCentralLogin(project, env, merged)
   };
 }
 
