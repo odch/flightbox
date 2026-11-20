@@ -170,6 +170,9 @@
         "feeTotalGross": {
           ".validate": "newData.isNumber()"
         },
+        "aircraftDataSource": {
+          ".validate": "newData.val() === 'manual' || newData.val() === 'registry'"
+        },
         "lastname": {
           ".validate": "newData.isString() && newData.val().length <= 100 && newData.val().length > 0"
         },
