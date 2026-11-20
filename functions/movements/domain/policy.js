@@ -6,6 +6,8 @@
 // database rules of the project: the allowed runways, routes, flight types and
 // aircraft categories, the aerodrome ICAO (for 'circuits'), whether movements
 // are owner-scoped (loginForm 'email') and which movement lock applies.
+// Beyond the rules, for the app-level checks of the API (checkAppRules.js):
+// whether helicopters record no runway (aerodrome.noRunwayIfHelicopter).
 
 function policyError(field, problem) {
   return new TypeError(`Invalid movement policy config: ${field} ${problem}`);
@@ -62,6 +64,7 @@ function buildMovementPolicy(config) {
     // ownerless ones (processFirebaseRules.js processMovementOwnership).
     personalAccess: config.loginForm === 'email',
     lockOnDateTime: config.lockOnDateTime,
+    noRunwayIfHelicopter: aerodrome.noRunwayIfHelicopter === true,
   });
 }
 
