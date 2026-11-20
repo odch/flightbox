@@ -276,7 +276,12 @@ Example: `true`
 Moves the app's movement writes (creating and editing departures and arrivals, setting the payment method of an
 arrival) from direct Realtime Database writes to the API of the Cloud Functions. The functions check each write
 with the same rules as the database (required fields, formats, runways, routes, flight types, ownership,
-movement lock) and derive `negativeTimestamp`, `createdBy` and `createdBy_orderKey` themselves. They write as
+movement lock) and derive `negativeTimestamp`, `createdBy` and `createdBy_orderKey` themselves. On top of the
+database rules they check what the app's wizard requires (`functions/movements/domain/checkAppRules.js`), so that
+other API clients (the Open Digital MCP hub) cannot record movements the app would not: a runway, except for
+helicopters where `aerodrome.noRunwayIfHelicopter` is set, and a flight type that exists for the aircraft category
+(e.g. `glider_*` only for gliders; reason `not-for-aircraft-category`). A new movement is checked as a whole; a
+change only in what it writes, so movements stored before without a runway can still be changed. They write as
 the signed-in user, so the database rules still apply to every write. Deleting movements and reading them still
 go to the database directly. Disabled by default; without it the app writes to the database as before.
 

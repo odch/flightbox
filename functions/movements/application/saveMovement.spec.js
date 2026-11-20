@@ -70,6 +70,37 @@ describe('functions', () => {
       expect(repository.createMovement).not.toHaveBeenCalled();
     });
 
+    it('rejects what the app would not record: no runway, a flight type of another category', async () => {
+      const repository = repositoryWith();
+
+      const result = await save(repository, { input: departureInput(policy, { runway: undefined, flightType: 'glider_private_winch' }) });
+
+      expect(result).toEqual({
+        ok: false,
+        code: 'invalid-argument',
+        validationErrors: [
+          { field: 'runway', reason: 'required' },
+          { field: 'flightType', reason: 'not-for-aircraft-category' },
+        ],
+      });
+      expect(repository.createMovement).not.toHaveBeenCalled();
+    });
+
+    it('records a helicopter without a runway where the aerodrome says so (lsze)', async () => {
+      const repository = repositoryWith();
+
+      const input = departureInput(policy, { runway: undefined, aircraftCategory: 'Hubschrauber', flightType: 'private' });
+      expect(await save(repository, { input })).toEqual({ ok: true, key: '-Nnew', created: true });
+    });
+
+    it('does not ask a stored movement without a runway for one when other fields change', async () => {
+      const repository = repositoryWith({
+        existing: stored('departure', policy, { createdBy: ACTORS.pilot.email, runway: undefined }),
+      });
+
+      expect(await save(repository, { key: 'k1', input: { remarks: 'x' } })).toEqual({ ok: true, key: 'k1', created: false });
+    });
+
     it('passes write failures on', async () => {
       const repository = repositoryWith();
       const failure = new Error('rules');

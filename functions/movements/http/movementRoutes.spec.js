@@ -195,6 +195,23 @@ describe('functions', () => {
         expect(repository.createMovement).not.toHaveBeenCalled();
       });
 
+      it('answers 400 for a movement the app would not record', async () => {
+        const body = departureInput(policy, { runway: undefined, aircraftCategory: 'Segelflugzeug', flightType: 'private' });
+
+        await expectError(await send('POST', '/api/app/movements/departures', { body }), 400, {
+          code: 'invalid-argument',
+          message: 'Validation failed',
+          details: {
+            reason: 'validation-failed',
+            validationErrors: [
+              { field: 'runway', reason: 'required' },
+              { field: 'flightType', reason: 'not-for-aircraft-category' },
+            ],
+          },
+        });
+        expect(repository.createMovement).not.toHaveBeenCalled();
+      });
+
       it('reports validation errors before the lock', async () => {
         repository = fakeRepository({ settings: { lockDate: Date.parse('2026-12-01T00:00:00.000Z') } });
         const body = departureInput(policy, { dateTime: undefined });
