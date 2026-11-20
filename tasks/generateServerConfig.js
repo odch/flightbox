@@ -134,11 +134,18 @@ function buildAerodrome(project, env, aerodrome, field = 'aerodrome') {
   if (typeof aerodrome.ICAO !== 'string' || !ICAO_RE.test(aerodrome.ICAO)) {
     throw configError(project, env, `${field}.ICAO`, `must match ${ICAO_RE}: ${JSON.stringify(aerodrome.ICAO)}`);
   }
+  const noRunwayIfHelicopter = hasOwn(aerodrome, 'noRunwayIfHelicopter') ? aerodrome.noRunwayIfHelicopter : false;
+  if (typeof noRunwayIfHelicopter !== 'boolean') {
+    throw configError(project, env, `${field}.noRunwayIfHelicopter`, `must be a boolean: ${JSON.stringify(noRunwayIfHelicopter)}`);
+  }
   return {
     ICAO: aerodrome.ICAO,
     runways: buildRunways(project, env, aerodrome.runways),
     departureRoutes: buildRoutes(project, env, aerodrome.departureRoutes, `${field}.departureRoutes`),
-    arrivalRoutes: buildRoutes(project, env, aerodrome.arrivalRoutes, `${field}.arrivalRoutes`)
+    arrivalRoutes: buildRoutes(project, env, aerodrome.arrivalRoutes, `${field}.arrivalRoutes`),
+    // Not in the database rules: the app's wizard asks for no runway for
+    // helicopters, and the movement API checks the same (checkAppRules.js).
+    noRunwayIfHelicopter
   };
 }
 

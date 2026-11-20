@@ -130,7 +130,8 @@ describe('tasks/generateServerConfig', () => {
         ICAO: client.aerodrome.ICAO,
         runways: objectToArray(client.aerodrome.runways).map(({ name, type }) => ({ name, type })),
         departureRoutes: objectToArray(client.aerodrome.departureRoutes).map(({ name }) => ({ name })),
-        arrivalRoutes: objectToArray(client.aerodrome.arrivalRoutes).map(({ name }) => ({ name }))
+        arrivalRoutes: objectToArray(client.aerodrome.arrivalRoutes).map(({ name }) => ({ name })),
+        noRunwayIfHelicopter: client.aerodrome.noRunwayIfHelicopter === true
       },
       ...(client.centralLogin ? { centralLogin: client.centralLogin } : {})
     });
@@ -213,14 +214,23 @@ describe('tasks/generateServerConfig', () => {
         ICAO: 'LSXX',
         runways: [{ name: '36', type: 'A' }],
         departureRoutes: [],
-        arrivalRoutes: [{ name: 'west' }]
+        arrivalRoutes: [{ name: 'west' }],
+        noRunwayIfHelicopter: false
       });
       expect(buildServerConfig('lszt', conf, 'production').aerodrome).toEqual({
         ICAO: 'LSZT',
         runways: RUNWAYS,
         departureRoutes: [{ name: 'south' }, { name: 'matzingen' }],
-        arrivalRoutes: [{ name: 'north' }]
+        arrivalRoutes: [{ name: 'north' }],
+        noRunwayIfHelicopter: false
       });
+    });
+
+    it('takes noRunwayIfHelicopter from the aerodrome and rejects non-booleans', () => {
+      const withFlag = value => makeConf({ aerodrome: makeAerodrome({ noRunwayIfHelicopter: value }) });
+      expect(buildServerConfig('lszt', withFlag(true), 'test').aerodrome.noRunwayIfHelicopter).toBe(true);
+      expect(buildServerConfig('lszt', withFlag(false), 'test').aerodrome.noRunwayIfHelicopter).toBe(false);
+      expect(() => buildServerConfig('lszt', withFlag('true'), 'test')).toThrow(/aerodrome\.noRunwayIfHelicopter/);
     });
 
     it('emits centralLogin only for the environment that configures it', () => {

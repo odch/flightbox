@@ -31,7 +31,15 @@ describe('movement domain', () => {
         aircraftCategories: ['Flugzeug', 'Motorsegler'],
         personalAccess: true,
         lockOnDateTime: false,
+        noRunwayIfHelicopter: false,
       });
+    });
+
+    it('takes noRunwayIfHelicopter from the aerodrome (only true counts)', () => {
+      expect(buildMovementPolicy(withAerodrome({ noRunwayIfHelicopter: true })).noRunwayIfHelicopter).toBe(true);
+      expect(buildMovementPolicy(withAerodrome({ noRunwayIfHelicopter: 'yes' })).noRunwayIfHelicopter).toBe(false);
+      expect(loadVariant('lsze').policy.noRunwayIfHelicopter).toBe(true);
+      expect(loadVariant('lszt').policy.noRunwayIfHelicopter).toBe(false);
     });
 
     it('scopes movements to their owner only for the e-mail login', () => {
