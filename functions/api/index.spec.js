@@ -141,9 +141,11 @@ describe('functions', () => {
       expect(routes).toEqual([
         [['post'], ['/app/movements/:type', '/api/app/movements/:type']],
         [['patch'], ['/app/movements/:type/:key', '/api/app/movements/:type/:key']],
+        [['get'], ['/app/movements', '/api/app/movements']],
       ]);
-      // requestId, appAuth, JSON body, handler
-      movementLayers.forEach(layer => expect(layer.route.stack).toHaveLength(4));
+      // Writes: requestId, appAuth, requireScope, JSON body, handler; the
+      // list: requestId, appAuth, requireScope, handler.
+      expect(movementLayers.map(layer => layer.route.stack.length)).toEqual([5, 5, 4]);
     });
 
     it('lets admins manage API keys when the tenant has an API feature', () => {

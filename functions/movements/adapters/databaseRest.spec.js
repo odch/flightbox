@@ -200,5 +200,43 @@ describe('functions', () => {
         await expect(client.write('POST', 'departures', {}, PILOT)).rejects.toThrow(DatabaseRestError);
       });
     });
+
+    describe('read', () => {
+      it('queries as the caller with JSON-encoded parameters', async () => {
+        const { client, call } = setup({ answer: response(200, { k1: { immatriculation: 'HBPIV' } }) });
+
+        const answer = await client.read('arrivals', {
+          orderBy: 'createdBy_orderKey', startAt: 'pilot@example.com_1', endAt: 'pilot@example.com_2', limitToFirst: 201,
+        }, PILOT);
+
+        expect(answer).toEqual({ k1: { immatriculation: 'HBPIV' } });
+        const { url, init } = call(0);
+        expect(url.pathname).toBe('/arrivals.json');
+        expect(init.method).toBe('GET');
+        expect(init.headers.Authorization).toBe('Bearer access-1');
+        expect(JSON.parse(url.searchParams.get('auth_variable_override'))).toEqual(PILOT);
+        expect(url.searchParams.get('orderBy')).toBe('"createdBy_orderKey"');
+        expect(url.searchParams.get('startAt')).toBe('"pilot@example.com_1"');
+        expect(url.searchParams.get('limitToFirst')).toBe('201');
+      });
+
+      it('never reads without a caller', async () => {
+        const { client, fetchImpl } = setup();
+
+        await expect(client.read('arrivals', {}, { uid: '' })).rejects.toThrow(TypeError);
+        expect(fetchImpl).not.toHaveBeenCalled();
+      });
+
+      it('reports a rules denial as RulesRejectedError and other failures as DatabaseRestError', async () => {
+        const denied = await setup({ answer: response(401, { error: 'Permission denied' }) })
+          .client.read('arrivals', {}, PILOT).catch(e => e);
+        expect(denied).toBeInstanceOf(RulesRejectedError);
+        expect(denied.message).toBe('Database rules rejected the read of arrivals');
+
+        const failed = await setup({ answer: response(500) }).client.read('arrivals', {}, PILOT).catch(e => e);
+        expect(failed).toBeInstanceOf(DatabaseRestError);
+        expect(failed.status).toBe(500);
+      });
+    });
   });
 });

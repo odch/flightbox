@@ -97,5 +97,109 @@ describe('functions', () => {
         await expect(repository.updateMovement('departure', 'k1', {}, PILOT)).rejects.toBe(failure);
       });
     });
+
+    describe('movement lists', () => {
+      const PERSONAL = { personalAccess: true };
+      const SHARED = { personalAccess: false };
+      const LOGIN_PILOT = { uid: 'login:sub-1', email: 'pilot@example.com', isAdmin: false, scopes: ['movements:read'] };
+      const LOGIN_ADMIN = { uid: 'login:sub-2', email: 'admin@example.com', isAdmin: false, scopes: ['movements:read'] };
+
+      // Firebase users of the app by e-mail.
+      function fakeAuth(users) {
+        return {
+          getUserByEmail: jest.fn(async email => {
+            if (!users[email]) {
+              const error = new Error('no user');
+              error.code = 'auth/user-not-found';
+              throw error;
+            }
+            return { emailVerified: true, disabled: false, ...users[email] };
+          }),
+        };
+      }
+
+      const reader = (data, users = {}) => createRtdbMovementRepository({
+        db: () => fakeDb(data), auth: () => fakeAuth(users), rest: {},
+      });
+
+      it('lets an app admin or allMovements operator read all, as their own uid', async () => {
+        const repository = reader({ 'admins/admin-uid': true, 'logins/op-uid/allMovements': true });
+
+        expect(await repository.resolveReader({ uid: 'admin-uid', email: 'admin@example.com', isAdmin: true }, PERSONAL))
+          .toEqual({ all: true, authOverride: { uid: 'admin-uid', token: { email: 'admin@example.com' } } });
+        expect((await repository.resolveReader({ uid: 'op-uid', email: null }, PERSONAL)).all).toBe(true);
+        expect(await repository.resolveReader(PILOT, PERSONAL))
+          .toEqual({ all: false, authOverride: { uid: 'pilot-uid', token: { email: 'pilot@example.com' } } });
+      });
+
+      it('gives a login caller the rights of the app user with the same verified e-mail', async () => {
+        const repository = reader({ 'admins/admin-uid': true }, {
+          'admin@example.com': { uid: 'admin-uid' },
+          'pilot@example.com': { uid: 'pilot-uid' },
+        });
+
+        // An all read runs as the app user, so the rules see the admin's uid.
+        expect(await repository.resolveReader(LOGIN_ADMIN, PERSONAL))
+          .toEqual({ all: true, authOverride: { uid: 'admin-uid', token: { email: 'admin@example.com' } } });
+        expect(await repository.resolveReader(LOGIN_PILOT, PERSONAL))
+          .toEqual({ all: false, authOverride: { uid: 'login:sub-1', token: { email: 'pilot@example.com' } } });
+      });
+
+      it.each([
+        ['no app user', {}],
+        ['an unverified app user', { 'admin@example.com': { uid: 'admin-uid', emailVerified: false } }],
+        ['a disabled app user', { 'admin@example.com': { uid: 'admin-uid', disabled: true } }],
+      ])('does not let a login caller read all with %s', async (_, users) => {
+        const repository = reader({ 'admins/admin-uid': true }, users);
+
+        expect((await repository.resolveReader(LOGIN_ADMIN, PERSONAL)).all).toBe(false);
+      });
+
+      it('passes other failures of the user lookup on', async () => {
+        const failure = Object.assign(new Error('quota'), { code: 'auth/quota-exceeded' });
+        const repository = createRtdbMovementRepository({
+          db: () => fakeDb({}), auth: () => ({ getUserByEmail: async () => { throw failure; } }), rest: {},
+        });
+
+        await expect(repository.resolveReader(LOGIN_ADMIN, PERSONAL)).rejects.toBe(failure);
+      });
+
+      it('lets everyone read all where access is shared', async () => {
+        expect(await reader({}).resolveReader(PILOT, SHARED))
+          .toEqual({ all: true, authOverride: { uid: 'pilot-uid', token: { email: 'pilot@example.com' } } });
+      });
+
+      it('queries the owner\'s index or the timestamp, as the caller, newest first', async () => {
+        const rest = {
+          read: jest.fn(async () => ({
+            older: { negativeTimestamp: -2000 },
+            newer: { negativeTimestamp: -3000 },
+            broken: 'x',
+          })),
+        };
+        const repository = createRtdbMovementRepository({ db: () => fakeDb({}), rest });
+        const override = { uid: 'login:sub-1', token: { email: 'pilot@example.com' } };
+
+        const own = await repository.listMovements('arrival', { fromMs: 1000, toMs: 5000, owner: 'pilot@example.com', limit: 11 }, override);
+        await repository.listMovements('departure', { fromMs: 1000, toMs: 5000, owner: null, limit: 11 }, override);
+
+        expect(own.map(([key]) => key)).toEqual(['newer', 'older']);
+        expect(rest.read).toHaveBeenNthCalledWith(1, 'arrivals', {
+          orderBy: 'createdBy_orderKey',
+          startAt: 'pilot@example.com_9999999994999',
+          endAt: 'pilot@example.com_9999999998999',
+          limitToFirst: 11,
+        }, override);
+        expect(rest.read).toHaveBeenNthCalledWith(2, 'departures', {
+          orderBy: 'negativeTimestamp', startAt: -5000, endAt: -1000, limitToFirst: 11,
+        }, override);
+      });
+
+      it('answers an empty list for no result', async () => {
+        const repository = createRtdbMovementRepository({ db: () => fakeDb({}), rest: { read: async () => null } });
+
+        expect(await repository.listMovements('arrival', { fromMs: 0, toMs: 1, owner: null, limit: 1 }, { uid: 'u' })).toEqual([]);
+      });
+    });
   });
 });
