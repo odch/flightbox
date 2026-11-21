@@ -7,7 +7,9 @@
 // aircraft categories, the aerodrome ICAO (for 'circuits'), whether movements
 // are owner-scoped (loginForm 'email') and which movement lock applies.
 // Beyond the rules, for the app-level checks of the API (checkAppRules.js):
-// whether helicopters record no runway (aerodrome.noRunwayIfHelicopter).
+// whether helicopters record no runway (aerodrome.noRunwayIfHelicopter); for
+// paying the landing fee (paymentOptions.js): the payment methods and
+// homebasePayment. Configs generated before these fields offer none.
 
 function policyError(field, problem) {
   return new TypeError(`Invalid movement policy config: ${field} ${problem}`);
@@ -65,6 +67,9 @@ function buildMovementPolicy(config) {
     personalAccess: config.loginForm === 'email',
     lockOnDateTime: config.lockOnDateTime,
     noRunwayIfHelicopter: aerodrome.noRunwayIfHelicopter === true,
+    paymentMethods: Object.freeze((Array.isArray(config.paymentMethods) ? config.paymentMethods : [])
+      .map(method => Object.freeze({ ...method }))),
+    homebasePayment: config.homebasePayment === true,
   });
 }
 

@@ -142,10 +142,13 @@ describe('functions', () => {
         [['post'], ['/app/movements/:type', '/api/app/movements/:type']],
         [['patch'], ['/app/movements/:type/:key', '/api/app/movements/:type/:key']],
         [['get'], ['/app/movements', '/api/app/movements']],
+        [['get'], ['/app/movements/arrivals/:key/payment', '/api/app/movements/arrivals/:key/payment']],
+        [['post'], ['/app/movements/arrivals/:key/payment', '/api/app/movements/arrivals/:key/payment']],
       ]);
       // Writes: requestId, appAuth, requireScope, JSON body, handler; the
       // list: requestId, appAuth, requireScope, handler.
-      expect(movementLayers.map(layer => layer.route.stack.length)).toEqual([5, 5, 4]);
+      // Payment: requestId, appAuth, requireScope, (JSON body,) handler.
+      expect(movementLayers.map(layer => layer.route.stack.length)).toEqual([5, 5, 4, 4, 5]);
     });
 
     it('lets admins manage API keys when the tenant has an API feature', () => {

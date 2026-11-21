@@ -63,6 +63,9 @@ function fakeRepository({ movements = {}, settings = {} } = {}) {
     updateMovement: jest.fn(async () => undefined),
     loadReaderFacts: jest.fn(async actor => ({ appUid: actor.uid, admin: actor.isAdmin === true, allMovements: false })),
     listMovements: jest.fn(async () => listed),
+    loadPaymentFacts: jest.fn(async () => ({ invoiceRecipientNames: [], isHomeBase: false })),
+    createCardPayment: jest.fn(async () => '-Npay1'),
+    waitForCheckout: jest.fn(async () => ({ url: 'https://pay.example.com/c/1' })),
   };
 }
 
@@ -589,6 +592,47 @@ describe('functions', () => {
         expect(response.status).toBe(500);
         expect(logger.error).toHaveBeenCalledWith(
           'Movement list rejected by database rules after the API allowed it', expect.objectContaining({ uid: 'pilot-uid' }));
+      });
+    });
+
+    describe('GET/POST /api/app/movements/arrivals/:key/payment', () => {
+      const priced = { createdBy: 'pilot@example.com', landingFeeSingle: 27.75, landingFeeTotal: 27.75, feeTotalGross: 30 };
+
+      it('tells the pilot how to pay, as the app would', async () => {
+        storeArrival(KEY, priced);
+
+        const response = await send('GET', `/api/app/movements/arrivals/${KEY}/payment`);
+
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual({
+          due: true, amount: 30, currency: 'CHF', state: 'open', options: [{ method: 'checkout' }],
+        });
+      });
+
+      it('starts an online payment and answers the checkout URL', async () => {
+        storeArrival(KEY, priced);
+
+        const response = await send('POST', `/api/app/movements/arrivals/${KEY}/payment`, { body: { method: 'checkout' } });
+
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual({ method: 'checkout', checkoutUrl: 'https://pay.example.com/c/1' });
+        expect(repository.createCardPayment).toHaveBeenCalledWith(expect.objectContaining({ amount: 3000, arrivalReference: KEY }), actor('pilot-uid'));
+      });
+
+      it('answers 400, 403, 404 and 409 in the envelope', async () => {
+        storeArrival(KEY, priced);
+        await expectError(await send('POST', `/api/app/movements/arrivals/${KEY}/payment`, { body: { method: 'invoice', invoiceRecipientName: 'X' } }), 400, {
+          code: 'invalid-argument', message: 'This payment method is not offered for this arrival', details: { reason: 'method-not-offered' },
+        });
+        await expectError(await send('POST', `/api/app/movements/arrivals/${KEY}/payment`, { body: { foo: 1 } }), 400, {
+          code: 'invalid-argument',
+          message: 'Validation failed',
+          details: { reason: 'validation-failed', validationErrors: [{ field: 'method', reason: 'required' }, { field: 'foo', reason: 'unknown-field' }] },
+        });
+        expect((await send('GET', `/api/app/movements/arrivals/${KEY}/payment`, { uid: 'other-uid' })).status).toBe(403);
+        expect((await send('GET', '/api/app/movements/arrivals/-Nmissing/payment')).status).toBe(404);
+        storeArrival(KEY, { ...priced, paymentMethod: { method: 'checkout', status: 'completed' } });
+        expect((await send('POST', `/api/app/movements/arrivals/${KEY}/payment`, { body: { method: 'checkout' } })).status).toBe(409);
       });
     });
 

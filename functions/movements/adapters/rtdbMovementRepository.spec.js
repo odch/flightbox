@@ -192,5 +192,47 @@ describe('functions', () => {
         expect(await repository.listMovements('arrival', { fromMs: 0, toMs: 1, owner: null, limit: 1 }, { uid: 'u', email: null })).toEqual([]);
       });
     });
+
+    describe('payments', () => {
+      it('loads the invoice recipients of the actor and whether the aircraft is home-based', async () => {
+        const repository = createRtdbMovementRepository({
+          db: () => fakeDb({
+            '/settings/invoiceRecipients': [{ name: 'Fluggruppe A', emails: ['pilot@example.com'] }, { name: 'Firma B', emails: ['x@example.com'] }],
+            'settings/aircrafts/club': { HBKOF: true },
+            'settings/aircrafts/homeBase': { HBPIV: true },
+          }),
+          rest: {},
+        });
+
+        expect(await repository.loadPaymentFacts(PILOT, { immatriculation: 'HBPIV' }))
+          .toEqual({ invoiceRecipientNames: ['Fluggruppe A'], isHomeBase: true });
+        expect(await repository.loadPaymentFacts({ uid: 'guest', email: null }, { immatriculation: 'HBXYZ' }))
+          .toEqual({ invoiceRecipientNames: [], isHomeBase: false });
+      });
+
+      it('pushes the card payment as the actor', async () => {
+        const rest = { write: jest.fn(async () => ({ name: '-Npay1' })) };
+        const repository = createRtdbMovementRepository({ db: () => fakeDb({}), rest });
+
+        expect(await repository.createCardPayment({ amount: 3000 }, PILOT)).toBe('-Npay1');
+        expect(rest.write).toHaveBeenCalledWith('POST', 'card-payments', { amount: 3000 }, { uid: 'pilot-uid', token: { email: 'pilot@example.com' } });
+      });
+
+      it('waits for the checkout URL or a failure of the payment service', async () => {
+        const answers = [{ status: 'pending' }, { status: 'pending', data: 'https://pay.example.com/c/1' }];
+        const db = { ref: jest.fn(() => ({ once: async () => ({ val: () => answers.shift() ?? null }) })) };
+        const sleep = jest.fn(async () => undefined);
+        const repository = createRtdbMovementRepository({ db: () => db, rest: {}, sleep });
+
+        expect(await repository.waitForCheckout('-Npay1')).toEqual({ url: 'https://pay.example.com/c/1' });
+        expect(db.ref).toHaveBeenCalledWith('card-payments/-Npay1');
+        expect(sleep).toHaveBeenCalledTimes(1);
+
+        const failing = createRtdbMovementRepository({ db: () => fakeDb({ 'card-payments/p2': { status: 'failure' } }), rest: {}, sleep });
+        expect(await failing.waitForCheckout('p2')).toEqual({ failed: true });
+        const silent = createRtdbMovementRepository({ db: () => fakeDb({}), rest: {}, sleep });
+        expect(await silent.waitForCheckout('p3', { timeoutMs: 1000, intervalMs: 500 })).toEqual({ pending: true });
+      });
+    });
   });
 });

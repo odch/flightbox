@@ -119,6 +119,31 @@ function buildFlightTypes(project, env, merged) {
   });
 }
 
+// The client's PAYMENT_METHODS (src/util/paymentMethods.ts) and the
+// conditions of getEnabledPaymentMethods.
+const PAYMENT_METHOD_NAMES = ['card', 'checkout', 'cash', 'card_external', 'twint_external', 'invoice'];
+const PAYMENT_AUTH_CONDITIONS = ['kiosk', 'notKiosk'];
+
+// paymentMethods as the client reads them (objectToArray of the packinized
+// list): a name, or {name, authCondition}. The movement API offers a pilot
+// the same methods as the app's arrival wizard.
+function buildPaymentMethods(project, env, merged) {
+  const methods = hasOwn(merged, 'paymentMethods') ? merged.paymentMethods : defaultConf.paymentMethods;
+  if (!Array.isArray(methods)) {
+    throw configError(project, env, 'paymentMethods', 'must be an array');
+  }
+  return clientOrder(methods).map(method => {
+    const entry = typeof method === 'string' ? { name: method } : method;
+    if (!isPlainObject(entry) || !PAYMENT_METHOD_NAMES.includes(entry.name)) {
+      throw configError(project, env, 'paymentMethods', `contains an unknown method: ${JSON.stringify(method)}`);
+    }
+    if (hasOwn(entry, 'authCondition') && !PAYMENT_AUTH_CONDITIONS.includes(entry.authCondition)) {
+      throw configError(project, env, 'paymentMethods', `contains an unknown authCondition: ${JSON.stringify(method)}`);
+    }
+    return hasOwn(entry, 'authCondition') ? { name: entry.name, authCondition: entry.authCondition } : { name: entry.name };
+  });
+}
+
 function buildLoginForm(project, env, merged) {
   const loginForm = hasOwn(merged, 'loginForm') ? merged.loginForm : defaultConf.loginForm;
   if (typeof loginForm !== 'string' || loginForm === '') {
@@ -230,6 +255,9 @@ function buildServerConfig(project, conf, env) {
     // Not per project: the list the database rules accept (aircraftCategory).
     aircraftCategories: aircraftCategoriesData.map(category => category.name),
     aerodrome,
+    // What the arrival wizard offers for paying the landing fee.
+    paymentMethods: buildPaymentMethods(project, env, merged),
+    homebasePayment: readFlag(project, env, merged, 'homebasePayment'),
     ...buildCentralLogin(project, env, merged)
   };
 }
