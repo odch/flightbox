@@ -7,7 +7,7 @@ import {saveMovement} from '../modules/movements';
 import Finish, {FinishLoading} from '../components/wizards/ArrivalWizard/Finish';
 import {HeadingType} from '../components/wizards/MovementWizard';
 import objectToArray from '../util/objectToArray';
-import {getEnabledPaymentMethods} from '../util/paymentMethods';
+import {getSelectablePaymentMethods} from '../util/paymentMethods';
 import {RootState} from '../modules';
 
 interface Fees {
@@ -73,12 +73,11 @@ const ArrivalFinishContainer = (props: Props) => {
     return <FinishLoading />;
   }
 
-  const enabledPaymentMethods = getEnabledPaymentMethods(
+  const enabledPaymentMethods = getSelectablePaymentMethods(
     objectToArray(__CONF__.paymentMethods),
-    auth.data,
-  )
-    .filter((method: string) => method === 'card' ? localUser : true)
-    .filter((method: string) => method === 'invoice' ? invoiceRecipients.length > 0 : true);
+    {...auth.data, local: !!localUser},
+    invoiceRecipients,
+  );
 
   const isHomeBase =
     (aircraftSettings.club as any)[immatriculation] === true ||
