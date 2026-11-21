@@ -138,8 +138,11 @@ if (projectConfig.reportApiEnabled === true) {
   const {apiKeyOrAdminAuth} = require('./apiKeyAuth')
   require('./reports').registerReportRoutes(api, projectConfig, apiKeyOrAdminAuth(SCOPES.REPORTS_AIRSTAT))
 }
-// Movement writes of the web app (movementWritesViaApi), for signed-in users.
-if (projectConfig.movementWritesViaApi === true) {
+// The movement API: the web app's movement writes (movementWritesViaApi),
+// and API clients with tokens of the central login (centralLogin, e.g. the
+// Open Digital MCP hub). centralLogin alone leaves the app writing to the
+// database as before.
+if (projectConfig.movementWritesViaApi === true || projectConfig.centralLogin) {
   require('../movements').registerMovementRoutes(api, projectConfig)
 }
 

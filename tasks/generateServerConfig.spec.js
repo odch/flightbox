@@ -164,11 +164,11 @@ describe('tasks/generateServerConfig', () => {
 
   // cypress-testing-api only builds the Cypress run of the movement specs
   // with the flag (same Firebase project as cypress-testing).
-  it('accepts central login tokens on lsze test only', () => {
+  it('accepts central login tokens on lsze and lszm test only', () => {
     CASES.forEach(([project, env]) => {
       const { centralLogin } = buildServerConfigFor(project, env);
-      if (`${project}/${env}` === 'lsze/test') {
-        expect(centralLogin).toEqual(expect.objectContaining({ audience: 'flightbox-lsze-test' }));
+      if (['lsze/test', 'lszm/test'].includes(`${project}/${env}`)) {
+        expect(centralLogin).toEqual(expect.objectContaining({ audience: `flightbox-${project}-test` }));
       } else {
         expect(centralLogin).toBeUndefined();
       }
@@ -450,7 +450,7 @@ describe('tasks/generateServerConfig', () => {
       }
     );
 
-    describe('environment-level aerodrome with movementWritesViaApi', () => {
+    describe('environment-level aerodrome with the movement API', () => {
       const withTestAerodrome = (aerodrome, flags = { movementWritesViaApi: true }) => makeConf({}, {
         test: { firebaseProjectId: 'flightbox-test', aerodrome, ...flags },
         production: { firebaseProjectId: 'flightbox-prod' }
@@ -464,8 +464,14 @@ describe('tasks/generateServerConfig', () => {
         ['the arrival routes', { arrivalRoutes: [] }]
       ])('rejects one that changes %s (the database rules read the top level)', (label, overrides) => {
         const conf = withTestAerodrome(makeAerodrome(overrides));
-        expectError(conf, 'test', 'environments\\.test\\.aerodrome.*movementWritesViaApi');
+        expectError(conf, 'test', 'environments\\.test\\.aerodrome.*movement API');
         expect(() => buildServerConfig('lsxy', conf, 'production')).not.toThrow();
+      });
+
+      it('rejects it when the environment sets centralLogin (the API is offered)', () => {
+        const centralLogin = { issuer: 'https://login.example.com', jwksUri: 'https://login.example.com/jwks', audience: 'flightbox-test' };
+        const conf = withTestAerodrome(makeAerodrome({ ICAO: 'LSXX' }), { centralLogin });
+        expectError(conf, 'test', 'environments\\.test\\.aerodrome.*movement API');
       });
 
       it('rejects it when the flag is set at the top level', () => {
