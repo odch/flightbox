@@ -12,6 +12,7 @@ const { ApiError, validationError, sendError } = require('../../api/http/errors'
 const { buildMovementPolicy } = require('../domain');
 const { saveMovement, OUTCOMES } = require('../application/saveMovement');
 const { listMovements } = require('../application/listMovements');
+const { getArrivalPayment, payArrival } = require('../application/payArrival');
 const { createRtdbMovementRepository } = require('../adapters/rtdbMovementRepository');
 const { RulesRejectedError } = require('../adapters/databaseRest');
 
@@ -22,6 +23,7 @@ const { RulesRejectedError } = require('../adapters/databaseRest');
 const CREATE_PATHS = ['/app/movements/:type', '/api/app/movements/:type'];
 const UPDATE_PATHS = ['/app/movements/:type/:key', '/api/app/movements/:type/:key'];
 const LIST_PATHS = ['/app/movements', '/api/app/movements'];
+const PAYMENT_PATHS = ['/app/movements/arrivals/:key/payment', '/api/app/movements/arrivals/:key/payment'];
 
 // A list covers at most this period (and MAX_PER_TYPE movements per type).
 const MAX_LIST_RANGE_MS = 31 * 24 * 60 * 60 * 1000;
@@ -239,6 +241,66 @@ function listHandler({ repository, policy }) {
   });
 }
 
+const PAYMENT_MESSAGES = Object.freeze({
+  'not-found': 'Movement not found',
+  'not-owner': 'Not allowed to pay this movement',
+  'already-paid': 'The landing fee is already paid or its payment arranged',
+  'no-payment-due': 'No landing fee is due for this arrival',
+  'method-not-offered': 'This payment method is not offered for this arrival',
+  'checkout-failed': 'The online payment could not be started',
+  'movement-locked': 'Movement is locked',
+});
+
+function paymentRejection(result) {
+  return new ApiError(result.code, PAYMENT_MESSAGES[result.reason] || 'Payment not possible', { reason: result.reason });
+}
+
+// POST body: {method, invoiceRecipientName?}
+function paymentChoiceOf(req) {
+  const body = inputOf(req);
+  const errors = [];
+  if (typeof body.method !== 'string' || body.method === '') {
+    errors.push({ field: 'method', reason: 'required' });
+  }
+  if (body.invoiceRecipientName !== undefined && typeof body.invoiceRecipientName !== 'string') {
+    errors.push({ field: 'invoiceRecipientName', reason: 'not-a-string' });
+  }
+  const unknown = Object.keys(body).filter(field => !['method', 'invoiceRecipientName'].includes(field));
+  unknown.forEach(field => errors.push({ field, reason: 'unknown-field' }));
+  if (errors.length > 0) {
+    throw validationError(errors);
+  }
+  return { method: body.method, invoiceRecipientName: body.invoiceRecipientName };
+}
+
+function paymentHandlers({ repository, policy }) {
+  const run = (useCase, extra) => asyncRoute(async (req, res) => {
+    const key = movementKeyOf(req);
+    let result;
+    try {
+      result = await useCase({ repository, policy: policy(), actor: req.actor, key, ...extra(req) });
+    } catch (error) {
+      if (error instanceof RulesRejectedError) {
+        logger.error('Payment write rejected by database rules after the API allowed it', {
+          requestId: req.requestId, key, uid: req.actor.uid,
+        });
+        throw new ApiError('internal', 'Internal error');
+      }
+      throw error;
+    }
+    if (!result.ok) {
+      throw paymentRejection(result);
+    }
+    const { ok, ...body } = result;
+    res.set('Cache-Control', 'no-store');
+    res.status(200).json(body);
+  });
+  return {
+    get: run(getArrivalPayment, () => ({})),
+    post: run(payArrival, req => ({ choice: paymentChoiceOf(req) })),
+  };
+}
+
 /**
  * Registers POST /app/movements/:type (create) and PATCH
  * /app/movements/:type/:key (update, merged like RTDB update()), also under
@@ -249,7 +311,9 @@ function listHandler({ repository, policy }) {
  * (also under /api): the movements of a period the caller may see,
  * {from, to, movements, truncated} (application/listMovements.js). Tokens of
  * the central login need the scope movements:write to write and
- * movements:read to list.
+ * movements:read to list. And GET/POST /app/movements/arrivals/:key/payment:
+ * how the caller may pay the landing fee of an arrival, and paying it
+ * (application/payArrival.js), with movements:write.
  */
 function registerMovementRoutes(app, config, {
   auth = getAuth,
@@ -263,6 +327,9 @@ function registerMovementRoutes(app, config, {
   app.post(CREATE_PATHS, ...write, saveHandler({ repository, policy, isCreate: true }));
   app.patch(UPDATE_PATHS, ...write, saveHandler({ repository, policy, isCreate: false }));
   app.get(LIST_PATHS, requestId, authenticate, requireScope('movements:read'), listHandler({ repository, policy }));
+  const payment = paymentHandlers({ repository, policy });
+  app.get(PAYMENT_PATHS, requestId, authenticate, requireScope('movements:write'), payment.get);
+  app.post(PAYMENT_PATHS, requestId, authenticate, requireScope('movements:write'), jsonBody(), payment.post);
 }
 
-module.exports = { registerMovementRoutes, CREATE_PATHS, UPDATE_PATHS, LIST_PATHS };
+module.exports = { registerMovementRoutes, CREATE_PATHS, UPDATE_PATHS, LIST_PATHS, PAYMENT_PATHS };

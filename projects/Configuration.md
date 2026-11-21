@@ -366,6 +366,18 @@ location, route, runway, counts, fees, payment method and status; not the pilot'
 number, remarks, route description, customs form or invoice recipient). The API reads as the caller
 (`auth_variable_override`; for an admin as their app user), so the read rules apply as in the app.
 
+Paying the landing fee (`GET`/`POST /api/app/movements/arrivals/<key>/payment`, scope `movements:write`): the API
+offers exactly what the app's arrival wizard offers the caller (`functions/movements/domain/paymentOptions.js`,
+parity with `src/util/paymentMethods.ts` in `src/util/paymentOptions.parity.spec.js`): payment only when a fee is due
+and the aircraft is not a club or home-base aircraft unless `homebasePayment`; the `paymentMethods` whose
+`authCondition` holds (a caller of the central login is never a kiosk), the card terminal (`card`) only for local
+sign-ins, invoice once per recipient whose `emails` list the caller. `GET` answers `{due, amount, currency, options,
+state}` (`state`: `open`, `pending`, `paid`, `arranged`); `POST {method, invoiceRecipientName?}` records the method on
+the arrival like any change (ownership, lock), and for `checkout` also pushes the `/card-payments` entry the app writes
+(amount = the arrival's `feeTotalGross` in cents), waits up to 10 seconds for the payment service's checkout URL and
+answers `{method, checkoutUrl}` (`null` when the service did not answer in time). `updateArrivalPaymentStatus` marks
+the arrival paid as for the app.
+
 Set it per environment. Only the functions read it (`functions/project-config.generated.json`, validated by
 `tasks/generateServerConfig.js`); without it, tokens of the login are rejected like any other unknown token.
 Set on `lsze` test, with the dev login (`odch-login-dev`) at its `*.run.app` address until

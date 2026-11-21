@@ -32,7 +32,18 @@ describe('movement domain', () => {
         personalAccess: true,
         lockOnDateTime: false,
         noRunwayIfHelicopter: false,
+        paymentMethods: [],
+        homebasePayment: false,
       });
+    });
+
+    it('takes the payment methods and homebasePayment from the config', () => {
+      const policy = buildMovementPolicy(withConfig({
+        paymentMethods: [{ name: 'checkout', authCondition: 'notKiosk' }, { name: 'invoice' }], homebasePayment: true,
+      }));
+      expect(policy.paymentMethods).toEqual([{ name: 'checkout', authCondition: 'notKiosk' }, { name: 'invoice' }]);
+      expect(policy.homebasePayment).toBe(true);
+      expect(loadVariant('lsze').policy.paymentMethods.map(m => m.name)).toEqual(['checkout', 'card_external', 'invoice']);
     });
 
     it('takes noRunwayIfHelicopter from the aerodrome (only true counts)', () => {

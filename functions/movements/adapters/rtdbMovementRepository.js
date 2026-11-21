@@ -3,6 +3,7 @@
 const { getDatabase } = require('firebase-admin/database');
 const { createDatabaseRestClient } = require('./databaseRest');
 const { toOrderKey } = require('../domain/orderKey');
+const fetchUserInvoiceRecipients = require('../../api/fetchUserInvoiceRecipients');
 
 // Realtime Database implementation of the movement repository port (see
 // functions/movements/application/saveMovement.js).
@@ -71,8 +72,60 @@ const byNewest = (a, b) => (a[1].negativeTimestamp ?? 0) - (b[1].negativeTimesta
 // for callers of the central login.
 const defaultAuth = () => require('firebase-admin/auth').getAuth();
 
-function createRtdbMovementRepository({ db = getDatabase, auth = defaultAuth, rest = createDatabaseRestClient() } = {}) {
+const defaultSleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+function createRtdbMovementRepository({
+  db = getDatabase, auth = defaultAuth, rest = createDatabaseRestClient(), sleep = defaultSleep,
+} = {}) {
   return {
+    /**
+     * What decides how the actor may pay an arrival (domain/paymentOptions.js):
+     * {invoiceRecipientNames, isHomeBase}: the invoice recipients the actor's
+     * e-mail is listed for (as the app's /users/me/invoice-recipients) and
+     * whether the aircraft is a club or home-base aircraft (/settings/aircrafts).
+     */
+    async loadPaymentFacts(actor, arrival) {
+      const database = db();
+      const [invoiceRecipientNames, club, homeBase] = await Promise.all([
+        fetchUserInvoiceRecipients(database, actor.email),
+        readValue(database, 'settings/aircrafts/club'),
+        readValue(database, 'settings/aircrafts/homeBase'),
+      ]);
+      const registration = arrival.immatriculation;
+      const isHomeBase = typeof registration === 'string'
+        && ((club || {})[registration] === true || (homeBase || {})[registration] === true);
+      return { invoiceRecipientNames, isHomeBase };
+    },
+
+    // push() of an online payment to /card-payments as the actor; the key.
+    async createCardPayment(payment, actor) {
+      const answer = await rest.write('POST', 'card-payments', payment, authOverrideFor(actor));
+      if (!answer || typeof answer.name !== 'string') {
+        throw new Error('Database answered a push without the new key');
+      }
+      return answer.name;
+    },
+
+    /**
+     * Waits for the payment service's answer to an online payment:
+     * {url} (the checkout page), {failed: true}, or {pending: true} after
+     * `timeoutMs`.
+     */
+    async waitForCheckout(paymentId, { timeoutMs = 10000, intervalMs = 500 } = {}) {
+      const database = db();
+      for (let waited = 0; waited <= timeoutMs; waited += intervalMs) {
+        const payment = await readValue(database, `card-payments/${paymentId}`);
+        if (payment && typeof payment.data === 'string' && payment.data !== '') {
+          return { url: payment.data };
+        }
+        if (payment && payment.status === 'failure') {
+          return { failed: true };
+        }
+        await sleep(intervalMs);
+      }
+      return { pending: true };
+    },
+
     /**
      * What decides which movements the actor may list (domain/readAccess.js):
      * {appUid, admin, allMovements}. appUid: the actor's Firebase uid; for a

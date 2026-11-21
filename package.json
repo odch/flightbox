@@ -8,7 +8,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:functions": "cd functions && npm test",
-    "test:rules": "firebase emulators:exec --only database --config firebase.emulator.json --project demo-rules-test \"node test/rules/movementWrite.rules.js && node test/rules/movementDomainParity.rules.js && node test/rules/movementApiWrite.rules.js && node test/rules/movementApiRead.rules.js\"",
+    "test:rules": "firebase emulators:exec --only database --config firebase.emulator.json --project demo-rules-test \"node test/rules/movementWrite.rules.js && node test/rules/movementDomainParity.rules.js && node test/rules/movementApiWrite.rules.js && node test/rules/movementApiRead.rules.js && node test/rules/movementApiPayment.rules.js\"",
     "test:app": "jest --testPathIgnorePatterns=functions",
     "codecov": "codecov",
     "cy:open": "cypress open",

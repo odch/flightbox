@@ -133,6 +133,10 @@ describe('tasks/generateServerConfig', () => {
         arrivalRoutes: objectToArray(client.aerodrome.arrivalRoutes).map(({ name }) => ({ name })),
         noRunwayIfHelicopter: client.aerodrome.noRunwayIfHelicopter === true
       },
+      paymentMethods: objectToArray(client.paymentMethods).map(method => (typeof method === 'string'
+        ? { name: method }
+        : { name: method.name, ...(method.authCondition ? { authCondition: method.authCondition } : {}) })),
+      homebasePayment: client.homebasePayment === true,
       ...(client.centralLogin ? { centralLogin: client.centralLogin } : {})
     });
   });
