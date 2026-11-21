@@ -8,6 +8,7 @@ import Heading from './Heading';
 import {ReferenceNumberMessage} from './Message';
 import FinishActions from './FinishActions'
 import PaymentMethodImport from '../../../../containers/PaymentMethodContainer'
+import {isPaymentDue} from '../../../../util/paymentMethods'
 const PaymentMethod = PaymentMethodImport as any
 import {HeadingType} from '../../MovementWizard'
 import Fees from './Fees'
@@ -46,7 +47,7 @@ const Finish = props => {
       ? t('arrival.created')
       : undefined;
 
-  const showPayment = (isHomeBase === false || __CONF__.homebasePayment) && !isUpdate && !!fees && fees.totalGross > 0
+  const showPayment = !isUpdate && !!fees && isPaymentDue(isHomeBase, __CONF__.homebasePayment === true, fees.totalGross)
 
   const {
     landings,
