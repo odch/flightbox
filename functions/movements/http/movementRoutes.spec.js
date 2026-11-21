@@ -61,7 +61,7 @@ function fakeRepository({ movements = {}, settings = {} } = {}) {
     })),
     createMovement: jest.fn(async () => 'new-key'),
     updateMovement: jest.fn(async () => undefined),
-    resolveReader: jest.fn(async actor => ({ all: actor.isAdmin === true, authOverride: { uid: actor.uid, token: {} } })),
+    loadReaderFacts: jest.fn(async actor => ({ appUid: actor.uid, admin: actor.isAdmin === true, allMovements: false })),
     listMovements: jest.fn(async () => listed),
   };
 }
@@ -558,7 +558,7 @@ describe('functions', () => {
         expect(repository.listMovements).toHaveBeenCalledTimes(1);
         expect(repository.listMovements).toHaveBeenCalledWith('departure', {
           fromMs: Date.parse(FROM), toMs: Date.parse(TO), owner: 'pilot@example.com', limit: 201,
-        }, { uid: 'pilot-uid', token: {} });
+        }, { uid: 'pilot-uid', email: 'pilot@example.com' });
       });
 
       it('answers 400 for a missing, malformed or too long period', async () => {
@@ -809,7 +809,7 @@ describe('functions', () => {
 
         const read = await login.request(query, { headers: { Authorization: `Bearer ${readOnly}` } });
         expect(read.status).toBe(200);
-        expect(repository.resolveReader).toHaveBeenCalledWith(loginActorOf('pilot@example.com', ['movements:read']), policy);
+        expect(repository.loadReaderFacts).toHaveBeenCalledWith(loginActorOf('pilot@example.com', ['movements:read']));
       });
 
       it('rejects login tokens where centralLogin is not configured', async () => {

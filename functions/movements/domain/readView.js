@@ -6,8 +6,8 @@ const { hasOwn, isPlainObject } = require('./normalize');
 //
 // The caller's own movements (createdBy is the caller's e-mail) come with
 // all their fields except the index fields. Movements of others, which only
-// admins and allMovements operators get (rtdbMovementRepository.js
-// resolveReader), carry no personal data: only the operational fields below.
+// admins and allMovements operators get (readAccess.js), carry no personal
+// data: only the operational fields below.
 // Whitelisted, so a field added to movements later stays out until it is
 // listed here. Not listed on purpose: firstname, lastname, email, phone,
 // memberNr, createdBy, remarks and route (free text), the customs form

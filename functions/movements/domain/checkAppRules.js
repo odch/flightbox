@@ -2,6 +2,10 @@
 
 const { REASONS } = require('./reasons');
 const { hasOwn } = require('./normalize');
+// The server's one port of the client's flight type and category tables
+// (with client parity tests, src/util/airstatOracles/tables.spec.js). It
+// lives in the airstat engine, which may only load files of its own folder;
+// depending on it from here costs nothing (pure data, no packages).
 const { FLIGHT_TYPES, getAirstatType, isHelicopter } = require('../../reports/airstat/tables');
 
 // What the app's wizard requires beyond the database rules, checked for
