@@ -2,10 +2,17 @@ import {END, eventChannel, Task} from 'redux-saga';
 import {cancel, fork, put, take, takeEvery} from 'redux-saga/effects';
 import {onValue} from 'firebase/database';
 import {FIREBASE_AUTHENTICATION_EVENT} from '../auth/actions';
-import firebase from '../../util/firebase';
+import firebase, {isSignedIn} from '../../util/firebase';
 import {error} from '../../util/log';
 
 type LoadedActionCreator = (value: any) => { type: string };
+
+// Signing out makes Firebase cancel the admin-only listeners with
+// permission_denied, often before the sign-out reaches the sagas that
+// would remove them. Such a cancel is expected and not worth reporting.
+function isDeniedAfterSignOut(e: unknown) {
+  return (e as any)?.code === 'PERMISSION_DENIED' && !isSignedIn();
+}
 
 // Emits `loaded(value)` for every change at `path`. Closing the channel
 // removes the Firebase listener. If Firebase cancels the listener (e.g.
@@ -15,7 +22,9 @@ export function createSettingChannel(path: string, loaded: LoadedActionCreator) 
     firebase(path),
     snapshot => emit(loaded(snapshot.val())),
     e => {
-      error(`Listener for ${path} was cancelled`, e);
+      if (!isDeniedAfterSignOut(e)) {
+        error(`Listener for ${path} was cancelled`, e);
+      }
       emit(END);
     }
   ));
