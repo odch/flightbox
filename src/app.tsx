@@ -41,6 +41,9 @@ import { redactBreadcrumb, redactEvent } from './util/sentryRedaction';
 
 Sentry.init({
   dsn: "https://8a606d82aa68850021fbfac2ffda30b5@o4509293310967808.ingest.de.sentry.io/4509293314113617",
+  // The dev server (`npm start`, also used by the Cypress runs in CI)
+  // must not report: its errors would eat the reserved Sentry volume
+  enabled: !__DEV__,
   // Our DPA rules out personal data in Sentry. Sentry v11 collects user
   // info (incl. IP address), cookies, headers and bodies by default, so
   // switch every data collection category off explicitly.
