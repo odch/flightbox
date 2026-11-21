@@ -121,7 +121,7 @@ describe('functions', () => {
       expect(fbAdminAuth).toHaveBeenCalledWith(req, {}, next);
     });
 
-    it('has no movement write routes unless the tenant enables movementWritesViaApi', () => {
+    it('has no movement routes unless the tenant enables movementWritesViaApi or centralLogin', () => {
       [
         { reportApiEnabled: false, movementWritesViaApi: false },
         { reportApiEnabled: true, aerodrome: { ICAO: 'LSZE', runways: [] } },
@@ -149,6 +149,17 @@ describe('functions', () => {
       // list: requestId, appAuth, requireScope, handler.
       // Payment: requestId, appAuth, requireScope, (JSON body,) handler.
       expect(movementLayers.map(layer => layer.route.stack.length)).toEqual([5, 5, 4, 4, 5]);
+    });
+
+    it('serves the movement API to central login clients when the tenant sets centralLogin', () => {
+      const centralLogin = { issuer: 'https://login.example.com', jwksUri: 'https://login.example.com/jwks', audience: 'flightbox-test' };
+      const { api } = loadApi({ reportApiEnabled: false, movementWritesViaApi: false, centralLogin });
+      const paths = routeLayers(api).map(layer => layer.route.path).flat();
+
+      expect(paths).toEqual(expect.arrayContaining([
+        '/api/app/movements/:type', '/api/app/movements/:type/:key', '/api/app/movements',
+        '/api/app/movements/arrivals/:key/payment',
+      ]));
     });
 
     it('lets admins manage API keys when the tenant has an API feature', () => {

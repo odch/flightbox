@@ -183,10 +183,10 @@ const movementRuleView = aerodrome => JSON.stringify({
   arrivalRoutes: aerodrome.arrivalRoutes.map(({ name }) => name).sort()
 });
 
-// The database rules are built from the top-level aerodrome only. With
-// movement writes through the API, an environment-level aerodrome must not
-// change what the movement rules read, or the API would accept runways or
-// routes the rules reject (and the other way round).
+// The database rules are built from the top-level aerodrome only. With the
+// movement API (movementWritesViaApi or centralLogin), an environment-level
+// aerodrome must not change what the movement rules read, or the API would
+// accept runways or routes the rules reject (and the other way round).
 function assertMovementAerodromeMatchesRules(project, env, conf, aerodrome) {
   if (!hasOwn(conf.environments[env], 'aerodrome')) {
     return;
@@ -194,7 +194,7 @@ function assertMovementAerodromeMatchesRules(project, env, conf, aerodrome) {
   const topLevel = buildAerodrome(project, env, conf.aerodrome);
   if (movementRuleView(topLevel) !== movementRuleView(aerodrome)) {
     throw configError(project, env, `environments.${env}.aerodrome`,
-      'must not change ICAO, runway or route names while movementWritesViaApi is on: '
+      'must not change ICAO, runway or route names while the movement API is on: '
       + 'the database rules read them from the top level only');
   }
 }
@@ -238,7 +238,8 @@ function buildServerConfig(project, conf, env) {
   }
   const aerodrome = buildAerodrome(project, env, merged.aerodrome);
   const movementWritesViaApi = readFlag(project, env, merged, 'movementWritesViaApi');
-  if (movementWritesViaApi) {
+  const centralLogin = buildCentralLogin(project, env, merged);
+  if (movementWritesViaApi || centralLogin.centralLogin) {
     assertMovementAerodromeMatchesRules(project, env, conf, aerodrome);
   }
 
@@ -258,7 +259,7 @@ function buildServerConfig(project, conf, env) {
     // What the arrival wizard offers for paying the landing fee.
     paymentMethods: buildPaymentMethods(project, env, merged),
     homebasePayment: readFlag(project, env, merged, 'homebasePayment'),
-    ...buildCentralLogin(project, env, merged)
+    ...centralLogin
   };
 }
 

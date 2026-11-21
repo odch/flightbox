@@ -57,7 +57,12 @@
       "firebaseProjectId": "lszm-test",
       "firebaseDatabaseUrl": "https://lszm-test-eu.europe-west1.firebasedatabase.app",
       "firebaseApiKey": "AIzaSyBP3IcalmLfA6gi9bq4Ln6aDyelL4gOLGg",
-      "passkeysEnabled": true
+      "passkeysEnabled": true,
+      "centralLogin": {
+        "issuer": "https://odch-login-422294830636.europe-west1.run.app",
+        "jwksUri": "https://odch-login-422294830636.europe-west1.run.app/jwks",
+        "audience": "flightbox-lszm-test"
+      }
     },
     "production": {
       "customsSelfDeclarationEnabled": true,

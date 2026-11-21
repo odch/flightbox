@@ -192,7 +192,8 @@ when the database holds the strategy under `/settings/landingFeesStrategy` (set 
 function `computeArrivalFeesOnWrite` then recomputes the fee fields of every arrival that is written, from the app or
 the API, with MTOW and category from the aircraft register where the registration is known, and records where they came
 from in `aircraftDataSource` (`registry` or `manual`). Only strategies ported to `functions/fees/landingFeeStrategies`
-can be used this way: `lspl` and `lsze`. Arrivals stored before are priced at their next change.
+can be used this way: `lspl`, `lsze` and `lszm` (each with a parity test against the app's tariff). Arrivals stored
+before are priced at their next change.
 
 ### `environments`
 
@@ -222,8 +223,8 @@ always read from the top level.
 
 `enabledFlightTypes`, `loginForm` and `lockOnDateTime` must be set at the top level: the database rules are
 built from the top level only, and the functions apply the same movement rules, so the functions deploy fails
-when an environment sets one of them. For the same reason, while `movementWritesViaApi` is on, an
-environment-level `aerodrome` may not change the `ICAO`, the runway names or the departure and arrival route
+when an environment sets one of them. For the same reason, while the movement API is on (`movementWritesViaApi` or
+`centralLogin`), an environment-level `aerodrome` may not change the `ICAO`, the runway names or the departure and arrival route
 names of the top-level one.
 
 ### `theme`
@@ -313,7 +314,8 @@ Differences to direct database writes:
   allowed the write.
 * The server sets `negativeTimestamp`, `createdBy` and `createdBy_orderKey`; the values of the app are ignored.
 
-Switching it on or off: the routes only exist in functions deployed with the flag (`functions/api/index.js`),
+Switching it on or off: the routes only exist in functions deployed with the flag or with `centralLogin`
+(`functions/api/index.js`),
 while the app has the flag built in, also in tabs and kiosks that stay open after a deployment. An app with the
 flag and functions without it means every save fails with `Request failed (HTTP 404)` (also if the functions
 reject the generated configuration, e.g. a `firebaseProjectId` mismatch). The test deployment
@@ -331,8 +333,9 @@ Example: `true`
 
 ### `centralLogin`
 
-Lets the app API (the routes of `movementWritesViaApi`) also accept access tokens of the central login (the Open
-Digital account, `odch/odch-login`), next to the Firebase ID tokens of the app. The Open Digital MCP hub
+Offers the movement API (the routes of `movementWritesViaApi`) and lets it accept access tokens of the central
+login (the Open Digital account, `odch/odch-login`), next to the Firebase ID tokens of the app. With `centralLogin`
+alone the routes exist for API clients, while the app keeps writing to the database directly. The Open Digital MCP hub
 (`odch/mcp-hub`) uses them to record departures and arrivals for a pilot from an AI client (Claude etc.): it
 exchanges the pilot's token at the login (token exchange, RFC 8693) for a token for exactly this instance and
 calls `POST/PATCH /api/app/movements/...` with it, and `GET /api/app/movements?from=&to=` to list movements.
@@ -380,8 +383,9 @@ the arrival paid as for the app.
 
 Set it per environment. Only the functions read it (`functions/project-config.generated.json`, validated by
 `tasks/generateServerConfig.js`); without it, tokens of the login are rejected like any other unknown token.
-Set on `lsze` test, with the dev login (`odch-login-dev`) at its `*.run.app` address until
-`login.opendigital.ch` exists.
+Set on `lsze` and `lszm` test, with the dev login (`odch-login-dev`) at its `*.run.app` address until
+`login.opendigital.ch` exists. For landing fees on arrivals recorded through the API, the instance also needs
+`/settings/landingFeesStrategy` (see `landingFeesStrategy`).
 
 ### `customsSelfDeclarationEnabled`
 
