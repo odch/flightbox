@@ -256,7 +256,7 @@ describe('functions/fees: tariff data identical to the client', () => {
   const path = require('path');
   const clientData = name => require(path.join(__dirname, '../../src/util/landingFeeStrategies', `${name}_data.json`));
 
-  it.each(['lspl', 'lsze'])('%s_data.json', name => {
+  it.each(['lspl', 'lsze', 'lszm'])('%s_data.json', name => {
     expect(require(`./landingFeeStrategies/${name}_data.json`)).toEqual(clientData(name));
   });
 });

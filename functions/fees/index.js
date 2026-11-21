@@ -7,6 +7,7 @@
 // server-owned fees.
 const lspl = require('./landingFeeStrategies/lspl');
 const lsze = require('./landingFeeStrategies/lsze');
+const lszm = require('./landingFeeStrategies/lszm');
 
 const AircraftOrigin = Object.freeze({
   CLUB: 'club',
@@ -17,6 +18,7 @@ const AircraftOrigin = Object.freeze({
 const strategies = {
   lspl,
   lsze,
+  lszm,
 };
 
 const roundToFiveCents = (val) => Math.round(val * 20) / 20;
