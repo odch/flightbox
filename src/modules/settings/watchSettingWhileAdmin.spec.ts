@@ -1,6 +1,6 @@
 import {runSaga, stdChannel} from 'redux-saga';
 import {onValue} from 'firebase/database';
-import firebase from '../../util/firebase';
+import firebase, {isSignedIn} from '../../util/firebase';
 import {error} from '../../util/log';
 import {FIREBASE_AUTHENTICATION_EVENT} from '../auth/actions';
 import {watchSettingWhileAdmin} from './watchSettingWhileAdmin';
@@ -23,6 +23,11 @@ const authEvent = (authData: any) => ({
 const adminLogin = () => authEvent({uid: 'admin-uid', admin: true});
 const userLogin = () => authEvent({uid: 'user-uid', admin: false});
 const logout = () => authEvent(null);
+// Shaped like the errors Firebase passes to a cancelled listener
+const permissionDenied = () => Object.assign(
+  new Error(`permission_denied at ${PATH}: Client doesn't have permission to access the desired data.`),
+  {code: 'PERMISSION_DENIED'}
+);
 
 describe('modules', () => {
   describe('settings', () => {
@@ -42,6 +47,7 @@ describe('modules', () => {
       beforeEach(() => {
         jest.clearAllMocks();
         (firebase as jest.Mock).mockImplementation((path: string) => ({path}));
+        (isSignedIn as jest.Mock).mockReturnValue(true);
         unsubscribe = jest.fn();
         (onValue as jest.Mock).mockReturnValue(unsubscribe);
 
@@ -129,13 +135,33 @@ describe('modules', () => {
 
       it('logs and allows a new subscription when Firebase cancels the listener', () => {
         emit(adminLogin());
-        const denied = new Error('permission_denied');
+        const denied = permissionDenied();
         lastListener().onCancel(denied);
 
         expect(error).toHaveBeenCalledWith(`Listener for ${PATH} was cancelled`, denied);
 
         emit(adminLogin());
         expect(onValue).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not log a permission_denied cancel after the sign-out', () => {
+        emit(adminLogin());
+        (isSignedIn as jest.Mock).mockReturnValue(false);
+        lastListener().onCancel(permissionDenied());
+
+        expect(error).not.toHaveBeenCalled();
+
+        emit(adminLogin());
+        expect(onValue).toHaveBeenCalledTimes(2);
+      });
+
+      it('logs other cancels after the sign-out', () => {
+        emit(adminLogin());
+        (isSignedIn as jest.Mock).mockReturnValue(false);
+        const unavailable = Object.assign(new Error('unavailable'), {code: 'UNAVAILABLE'});
+        lastListener().onCancel(unavailable);
+
+        expect(error).toHaveBeenCalledWith(`Listener for ${PATH} was cancelled`, unavailable);
       });
     });
   });

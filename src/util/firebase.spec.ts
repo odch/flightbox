@@ -45,6 +45,7 @@ import firebaseDefault, {
   unauth,
   loadValue,
   getIdToken,
+  isSignedIn,
 } from './firebase';
 
 describe('util/firebase', () => {
@@ -305,6 +306,17 @@ describe('util/firebase', () => {
       const result = getIdToken();
       expect(mockAuth.currentUser.getIdToken).toHaveBeenCalled();
       expect(result).toBe(mockToken);
+    });
+  });
+
+  describe('isSignedIn', () => {
+    it('returns true when a user is signed in', () => {
+      expect(isSignedIn()).toBe(true);
+    });
+
+    it('returns false when nobody is signed in', () => {
+      mockAuth.currentUser = null;
+      expect(isSignedIn()).toBe(false);
     });
   });
 });

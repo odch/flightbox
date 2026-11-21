@@ -114,6 +114,11 @@ export function getIdToken() {
   return getAuth().currentUser!.getIdToken();
 }
 
+export function isSignedIn() {
+  initialize();
+  return !!getAuth().currentUser;
+}
+
 export default firebase;
 
 if ((window as any).Cypress) {
