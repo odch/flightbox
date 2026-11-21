@@ -11,7 +11,7 @@ const TO = Date.parse('2026-11-20T23:59:59.999Z');
 function repositoryWith({ all = false, departures = [], arrivals = [] } = {}) {
   const lists = { departure: departures, arrival: arrivals };
   return {
-    resolveReader: jest.fn(async () => ({ all, authOverride: { uid: 'reader' } })),
+    loadReaderFacts: jest.fn(async () => ({ appUid: all ? 'reader' : null, admin: all, allMovements: false })),
     listMovements: jest.fn(async (type, query) => lists[type].slice(0, query.limit)),
   };
 }
@@ -36,7 +36,7 @@ describe('functions', () => {
         ['departure', 'd1', true, 'Hans'],
       ]);
       expect(repository.listMovements).toHaveBeenCalledWith(
-        'departure', { fromMs: FROM, toMs: TO, owner: 'pilot@example.com', limit: 201 }, { uid: 'reader' });
+        'departure', { fromMs: FROM, toMs: TO, owner: 'pilot@example.com', limit: 201 }, { uid: 'pilot-uid', email: 'pilot@example.com' });
     });
 
     it('asks for all movements for a reader who may see them, others without personal data', async () => {
@@ -51,7 +51,7 @@ describe('functions', () => {
       const { movements } = await list(repository, { types: ['arrival'] });
 
       expect(repository.listMovements).toHaveBeenCalledWith(
-        'arrival', expect.objectContaining({ owner: null }), { uid: 'reader' });
+        'arrival', expect.objectContaining({ owner: null }), { uid: 'reader', email: 'pilot@example.com' });
       expect(movements).toEqual([
         { type: 'arrival', key: 'a1', own: false, dateTime: '2026-11-20T09:15:00.000Z', immatriculation: 'HBKOF' },
         expect.objectContaining({ key: 'a2', own: true, firstname: 'Hans' }),

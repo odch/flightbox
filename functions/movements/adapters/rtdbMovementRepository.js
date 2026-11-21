@@ -40,18 +40,6 @@ async function readValue(db, path) {
 const LOGIN_UID_PREFIX = 'login:';
 const INVALID_KEY_CHARS = /[.#$[\]/]/;
 
-// The client's canSeeAllMovements and the rules' CAN_SEE_ALL_MOVEMENTS
-// (tasks/processFirebaseRules.js): /admins/<uid> or /logins/<uid>/allMovements.
-async function canSeeAllMovements(db, uid) {
-  if (!uid || INVALID_KEY_CHARS.test(uid)) {
-    return false;
-  }
-  const [admin, allMovements] = await Promise.all([
-    readValue(db, `admins/${uid}`),
-    readValue(db, `logins/${uid}/allMovements`),
-  ]);
-  return admin === true || allMovements === true;
-}
 
 // The app's Firebase user of a verified e-mail (the app signs pilots in by
 // e-mail code, one user per address; functions/auth/verifySignInCode.js),
@@ -86,32 +74,32 @@ const defaultAuth = () => require('firebase-admin/auth').getAuth();
 function createRtdbMovementRepository({ db = getDatabase, auth = defaultAuth, rest = createDatabaseRestClient() } = {}) {
   return {
     /**
-     * Which movements the actor may list, as in the app: {all, authOverride}.
-     * all: every movement (shared access, admins and allMovements
-     * operators), else only the actor's own. A caller with a token of the
-     * central login has the rights of the app user with the same verified
-     * e-mail; for an `all` read the request then runs as that user, so the
-     * database rules see the same uid as for the app.
+     * What decides which movements the actor may list (domain/readAccess.js):
+     * {appUid, admin, allMovements}. appUid: the actor's Firebase uid; for a
+     * caller of the central login the app user with the same verified
+     * e-mail, or null. admin, allMovements: that user's /admins/<uid> and
+     * /logins/<uid>/allMovements entries (the rules' CAN_SEE_ALL_MOVEMENTS).
      */
-    async resolveReader(actor, policy) {
-      const own = authOverrideFor(actor);
-      if (!policy.personalAccess) {
-        return { all: true, authOverride: own };
+    async loadReaderFacts(actor) {
+      const appUid = actor.uid.startsWith(LOGIN_UID_PREFIX) ? await appUserUid(auth(), actor.email) : actor.uid;
+      if (!appUid || INVALID_KEY_CHARS.test(appUid)) {
+        return { appUid: null, admin: false, allMovements: false };
       }
       const database = db();
-      const uid = actor.uid.startsWith(LOGIN_UID_PREFIX) ? await appUserUid(auth(), actor.email) : actor.uid;
-      if (await canSeeAllMovements(database, uid)) {
-        return { all: true, authOverride: { uid, token: own.token } };
-      }
-      return { all: false, authOverride: own };
+      const [admin, allMovements] = await Promise.all([
+        readValue(database, `admins/${appUid}`),
+        readValue(database, `logins/${appUid}/allMovements`),
+      ]);
+      return { appUid, admin: admin === true, allMovements: allMovements === true };
     },
 
     /**
      * Movements of `type` with dateTime in [fromMs, toMs], newest first, at
      * most `limit`; only those created by `owner` unless owner is null.
-     * Read as the caller (authOverride); resolves with [[key, movement]].
+     * Read as `caller` ({uid, email}, as authOverrideFor presents it to the
+     * rules); resolves with [[key, movement]].
      */
-    async listMovements(type, { fromMs, toMs, owner, limit }, authOverride) {
+    async listMovements(type, { fromMs, toMs, owner, limit }, caller) {
       const query = owner
         ? {
           orderBy: 'createdBy_orderKey',
@@ -120,7 +108,7 @@ function createRtdbMovementRepository({ db = getDatabase, auth = defaultAuth, re
           limitToFirst: limit,
         }
         : { orderBy: 'negativeTimestamp', startAt: -toMs, endAt: -fromMs, limitToFirst: limit };
-      const answer = await rest.read(pathOf(type), query, authOverride);
+      const answer = await rest.read(pathOf(type), query, authOverrideFor(caller));
       const entries = answer && typeof answer === 'object' ? Object.entries(answer) : [];
       return entries.filter(([, movement]) => movement && typeof movement === 'object').sort(byNewest);
     },

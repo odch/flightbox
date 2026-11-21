@@ -80,7 +80,7 @@ async function resolveActor(decodedToken, db) {
 // A pilot with a token of the central login (loginTokens.js). Never an
 // admin for writes: admin rights stay with the Firebase accounts of this
 // instance (reading resolves the app user of the e-mail, see
-// rtdbMovementRepository.js resolveReader). `scopes`: what the token allows
+// domain/readAccess.js). `scopes`: what the token allows
 // (movements:write, movements:read); Firebase actors have none, the app may
 // do everything its user may.
 function loginActor({ sub, email, scopes = [] }) {

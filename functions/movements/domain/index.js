@@ -11,6 +11,8 @@ const { buildMovementPolicy } = require('./policy');
 const { validateMovement, MOVEMENT_TYPES, PAYMENT_METHODS } = require('./validateMovement');
 const { checkWriteAccess } = require('./checkWriteAccess');
 const { checkAppRules } = require('./checkAppRules');
+const { readAccess } = require('./readAccess');
+const { toReadView } = require('./readView');
 const { prepareWrite, SERVER_OWNED } = require('./prepareWrite');
 const { toOrderKey } = require('./orderKey');
 const { REASONS, CODES } = require('./reasons');
@@ -20,6 +22,8 @@ module.exports = {
   validateMovement,
   checkWriteAccess,
   checkAppRules,
+  readAccess,
+  toReadView,
   prepareWrite,
   toOrderKey,
   MOVEMENT_TYPES,

@@ -99,8 +99,6 @@ describe('functions', () => {
     });
 
     describe('movement lists', () => {
-      const PERSONAL = { personalAccess: true };
-      const SHARED = { personalAccess: false };
       const LOGIN_PILOT = { uid: 'login:sub-1', email: 'pilot@example.com', isAdmin: false, scopes: ['movements:read'] };
       const LOGIN_ADMIN = { uid: 'login:sub-2', email: 'admin@example.com', isAdmin: false, scopes: ['movements:read'] };
 
@@ -122,37 +120,34 @@ describe('functions', () => {
         db: () => fakeDb(data), auth: () => fakeAuth(users), rest: {},
       });
 
-      it('lets an app admin or allMovements operator read all, as their own uid', async () => {
+      it('loads the /admins and allMovements entries of a Firebase actor', async () => {
         const repository = reader({ 'admins/admin-uid': true, 'logins/op-uid/allMovements': true });
 
-        expect(await repository.resolveReader({ uid: 'admin-uid', email: 'admin@example.com', isAdmin: true }, PERSONAL))
-          .toEqual({ all: true, authOverride: { uid: 'admin-uid', token: { email: 'admin@example.com' } } });
-        expect((await repository.resolveReader({ uid: 'op-uid', email: null }, PERSONAL)).all).toBe(true);
-        expect(await repository.resolveReader(PILOT, PERSONAL))
-          .toEqual({ all: false, authOverride: { uid: 'pilot-uid', token: { email: 'pilot@example.com' } } });
+        expect(await repository.loadReaderFacts({ uid: 'admin-uid', email: 'admin@example.com', isAdmin: true }))
+          .toEqual({ appUid: 'admin-uid', admin: true, allMovements: false });
+        expect(await repository.loadReaderFacts({ uid: 'op-uid', email: null }))
+          .toEqual({ appUid: 'op-uid', admin: false, allMovements: true });
+        expect(await repository.loadReaderFacts(PILOT)).toEqual({ appUid: 'pilot-uid', admin: false, allMovements: false });
       });
 
-      it('gives a login caller the rights of the app user with the same verified e-mail', async () => {
+      it('takes the app user with the same verified e-mail for a login caller', async () => {
         const repository = reader({ 'admins/admin-uid': true }, {
           'admin@example.com': { uid: 'admin-uid' },
           'pilot@example.com': { uid: 'pilot-uid' },
         });
 
-        // An all read runs as the app user, so the rules see the admin's uid.
-        expect(await repository.resolveReader(LOGIN_ADMIN, PERSONAL))
-          .toEqual({ all: true, authOverride: { uid: 'admin-uid', token: { email: 'admin@example.com' } } });
-        expect(await repository.resolveReader(LOGIN_PILOT, PERSONAL))
-          .toEqual({ all: false, authOverride: { uid: 'login:sub-1', token: { email: 'pilot@example.com' } } });
+        expect(await repository.loadReaderFacts(LOGIN_ADMIN)).toEqual({ appUid: 'admin-uid', admin: true, allMovements: false });
+        expect(await repository.loadReaderFacts(LOGIN_PILOT)).toEqual({ appUid: 'pilot-uid', admin: false, allMovements: false });
       });
 
       it.each([
         ['no app user', {}],
         ['an unverified app user', { 'admin@example.com': { uid: 'admin-uid', emailVerified: false } }],
         ['a disabled app user', { 'admin@example.com': { uid: 'admin-uid', disabled: true } }],
-      ])('does not let a login caller read all with %s', async (_, users) => {
+      ])('finds no app user for a login caller with %s', async (_, users) => {
         const repository = reader({ 'admins/admin-uid': true }, users);
 
-        expect((await repository.resolveReader(LOGIN_ADMIN, PERSONAL)).all).toBe(false);
+        expect(await repository.loadReaderFacts(LOGIN_ADMIN)).toEqual({ appUid: null, admin: false, allMovements: false });
       });
 
       it('passes other failures of the user lookup on', async () => {
@@ -161,12 +156,7 @@ describe('functions', () => {
           db: () => fakeDb({}), auth: () => ({ getUserByEmail: async () => { throw failure; } }), rest: {},
         });
 
-        await expect(repository.resolveReader(LOGIN_ADMIN, PERSONAL)).rejects.toBe(failure);
-      });
-
-      it('lets everyone read all where access is shared', async () => {
-        expect(await reader({}).resolveReader(PILOT, SHARED))
-          .toEqual({ all: true, authOverride: { uid: 'pilot-uid', token: { email: 'pilot@example.com' } } });
+        await expect(repository.loadReaderFacts(LOGIN_ADMIN)).rejects.toBe(failure);
       });
 
       it('queries the owner\'s index or the timestamp, as the caller, newest first', async () => {
@@ -178,10 +168,11 @@ describe('functions', () => {
           })),
         };
         const repository = createRtdbMovementRepository({ db: () => fakeDb({}), rest });
+        const caller = { uid: 'login:sub-1', email: 'pilot@example.com' };
         const override = { uid: 'login:sub-1', token: { email: 'pilot@example.com' } };
 
-        const own = await repository.listMovements('arrival', { fromMs: 1000, toMs: 5000, owner: 'pilot@example.com', limit: 11 }, override);
-        await repository.listMovements('departure', { fromMs: 1000, toMs: 5000, owner: null, limit: 11 }, override);
+        const own = await repository.listMovements('arrival', { fromMs: 1000, toMs: 5000, owner: 'pilot@example.com', limit: 11 }, caller);
+        await repository.listMovements('departure', { fromMs: 1000, toMs: 5000, owner: null, limit: 11 }, caller);
 
         expect(own.map(([key]) => key)).toEqual(['newer', 'older']);
         expect(rest.read).toHaveBeenNthCalledWith(1, 'arrivals', {
@@ -198,7 +189,7 @@ describe('functions', () => {
       it('answers an empty list for no result', async () => {
         const repository = createRtdbMovementRepository({ db: () => fakeDb({}), rest: { read: async () => null } });
 
-        expect(await repository.listMovements('arrival', { fromMs: 0, toMs: 1, owner: null, limit: 1 }, { uid: 'u' })).toEqual([]);
+        expect(await repository.listMovements('arrival', { fromMs: 0, toMs: 1, owner: null, limit: 1 }, { uid: 'u', email: null })).toEqual([]);
       });
     });
   });
