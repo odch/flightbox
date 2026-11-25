@@ -44,6 +44,14 @@ Sentry.init({
   // The dev server (`npm start`, also used by the Cypress runs in CI)
   // must not report: its errors would eat the reserved Sentry volume
   enabled: !__DEV__,
+  // When the browser deletes the site data while the page runs (seen on
+  // iOS), Firebase's own IndexedDB reads fail. Firebase copes with it,
+  // but leaves some of these rejections unhandled. Our code does not use
+  // IndexedDB itself.
+  ignoreErrors: [
+    /Database deleted by request of the user/,
+    /The database connection is closing/,
+  ],
   // Our DPA rules out personal data in Sentry. Sentry v11 collects user
   // info (incl. IP address), cookies, headers and bodies by default, so
   // switch every data collection category off explicitly.
